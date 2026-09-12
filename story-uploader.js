@@ -3848,6 +3848,38 @@
           playPromise.catch(
             function(){
 
+              const screen =
+                document.getElementById(
+                  "ma7alak-full-story"
+                );
+
+
+              if(
+                thisTransition !==
+                transitionToken ||
+                !screen ||
+                !screen.classList.contains(
+                  "active"
+                ) ||
+                !media.isConnected
+              ){
+
+                try{
+
+                  media.pause();
+
+                  media.muted =
+                    true;
+
+                }
+
+                catch(error){}
+
+                return;
+
+              }
+
+
               media.muted =
                 true;
 
@@ -4251,10 +4283,21 @@
 
 
   /* =========================================================
-     CLOSE STORIES
+     STOP STORY PLAYBACK
+     ONE SAFE CLEANUP FUNCTION FOR EVERY EXIT METHOD
   ========================================================= */
 
-  function closeStories(){
+  function stopStoryPlayback(
+    unloadMedia
+  ){
+
+    clearInterval(
+      timer
+    );
+
+
+    transitionToken++;
+
 
     const screen =
       document.getElementById(
@@ -4264,17 +4307,12 @@
 
     if(!screen){
 
+      currentMedia =
+        null;
+
       return;
 
     }
-
-
-    clearInterval(
-      timer
-    );
-
-
-    transitionToken++;
 
 
     const videos =
@@ -4293,17 +4331,58 @@
           video.muted =
             true;
 
-          video.removeAttribute(
-            "src"
-          );
+          video.volume =
+            0;
 
-          video.load();
+
+          if(
+            unloadMedia !==
+            false
+          ){
+
+            video.removeAttribute(
+              "src"
+            );
+
+            video.load();
+
+          }
 
         }
 
         catch(error){}
 
       }
+    );
+
+
+    currentMedia =
+      null;
+
+  }
+
+
+  /* =========================================================
+     CLOSE STORIES
+  ========================================================= */
+
+  function closeStories(){
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    if(!screen){
+
+      return;
+
+    }
+
+
+    stopStoryPlayback(
+      true
     );
 
 
@@ -4385,10 +4464,6 @@
 
           }
 
-
-          currentMedia =
-            null;
-
         }
 
       },
@@ -4429,52 +4504,12 @@
       ){
 
         /*
-          IMPORTANT:
-          On phones, the system/browser Back button can exit
-          fullscreen without pressing our Story X button.
-          Stop every Story video immediately so hidden audio
-          cannot continue playing in the background.
+          Mobile/system Back can exit native fullscreen
+          without pressing the Story X button.
         */
-        clearInterval(
-          timer
+        stopStoryPlayback(
+          true
         );
-
-
-        transitionToken++;
-
-
-        const videos =
-          screen.querySelectorAll(
-            "video"
-          );
-
-
-        videos.forEach(
-          function(video){
-
-            try{
-
-              video.pause();
-
-              video.muted =
-                true;
-
-              video.removeAttribute(
-                "src"
-              );
-
-              video.load();
-
-            }
-
-            catch(error){}
-
-          }
-        );
-
-
-        currentMedia =
-          null;
 
 
         screen.classList.remove(
@@ -4509,56 +4544,74 @@
 
 
   /* =========================================================
-     STOP STORY AUDIO WHEN LEAVING THE PAGE
+     STOP STORY VIDEO/AUDIO ON EVERY PAGE EXIT METHOD
   ========================================================= */
 
   window.addEventListener(
     "pagehide",
     function(){
 
-      const screen =
-        document.getElementById(
-          "ma7alak-full-story"
-        );
-
-
-      if(!screen){
-
-        return;
-
-      }
-
-
-      clearInterval(
-        timer
+      stopStoryPlayback(
+        true
       );
 
-
-      transitionToken++;
-
-
-      const videos =
-        screen.querySelectorAll(
-          "video"
-        );
+    }
+  );
 
 
-      videos.forEach(
-        function(video){
+  window.addEventListener(
+    "beforeunload",
+    function(){
 
-          try{
+      stopStoryPlayback(
+        true
+      );
 
-            video.pause();
+    }
+  );
 
-            video.muted =
-              true;
 
-          }
+  window.addEventListener(
+    "popstate",
+    function(){
 
-          catch(error){}
+      stopStoryPlayback(
+        true
+      );
+
+    }
+  );
+
+
+  document.addEventListener(
+    "visibilitychange",
+    function(){
+
+      if(
+        document.visibilityState ===
+        "hidden"
+      ){
+
+        const screen =
+          document.getElementById(
+            "ma7alak-full-story"
+          );
+
+
+        if(
+          screen &&
+          screen.classList.contains(
+            "active"
+          )
+        ){
+
+          stopStoryPlayback(
+            true
+          );
 
         }
-      );
+
+      }
 
     }
   );
@@ -4755,8 +4808,8 @@
    8. Did NOT add visible left/right navigation arrows; the existing invisible tap areas remain only for navigation.
    9. Kept the premium Story heart with no like number and the English time labels.
    10. No Story viewer-count/viewer-number system was added or changed.
-   11. Fixed phone/browser Back behavior: when fullscreen is exited without pressing the Story X, every Story video is immediately paused, muted, and unloaded.
-   12. Added a pagehide safety stop so Story audio/video is paused when the visitor leaves or navigates away from the page.
-   13. No upload, likes, owner controls, Story navigation, timing, Supabase, or viewer-count logic was changed.
+   11. Added one shared stopStoryPlayback() cleanup so every exit path pauses, mutes, sets volume to 0, and unloads Story videos.
+   12. Browser/system Back, fullscreen exit, pagehide, beforeunload, popstate, and hidden-page transitions now stop Story playback immediately.
+   13. Fixed the video play() fallback race so a rejected play promise cannot restart a Story after the viewer has already closed.
+   14. No upload, likes, owner controls, Story navigation, timing, Supabase, or viewer-count logic was changed.
 ========================================================= -->
-     
