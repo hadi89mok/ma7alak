@@ -1576,6 +1576,14 @@
 
   let isDeletingStory = false;
 
+  /*
+    Phone/browser Back handling:
+    when a Story opens we add one same-page history entry.
+    This makes the Back button close the Story first instead
+    of leaving a hidden playing video behind.
+  */
+  let storyHistoryPushed = false;
+
 
   /* =========================================================
      STORY LIKES
@@ -3234,6 +3242,35 @@
     );
 
 
+    /*
+      IMPORTANT FOR PHONE BACK BUTTON:
+      Add one temporary same-page history entry while the
+      Story viewer is open. Android/browser Back will pop
+      this entry first, which lets us stop the video/audio
+      before any page navigation happens.
+    */
+    if(!storyHistoryPushed){
+
+      try{
+
+        window.history.pushState(
+          {
+            ma7alakStoryOpen:true
+          },
+          "",
+          window.location.href
+        );
+
+        storyHistoryPushed =
+          true;
+
+      }
+
+      catch(error){}
+
+    }
+
+
     document.documentElement.style.overflow =
       "hidden";
 
@@ -4315,6 +4352,46 @@
     }
 
 
+    /*
+      Kill the referenced current video first, even if the
+      browser has already detached/hidden it from the viewer.
+    */
+    if(
+      currentMedia &&
+      currentMedia.tagName ===
+      "VIDEO"
+    ){
+
+      try{
+
+        currentMedia.pause();
+
+        currentMedia.muted =
+          true;
+
+        currentMedia.volume =
+          0;
+
+        if(
+          unloadMedia !==
+          false
+        ){
+
+          currentMedia.removeAttribute(
+            "src"
+          );
+
+          currentMedia.load();
+
+        }
+
+      }
+
+      catch(error){}
+
+    }
+
+
     const videos =
       screen.querySelectorAll(
         "video"
@@ -4366,7 +4443,9 @@
      CLOSE STORIES
   ========================================================= */
 
-  function closeStories(){
+  function closeStories(
+    fromHistory
+  ){
 
     const screen =
       document.getElementById(
@@ -4384,6 +4463,46 @@
     stopStoryPlayback(
       true
     );
+
+
+    /*
+      If the X button closed the Story, remove our temporary
+      same-page Story history entry too. When Back itself
+      caused the close, fromHistory=true prevents a second
+      history.back() call.
+    */
+    if(
+      !fromHistory &&
+      storyHistoryPushed
+    ){
+
+      storyHistoryPushed =
+        false;
+
+      try{
+
+        if(
+          window.history.state &&
+          window.history.state.ma7alakStoryOpen ===
+          true
+        ){
+
+          window.history.back();
+
+        }
+
+      }
+
+      catch(error){}
+
+    }
+
+    else if(fromHistory){
+
+      storyHistoryPushed =
+        false;
+
+    }
 
 
     try{
@@ -4575,9 +4694,39 @@
     "popstate",
     function(){
 
-      stopStoryPlayback(
-        true
-      );
+      const screen =
+        document.getElementById(
+          "ma7alak-full-story"
+        );
+
+
+      /*
+        This is the actual phone/browser Back path.
+        Close the viewer AND destroy playback.
+      */
+      if(
+        screen &&
+        screen.classList.contains(
+          "active"
+        )
+      ){
+
+        closeStories(
+          true
+        );
+
+      }
+
+      else{
+
+        storyHistoryPushed =
+          false;
+
+        stopStoryPlayback(
+          true
+        );
+
+      }
 
     }
   );
@@ -4615,6 +4764,83 @@
 
     }
   );
+
+
+  /*
+    Hostinger embeds can run this Story code inside an iframe.
+    If the parent page is same-origin, also listen to the
+    parent's navigation lifecycle so hidden iframe audio
+    cannot survive a parent-page Back action.
+  */
+  try{
+
+    if(
+      window.parent &&
+      window.parent !== window
+    ){
+
+      window.parent.addEventListener(
+        "pagehide",
+        function(){
+
+          stopStoryPlayback(
+            true
+          );
+
+        }
+      );
+
+
+      window.parent.addEventListener(
+        "beforeunload",
+        function(){
+
+          stopStoryPlayback(
+            true
+          );
+
+        }
+      );
+
+
+      window.parent.addEventListener(
+        "popstate",
+        function(){
+
+          const screen =
+            document.getElementById(
+              "ma7alak-full-story"
+            );
+
+          if(
+            screen &&
+            screen.classList.contains(
+              "active"
+            )
+          ){
+
+            closeStories(
+              true
+            );
+
+          }
+
+          else{
+
+            stopStoryPlayback(
+              true
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+
+  catch(error){}
 
 
   /* =========================================================
@@ -4808,8 +5034,10 @@
    8. Did NOT add visible left/right navigation arrows; the existing invisible tap areas remain only for navigation.
    9. Kept the premium Story heart with no like number and the English time labels.
    10. No Story viewer-count/viewer-number system was added or changed.
-   11. Added one shared stopStoryPlayback() cleanup so every exit path pauses, mutes, sets volume to 0, and unloads Story videos.
-   12. Browser/system Back, fullscreen exit, pagehide, beforeunload, popstate, and hidden-page transitions now stop Story playback immediately.
-   13. Fixed the video play() fallback race so a rejected play promise cannot restart a Story after the viewer has already closed.
-   14. No upload, likes, owner controls, Story navigation, timing, Supabase, or viewer-count logic was changed.
+   11. Story open now creates one temporary same-page browser-history entry so phone/browser Back closes the Story first.
+   12. popstate now calls the real Story close cleanup instead of only trying to pause playback.
+   13. stopStoryPlayback() now also destroys currentMedia directly, even if the browser has already hidden or detached it.
+   14. Added same-origin parent-window pagehide/beforeunload/popstate safety listeners for Hostinger iframe/embed navigation.
+   15. Existing fullscreen, X-close, pagehide, beforeunload, visibilitychange, likes, owner controls, upload bridge, navigation, timing, Supabase, and viewer-count behavior was otherwise kept unchanged.
 ========================================================= -->
+
