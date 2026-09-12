@@ -1,0 +1,3145 @@
+/* =========================================================
+   MA7ALAK — PREMIUM SHOPS DIRECTORY
+   GITHUB-READY JAVASCRIPT
+========================================================= */
+
+(function(){
+  "use strict";
+
+  if(!document.getElementById("ma7alak-show-shops-github-style")){
+    const style = document.createElement("style");
+    style.id = "ma7alak-show-shops-github-style";
+    style.textContent = "/* =========================================================\n   MA7ALAK SHOPS — GLOBAL FOUNDATION\n========================================================= */\n\nhtml.ma7alak-shops-page-active,\nhtml.ma7alak-shops-page-active body{\n\n  background:#080706 !important;\n\n  color:#fff !important;\n\n}\n\n\nbody.ma7alak-shops-body{\n\n  background:#080706 !important;\n\n  color:#fff !important;\n\n}\n\n\n/* =========================================================\n   MAIN PAGE\n========================================================= */\n\n#ma7alak-shops-page{\n\n  --gold:#f5b83f;\n  --gold-light:#ffd982;\n  --gold-soft:#d69a42;\n\n  --cream:#f7efe4;\n\n  --white:#ffffff;\n\n  --muted:#b9b0a6;\n  --muted2:#8f877e;\n\n  --glass:rgba(46,35,27,.60);\n  --glass-light:rgba(255,255,255,.075);\n\n  --border:rgba(255,255,255,.20);\n  --gold-border:rgba(245,184,63,.55);\n\n  position:relative;\n\n  width:100%;\n\n  max-width:1500px;\n\n  margin:0 auto;\n\n  padding:\n    40px 42px 80px;\n\n  box-sizing:border-box;\n\n  overflow:hidden;\n\n  color:#fff;\n\n  font-family:\n    Inter,\n    -apple-system,\n    BlinkMacSystemFont,\n    \"Segoe UI\",\n    Roboto,\n    Arial,\n    sans-serif;\n\n}\n\n\n/* =========================================================\n   CINEMATIC BACKGROUND\n========================================================= */\n\n#ma7alak-shops-page .ma7alak-background{\n\n  position:absolute;\n\n  inset:0;\n\n  z-index:-10;\n\n  overflow:hidden;\n\n  background:\n\n    linear-gradient(\n      180deg,\n      rgba(4,3,2,.25),\n      rgba(5,4,3,.82) 58%,\n      #080706 100%\n    );\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-image{\n\n  position:absolute;\n\n  inset:0;\n\n  width:100%;\n\n  height:100%;\n\n  object-fit:cover;\n\n  object-position:center top;\n\n  opacity:.38;\n\n  filter:\n    saturate(.75)\n    contrast(1.08)\n    brightness(.72);\n\n  transform:scale(1.03);\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-overlay{\n\n  position:absolute;\n\n  inset:0;\n\n  background:\n\n    radial-gradient(\n      circle at 50% 12%,\n      rgba(188,116,39,.28),\n      transparent 34%\n    ),\n\n    radial-gradient(\n      circle at 15% 58%,\n      rgba(172,103,35,.15),\n      transparent 30%\n    ),\n\n    radial-gradient(\n      circle at 88% 65%,\n      rgba(230,160,67,.13),\n      transparent 32%\n    ),\n\n    linear-gradient(\n      180deg,\n      rgba(8,7,5,.05),\n      rgba(8,7,5,.62) 50%,\n      #080706 92%\n    );\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-vignette{\n\n  position:absolute;\n\n  inset:0;\n\n  box-shadow:\n    inset 0 0 180px rgba(0,0,0,.72);\n\n}\n\n\n/* =========================================================\n   TOP BRAND\n========================================================= */\n\n.ma7alak-top-brand{\n\n  position:relative;\n\n  text-align:center;\n\n  padding-top:4px;\n\n  margin-bottom:25px;\n\n}\n\n\n.ma7alak-brand-name{\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:52px;\n\n  line-height:1;\n\n  font-weight:700;\n\n  letter-spacing:-2px;\n\n  color:#fff;\n\n  text-shadow:\n    0 5px 30px rgba(0,0,0,.7);\n\n}\n\n\n.ma7alak-brand-subtitle{\n\n  margin-top:9px;\n\n  font-size:9px;\n\n  line-height:1;\n\n  letter-spacing:5px;\n\n  color:#c7bdb1;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-brand-rule{\n\n  width:75px;\n\n  height:1px;\n\n  margin:17px auto 0;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      var(--gold),\n      transparent\n    );\n\n  opacity:.8;\n\n}\n\n\n/* =========================================================\n   DECORATIVE SIDE TEXT\n========================================================= */\n\n.ma7alak-side-left{\n\n  position:absolute;\n\n  left:4px;\n\n  top:28px;\n\n  width:120px;\n\n  color:#d8c8b5;\n\n  font-size:8px;\n\n  letter-spacing:5px;\n\n  line-height:2;\n\n  text-transform:uppercase;\n\n  opacity:.72;\n\n}\n\n\n.ma7alak-side-right{\n\n  position:absolute;\n\n  right:4px;\n\n  top:25px;\n\n  color:#f0d4a8;\n\n  font-family:\n    \"Brush Script MT\",\n    cursive;\n\n  font-size:19px;\n\n  line-height:1.05;\n\n  transform:rotate(-7deg);\n\n  opacity:.82;\n\n}\n\n\n/* =========================================================\n   HERO\n========================================================= */\n\n.ma7alak-hero{\n\n  text-align:center;\n\n  margin:\n    24px auto 32px;\n\n}\n\n\n.ma7alak-hero-icon{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  width:48px;\n\n  height:48px;\n\n  margin:0 auto 8px;\n\n  color:var(--gold);\n\n  font-size:32px;\n\n  filter:\n    drop-shadow(\n      0 0 16px rgba(245,184,63,.24)\n    );\n\n}\n\n\n.ma7alak-hero h1{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:\n    clamp(48px,6vw,74px);\n\n  line-height:1;\n\n  letter-spacing:-2px;\n\n  color:#fff;\n\n  text-shadow:\n    0 5px 35px rgba(0,0,0,.7);\n\n}\n\n\n.ma7alak-hero h1 span{\n\n  color:var(--gold);\n\n  text-shadow:\n    0 0 35px rgba(245,184,63,.16);\n\n}\n\n\n.ma7alak-hero p{\n\n  margin:\n    11px auto 0;\n\n  max-width:650px;\n\n  color:#c1b8af;\n\n  font-size:15px;\n\n  line-height:1.6;\n\n}\n\n\n/* =========================================================\n   SEARCH\n========================================================= */\n\n.ma7alak-search-wrapper{\n\n  width:100%;\n\n  max-width:860px;\n\n  margin:\n    0 auto 25px;\n\n  position:relative;\n\n}\n\n\n.ma7alak-search{\n\n  width:100%;\n\n  height:60px;\n\n  padding:\n    0 60px 0 22px;\n\n  box-sizing:border-box;\n\n  border-radius:18px;\n\n  border:\n    1px solid rgba(255,255,255,.25);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(45,36,29,.72),\n      rgba(24,20,17,.65)\n    );\n\n  backdrop-filter:blur(22px);\n\n  -webkit-backdrop-filter:blur(22px);\n\n  color:#fff;\n\n  outline:none;\n\n  font-size:14px;\n\n  box-shadow:\n    0 18px 55px rgba(0,0,0,.34),\n    inset 0 1px rgba(255,255,255,.09);\n\n  transition:\n    border-color .25s ease,\n    box-shadow .25s ease;\n\n}\n\n\n.ma7alak-search::placeholder{\n\n  color:#9f968d;\n\n}\n\n\n.ma7alak-search:focus{\n\n  border-color:\n    rgba(245,184,63,.70);\n\n  box-shadow:\n    0 0 0 4px rgba(245,184,63,.07),\n    0 20px 60px rgba(0,0,0,.38);\n\n}\n\n\n.ma7alak-search-icon{\n\n  position:absolute;\n\n  right:21px;\n\n  top:50%;\n\n  transform:translateY(-50%);\n\n  width:25px;\n\n  height:25px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  color:#e3d7c9;\n\n  font-size:25px;\n\n  pointer-events:none;\n\n}\n\n\n/* =========================================================\n   FILTER AREA\n========================================================= */\n\n.ma7alak-filter-block{\n\n  margin-bottom:20px;\n\n}\n\n\n.ma7alak-filter-label{\n\n  margin:\n    0 0 10px 2px;\n\n  color:#d1c6bb;\n\n  font-size:12px;\n\n  font-weight:600;\n\n}\n\n\n.ma7alak-area-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:9px;\n\n}\n\n\n.ma7alak-area-button{\n\n  min-height:51px;\n\n  border-radius:14px;\n\n  border:\n    1px solid rgba(255,255,255,.20);\n\n  background:\n    rgba(22,19,17,.68);\n\n  backdrop-filter:blur(14px);\n\n  -webkit-backdrop-filter:blur(14px);\n\n  color:#e9e2da;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:8px;\n\n  cursor:pointer;\n\n  transition:\n    transform .22s ease,\n    border-color .22s ease,\n    background .22s ease,\n    box-shadow .22s ease;\n\n}\n\n\n.ma7alak-area-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(245,184,63,.55);\n\n  background:\n    rgba(75,51,28,.55);\n\n}\n\n\n.ma7alak-area-button.active{\n\n  border-color:\n    var(--gold);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(170,105,29,.42),\n      rgba(77,49,25,.45)\n    );\n\n  color:#ffe1a1;\n\n  box-shadow:\n    0 0 25px rgba(245,184,63,.09),\n    inset 0 1px rgba(255,255,255,.08);\n\n}\n\n\n.ma7alak-area-button .icon{\n\n  font-size:16px;\n\n}\n\n\n/* =========================================================\n   CATEGORY\n========================================================= */\n\n.ma7alak-category-section{\n\n  display:none;\n\n  padding-top:2px;\n\n  animation:\n    ma7alakSectionIn .42s ease both;\n\n}\n\n\n.ma7alak-category-section.visible{\n\n  display:block;\n\n}\n\n\n.ma7alak-category-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:9px;\n\n}\n\n\n.ma7alak-category-button{\n\n  min-height:58px;\n\n  padding:\n    9px 12px;\n\n  border-radius:15px;\n\n  border:\n    1px solid rgba(255,255,255,.19);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(41,34,29,.68),\n      rgba(21,19,17,.62)\n    );\n\n  color:#e9e2da;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  cursor:pointer;\n\n  transition:.22s ease;\n\n}\n\n\n.ma7alak-category-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(245,184,63,.52);\n\n}\n\n\n.ma7alak-category-button.active{\n\n  border-color:\n    var(--gold);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(174,109,29,.42),\n      rgba(75,48,26,.40)\n    );\n\n  color:#ffe7b2;\n\n  box-shadow:\n    0 0 25px rgba(245,184,63,.08);\n\n}\n\n\n.ma7alak-category-icon{\n\n  font-size:20px;\n\n}\n\n\n/* =========================================================\n   RESULTS\n========================================================= */\n\n.ma7alak-results{\n\n  display:none;\n\n  margin-top:30px;\n\n  animation:\n    ma7alakSectionIn .45s ease both;\n\n}\n\n\n.ma7alak-results.visible{\n\n  display:block;\n\n}\n\n\n.ma7alak-results-top{\n\n  display:flex;\n\n  align-items:flex-end;\n\n  justify-content:space-between;\n\n  gap:20px;\n\n  padding-bottom:15px;\n\n  border-bottom:\n    1px solid rgba(255,255,255,.13);\n\n}\n\n\n.ma7alak-results-kicker{\n\n  margin-bottom:6px;\n\n  color:#c2975b;\n\n  font-size:9px;\n\n  font-weight:700;\n\n  letter-spacing:3px;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-results-title{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:31px;\n\n  line-height:1.05;\n\n  color:#fff;\n\n  letter-spacing:-.7px;\n\n}\n\n\n.ma7alak-results-subtitle{\n\n  margin:\n    7px 0 0;\n\n  color:#aaa198;\n\n  font-size:12px;\n\n}\n\n\n.ma7alak-results-count{\n\n  padding:\n    8px 13px;\n\n  border-radius:999px;\n\n  white-space:nowrap;\n\n  border:\n    1px solid rgba(245,184,63,.30);\n\n  background:\n    rgba(245,184,63,.065);\n\n  color:#d6b47b;\n\n  font-size:10px;\n\n  font-weight:700;\n\n}\n\n\n/* =========================================================\n   SHOP GRID\n========================================================= */\n\n.ma7alak-shop-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:12px;\n\n  padding-top:14px;\n\n}\n\n\n/* =========================================================\n   SHOP CARD\n========================================================= */\n\n.ma7alak-shop-card{\n\n  position:relative;\n\n  min-width:0;\n\n  padding:\n    20px 13px 13px;\n\n  border-radius:20px;\n\n  border:\n    1px solid rgba(255,255,255,.22);\n\n  background:\n\n    radial-gradient(\n      circle at 50% 10%,\n      rgba(198,126,48,.17),\n      transparent 42%\n    ),\n\n    linear-gradient(\n      145deg,\n      rgba(75,58,45,.72),\n      rgba(28,24,21,.72)\n    );\n\n  backdrop-filter:blur(19px);\n\n  -webkit-backdrop-filter:blur(19px);\n\n  box-shadow:\n    0 18px 48px rgba(0,0,0,.38),\n    inset 0 1px rgba(255,255,255,.10);\n\n  text-align:center;\n\n  overflow:hidden;\n\n  transition:\n    transform .28s ease,\n    border-color .28s ease,\n    box-shadow .28s ease;\n\n}\n\n\n.ma7alak-shop-card::before{\n\n  content:\"\";\n\n  position:absolute;\n\n  width:190px;\n\n  height:190px;\n\n  left:50%;\n\n  top:-110px;\n\n  transform:translateX(-50%);\n\n  border-radius:50%;\n\n  background:\n    radial-gradient(\n      circle,\n      rgba(229,159,69,.19),\n      transparent 68%\n    );\n\n  pointer-events:none;\n\n}\n\n\n.ma7alak-shop-card::after{\n\n  content:\"\";\n\n  position:absolute;\n\n  left:-80%;\n\n  top:0;\n\n  width:55%;\n\n  height:100%;\n\n  transform:skewX(-18deg);\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(255,255,255,.035),\n      transparent\n    );\n\n  transition:\n    left .7s ease;\n\n  pointer-events:none;\n\n}\n\n\n.ma7alak-shop-card:hover{\n\n  transform:translateY(-6px);\n\n  border-color:\n    rgba(245,184,63,.48);\n\n  box-shadow:\n    0 27px 65px rgba(0,0,0,.48),\n    0 0 35px rgba(245,184,63,.06),\n    inset 0 1px rgba(255,255,255,.12);\n\n}\n\n\n.ma7alak-shop-card:hover::after{\n\n  left:130%;\n\n}\n\n\n/* =========================================================\n   CIRCULAR SHOP IMAGE\n========================================================= */\n\n.ma7alak-shop-image-link{\n\n  width:100%;\n\n  display:flex;\n\n  justify-content:center;\n\n  align-items:center;\n\n  text-decoration:none;\n\n  position:relative;\n\n  z-index:2;\n\n}\n\n\n.ma7alak-shop-image-ring{\n\n  position:relative;\n\n  width:146px;\n\n  height:146px;\n\n  padding:4px;\n\n  border-radius:50%;\n\n  box-sizing:border-box;\n\n  background:\n    linear-gradient(\n      145deg,\n      #fff0c6,\n      #d99a47 36%,\n      #76502d 70%,\n      #2c2118\n    );\n\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.16),\n    0 13px 35px rgba(0,0,0,.48),\n    0 0 27px rgba(230,158,68,.11);\n\n  transition:\n    transform .3s ease,\n    box-shadow .3s ease;\n\n}\n\n\n.ma7alak-shop-card:hover\n.ma7alak-shop-image-ring{\n\n  transform:scale(1.035);\n\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.22),\n    0 16px 42px rgba(0,0,0,.55),\n    0 0 38px rgba(245,184,63,.17);\n\n}\n\n\n.ma7alak-shop-image-inner{\n\n  width:100%;\n\n  height:100%;\n\n  border-radius:50%;\n\n  overflow:hidden;\n\n  background:#15110d;\n\n  border:\n    3px solid rgba(15,12,9,.84);\n\n  box-sizing:border-box;\n\n}\n\n\n.ma7alak-shop-image-inner img{\n\n  display:block;\n\n  width:100%;\n\n  height:100%;\n\n  object-fit:cover;\n\n  object-position:center;\n\n}\n\n\n/* =========================================================\n   VERIFIED BADGE\n========================================================= */\n\n.ma7alak-verified-badge{\n\n  position:absolute;\n\n  right:calc(50% - 74px);\n\n  bottom:0;\n\n  width:27px;\n\n  height:27px;\n\n  border-radius:50%;\n\n  background:#1688ef;\n\n  border:\n    2px solid #fff;\n\n  color:#fff;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  font-size:14px;\n\n  font-weight:900;\n\n  box-shadow:\n    0 5px 16px rgba(0,0,0,.40);\n\n}\n\n\n/* =========================================================\n   SHOP CONTENT\n========================================================= */\n\n.ma7alak-shop-content{\n\n  position:relative;\n\n  z-index:3;\n\n  margin-top:15px;\n\n}\n\n\n.ma7alak-shop-title-row{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  flex-wrap:wrap;\n\n  gap:5px;\n\n}\n\n\n.ma7alak-shop-name{\n\n  margin:0;\n\n  color:#fff;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:20px;\n\n  line-height:1.15;\n\n  font-weight:700;\n\n  letter-spacing:-.2px;\n\n}\n\n\n.ma7alak-shop-arabic{\n\n  min-height:21px;\n\n  margin-top:4px;\n\n  direction:rtl;\n\n  color:#e5ddd4;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  line-height:1.5;\n\n}\n\n\n/* =========================================================\n   CATEGORY PILL\n========================================================= */\n\n.ma7alak-shop-category-pill{\n\n  display:inline-flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  margin-top:8px;\n\n  padding:\n    5px 12px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(225,164,91,.45);\n\n  background:\n    rgba(181,110,40,.16);\n\n  color:#d9b98a;\n\n  font-size:8px;\n\n  font-weight:800;\n\n  letter-spacing:1px;\n\n  text-transform:uppercase;\n\n}\n\n\n/* =========================================================\n   LOCATION\n========================================================= */\n\n.ma7alak-shop-location{\n\n  display:flex;\n\n  justify-content:center;\n\n  align-items:center;\n\n  gap:5px;\n\n  margin-top:9px;\n\n  color:#bdb5ad;\n\n  font-size:10px;\n\n  line-height:1.3;\n\n}\n\n\n.ma7alak-location-icon{\n\n  font-size:13px;\n\n}\n\n\n/* =========================================================\n   FEATURED\n========================================================= */\n\n.ma7alak-featured{\n\n  display:inline-flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:5px;\n\n  margin-top:9px;\n\n  padding:\n    5px 10px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(245,184,63,.78);\n\n  background:\n    rgba(171,106,26,.13);\n\n  color:#ffd15e;\n\n  font-size:8px;\n\n  font-weight:800;\n\n  letter-spacing:.8px;\n\n  text-transform:uppercase;\n\n  box-shadow:\n    0 0 17px rgba(245,184,63,.08);\n\n  animation:\n    ma7alakFeaturedGlow 2.6s ease-in-out infinite;\n\n}\n\n\n.ma7alak-featured.red{\n\n  border-color:\n    rgba(255,91,91,.75);\n\n  color:#ff8585;\n\n  background:\n    rgba(170,40,40,.11);\n\n  animation:\n    ma7alakRedGlow 2.6s ease-in-out infinite;\n\n}\n\n\n/* =========================================================\n   VIEW PROFILE\n========================================================= */\n\n.ma7alak-profile-button{\n\n  width:100%;\n\n  min-height:43px;\n\n  margin-top:12px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  box-sizing:border-box;\n\n  border-radius:13px;\n\n  border:\n    1px solid rgba(232,174,101,.58);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(179,115,52,.48),\n      rgba(112,69,34,.34)\n    );\n\n  color:#fff;\n\n  text-decoration:none;\n\n  font-size:11px;\n\n  font-weight:700;\n\n  transition:.22s ease;\n\n}\n\n\n.ma7alak-profile-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(255,207,111,.9);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(205,137,58,.57),\n      rgba(120,73,35,.42)\n    );\n\n  box-shadow:\n    0 9px 25px rgba(0,0,0,.30);\n\n}\n\n\n.ma7alak-profile-arrow{\n\n  font-size:17px;\n\n  transition:\n    transform .2s ease;\n\n}\n\n\n.ma7alak-profile-button:hover\n.ma7alak-profile-arrow{\n\n  transform:translateX(4px);\n\n}\n\n\n/* =========================================================\n   EMPTY\n========================================================= */\n\n.ma7alak-empty{\n\n  display:none;\n\n  padding:\n    50px 20px;\n\n  text-align:center;\n\n  border-radius:22px;\n\n  border:\n    1px solid rgba(255,255,255,.14);\n\n  background:\n    rgba(255,255,255,.045);\n\n  margin-top:15px;\n\n}\n\n\n.ma7alak-empty-icon{\n\n  font-size:40px;\n\n  margin-bottom:10px;\n\n}\n\n\n.ma7alak-empty h3{\n\n  margin:0 0 6px;\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:24px;\n\n}\n\n\n.ma7alak-empty p{\n\n  margin:0;\n\n  color:#999189;\n\n  font-size:12px;\n\n}\n\n\n/* =========================================================\n   CHANGE AREA\n========================================================= */\n\n.ma7alak-change-area{\n\n  display:none;\n\n  margin:\n    20px auto 0;\n\n  padding:\n    8px 14px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(255,255,255,.15);\n\n  background:\n    rgba(255,255,255,.04);\n\n  color:#aaa29a;\n\n  font-size:11px;\n\n  cursor:pointer;\n\n}\n\n\n.ma7alak-change-area.visible{\n\n  display:block;\n\n}\n\n\n/* =========================================================\n   BUSINESS CTA\n========================================================= */\n\n.ma7alak-business-cta{\n\n  margin-top:45px;\n\n  min-height:125px;\n\n  padding:\n    25px 28px;\n\n  box-sizing:border-box;\n\n  border-radius:22px;\n\n  border:\n    1px solid rgba(245,184,63,.38);\n\n  background:\n\n    radial-gradient(\n      circle at 75% 50%,\n      rgba(226,155,59,.22),\n      transparent 38%\n    ),\n\n    linear-gradient(\n      135deg,\n      rgba(42,33,26,.82),\n      rgba(19,16,14,.78)\n    );\n\n  backdrop-filter:blur(18px);\n\n  -webkit-backdrop-filter:blur(18px);\n\n  box-shadow:\n    0 20px 60px rgba(0,0,0,.38),\n    inset 0 1px rgba(255,255,255,.08);\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:space-between;\n\n  gap:25px;\n\n}\n\n\n.ma7alak-business-small{\n\n  margin-bottom:6px;\n\n  color:#b48a54;\n\n  font-size:8px;\n\n  letter-spacing:3px;\n\n  font-weight:800;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-business-cta h2{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  color:#fff;\n\n  font-size:27px;\n\n  line-height:1.15;\n\n}\n\n\n.ma7alak-business-cta h2 span{\n\n  color:#efc477;\n\n}\n\n\n.ma7alak-business-cta p{\n\n  margin:\n    6px 0 0;\n\n  color:#a9a097;\n\n  font-size:11px;\n\n}\n\n\n.ma7alak-add-button{\n\n  min-width:180px;\n\n  height:52px;\n\n  padding:\n    0 22px;\n\n  border-radius:14px;\n\n  background:\n    linear-gradient(\n      135deg,\n      #ffc958,\n      #d88b29\n    );\n\n  color:#241608;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:8px;\n\n  text-decoration:none;\n\n  font-size:12px;\n\n  font-weight:800;\n\n  box-shadow:\n    0 12px 32px rgba(214,137,36,.24);\n\n  transition:.23s ease;\n\n}\n\n\n.ma7alak-add-button:hover{\n\n  transform:translateY(-3px);\n\n  box-shadow:\n    0 17px 40px rgba(214,137,36,.35);\n\n}\n\n\n/* =========================================================\n   FOOTER\n========================================================= */\n\n.ma7alak-footer{\n\n  margin-top:35px;\n\n  padding-top:25px;\n\n  border-top:\n    1px solid rgba(255,255,255,.10);\n\n  text-align:center;\n\n}\n\n\n.ma7alak-footer-features{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:0;\n\n}\n\n\n.ma7alak-footer-feature{\n\n  min-width:190px;\n\n  padding:\n    0 25px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  color:#d4cbc1;\n\n  font-size:10px;\n\n}\n\n\n.ma7alak-footer-feature + .ma7alak-footer-feature{\n\n  border-left:\n    1px solid rgba(255,255,255,.16);\n\n}\n\n\n.ma7alak-footer-feature-icon{\n\n  color:#efc27a;\n\n  font-size:22px;\n\n}\n\n\n.ma7alak-footer-feature-text{\n\n  text-align:left;\n\n}\n\n\n.ma7alak-footer-feature-text strong{\n\n  display:block;\n\n  color:#eee6dc;\n\n  font-size:10px;\n\n}\n\n\n.ma7alak-footer-feature-text span{\n\n  display:block;\n\n  margin-top:2px;\n\n  color:#777069;\n\n  font-size:8px;\n\n}\n\n\n.ma7alak-footer-logo{\n\n  margin-top:23px;\n\n  font-family:\n    Georgia,\n    serif;\n\n  color:#ded5cb;\n\n  font-size:24px;\n\n}\n\n\n.ma7alak-footer-tagline{\n\n  margin-top:5px;\n\n  color:#766e67;\n\n  font-size:7px;\n\n  letter-spacing:3px;\n\n  text-transform:uppercase;\n\n}\n\n\n/* =========================================================\n   ANIMATIONS\n========================================================= */\n\n@keyframes ma7alakSectionIn{\n\n  from{\n\n    opacity:0;\n\n    transform:translateY(13px);\n\n  }\n\n  to{\n\n    opacity:1;\n\n    transform:translateY(0);\n\n  }\n\n}\n\n\n@keyframes ma7alakFeaturedGlow{\n\n  0%,\n  100%{\n\n    box-shadow:\n      0 0 0 rgba(245,184,63,0);\n\n  }\n\n  50%{\n\n    box-shadow:\n      0 0 19px rgba(245,184,63,.16);\n\n  }\n\n}\n\n\n@keyframes ma7alakRedGlow{\n\n  0%,\n  100%{\n\n    box-shadow:\n      0 0 0 rgba(255,80,80,0);\n\n  }\n\n  50%{\n\n    box-shadow:\n      0 0 20px rgba(255,80,80,.15);\n\n  }\n\n}\n\n\n/* =========================================================\n   TABLET\n========================================================= */\n\n@media(max-width:1050px){\n\n  #ma7alak-shops-page{\n\n    padding-left:20px;\n\n    padding-right:20px;\n\n  }\n\n\n  .ma7alak-shop-grid{\n\n    grid-template-columns:\n      repeat(3,minmax(0,1fr));\n\n  }\n\n}\n\n\n/* =========================================================\n   MOBILE\n========================================================= */\n\n@media(max-width:700px){\n\n  #ma7alak-shops-page{\n\n    padding:\n      27px 9px 55px;\n\n  }\n\n\n  .ma7alak-side-left{\n\n    display:none;\n\n  }\n\n\n  .ma7alak-side-right{\n\n    right:3px;\n\n    top:10px;\n\n    font-size:14px;\n\n  }\n\n\n  .ma7alak-brand-name{\n\n    font-size:39px;\n\n  }\n\n\n  .ma7alak-brand-subtitle{\n\n    font-size:7px;\n\n    letter-spacing:3px;\n\n  }\n\n\n  .ma7alak-hero{\n\n    margin-top:20px;\n\n    margin-bottom:23px;\n\n  }\n\n\n  .ma7alak-hero-icon{\n\n    width:39px;\n\n    height:39px;\n\n    font-size:26px;\n\n  }\n\n\n  .ma7alak-hero h1{\n\n    font-size:47px;\n\n    letter-spacing:-1.7px;\n\n  }\n\n\n  .ma7alak-hero p{\n\n    padding:0 16px;\n\n    font-size:13px;\n\n  }\n\n\n  .ma7alak-search{\n\n    height:55px;\n\n    border-radius:16px;\n\n    font-size:12px;\n\n  }\n\n\n  .ma7alak-search-wrapper{\n\n    margin-bottom:21px;\n\n  }\n\n\n  .ma7alak-filter-label{\n\n    font-size:11px;\n\n  }\n\n\n  .ma7alak-area-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-area-button{\n\n    min-height:49px;\n\n    border-radius:13px;\n\n    font-size:11px;\n\n  }\n\n\n  .ma7alak-category-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-category-button{\n\n    min-height:55px;\n\n    border-radius:13px;\n\n    font-size:10px;\n\n    padding:\n      8px 5px;\n\n  }\n\n\n  .ma7alak-category-icon{\n\n    font-size:17px;\n\n  }\n\n\n  .ma7alak-results{\n\n    margin-top:25px;\n\n  }\n\n\n  .ma7alak-results-top{\n\n    align-items:flex-start;\n\n    flex-direction:column;\n\n    gap:9px;\n\n  }\n\n\n  .ma7alak-results-title{\n\n    font-size:27px;\n\n  }\n\n\n  .ma7alak-results-subtitle{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-results-count{\n\n    font-size:9px;\n\n  }\n\n\n  /* =====================================================\n     TWO LARGE CARDS PER ROW\n  ===================================================== */\n\n  .ma7alak-shop-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:9px;\n\n    padding-top:11px;\n\n  }\n\n\n  .ma7alak-shop-card{\n\n    padding:\n      15px 7px 9px;\n\n    border-radius:18px;\n\n  }\n\n\n  .ma7alak-shop-image-ring{\n\n    width:118px;\n\n    height:118px;\n\n    padding:4px;\n\n  }\n\n\n  .ma7alak-shop-image-inner{\n\n    border-width:2px;\n\n  }\n\n\n  .ma7alak-verified-badge{\n\n    right:calc(50% - 61px);\n\n    width:23px;\n\n    height:23px;\n\n    font-size:12px;\n\n    border-width:2px;\n\n  }\n\n\n  .ma7alak-shop-content{\n\n    margin-top:11px;\n\n  }\n\n\n  .ma7alak-shop-name{\n\n    font-size:16px;\n\n  }\n\n\n  .ma7alak-shop-arabic{\n\n    font-size:10px;\n\n    margin-top:3px;\n\n  }\n\n\n  .ma7alak-shop-category-pill{\n\n    margin-top:7px;\n\n    padding:\n      5px 7px;\n\n    font-size:6.5px;\n\n    letter-spacing:.5px;\n\n  }\n\n\n  .ma7alak-shop-location{\n\n    margin-top:7px;\n\n    font-size:8px;\n\n  }\n\n\n  .ma7alak-location-icon{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-featured{\n\n    margin-top:7px;\n\n    padding:\n      5px 7px;\n\n    font-size:6.5px;\n\n    letter-spacing:.4px;\n\n  }\n\n\n  .ma7alak-profile-button{\n\n    min-height:37px;\n\n    margin-top:9px;\n\n    border-radius:11px;\n\n    font-size:9px;\n\n    gap:5px;\n\n  }\n\n\n  .ma7alak-profile-arrow{\n\n    font-size:13px;\n\n  }\n\n\n  /* CTA */\n\n  .ma7alak-business-cta{\n\n    margin-top:35px;\n\n    padding:\n      23px 15px;\n\n    border-radius:19px;\n\n    flex-direction:column;\n\n    text-align:center;\n\n    gap:17px;\n\n  }\n\n\n  .ma7alak-business-cta h2{\n\n    font-size:24px;\n\n  }\n\n\n  .ma7alak-business-cta p{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-add-button{\n\n    width:100%;\n\n    min-height:50px;\n\n    height:50px;\n\n  }\n\n\n  /* FOOTER */\n\n  .ma7alak-footer-features{\n\n    flex-direction:column;\n\n    gap:17px;\n\n  }\n\n\n  .ma7alak-footer-feature{\n\n    min-width:0;\n\n    padding:0;\n\n  }\n\n\n  .ma7alak-footer-feature + .ma7alak-footer-feature{\n\n    border-left:none;\n\n  }\n\n}\n\n\n/* =========================================================\n   VERY SMALL PHONES\n========================================================= */\n\n@media(max-width:390px){\n\n  #ma7alak-shops-page{\n\n    padding-left:6px;\n\n    padding-right:6px;\n\n  }\n\n\n  .ma7alak-shop-grid{\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-shop-card{\n\n    padding-left:5px;\n\n    padding-right:5px;\n\n  }\n\n\n  .ma7alak-shop-image-ring{\n\n    width:105px;\n\n    height:105px;\n\n  }\n\n\n  .ma7alak-verified-badge{\n\n    right:calc(50% - 54px);\n\n    width:21px;\n\n    height:21px;\n\n  }\n\n\n  .ma7alak-shop-name{\n\n    font-size:14px;\n\n  }\n\n\n  .ma7alak-shop-arabic{\n\n    font-size:9px;\n\n  }\n\n\n  .ma7alak-shop-location{\n\n    font-size:7.5px;\n\n  }\n\n\n  .ma7alak-profile-button{\n\n    font-size:8px;\n\n  }\n\n}\n\n\n\n/* =========================================================\n   MA7ALAK — LIVE STORY RING + STORY VIEWER\n   ========================================================= */\n\n.ma7alak-shop-image-link{\n  cursor:pointer;\n}\n\n.ma7alak-shop-image-ring.ma7alak-has-story{\n  padding:5px;\n  background:\n    conic-gradient(\n      from 0deg,\n      #ffd86b 0deg,\n      #f5a623 65deg,\n      #ffcc66 130deg,\n      #fff0b0 190deg,\n      #f5a623 250deg,\n      #ffd86b 315deg,\n      #ffd86b 360deg\n    );\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.18),\n    0 13px 35px rgba(0,0,0,.48),\n    0 0 30px rgba(245,184,63,.28);\n}\n\n/* Instagram-style expanding pulse. The shop image stays completely still. */\n.ma7alak-shop-image-ring.ma7alak-has-story::after{\n  content:\"\";\n  position:absolute;\n  left:50%;\n  top:50%;\n  width:100%;\n  height:100%;\n  box-sizing:border-box;\n  border:3px solid rgba(255,216,107,.95);\n  border-radius:50%;\n  transform:translate(-50%,-50%) scale(.92);\n  opacity:0;\n  pointer-events:none;\n  z-index:5;\n  animation:ma7alakInstagramStoryPulse 1.8s ease-out infinite;\n}\n\n@keyframes ma7alakInstagramStoryPulse{\n  0%{\n    transform:translate(-50%,-50%) scale(.92);\n    opacity:.95;\n  }\n  45%{\n    transform:translate(-50%,-50%) scale(1.08);\n    opacity:.62;\n  }\n  100%{\n    transform:translate(-50%,-50%) scale(1.28);\n    opacity:0;\n  }\n}\n\n.ma7alak-shop-image-ring.ma7alak-has-story\n.ma7alak-shop-image-inner{\n  border-width:3px;\n  border-color:#080706;\n}\n\n@keyframes ma7alakShopStorySnake{\n  from{\n    transform:rotate(0deg);\n  }\n  to{\n    transform:rotate(360deg);\n  }\n}\n\n/* Keep the image itself upright while the outer ring rotates. */\n.ma7alak-shop-image-ring.ma7alak-has-story\n.ma7alak-shop-image-inner{\n  transform:rotate(0deg);\n}\n\n.ma7alak-story-viewer{\n  position:fixed;\n  inset:0;\n  z-index:2147483000;\n  display:none;\n  align-items:center;\n  justify-content:center;\n  padding:18px;\n  box-sizing:border-box;\n  background:rgba(0,0,0,.88);\n  backdrop-filter:blur(18px);\n  -webkit-backdrop-filter:blur(18px);\n}\n\n.ma7alak-story-viewer.visible{\n  display:flex;\n}\n\n.ma7alak-story-viewer-backdrop{\n  position:absolute;\n  inset:0;\n}\n\n.ma7alak-story-viewer-shell{\n  position:relative;\n  z-index:2;\n  width:min(430px,94vw);\n  height:min(820px,92vh);\n  border-radius:24px;\n  overflow:hidden;\n  background:#080706;\n  border:1px solid rgba(255,255,255,.14);\n  box-shadow:\n    0 30px 100px rgba(0,0,0,.72),\n    0 0 55px rgba(245,184,63,.08);\n}\n\n.ma7alak-story-viewer-progress{\n  position:absolute;\n  z-index:10;\n  top:12px;\n  left:12px;\n  right:12px;\n  display:flex;\n  gap:4px;\n  pointer-events:none;\n}\n\n.ma7alak-story-progress-item{\n  position:relative;\n  flex:1;\n  height:3px;\n  overflow:hidden;\n  border-radius:999px;\n  background:rgba(255,255,255,.28);\n}\n\n.ma7alak-story-progress-item.done{\n  background:#fff;\n}\n\n.ma7alak-story-progress-item.current{\n  background:rgba(255,255,255,.28);\n}\n\n.ma7alak-story-progress-item.current::after{\n  content:\"\";\n  position:absolute;\n  inset:0;\n  transform-origin:left center;\n  transform:scaleX(0);\n  background:#fff;\n}\n\n.ma7alak-story-viewer-top{\n  position:absolute;\n  z-index:11;\n  top:26px;\n  left:14px;\n  right:14px;\n  display:flex;\n  align-items:center;\n  justify-content:space-between;\n  gap:10px;\n  pointer-events:none;\n}\n\n.ma7alak-story-viewer-shop{\n  min-width:0;\n  display:flex;\n  align-items:center;\n  gap:8px;\n  color:#fff;\n  text-shadow:0 2px 8px rgba(0,0,0,.65);\n}\n\n.ma7alak-story-viewer-shop-image{\n  width:34px;\n  height:34px;\n  flex:0 0 34px;\n  border-radius:50%;\n  object-fit:cover;\n  border:2px solid rgba(255,255,255,.9);\n  box-shadow:0 4px 15px rgba(0,0,0,.45);\n}\n\n.ma7alak-story-viewer-shop-name{\n  min-width:0;\n  overflow:hidden;\n  text-overflow:ellipsis;\n  white-space:nowrap;\n  font-size:12px;\n  font-weight:700;\n}\n\n.ma7alak-story-viewer-close{\n  pointer-events:auto;\n  width:36px;\n  height:36px;\n  flex:0 0 36px;\n  border:0;\n  border-radius:50%;\n  background:rgba(0,0,0,.38);\n  color:#fff;\n  font-size:25px;\n  line-height:1;\n  cursor:pointer;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  backdrop-filter:blur(10px);\n  -webkit-backdrop-filter:blur(10px);\n}\n\n.ma7alak-story-viewer-media{\n  width:100%;\n  height:100%;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  background:#050403;\n}\n\n.ma7alak-story-viewer-media img,\n.ma7alak-story-viewer-media video{\n  width:100%;\n  height:100%;\n  object-fit:contain;\n  background:#050403;\n}\n\n.ma7alak-story-viewer-tap-left,\n.ma7alak-story-viewer-tap-right,\n.ma7alak-story-viewer-tap-left:hover,\n.ma7alak-story-viewer-tap-right:hover,\n.ma7alak-story-viewer-tap-left:focus,\n.ma7alak-story-viewer-tap-right:focus,\n.ma7alak-story-viewer-tap-left:focus-visible,\n.ma7alak-story-viewer-tap-right:focus-visible,\n.ma7alak-story-viewer-tap-left:active,\n.ma7alak-story-viewer-tap-right:active{\n  position:absolute !important;\n  z-index:8 !important;\n  top:0 !important;\n  bottom:0 !important;\n  width:35% !important;\n  height:auto !important;\n  min-width:0 !important;\n  min-height:0 !important;\n  padding:0 !important;\n  margin:0 !important;\n  border:0 !important;\n  border-radius:0 !important;\n  outline:0 !important;\n  background:transparent !important;\n  background-color:transparent !important;\n  background-image:none !important;\n  box-shadow:none !important;\n  color:transparent !important;\n  text-shadow:none !important;\n  appearance:none !important;\n  -webkit-appearance:none !important;\n  -webkit-tap-highlight-color:transparent !important;\n  transform:none !important;\n  opacity:1 !important;\n  cursor:pointer !important;\n}\n\n.ma7alak-story-viewer-tap-left{\n  left:0 !important;\n  right:auto !important;\n}\n\n.ma7alak-story-viewer-tap-right{\n  right:0 !important;\n  left:auto !important;\n}\n\n.ma7alak-story-viewer-tap-left::before,\n.ma7alak-story-viewer-tap-left::after,\n.ma7alak-story-viewer-tap-right::before,\n.ma7alak-story-viewer-tap-right::after{\n  content:none !important;\n  display:none !important;\n}\n\n.ma7alak-story-viewer-loading{\n  position:absolute;\n  z-index:9;\n  inset:0;\n  display:none;\n  align-items:center;\n  justify-content:center;\n  color:#fff;\n  font-size:12px;\n  background:rgba(0,0,0,.18);\n  pointer-events:none;\n}\n\n.ma7alak-story-viewer-loading.visible{\n  display:flex;\n}\n\n.ma7alak-story-viewer-loading::before{\n  content:\"\";\n  width:28px;\n  height:28px;\n  border:2px solid rgba(255,255,255,.25);\n  border-top-color:#fff;\n  border-radius:50%;\n  animation:ma7alakStorySpin .7s linear infinite;\n}\n\n@keyframes ma7alakStorySpin{\n  to{\n    transform:rotate(360deg);\n  }\n}\n\n@media(max-width:700px){\n\n  .ma7alak-shop-image-ring.ma7alak-has-story{\n    padding:5px;\n  }\n\n  .ma7alak-story-viewer{\n    padding:0;\n  }\n\n  .ma7alak-story-viewer-shell{\n    width:100vw;\n    height:100dvh;\n    max-width:none;\n    max-height:none;\n    border-radius:0;\n    border:0;\n  }\n\n  .ma7alak-story-viewer-progress{\n    top:10px;\n    left:9px;\n    right:9px;\n  }\n\n  .ma7alak-story-viewer-top{\n    top:23px;\n  }\n}";
+    (document.head || document.documentElement).appendChild(style);
+  }
+})();
+
+(function(){
+
+  "use strict";
+
+
+  /* =========================================================
+     ONLY RUN ON ACTUAL SHOPS PAGE
+  ========================================================= */
+
+  function getPath(){
+
+    return window.location.pathname
+      .replace(/\/+/g,"/")
+      .replace(/\/$/,"")
+      .toLowerCase();
+
+  }
+
+
+  if(
+    getPath() !== "/shwf-almhlat-"
+  ){
+
+    return;
+
+  }
+
+
+  /* =========================================================
+     PAGE CLASSES
+  ========================================================= */
+
+  document.documentElement.classList.add(
+    "ma7alak-shops-page-active"
+  );
+
+
+  if(document.body){
+
+    document.body.classList.add(
+      "ma7alak-shops-body"
+    );
+
+  }
+
+
+  /* =========================================================
+     SHOP DATA
+     
+     These are the current sample shops.
+     
+     Later these can be replaced by Supabase data
+     without changing the design.
+  ========================================================= */
+
+  const shops = [
+
+    /* =====================================================
+       MASAYA
+    ===================================================== */
+
+    {
+
+      id:"masaya-cafe",
+
+      name:"Masaya Cafe",
+
+      arabic:"كافية مسايا",
+
+      area:"Da7ye",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"حارة حريك - الصفير",
+
+      image:
+        "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/IMG-20260906-WA0049.jpg",
+
+      url:
+        "https://ma7alak.com/masaya-cafe",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       DOZE 3ALE
+    ===================================================== */
+
+    {
+
+      id:"doze-3-ale",
+
+      name:"Doze 3ale",
+
+      arabic:"دوزة عاله",
+
+      area:"Da7ye",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"الحدث",
+
+      image:
+        "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/IMG-20260906-WA0108.jpg",
+
+      url:
+        "https://ma7alak.com/doze-3-ale",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:true
+
+    },
+
+
+    /* =====================================================
+       BEIRUT COFFEE
+    ===================================================== */
+
+    {
+
+      id:"beirut-coffee",
+
+      name:"Beirut Coffee",
+
+      arabic:"قهوة بيروت",
+
+      area:"Central Beirut",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"الحمرا - بيروت",
+
+      image:
+        "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       URBAN BREW
+    ===================================================== */
+
+    {
+
+      id:"urban-brew",
+
+      name:"Urban Brew",
+
+      arabic:"أوربان برو",
+
+      area:"Central Beirut",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"مار مخايل - بيروت",
+
+      image:
+        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       DAILY CUP
+    ===================================================== */
+
+    {
+
+      id:"daily-cup",
+
+      name:"The Daily Cup",
+
+      arabic:"ذا ديلي كب",
+
+      area:"Da7ye",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"صيدا",
+
+      image:
+        "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:false,
+
+      featured:false,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       NORTH BREW
+    ===================================================== */
+
+    {
+
+      id:"north-brew",
+
+      name:"North Brew",
+
+      arabic:"نورث برو",
+
+      area:"North Lebanon",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"طرابلس",
+
+      image:
+        "https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:false,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       ROASTED LOUNGE
+    ===================================================== */
+
+    {
+
+      id:"roasted-lounge",
+
+      name:"Roasted Lounge",
+
+      arabic:"روستد لاونج",
+
+      area:"South Lebanon",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"صور",
+
+      image:
+        "https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:false,
+
+      featured:false,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       KAIF
+    ===================================================== */
+
+    {
+
+      id:"kaif-cafe",
+
+      name:"Kaif Café",
+
+      arabic:"كيف كافيه",
+
+      area:"Central Beirut",
+
+      category:"cafe",
+
+      categoryName:"Café & Coffee",
+
+      location:"بيروت",
+
+      image:
+        "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       CLOTHING
+    ===================================================== */
+
+    {
+
+      id:"local-style",
+
+      name:"Local Style",
+
+      arabic:"لوكل ستايل",
+
+      area:"Da7ye",
+
+      category:"clothing",
+
+      categoryName:"Clothing Stores",
+
+      location:"حارة حريك",
+
+      image:
+        "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:false,
+
+      redFeatured:false
+
+    },
+
+
+    {
+
+      id:"beirut-fashion",
+
+      name:"Beirut Fashion",
+
+      arabic:"بيروت فاشن",
+
+      area:"Central Beirut",
+
+      category:"clothing",
+
+      categoryName:"Clothing Stores",
+
+      location:"بدارو - بيروت",
+
+      image:
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:false,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       GENERAL SERVICES
+    ===================================================== */
+
+    {
+
+      id:"local-services",
+
+      name:"Local Services",
+
+      arabic:"خدمات محلية",
+
+      area:"Da7ye",
+
+      category:"services",
+
+      categoryName:"General Services",
+
+      location:"الضاحية الجنوبية",
+
+      image:
+        "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:false,
+
+      redFeatured:false
+
+    },
+
+
+    /* =====================================================
+       FOOD
+    ===================================================== */
+
+    {
+
+      id:"corner-bites",
+
+      name:"Corner Bites",
+
+      arabic:"كورنر بايتس",
+
+      area:"South Lebanon",
+
+      category:"food",
+
+      categoryName:"Kiosks & Food",
+
+      location:"صيدا",
+
+      image:
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=90",
+
+      url:
+        "https://ma7alak.com/shwf-almhlat-",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    }
+
+  ];
+
+
+  /* =========================================================
+     BUILD PAGE
+  ========================================================= */
+
+  const page =
+    document.createElement("div");
+
+
+  page.id =
+    "ma7alak-shops-page";
+
+
+  page.innerHTML = `
+
+    <!-- =====================================================
+         BACKGROUND
+    ====================================================== -->
+
+    <div class="ma7alak-background">
+
+      <img
+        class="ma7alak-background-image"
+        src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=2200&q=85"
+        alt=""
+      >
+
+      <div class="ma7alak-background-overlay"></div>
+
+      <div class="ma7alak-background-vignette"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BRAND
+    ====================================================== -->
+
+    <div class="ma7alak-top-brand">
+
+      <div class="ma7alak-side-left">
+
+        EXPLORE<br>
+        SHOP LOCAL<br>
+        BE PART OF IT
+
+      </div>
+
+
+      <div class="ma7alak-side-right">
+
+        Lebanon<br>
+        Local<br>
+        Always ♡
+
+      </div>
+
+
+      <div class="ma7alak-brand-name">
+        Ma7alak
+      </div>
+
+
+      <div class="ma7alak-brand-subtitle">
+
+        SUPPORT LOCAL
+        &nbsp; • &nbsp;
+        DISCOVER MORE
+
+      </div>
+
+
+      <div class="ma7alak-brand-rule"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="ma7alak-hero">
+
+      <div class="ma7alak-hero-icon">
+        ☕
+      </div>
+
+
+      <h1>
+
+        Discover
+        <span>Shops.</span>
+
+      </h1>
+
+
+      <p>
+
+        Discover amazing local businesses,
+        hidden gems and places worth seeing around you.
+
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <div class="ma7alak-search-wrapper">
+
+      <input
+        id="ma7alak-shop-search"
+        class="ma7alak-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Search shops, places or categories..."
+      >
+
+
+      <div class="ma7alak-search-icon">
+        ⌕
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         AREA
+    ====================================================== -->
+
+    <div class="ma7alak-filter-block">
+
+      <div class="ma7alak-filter-label">
+        Select Area
+      </div>
+
+
+      <div
+        id="ma7alak-area-grid"
+        class="ma7alak-area-grid"
+      >
+
+        <button
+          class="ma7alak-area-button"
+          data-area="Da7ye"
+        >
+
+          <span class="icon">
+            📍
+          </span>
+
+          Da7ye
+
+        </button>
+
+
+        <button
+          class="ma7alak-area-button"
+          data-area="Central Beirut"
+        >
+
+          <span class="icon">
+            📍
+          </span>
+
+          Central Beirut
+
+        </button>
+
+
+        <button
+          class="ma7alak-area-button"
+          data-area="South Lebanon"
+        >
+
+          <span class="icon">
+            📍
+          </span>
+
+          South Lebanon
+
+        </button>
+
+
+        <button
+          class="ma7alak-area-button"
+          data-area="North Lebanon"
+        >
+
+          <span class="icon">
+            📍
+          </span>
+
+          North Lebanon
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CATEGORY
+    ====================================================== -->
+
+    <section
+      id="ma7alak-category-section"
+      class="ma7alak-category-section"
+    >
+
+      <div class="ma7alak-filter-label">
+        Select Category
+      </div>
+
+
+      <div class="ma7alak-category-grid">
+
+
+        <button
+          class="ma7alak-category-button"
+          data-category="cafe"
+        >
+
+          <span class="ma7alak-category-icon">
+            ☕
+          </span>
+
+          Café & Coffee
+
+        </button>
+
+
+        <button
+          class="ma7alak-category-button"
+          data-category="clothing"
+        >
+
+          <span class="ma7alak-category-icon">
+            ♧
+          </span>
+
+          Clothing Stores
+
+        </button>
+
+
+        <button
+          class="ma7alak-category-button"
+          data-category="services"
+        >
+
+          <span class="ma7alak-category-icon">
+            ⚒
+          </span>
+
+          General Services
+
+        </button>
+
+
+        <button
+          class="ma7alak-category-button"
+          data-category="food"
+        >
+
+          <span class="ma7alak-category-icon">
+            🍴
+          </span>
+
+          Kiosks & Food
+
+        </button>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTS
+    ====================================================== -->
+
+    <section
+      id="ma7alak-results"
+      class="ma7alak-results"
+    >
+
+      <div class="ma7alak-results-top">
+
+        <div>
+
+          <div
+            id="ma7alak-results-kicker"
+            class="ma7alak-results-kicker"
+          >
+            SELECTED AREA
+          </div>
+
+
+          <h2
+            id="ma7alak-results-title"
+            class="ma7alak-results-title"
+          >
+            Cafés & Coffee Spots
+          </h2>
+
+
+          <p
+            id="ma7alak-results-subtitle"
+            class="ma7alak-results-subtitle"
+          >
+            Discover local businesses around you.
+          </p>
+
+        </div>
+
+
+        <div
+          id="ma7alak-results-count"
+          class="ma7alak-results-count"
+        >
+          0 shops
+        </div>
+
+      </div>
+
+
+      <div
+        id="ma7alak-shop-grid"
+        class="ma7alak-shop-grid"
+      ></div>
+
+
+      <div
+        id="ma7alak-empty"
+        class="ma7alak-empty"
+      >
+
+        <div class="ma7alak-empty-icon">
+          🔎
+        </div>
+
+
+        <h3>
+          Nothing found yet
+        </h3>
+
+
+        <p>
+          Try another shop, area or category.
+        </p>
+
+      </div>
+
+
+      <button
+        id="ma7alak-change-area"
+        class="ma7alak-change-area"
+      >
+
+        ← Change area
+
+      </button>
+
+    </section>
+
+
+    <!-- =====================================================
+         BUSINESS CTA
+    ====================================================== -->
+
+    <section class="ma7alak-business-cta">
+
+      <div>
+
+        <div class="ma7alak-business-small">
+          FOR LOCAL BUSINESSES
+        </div>
+
+
+        <h2>
+
+          Your shop belongs on
+          <span>Ma7alak.</span>
+
+        </h2>
+
+
+        <p>
+
+          Reach more people.
+          Grow your business.
+          Be part of something local.
+
+        </p>
+
+      </div>
+
+
+      <a
+        class="ma7alak-add-button"
+        href="https://ma7alak.com/dhyf-mhlk-"
+        onclick="
+          window.top.location.href='https://ma7alak.com/dhyf-mhlk-';
+          return false;
+        "
+      >
+
+        Add Your Shop
+
+        <span>
+          →
+        </span>
+
+      </a>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="ma7alak-footer">
+
+      <div class="ma7alak-footer-features">
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ♡
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              Support Local
+            </strong>
+
+            <span>
+              Stronger Communities
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ◈
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              Discover More
+            </strong>
+
+            <span>
+              Hidden Gems
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ✦
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              A Stronger Lebanon
+            </strong>
+
+            <span>
+              Together
+            </span>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="ma7alak-footer-logo">
+        Ma7alak
+      </div>
+
+
+      <div class="ma7alak-footer-tagline">
+        More Than A Place • A Community
+      </div>
+
+    </footer>
+
+  `;
+
+
+  /* =========================================================
+     HEADER DETECTION
+  ========================================================= */
+
+  function findHeader(){
+
+    const selectors = [
+
+      "header",
+
+      "[role='banner']",
+
+      ".site-header",
+
+      ".main-header",
+
+      ".website-header",
+
+      ".header",
+
+      "nav"
+
+    ];
+
+
+    for(
+      const selector of selectors
+    ){
+
+      const found =
+        document.querySelector(selector);
+
+
+      if(found){
+
+        return found;
+
+      }
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /* =========================================================
+     INSERT PAGE
+  ========================================================= */
+
+  function insertPage(){
+
+    if(
+      document.getElementById(
+        "ma7alak-shops-page"
+      )
+    ){
+
+      return true;
+
+    }
+
+
+    const header =
+      findHeader();
+
+
+    if(header){
+
+      header.insertAdjacentElement(
+        "afterend",
+        page
+      );
+
+      return true;
+
+    }
+
+
+    if(document.body){
+
+      document.body.insertBefore(
+        page,
+        document.body.firstChild
+      );
+
+      return true;
+
+    }
+
+
+    return false;
+
+  }
+
+
+  /* =========================================================
+     STATE
+  ========================================================= */
+
+  let selectedArea =
+    null;
+
+
+  let selectedCategory =
+    null;
+
+
+  let searchTerm =
+    "";
+
+
+  /* =========================================================
+     ELEMENT REFERENCES
+  ========================================================= */
+
+  let areaButtons;
+
+  let categoryButtons;
+
+  let categorySection;
+
+  let results;
+
+  let shopGrid;
+
+  let resultCount;
+
+  let resultsTitle;
+
+  let resultsSubtitle;
+
+  let resultsKicker;
+
+  let empty;
+
+  let changeArea;
+
+  let searchInput;
+
+
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
+
+  function initialize(){
+
+    areaButtons =
+      page.querySelectorAll(
+        ".ma7alak-area-button"
+      );
+
+
+    categoryButtons =
+      page.querySelectorAll(
+        ".ma7alak-category-button"
+      );
+
+
+    categorySection =
+      page.querySelector(
+        "#ma7alak-category-section"
+      );
+
+
+    results =
+      page.querySelector(
+        "#ma7alak-results"
+      );
+
+
+    shopGrid =
+      page.querySelector(
+        "#ma7alak-shop-grid"
+      );
+
+
+    resultCount =
+      page.querySelector(
+        "#ma7alak-results-count"
+      );
+
+
+    resultsTitle =
+      page.querySelector(
+        "#ma7alak-results-title"
+      );
+
+
+    resultsSubtitle =
+      page.querySelector(
+        "#ma7alak-results-subtitle"
+      );
+
+
+    resultsKicker =
+      page.querySelector(
+        "#ma7alak-results-kicker"
+      );
+
+
+    empty =
+      page.querySelector(
+        "#ma7alak-empty"
+      );
+
+
+    changeArea =
+      page.querySelector(
+        "#ma7alak-change-area"
+      );
+
+
+    searchInput =
+      page.querySelector(
+        "#ma7alak-shop-search"
+      );
+
+
+    bindEvents();
+
+    ma7alakBindStoryCardClicks();
+
+    /*
+     * Start the live Story system in the background.
+     */
+    ma7alakStartStorySystem();
+
+  }
+
+
+  /* =========================================================
+     EVENTS
+  ========================================================= */
+
+  function bindEvents(){
+
+
+    /* AREA */
+
+    areaButtons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          function(){
+
+            selectedArea =
+              this.dataset.area;
+
+
+            selectedCategory =
+              null;
+
+
+            areaButtons.forEach(
+              item => {
+
+                item.classList.remove(
+                  "active"
+                );
+
+              }
+            );
+
+
+            this.classList.add(
+              "active"
+            );
+
+
+            categoryButtons.forEach(
+              item => {
+
+                item.classList.remove(
+                  "active"
+                );
+
+              }
+            );
+
+
+            categorySection.classList.add(
+              "visible"
+            );
+
+
+            results.classList.remove(
+              "visible"
+            );
+
+
+            searchInput.value =
+              "";
+
+
+            searchTerm =
+              "";
+
+
+            setTimeout(
+              function(){
+
+                categorySection.scrollIntoView({
+
+                  behavior:"smooth",
+
+                  block:"center"
+
+                });
+
+              },
+              80
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    /* CATEGORY */
+
+    categoryButtons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          function(){
+
+            if(!selectedArea){
+
+              return;
+
+            }
+
+
+            selectedCategory =
+              this.dataset.category;
+
+
+            categoryButtons.forEach(
+              item => {
+
+                item.classList.remove(
+                  "active"
+                );
+
+              }
+            );
+
+
+            this.classList.add(
+              "active"
+            );
+
+
+            renderResults();
+
+
+            setTimeout(
+              function(){
+
+                results.scrollIntoView({
+
+                  behavior:"smooth",
+
+                  block:"start"
+
+                });
+
+              },
+              100
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    /* SEARCH */
+
+    searchInput.addEventListener(
+      "input",
+      function(){
+
+        searchTerm =
+          this.value
+            .trim()
+            .toLowerCase();
+
+
+        if(
+          selectedArea &&
+          selectedCategory
+        ){
+
+          renderResults();
+
+        }
+
+      }
+    );
+
+
+    /* CHANGE AREA */
+
+    changeArea.addEventListener(
+      "click",
+      function(){
+
+        selectedArea =
+          null;
+
+
+        selectedCategory =
+          null;
+
+
+        searchTerm =
+          "";
+
+
+        searchInput.value =
+          "";
+
+
+        results.classList.remove(
+          "visible"
+        );
+
+
+        categorySection.classList.remove(
+          "visible"
+        );
+
+
+        areaButtons.forEach(
+          item => {
+
+            item.classList.remove(
+              "active"
+            );
+
+          }
+        );
+
+
+        categoryButtons.forEach(
+          item => {
+
+            item.classList.remove(
+              "active"
+            );
+
+          }
+        );
+
+
+        page.querySelector(
+          ".ma7alak-area-grid"
+        ).scrollIntoView({
+
+          behavior:"smooth",
+
+          block:"center"
+
+        });
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     RENDER RESULTS
+  ========================================================= */
+
+  function renderResults(){
+
+    if(
+      !selectedArea ||
+      !selectedCategory
+    ){
+
+      return;
+
+    }
+
+
+    results.classList.add(
+      "visible"
+    );
+
+
+    const categoryButton =
+      page.querySelector(
+        '.ma7alak-category-button[data-category="' +
+        selectedCategory +
+        '"]'
+      );
+
+
+    let categoryName =
+      categoryButton
+        ? categoryButton.textContent.trim()
+        : "Shops";
+
+
+    let filtered =
+      shops.filter(
+        shop => {
+
+          if(
+            shop.area !== selectedArea
+          ){
+
+            return false;
+
+          }
+
+
+          if(
+            shop.category !== selectedCategory
+          ){
+
+            return false;
+
+          }
+
+
+          if(
+            !searchTerm
+          ){
+
+            return true;
+
+          }
+
+
+          const searchable = (
+
+            shop.name +
+            " " +
+            shop.arabic +
+            " " +
+            shop.area +
+            " " +
+            shop.categoryName +
+            " " +
+            shop.location
+
+          ).toLowerCase();
+
+
+          return searchable.includes(
+            searchTerm
+          );
+
+        }
+      );
+
+
+    resultsKicker.textContent =
+      selectedArea.toUpperCase();
+
+
+    resultsTitle.textContent =
+      categoryName;
+
+
+    resultsSubtitle.textContent =
+      filtered.length +
+      (
+        filtered.length === 1
+          ? " local shop"
+          : " local shops"
+      ) +
+      " found in " +
+      selectedArea;
+
+
+    resultCount.textContent =
+      filtered.length +
+      (
+        filtered.length === 1
+          ? " shop"
+          : " shops"
+      );
+
+
+    shopGrid.innerHTML =
+      "";
+
+
+    if(
+      filtered.length === 0
+    ){
+
+      empty.style.display =
+        "block";
+
+
+      changeArea.classList.add(
+        "visible"
+      );
+
+
+      return;
+
+    }
+
+
+    empty.style.display =
+      "none";
+
+
+    changeArea.classList.add(
+      "visible"
+    );
+
+
+    filtered.forEach(
+      shop => {
+
+        shopGrid.appendChild(
+          createShopCard(shop)
+        );
+
+      }
+    );
+
+  }
+
+
+
+  /* =========================================================
+     LIVE STORIES — SUPABASE
+     ========================================================= */
+
+  const MA7ALAK_SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
+
+  const MA7ALAK_SUPABASE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
+  let ma7alakSupabaseClient =
+    null;
+
+  let ma7alakActiveStoryShops =
+    new Set();
+
+  /*
+   * Story IDs already viewed by this visitor.
+   * Stored locally so a viewed shop does not keep
+   * showing the "new story" animation after opening it.
+   */
+  const MA7ALAK_VIEWED_STORIES_KEY =
+    "ma7alak_viewed_story_ids";
+
+  let ma7alakViewedStoryIds =
+    new Set();
+
+  try{
+    const savedViewedStories =
+      JSON.parse(
+        localStorage.getItem(
+          MA7ALAK_VIEWED_STORIES_KEY
+        ) || "[]"
+      );
+
+    if(Array.isArray(savedViewedStories)){
+      ma7alakViewedStoryIds =
+        new Set(
+          savedViewedStories.map(
+            function(id){
+              return String(id);
+            }
+          )
+        );
+    }
+  }catch(e){}
+
+  function ma7alakSaveViewedStories(){
+    try{
+      localStorage.setItem(
+        MA7ALAK_VIEWED_STORIES_KEY,
+        JSON.stringify(
+          Array.from(ma7alakViewedStoryIds)
+        )
+      );
+    }catch(e){}
+  }
+
+  function ma7alakMarkStoriesViewed(stories){
+    (stories || []).forEach(
+      function(story){
+        if(story && story.id != null){
+          ma7alakViewedStoryIds.add(
+            String(story.id)
+          );
+        }
+      }
+    );
+
+    ma7alakSaveViewedStories();
+  }
+
+  let ma7alakStoryViewer =
+    null;
+
+  let ma7alakStoryItems =
+    [];
+
+  let ma7alakStoryIndex =
+    0;
+
+  let ma7alakStoryTimer =
+    null;
+
+  let ma7alakStoryViewerShop =
+    null;
+
+  let ma7alakStoryChannel =
+    null;
+
+  let ma7alakStoryLoaded =
+    false;
+
+
+  function ma7alakGetSupabaseClient(){
+
+    if(
+      ma7alakSupabaseClient
+    ){
+
+      return ma7alakSupabaseClient;
+
+    }
+
+    if(
+      window.supabase &&
+      typeof window.supabase.createClient === "function"
+    ){
+
+      ma7alakSupabaseClient =
+        window.supabase.createClient(
+          MA7ALAK_SUPABASE_URL,
+          MA7ALAK_SUPABASE_KEY
+        );
+
+      return ma7alakSupabaseClient;
+
+    }
+
+    return null;
+
+  }
+
+
+  function ma7alakLoadSupabase(){
+
+    return new Promise(
+      function(resolve){
+
+        const existing =
+          ma7alakGetSupabaseClient();
+
+        if(existing){
+
+          resolve(existing);
+
+          return;
+
+        }
+
+        const script =
+          document.createElement("script");
+
+        script.src =
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+        script.onload =
+          function(){
+
+            resolve(
+              ma7alakGetSupabaseClient()
+            );
+
+          };
+
+        script.onerror =
+          function(){
+
+            resolve(null);
+
+          };
+
+        document.head.appendChild(
+          script
+        );
+
+      }
+    );
+
+  }
+
+
+  function ma7alakSetStoryRing(
+    shopSlug,
+    active
+  ){
+
+    const rings =
+      page.querySelectorAll(
+        '.ma7alak-shop-image-ring[data-shop-slug="' +
+        CSS.escape(shopSlug) +
+        '"]'
+      );
+
+    rings.forEach(
+      function(ring){
+
+        ring.classList.toggle(
+          "ma7alak-has-story",
+          !!active
+        );
+
+      }
+    );
+
+  }
+
+
+  function ma7alakRefreshStoryRings(){
+
+    ma7alakActiveStoryShops.forEach(
+      function(slug){
+
+        ma7alakSetStoryRing(
+          slug,
+          true
+        );
+
+      }
+    );
+
+  }
+
+
+  async function ma7alakLoadActiveStoryShops(){
+
+    const client =
+      ma7alakGetSupabaseClient();
+
+    if(!client){
+
+      return;
+
+    }
+
+    const now =
+      new Date().toISOString();
+
+    const result =
+      await client
+        .from("shop_stories")
+        .select(
+          "shop_slug,id,expires_at,created_at"
+        )
+        .gt(
+          "expires_at",
+          now
+        );
+
+    if(result.error){
+
+      console.warn(
+        "Ma7alak stories:",
+        result.error
+      );
+
+      return;
+
+    }
+
+    ma7alakActiveStoryShops =
+      new Set(
+        (result.data || [])
+          .filter(
+            function(row){
+              return row &&
+                row.shop_slug &&
+                !ma7alakViewedStoryIds.has(
+                  String(row.id)
+                );
+            }
+          )
+          .map(
+            function(row){
+              return row.shop_slug;
+            }
+          )
+          .filter(Boolean)
+      );
+
+    ma7alakStoryLoaded =
+      true;
+
+    page
+      .querySelectorAll(
+        ".ma7alak-shop-image-ring.ma7alak-has-story"
+      )
+      .forEach(
+        function(ring){
+          ring.classList.remove(
+            "ma7alak-has-story"
+          );
+        }
+      );
+
+    ma7alakRefreshStoryRings();
+
+  }
+
+
+  async function ma7alakOpenShopStories(
+    shop
+  ){
+
+    const client =
+      ma7alakGetSupabaseClient();
+
+    if(!client){
+
+      return;
+
+    }
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    ma7alakStoryViewerShop =
+      shop;
+
+    if(!ma7alakStoryViewer){
+
+      ma7alakCreateStoryViewer();
+
+    }
+
+    ma7alakStoryViewer.classList.add(
+      "visible"
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+
+    if(document.body){
+
+      document.body.style.overflow =
+        "hidden";
+
+    }
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-loading"
+      )
+      .classList.add(
+        "visible"
+      );
+
+    const now =
+      new Date().toISOString();
+
+    const result =
+      await client
+        .from("shop_stories")
+        .select(
+          "id,shop_slug,media_type,storage_path,expires_at,created_at"
+        )
+        .eq(
+          "shop_slug",
+          shop.id
+        )
+        .gt(
+          "expires_at",
+          now
+        )
+        .order(
+          "created_at",
+          {
+            ascending:true
+          }
+        );
+
+    if(result.error){
+
+      console.warn(
+        "Ma7alak story viewer:",
+        result.error
+      );
+
+      ma7alakCloseStoryViewer();
+
+      return;
+
+    }
+
+    ma7alakStoryItems =
+      result.data || [];
+
+    /*
+     * Opening the story means the visitor has seen it.
+     * Mark the current active stories as viewed immediately
+     * so the ring stops pulsing without needing a refresh.
+     */
+    ma7alakMarkStoriesViewed(
+      ma7alakStoryItems
+    );
+
+    ma7alakActiveStoryShops.delete(
+      shop.id
+    );
+
+    ma7alakSetStoryRing(
+      shop.id,
+      false
+    );
+
+    if(
+      ma7alakStoryItems.length === 0
+    ){
+
+      ma7alakActiveStoryShops.delete(
+        shop.id
+      );
+
+      ma7alakSetStoryRing(
+        shop.id,
+        false
+      );
+
+      ma7alakCloseStoryViewer();
+
+      return;
+
+    }
+
+    ma7alakStoryIndex =
+      0;
+
+    ma7alakRenderStoryViewer();
+
+  }
+
+
+  function ma7alakStoryURL(
+    storagePath
+  ){
+
+    return (
+      MA7ALAK_SUPABASE_URL +
+      "/storage/v1/object/public/shop-stories/" +
+      storagePath
+    );
+
+  }
+
+
+  function ma7alakCreateStoryViewer(){
+
+    ma7alakStoryViewer =
+      document.createElement("div");
+
+    ma7alakStoryViewer.className =
+      "ma7alak-story-viewer";
+
+    ma7alakStoryViewer.innerHTML = `
+
+      <div
+        class="ma7alak-story-viewer-backdrop"
+      ></div>
+
+      <div
+        class="ma7alak-story-viewer-shell"
+      >
+
+        <div
+          class="ma7alak-story-viewer-progress"
+        ></div>
+
+        <div
+          class="ma7alak-story-viewer-top"
+        >
+
+          <div
+            class="ma7alak-story-viewer-shop"
+          >
+
+            <img
+              class="ma7alak-story-viewer-shop-image"
+              alt=""
+            >
+
+            <div
+              class="ma7alak-story-viewer-shop-name"
+            ></div>
+
+          </div>
+
+          <button
+            type="button"
+            class="ma7alak-story-viewer-close"
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div
+          class="ma7alak-story-viewer-media"
+        ></div>
+
+        <button
+          type="button"
+          class="ma7alak-story-viewer-tap-left"
+          aria-label="Previous story"
+        ></button>
+
+        <button
+          type="button"
+          class="ma7alak-story-viewer-tap-right"
+          aria-label="Next story"
+        ></button>
+
+        <div
+          class="ma7alak-story-viewer-loading"
+        ></div>
+
+      </div>
+
+    `;
+
+    document.body.appendChild(
+      ma7alakStoryViewer
+    );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-backdrop"
+      )
+      .addEventListener(
+        "click",
+        ma7alakCloseStoryViewer
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-close"
+      )
+      .addEventListener(
+        "click",
+        ma7alakCloseStoryViewer
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-tap-left"
+      )
+      .addEventListener(
+        "click",
+        function(){
+          ma7alakPreviousStory();
+        }
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-tap-right"
+      )
+      .addEventListener(
+        "click",
+        function(){
+          ma7alakNextStory();
+        }
+      );
+
+  }
+
+
+  function ma7alakRenderStoryViewer(){
+
+    if(
+      !ma7alakStoryViewer ||
+      !ma7alakStoryItems.length
+    ){
+
+      return;
+
+    }
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    const story =
+      ma7alakStoryItems[
+        ma7alakStoryIndex
+      ];
+
+    const progress =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-progress"
+      );
+
+    progress.innerHTML =
+      ma7alakStoryItems
+        .map(
+          function(item,index){
+
+            return `
+              <div
+                class="
+                  ma7alak-story-progress-item
+                  ${index < ma7alakStoryIndex ? "done" : ""}
+                  ${index === ma7alakStoryIndex ? "current" : ""}
+                "
+              ></div>
+            `;
+
+          }
+        )
+        .join("");
+
+    const shopImage =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-shop-image"
+      );
+
+    shopImage.src =
+      ma7alakStoryViewerShop.image;
+
+    shopImage.alt =
+      ma7alakStoryViewerShop.name;
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-shop-name"
+      )
+      .textContent =
+      ma7alakStoryViewerShop.name;
+
+    const media =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-media"
+      );
+
+    media.innerHTML =
+      "";
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-loading"
+      )
+      .classList.remove(
+        "visible"
+      );
+
+    const url =
+      ma7alakStoryURL(
+        story.storage_path
+      );
+
+    if(
+      story.media_type === "video"
+    ){
+
+      const video =
+        document.createElement("video");
+
+      video.src =
+        url;
+
+      video.autoplay =
+        true;
+
+      video.playsInline =
+        true;
+
+      video.controls =
+        false;
+
+      video.muted =
+        false;
+
+      video.preload =
+        "auto";
+
+      video.setAttribute(
+        "playsinline",
+        ""
+      );
+
+      video.setAttribute(
+        "webkit-playsinline",
+        ""
+      );
+
+      video.addEventListener(
+        "ended",
+        function(){
+
+          ma7alakNextStory();
+
+        }
+      );
+
+      video.addEventListener(
+        "waiting",
+        function(){
+
+          ma7alakStoryViewer
+            .querySelector(
+              ".ma7alak-story-viewer-loading"
+            )
+            .classList.add(
+              "visible"
+            );
+
+        }
+      );
+
+      video.addEventListener(
+        "playing",
+        function(){
+
+          ma7alakStoryViewer
+            .querySelector(
+              ".ma7alak-story-viewer-loading"
+            )
+            .classList.remove(
+              "visible"
+            );
+
+        }
+      );
+
+      media.appendChild(
+        video
+      );
+
+      video.play()
+        .catch(
+          function(){
+
+            /*
+             * Some mobile browsers block
+             * unmuted autoplay. In that case
+             * the user can tap the story and
+             * playback will start normally.
+             */
+
+          }
+        );
+
+    }else{
+
+      const image =
+        document.createElement("img");
+
+      image.src =
+        url;
+
+      image.alt =
+        ma7alakStoryViewerShop.name;
+
+      image.addEventListener(
+        "load",
+        function(){
+
+          ma7alakStoryTimer =
+            setTimeout(
+              ma7alakNextStory,
+              5000
+            );
+
+        }
+      );
+
+      media.appendChild(
+        image
+      );
+
+    }
+
+    const currentProgress =
+      progress.querySelector(
+        ".current"
+      );
+
+    if(currentProgress){
+
+      if(
+        story.media_type === "image"
+      ){
+
+        currentProgress
+          .style
+          .setProperty(
+            "transition",
+            "transform 5s linear"
+          );
+
+        currentProgress
+          .style
+          .setProperty(
+            "transform-origin",
+            "left center"
+          );
+
+        currentProgress
+          .style
+          .setProperty(
+            "transform",
+            "scaleX(1)"
+          );
+
+      }else{
+
+        const video =
+          media.querySelector(
+            "video"
+          );
+
+        if(video){
+
+          const updateProgress =
+            function(){
+
+              if(
+                video.duration &&
+                isFinite(video.duration)
+              ){
+
+                currentProgress.style
+                  .width =
+                  (
+                    video.currentTime /
+                    video.duration *
+                    100
+                  ) +
+                  "%";
+
+              }
+
+            };
+
+          video.addEventListener(
+            "timeupdate",
+            updateProgress
+          );
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  function ma7alakNextStory(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryIndex <
+      ma7alakStoryItems.length - 1
+    ){
+
+      ma7alakStoryIndex++;
+
+      ma7alakRenderStoryViewer();
+
+      return;
+
+    }
+
+    /*
+     * We reached the end.
+     * The shop's active story ring stops.
+     */
+    ma7alakActiveStoryShops.delete(
+      ma7alakStoryViewerShop.id
+    );
+
+    ma7alakSetStoryRing(
+      ma7alakStoryViewerShop.id,
+      false
+    );
+
+    ma7alakCloseStoryViewer();
+
+  }
+
+
+  function ma7alakPreviousStory(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryIndex > 0
+    ){
+
+      ma7alakStoryIndex--;
+
+      ma7alakRenderStoryViewer();
+
+    }
+
+  }
+
+
+  function ma7alakCloseStoryViewer(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryViewer
+    ){
+
+      const video =
+        ma7alakStoryViewer.querySelector(
+          "video"
+        );
+
+      if(video){
+
+        video.pause();
+
+      }
+
+      ma7alakStoryViewer.classList.remove(
+        "visible"
+      );
+
+    }
+
+    document.documentElement.style.overflow =
+      "";
+
+    if(document.body){
+
+      document.body.style.overflow =
+        "";
+
+    }
+
+  }
+
+
+  function ma7alakBindStoryCardClicks(){
+
+    if(!shopGrid){
+
+      return;
+
+    }
+
+    if(
+      shopGrid.dataset.storyClickBound === "1"
+    ){
+
+      return;
+
+    }
+
+    shopGrid.dataset.storyClickBound =
+      "1";
+
+    /* Capture the click before any link/navigation handler can follow the shop URL. */
+    shopGrid.addEventListener(
+      "click",
+      function(event){
+
+        const link =
+          event.target.closest(
+            ".ma7alak-shop-image-link"
+          );
+
+        if(!link){
+
+          return;
+
+        }
+
+        const ring =
+          link.querySelector(
+            ".ma7alak-shop-image-ring"
+          );
+
+        if(
+          !ring ||
+          !ring.classList.contains(
+            "ma7alak-has-story"
+          )
+        ){
+
+          return;
+
+        }
+
+        const slug =
+          ring.dataset.shopSlug;
+
+        const shop =
+          shops.find(
+            function(item){
+              return item.id === slug;
+            }
+          );
+
+        if(!shop){
+
+          return;
+
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        ma7alakOpenShopStories(
+          shop
+        );
+
+      }
+    );
+
+  }
+
+  /* =========================================================
+     STORY RING CLICK — HARD NAVIGATION OVERRIDE
+     If a shop has a live story, tapping its ring opens
+     the story viewer instead of navigating to the shop page.
+  ========================================================= */
+  document.addEventListener(
+    "click",
+    function(event){
+
+      const link =
+        event.target.closest &&
+        event.target.closest(
+          ".ma7alak-shop-image-link"
+        );
+
+      if(!link){
+        return;
+      }
+
+      const ring =
+        link.querySelector(
+          ".ma7alak-shop-image-ring"
+        );
+
+      if(!ring || !ring.classList.contains("ma7alak-has-story")){
+        return;
+      }
+
+      const slug =
+        ring.dataset.shopSlug;
+
+      const shop =
+        shops.find(function(item){
+          return String(item.id) === String(slug);
+        });
+
+      if(!shop){
+        return;
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      ma7alakOpenShopStories(shop);
+
+    },
+    true
+  );
+
+
+  async function ma7alakStartStorySystem(){
+
+    const client =
+      await ma7alakLoadSupabase();
+
+    if(!client){
+
+      return;
+
+    }
+
+    await ma7alakLoadActiveStoryShops();
+
+    ma7alakBindStoryCardClicks();
+
+    if(
+      ma7alakStoryChannel
+    ){
+
+      try{
+        await client.removeChannel(
+          ma7alakStoryChannel
+        );
+      }catch(e){}
+
+    }
+
+    ma7alakStoryChannel =
+      client
+        .channel(
+          "ma7alak-shops-live-stories"
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"shop_stories"
+          },
+          function(payload){
+
+            const row =
+              payload.new;
+
+            if(
+              !row ||
+              !row.shop_slug
+            ){
+
+              return;
+
+            }
+
+            const expires =
+              new Date(
+                row.expires_at
+              ).getTime();
+
+            if(
+              expires <= Date.now()
+            ){
+
+              return;
+
+            }
+
+            /*
+             * A newly inserted story has a new ID, so it is
+             * automatically treated as unseen even if this shop
+             * was viewed before.
+             */
+            ma7alakViewedStoryIds.delete(
+              String(row.id)
+            );
+            ma7alakSaveViewedStories();
+
+            ma7alakActiveStoryShops.add(
+              row.shop_slug
+            );
+
+            ma7alakSetStoryRing(
+              row.shop_slug,
+              true
+            );
+
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"DELETE",
+            schema:"public",
+            table:"shop_stories"
+          },
+          function(payload){
+
+            const slug =
+              payload.old &&
+              payload.old.shop_slug;
+
+            if(!slug){
+
+              return;
+
+            }
+
+            /*
+             * Re-query because there may be
+             * another active story for this shop.
+             */
+            ma7alakLoadActiveStoryShops();
+
+          }
+        )
+        .subscribe();
+
+    /*
+     * Stories expire after 24 hours. Re-check
+     * periodically so the ring disappears even
+     * when no database DELETE event occurs.
+     */
+    /*
+     * Fast fallback polling. Realtime normally updates the ring
+     * instantly; this catches cases where Supabase Realtime is
+     * delayed/not enabled for the table. Maximum delay is ~2 sec.
+     */
+    if(!window.ma7alakStoryFallbackTimer){
+      window.ma7alakStoryFallbackTimer =
+        setInterval(
+          ma7alakLoadActiveStoryShops,
+          2000
+        );
+    }
+
+  }
+
+
+  /* =========================================================
+     CREATE SHOP CARD
+  ========================================================= */
+
+  function createShopCard(shop){
+
+    const card =
+      document.createElement("article");
+
+
+    card.className =
+      "ma7alak-shop-card";
+
+
+    const verifiedHTML =
+      shop.verified
+
+        ? `
+
+          <div
+            class="ma7alak-verified-badge"
+            title="Verified"
+          >
+            ✓
+          </div>
+
+        `
+
+        : "";
+
+
+    let featuredHTML =
+      "";
+
+
+    if(shop.featured){
+
+      featuredHTML = `
+
+        <div
+          class="
+            ma7alak-featured
+            ${shop.redFeatured ? "red" : ""}
+          "
+        >
+
+          ★ FEATURED
+
+        </div>
+
+      `;
+
+    }
+
+
+    card.innerHTML = `
+
+
+      <!-- SHOP IMAGE -->
+
+      <a
+        class="ma7alak-shop-image-link"
+        href="${shop.url}"
+        onclick="
+          window.top.location.href='${shop.url}';
+          return false;
+        "
+      >
+
+        <div
+          class="ma7alak-shop-image-ring"
+          data-shop-slug="${escapeHTML(shop.id)}"
+        >
+
+          <div class="ma7alak-shop-image-inner">
+
+            <img
+              src="${shop.image}"
+              alt="${escapeHTML(shop.name)}"
+              loading="lazy"
+            >
+
+          </div>
+
+
+          ${verifiedHTML}
+
+        </div>
+
+      </a>
+
+
+      <!-- SHOP INFORMATION -->
+
+      <div class="ma7alak-shop-content">
+
+
+        <div class="ma7alak-shop-title-row">
+
+          <h3 class="ma7alak-shop-name">
+
+            ${escapeHTML(shop.name)}
+
+          </h3>
+
+        </div>
+
+
+        <div class="ma7alak-shop-arabic">
+
+          ${escapeHTML(shop.arabic)}
+
+        </div>
+
+
+        <div class="ma7alak-shop-category-pill">
+
+          ${escapeHTML(shop.categoryName)}
+
+        </div>
+
+
+        <div class="ma7alak-shop-location">
+
+          <span class="ma7alak-location-icon">
+            📍
+          </span>
+
+          <span>
+            ${escapeHTML(shop.location)}
+          </span>
+
+        </div>
+
+
+        ${featuredHTML}
+
+
+        <a
+          class="ma7alak-profile-button"
+          href="${shop.url}"
+          onclick="
+            window.top.location.href='${shop.url}';
+            return false;
+          "
+        >
+
+          View Profile
+
+          <span class="ma7alak-profile-arrow">
+            →
+          </span>
+
+        </a>
+
+
+      </div>
+
+    `;
+
+
+    return card;
+
+  }
+
+
+  /* =========================================================
+     ESCAPE HTML
+  ========================================================= */
+
+  function escapeHTML(value){
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+
+  }
+
+
+  /* =========================================================
+     INSERT WITH RETRIES
+  ========================================================= */
+
+  let attempts =
+    0;
+
+
+  function start(){
+
+    attempts++;
+
+
+    if(
+      insertPage()
+    ){
+
+      initialize();
+
+      return;
+
+    }
+
+
+    if(
+      attempts < 35
+    ){
+
+      setTimeout(
+        start,
+        350
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     START AFTER DOM
+  ========================================================= */
+
+  if(
+    document.readyState === "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      start
+    );
+
+  }else{
+
+    start();
+
+  }
+
+
+  /* =========================================================
+     HOSTINGER HEADER WATCH
+  ========================================================= */
+
+  const observer =
+    new MutationObserver(
+      function(){
+
+        if(
+          !document.getElementById(
+            "ma7alak-shops-page"
+          )
+        ){
+
+          start();
+
+        }
+
+      }
+    );
+
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
+
+
+})();
+
+/* =========================================================
+   WHAT CHANGED
+   - Converted the original Hostinger HTML/CSS/JS block into one GitHub-ready .js file.
+   - Removed the outer <style> and <script> tags.
+   - The original CSS is injected automatically by JavaScript.
+   - The original shops-page JavaScript logic was kept unchanged.
+   - No shop data, story-ring logic, story viewer logic, filtering, layout, or page behavior was intentionally changed.
+========================================================= */
