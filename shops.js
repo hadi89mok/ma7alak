@@ -13,6 +13,7 @@
   }
 
   const style = document.createElement("style");
+
   style.textContent = `
 /* =========================================================
    MA7ALAK SHOPS — GLOBAL FOUNDATION
@@ -998,841 +999,1336 @@ body.ma7alak-shops-body{
 }
 
 
-`;
-  document.head.appendChild(style);
-  .ma7alak-shop-card:hover::after{
+.ma7alak-shop-card:hover::after{
 
-    left:130%;
+  left:130%;
+
+}
+
+
+/* =========================================================
+   CIRCULAR SHOP IMAGE
+========================================================= */
+
+.ma7alak-shop-image-link{
+
+  width:100%;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  text-decoration:none;
+
+  position:relative;
+
+  z-index:2;
+
+}
+
+
+.ma7alak-shop-image-ring{
+
+  position:relative;
+
+  width:146px;
+
+  height:146px;
+
+  padding:4px;
+
+  border-radius:50%;
+
+  box-sizing:border-box;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff0c6,
+      #d99a47 36%,
+      #76502d 70%,
+      #2c2118
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.16),
+    0 13px 35px rgba(0,0,0,.48),
+    0 0 27px rgba(230,158,68,.11);
+
+  transition:
+    transform .3s ease,
+    box-shadow .3s ease;
+
+}
+
+
+.ma7alak-shop-card:hover
+.ma7alak-shop-image-ring{
+
+  transform:scale(1.035);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.22),
+    0 16px 42px rgba(0,0,0,.55),
+    0 0 38px rgba(245,184,63,.17);
+
+}
+
+
+.ma7alak-shop-image-inner{
+
+  width:100%;
+
+  height:100%;
+
+  border-radius:50%;
+
+  overflow:hidden;
+
+  background:#15110d;
+
+  border:
+    3px solid rgba(15,12,9,.84);
+
+  box-sizing:border-box;
+
+}
+
+
+.ma7alak-shop-image-inner img{
+
+  display:block;
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:cover;
+
+  object-position:center;
+
+}
+
+
+/* =========================================================
+   VERIFIED BADGE
+========================================================= */
+
+.ma7alak-verified-badge{
+
+  position:absolute;
+
+  right:calc(50% - 74px);
+
+  bottom:0;
+
+  width:27px;
+
+  height:27px;
+
+  border-radius:50%;
+
+  background:#1688ef;
+
+  border:
+    2px solid #fff;
+
+  color:#fff;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:14px;
+
+  font-weight:900;
+
+  box-shadow:
+    0 5px 16px rgba(0,0,0,.40);
+
+}
+
+
+/* =========================================================
+   SHOP CONTENT
+========================================================= */
+
+.ma7alak-shop-content{
+
+  position:relative;
+
+  z-index:3;
+
+  margin-top:15px;
+
+}
+
+
+.ma7alak-shop-title-row{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  flex-wrap:wrap;
+
+  gap:5px;
+
+}
+
+
+.ma7alak-shop-name{
+
+  margin:0;
+
+  color:#fff;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:20px;
+
+  line-height:1.15;
+
+  font-weight:700;
+
+  letter-spacing:-.2px;
+
+}
+
+
+.ma7alak-shop-arabic{
+
+  min-height:21px;
+
+  margin-top:4px;
+
+  direction:rtl;
+
+  color:#e5ddd4;
+
+  font-size:13px;
+
+  font-weight:600;
+
+  line-height:1.5;
+
+}
+
+
+/* =========================================================
+   CATEGORY PILL
+========================================================= */
+
+.ma7alak-shop-category-pill{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  margin-top:8px;
+
+  padding:
+    5px 12px;
+
+  border-radius:999px;
+
+  border:
+    1px solid rgba(225,164,91,.45);
+
+  background:
+    rgba(181,110,40,.16);
+
+  color:#d9b98a;
+
+  font-size:8px;
+
+  font-weight:800;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+}
+
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.ma7alak-shop-location{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  gap:5px;
+
+  margin-top:9px;
+
+  color:#bdb5ad;
+
+  font-size:10px;
+
+  line-height:1.3;
+
+}
+
+
+.ma7alak-location-icon{
+
+  font-size:13px;
+
+}
+
+
+/* =========================================================
+   FEATURED
+========================================================= */
+
+.ma7alak-featured{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:5px;
+
+  margin-top:9px;
+
+  padding:
+    5px 10px;
+
+  border-radius:999px;
+
+  border:
+    1px solid rgba(245,184,63,.78);
+
+  background:
+    rgba(171,106,26,.13);
+
+  color:#ffd15e;
+
+  font-size:8px;
+
+  font-weight:800;
+
+  letter-spacing:.8px;
+
+  text-transform:uppercase;
+
+  box-shadow:
+    0 0 17px rgba(245,184,63,.08);
+
+  animation:
+    ma7alakFeaturedGlow 2.6s ease-in-out infinite;
+
+}
+
+
+.ma7alak-featured.red{
+
+  border-color:
+    rgba(255,91,91,.75);
+
+  color:#ff8585;
+
+  background:
+    rgba(170,40,40,.11);
+
+  animation:
+    ma7alakRedGlow 2.6s ease-in-out infinite;
+
+}
+
+
+/* =========================================================
+   VIEW PROFILE
+========================================================= */
+
+.ma7alak-profile-button{
+
+  width:100%;
+
+  min-height:43px;
+
+  margin-top:12px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:9px;
+
+  box-sizing:border-box;
+
+  border-radius:13px;
+
+  border:
+    1px solid rgba(232,174,101,.58);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(179,115,52,.48),
+      rgba(112,69,34,.34)
+    );
+
+  color:#fff;
+
+  text-decoration:none;
+
+  font-size:11px;
+
+  font-weight:700;
+
+  transition:.22s ease;
+
+}
+
+
+.ma7alak-profile-button:hover{
+
+  transform:translateY(-2px);
+
+  border-color:
+    rgba(255,207,111,.9);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(205,137,58,.57),
+      rgba(120,73,35,.42)
+    );
+
+  box-shadow:
+    0 9px 25px rgba(0,0,0,.30);
+
+}
+
+
+.ma7alak-profile-arrow{
+
+  font-size:17px;
+
+  transition:
+    transform .2s ease;
+
+}
+
+
+.ma7alak-profile-button:hover
+.ma7alak-profile-arrow{
+
+  transform:translateX(4px);
+
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.ma7alak-empty{
+
+  display:none;
+
+  padding:
+    50px 20px;
+
+  text-align:center;
+
+  border-radius:22px;
+
+  border:
+    1px solid rgba(255,255,255,.14);
+
+  background:
+    rgba(255,255,255,.045);
+
+  margin-top:15px;
+
+}
+
+
+.ma7alak-empty-icon{
+
+  font-size:40px;
+
+  margin-bottom:10px;
+
+}
+
+
+.ma7alak-empty h3{
+
+  margin:0 0 6px;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:24px;
+
+}
+
+
+.ma7alak-empty p{
+
+  margin:0;
+
+  color:#999189;
+
+  font-size:12px;
+
+}
+
+
+/* =========================================================
+   CHANGE AREA
+========================================================= */
+
+.ma7alak-change-area{
+
+  display:none;
+
+  margin:
+    20px auto 0;
+
+  padding:
+    8px 14px;
+
+  border-radius:999px;
+
+  border:
+    1px solid rgba(255,255,255,.15);
+
+  background:
+    rgba(255,255,255,.04);
+
+  color:#aaa29a;
+
+  font-size:11px;
+
+  cursor:pointer;
+
+}
+
+
+.ma7alak-change-area.visible{
+
+  display:block;
+
+}
+
+
+/* =========================================================
+   BUSINESS CTA
+========================================================= */
+
+.ma7alak-business-cta{
+
+  margin-top:45px;
+
+  min-height:125px;
+
+  padding:
+    25px 28px;
+
+  box-sizing:border-box;
+
+  border-radius:22px;
+
+  border:
+    1px solid rgba(245,184,63,.38);
+
+  background:
+
+    radial-gradient(
+      circle at 75% 50%,
+      rgba(226,155,59,.22),
+      transparent 38%
+    ),
+
+    linear-gradient(
+      135deg,
+      rgba(42,33,26,.82),
+      rgba(19,16,14,.78)
+    );
+
+  backdrop-filter:blur(18px);
+
+  -webkit-backdrop-filter:blur(18px);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.38),
+    inset 0 1px rgba(255,255,255,.08);
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:25px;
+
+}
+
+
+.ma7alak-business-small{
+
+  margin-bottom:6px;
+
+  color:#b48a54;
+
+  font-size:8px;
+
+  letter-spacing:3px;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+
+}
+
+
+.ma7alak-business-cta h2{
+
+  margin:0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  color:#fff;
+
+  font-size:27px;
+
+  line-height:1.15;
+
+}
+
+
+.ma7alak-business-cta h2 span{
+
+  color:#efc477;
+
+}
+
+
+.ma7alak-business-cta p{
+
+  margin:
+    6px 0 0;
+
+  color:#a9a097;
+
+  font-size:11px;
+
+}
+
+
+.ma7alak-add-button{
+
+  min-width:180px;
+
+  height:52px;
+
+  padding:
+    0 22px;
+
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffc958,
+      #d88b29
+    );
+
+  color:#241608;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:8px;
+
+  text-decoration:none;
+
+  font-size:12px;
+
+  font-weight:800;
+
+  box-shadow:
+    0 12px 32px rgba(214,137,36,.24);
+
+  transition:.23s ease;
+
+}
+
+
+.ma7alak-add-button:hover{
+
+  transform:translateY(-3px);
+
+  box-shadow:
+    0 17px 40px rgba(214,137,36,.35);
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.ma7alak-footer{
+
+  margin-top:35px;
+
+  padding-top:25px;
+
+  border-top:
+    1px solid rgba(255,255,255,.10);
+
+  text-align:center;
+
+}
+
+
+.ma7alak-footer-features{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:0;
+
+}
+
+
+.ma7alak-footer-feature{
+
+  min-width:190px;
+
+  padding:
+    0 25px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:9px;
+
+  color:#d4cbc1;
+
+  font-size:10px;
+
+}
+
+
+.ma7alak-footer-feature
++ .ma7alak-footer-feature{
+
+  border-left:
+    1px solid rgba(255,255,255,.16);
+
+}
+
+
+.ma7alak-footer-feature-icon{
+
+  color:#efc27a;
+
+  font-size:22px;
+
+}
+
+
+.ma7alak-footer-feature-text{
+
+  text-align:left;
+
+}
+
+
+.ma7alak-footer-feature-text strong{
+
+  display:block;
+
+  color:#eee6dc;
+
+  font-size:10px;
+
+}
+
+
+.ma7alak-footer-feature-text span{
+
+  display:block;
+
+  margin-top:2px;
+
+  color:#777069;
+
+  font-size:8px;
+
+}
+
+
+.ma7alak-footer-logo{
+
+  margin-top:23px;
+
+  font-family:
+    Georgia,
+    serif;
+
+  color:#ded5cb;
+
+  font-size:24px;
+
+}
+
+
+.ma7alak-footer-tagline{
+
+  margin-top:5px;
+
+  color:#766e67;
+
+  font-size:7px;
+
+  letter-spacing:3px;
+
+  text-transform:uppercase;
+
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes ma7alakSectionIn{
+
+  from{
+
+    opacity:0;
+
+    transform:translateY(13px);
+
+  }
+
+  to{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+  }
+
+}
+
+
+@keyframes ma7alakFeaturedGlow{
+
+  0%,
+  100%{
+
+    box-shadow:
+      0 0 0 rgba(245,184,63,0);
+
+  }
+
+  50%{
+
+    box-shadow:
+      0 0 19px rgba(245,184,63,.16);
+
+  }
+
+}
+
+
+@keyframes ma7alakRedGlow{
+
+  0%,
+  100%{
+
+    box-shadow:
+      0 0 0 rgba(255,80,80,0);
+
+  }
+
+  50%{
+
+    box-shadow:
+      0 0 20px rgba(255,80,80,.15);
+
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:1050px){
+
+  #ma7alak-shops-page{
+
+    padding-left:20px;
+
+    padding-right:20px;
+
+  }
+
+  .ma7alak-shop-grid{
+
+    grid-template-columns:
+      repeat(3,minmax(0,1fr));
+
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:700px){
+
+  #ma7alak-shops-page{
+
+    padding:
+      27px 9px 55px;
 
   }
 
 
-  /* =========================================================
-     CIRCULAR SHOP IMAGE
-  ========================================================= */
+  .ma7alak-side-left{
 
-  .ma7alak-shop-image-link{
+    display:none;
 
-    width:100%;
+  }
 
-    display:flex;
 
-    justify-content:center;
+  .ma7alak-side-right{
 
-    align-items:center;
+    right:3px;
 
-    text-decoration:none;
+    top:10px;
 
-    position:relative;
+    font-size:14px;
 
-    z-index:2;
+  }
+
+
+  .ma7alak-brand-name{
+
+    font-size:39px;
+
+  }
+
+
+  .ma7alak-brand-subtitle{
+
+    font-size:7px;
+
+    letter-spacing:3px;
+
+  }
+
+
+  .ma7alak-hero{
+
+    margin-top:20px;
+
+    margin-bottom:23px;
+
+  }
+
+
+  .ma7alak-hero-icon{
+
+    width:39px;
+
+    height:39px;
+
+    font-size:26px;
+
+  }
+
+
+  .ma7alak-hero h1{
+
+    font-size:47px;
+
+    letter-spacing:-1.7px;
+
+  }
+
+
+  .ma7alak-hero p{
+
+    padding:0 16px;
+
+    font-size:13px;
+
+  }
+
+
+  .ma7alak-search{
+
+    height:55px;
+
+    border-radius:16px;
+
+    font-size:12px;
+
+  }
+
+
+  .ma7alak-search-wrapper{
+
+    margin-bottom:21px;
+
+  }
+
+
+  .ma7alak-filter-label{
+
+    font-size:11px;
+
+  }
+
+
+  .ma7alak-area-grid{
+
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+
+    gap:7px;
+
+  }
+
+
+  .ma7alak-area-button{
+
+    min-height:49px;
+
+    border-radius:13px;
+
+    font-size:11px;
+
+  }
+
+
+  .ma7alak-category-grid{
+
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+
+    gap:7px;
+
+  }
+
+
+  .ma7alak-category-button{
+
+    min-height:55px;
+
+    border-radius:13px;
+
+    font-size:10px;
+
+    padding:
+      8px 5px;
+
+  }
+
+
+  .ma7alak-category-icon{
+
+    font-size:17px;
+
+  }
+
+
+  .ma7alak-results{
+
+    margin-top:25px;
+
+  }
+
+
+  .ma7alak-results-top{
+
+    align-items:flex-start;
+
+    flex-direction:column;
+
+    gap:9px;
+
+  }
+
+
+  .ma7alak-results-title{
+
+    font-size:27px;
+
+  }
+
+
+  .ma7alak-results-subtitle{
+
+    font-size:10px;
+
+  }
+
+
+  .ma7alak-results-count{
+
+    font-size:9px;
+
+  }
+
+
+  /* =====================================================
+     TWO LARGE CARDS PER ROW
+  ===================================================== */
+
+  .ma7alak-shop-grid{
+
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+
+    gap:9px;
+
+    padding-top:11px;
+
+  }
+
+
+  .ma7alak-shop-card{
+
+    padding:
+      15px 7px 9px;
+
+    border-radius:18px;
 
   }
 
 
   .ma7alak-shop-image-ring{
 
-    position:relative;
+    width:118px;
 
-    width:146px;
-
-    height:146px;
+    height:118px;
 
     padding:4px;
-
-    border-radius:50%;
-
-    box-sizing:border-box;
-
-    background:
-      linear-gradient(
-        145deg,
-        #fff0c6,
-        #d99a47 36%,
-        #76502d 70%,
-        #2c2118
-      );
-
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,.16),
-      0 13px 35px rgba(0,0,0,.48),
-      0 0 27px rgba(230,158,68,.11);
-
-    transition:
-      transform .3s ease,
-      box-shadow .3s ease;
-
-  }
-
-
-  .ma7alak-shop-card:hover
-  .ma7alak-shop-image-ring{
-
-    transform:scale(1.035);
-
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,.22),
-      0 16px 42px rgba(0,0,0,.55),
-      0 0 38px rgba(245,184,63,.17);
 
   }
 
 
   .ma7alak-shop-image-inner{
 
-    width:100%;
-
-    height:100%;
-
-    border-radius:50%;
-
-    overflow:hidden;
-
-    background:#15110d;
-
-    border:
-      3px solid rgba(15,12,9,.84);
-
-    box-sizing:border-box;
+    border-width:2px;
 
   }
 
-
-  .ma7alak-shop-image-inner img{
-
-    display:block;
-
-    width:100%;
-
-    height:100%;
-
-    object-fit:cover;
-
-    object-position:center;
-
-  }
-
-
-  /* =========================================================
-     VERIFIED BADGE
-  ========================================================= */
 
   .ma7alak-verified-badge{
 
-    position:absolute;
+    right:calc(50% - 61px);
 
-    right:calc(50% - 74px);
+    width:23px;
 
-    bottom:0;
+    height:23px;
 
-    width:27px;
+    font-size:12px;
 
-    height:27px;
-
-    border-radius:50%;
-
-    background:#1688ef;
-
-    border:
-      2px solid #fff;
-
-    color:#fff;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:14px;
-
-    font-weight:900;
-
-    box-shadow:
-      0 5px 16px rgba(0,0,0,.40);
+    border-width:2px;
 
   }
 
-
-  /* =========================================================
-     SHOP CONTENT
-  ========================================================= */
 
   .ma7alak-shop-content{
 
-    position:relative;
-
-    z-index:3;
-
-    margin-top:15px;
-
-  }
-
-
-  .ma7alak-shop-title-row{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    flex-wrap:wrap;
-
-    gap:5px;
+    margin-top:11px;
 
   }
 
 
   .ma7alak-shop-name{
 
-    margin:0;
-
-    color:#fff;
-
-    font-family:
-      Georgia,
-      "Times New Roman",
-      serif;
-
-    font-size:20px;
-
-    line-height:1.15;
-
-    font-weight:700;
-
-    letter-spacing:-.2px;
+    font-size:16px;
 
   }
 
 
   .ma7alak-shop-arabic{
 
-    min-height:21px;
+    font-size:10px;
 
-    margin-top:4px;
-
-    direction:rtl;
-
-    color:#e5ddd4;
-
-    font-size:13px;
-
-    font-weight:600;
-
-    line-height:1.5;
+    margin-top:3px;
 
   }
 
-
-  /* =========================================================
-     CATEGORY PILL
-  ========================================================= */
 
   .ma7alak-shop-category-pill{
 
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    margin-top:8px;
+    margin-top:7px;
 
     padding:
-      5px 12px;
+      5px 7px;
 
-    border-radius:999px;
+    font-size:6.5px;
 
-    border:
-      1px solid rgba(225,164,91,.45);
-
-    background:
-      rgba(181,110,40,.16);
-
-    color:#d9b98a;
-
-    font-size:8px;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    text-transform:uppercase;
+    letter-spacing:.5px;
 
   }
 
 
-  /* =========================================================
-     LOCATION
-  ========================================================= */
-
   .ma7alak-shop-location{
 
-    display:flex;
+    margin-top:7px;
 
-    justify-content:center;
-
-    align-items:center;
-
-    gap:5px;
-
-    margin-top:9px;
-
-    color:#bdb5ad;
-
-    font-size:10px;
-
-    line-height:1.3;
+    font-size:8px;
 
   }
 
 
   .ma7alak-location-icon{
 
+    font-size:10px;
+
+  }
+
+
+  .ma7alak-featured{
+
+    margin-top:7px;
+
+    padding:
+      5px 7px;
+
+    font-size:6.5px;
+
+    letter-spacing:.4px;
+
+  }
+
+
+  .ma7alak-profile-button{
+
+    min-height:37px;
+
+    margin-top:9px;
+
+    border-radius:11px;
+
+    font-size:9px;
+
+    gap:5px;
+
+  }
+
+
+  .ma7alak-profile-arrow{
+
     font-size:13px;
 
   }
 
 
-  /* =========================================================
-     FEATURED
-  ========================================================= */
-
-  .ma7alak-featured{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:5px;
-
-    margin-top:9px;
-
-    padding:
-      5px 10px;
-
-    border-radius:999px;
-
-    border:
-      1px solid rgba(245,184,63,.78);
-
-    background:
-      rgba(171,106,26,.13);
-
-    color:#ffd15e;
-
-    font-size:8px;
-
-    font-weight:800;
-
-    letter-spacing:.8px;
-
-    text-transform:uppercase;
-
-    box-shadow:
-      0 0 17px rgba(245,184,63,.08);
-
-    animation:
-      ma7alakFeaturedGlow 2.6s ease-in-out infinite;
-
-  }
-
-
-  .ma7alak-featured.red{
-
-    border-color:
-      rgba(255,91,91,.75);
-
-    color:#ff8585;
-
-    background:
-      rgba(170,40,40,.11);
-
-    animation:
-      ma7alakRedGlow 2.6s ease-in-out infinite;
-
-  }
-
-
-  /* =========================================================
-     VIEW PROFILE
-  ========================================================= */
-
-  .ma7alak-profile-button{
-
-    width:100%;
-
-    min-height:43px;
-
-    margin-top:12px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:9px;
-
-    box-sizing:border-box;
-
-    border-radius:13px;
-
-    border:
-      1px solid rgba(232,174,101,.58);
-
-    background:
-      linear-gradient(
-        135deg,
-        rgba(179,115,52,.48),
-        rgba(112,69,34,.34)
-      );
-
-    color:#fff;
-
-    text-decoration:none;
-
-    font-size:11px;
-
-    font-weight:700;
-
-    transition:.22s ease;
-
-  }
-
-
-  .ma7alak-profile-button:hover{
-
-    transform:translateY(-2px);
-
-    border-color:
-      rgba(255,207,111,.9);
-
-    background:
-      linear-gradient(
-        135deg,
-        rgba(205,137,58,.57),
-        rgba(120,73,35,.42)
-      );
-
-    box-shadow:
-      0 9px 25px rgba(0,0,0,.30);
-
-  }
-
-
-  .ma7alak-profile-arrow{
-
-    font-size:17px;
-
-    transition:
-      transform .2s ease;
-
-  }
-
-
-  .ma7alak-profile-button:hover
-  .ma7alak-profile-arrow{
-
-    transform:translateX(4px);
-
-  }
-
-
-  /* =========================================================
-     EMPTY
-  ========================================================= */
-
-  .ma7alak-empty{
-
-    display:none;
-
-    padding:
-      50px 20px;
-
-    text-align:center;
-
-    border-radius:22px;
-
-    border:
-      1px solid rgba(255,255,255,.14);
-
-    background:
-      rgba(255,255,255,.045);
-
-    margin-top:15px;
-
-  }
-
-
-  .ma7alak-empty-icon{
-
-    font-size:40px;
-
-    margin-bottom:10px;
-
-  }
-
-
-  .ma7alak-empty h3{
-
-    margin:0 0 6px;
-
-    font-family:
-      Georgia,
-      serif;
-
-    font-size:24px;
-
-  }
-
-
-  .ma7alak-empty p{
-
-    margin:0;
-
-    color:#999189;
-
-    font-size:12px;
-
-  }
-
-
-  /* =========================================================
-     CHANGE AREA
-  ========================================================= */
-
-  .ma7alak-change-area{
-
-    display:none;
-
-    margin:
-      20px auto 0;
-
-    padding:
-      8px 14px;
-
-    border-radius:999px;
-
-    border:
-      1px solid rgba(255,255,255,.15);
-
-    background:
-      rgba(255,255,255,.04);
-
-    color:#aaa29a;
-
-    font-size:11px;
-
-    cursor:pointer;
-
-  }
-
-
-  .ma7alak-change-area.visible{
-
-    display:block;
-
-  }
-
-    <!-- =====================================================
-         RESULTS
-    ====================================================== -->
-
-    <section
-      id="ma7alak-results"
-      class="ma7alak-results"
-    >
-
-      <div class="ma7alak-results-top">
-
-        <div>
-
-          <div
-            id="ma7alak-results-kicker"
-            class="ma7alak-results-kicker"
-          >
-            SELECTED AREA
-          </div>
-
-
-          <h2
-            id="ma7alak-results-title"
-            class="ma7alak-results-title"
-          >
-            Cafés & Coffee Spots
-          </h2>
-
-
-          <p
-            id="ma7alak-results-subtitle"
-            class="ma7alak-results-subtitle"
-          >
-            Discover local businesses around you.
-          </p>
-
-        </div>
-
-
-        <div
-          id="ma7alak-results-count"
-          class="ma7alak-results-count"
-        >
-          0 shops
-        </div>
-
-      </div>
-
-
-      <div
-        id="ma7alak-shop-grid"
-        class="ma7alak-shop-grid"
-      ></div>
-
-
-      <div
-        id="ma7alak-empty"
-        class="ma7alak-empty"
-      >
-
-        <div class="ma7alak-empty-icon">
-          🔎
-        </div>
-
-
-        <h3>
-          Nothing found yet
-        </h3>
-
-
-        <p>
-          Try another shop, area or category.
-        </p>
-
-      </div>
-
-
-      <button
-        id="ma7alak-change-area"
-        class="ma7alak-change-area"
-      >
-
-        ← Change area
-
-      </button>
-
-    </section>
-  /* =========================================================
-     BUSINESS CTA
-  ========================================================= */
+  /* CTA */
 
   .ma7alak-business-cta{
 
-    margin-top:45px;
-
-    min-height:125px;
+    margin-top:35px;
 
     padding:
-      25px 28px;
+      23px 15px;
 
-    box-sizing:border-box;
+    border-radius:19px;
 
-    border-radius:22px;
+    flex-direction:column;
 
-    border:
-      1px solid rgba(245,184,63,.38);
+    text-align:center;
 
-    background:
-
-      radial-gradient(
-        circle at 75% 50%,
-        rgba(226,155,59,.22),
-        transparent 38%
-      ),
-
-      linear-gradient(
-        135deg,
-        rgba(42,33,26,.82),
-        rgba(19,16,14,.78)
-      );
-
-    backdrop-filter:blur(18px);
-
-    -webkit-backdrop-filter:blur(18px);
-
-    box-shadow:
-      0 20px 60px rgba(0,0,0,.38),
-      inset 0 1px rgba(255,255,255,.08);
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:25px;
-
-  }
-
-
-  .ma7alak-business-small{
-
-    margin-bottom:6px;
-
-    color:#b48a54;
-
-    font-size:8px;
-
-    letter-spacing:3px;
-
-    font-weight:800;
-
-    text-transform:uppercase;
+    gap:17px;
 
   }
 
 
   .ma7alak-business-cta h2{
 
-    margin:0;
-
-    font-family:
-      Georgia,
-      "Times New Roman",
-      serif;
-
-    color:#fff;
-
-    font-size:27px;
-
-    line-height:1.15;
-
-  }
-
-
-  .ma7alak-business-cta h2 span{
-
-    color:#efc477;
+    font-size:24px;
 
   }
 
 
   .ma7alak-business-cta p{
 
-    margin:
-      6px 0 0;
-
-    color:#a9a097;
-
-    font-size:11px;
+    font-size:10px;
 
   }
 
 
   .ma7alak-add-button{
 
-    min-width:180px;
+    width:100%;
 
-    height:52px;
+    min-height:50px;
 
-    padding:
-      0 22px;
-
-    border-radius:14px;
-
-    background:
-      linear-gradient(
-        135deg,
-        #ffc958,
-        #d88b29
-      );
-
-    color:#241608;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:8px;
-
-    text-decoration:none;
-
-    font-size:12px;
-
-    font-weight:800;
-
-    box-shadow:
-      0 12px 32px rgba(214,137,36,.24);
-
-    transition:.23s ease;
+    height:50px;
 
   }
 
 
-  .ma7alak-add-button:hover{
-
-    transform:translateY(-3px);
-
-    box-shadow:
-      0 17px 40px rgba(214,137,36,.35);
-
-  }
-
-
-  /* =========================================================
-     FOOTER
-  ========================================================= */
-
-  .ma7alak-footer{
-
-    margin-top:35px;
-
-    padding-top:25px;
-
-    border-top:
-      1px solid rgba(255,255,255,.10);
-
-    text-align:center;
-
-  }
-
+  /* FOOTER */
 
   .ma7alak-footer-features{
 
-    display:flex;
+    flex-direction:column;
 
-    align-items:center;
-
-    justify-content:center;
-
-    gap:0;
+    gap:17px;
 
   }
 
 
   .ma7alak-footer-feature{
 
-    min-width:190px;
+    min-width:0;
 
-    padding:
-      0 25px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:9px;
-
-    color:#d4cbc1;
-
-    font-size:10px;
+    padding:0;
 
   }
 
@@ -1840,681 +2336,97 @@ body.ma7alak-shops-body{
   .ma7alak-footer-feature
   + .ma7alak-footer-feature{
 
-    border-left:
-      1px solid rgba(255,255,255,.16);
+    border-left:none;
+
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media(max-width:390px){
+
+  #ma7alak-shops-page{
+
+    padding-left:6px;
+
+    padding-right:6px;
 
   }
 
 
-  .ma7alak-footer-feature-icon{
+  .ma7alak-shop-grid{
 
-    color:#efc27a;
-
-    font-size:22px;
+    gap:7px;
 
   }
 
 
-  .ma7alak-footer-feature-text{
+  .ma7alak-shop-card{
 
-    text-align:left;
+    padding-left:5px;
 
-  }
-
-
-  .ma7alak-footer-feature-text strong{
-
-    display:block;
-
-    color:#eee6dc;
-
-    font-size:10px;
+    padding-right:5px;
 
   }
 
 
-  .ma7alak-footer-feature-text span{
+  .ma7alak-shop-image-ring{
 
-    display:block;
+    width:105px;
 
-    margin-top:2px;
+    height:105px;
 
-    color:#777069;
+  }
+
+
+  .ma7alak-verified-badge{
+
+    right:calc(50% - 54px);
+
+    width:21px;
+
+    height:21px;
+
+  }
+
+
+  .ma7alak-shop-name{
+
+    font-size:14px;
+
+  }
+
+
+  .ma7alak-shop-arabic{
+
+    font-size:9px;
+
+  }
+
+
+  .ma7alak-shop-location{
+
+    font-size:7.5px;
+
+  }
+
+
+  .ma7alak-profile-button{
 
     font-size:8px;
 
   }
 
-
-  .ma7alak-footer-logo{
-
-    margin-top:23px;
-
-    font-family:
-      Georgia,
-      serif;
-
-    color:#ded5cb;
-
-    font-size:24px;
-
-  }
-
-
-  .ma7alak-footer-tagline{
-
-    margin-top:5px;
-
-    color:#766e67;
-
-    font-size:7px;
-
-    letter-spacing:3px;
-
-    text-transform:uppercase;
-
-  }
-
-
-  /* =========================================================
-     ANIMATIONS
-  ========================================================= */
-
-  @keyframes ma7alakSectionIn{
-
-    from{
-
-      opacity:0;
-
-      transform:translateY(13px);
-
-    }
-
-    to{
-
-      opacity:1;
-
-      transform:translateY(0);
-
-    }
-
-  }
-
-
-  @keyframes ma7alakFeaturedGlow{
-
-    0%,
-    100%{
-
-      box-shadow:
-        0 0 0 rgba(245,184,63,0);
-
-    }
-
-    50%{
-
-      box-shadow:
-        0 0 19px rgba(245,184,63,.16);
-
-    }
-
-  }
-
-
-  @keyframes ma7alakRedGlow{
-
-    0%,
-    100%{
-
-      box-shadow:
-        0 0 0 rgba(255,80,80,0);
-
-    }
-
-    50%{
-
-      box-shadow:
-        0 0 20px rgba(255,80,80,.15);
-
-    }
-
-  }
-
-
-  /* =========================================================
-     TABLET
-  ========================================================= */
-
-  @media(max-width:1050px){
-
-    #ma7alak-shops-page{
-
-      padding-left:20px;
-
-      padding-right:20px;
-
-    }
-
-
-    .ma7alak-shop-grid{
-
-      grid-template-columns:
-        repeat(3,minmax(0,1fr));
-
-    }
-
-  }
-
-
-  /* =========================================================
-     MOBILE
-  ========================================================= */
-
-  @media(max-width:700px){
-
-    #ma7alak-shops-page{
-
-      padding:
-        27px 9px 55px;
-
-    }
-
-
-    .ma7alak-side-left{
-
-      display:none;
-
-    }
-
-
-    .ma7alak-side-right{
-
-      right:3px;
-
-      top:10px;
-
-      font-size:14px;
-
-    }
-
-
-    .ma7alak-brand-name{
-
-      font-size:39px;
-
-    }
-
-
-    .ma7alak-brand-subtitle{
-
-      font-size:7px;
-
-      letter-spacing:3px;
-
-    }
-
-
-    .ma7alak-hero{
-
-      margin-top:20px;
-
-      margin-bottom:23px;
-
-    }
-
-
-    .ma7alak-hero-icon{
-
-      width:39px;
-
-      height:39px;
-
-      font-size:26px;
-
-    }
-
-
-    .ma7alak-hero h1{
-
-      font-size:47px;
-
-      letter-spacing:-1.7px;
-
-    }
-
-
-    .ma7alak-hero p{
-
-      padding:0 16px;
-
-      font-size:13px;
-
-    }
-
-
-    .ma7alak-search{
-
-      height:55px;
-
-      border-radius:16px;
-
-      font-size:12px;
-
-    }
-
-
-    .ma7alak-search-wrapper{
-
-      margin-bottom:21px;
-
-    }
-
-
-    .ma7alak-filter-label{
-
-      font-size:11px;
-
-    }
-
-
-    .ma7alak-area-grid{
-
-      grid-template-columns:
-        repeat(2,minmax(0,1fr));
-
-      gap:7px;
-
-    }
-
-
-    .ma7alak-area-button{
-
-      min-height:49px;
-
-      border-radius:13px;
-
-      font-size:11px;
-
-    }
-
-
-    .ma7alak-category-grid{
-
-      grid-template-columns:
-        repeat(2,minmax(0,1fr));
-
-      gap:7px;
-
-    }
-
-
-    .ma7alak-category-button{
-
-      min-height:55px;
-
-      border-radius:13px;
-
-      font-size:10px;
-
-      padding:
-        8px 5px;
-
-    }
-
-
-    .ma7alak-category-icon{
-
-      font-size:17px;
-
-    }
-
-
-    .ma7alak-results{
-
-      margin-top:25px;
-
-    }
-
-
-    .ma7alak-results-top{
-
-      align-items:flex-start;
-
-      flex-direction:column;
-
-      gap:9px;
-
-    }
-
-
-    .ma7alak-results-title{
-
-      font-size:27px;
-
-    }
-
-
-    .ma7alak-results-subtitle{
-
-      font-size:10px;
-
-    }
-
-
-    .ma7alak-results-count{
-
-      font-size:9px;
-
-    }
-
-
-    /* =====================================================
-       TWO LARGE CARDS PER ROW
-    ===================================================== */
-
-    .ma7alak-shop-grid{
-
-      grid-template-columns:
-        repeat(2,minmax(0,1fr));
-
-      gap:9px;
-
-      padding-top:11px;
-
-    }
-
-
-    .ma7alak-shop-card{
-
-      padding:
-        15px 7px 9px;
-
-      border-radius:18px;
-
-    }
-
-
-    .ma7alak-shop-image-ring{
-
-      width:118px;
-
-      height:118px;
-
-      padding:4px;
-
-    }
-
-
-    .ma7alak-shop-image-inner{
-
-      border-width:2px;
-
-    }
-
-
-    .ma7alak-verified-badge{
-
-      right:calc(50% - 61px);
-
-      width:23px;
-
-      height:23px;
-
-      font-size:12px;
-
-      border-width:2px;
-
-    }
-
-
-    .ma7alak-shop-content{
-
-      margin-top:11px;
-
-    }
-
-
-    .ma7alak-shop-name{
-
-      font-size:16px;
-
-    }
-
-
-    .ma7alak-shop-arabic{
-
-      font-size:10px;
-
-      margin-top:3px;
-
-    }
-
-
-    .ma7alak-shop-category-pill{
-
-      margin-top:7px;
-
-      padding:
-        5px 7px;
-
-      font-size:6.5px;
-
-      letter-spacing:.5px;
-
-    }
-
-
-    .ma7alak-shop-location{
-
-      margin-top:7px;
-
-      font-size:8px;
-
-    }
-
-
-    .ma7alak-location-icon{
-
-      font-size:10px;
-
-    }
-
-
-    .ma7alak-featured{
-
-      margin-top:7px;
-
-      padding:
-        5px 7px;
-
-      font-size:6.5px;
-
-      letter-spacing:.4px;
-
-    }
-
-
-    .ma7alak-profile-button{
-
-      min-height:37px;
-
-      margin-top:9px;
-
-      border-radius:11px;
-
-      font-size:9px;
-
-      gap:5px;
-
-    }
-
-
-    .ma7alak-profile-arrow{
-
-      font-size:13px;
-
-    }
-
-
-    /* CTA */
-
-    .ma7alak-business-cta{
-
-      margin-top:35px;
-
-      padding:
-        23px 15px;
-
-      border-radius:19px;
-
-      flex-direction:column;
-
-      text-align:center;
-
-      gap:17px;
-
-    }
-
-
-    .ma7alak-business-cta h2{
-
-      font-size:24px;
-
-    }
-
-
-    .ma7alak-business-cta p{
-
-      font-size:10px;
-
-    }
-
-
-    .ma7alak-add-button{
-
-      width:100%;
-
-      min-height:50px;
-
-      height:50px;
-
-    }
-
-
-    /* FOOTER */
-
-    .ma7alak-footer-features{
-
-      flex-direction:column;
-
-      gap:17px;
-
-    }
-
-
-    .ma7alak-footer-feature{
-
-      min-width:0;
-
-      padding:0;
-
-    }
-
-
-    .ma7alak-footer-feature
-    + .ma7alak-footer-feature{
-
-      border-left:none;
-
-    }
-
-  }
-
-
-  /* =========================================================
-     VERY SMALL PHONES
-  ========================================================= */
-
-  @media(max-width:390px){
-
-    #ma7alak-shops-page{
-
-      padding-left:6px;
-
-      padding-right:6px;
-
-    }
-
-
-    .ma7alak-shop-grid{
-
-      gap:7px;
-
-    }
-
-
-    .ma7alak-shop-card{
-
-      padding-left:5px;
-
-      padding-right:5px;
-
-    }
-
-
-    .ma7alak-shop-image-ring{
-
-      width:105px;
-
-      height:105px;
-
-    }
-
-
-    .ma7alak-verified-badge{
-
-      right:calc(50% - 54px);
-
-      width:21px;
-
-      height:21px;
-
-    }
-
-
-    .ma7alak-shop-name{
-
-      font-size:14px;
-
-    }
-
-
-    .ma7alak-shop-arabic{
-
-      font-size:9px;
-
-    }
-
-
-    .ma7alak-shop-location{
-
-      font-size:7.5px;
-
-    }
-
-
-    .ma7alak-profile-button{
-
-      font-size:8px;
-
-    }
-
-  }
-
+}
 
 `;
 
   document.head.appendChild(style);
+
 
   /* =========================================================
      ONLY RUN ON ACTUAL SHOPS PAGE
@@ -2531,6 +2443,8 @@ body.ma7alak-shops-body{
     );
 
   }
+
+
   /* =========================================================
      SHOP DATA
 
@@ -2990,7 +2904,9 @@ body.ma7alak-shops-body{
       <div class="ma7alak-side-left">
 
         EXPLORE<br>
+
         SHOP LOCAL<br>
+
         BE PART OF IT
 
       </div>
@@ -3042,6 +2958,7 @@ body.ma7alak-shops-body{
       <h1>
 
         Discover
+
         <span>Shops.</span>
 
       </h1>
@@ -3185,7 +3102,6 @@ body.ma7alak-shops-body{
 
       <div class="ma7alak-category-grid">
 
-
         <button
           class="ma7alak-category-button"
           data-category="cafe"
@@ -3248,7 +3164,6 @@ body.ma7alak-shops-body{
           Kiosks & Food
 
         </button>
-
 
       </div>
 
@@ -3356,6 +3271,8 @@ body.ma7alak-shops-body{
       </button>
 
     </section>
+
+
     <!-- =====================================================
          BUSINESS CTA
     ====================================================== -->
@@ -3365,13 +3282,16 @@ body.ma7alak-shops-body{
       <div>
 
         <div class="ma7alak-business-small">
+
           FOR LOCAL BUSINESSES
+
         </div>
 
 
         <h2>
 
           Your shop belongs on
+
           <span>Ma7alak.</span>
 
         </h2>
@@ -3400,7 +3320,9 @@ body.ma7alak-shops-body{
         Add Your Shop
 
         <span>
+
           →
+
         </span>
 
       </a>
@@ -3420,17 +3342,23 @@ body.ma7alak-shops-body{
         <div class="ma7alak-footer-feature">
 
           <div class="ma7alak-footer-feature-icon">
+
             ♡
+
           </div>
 
           <div class="ma7alak-footer-feature-text">
 
             <strong>
+
               Support Local
+
             </strong>
 
             <span>
+
               Stronger Communities
+
             </span>
 
           </div>
@@ -3441,17 +3369,23 @@ body.ma7alak-shops-body{
         <div class="ma7alak-footer-feature">
 
           <div class="ma7alak-footer-feature-icon">
+
             ◈
+
           </div>
 
           <div class="ma7alak-footer-feature-text">
 
             <strong>
+
               Discover More
+
             </strong>
 
             <span>
+
               Hidden Gems
+
             </span>
 
           </div>
@@ -3462,17 +3396,23 @@ body.ma7alak-shops-body{
         <div class="ma7alak-footer-feature">
 
           <div class="ma7alak-footer-feature-icon">
+
             ✦
+
           </div>
 
           <div class="ma7alak-footer-feature-text">
 
             <strong>
+
               A Stronger Lebanon
+
             </strong>
 
             <span>
+
               Together
+
             </span>
 
           </div>
@@ -3484,12 +3424,16 @@ body.ma7alak-shops-body{
 
 
       <div class="ma7alak-footer-logo">
+
         Ma7alak
+
       </div>
 
 
       <div class="ma7alak-footer-tagline">
+
         More Than A Place • A Community
+
       </div>
 
     </footer>
@@ -4153,7 +4097,9 @@ body.ma7alak-shops-body{
             class="ma7alak-verified-badge"
             title="Verified"
           >
+
             ✓
+
           </div>
 
         `
@@ -4252,11 +4198,15 @@ body.ma7alak-shops-body{
         <div class="ma7alak-shop-location">
 
           <span class="ma7alak-location-icon">
+
             📍
+
           </span>
 
           <span>
+
             ${escapeHTML(shop.location)}
+
           </span>
 
         </div>
@@ -4277,7 +4227,9 @@ body.ma7alak-shops-body{
           View Profile
 
           <span class="ma7alak-profile-arrow">
+
             →
+
           </span>
 
         </a>
@@ -4343,20 +4295,48 @@ body.ma7alak-shops-body{
 
 
     if(
-        if(
-      document.readyState === "loading"
+      insertPage()
     ){
 
-      document.addEventListener(
-        "DOMContentLoaded",
-        start
-      );
+      initialize();
 
-    }else{
-
-      start();
+      return;
 
     }
+
+
+    if(
+      attempts < 35
+    ){
+
+      setTimeout(
+        start,
+        350
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     START AFTER DOM
+  ========================================================= */
+
+  if(
+    document.readyState === "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      start
+    );
+
+  }else{
+
+    start();
+
+  }
 
 
   /* =========================================================
@@ -4390,5 +4370,4 @@ body.ma7alak-shops-body{
   );
 
 
-})();
 })();
