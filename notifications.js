@@ -2604,7 +2604,9 @@ async function openNotifications(){
     );
 
 
-  if(!panel){
+  if(
+    !panel
+  ){
 
     return;
 
@@ -2616,19 +2618,12 @@ async function openNotifications(){
 
 
   /*
-     Load latest notifications.
+     INSTANT OPEN:
 
-     Existing highlights remain.
-  */
+     Open the panel immediately using whatever
+     notification data is already in memory.
 
-  await loadNotifications();
-
-
-  /*
-     Opening the bell clears
-     ONLY the badge number.
-
-     It does NOT clear highlights.
+     Do NOT wait for Supabase before showing it.
   */
 
   notificationBadgeCount =
@@ -2643,6 +2638,43 @@ async function openNotifications(){
   panel.classList.add(
     "open"
   );
+
+
+  /*
+     Refresh latest notifications in the background.
+
+     This keeps the button feeling instant while still
+     updating the panel with fresh Supabase data.
+  */
+
+  try{
+
+    await loadNotifications();
+
+
+    if(
+      notificationsOpen
+    ){
+
+      notificationBadgeCount =
+        0;
+
+
+      updateNotificationBadge();
+
+      renderNotifications();
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      "Ma7alak instant notification refresh:",
+      error
+    );
+
+  }
 
 }
 
@@ -2918,3 +2950,14 @@ else{
 ========================================================= */
 
 })();
+
+/* =========================================================
+   WHAT CHANGED
+   =========================================================
+
+   1. Notification panel now opens instantly when the bell is pressed.
+   2. It no longer waits for Supabase/network requests before becoming visible.
+   3. Existing notifications render immediately.
+   4. Fresh notifications still load from Supabase in the background.
+   5. All other notification behavior remains unchanged.
+========================================================= */
