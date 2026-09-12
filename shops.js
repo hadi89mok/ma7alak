@@ -1538,7 +1538,93 @@ body.ma7alak-shops-body{
 
   }
 
+    <!-- =====================================================
+         RESULTS
+    ====================================================== -->
 
+    <section
+      id="ma7alak-results"
+      class="ma7alak-results"
+    >
+
+      <div class="ma7alak-results-top">
+
+        <div>
+
+          <div
+            id="ma7alak-results-kicker"
+            class="ma7alak-results-kicker"
+          >
+            SELECTED AREA
+          </div>
+
+
+          <h2
+            id="ma7alak-results-title"
+            class="ma7alak-results-title"
+          >
+            Cafés & Coffee Spots
+          </h2>
+
+
+          <p
+            id="ma7alak-results-subtitle"
+            class="ma7alak-results-subtitle"
+          >
+            Discover local businesses around you.
+          </p>
+
+        </div>
+
+
+        <div
+          id="ma7alak-results-count"
+          class="ma7alak-results-count"
+        >
+          0 shops
+        </div>
+
+      </div>
+
+
+      <div
+        id="ma7alak-shop-grid"
+        class="ma7alak-shop-grid"
+      ></div>
+
+
+      <div
+        id="ma7alak-empty"
+        class="ma7alak-empty"
+      >
+
+        <div class="ma7alak-empty-icon">
+          🔎
+        </div>
+
+
+        <h3>
+          Nothing found yet
+        </h3>
+
+
+        <p>
+          Try another shop, area or category.
+        </p>
+
+      </div>
+
+
+      <button
+        id="ma7alak-change-area"
+        class="ma7alak-change-area"
+      >
+
+        ← Change area
+
+      </button>
+
+    </section>
   /* =========================================================
      BUSINESS CTA
   ========================================================= */
