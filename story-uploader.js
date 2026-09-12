@@ -1,188 +1,470 @@
-(function(){
+<!-- =========================================================
+     MA7ALAK STORIES
+     SHOP: masaya-cafe
 
-  "use strict";
-
-  /*
-  =========================================================
-  MA7ALAK
-  GLOBAL PAGE-LEVEL STORY UPLOADER
-
-  IMPORTANT:
-  - This code is GLOBAL.
-  - Do NOT make one copy per shop.
-  - Do NOT put this inside a Story Embed.
-  - It creates NO visible/layout element until + is pressed.
-
-  Works with:
-    masaya-cafe
-    doze-3ale
-    future shops...
-  =========================================================
-  */
-
-
-  /* =========================================================
-     SUPABASE CONFIG
-  ========================================================= */
-
-  const SUPABASE_URL =
-    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
-
-  const SUPABASE_KEY =
-    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+     ✓ Story circle
+     ✓ Story viewer
+     ✓ Fullscreen
+     ✓ Images
+     ✓ Videos
+     ✓ Sound
+     ✓ Story navigation
+     ✓ Progress bars
+     ✓ New story animation
+     ✓ Owner + button
+     ✓ PAGE-LEVEL owner upload bridge
+     ✓ OWNER DELETE STORY
+     ✓ STORY TIME AGO
+     ✓ Mobile-safe
+     ✓ Supabase stories
+     ✓ 24 hour expiry
+========================================================= -->
 
 
-  /* =========================================================
-     STATE
-  ========================================================= */
+<style>
 
-  let supabaseClient =
-    null;
+/* =========================================================
+   STORY WRAPPER
+========================================================= */
 
-  let supabaseLoading =
-    null;
+#ma7alak-story-wrapper{
 
-  let activeShopSlug =
-    null;
+  width:100%!important;
 
-  let isUploading =
-    false;
+  display:flex!important;
 
-  let uploadSourceWindow =
-    null;
+  justify-content:center!important;
+  align-items:center!important;
 
+  margin:15px 0!important;
 
-  /* =========================================================
-     LOAD SUPABASE ONLY WHEN NEEDED
-  ========================================================= */
+  padding:0!important;
 
-  function loadSupabase(){
+  position:relative!important;
 
-    if(
-      window.supabase &&
-      typeof window.supabase.createClient === "function"
-    ){
+  min-height:82px!important;
 
-      if(!supabaseClient){
+  background:transparent!important;
 
-        supabaseClient =
-          window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-          );
+  border:none!important;
 
-      }
+  border-radius:0!important;
 
-      return Promise.resolve(
-        supabaseClient
-      );
+  box-shadow:none!important;
 
-    }
+  -webkit-box-shadow:none!important;
+
+  outline:none!important;
+
+  overflow:visible!important;
+
+  z-index:999999!important;
+
+}
 
 
-    if(
-      supabaseLoading
-    ){
+/* =========================================================
+   NEW STORY RING
+========================================================= */
 
-      return supabaseLoading;
+#ma7alak-story-new-ring{
 
-    }
+  position:absolute!important;
 
+  left:50%!important;
+  top:50%!important;
 
-    supabaseLoading =
-      new Promise(function(resolve, reject){
+  width:90px!important;
+  height:90px!important;
 
-        const script =
-          document.createElement("script");
+  transform:
+    translate(-50%,-50%)
+    scale(.88);
 
-        script.src =
-          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  border-radius:50%!important;
 
-        script.async =
-          true;
+  border:3px solid #d9a441!important;
 
-        script.onload =
-          function(){
+  background:transparent!important;
 
-            try{
+  box-shadow:none!important;
 
-              supabaseClient =
-                window.supabase.createClient(
-                  SUPABASE_URL,
-                  SUPABASE_KEY
-                );
+  pointer-events:none!important;
 
-              resolve(
-                supabaseClient
-              );
+  opacity:0;
 
-            }
+  z-index:1!important;
 
-            catch(error){
+  box-sizing:border-box!important;
 
-              reject(error);
-
-            }
-
-          };
+}
 
 
-        script.onerror =
-          function(){
+/* =========================================================
+   NEW STORY ACTIVE
+========================================================= */
 
-            reject(
-              new Error(
-                "SUPABASE_LOAD_FAILED"
-              )
-            );
+#ma7alak-story-wrapper.story-has-new
+#ma7alak-story-new-ring{
 
-          };
+  opacity:1;
+
+  animation:
+    ma7alakNewStoryPulse
+    1.65s
+    ease-out
+    infinite;
+
+  -webkit-animation:
+    ma7alakNewStoryPulse
+    1.65s
+    ease-out
+    infinite;
+
+}
 
 
-        document.head.appendChild(
-          script
-        );
+/* =========================================================
+   NEW STORY PULSE
+========================================================= */
 
-      });
+@keyframes ma7alakNewStoryPulse{
 
+  0%{
 
-    return supabaseLoading;
+    transform:
+      translate(-50%,-50%)
+      scale(.88);
+
+    opacity:1;
+
+    border-width:3px;
 
   }
 
+  55%{
 
-  /* =========================================================
-     INJECT UPLOADER CSS ONLY WHEN NEEDED
-  ========================================================= */
+    transform:
+      translate(-50%,-50%)
+      scale(1.08);
 
-  function injectUploaderCSS(){
+    opacity:.58;
 
-    if(
-      document.getElementById(
-        "ma7alak-page-story-uploader-style"
-      )
-    ){
+    border-width:2px;
 
-      return;
+  }
 
-    }
+  100%{
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.30);
+
+    opacity:0;
+
+    border-width:1px;
+
+  }
+
+}
 
 
-    const style =
-      document.createElement("style");
+@-webkit-keyframes ma7alakNewStoryPulse{
 
+  0%{
 
-    style.id =
-      "ma7alak-page-story-uploader-style";
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(.88);
 
+    opacity:1;
 
-    style.textContent = `
+    border-width:3px;
+
+  }
+
+  55%{
+
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(1.08);
+
+    opacity:.58;
+
+    border-width:2px;
+
+  }
+
+  100%{
+
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(1.30);
+
+    opacity:0;
+
+    border-width:1px;
+
+  }
+
+}
+
 
 /* =========================================================
-   MA7ALAK PAGE STORY UPLOADER
+   STORY BUTTON
 ========================================================= */
 
-#ma7alak-page-story-uploader{
+#ma7alak-story-button{
+
+  position:relative!important;
+
+  width:82px!important;
+  height:82px!important;
+
+  padding:3px!important;
+
+  margin:0!important;
+
+  border-radius:50%!important;
+
+  border:3px solid #d9a441!important;
+
+  background:#111!important;
+
+  box-shadow:none!important;
+
+  -webkit-box-shadow:none!important;
+
+  filter:none!important;
+
+  cursor:pointer!important;
+
+  overflow:hidden!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  outline:none!important;
+
+  z-index:2!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+  box-sizing:border-box!important;
+
+  clip-path:
+    circle(50% at 50% 50%)!important;
+
+  -webkit-clip-path:
+    circle(50% at 50% 50%)!important;
+
+}
+
+
+/* =========================================================
+   REMOVE BUTTON EFFECTS
+========================================================= */
+
+#ma7alak-story-button::before,
+#ma7alak-story-button::after{
+
+  content:none!important;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+}
+
+
+#ma7alak-story-button:hover,
+#ma7alak-story-button:focus,
+#ma7alak-story-button:focus-visible,
+#ma7alak-story-button:active{
+
+  outline:none!important;
+
+  background:#111!important;
+
+  box-shadow:none!important;
+
+  -webkit-box-shadow:none!important;
+
+}
+
+
+/* =========================================================
+   STORY PREVIEW
+========================================================= */
+
+#ma7alak-story-preview{
+
+  width:100%!important;
+  height:100%!important;
+
+  margin:0!important;
+
+  padding:0!important;
+
+  border-radius:50%!important;
+
+  overflow:hidden!important;
+
+  background:#171717!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+}
+
+
+#ma7alak-story-preview img,
+#ma7alak-story-preview video{
+
+  width:100%!important;
+  height:100%!important;
+
+  object-fit:cover!important;
+
+  border-radius:50%!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+  display:block!important;
+
+}
+
+
+/* =========================================================
+   EMPTY CIRCLE
+========================================================= */
+
+.ma7alak-story-placeholder{
+
+  width:100%!important;
+  height:100%!important;
+
+  border-radius:50%!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #121212,
+      #292929
+    )!important;
+
+  color:transparent!important;
+
+  font-size:0!important;
+
+}
+
+
+/* =========================================================
+   OWNER PLUS
+========================================================= */
+
+#ma7alak-owner-add-story{
+
+  position:absolute!important;
+
+  width:28px!important;
+  height:28px!important;
+
+  right:calc(50% - 49px)!important;
+
+  bottom:-2px!important;
+
+  border:2px solid #111!important;
+
+  border-radius:50%!important;
+
+  background:#d9a441!important;
+
+  color:#111!important;
+
+  display:none;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  font-size:21px!important;
+
+  font-weight:900!important;
+
+  line-height:1!important;
+
+  padding:0!important;
+
+  margin:0!important;
+
+  cursor:pointer!important;
+
+  z-index:20!important;
+
+  box-shadow:
+    0 3px 12px rgba(0,0,0,.45)!important;
+
+  -webkit-box-shadow:
+    0 3px 12px rgba(0,0,0,.45)!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  outline:none!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+}
+
+
+#ma7alak-owner-add-story.visible{
+
+  display:flex!important;
+
+}
+
+
+#ma7alak-owner-add-story:active{
+
+  transform:scale(.90)!important;
+
+}
+
+
+/* =========================================================
+   FULL STORY
+========================================================= */
+
+#ma7alak-full-story{
 
   position:fixed!important;
 
@@ -194,175 +476,179 @@
   width:100dvw!important;
   height:100dvh!important;
 
+  background:#000!important;
+
   display:none;
 
   align-items:center!important;
 
   justify-content:center!important;
 
-  box-sizing:border-box!important;
-
-  padding:
-    max(
-      18px,
-      env(safe-area-inset-top)
-    )
-    14px
-    max(
-      24px,
-      env(safe-area-inset-bottom)
-    )
-    14px!important;
-
-  background:
-
-    radial-gradient(
-      circle at 50% 15%,
-      rgba(217,164,65,.14),
-      transparent 34%
-    ),
-
-    radial-gradient(
-      circle at 15% 90%,
-      rgba(217,164,65,.06),
-      transparent 30%
-    ),
-
-    linear-gradient(
-      145deg,
-      #050505,
-      #111111 48%,
-      #050505
-    )!important;
+  overflow:hidden!important;
 
   z-index:2147483647!important;
 
-  overflow:hidden!important;
+  margin:0!important;
 
-  overscroll-behavior:none!important;
-
-  -webkit-tap-highlight-color:
-    transparent!important;
-
-}
-
-
-#ma7alak-page-story-uploader.active{
-
-  display:flex!important;
-
-}
-
-
-#ma7alak-page-story-uploader::before{
-
-  content:"";
-
-  position:absolute;
-
-  width:500px;
-  height:500px;
-
-  left:50%;
-  top:50%;
-
-  transform:
-    translate(-50%,-50%);
-
-  border-radius:50%;
-
-  border:
-    1px solid
-    rgba(217,164,65,.075);
-
-  pointer-events:none;
-
-}
-
-
-#ma7alak-page-story-uploader::after{
-
-  content:"";
-
-  position:absolute;
-
-  width:340px;
-  height:340px;
-
-  left:50%;
-  top:50%;
-
-  transform:
-    translate(-50%,-50%);
-
-  border-radius:50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(217,164,65,.08),
-      transparent 68%
-    );
-
-  pointer-events:none;
-
-}
-
-
-#ma7alak-page-story-panel{
-
-  position:relative!important;
-
-  width:
-    min(
-      430px,
-      calc(100vw - 28px)
-    )!important;
-
-  height:
-    min(
-      570px,
-      calc(100dvh - 36px)
-    )!important;
-
-  min-height:500px!important;
+  padding:0!important;
 
   box-sizing:border-box!important;
 
+  isolation:isolate;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+#ma7alak-full-story.active{
+
   display:flex!important;
 
-  flex-direction:column!important;
+}
 
-  align-items:center!important;
 
-  justify-content:center!important;
+/* =========================================================
+   NATIVE FULLSCREEN
+========================================================= */
 
-  padding:
-    60px 20px 42px!important;
+#ma7alak-full-story:fullscreen{
 
-  margin:0!important;
+  width:100vw!important;
+  height:100vh!important;
 
-  border:
-    1px solid
-    rgba(217,164,65,.28)!important;
+  background:#000!important;
 
-  border-radius:38px!important;
+}
 
-  background:
 
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.085),
-      rgba(255,255,255,.025)
-    )!important;
+#ma7alak-full-story:-webkit-full-screen{
 
-  box-shadow:
+  width:100vw!important;
+  height:100vh!important;
 
-    0 30px 100px
-      rgba(0,0,0,.80),
+  background:#000!important;
 
-    inset 0 1px 0
-      rgba(255,255,255,.07)!important;
+}
+
+
+/* =========================================================
+   STORY MEDIA
+========================================================= */
+
+#ma7alak-full-story-media{
+
+  position:absolute!important;
+
+  top:50%!important;
+  left:50%!important;
+
+  transform:
+    translate(-50%,-50%);
+
+  width:
+    calc(100vw - 24px)!important;
+
+  height:
+    calc(100vh - 24px)!important;
+
+  width:
+    calc(100dvw - 24px)!important;
+
+  height:
+    calc(100dvh - 24px)!important;
+
+  background:#000!important;
+
+  display:block!important;
+
+  overflow:hidden!important;
+
+  border-radius:24px!important;
+
+  box-sizing:border-box!important;
+
+  isolation:isolate;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+/* =========================================================
+   MEDIA LAYERS
+========================================================= */
+
+.ma7alak-story-media-layer{
+
+  position:absolute!important;
+
+  inset:0!important;
+
+  width:100%!important;
+  height:100%!important;
+
+  object-fit:contain!important;
+
+  background:#000!important;
+
+  border-radius:24px!important;
+
+  display:block!important;
+
+  opacity:0;
+
+  visibility:hidden;
+
+  transition:
+    opacity .32s ease;
+
+  will-change:opacity;
+
+  backface-visibility:hidden;
+
+  -webkit-backface-visibility:hidden;
+
+  transform:
+    translateZ(0);
+
+  z-index:1;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+.ma7alak-story-media-layer.active{
+
+  opacity:1;
+
+  visibility:visible;
+
+  z-index:2;
+
+}
+
+
+/* =========================================================
+   STORY SHOP NAME
+========================================================= */
+
+#ma7alak-story-shop-name{
+
+  position:absolute!important;
+
+  top:76px!important;
+
+  left:20px!important;
+
+  max-width:calc(100% - 130px)!important;
 
   color:#fff!important;
 
@@ -371,193 +657,11 @@
     "Segoe UI",
     sans-serif!important;
 
-  animation:
-    ma7alakPageUploaderAppear
-    .28s
-    cubic-bezier(.2,.8,.2,1);
-
-  z-index:2!important;
-
-}
-
-
-@keyframes ma7alakPageUploaderAppear{
-
-  from{
-
-    opacity:0;
-
-    transform:
-      scale(.90)
-      translateY(18px);
-
-  }
-
-  to{
-
-    opacity:1;
-
-    transform:
-      scale(1)
-      translateY(0);
-
-  }
-
-}
-
-
-#ma7alak-page-story-panel::before{
-
-  content:"";
-
-  position:absolute;
-
-  top:-1px;
-
-  left:15%;
-
-  right:15%;
-
-  height:2px;
-
-  border-radius:20px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      #d9a441,
-      transparent
-    );
-
-}
-
-
-#ma7alak-page-story-close{
-
-  position:absolute!important;
-
-  top:15px!important;
-
-  right:16px!important;
-
-  width:44px!important;
-  height:44px!important;
-
-  border:
-    1px solid
-    rgba(255,255,255,.11)!important;
-
-  border-radius:50%!important;
-
-  background:
-    rgba(255,255,255,.055)!important;
-
-  color:#fff!important;
-
-  font-size:28px!important;
-
-  line-height:40px!important;
-
-  text-align:center!important;
-
-  padding:0!important;
-
-  margin:0!important;
-
-  cursor:pointer!important;
-
-  outline:none!important;
-
-  appearance:none!important;
-
-  -webkit-appearance:none!important;
-
-  -webkit-tap-highlight-color:
-    transparent!important;
-
-  z-index:10!important;
-
-}
-
-
-#ma7alak-page-story-close:active{
-
-  transform:scale(.90)!important;
-
-}
-
-
-#ma7alak-page-story-title{
-
-  margin:0!important;
-
-  padding:0!important;
-
-  color:#fff!important;
-
-  text-align:center!important;
-
-  font-size:28px!important;
-
-  line-height:1.2!important;
-
-  font-weight:900!important;
-
-  letter-spacing:-.7px!important;
-
-}
-
-
-#ma7alak-page-story-subtitle{
-
-  margin:
-    9px 0 18px!important;
-
-  padding:0!important;
-
-  color:
-    rgba(255,255,255,.46)!important;
-
-  font-size:12px!important;
-
-  line-height:1.6!important;
-
-  text-align:center!important;
-
-}
-
-
-#ma7alak-page-story-shop{
-
-  display:inline-flex!important;
-
-  align-items:center!important;
-
-  justify-content:center!important;
-
-  max-width:85%!important;
-
-  margin:
-    0 0 32px!important;
-
-  padding:
-    8px 16px!important;
-
-  border:
-    1px solid
-    rgba(217,164,65,.22)!important;
-
-  border-radius:30px!important;
-
-  background:
-    rgba(217,164,65,.08)!important;
-
-  color:#d9a441!important;
-
-  font-size:11px!important;
+  font-size:16px!important;
 
   font-weight:800!important;
+
+  line-height:22px!important;
 
   white-space:nowrap!important;
 
@@ -565,802 +669,1489 @@
 
   text-overflow:ellipsis!important;
 
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.55)!important;
+
+  pointer-events:none!important;
+
+  z-index:125!important;
+
+  box-sizing:border-box!important;
+
 }
 
 
-#ma7alak-page-story-options{
+/* =========================================================
+   STORY TIME
+========================================================= */
 
-  width:100%!important;
+#ma7alak-story-time{
+
+  position:absolute!important;
+
+  top:104px!important;
+
+  left:20px!important;
+
+  min-height:32px!important;
+
+  padding:
+    0 12px!important;
 
   display:flex!important;
 
   align-items:center!important;
 
   justify-content:center!important;
-
-  gap:18px!important;
-
-}
-
-
-.ma7alak-page-story-option{
-
-  position:relative!important;
-
-  width:122px!important;
-  height:122px!important;
-
-  min-width:122px!important;
-  min-height:122px!important;
-
-  border-radius:50%!important;
 
   border:
     1px solid
-    rgba(217,164,65,.42)!important;
+    rgba(255,255,255,.14)!important;
+
+  border-radius:18px!important;
 
   background:
+    rgba(15,15,15,.68)!important;
 
-    radial-gradient(
-      circle at 35% 25%,
-      rgba(217,164,65,.21),
-      rgba(255,255,255,.035) 58%,
-      rgba(0,0,0,.25)
-    )!important;
+  color:
+    rgba(255,255,255,.88)!important;
 
-  color:#fff!important;
+  font-family:
+    Arial,
+    "Segoe UI",
+    sans-serif!important;
 
-  display:flex!important;
+  font-size:11px!important;
 
-  flex-direction:column!important;
+  font-weight:700!important;
+
+  line-height:32px!important;
+
+  white-space:nowrap!important;
+
+  backdrop-filter:blur(12px)!important;
+
+  -webkit-backdrop-filter:blur(12px)!important;
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.28)!important;
+
+  pointer-events:none!important;
+
+  z-index:125!important;
+
+  box-sizing:border-box!important;
+
+}
+
+
+/* =========================================================
+   OWNER DELETE BUTTON
+========================================================= */
+
+#ma7alak-story-delete-btn{
+
+  position:absolute!important;
+
+  top:136px!important;
+
+  right:20px!important;
+
+  width:48px!important;
+
+  height:48px!important;
+
+  display:none!important;
 
   align-items:center!important;
 
   justify-content:center!important;
+
+  border:
+    1px solid
+    rgba(255,255,255,.13)!important;
+
+  border-radius:50%!important;
+
+  background:
+    rgba(20,20,20,.72)!important;
+
+  color:#fff!important;
+
+  font-size:20px!important;
+
+  line-height:1!important;
 
   padding:0!important;
 
   margin:0!important;
 
-  box-sizing:border-box!important;
-
   cursor:pointer!important;
 
-  font-family:inherit!important;
+  z-index:125!important;
+
+  backdrop-filter:blur(10px)!important;
+
+  -webkit-backdrop-filter:blur(10px)!important;
+
+  outline:none!important;
 
   appearance:none!important;
 
   -webkit-appearance:none!important;
 
-  outline:none!important;
-
   -webkit-tap-highlight-color:
     transparent!important;
 
-  transition:
-    transform .18s ease,
-    border-color .18s ease!important;
+  box-sizing:border-box!important;
 
 }
 
 
-.ma7alak-page-story-option::before{
+#ma7alak-story-delete-btn.visible{
 
-  content:"";
+  display:flex!important;
+
+}
+
+
+#ma7alak-story-delete-btn:hover{
+
+  background:
+    rgba(150,25,25,.78)!important;
+
+  border-color:
+    rgba(255,90,90,.35)!important;
+
+}
+
+
+#ma7alak-story-delete-btn:active{
+
+  transform:scale(.90)!important;
+
+  background:
+    rgba(180,25,25,.88)!important;
+
+}
+
+
+/* =========================================================
+   DESKTOP STORY
+========================================================= */
+
+@media(min-width:601px){
+
+  #ma7alak-full-story-media{
+
+    width:
+      min(
+        520px,
+        calc(100vw - 40px)
+      )!important;
+
+    height:
+      min(
+        900px,
+        calc(100vh - 30px)
+      )!important;
+
+    width:
+      min(
+        520px,
+        calc(100dvw - 40px)
+      )!important;
+
+    height:
+      min(
+        900px,
+        calc(100dvh - 30px)
+      )!important;
+
+    border-radius:26px!important;
+
+  }
+
+
+  .ma7alak-story-media-layer{
+
+    border-radius:26px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:600px){
+
+  #ma7alak-story-wrapper{
+
+    min-height:76px!important;
+
+    margin:15px 0!important;
+
+  }
+
+
+  #ma7alak-story-button{
+
+    width:76px!important;
+
+    height:76px!important;
+
+  }
+
+
+  #ma7alak-story-new-ring{
+
+    width:82px!important;
+
+    height:82px!important;
+
+  }
+
+
+  #ma7alak-owner-add-story{
+
+    width:27px!important;
+
+    height:27px!important;
+
+    right:calc(50% - 47px)!important;
+
+    bottom:-1px!important;
+
+    font-size:20px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     STORY VIEWER
+  ----------------------------------------- */
+
+  #ma7alak-full-story-media{
+
+    width:
+      calc(100vw - 12px)!important;
+
+    height:
+      calc(100vh - 12px)!important;
+
+    width:
+      calc(100dvw - 12px)!important;
+
+    height:
+      calc(100dvh - 12px)!important;
+
+    border-radius:20px!important;
+
+  }
+
+
+  .ma7alak-story-media-layer{
+
+    border-radius:20px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     SHOP NAME
+  ----------------------------------------- */
+
+  #ma7alak-story-shop-name{
+
+    top:68px!important;
+
+    left:14px!important;
+
+    max-width:calc(100% - 105px)!important;
+
+    font-size:15px!important;
+
+    line-height:21px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     TIME
+  ----------------------------------------- */
+
+  #ma7alak-story-time{
+
+    top:94px!important;
+
+    left:14px!important;
+
+    min-height:30px!important;
+
+    padding:
+      0 10px!important;
+
+    font-size:10px!important;
+
+    line-height:30px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     DELETE
+  ----------------------------------------- */
+
+  #ma7alak-story-delete-btn{
+
+    top:124px!important;
+
+    right:14px!important;
+
+    width:44px!important;
+
+    height:44px!important;
+
+    font-size:18px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media(max-width:380px){
+
+  #ma7alak-story-button{
+
+    width:74px!important;
+    height:74px!important;
+
+  }
+
+
+  #ma7alak-story-delete-btn{
+
+    top:122px!important;
+
+    right:14px!important;
+
+    width:42px!important;
+
+    height:42px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   STORY LIKE BUTTON
+========================================================= */
+
+#ma7alak-story-like-btn{
+
+  position:absolute!important;
+  left:50%!important;
+  bottom:105px!important;
+  transform:translateX(-50%)!important;
+
+  width:56px!important;
+  min-width:56px!important;
+  height:56px!important;
+  padding:0!important;
+  margin:0!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:50%!important;
+  background:linear-gradient(145deg,rgba(28,28,31,.86),rgba(8,8,10,.72))!important;
+  color:rgba(255,255,255,.96)!important;
+
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:30px!important;
+  line-height:1!important;
+  font-weight:400!important;
+
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -1px 0 rgba(0,0,0,.35)!important;
+
+  cursor:pointer!important;
+  z-index:2147483646!important;
+  outline:none!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+  box-sizing:border-box!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  transition:
+    transform .18s ease,
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease!important;
+}
+
+#ma7alak-story-like-btn::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-3px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(217,164,65,.28)!important;
+  pointer-events:none!important;
+  opacity:.8!important;
+}
+
+#ma7alak-story-like-btn .ma7alak-like-heart{
+  display:block!important;
+  position:relative!important;
+  z-index:1!important;
+  font-size:30px!important;
+  line-height:1!important;
+  transform:translateY(1px)!important;
+  text-shadow:0 2px 10px rgba(0,0,0,.35)!important;
+  transition:
+    transform .18s ease,
+    color .22s ease,
+    text-shadow .22s ease!important;
+}
+
+#ma7alak-story-like-btn.liked{
+  color:#ff4b67!important;
+  border-color:rgba(255,92,115,.72)!important;
+  background:linear-gradient(145deg,rgba(62,17,28,.94),rgba(22,8,14,.9))!important;
+  box-shadow:
+    0 10px 34px rgba(0,0,0,.42),
+    0 0 24px rgba(255,64,91,.22),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.35)!important;
+}
+
+#ma7alak-story-like-btn.liked::before{
+  border-color:rgba(255,92,115,.5)!important;
+}
+
+#ma7alak-story-like-btn.liked .ma7alak-like-heart{
+  color:#ff4b67!important;
+  text-shadow:
+    0 0 12px rgba(255,64,91,.42),
+    0 2px 10px rgba(0,0,0,.3)!important;
+  animation:ma7alakHeartPop .32s ease-out!important;
+}
+
+#ma7alak-story-like-btn:active{
+  transform:translateX(-50%) scale(.9)!important;
+}
+
+#ma7alak-story-like-btn:hover{
+  border-color:rgba(255,255,255,.42)!important;
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.42),
+    0 0 18px rgba(217,164,65,.10),
+    inset 0 1px 0 rgba(255,255,255,.2)!important;
+}
+
+#ma7alak-story-like-btn.liked:hover{
+  border-color:rgba(255,92,115,.86)!important;
+  box-shadow:
+    0 12px 36px rgba(0,0,0,.44),
+    0 0 28px rgba(255,64,91,.28),
+    inset 0 1px 0 rgba(255,255,255,.16)!important;
+}
+
+#ma7alak-story-like-btn:disabled{
+  cursor:default!important;
+  opacity:.72!important;
+}
+
+@keyframes ma7alakHeartPop{
+  0%{transform:translateY(1px) scale(.72);}
+  55%{transform:translateY(1px) scale(1.18);}
+  100%{transform:translateY(1px) scale(1);}
+}
+
+@media(max-width:600px){
+  #ma7alak-story-like-btn{
+    bottom:95px!important;
+    width:54px!important;
+    min-width:54px!important;
+    height:54px!important;
+  }
+
+  #ma7alak-story-like-btn .ma7alak-like-heart{
+    font-size:29px!important;
+  }
+}
+
+
+/* =========================================================
+   PROGRESS BARS
+========================================================= */
+
+#ma7alak-story-progress-wrap{
 
   position:absolute;
 
-  inset:7px;
+  top:10px;
 
-  border-radius:50%;
+  left:12px;
+  right:12px;
 
-  border:
-    1px solid
-    rgba(255,255,255,.055);
+  height:4px;
+
+  display:flex;
+
+  gap:4px;
+
+  z-index:100;
 
   pointer-events:none;
 
 }
 
 
-.ma7alak-page-story-option:hover{
+.ma7alak-story-progress-segment{
 
-  transform:
-    translateY(-4px)
-    scale(1.03)!important;
+  flex:1;
 
-  border-color:
-    rgba(217,164,65,.85)!important;
+  height:4px;
 
-}
-
-
-.ma7alak-page-story-option:active{
-
-  transform:
-    scale(.92)!important;
-
-}
-
-
-.ma7alak-page-story-option-icon{
-
-  display:block!important;
-
-  font-size:36px!important;
-
-  line-height:1!important;
-
-  margin:
-    0 0 9px!important;
-
-}
-
-
-.ma7alak-page-story-option-title{
-
-  display:block!important;
-
-  color:#fff!important;
-
-  font-size:12px!important;
-
-  font-weight:900!important;
-
-}
-
-
-#ma7alak-page-story-status{
-
-  width:100%!important;
-
-  min-height:30px!important;
-
-  margin:
-    25px 0 0!important;
-
-  text-align:center!important;
-
-  color:
-    rgba(255,255,255,.72)!important;
-
-  font-size:12px!important;
-
-  line-height:1.6!important;
-
-  display:none!important;
-
-}
-
-
-#ma7alak-page-story-status.visible{
-
-  display:block!important;
-
-}
-
-
-#ma7alak-page-story-progress{
-
-  width:190px!important;
-
-  height:5px!important;
-
-  margin:
-    10px auto 0!important;
-
-  border-radius:20px!important;
-
-  overflow:hidden!important;
+  border-radius:20px;
 
   background:
-    rgba(255,255,255,.08)!important;
+    rgba(255,255,255,.30);
 
-  display:none!important;
+  overflow:hidden;
 
-}
-
-
-#ma7alak-page-story-progress.visible{
-
-  display:block!important;
+  position:relative;
 
 }
 
 
-#ma7alak-page-story-progress-bar{
+.ma7alak-story-progress-fill{
+
+  position:absolute;
+
+  left:0;
+  top:0;
 
   width:0%;
 
   height:100%;
 
-  border-radius:20px;
-
   background:#d9a441;
 
-  transition:
-    width .20s ease;
+  border-radius:20px;
 
 }
 
 
-#ma7alak-page-story-note{
+/* =========================================================
+   CLOSE STORY
+========================================================= */
 
-  position:absolute!important;
+#ma7alak-story-close-btn{
 
-  bottom:25px!important;
+  position:absolute;
 
-  left:20px!important;
+  top:60px;
+  right:20px;
 
-  right:20px!important;
+  width:48px;
+  height:48px;
 
-  margin:0!important;
+  border:none!important;
 
-  padding:0!important;
+  border-radius:50%;
 
-  text-align:center!important;
+  background:
+    rgba(20,20,20,.72);
 
-  color:
-    rgba(255,255,255,.28)!important;
+  color:#fff;
 
-  font-size:9px!important;
+  font-size:30px;
+
+  line-height:48px;
+
+  padding:0;
+
+  text-align:center;
+
+  cursor:pointer;
+
+  z-index:120;
+
+  backdrop-filter:blur(10px);
+
+  -webkit-backdrop-filter:blur(10px);
+
+  -webkit-tap-highlight-color:
+    transparent;
+
+  outline:none!important;
 
 }
 
+
+/* =========================================================
+   TAP AREAS
+========================================================= */
+
+#ma7alak-story-tap-left,
+#ma7alak-story-tap-right{
+
+  position:absolute;
+
+  top:0;
+  bottom:0;
+
+  width:50%;
+
+  z-index:90;
+
+  cursor:pointer;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  padding:0;
+
+  margin:0;
+
+  outline:none!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+  box-shadow:none!important;
+
+}
+
+
+#ma7alak-story-tap-left{
+
+  left:0;
+
+}
+
+
+#ma7alak-story-tap-right{
+
+  right:0;
+
+}
+
+
+#ma7alak-story-tap-left:focus,
+#ma7alak-story-tap-left:focus-visible,
+#ma7alak-story-tap-left:active,
+#ma7alak-story-tap-right:focus,
+#ma7alak-story-tap-right:focus-visible,
+#ma7alak-story-tap-right:active{
+
+  background:transparent!important;
+
+  border:0!important;
+
+  outline:none!important;
+
+  box-shadow:none!important;
+
+}
+
+
+/* =========================================================
+   MOBILE STORY CONTROLS
+========================================================= */
 
 @media(max-width:600px){
 
-  #ma7alak-page-story-uploader{
+  #ma7alak-story-close-btn{
 
-    padding:
-      max(
-        12px,
-        env(safe-area-inset-top)
-      )
-      10px
-      max(
-        18px,
-        env(safe-area-inset-bottom)
-      )
-      10px!important;
+    top:68px;
+
+    right:14px;
+
+    width:44px;
+
+    height:44px;
+
+    line-height:44px;
 
   }
 
 
-  #ma7alak-page-story-panel{
+  #ma7alak-story-progress-wrap{
 
-    width:
-      calc(100vw - 20px)!important;
+    top:8px;
 
-    height:
-      min(
-        540px,
-        calc(100dvh - 24px)
-      )!important;
+    left:9px;
+    right:9px;
 
-    min-height:480px!important;
+    height:3px;
 
-    border-radius:32px!important;
-
-    padding:
-      58px 12px 48px!important;
+    gap:3px;
 
   }
 
 
-  #ma7alak-page-story-title{
+  .ma7alak-story-progress-segment{
 
-    font-size:25px!important;
-
-  }
-
-
-  #ma7alak-page-story-subtitle{
-
-    margin-bottom:16px!important;
-
-  }
-
-
-  #ma7alak-page-story-shop{
-
-    margin-bottom:27px!important;
-
-  }
-
-
-  #ma7alak-page-story-options{
-
-    gap:14px!important;
-
-  }
-
-
-  .ma7alak-page-story-option{
-
-    width:108px!important;
-    height:108px!important;
-
-    min-width:108px!important;
-    min-height:108px!important;
-
-  }
-
-
-  .ma7alak-page-story-option-icon{
-
-    font-size:32px!important;
-
-  }
-
-
-  .ma7alak-page-story-option-title{
-
-    font-size:11px!important;
-
-  }
-
-
-  #ma7alak-page-story-note{
-
-    bottom:22px!important;
+    height:3px;
 
   }
 
 }
 
-
-@media(max-width:380px){
-
-  #ma7alak-page-story-panel{
-
-    min-height:450px!important;
-
-    padding:
-      52px 8px 44px!important;
-
-  }
+</style>
 
 
-  #ma7alak-page-story-title{
+<!-- =========================================================
+     STORY CIRCLE
+========================================================= -->
 
-    font-size:23px!important;
+<div
+  id="ma7alak-story-wrapper"
+  style="
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    outline:none !important;
+  "
+>
 
-  }
-
-
-  #ma7alak-page-story-subtitle{
-
-    font-size:11px!important;
-
-  }
-
-
-  #ma7alak-page-story-shop{
-
-    margin-bottom:22px!important;
-
-  }
-
-
-  .ma7alak-page-story-option{
-
-    width:96px!important;
-    height:96px!important;
-
-    min-width:96px!important;
-    min-height:96px!important;
-
-  }
+  <div
+    id="ma7alak-story-new-ring"
+    aria-hidden="true"
+  ></div>
 
 
-  .ma7alak-page-story-option-icon{
+  <button
+    id="ma7alak-story-button"
+    type="button"
+    aria-label="View stories"
+  >
 
-    font-size:28px!important;
-
-  }
-
-}
-
-    `;
-
-
-    document.head.appendChild(
-      style
-    );
-
-  }
-
-
-  /* =========================================================
-     CREATE UPLOADER
-  ========================================================= */
-
-  function createUploader(){
-
-    let overlay =
-      document.getElementById(
-        "ma7alak-page-story-uploader"
-      );
-
-
-    if(overlay){
-
-      return overlay;
-
-    }
-
-
-    injectUploaderCSS();
-
-
-    overlay =
-      document.createElement(
-        "div"
-      );
-
-
-    overlay.id =
-      "ma7alak-page-story-uploader";
-
-
-    overlay.innerHTML = `
+    <div id="ma7alak-story-preview">
 
       <div
-        id="ma7alak-page-story-panel"
-      >
+        class="ma7alak-story-placeholder"
+      ></div>
 
-        <button
-          id="ma7alak-page-story-close"
-          type="button"
-          aria-label="Close"
-        >
-          ×
-        </button>
+    </div>
+
+  </button>
 
 
-        <div
-          id="ma7alak-page-story-title"
-        >
-          إضافة ستوري
-        </div>
+  <button
+    id="ma7alak-owner-add-story"
+    type="button"
+    aria-label="Add story"
+  >
+    +
+  </button>
+
+</div>
 
 
-        <div
-          id="ma7alak-page-story-subtitle"
-        >
-          شارك آخر شي جديد من محلك
-        </div>
+<!-- =========================================================
+     SUPABASE
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
-        <div
-          id="ma7alak-page-story-shop"
-        ></div>
+<script>
+
+(function(){
+
+  "use strict";
 
 
-        <div
-          id="ma7alak-page-story-options"
-        >
+  /* =========================================================
+     SUPABASE
+  ========================================================= */
 
-          <button
-            id="ma7alak-page-story-image"
-            class="ma7alak-page-story-option"
-            type="button"
-          >
-
-            <span
-              class="ma7alak-page-story-option-icon"
-            >
-              📸
-            </span>
-
-            <span
-              class="ma7alak-page-story-option-title"
-            >
-              صورة
-            </span>
-
-          </button>
+  const SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
 
 
-          <button
-            id="ma7alak-page-story-video"
-            class="ma7alak-page-story-option"
-            type="button"
-          >
-
-            <span
-              class="ma7alak-page-story-option-icon"
-            >
-              🎥
-            </span>
-
-            <span
-              class="ma7alak-page-story-option-title"
-            >
-              فيديو
-            </span>
-
-          </button>
-
-        </div>
+  const SUPABASE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
 
 
-        <input
-          id="ma7alak-page-story-image-input"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          style="display:none!important;"
-        />
-
-
-        <input
-          id="ma7alak-page-story-video-input"
-          type="file"
-          accept="video/mp4,video/webm,video/quicktime"
-          style="display:none!important;"
-        />
-
-
-        <div
-          id="ma7alak-page-story-status"
-        ></div>
-
-
-        <div
-          id="ma7alak-page-story-progress"
-        >
-
-          <div
-            id="ma7alak-page-story-progress-bar"
-          ></div>
-
-        </div>
-
-
-        <div
-          id="ma7alak-page-story-note"
-        >
-          الستوري بتختفي تلقائياً بعد 24 ساعة
-        </div>
-
-      </div>
-
-    `;
-
-
-    document.body.appendChild(
-      overlay
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
     );
 
 
-    document
-      .getElementById(
-        "ma7alak-page-story-close"
-      )
-      .addEventListener(
-        "click",
-        closeUploader
-      );
+  /* =========================================================
+     SHOP
+  ========================================================= */
+
+  const SHOP_SLUG =
+    "masaya-cafe";
 
 
-    document
-      .getElementById(
-        "ma7alak-page-story-image"
-      )
-      .addEventListener(
-        "click",
-        function(){
+  /* =========================================================
+     SEEN KEY
+  ========================================================= */
 
-          if(
-            !isUploading
-          ){
-
-            document
-              .getElementById(
-                "ma7alak-page-story-image-input"
-              )
-              .click();
-
-          }
-
-        }
-      );
+  const STORY_SEEN_KEY =
+    "ma7alak_story_seen_" +
+    SHOP_SLUG;
 
 
-    document
-      .getElementById(
-        "ma7alak-page-story-video"
-      )
-      .addEventListener(
-        "click",
-        function(){
+  /* =========================================================
+     ELEMENTS
+  ========================================================= */
 
-          if(
-            !isUploading
-          ){
-
-            document
-              .getElementById(
-                "ma7alak-page-story-video-input"
-              )
-              .click();
-
-          }
-
-        }
-      );
-
-
-    document
-      .getElementById(
-        "ma7alak-page-story-image-input"
-      )
-      .addEventListener(
-        "change",
-        function(){
-
-          if(
-            this.files &&
-            this.files[0]
-          ){
-
-            uploadStory(
-              this.files[0],
-              "image"
-            );
-
-          }
-
-        }
-      );
-
-
-    document
-      .getElementById(
-        "ma7alak-page-story-video-input"
-      )
-      .addEventListener(
-        "change",
-        function(){
-
-          if(
-            this.files &&
-            this.files[0]
-          ){
-
-            uploadStory(
-              this.files[0],
-              "video"
-            );
-
-          }
-
-        }
-      );
-
-
-    overlay.addEventListener(
-      "click",
-      function(event){
-
-        if(
-          event.target === overlay &&
-          !isUploading
-        ){
-
-          closeUploader();
-
-        }
-
-      }
+  const storyWrapper =
+    document.getElementById(
+      "ma7alak-story-wrapper"
     );
 
 
-    return overlay;
+  const storyButton =
+    document.getElementById(
+      "ma7alak-story-button"
+    );
+
+
+  const storyPreview =
+    document.getElementById(
+      "ma7alak-story-preview"
+    );
+
+
+  const ownerAddButton =
+    document.getElementById(
+      "ma7alak-owner-add-story"
+    );
+
+
+  const newRing =
+    document.getElementById(
+      "ma7alak-story-new-ring"
+    );
+
+
+  /* =========================================================
+     DATA
+  ========================================================= */
+
+  let stories = [];
+
+  let currentStory = 0;
+
+  let timer = null;
+
+  let currentMedia = null;
+
+  let transitionToken = 0;
+
+  let isShopOwner = false;
+
+  let newRingAnimation = null;
+
+  let isDeletingStory = false;
+
+
+  /* =========================================================
+     STORY LIKES
+  ========================================================= */
+
+  const VISITOR_ID_KEY =
+    "ma7alak_visitor_id";
+
+  let visitorId = null;
+
+  const likedStoryIds = new Set();
+
+  try{
+
+    visitorId =
+      localStorage.getItem(
+        VISITOR_ID_KEY
+      );
+
+  }
+  catch(error){}
+
+  if(!visitorId){
+
+    try{
+
+      visitorId =
+        crypto.randomUUID();
+
+    }
+    catch(error){
+
+      visitorId =
+        "visitor_" +
+        Date.now() +
+        "_" +
+        Math.random()
+          .toString(36)
+          .slice(2);
+
+    }
+
+    try{
+
+      localStorage.setItem(
+        VISITOR_ID_KEY,
+        visitorId
+      );
+
+    }
+    catch(error){}
+
+  }
+
+  try{
+
+    const savedLikes =
+      JSON.parse(
+        localStorage.getItem(
+          "ma7alak_story_liked_ids"
+        ) || "[]"
+      );
+
+    if(Array.isArray(savedLikes)){
+
+      savedLikes.forEach(
+        function(id){
+
+          if(id != null){
+            likedStoryIds.add(
+              String(id)
+            );
+          }
+
+        }
+      );
+
+    }
+
+  }
+  catch(error){}
+
+  function saveLikedStories(){
+
+    try{
+
+      localStorage.setItem(
+        "ma7alak_story_liked_ids",
+        JSON.stringify(
+          Array.from(
+            likedStoryIds
+          )
+        )
+      );
+
+    }
+    catch(error){}
 
   }
 
 
   /* =========================================================
-     RESET
+     STORY URL
   ========================================================= */
 
-  function resetUploader(){
+  function storyURL(path){
 
-    const status =
-      document.getElementById(
-        "ma7alak-page-story-status"
-      );
-
-
-    const progress =
-      document.getElementById(
-        "ma7alak-page-story-progress"
-      );
-
-
-    const bar =
-      document.getElementById(
-        "ma7alak-page-story-progress-bar"
-      );
-
-
-    if(status){
-
-      status.textContent =
-        "";
-
-      status.classList.remove(
-        "visible"
-      );
-
-    }
-
-
-    if(progress){
-
-      progress.classList.remove(
-        "visible"
-      );
-
-    }
-
-
-    if(bar){
-
-      bar.style.width =
-        "0%";
-
-    }
+    return (
+      SUPABASE_URL +
+      "/storage/v1/object/public/shop-stories/" +
+      path
+    );
 
   }
 
 
   /* =========================================================
-     STATUS
+     MEDIA TYPE
   ========================================================= */
 
-  function showStatus(
-    message
-  ){
+  function mediaType(story){
 
-    const status =
+    if(
+      story.media_type ===
+      "video"
+    ){
+
+      return "video";
+
+    }
+
+
+    if(
+      story.media_type ===
+      "image"
+    ){
+
+      return "image";
+
+    }
+
+
+    const path =
+      String(
+        story.storage_path ||
+        ""
+      ).toLowerCase();
+
+
+    if(
+      path.endsWith(".mp4") ||
+      path.endsWith(".webm") ||
+      path.endsWith(".mov") ||
+      path.endsWith(".m4v")
+    ){
+
+      return "video";
+
+    }
+
+
+    return "image";
+
+  }
+
+
+  /* =========================================================
+     TIME AGO
+  ========================================================= */
+
+  function storyTimeAgo(createdAt){
+
+    const created =
+      new Date(createdAt).getTime();
+
+    if(!Number.isFinite(created)){
+      return "Just now";
+    }
+
+    const now = Date.now();
+
+    let seconds =
+      Math.floor(
+        (now - created) /
+        1000
+      );
+
+    if(seconds < 0){
+      seconds = 0;
+    }
+
+    if(seconds < 10){
+      return "Just now";
+    }
+
+    if(seconds < 60){
+      return seconds + (seconds === 1 ? " second ago" : " seconds ago");
+    }
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+    if(minutes < 60){
+      return minutes + (minutes === 1 ? " minute ago" : " minutes ago");
+    }
+
+    const hours =
+      Math.floor(minutes / 60);
+
+    if(hours < 24){
+      return hours + (hours === 1 ? " hour ago" : " hours ago");
+    }
+
+    const days =
+      Math.floor(hours / 24);
+
+    if(days === 1){
+      return "Yesterday";
+    }
+
+    if(days < 7){
+      return days + " days ago";
+    }
+
+    const weeks =
+      Math.floor(days / 7);
+
+    if(weeks === 1){
+      return "1 week ago";
+    }
+
+    return weeks + " weeks ago";
+
+  }
+
+
+  /* =========================================================
+     UPDATE STORY TIME
+  ========================================================= */
+
+  function updateStoryTime(){
+
+    const timeElement =
       document.getElementById(
-        "ma7alak-page-story-status"
+        "ma7alak-story-time"
+      );
+
+    const nameElement =
+      document.getElementById(
+        "ma7alak-story-shop-name"
       );
 
 
-    if(!status){
+    if(
+      !stories.length
+    ){
 
       return;
 
     }
 
 
-    status.textContent =
-      message;
+    const story =
+      stories[
+        currentStory
+      ];
 
 
-    status.classList.add(
-      "visible"
-    );
+    if(!story){
+
+      return;
+
+    }
+
+
+    if(timeElement){
+
+      timeElement.textContent =
+        storyTimeAgo(
+          story.created_at
+        );
+
+    }
+
+
+    if(nameElement){
+
+      const shopName =
+        String(story.shop_slug || SHOP_SLUG)
+          .split("-")
+          .filter(Boolean)
+          .map(function(part){
+            return part.charAt(0).toUpperCase() + part.slice(1);
+          })
+          .join(" ");
+
+      nameElement.textContent =
+        shopName || "Ma7alak";
+
+      /*
+        Every Story already has its own unique Supabase
+        story.id. Keep that ID attached to the displayed
+        shop name so the name always belongs to the exact
+        Story currently open.
+      */
+      nameElement.setAttribute(
+        "data-story-id",
+        String(story.id)
+      );
+
+    }
 
   }
 
 
   /* =========================================================
-     OPEN UPLOADER
+     START NEW STORY ANIMATION
   ========================================================= */
 
-  async function openUploader(
-    shopSlug,
-    sourceWindow
-  ){
+  function startNewStoryAnimation(){
+
+    if(!storyWrapper){
+
+      return;
+
+    }
+
+
+    storyWrapper.classList.remove(
+      "story-has-new"
+    );
+
+
+    void storyWrapper.offsetWidth;
+
+
+    storyWrapper.classList.add(
+      "story-has-new"
+    );
+
 
     if(
-      !shopSlug ||
-      isUploading
+      newRing &&
+      typeof newRing.animate ===
+      "function"
+    ){
+
+      try{
+
+        if(
+          newRingAnimation
+        ){
+
+          newRingAnimation.cancel();
+
+        }
+
+
+        newRingAnimation =
+          newRing.animate(
+
+            [
+
+              {
+
+                transform:
+                  "translate(-50%,-50%) scale(.88)",
+
+                opacity:1
+
+              },
+
+              {
+
+                transform:
+                  "translate(-50%,-50%) scale(1.08)",
+
+                opacity:.58
+
+              },
+
+              {
+
+                transform:
+                  "translate(-50%,-50%) scale(1.30)",
+
+                opacity:0
+
+              }
+
+            ],
+
+            {
+
+              duration:1650,
+
+              easing:
+                "cubic-bezier(.2,.65,.3,1)",
+
+              iterations:
+                Infinity
+
+            }
+
+          );
+
+      }
+
+      catch(error){
+
+        console.log(
+          "MA7ALAK animation fallback"
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STOP NEW STORY ANIMATION
+  ========================================================= */
+
+  function stopNewStoryAnimation(){
+
+    if(
+      storyWrapper
+    ){
+
+      storyWrapper.classList.remove(
+        "story-has-new"
+      );
+
+    }
+
+
+    if(
+      newRingAnimation
+    ){
+
+      try{
+
+        newRingAnimation.cancel();
+
+      }
+
+      catch(error){}
+
+
+      newRingAnimation =
+        null;
+
+    }
+
+
+    if(newRing){
+
+      newRing.style.opacity =
+        "0";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     CHECK NEW STORY
+  ========================================================= */
+
+  function updateNewStoryAnimation(){
+
+    if(!storyWrapper){
+
+      return;
+
+    }
+
+
+    if(
+      !stories.length
+    ){
+
+      stopNewStoryAnimation();
+
+      return;
+
+    }
+
+
+    const newestStory =
+      stories[0];
+
+
+    let lastSeen =
+      null;
+
+
+    try{
+
+      lastSeen =
+        localStorage.getItem(
+          STORY_SEEN_KEY
+        );
+
+    }
+
+    catch(error){
+
+      lastSeen =
+        null;
+
+    }
+
+
+    if(!lastSeen){
+
+      startNewStoryAnimation();
+
+      return;
+
+    }
+
+
+    const newestTime =
+      new Date(
+        newestStory.created_at
+      ).getTime();
+
+
+    const lastSeenTime =
+      new Date(
+        lastSeen
+      ).getTime();
+
+
+    if(
+      newestTime >
+      lastSeenTime
+    ){
+
+      startNewStoryAnimation();
+
+    }
+
+    else{
+
+      stopNewStoryAnimation();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     MARK STORIES AS SEEN
+  ========================================================= */
+
+  function markStoriesAsSeen(){
+
+    if(
+      !stories.length
+    ){
+
+      return;
+
+    }
+
+
+    const newestStory =
+      stories[0];
+
+
+    if(
+      !newestStory.created_at
     ){
 
       return;
@@ -1370,24 +2161,46 @@
 
     try{
 
-      const client =
-        await loadSupabase();
+      localStorage.setItem(
+        STORY_SEEN_KEY,
+        newestStory.created_at
+      );
+
+    }
+
+    catch(error){}
 
 
-      const sessionResult =
-        await client.auth.getSession();
+    stopNewStoryAnimation();
+
+  }
+
+
+  /* =========================================================
+     CHECK OWNER
+  ========================================================= */
+
+  async function checkShopOwner(){
+
+    try{
+
+      const result =
+        await supabaseClient.auth.getSession();
 
 
       const session =
-        sessionResult &&
-        sessionResult.data &&
-        sessionResult.data.session;
+        result &&
+        result.data &&
+        result.data.session;
 
 
       if(!session){
 
-        alert(
-          "لازم تكون مسجّل الدخول."
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
         );
 
         return;
@@ -1401,21 +2214,32 @@
 
       if(!user){
 
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
+        );
+
         return;
 
       }
 
 
-      /* -----------------------------------------
-         VERIFY OWNER
-      ----------------------------------------- */
-
       const ownerResult =
-        await client
+        await supabaseClient
           .from("shop_owners")
-          .select("shop_slug")
-          .eq("user_id", user.id)
-          .eq("shop_slug", shopSlug)
+          .select(
+            "shop_slug"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
           .maybeSingle();
 
 
@@ -1424,8 +2248,11 @@
         !ownerResult.data
       ){
 
-        alert(
-          "ما عندك صلاحية لهذا المحل."
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
         );
 
         return;
@@ -1433,37 +2260,12 @@
       }
 
 
-      activeShopSlug =
-        shopSlug;
+      isShopOwner =
+        true;
 
 
-      uploadSourceWindow =
-        sourceWindow || null;
-
-
-      const overlay =
-        createUploader();
-
-
-      const shopLabel =
-        document.getElementById(
-          "ma7alak-page-story-shop"
-        );
-
-
-      if(shopLabel){
-
-        shopLabel.textContent =
-          shopSlug;
-
-      }
-
-
-      resetUploader();
-
-
-      overlay.classList.add(
-        "active"
+      ownerAddButton.classList.add(
+        "visible"
       );
 
     }
@@ -1471,12 +2273,15 @@
     catch(error){
 
       console.error(
-        "MA7ALAK uploader open error:",
+        "MA7ALAK owner check:",
         error
       );
 
-      alert(
-        "صار خطأ. جرّب مرة ثانية."
+      isShopOwner =
+        false;
+
+      ownerAddButton.classList.remove(
+        "visible"
       );
 
     }
@@ -1485,108 +2290,16 @@
 
 
   /* =========================================================
-     CLOSE
+     OPEN OWNER UPLOADER
+
+     IMPORTANT:
+     The actual uploader is handled by
+     PAGE-LEVEL CUSTOM CODE.
   ========================================================= */
 
-  function closeUploader(){
+  function openOwnerUpload(){
 
-    if(
-      isUploading
-    ){
-
-      return;
-
-    }
-
-
-    const overlay =
-      document.getElementById(
-        "ma7alak-page-story-uploader"
-      );
-
-
-    if(!overlay){
-
-      return;
-
-    }
-
-
-    overlay.classList.remove(
-      "active"
-    );
-
-
-    activeShopSlug =
-      null;
-
-
-    uploadSourceWindow =
-      null;
-
-
-    const imageInput =
-      document.getElementById(
-        "ma7alak-page-story-image-input"
-      );
-
-
-    const videoInput =
-      document.getElementById(
-        "ma7alak-page-story-video-input"
-      );
-
-
-    if(imageInput){
-
-      imageInput.value =
-        "";
-
-    }
-
-
-    if(videoInput){
-
-      videoInput.value =
-        "";
-
-    }
-
-  }
-
-
-  /* =========================================================
-     UPLOAD STORY
-  ========================================================= */
-
-  async function uploadStory(
-    file,
-    type
-  ){
-
-    if(
-      isUploading ||
-      !activeShopSlug ||
-      !file
-    ){
-
-      return;
-
-    }
-
-
-    const maxSize =
-      50 * 1024 * 1024;
-
-
-    if(
-      file.size >
-      maxSize
-    ){
-
-      alert(
-        "حجم الملف كبير. الحد الأقصى 50MB."
-      );
+    if(!isShopOwner){
 
       return;
 
@@ -1595,393 +2308,20 @@
 
     try{
 
-      isUploading =
-        true;
+      window.parent.postMessage(
 
+        {
 
-      const progress =
-        document.getElementById(
-          "ma7alak-page-story-progress"
-        );
+          type:
+            "MA7ALAK_OPEN_STORY_UPLOADER",
 
-
-      const bar =
-        document.getElementById(
-          "ma7alak-page-story-progress-bar"
-        );
-
-
-      if(progress){
-
-        progress.classList.add(
-          "visible"
-        );
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "10%";
-
-      }
-
-
-      showStatus(
-        "جاري رفع الستوري..."
-      );
-
-
-      const client =
-        await loadSupabase();
-
-
-      /* -----------------------------------------
-         SESSION
-      ----------------------------------------- */
-
-      const sessionResult =
-        await client.auth.getSession();
-
-
-      const session =
-        sessionResult &&
-        sessionResult.data &&
-        sessionResult.data.session;
-
-
-      if(!session){
-
-        throw new Error(
-          "NO_SESSION"
-        );
-
-      }
-
-
-      const user =
-        session.user;
-
-
-      /* -----------------------------------------
-         OWNER CHECK
-      ----------------------------------------- */
-
-      const ownerResult =
-        await client
-          .from("shop_owners")
-          .select("shop_slug")
-          .eq("user_id", user.id)
-          .eq("shop_slug", activeShopSlug)
-          .maybeSingle();
-
-
-      if(
-        ownerResult.error ||
-        !ownerResult.data
-      ){
-
-        throw new Error(
-          "NOT_OWNER"
-        );
-
-      }
-
-
-      /* -----------------------------------------
-         EXTENSION
-      ----------------------------------------- */
-
-      let extension =
-        "jpg";
-
-
-      if(
-        type === "video"
-      ){
-
-        if(
-          file.type === "video/webm"
-        ){
-
-          extension =
-            "webm";
-
-        }
-
-        else if(
-          file.type === "video/quicktime"
-        ){
-
-          extension =
-            "mov";
-
-        }
-
-        else{
-
-          extension =
-            "mp4";
-
-        }
-
-      }
-
-      else{
-
-        if(
-          file.type === "image/png"
-        ){
-
-          extension =
-            "png";
-
-        }
-
-        else if(
-          file.type === "image/webp"
-        ){
-
-          extension =
-            "webp";
-
-        }
-
-        else if(
-          file.type === "image/gif"
-        ){
-
-          extension =
-            "gif";
-
-        }
-
-      }
-
-
-      /* -----------------------------------------
-         UNIQUE ID
-      ----------------------------------------- */
-
-      const uniqueId =
-        crypto.randomUUID
-          ? crypto.randomUUID()
-          :
-          (
-            Date.now() +
-            "_" +
-            Math.random()
-              .toString(36)
-              .slice(2)
-          );
-
-
-      const storagePath =
-        activeShopSlug +
-        "/" +
-        uniqueId +
-        "." +
-        extension;
-
-
-      if(bar){
-
-        bar.style.width =
-          "25%";
-
-      }
-
-
-      /* -----------------------------------------
-         STORAGE
-      ----------------------------------------- */
-
-      const uploadResult =
-        await client
-          .storage
-          .from("shop-stories")
-          .upload(
-            storagePath,
-            file,
-            {
-
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-      if(
-        uploadResult.error
-      ){
-
-        throw uploadResult.error;
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "70%";
-
-      }
-
-
-      /* -----------------------------------------
-         24 HOURS
-      ----------------------------------------- */
-
-      const expiresAt =
-        new Date(
-          Date.now() +
-          24 * 60 * 60 * 1000
-        ).toISOString();
-
-
-      /* -----------------------------------------
-         DATABASE
-      ----------------------------------------- */
-
-      const insertResult =
-        await client
-          .from("shop_stories")
-          .insert({
-
-            user_id:
-              user.id,
-
-            shop_slug:
-              activeShopSlug,
-
-            media_type:
-              type,
-
-            storage_path:
-              storagePath,
-
-            expires_at:
-              expiresAt
-
-          })
-          .select()
-          .single();
-
-
-      if(
-        insertResult.error
-      ){
-
-        await client
-          .storage
-          .from("shop-stories")
-          .remove([
-            storagePath
-          ]);
-
-        throw insertResult.error;
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "100%";
-
-      }
-
-
-      showStatus(
-        "✓ تم نشر الستوري!"
-      );
-
-
-      /* -----------------------------------------
-         TELL STORY EMBED
-      ----------------------------------------- */
-
-      if(
-        uploadSourceWindow
-      ){
-
-        try{
-
-          uploadSourceWindow.postMessage(
-
-            {
-
-              type:
-                "MA7ALAK_STORY_UPLOADED",
-
-              shopSlug:
-                activeShopSlug
-
-            },
-
-            "*"
-
-          );
-
-        }
-
-        catch(error){
-
-          console.log(
-            "MA7ALAK upload message error:",
-            error
-          );
-
-        }
-
-      }
-
-
-      /* -----------------------------------------
-         ALSO TELL PAGE
-      ----------------------------------------- */
-
-      try{
-
-        window.postMessage(
-
-          {
-
-            type:
-              "MA7ALAK_STORY_UPLOADED",
-
-            shopSlug:
-              activeShopSlug
-
-          },
-
-          "*"
-
-        );
-
-      }
-
-      catch(error){}
-
-
-      setTimeout(
-        function(){
-
-          isUploading =
-            false;
-
-          closeUploader();
+          shopSlug:
+            SHOP_SLUG
 
         },
-        850
+
+        "*"
+
       );
 
     }
@@ -1989,59 +2329,1846 @@
     catch(error){
 
       console.error(
-        "MA7ALAK page uploader error:",
+        "MA7ALAK uploader bridge:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     UPLOAD FINISHED MESSAGE
+  ========================================================= */
+
+  window.addEventListener(
+    "message",
+    function(event){
+
+      if(
+        !event.data ||
+        event.data.type !==
+        "MA7ALAK_STORY_UPLOADED"
+      ){
+
+        return;
+
+      }
+
+
+      if(
+        event.data.shopSlug !==
+        SHOP_SLUG
+      ){
+
+        return;
+
+      }
+
+
+      loadStories();
+
+    }
+  );
+
+
+  /* =========================================================
+     LOAD STORIES
+  ========================================================= */
+
+  async function loadStories(){
+
+    try{
+
+      const now =
+        new Date().toISOString();
+
+
+      const result =
+        await supabaseClient
+          .from("shop_stories")
+          .select(
+            "id,shop_slug,media_type,storage_path,expires_at,created_at"
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
+          .gt(
+            "expires_at",
+            now
+          )
+          .order(
+            "created_at",
+            {
+              ascending:false
+            }
+          );
+
+
+      if(
+        result.error
+      ){
+
+        console.error(
+          "MA7ALAK Stories:",
+          result.error
+        );
+
+        return;
+
+      }
+
+
+      stories =
+        result.data || [];
+
+
+      updateNewStoryAnimation();
+
+
+      if(
+        stories.length === 0
+      ){
+
+        storyPreview.innerHTML =
+          `
+            <div
+              class="ma7alak-story-placeholder"
+            ></div>
+          `;
+
+        return;
+
+      }
+
+
+      const story =
+        stories[0];
+
+
+      const url =
+        storyURL(
+          story.storage_path
+        );
+
+
+      const type =
+        mediaType(
+          story
+        );
+
+
+      storyPreview.innerHTML =
+        "";
+
+
+      if(
+        type === "video"
+      ){
+
+        const video =
+          document.createElement(
+            "video"
+          );
+
+
+        video.src =
+          url;
+
+
+        video.autoplay =
+          true;
+
+
+        video.loop =
+          true;
+
+
+        video.muted =
+          true;
+
+
+        video.playsInline =
+          true;
+
+
+        video.setAttribute(
+          "playsinline",
+          ""
+        );
+
+
+        video.setAttribute(
+          "webkit-playsinline",
+          ""
+        );
+
+
+        video.preload =
+          "metadata";
+
+
+        storyPreview.appendChild(
+          video
+        );
+
+
+        video.play().catch(
+          function(){}
+        );
+
+      }
+
+
+      else{
+
+        const image =
+          document.createElement(
+            "img"
+          );
+
+
+        image.src =
+          url;
+
+
+        image.alt =
+          "Story";
+
+
+        storyPreview.appendChild(
+          image
+        );
+
+      }
+
+    }
+
+    catch(error){
+
+      console.error(
+        "MA7ALAK Stories:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     CREATE STORY VIEWER
+  ========================================================= */
+
+  function createStoryScreen(){
+
+    const existing =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    if(existing){
+
+      return existing;
+
+    }
+
+
+    const screen =
+      document.createElement(
+        "div"
+      );
+
+
+    screen.id =
+      "ma7alak-full-story";
+
+
+    screen.innerHTML = `
+
+      <div
+        id="ma7alak-full-story-media"
+      ></div>
+
+
+      <div
+        id="ma7alak-story-progress-wrap"
+      ></div>
+
+
+      <div
+        id="ma7alak-story-shop-name"
+      ></div>
+
+
+      <div
+        id="ma7alak-story-time"
+      ></div>
+
+
+      <button
+        id="ma7alak-story-delete-btn"
+        type="button"
+        aria-label="Delete story"
+      >
+        🗑️
+      </button>
+
+
+      <button
+        id="ma7alak-story-like-btn"
+        type="button"
+        aria-label="Like story"
+      >
+        <span class="ma7alak-like-heart">♡</span>
+      </button>
+
+
+      <button
+        id="ma7alak-story-tap-left"
+        type="button"
+        aria-label="Previous story"
+      ></button>
+
+
+      <button
+        id="ma7alak-story-tap-right"
+        type="button"
+        aria-label="Next story"
+      ></button>
+
+
+      <button
+        id="ma7alak-story-close-btn"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+    `;
+
+
+    document.body.appendChild(
+      screen
+    );
+
+    /*
+      Final safety net for mobile/fullscreen:
+      if a parent or another transparent control
+      receives the event first, detect the Like
+      button and handle it here.
+    */
+    screen.addEventListener(
+      "click",
+      function(event){
+
+        const target =
+          event.target &&
+          event.target.closest &&
+          event.target.closest(
+            "#ma7alak-story-like-btn"
+          );
+
+        if(!target){
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        likeCurrentStory();
+
+      },
+      true
+    );
+
+
+    document
+      .getElementById(
+        "ma7alak-story-close-btn"
+      )
+      .onclick =
+      closeStories;
+
+
+    document
+      .getElementById(
+        "ma7alak-story-tap-right"
+      )
+      .onclick =
+      nextStory;
+
+
+    document
+      .getElementById(
+        "ma7alak-story-tap-left"
+      )
+      .onclick =
+      previousStory;
+
+
+    document
+      .getElementById(
+        "ma7alak-story-delete-btn"
+      )
+      .onclick =
+      deleteCurrentStory;
+
+
+    const likeButton =
+      document.getElementById(
+        "ma7alak-story-like-btn"
+      );
+
+    if(likeButton){
+
+      /*
+        IMPORTANT:
+        Use the button itself as the click target.
+        The story navigation tap areas must NEVER
+        be able to steal a Like press.
+      */
+      likeButton.onclick = function(event){
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        likeCurrentStory();
+
+        return false;
+
+      };
+
+      likeButton.addEventListener(
+        "pointerdown",
+        function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        },
+        true
+      );
+
+      likeButton.addEventListener(
+        "touchstart",
+        function(event){
+          event.stopPropagation();
+        },
+        {passive:true,capture:true}
+      );
+
+    }
+
+
+    return screen;
+
+  }
+
+
+  /* =========================================================
+     UPDATE OWNER DELETE BUTTON
+  ========================================================= */
+
+  function updateDeleteButton(){
+
+    const deleteButton =
+      document.getElementById(
+        "ma7alak-story-delete-btn"
+      );
+
+
+    if(
+      !deleteButton
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      isShopOwner &&
+      stories.length
+    ){
+
+      deleteButton.classList.add(
+        "visible"
+      );
+
+    }
+
+    else{
+
+      deleteButton.classList.remove(
+        "visible"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     DELETE CURRENT STORY
+  ========================================================= */
+
+  async function deleteCurrentStory(){
+
+    if(
+      !isShopOwner ||
+      isDeletingStory ||
+      !stories.length
+    ){
+
+      return;
+
+    }
+
+
+    const story =
+      stories[
+        currentStory
+      ];
+
+
+    if(!story){
+
+      return;
+
+    }
+
+
+    const confirmed =
+      window.confirm(
+        "حذف هالستوري؟\n\nما رح تقدر ترجعها بعد الحذف."
+      );
+
+
+    if(!confirmed){
+
+      return;
+
+    }
+
+
+    try{
+
+      isDeletingStory =
+        true;
+
+
+      const deleteButton =
+        document.getElementById(
+          "ma7alak-story-delete-btn"
+        );
+
+
+      if(deleteButton){
+
+        deleteButton.disabled =
+          true;
+
+        deleteButton.textContent =
+          "⏳";
+
+      }
+
+
+      clearInterval(
+        timer
+      );
+
+
+      /*
+        Stop current video immediately.
+      */
+
+      if(
+        currentMedia &&
+        currentMedia.tagName ===
+        "VIDEO"
+      ){
+
+        try{
+
+          currentMedia.pause();
+
+          currentMedia.muted =
+            true;
+
+        }
+
+        catch(error){}
+
+      }
+
+
+      /*
+        Delete physical file first.
+      */
+
+      const storageResult =
+        await supabaseClient
+          .storage
+          .from("shop-stories")
+          .remove([
+            story.storage_path
+          ]);
+
+
+      if(
+        storageResult.error
+      ){
+
+        throw storageResult.error;
+
+      }
+
+
+      /*
+        Delete database row.
+      */
+
+      const databaseResult =
+        await supabaseClient
+          .from("shop_stories")
+          .delete()
+          .eq(
+            "id",
+            story.id
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          );
+
+
+      if(
+        databaseResult.error
+      ){
+
+        throw databaseResult.error;
+
+      }
+
+
+      /*
+        Remove locally.
+      */
+
+      stories.splice(
+        currentStory,
+        1
+      );
+
+
+      /*
+        No stories left.
+      */
+
+      if(
+        stories.length === 0
+      ){
+
+        closeStories();
+
+        await loadStories();
+
+        return;
+
+      }
+
+
+      /*
+        If we deleted the last story,
+        move to the new last story.
+      */
+
+      if(
+        currentStory >=
+        stories.length
+      ){
+
+        currentStory =
+          stories.length - 1;
+
+      }
+
+
+      createProgressBars();
+
+
+      showStory(
+        currentStory
+      );
+
+
+      await loadStories();
+
+    }
+
+    catch(error){
+
+      console.error(
+        "MA7ALAK delete story error:",
         error
       );
 
 
-      isUploading =
+      alert(
+        "صار خطأ أثناء حذف الستوري. جرّب مرة ثانية."
+      );
+
+    }
+
+    finally{
+
+      isDeletingStory =
         false;
 
 
-      if(
-        error &&
-        error.message ===
-        "NO_SESSION"
+      const deleteButton =
+        document.getElementById(
+          "ma7alak-story-delete-btn"
+        );
+
+
+      if(deleteButton){
+
+        deleteButton.disabled =
+          false;
+
+        deleteButton.textContent =
+          "🗑️";
+
+      }
+
+
+      updateDeleteButton();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     PROGRESS BARS
+  ========================================================= */
+
+  function createProgressBars(){
+
+    const wrap =
+      document.getElementById(
+        "ma7alak-story-progress-wrap"
+      );
+
+
+    if(!wrap){
+
+      return;
+
+    }
+
+
+    wrap.innerHTML =
+      "";
+
+
+    stories.forEach(
+      function(){
+
+        const segment =
+          document.createElement(
+            "div"
+          );
+
+
+        segment.className =
+          "ma7alak-story-progress-segment";
+
+
+        const fill =
+          document.createElement(
+            "div"
+          );
+
+
+        fill.className =
+          "ma7alak-story-progress-fill";
+
+
+        segment.appendChild(
+          fill
+        );
+
+
+        wrap.appendChild(
+          segment
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     UPDATE PROGRESS
+  ========================================================= */
+
+  function updateProgressBars(
+    activeIndex,
+    percent
+  ){
+
+    const fills =
+      document.querySelectorAll(
+        ".ma7alak-story-progress-fill"
+      );
+
+
+    fills.forEach(
+      function(
+        fill,
+        index
       ){
 
-        showStatus(
-          "لازم تكون مسجّل الدخول."
-        );
+        if(
+          index <
+          activeIndex
+        ){
+
+          fill.style.width =
+            "100%";
+
+        }
+
+        else if(
+          index ===
+          activeIndex
+        ){
+
+          fill.style.width =
+            Math.max(
+              0,
+              Math.min(
+                100,
+                percent
+              )
+            ) +
+            "%";
+
+        }
+
+        else{
+
+          fill.style.width =
+            "0%";
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     OPEN STORIES
+  ========================================================= */
+
+  function openStories(){
+
+    if(
+      stories.length === 0
+    ){
+
+      alert(
+        "ما في ستوري حالياً 📸"
+      );
+
+      return;
+
+    }
+
+
+    markStoriesAsSeen();
+
+
+    const screen =
+      createStoryScreen();
+
+
+    currentStory =
+      0;
+
+
+    screen.style.position =
+      "fixed";
+
+
+    screen.style.left =
+      "0";
+
+
+    screen.style.top =
+      "0";
+
+
+    screen.style.width =
+      "100vw";
+
+
+    screen.style.height =
+      "100vh";
+
+
+    screen.classList.add(
+      "active"
+    );
+
+
+    document.documentElement.style.overflow =
+      "hidden";
+
+
+    document.body.style.overflow =
+      "hidden";
+
+
+    createProgressBars();
+
+
+    updateDeleteButton();
+
+
+    enterNativeFullscreen(
+      screen
+    );
+
+
+    showStory(
+      currentStory
+    );
+
+  }
+
+
+  /* =========================================================
+     NATIVE FULLSCREEN
+  ========================================================= */
+
+  function enterNativeFullscreen(
+    screen
+  ){
+
+    try{
+
+      if(
+        screen.requestFullscreen
+      ){
+
+        const request =
+          screen.requestFullscreen();
+
+
+        if(
+          request &&
+          typeof request.catch ===
+          "function"
+        ){
+
+          request.catch(
+            function(){}
+          );
+
+        }
 
       }
 
       else if(
-        error &&
-        error.message ===
-        "NOT_OWNER"
+        screen.webkitRequestFullscreen
       ){
 
-        showStatus(
-          "ما عندك صلاحية لهذا المحل."
-        );
+        screen.webkitRequestFullscreen();
 
       }
 
-      else{
+    }
 
-        showStatus(
-          "صار خطأ أثناء الرفع. جرّب مرة ثانية."
+    catch(error){}
+
+  }
+
+
+  /* =========================================================
+     CREATE MEDIA
+  ========================================================= */
+
+  function createMediaElement(
+    story
+  ){
+
+    const type =
+      mediaType(
+        story
+      );
+
+
+    const url =
+      storyURL(
+        story.storage_path
+      );
+
+
+    let media;
+
+
+    if(
+      type === "video"
+    ){
+
+      media =
+        document.createElement(
+          "video"
         );
+
+
+      media.autoplay =
+        false;
+
+
+      media.muted =
+        true;
+
+
+      media.playsInline =
+        true;
+
+
+      media.controls =
+        false;
+
+
+      media.preload =
+        "auto";
+
+
+      media.setAttribute(
+        "playsinline",
+        ""
+      );
+
+
+      media.setAttribute(
+        "webkit-playsinline",
+        ""
+      );
+
+
+      media.setAttribute(
+        "disablepictureinpicture",
+        ""
+      );
+
+
+      media.setAttribute(
+        "controlslist",
+        "nodownload noplaybackrate"
+      );
+
+    }
+
+    else{
+
+      media =
+        document.createElement(
+          "img"
+        );
+
+
+      media.alt =
+        "Story";
+
+    }
+
+
+    media.className =
+      "ma7alak-story-media-layer";
+
+
+    media.src =
+      url;
+
+
+    media.style.opacity =
+      "0";
+
+
+    media.style.visibility =
+      "hidden";
+
+
+    return {
+
+      media:
+        media,
+
+      type:
+        type,
+
+      url:
+        url
+
+    };
+
+  }
+
+
+  /* =========================================================
+     STORY LIKE BUTTON STATE
+  ========================================================= */
+
+  function updateLikeButton(){
+
+    const button =
+      document.getElementById(
+        "ma7alak-story-like-btn"
+      );
+
+    if(!button){
+      return;
+    }
+
+    const story =
+      stories[currentStory];
+
+    if(!story){
+      button.style.display = "none";
+      return;
+    }
+
+    button.style.display = "flex";
+
+    const liked =
+      likedStoryIds.has(
+        String(story.id)
+      );
+
+    const heart =
+      button.querySelector(
+        ".ma7alak-like-heart"
+      );
+
+    if(liked){
+
+      button.classList.add("liked");
+
+      if(heart){
+        heart.textContent = "♥";
+      }
+
+      button.setAttribute(
+        "aria-label",
+        "Story liked"
+      );
+
+    }
+    else{
+
+      button.classList.remove("liked");
+
+      if(heart){
+        heart.textContent = "♡";
+      }
+
+      button.setAttribute(
+        "aria-label",
+        "Like story"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     LIKE CURRENT STORY
+  ========================================================= */
+
+  async function likeCurrentStory(){
+
+    const story =
+      stories[currentStory];
+
+    if(!story || !story.id || !visitorId){
+      console.warn(
+        "MA7ALAK: cannot like story - missing story ID or visitor ID"
+      );
+      return;
+    }
+
+    const storyId =
+      String(story.id);
+
+    const button =
+      document.getElementById(
+        "ma7alak-story-like-btn"
+      );
+
+    /*
+      Each story/video has its own ID.
+      One visitor can therefore like Story 1, Story 2,
+      Story 3, etc. independently.
+    */
+    if(likedStoryIds.has(storyId)){
+      updateLikeButton();
+      return;
+    }
+
+    if(button){
+      button.disabled = true;
+      button.style.pointerEvents = "none";
+    }
+
+    try{
+
+      const result =
+        await supabaseClient.rpc(
+          "like_story",
+          {
+            p_story_id: story.id,
+            p_visitor_id: visitorId
+          }
+        );
+
+      if(result.error){
+        throw result.error;
+      }
+
+      const data =
+        result.data;
+
+      console.log(
+        "MA7ALAK story like result:",
+        data
+      );
+
+      if(!data || data.success !== true){
+        throw new Error(
+          (data && data.message) ||
+          "Like was not accepted by Supabase"
+        );
+      }
+
+      /*
+        Supabase is the source of truth.
+        If this visitor already liked this exact story,
+        the RPC returns already_liked=true and we still
+        show the correct liked state.
+      */
+      likedStoryIds.add(storyId);
+      saveLikedStories();
+
+      updateLikeButton();
+
+    }
+    catch(error){
+
+      console.error(
+        "MA7ALAK story like error:",
+        error
+      );
+
+      alert(
+        "ما قدرنا نسجّل اللايك. جرّب مرة ثانية."
+      );
+
+      /*
+        Do not permanently mark the story as liked when
+        Supabase rejects the request.
+      */
+      likedStoryIds.delete(storyId);
+      saveLikedStories();
+
+    }
+    finally{
+
+      if(button){
+        button.disabled = false;
+        button.style.pointerEvents = "auto";
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SHOW STORY
+  ========================================================= */
+
+  function showStory(
+    index
+  ){
+
+    if(
+      !stories.length
+    ){
+
+      return;
+
+    }
+
+
+    clearInterval(
+      timer
+    );
+
+
+    if(
+      index < 0
+    ){
+
+      index =
+        stories.length - 1;
+
+    }
+
+
+    if(
+      index >=
+      stories.length
+    ){
+
+      index =
+        0;
+
+    }
+
+
+    currentStory =
+      index;
+
+
+    const story =
+      stories[
+        currentStory
+      ];
+
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    const container =
+      document.getElementById(
+        "ma7alak-full-story-media"
+      );
+
+
+    if(
+      !screen ||
+      !container
+    ){
+
+      return;
+
+    }
+
+
+    /*
+      Update timestamp immediately.
+    */
+
+    updateStoryTime();
+
+
+    /*
+      Make sure owner controls match
+      current authentication state.
+    */
+
+    updateDeleteButton();
+    updateLikeButton();
+
+
+    const thisTransition =
+      ++transitionToken;
+
+
+    updateProgressBars(
+      currentStory,
+      0
+    );
+
+
+    if(
+      currentMedia &&
+      currentMedia.tagName ===
+      "VIDEO"
+    ){
+
+      try{
+
+        currentMedia.pause();
+
+        currentMedia.muted =
+          true;
+
+      }
+
+      catch(error){}
+
+    }
+
+
+    const result =
+      createMediaElement(
+        story
+      );
+
+
+    const media =
+      result.media;
+
+
+    const type =
+      result.type;
+
+
+    container.appendChild(
+      media
+    );
+
+
+    function activateMedia(){
+
+      if(
+        thisTransition !==
+        transitionToken
+      ){
+
+        if(
+          media.tagName ===
+          "VIDEO"
+        ){
+
+          try{
+
+            media.pause();
+
+            media.muted =
+              true;
+
+          }
+
+          catch(error){}
+
+        }
+
+
+        if(
+          media.parentNode
+        ){
+
+          media.parentNode.removeChild(
+            media
+          );
+
+        }
+
+
+        return;
 
       }
 
 
-      const progress =
-        document.getElementById(
-          "ma7alak-page-story-progress"
+      const allVideos =
+        container.querySelectorAll(
+          "video"
         );
 
 
-      if(progress){
+      allVideos.forEach(
+        function(video){
 
-        progress.classList.remove(
-          "visible"
-        );
+          if(
+            video !==
+            media
+          ){
+
+            try{
+
+              video.pause();
+
+              video.muted =
+                true;
+
+            }
+
+            catch(error){}
+
+          }
+
+        }
+      );
+
+
+      media.style.visibility =
+        "visible";
+
+
+      if(
+        type === "video"
+      ){
+
+        media.muted =
+          false;
+
+
+        const playPromise =
+          media.play();
+
+
+        if(
+          playPromise &&
+          typeof playPromise.catch ===
+          "function"
+        ){
+
+          playPromise.catch(
+            function(){
+
+              media.muted =
+                true;
+
+
+              media.play().catch(
+                function(){}
+              );
+
+            }
+          );
+
+        }
+
+      }
+
+
+      requestAnimationFrame(
+        function(){
+
+          if(
+            thisTransition !==
+            transitionToken
+          ){
+
+            return;
+
+          }
+
+
+          media.style.opacity =
+            "1";
+
+
+          media.classList.add(
+            "active"
+          );
+
+
+          const oldMedia =
+            currentMedia;
+
+
+          currentMedia =
+            media;
+
+
+          if(
+            oldMedia &&
+            oldMedia !==
+            media
+          ){
+
+            oldMedia.style.opacity =
+              "0";
+
+
+            oldMedia.classList.remove(
+              "active"
+            );
+
+
+            setTimeout(
+              function(){
+
+                if(
+                  oldMedia &&
+                  oldMedia !==
+                  currentMedia
+                ){
+
+                  if(
+                    oldMedia.tagName ===
+                    "VIDEO"
+                  ){
+
+                    try{
+
+                      oldMedia.pause();
+
+                      oldMedia.muted =
+                        true;
+
+                      oldMedia.removeAttribute(
+                        "src"
+                      );
+
+                      oldMedia.load();
+
+                    }
+
+                    catch(error){}
+
+                  }
+
+
+                  if(
+                    oldMedia.parentNode
+                  ){
+
+                    oldMedia.parentNode.removeChild(
+                      oldMedia
+                    );
+
+                  }
+
+                }
+
+              },
+              360
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    if(
+      type === "video"
+    ){
+
+      let activated =
+        false;
+
+
+      function activateVideoOnce(){
+
+        if(activated){
+
+          return;
+
+        }
+
+
+        activated =
+          true;
+
+
+        activateMedia();
+
+      }
+
+
+      media.addEventListener(
+        "loadeddata",
+        activateVideoOnce,
+        {
+          once:true
+        }
+      );
+
+
+      media.addEventListener(
+        "canplay",
+        activateVideoOnce,
+        {
+          once:true
+        }
+      );
+
+
+      if(
+        media.readyState >=
+        2
+      ){
+
+        activateVideoOnce();
+
+      }
+
+
+      media.addEventListener(
+        "timeupdate",
+        function(){
+
+          if(
+            media.duration &&
+            isFinite(
+              media.duration
+            )
+          ){
+
+            updateProgressBars(
+              currentStory,
+              (
+                media.currentTime /
+                media.duration
+              ) *
+              100
+            );
+
+          }
+
+        }
+      );
+
+
+      media.addEventListener(
+        "ended",
+        function(){
+
+          if(
+            thisTransition ===
+            transitionToken &&
+            currentMedia ===
+            media
+          ){
+
+            nextStory();
+
+          }
+
+        }
+      );
+
+    }
+
+
+    else{
+
+      let activated =
+        false;
+
+
+      function activateImageOnce(){
+
+        if(activated){
+
+          return;
+
+        }
+
+
+        activated =
+          true;
+
+
+        activateMedia();
+
+
+        const started =
+          Date.now();
+
+
+        timer =
+          setInterval(
+            function(){
+
+              if(
+                thisTransition !==
+                transitionToken
+              ){
+
+                clearInterval(
+                  timer
+                );
+
+                return;
+
+              }
+
+
+              const elapsed =
+                Date.now() -
+                started;
+
+
+              const percent =
+                Math.min(
+                  100,
+                  (
+                    elapsed /
+                    5000
+                  ) *
+                  100
+                );
+
+
+              updateProgressBars(
+                currentStory,
+                percent
+              );
+
+
+              if(
+                percent >=
+                100
+              ){
+
+                clearInterval(
+                  timer
+                );
+
+
+                nextStory();
+
+              }
+
+            },
+            50
+          );
+
+      }
+
+
+      media.addEventListener(
+        "load",
+        activateImageOnce,
+        {
+          once:true
+        }
+      );
+
+
+      if(
+        media.complete
+      ){
+
+        activateImageOnce();
 
       }
 
@@ -2051,51 +4178,386 @@
 
 
   /* =========================================================
-     MESSAGE FROM STORY EMBED
+     NEXT
+  ========================================================= */
+
+  function nextStory(){
+
+    if(
+      !stories.length ||
+      isDeletingStory
+    ){
+
+      return;
+
+    }
+
+
+    currentStory++;
+
+
+    if(
+      currentStory >=
+      stories.length
+    ){
+
+      currentStory =
+        0;
+
+    }
+
+
+    showStory(
+      currentStory
+    );
+
+  }
+
+
+  /* =========================================================
+     PREVIOUS
+  ========================================================= */
+
+  function previousStory(){
+
+    if(
+      !stories.length ||
+      isDeletingStory
+    ){
+
+      return;
+
+    }
+
+
+    currentStory--;
+
+
+    if(
+      currentStory < 0
+    ){
+
+      currentStory =
+        stories.length - 1;
+
+    }
+
+
+    showStory(
+      currentStory
+    );
+
+  }
+
+
+  /* =========================================================
+     CLOSE STORIES
+  ========================================================= */
+
+  function closeStories(){
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    if(!screen){
+
+      return;
+
+    }
+
+
+    clearInterval(
+      timer
+    );
+
+
+    transitionToken++;
+
+
+    const videos =
+      screen.querySelectorAll(
+        "video"
+      );
+
+
+    videos.forEach(
+      function(video){
+
+        try{
+
+          video.pause();
+
+          video.muted =
+            true;
+
+          video.removeAttribute(
+            "src"
+          );
+
+          video.load();
+
+        }
+
+        catch(error){}
+
+      }
+    );
+
+
+    try{
+
+      if(
+        document.fullscreenElement
+      ){
+
+        const exit =
+          document.exitFullscreen();
+
+
+        if(
+          exit &&
+          typeof exit.catch ===
+          "function"
+        ){
+
+          exit.catch(
+            function(){}
+          );
+
+        }
+
+      }
+
+      else if(
+        document.webkitFullscreenElement
+      ){
+
+        if(
+          document.webkitExitFullscreen
+        ){
+
+          document.webkitExitFullscreen();
+
+        }
+
+      }
+
+    }
+
+    catch(error){}
+
+
+    screen.classList.remove(
+      "active"
+    );
+
+
+    document.documentElement.style.overflow =
+      "";
+
+
+    document.body.style.overflow =
+      "";
+
+
+    setTimeout(
+      function(){
+
+        if(
+          !screen.classList.contains(
+            "active"
+          )
+        ){
+
+          const container =
+            document.getElementById(
+              "ma7alak-full-story-media"
+            );
+
+
+          if(container){
+
+            container.innerHTML =
+              "";
+
+          }
+
+
+          currentMedia =
+            null;
+
+        }
+
+      },
+      350
+    );
+
+  }
+
+
+  /* =========================================================
+     FULLSCREEN CHANGE
+  ========================================================= */
+
+  function fullscreenChanged(){
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    if(!screen){
+
+      return;
+
+    }
+
+
+    if(
+      !document.fullscreenElement &&
+      !document.webkitFullscreenElement
+    ){
+
+      if(
+        screen.classList.contains(
+          "active"
+        )
+      ){
+
+        /*
+          IMPORTANT:
+          On phones, the system/browser Back button can exit
+          fullscreen without pressing our Story X button.
+          Stop every Story video immediately so hidden audio
+          cannot continue playing in the background.
+        */
+        clearInterval(
+          timer
+        );
+
+
+        transitionToken++;
+
+
+        const videos =
+          screen.querySelectorAll(
+            "video"
+          );
+
+
+        videos.forEach(
+          function(video){
+
+            try{
+
+              video.pause();
+
+              video.muted =
+                true;
+
+              video.removeAttribute(
+                "src"
+              );
+
+              video.load();
+
+            }
+
+            catch(error){}
+
+          }
+        );
+
+
+        currentMedia =
+          null;
+
+
+        screen.classList.remove(
+          "active"
+        );
+
+
+        document.documentElement.style.overflow =
+          "";
+
+
+        document.body.style.overflow =
+          "";
+
+      }
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "fullscreenchange",
+    fullscreenChanged
+  );
+
+
+  document.addEventListener(
+    "webkitfullscreenchange",
+    fullscreenChanged
+  );
+
+
+  /* =========================================================
+     STOP STORY AUDIO WHEN LEAVING THE PAGE
   ========================================================= */
 
   window.addEventListener(
-    "message",
-    function(event){
+    "pagehide",
+    function(){
 
-      if(
-        !event.data
-      ){
-
-        return;
-
-      }
+      const screen =
+        document.getElementById(
+          "ma7alak-full-story"
+        );
 
 
-      if(
-        event.data.type !==
-        "MA7ALAK_OPEN_STORY_UPLOADER"
-      ){
+      if(!screen){
 
         return;
 
       }
 
 
-      const shopSlug =
-        String(
-          event.data.shopSlug ||
-          ""
-        ).trim();
+      clearInterval(
+        timer
+      );
 
 
-      if(
-        !shopSlug
-      ){
-
-        return;
-
-      }
+      transitionToken++;
 
 
-      openUploader(
-        shopSlug,
-        event.source
+      const videos =
+        screen.querySelectorAll(
+          "video"
+        );
+
+
+      videos.forEach(
+        function(video){
+
+          try{
+
+            video.pause();
+
+            video.muted =
+              true;
+
+          }
+
+          catch(error){}
+
+        }
       );
 
     }
@@ -2103,15 +4565,68 @@
 
 
   /* =========================================================
-     ESCAPE
+     STORY BUTTON
+  ========================================================= */
+
+  storyButton.addEventListener(
+    "click",
+    openStories
+  );
+
+
+  /* =========================================================
+     OWNER PLUS BUTTON
+  ========================================================= */
+
+  ownerAddButton.addEventListener(
+    "click",
+    function(event){
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      openOwnerUpload();
+
+    }
+  );
+
+
+  /* =========================================================
+     AUTH CHANGE
+  ========================================================= */
+
+  supabaseClient.auth.onAuthStateChange(
+    function(){
+
+      setTimeout(
+        checkShopOwner,
+        100
+      );
+
+    }
+  );
+
+
+  /* =========================================================
+     KEYBOARD
   ========================================================= */
 
   document.addEventListener(
     "keydown",
     function(event){
 
+      const screen =
+        document.getElementById(
+          "ma7alak-full-story"
+        );
+
+
       if(
-        event.key !== "Escape"
+        !screen ||
+        !screen.classList.contains(
+          "active"
+        )
       ){
 
         return;
@@ -2119,20 +4634,40 @@
       }
 
 
-      const overlay =
-        document.getElementById(
-          "ma7alak-page-story-uploader"
-        );
-
-
       if(
-        overlay &&
-        overlay.classList.contains(
-          "active"
-        )
+        event.key ===
+        "Escape"
       ){
 
-        closeUploader();
+        closeStories();
+
+      }
+
+      else if(
+        event.key ===
+        "ArrowRight"
+      ){
+
+        nextStory();
+
+      }
+
+      else if(
+        event.key ===
+        "ArrowLeft"
+      ){
+
+        previousStory();
+
+      }
+
+      else if(
+        event.key ===
+        "Delete" &&
+        isShopOwner
+      ){
+
+        deleteCurrentStory();
 
       }
 
@@ -2140,4 +4675,88 @@
   );
 
 
+  /* =========================================================
+     UPDATE TIME WHILE STORY IS OPEN
+     
+     Keeps:
+       الآن
+       1 د
+       2 د
+       1 س
+       etc.
+     accurate.
+  ========================================================= */
+
+  setInterval(
+    function(){
+
+      const screen =
+        document.getElementById(
+          "ma7alak-full-story"
+        );
+
+
+      if(
+        screen &&
+        screen.classList.contains(
+          "active"
+        )
+      ){
+
+        updateStoryTime();
+
+      }
+
+    },
+    30000
+  );
+
+
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
+
+  createStoryScreen();
+
+  checkShopOwner();
+
+  loadStories();
+
+
+  /* =========================================================
+     CHECK FOR NEW STORIES
+     EVERY 10 SECONDS
+  ========================================================= */
+
+  setInterval(
+    function(){
+
+      loadStories();
+
+    },
+    10000
+  );
+
+
 })();
+
+</script>
+
+<!-- =========================================================
+   WHAT CHANGED
+   =========================================================
+   1. Moved the Story shop name/time area lower.
+   2. Added the shop name above the English Story time, like Facebook Stories.
+   3. The displayed shop name is derived from the Story's shop_slug.
+   4. Each Story keeps its existing unique Supabase story.id, and that ID is attached to the displayed shop name with data-story-id.
+   5. Moved the X/close button lower.
+   6. Moved the owner delete button farther down and directly underneath the X.
+   7. Matched the delete button's right position with the X, including mobile.
+   8. Did NOT add visible left/right navigation arrows; the existing invisible tap areas remain only for navigation.
+   9. Kept the premium Story heart with no like number and the English time labels.
+   10. No Story viewer-count/viewer-number system was added or changed.
+   11. Fixed phone/browser Back behavior: when fullscreen is exited without pressing the Story X, every Story video is immediately paused, muted, and unloaded.
+   12. Added a pagehide safety stop so Story audio/video is paused when the visitor leaves or navigates away from the page.
+   13. No upload, likes, owner controls, Story navigation, timing, Supabase, or viewer-count logic was changed.
+========================================================= -->
+     
