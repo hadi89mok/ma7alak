@@ -1,28 +1,12 @@
-<!-- =========================================================
-     MA7ALAK STORIES
-     SHOP: masaya-cafe
+(function(){
+  "use strict";
 
-     ✓ Story circle
-     ✓ Story viewer
-     ✓ Fullscreen
-     ✓ Images
-     ✓ Videos
-     ✓ Sound
-     ✓ Story navigation
-     ✓ Progress bars
-     ✓ New story animation
-     ✓ Owner + button
-     ✓ PAGE-LEVEL owner upload bridge
-     ✓ OWNER DELETE STORY
-     ✓ STORY TIME AGO
-     ✓ Mobile-safe
-     ✓ Supabase stories
-     ✓ 24 hour expiry
-========================================================= -->
+  if(window.__MA7ALAK_STORIES_GITHUB_READY_LOADED__){
+    return;
+  }
+  window.__MA7ALAK_STORIES_GITHUB_READY_LOADED__ = true;
 
-<style>
-
-/* =========================================================
+  const MA7ALAK_STORY_CSS = `/* =========================================================
    STORY WRAPPER
 ========================================================= */
 
@@ -643,7 +627,7 @@
 
   position:absolute!important;
 
-  top:76px!important;
+  top:64px!important;
 
   left:20px!important;
 
@@ -688,7 +672,7 @@
 
   position:absolute!important;
 
-  top:104px!important;
+  top:90px!important;
 
   left:20px!important;
 
@@ -752,7 +736,7 @@
 
   position:absolute!important;
 
-  top:136px!important;
+  top:106px!important;
 
   right:20px!important;
 
@@ -965,7 +949,7 @@
 
   #ma7alak-story-shop-name{
 
-    top:68px!important;
+    top:54px!important;
 
     left:14px!important;
 
@@ -984,7 +968,7 @@
 
   #ma7alak-story-time{
 
-    top:94px!important;
+    top:80px!important;
 
     left:14px!important;
 
@@ -1006,7 +990,7 @@
 
   #ma7alak-story-delete-btn{
 
-    top:124px!important;
+    top:106px!important;
 
     right:14px!important;
 
@@ -1037,7 +1021,7 @@
 
   #ma7alak-story-delete-btn{
 
-    top:122px!important;
+    top:104px!important;
 
     right:14px!important;
 
@@ -1058,7 +1042,7 @@
 
   position:absolute!important;
   left:50%!important;
-  bottom:105px!important;
+  bottom:34px!important;
   transform:translateX(-50%)!important;
 
   width:56px!important;
@@ -1182,9 +1166,78 @@
   100%{transform:translateY(1px) scale(1);}
 }
 
+/* =========================================================
+   FACEBOOK-STYLE LIKE HEART BURST
+========================================================= */
+
+#ma7alak-story-heart-burst{
+  position:absolute!important;
+  inset:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  z-index:2147483647!important;
+}
+
+.ma7alak-story-floating-heart{
+  position:absolute!important;
+  left:50%!important;
+  bottom:42px!important;
+  display:block!important;
+  pointer-events:none!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  color:#ff4b67!important;
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-weight:900!important;
+  line-height:1!important;
+  text-shadow:
+    0 4px 12px rgba(0,0,0,.28),
+    0 0 14px rgba(255,75,103,.38)!important;
+  will-change:transform,opacity!important;
+  animation:
+    ma7alakStoryHeartFloat
+    var(--ma7alak-heart-duration,1.35s)
+    cubic-bezier(.16,.75,.28,1)
+    forwards!important;
+}
+
+@keyframes ma7alakStoryHeartFloat{
+  0%{
+    opacity:0;
+    transform:
+      translate3d(-50%,12px,0)
+      scale(.45)
+      rotate(0deg);
+  }
+  12%{
+    opacity:1;
+  }
+  60%{
+    opacity:.96;
+  }
+  100%{
+    opacity:0;
+    transform:
+      translate3d(
+        calc(-50% + var(--ma7alak-heart-x,0px)),
+        var(--ma7alak-heart-y,-62vh),
+        0
+      )
+      scale(var(--ma7alak-heart-scale,1.15))
+      rotate(var(--ma7alak-heart-rotate,0deg));
+  }
+}
+
+@media(max-width:600px){
+  .ma7alak-story-floating-heart{
+    bottom:34px!important;
+  }
+}
+
+
 @media(max-width:600px){
   #ma7alak-story-like-btn{
-    bottom:95px!important;
+    bottom:28px!important;
     width:54px!important;
     min-width:54px!important;
     height:54px!important;
@@ -1266,7 +1319,7 @@
 
   position:absolute;
 
-  top:60px;
+  top:48px;
   right:20px;
 
   width:48px;
@@ -1385,7 +1438,7 @@
 
   #ma7alak-story-close-btn{
 
-    top:68px;
+    top:54px;
 
     right:14px;
 
@@ -1418,15 +1471,9 @@
 
   }
 
-}
+}`;
 
-</style>
-
-<!-- =========================================================
-     STORY CIRCLE
-========================================================= -->
-
-<div
+  const MA7ALAK_STORY_MARKUP = `<div
   id="ma7alak-story-wrapper"
   style="
     background:transparent !important;
@@ -1469,16 +1516,37 @@ aria-label="Add story"
 
   </button>
 
-</div>
+</div>`;
 
-<!-- =========================================================
-     SUPABASE
-========================================================= -->
+  function injectStoryUI(){
+    if(!document.getElementById("ma7alak-stories-injected-style")){
+      const style = document.createElement("style");
+      style.id = "ma7alak-stories-injected-style";
+      style.textContent = MA7ALAK_STORY_CSS;
+      document.head.appendChild(style);
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    if(!document.getElementById("ma7alak-story-wrapper")){
+      const holder = document.createElement("div");
+      holder.innerHTML = MA7ALAK_STORY_MARKUP;
 
-<script>
+      const currentScript = document.currentScript;
+      const parent = currentScript && currentScript.parentNode
+        ? currentScript.parentNode
+        : document.body;
 
+      while(holder.firstChild){
+        parent.insertBefore(
+          holder.firstChild,
+          currentScript && currentScript.parentNode === parent
+            ? currentScript
+            : null
+        );
+      }
+    }
+  }
+
+  function startMa7alakStories(){
 (function(){
 
   "use strict";
@@ -1573,6 +1641,8 @@ aria-label="Add story"
   let newRingAnimation = null;
 
   let isDeletingStory = false;
+
+  let storyHistoryPushed = false;
 
 
   /* =========================================================
@@ -3232,6 +3302,27 @@ aria-label="Add story"
     );
 
 
+    if(!storyHistoryPushed){
+
+      try{
+
+        window.history.pushState(
+          {
+            ma7alakStoryOpen:true
+          },
+          "",
+          window.location.href
+        );
+
+        storyHistoryPushed =
+          true;
+
+      }
+      catch(error){}
+
+    }
+
+
     document.documentElement.style.overflow =
       "hidden";
 
@@ -3497,6 +3588,151 @@ aria-label="Add story"
 
 
   /* =========================================================
+     LIKE HEARTS ANIMATION
+  ========================================================= */
+
+  function launchLikeHearts(){
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+    if(
+      !screen ||
+      !screen.classList.contains("active")
+    ){
+      return;
+    }
+
+    let burst =
+      document.getElementById(
+        "ma7alak-story-heart-burst"
+      );
+
+    if(!burst){
+
+      burst =
+        document.createElement("div");
+
+      burst.id =
+        "ma7alak-story-heart-burst";
+
+      screen.appendChild(
+        burst
+      );
+
+    }
+
+    const totalHearts = 14;
+
+    for(
+      let i = 0;
+      i < totalHearts;
+      i++
+    ){
+
+      const heart =
+        document.createElement("span");
+
+      heart.className =
+        "ma7alak-story-floating-heart";
+
+      heart.textContent =
+        i % 4 === 0 ? "❤" : "♥";
+
+      const x =
+        Math.round(
+          (Math.random() * 180) - 90
+        );
+
+      const y =
+        -Math.round(
+          46 + (Math.random() * 32)
+        ) + "vh";
+
+      const rotate =
+        Math.round(
+          (Math.random() * 50) - 25
+        ) + "deg";
+
+      const scale =
+        (
+          .82 +
+          Math.random() * .72
+        ).toFixed(2);
+
+      const duration =
+        (
+          1.05 +
+          Math.random() * .75
+        ).toFixed(2) + "s";
+
+      const size =
+        Math.round(
+          18 +
+          Math.random() * 18
+        );
+
+      heart.style.setProperty(
+        "--ma7alak-heart-x",
+        x + "px"
+      );
+
+      heart.style.setProperty(
+        "--ma7alak-heart-y",
+        y
+      );
+
+      heart.style.setProperty(
+        "--ma7alak-heart-rotate",
+        rotate
+      );
+
+      heart.style.setProperty(
+        "--ma7alak-heart-scale",
+        scale
+      );
+
+      heart.style.setProperty(
+        "--ma7alak-heart-duration",
+        duration
+      );
+
+      heart.style.fontSize =
+        size + "px";
+
+      heart.style.animationDelay =
+        (i * 32) + "ms";
+
+      burst.appendChild(
+        heart
+      );
+
+      setTimeout(
+        function(){
+
+          if(
+            heart &&
+            heart.parentNode
+          ){
+
+            heart.parentNode.removeChild(
+              heart
+            );
+
+          }
+
+        },
+        2300
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
      LIKE CURRENT STORY
   ========================================================= */
 
@@ -3575,6 +3811,8 @@ aria-label="Add story"
       saveLikedStories();
 
       updateLikeButton();
+
+      launchLikeHearts();
 
     }
     catch(error){
@@ -3846,13 +4084,54 @@ aria-label="Add story"
           playPromise.catch(
             function(){
 
+              const activeScreen =
+                document.getElementById(
+                  "ma7alak-full-story"
+                );
+
+              if(
+                thisTransition !== transitionToken ||
+                !activeScreen ||
+                !activeScreen.classList.contains("active") ||
+                !media.isConnected
+              ){
+
+                try{
+
+                  media.pause();
+
+                  media.muted =
+                    true;
+
+                  media.volume =
+                    0;
+
+                }
+                catch(error){}
+
+                return;
+
+              }
+
+
               media.muted =
                 true;
 
 
-              media.play().catch(
-                function(){}
-              );
+              const mutedPlay =
+                media.play();
+
+              if(
+                mutedPlay &&
+                typeof mutedPlay.catch ===
+                "function"
+              ){
+
+                mutedPlay.catch(
+                  function(){}
+                );
+
+              }
 
             }
           );
@@ -4249,10 +4528,54 @@ aria-label="Add story"
 
 
   /* =========================================================
-     CLOSE STORIES
+     STOP STORY PLAYBACK
   ========================================================= */
 
-  function closeStories(){
+  function stopStoryPlayback(
+    unloadMedia
+  ){
+
+    clearInterval(
+      timer
+    );
+
+    transitionToken++;
+
+
+    if(
+      currentMedia &&
+      currentMedia.tagName ===
+      "VIDEO"
+    ){
+
+      try{
+
+        currentMedia.pause();
+
+        currentMedia.muted =
+          true;
+
+        currentMedia.volume =
+          0;
+
+        if(
+          unloadMedia !==
+          false
+        ){
+
+          currentMedia.removeAttribute(
+            "src"
+          );
+
+          currentMedia.load();
+
+        }
+
+      }
+      catch(error){}
+
+    }
+
 
     const screen =
       document.getElementById(
@@ -4260,49 +4583,114 @@ aria-label="Add story"
       );
 
 
+    if(screen){
+
+      const videos =
+        screen.querySelectorAll(
+          "video"
+        );
+
+
+      videos.forEach(
+        function(video){
+
+          try{
+
+            video.pause();
+
+            video.muted =
+              true;
+
+            video.volume =
+              0;
+
+            if(
+              unloadMedia !==
+              false
+            ){
+
+              video.removeAttribute(
+                "src"
+              );
+
+              video.load();
+
+            }
+
+          }
+          catch(error){}
+
+        }
+      );
+
+    }
+
+
+    currentMedia =
+      null;
+
+  }
+
+
+  /* =========================================================
+     CLOSE STORIES
+  ========================================================= */
+
+  function closeStories(fromHistory){
+
+    const isHistoryClose =
+      fromHistory === true;
+
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    stopStoryPlayback(
+      true
+    );
+
+
+    if(
+      !isHistoryClose &&
+      storyHistoryPushed
+    ){
+
+      storyHistoryPushed =
+        false;
+
+      try{
+
+        if(
+          window.history.state &&
+          window.history.state.ma7alakStoryOpen ===
+          true
+        ){
+
+          window.history.back();
+
+        }
+
+      }
+      catch(error){}
+
+    }
+
+    else if(isHistoryClose){
+
+      storyHistoryPushed =
+        false;
+
+    }
+
+
     if(!screen){
 
       return;
 
     }
-
-
-    clearInterval(
-      timer
-    );
-
-
-    transitionToken++;
-
-
-    const videos =
-      screen.querySelectorAll(
-        "video"
-      );
-
-
-    videos.forEach(
-      function(video){
-
-        try{
-
-          video.pause();
-
-          video.muted =
-            true;
-
-          video.removeAttribute(
-            "src"
-          );
-
-          video.load();
-
-        }
-
-        catch(error){}
-
-      }
-    );
 
 
     try{
@@ -4313,7 +4701,6 @@ aria-label="Add story"
 
         const exit =
           document.exitFullscreen();
-
 
         if(
           exit &&
@@ -4330,21 +4717,15 @@ aria-label="Add story"
       }
 
       else if(
-        document.webkitFullscreenElement
+        document.webkitFullscreenElement &&
+        document.webkitExitFullscreen
       ){
 
-        if(
-          document.webkitExitFullscreen
-        ){
-
-          document.webkitExitFullscreen();
-
-        }
+        document.webkitExitFullscreen();
 
       }
 
     }
-
     catch(error){}
 
 
@@ -4355,7 +4736,6 @@ aria-label="Add story"
 
     document.documentElement.style.overflow =
       "";
-
 
     document.body.style.overflow =
       "";
@@ -4375,7 +4755,6 @@ aria-label="Add story"
               "ma7alak-full-story-media"
             );
 
-
           if(container){
 
             container.innerHTML =
@@ -4383,9 +4762,17 @@ aria-label="Add story"
 
           }
 
+          const burst =
+            document.getElementById(
+              "ma7alak-story-heart-burst"
+            );
 
-          currentMedia =
-            null;
+          if(burst){
+
+            burst.innerHTML =
+              "";
+
+          }
 
         }
 
@@ -4417,77 +4804,20 @@ aria-label="Add story"
 
     if(
       !document.fullscreenElement &&
-      !document.webkitFullscreenElement
+      !document.webkitFullscreenElement &&
+      screen.classList.contains(
+        "active"
+      )
     ){
 
-      if(
-        screen.classList.contains(
-          "active"
-        )
-      ){
-
-        /*
-          IMPORTANT:
-          On phones, the system/browser Back button can exit
-          fullscreen without pressing our Story X button.
-          Stop every Story video immediately so hidden audio
-          cannot continue playing in the background.
-        */
-        clearInterval(
-          timer
-        );
-
-
-        transitionToken++;
-
-
-        const videos =
-          screen.querySelectorAll(
-            "video"
-          );
-
-
-        videos.forEach(
-          function(video){
-
-            try{
-
-              video.pause();
-
-              video.muted =
-                true;
-
-              video.removeAttribute(
-                "src"
-              );
-
-              video.load();
-
-            }
-
-            catch(error){}
-
-          }
-        );
-
-
-        currentMedia =
-          null;
-
-
-        screen.classList.remove(
-          "active"
-        );
-
-
-        document.documentElement.style.overflow =
-          "";
-
-
-        document.body.style.overflow =
-          "";
-
-      }
+      /*
+        Android/browser Back can exit native fullscreen
+        without pressing the Story X. Use the exact same
+        close path so playback is destroyed immediately.
+      */
+      closeStories(
+        false
+      );
 
     }
 
@@ -4510,8 +4840,29 @@ aria-label="Add story"
      STOP STORY AUDIO WHEN LEAVING THE PAGE
   ========================================================= */
 
+  function stopStoryOnPageExit(){
+
+    stopStoryPlayback(
+      true
+    );
+
+  }
+
+
   window.addEventListener(
     "pagehide",
+    stopStoryOnPageExit
+  );
+
+
+  window.addEventListener(
+    "beforeunload",
+    stopStoryOnPageExit
+  );
+
+
+  window.addEventListener(
+    "popstate",
     function(){
 
       const screen =
@@ -4519,47 +4870,131 @@ aria-label="Add story"
           "ma7alak-full-story"
         );
 
+      storyHistoryPushed =
+        false;
 
-      if(!screen){
+      if(
+        screen &&
+        screen.classList.contains(
+          "active"
+        )
+      ){
+
+        closeStories(
+          true
+        );
+
+      }
+
+      else{
+
+        stopStoryPlayback(
+          true
+        );
+
+      }
+
+    }
+  );
+
+
+  document.addEventListener(
+    "visibilitychange",
+    function(){
+
+      if(
+        document.visibilityState !==
+        "hidden"
+      ){
 
         return;
 
       }
 
 
-      clearInterval(
-        timer
-      );
-
-
-      transitionToken++;
-
-
-      const videos =
-        screen.querySelectorAll(
-          "video"
+      const screen =
+        document.getElementById(
+          "ma7alak-full-story"
         );
 
 
-      videos.forEach(
-        function(video){
+      if(
+        screen &&
+        screen.classList.contains(
+          "active"
+        )
+      ){
 
-          try{
+        stopStoryPlayback(
+          true
+        );
 
-            video.pause();
+      }
 
-            video.muted =
-              true;
+    }
+  );
+
+
+  /*
+    Hostinger can render custom code inside an iframe.
+    If the parent is same-origin, also stop playback when
+    that parent page navigates or changes history.
+  */
+  try{
+
+    if(
+      window.parent &&
+      window.parent !==
+      window
+    ){
+
+      window.parent.addEventListener(
+        "pagehide",
+        stopStoryOnPageExit
+      );
+
+      window.parent.addEventListener(
+        "beforeunload",
+        stopStoryOnPageExit
+      );
+
+      window.parent.addEventListener(
+        "popstate",
+        function(){
+
+          const screen =
+            document.getElementById(
+              "ma7alak-full-story"
+            );
+
+          if(
+            screen &&
+            screen.classList.contains(
+              "active"
+            )
+          ){
+
+            closeStories(
+              true
+            );
 
           }
 
-          catch(error){}
+          else{
+
+            stopStoryPlayback(
+              true
+            );
+
+          }
 
         }
       );
 
     }
-  );
+
+  }
+  catch(error){}
 
 
   /* =========================================================
@@ -4737,23 +5172,71 @@ aria-label="Add story"
 
 
 })();
+  }
 
-</script>
+  function ensureSupabaseAndStart(){
+    injectStoryUI();
 
-<!-- =========================================================
+    if(
+      window.supabase &&
+      typeof window.supabase.createClient === "function"
+    ){
+      startMa7alakStories();
+      return;
+    }
+
+    const existing = Array.from(
+      document.querySelectorAll("script")
+    ).find(function(script){
+      return String(script.src || "").includes(
+        "@supabase/supabase-js@2"
+      );
+    });
+
+    if(existing){
+      existing.addEventListener(
+        "load",
+        startMa7alakStories,
+        {once:true}
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    script.async = true;
+    script.onload = startMa7alakStories;
+    script.onerror = function(){
+      console.error("MA7ALAK: Supabase library failed to load.");
+    };
+    document.head.appendChild(script);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener(
+      "DOMContentLoaded",
+      ensureSupabaseAndStart,
+      {once:true}
+    );
+  } else {
+    ensureSupabaseAndStart();
+  }
+
+})();
+
+/* =========================================================
    WHAT CHANGED
    =========================================================
-   1. Moved the Story shop name/time area lower.
-   2. Added the shop name above the English Story time, like Facebook Stories.
-   3. The displayed shop name is derived from the Story's shop_slug.
-   4. Each Story keeps its existing unique Supabase story.id, and that ID is attached to the displayed shop name with data-story-id.
-   5. Moved the X/close button lower.
-   6. Moved the owner delete button farther down and directly underneath the X.
-   7. Matched the delete button's right position with the X, including mobile.
-   8. Did NOT add visible left/right navigation arrows; the existing invisible tap areas remain only for navigation.
-   9. Kept the premium Story heart with no like number and the English time labels.
-   10. No Story viewer-count/viewer-number system was added or changed.
-   11. Fixed phone/browser Back behavior: when fullscreen is exited without pressing the Story X, every Story video is immediately paused, muted, and unloaded.
-   12. Added a pagehide safety stop so Story audio/video is paused when the visitor leaves or navigates away from the page.
-   13. No upload, likes, owner controls, Story navigation, timing, Supabase, or viewer-count logic was changed.
-========================================================= -->
+   1. Fixed Story video/audio continuing after phone/browser Back.
+   2. Story open now creates a temporary same-page history entry so Back closes the Story first.
+   3. Back/popstate, fullscreen exit, pagehide, beforeunload, visibility change, and same-origin parent navigation now destroy Story playback.
+   4. Story playback cleanup now directly pauses, mutes, sets volume to 0, unloads currentMedia, and unloads every Story video.
+   5. Fixed the rejected play() fallback race so a video cannot restart after the Story has already closed.
+   6. Moved Masaya Cafe/shop name and Story time slightly higher.
+   7. Moved the X/close and owner delete buttons slightly higher.
+   8. Moved the Like heart lower to the bottom area.
+   9. After a successful Like, floating heart icons now burst upward across the Story like Facebook reactions.
+   10. Kept the separate owner upload-panel bridge, Story likes RPC, owner controls, navigation, Supabase data, and 24-hour Story behavior unchanged.
+   11. No Story viewer-count/viewer-number system was added.
+   12. Converted this exact Story source to GitHub-ready JavaScript: CSS and Story markup are injected by this file and Supabase is loaded automatically if needed.
+   ========================================================= */
