@@ -652,7 +652,7 @@
 
   inset:7px;
 
-  border-radius:50%!important;
+  border-radius:50%;
 
   border:
     1px solid
@@ -1474,7 +1474,6 @@
         "MA7ALAK uploader open error:",
         error
       );
-
 
       alert(
         "صار خطأ. جرّب مرة ثانية."
