@@ -213,64 +213,7 @@
       <div
         id="ma7alak-area-grid"
         class="ma7alak-area-grid"
-      >
-
-        <button
-          class="ma7alak-area-button"
-          data-area="Da7ye"
-        >
-
-          <span class="icon">
-            📍
-          </span>
-
-          Da7ye
-
-        </button>
-
-
-        <button
-          class="ma7alak-area-button"
-          data-area="Central Beirut"
-        >
-
-          <span class="icon">
-            📍
-          </span>
-
-          Central Beirut
-
-        </button>
-
-
-        <button
-          class="ma7alak-area-button"
-          data-area="South Lebanon"
-        >
-
-          <span class="icon">
-            📍
-          </span>
-
-          South Lebanon
-
-        </button>
-
-
-        <button
-          class="ma7alak-area-button"
-          data-area="North Lebanon"
-        >
-
-          <span class="icon">
-            📍
-          </span>
-
-          North Lebanon
-
-        </button>
-
-      </div>
+      ></div>
 
     </div>
 
@@ -289,66 +232,10 @@
       </div>
 
 
-      <div class="ma7alak-category-grid">
-
-
-        <button
-          class="ma7alak-category-button"
-          data-category="cafe"
-        >
-
-          <span class="ma7alak-category-icon">
-            ☕
-          </span>
-
-          Café & Coffee
-
-        </button>
-
-
-        <button
-          class="ma7alak-category-button"
-          data-category="clothing"
-        >
-
-          <span class="ma7alak-category-icon">
-            ♧
-          </span>
-
-          Clothing Stores
-
-        </button>
-
-
-        <button
-          class="ma7alak-category-button"
-          data-category="services"
-        >
-
-          <span class="ma7alak-category-icon">
-            ⚒
-          </span>
-
-          General Services
-
-        </button>
-
-
-        <button
-          class="ma7alak-category-button"
-          data-category="food"
-        >
-
-          <span class="ma7alak-category-icon">
-            🍴
-          </span>
-
-          Kiosks & Food
-
-        </button>
-
-
-      </div>
+      <div
+        id="ma7alak-category-grid"
+        class="ma7alak-category-grid"
+      ></div>
 
     </section>
 
@@ -704,6 +591,10 @@
 
   let categoryButtons;
 
+  let areaGrid;
+
+  let categoryGrid;
+
   let categorySection;
 
   let results;
@@ -730,6 +621,18 @@
   ========================================================= */
 
   async function initialize(){
+
+    areaGrid =
+      page.querySelector(
+        "#ma7alak-area-grid"
+      );
+
+
+    categoryGrid =
+      page.querySelector(
+        "#ma7alak-category-grid"
+      );
+
 
     areaButtons =
       page.querySelectorAll(
@@ -803,8 +706,6 @@
       );
 
 
-    bindEvents();
-
     ma7alakBindStoryCardClicks();
 
     /*
@@ -813,6 +714,14 @@
      * become real shop cards when the visitor selects filters.
      */
     await ma7alakLoadShopProfiles();
+
+    /*
+     * Build Area buttons from the live shop rows.
+     * Category buttons are then built dynamically for the selected area.
+     */
+    ma7alakRenderDynamicAreas();
+
+    bindEvents();
 
     /*
      * Start the existing live Story system after shop data exists,
@@ -824,151 +733,269 @@
 
 
   /* =========================================================
+     DYNAMIC AREA + CATEGORY FILTERS
+  ========================================================= */
+
+  function ma7alakEscapeHtml(value){
+
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+  }
+
+
+  function ma7alakCategoryIcon(category,name){
+
+    const text =
+      (String(category || "") + " " + String(name || ""))
+        .toLowerCase();
+
+    if(text.includes("cafe") || text.includes("coffee")) return "☕";
+    if(text.includes("food") || text.includes("restaurant") || text.includes("kiosk")) return "🍴";
+    if(text.includes("cloth") || text.includes("fashion")) return "👕";
+    if(text.includes("tattoo") || text.includes("piercing") || text.includes("makeup") || text.includes("beauty")) return "✦";
+    if(text.includes("gym") || text.includes("fitness")) return "🏋";
+    if(text.includes("barber") || text.includes("salon") || text.includes("hair")) return "✂";
+    if(text.includes("phone") || text.includes("mobile") || text.includes("electronic")) return "📱";
+    if(text.includes("service")) return "⚒";
+
+    return "🏪";
+
+  }
+
+
+  function ma7alakRenderDynamicAreas(){
+
+    const areas =
+      Array.from(
+        new Set(
+          shops
+            .map(shop => String(shop.area || "").trim())
+            .filter(Boolean)
+        )
+      )
+      .sort((a,b) =>
+        a.localeCompare(b,undefined,{sensitivity:"base"})
+      );
+
+    areaGrid.innerHTML =
+      areas
+        .map(area => `
+          <button
+            class="ma7alak-area-button"
+            data-area="${ma7alakEscapeHtml(area)}"
+            type="button"
+          >
+            <span class="icon">📍</span>
+            ${ma7alakEscapeHtml(area)}
+          </button>
+        `)
+        .join("");
+
+    areaButtons =
+      page.querySelectorAll(
+        ".ma7alak-area-button"
+      );
+
+  }
+
+
+  function ma7alakRenderDynamicCategories(area){
+
+    const categoryMap =
+      new Map();
+
+    shops.forEach(
+      shop => {
+
+        if(shop.area !== area){
+          return;
+        }
+
+        const key =
+          String(shop.category || "").trim();
+
+        if(!key){
+          return;
+        }
+
+        const name =
+          String(
+            shop.categoryName ||
+            key
+          ).trim();
+
+        if(!categoryMap.has(key)){
+          categoryMap.set(
+            key,
+            name
+          );
+        }
+
+      }
+    );
+
+    const categories =
+      Array.from(
+        categoryMap.entries()
+      )
+      .sort((a,b) =>
+        a[1].localeCompare(b[1],undefined,{sensitivity:"base"})
+      );
+
+    categoryGrid.innerHTML =
+      categories
+        .map(([key,name]) => `
+          <button
+            class="ma7alak-category-button"
+            data-category="${ma7alakEscapeHtml(key)}"
+            type="button"
+          >
+            <span class="ma7alak-category-icon">
+              ${ma7alakCategoryIcon(key,name)}
+            </span>
+            ${ma7alakEscapeHtml(name)}
+          </button>
+        `)
+        .join("");
+
+    categoryButtons =
+      page.querySelectorAll(
+        ".ma7alak-category-button"
+      );
+
+  }
+
+
+  /* =========================================================
      EVENTS
   ========================================================= */
 
   function bindEvents(){
 
 
-    /* AREA */
+    /* AREA — DYNAMIC BUTTONS */
 
-    areaButtons.forEach(
-      button => {
+    areaGrid.addEventListener(
+      "click",
+      function(event){
 
-        button.addEventListener(
-          "click",
-          function(){
+        const button =
+          event.target.closest(
+            ".ma7alak-area-button"
+          );
 
-            selectedArea =
-              this.dataset.area;
+        if(!button){
+          return;
+        }
 
+        selectedArea =
+          button.dataset.area;
 
-            selectedCategory =
-              null;
+        selectedCategory =
+          null;
 
+        areaButtons =
+          page.querySelectorAll(
+            ".ma7alak-area-button"
+          );
 
-            areaButtons.forEach(
-              item => {
-
-                item.classList.remove(
-                  "active"
-                );
-
-              }
-            );
-
-
-            this.classList.add(
+        areaButtons.forEach(
+          item => {
+            item.classList.remove(
               "active"
             );
-
-
-            categoryButtons.forEach(
-              item => {
-
-                item.classList.remove(
-                  "active"
-                );
-
-              }
-            );
-
-
-            categorySection.classList.add(
-              "visible"
-            );
-
-
-            results.classList.remove(
-              "visible"
-            );
-
-
-            searchInput.value =
-              "";
-
-
-            searchTerm =
-              "";
-
-
-            setTimeout(
-              function(){
-
-                categorySection.scrollIntoView({
-
-                  behavior:"smooth",
-
-                  block:"center"
-
-                });
-
-              },
-              80
-            );
-
           }
+        );
+
+        button.classList.add(
+          "active"
+        );
+
+        ma7alakRenderDynamicCategories(
+          selectedArea
+        );
+
+        categorySection.classList.add(
+          "visible"
+        );
+
+        results.classList.remove(
+          "visible"
+        );
+
+        searchInput.value =
+          "";
+
+        searchTerm =
+          "";
+
+        setTimeout(
+          function(){
+            categorySection.scrollIntoView({
+              behavior:"smooth",
+              block:"center"
+            });
+          },
+          80
         );
 
       }
     );
 
 
-    /* CATEGORY */
+    /* CATEGORY — DYNAMIC BUTTONS */
 
-    categoryButtons.forEach(
-      button => {
+    categoryGrid.addEventListener(
+      "click",
+      function(event){
 
-        button.addEventListener(
-          "click",
-          function(){
+        const button =
+          event.target.closest(
+            ".ma7alak-category-button"
+          );
 
-            if(!selectedArea){
+        if(
+          !button ||
+          !selectedArea
+        ){
+          return;
+        }
 
-              return;
+        selectedCategory =
+          button.dataset.category;
 
-            }
+        categoryButtons =
+          page.querySelectorAll(
+            ".ma7alak-category-button"
+          );
 
-
-            selectedCategory =
-              this.dataset.category;
-
-
-            categoryButtons.forEach(
-              item => {
-
-                item.classList.remove(
-                  "active"
-                );
-
-              }
-            );
-
-
-            this.classList.add(
+        categoryButtons.forEach(
+          item => {
+            item.classList.remove(
               "active"
             );
-
-
-            renderResults();
-
-
-            setTimeout(
-              function(){
-
-                results.scrollIntoView({
-
-                  behavior:"smooth",
-
-                  block:"start"
-
-                });
-
-              },
-              100
-            );
-
           }
+        );
+
+        button.classList.add(
+          "active"
+        );
+
+        renderResults();
+
+        setTimeout(
+          function(){
+            results.scrollIntoView({
+              behavior:"smooth",
+              block:"start"
+            });
+          },
+          100
         );
 
       }
@@ -1030,6 +1057,16 @@
         categorySection.classList.remove(
           "visible"
         );
+
+
+        categoryGrid.innerHTML =
+          "";
+
+
+        categoryButtons =
+          page.querySelectorAll(
+            ".ma7alak-category-button"
+          );
 
 
         areaButtons.forEach(
@@ -2800,14 +2837,16 @@
 })();
 
 /* =========================================================
-   WHAT CHANGED — SUPABASE SHOP DIRECTORY
-   - Based directly on the exact GitHub-ready Show Shops code supplied by the user.
-   - Removed the hardcoded const shops = [...] catalog.
-   - Shops now load live from public.shop_profiles through Supabase at page load.
-   - Only rows with is_active = true are loaded.
-   - No empty placeholder shop cards are created.
-   - Database rows are normalized into the SAME shop object shape the existing code expects.
-   - shop_slug becomes shop.id, preserving the existing Story-to-shop connection.
-   - Existing Story ring, Story viewer, filtering, search, card design and mobile two-card layout were not intentionally changed.
-   - Adding a future shop to shop_profiles no longer requires editing this GitHub file.
+   WHAT CHANGED — DYNAMIC AREAS + CATEGORIES
+   - Based directly on the last confirmed working Supabase-live Show Shops code.
+   - Removed hardcoded Area buttons from the page markup.
+   - Removed hardcoded Category buttons from the page markup.
+   - Area buttons now build automatically from active shop_profiles rows.
+   - Category buttons now build automatically from categories used by shops inside the selected Area.
+   - category_name controls the visible category label; category remains the filter key.
+   - Added automatic category icons with a safe shop fallback icon for new categories.
+   - If a new active shop uses a new Area, that Area appears automatically after refresh.
+   - If a shop uses a new Category, that Category appears automatically inside its Area after refresh.
+   - No GitHub edit is needed just to add future Areas or Categories.
+   - Existing search, shop cards, Story linking/viewer and mobile two-card layout were preserved.
 ========================================================= */
