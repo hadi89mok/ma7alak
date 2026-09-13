@@ -3750,7 +3750,110 @@ function closeNotifications(){
 
 
 /* =========================================================
-   STORY REALTIME
+   DIRECT REEL REALTIME
+   ---------------------------------------------------------
+   The old notification system depended on the homepage Reel
+   iframe/header bridge to notice a new Reel. Reels published
+   from the Admin Panel now arrive directly from shop_reels,
+   so we register the INSERT immediately here too.
+========================================================= */
+
+function registerRealtimeReelNotification(row){
+
+  if(!row){
+    return;
+  }
+
+  const reelId =
+    String(row.reel_id || "").trim();
+
+  if(!reelId){
+    return;
+  }
+
+  const liveReel = {
+    id:reelId,
+    shop:String(row.shop_name || row.shop_slug || "Shop").trim(),
+    shopUrl:String(row.shop_url || (row.shop_slug ? ("https://ma7alak.com/" + row.shop_slug) : "")).trim(),
+    icon:String(row.shop_icon || "").trim(),
+    video:String(row.video_url || "").trim()
+  };
+
+  const existingIds =
+    normalizeStringArray(
+      currentReelsState.reelIds || []
+    );
+
+  const nextIds =
+    [reelId].concat(
+      existingIds.filter(function(id){
+        return id !== reelId;
+      })
+    );
+
+  const existingCatalog =
+    Array.isArray(currentReelsState.reels)
+      ? currentReelsState.reels
+      : [];
+
+  const nextCatalog =
+    [liveReel].concat(
+      existingCatalog.filter(function(reel){
+        return String(reel && reel.id ? reel.id : "").trim() !== reelId;
+      })
+    );
+
+  currentReelsState = {
+    reelIds:nextIds,
+    reels:nextCatalog
+  };
+
+  try{
+    localStorage.setItem(
+      MA7ALAK_REELS_LIVE_CACHE_KEY,
+      JSON.stringify(currentReelsState)
+    );
+  }
+  catch(error){}
+
+  const state =
+    getReelNotificationState();
+
+  /* If this visitor has never initialized Reel notifications,
+     preserve the already-loaded Reels as the baseline but keep
+     THIS realtime INSERT unread. */
+  if(!state.initialized){
+
+    state.initialized = true;
+
+    const baseline =
+      existingIds.filter(function(id){
+        return id !== reelId;
+      });
+
+    state.known = baseline.slice();
+    state.seen = baseline.slice();
+  }
+
+  if(!state.known.includes(reelId)){
+    state.known.push(reelId);
+  }
+
+  /* New Reel must be unread so the red notification badge returns. */
+  state.seen =
+    state.seen.filter(function(id){
+      return id !== reelId;
+    });
+
+  state.detectedAt[reelId] =
+    row.created_at || new Date().toISOString();
+
+  saveReelNotificationState(state);
+}
+
+
+/* =========================================================
+   STORY + REEL REALTIME
 ========================================================= */
 
 async function setupRealtime(){
@@ -3796,25 +3899,42 @@ async function setupRealtime(){
           },
           async function(){
 
-            /*
-               Same shop posts again:
-               loadNotifications() keeps only its newest Story,
-               so the old row is REUSED automatically.
-            */
-            /*
-               Realtime INSERT = update immediately.
-               No page refresh required.
-            */
             await loadNotifications();
-
 
             notificationBadgeCount =
               calculateBadgeCount();
 
+            updateNotificationBadge();
+            renderNotifications();
+
+          }
+        )
+
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"shop_reels"
+          },
+          async function(payload){
+
+            registerRealtimeReelNotification(
+              payload && payload.new
+                ? payload.new
+                : null
+            );
+
+            await loadNotifications();
+
+            notificationBadgeCount =
+              calculateBadgeCount();
 
             updateNotificationBadge();
-
             renderNotifications();
+
+            /* Also ask the live Reel block to send its refreshed catalog. */
+            requestCurrentReelsState();
 
           }
         )
