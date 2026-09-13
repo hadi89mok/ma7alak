@@ -105,6 +105,40 @@
 
     },
 
+ /* =====================================================
+       Zee Tattoo
+    ===================================================== */
+
+    {
+
+      id:"zee-tattoos-and-piercing",
+
+      name:"Zee Tattoos & Piercing",
+
+      arabic:"By zee",
+
+      area:"Beirut",
+
+      category:"Makeup & Tattoos",
+
+      categoryName:"Tattoos&Piercing",
+
+      location:"اBeirut",
+
+      image:
+        "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg",
+
+      url:
+        "https://ma7alak.com/zee-tattoos-and-piercing",
+
+      verified:true,
+
+      featured:true,
+
+      redFeatured:false
+
+    },
+
 
     /* =====================================================
        DOZE 3ALE
