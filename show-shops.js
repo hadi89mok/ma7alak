@@ -61,466 +61,15 @@
 
 
   /* =========================================================
-     SHOP DATA
-     
-     These are the current sample shops.
-     
-     Later these can be replaced by Supabase data
-     without changing the design.
+     SHOP DATA — LIVE FROM SUPABASE
+
+     Shops are no longer hardcoded in this GitHub file.
+     Active rows from public.shop_profiles are loaded at runtime
+     and normalized into the exact object shape the existing
+     filters, cards and Story system already use.
   ========================================================= */
 
-  const shops = [
-
-    /* =====================================================
-       MASAYA
-    ===================================================== */
-
-    {
-
-      id:"masaya-cafe",
-
-      name:"Masaya Cafe",
-
-      arabic:"كافية مسايا",
-
-      area:"Da7ye",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"حارة حريك - الصفير",
-
-      image:
-        "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/IMG-20260906-WA0049.jpg",
-
-      url:
-        "https://ma7alak.com/masaya-cafe",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
- /* =====================================================
-       Zee Tattoo
-    ===================================================== */
-
-    {
-
-      id:"zee-tattoos-and-piercing",
-
-      name:"Zee Tattoos & Piercing",
-
-      arabic:"By zee",
-
-      area:"Beirut",
-
-      category:"Makeup & Tattoos",
-
-      categoryName:"Tattoos&Piercing",
-
-      location:"اBeirut",
-
-      image:
-        "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg",
-
-      url:
-        "https://ma7alak.com/zee-tattoos-and-piercing",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       DOZE 3ALE
-    ===================================================== */
-
-    {
-
-      id:"doze-3-ale",
-
-      name:"Doze 3ale",
-
-      arabic:"دوزة عاله",
-
-      area:"Da7ye",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"الحدث",
-
-      image:
-        "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/IMG-20260906-WA0108.jpg",
-
-      url:
-        "https://ma7alak.com/doze-3-ale",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:true
-
-    },
-
-
-    /* =====================================================
-       BEIRUT COFFEE
-    ===================================================== */
-
-    {
-
-      id:"beirut-coffee",
-
-      name:"Beirut Coffee",
-
-      arabic:"قهوة بيروت",
-
-      area:"Central Beirut",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"الحمرا - بيروت",
-
-      image:
-        "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       URBAN BREW
-    ===================================================== */
-
-    {
-
-      id:"urban-brew",
-
-      name:"Urban Brew",
-
-      arabic:"أوربان برو",
-
-      area:"Central Beirut",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"مار مخايل - بيروت",
-
-      image:
-        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       DAILY CUP
-    ===================================================== */
-
-    {
-
-      id:"daily-cup",
-
-      name:"The Daily Cup",
-
-      arabic:"ذا ديلي كب",
-
-      area:"Da7ye",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"صيدا",
-
-      image:
-        "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:false,
-
-      featured:false,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       NORTH BREW
-    ===================================================== */
-
-    {
-
-      id:"north-brew",
-
-      name:"North Brew",
-
-      arabic:"نورث برو",
-
-      area:"North Lebanon",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"طرابلس",
-
-      image:
-        "https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:false,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       ROASTED LOUNGE
-    ===================================================== */
-
-    {
-
-      id:"roasted-lounge",
-
-      name:"Roasted Lounge",
-
-      arabic:"روستد لاونج",
-
-      area:"South Lebanon",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"صور",
-
-      image:
-        "https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:false,
-
-      featured:false,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       KAIF
-    ===================================================== */
-
-    {
-
-      id:"kaif-cafe",
-
-      name:"Kaif Café",
-
-      arabic:"كيف كافيه",
-
-      area:"Central Beirut",
-
-      category:"cafe",
-
-      categoryName:"Café & Coffee",
-
-      location:"بيروت",
-
-      image:
-        "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       CLOTHING
-    ===================================================== */
-
-    {
-
-      id:"local-style",
-
-      name:"Local Style",
-
-      arabic:"لوكل ستايل",
-
-      area:"Da7ye",
-
-      category:"clothing",
-
-      categoryName:"Clothing Stores",
-
-      location:"حارة حريك",
-
-      image:
-        "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:false,
-
-      redFeatured:false
-
-    },
-
-
-    {
-
-      id:"beirut-fashion",
-
-      name:"Beirut Fashion",
-
-      arabic:"بيروت فاشن",
-
-      area:"Central Beirut",
-
-      category:"clothing",
-
-      categoryName:"Clothing Stores",
-
-      location:"بدارو - بيروت",
-
-      image:
-        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:false,
-
-      featured:true,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       GENERAL SERVICES
-    ===================================================== */
-
-    {
-
-      id:"local-services",
-
-      name:"Local Services",
-
-      arabic:"خدمات محلية",
-
-      area:"Da7ye",
-
-      category:"services",
-
-      categoryName:"General Services",
-
-      location:"الضاحية الجنوبية",
-
-      image:
-        "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:false,
-
-      redFeatured:false
-
-    },
-
-
-    /* =====================================================
-       FOOD
-    ===================================================== */
-
-    {
-
-      id:"corner-bites",
-
-      name:"Corner Bites",
-
-      arabic:"كورنر بايتس",
-
-      area:"South Lebanon",
-
-      category:"food",
-
-      categoryName:"Kiosks & Food",
-
-      location:"صيدا",
-
-      image:
-        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=90",
-
-      url:
-        "https://ma7alak.com/shwf-almhlat-",
-
-      verified:true,
-
-      featured:true,
-
-      redFeatured:false
-
-    }
-
-  ];
+  let shops = [];
 
 
   /* =========================================================
@@ -1180,7 +729,7 @@
      INITIALIZE
   ========================================================= */
 
-  function initialize(){
+  async function initialize(){
 
     areaButtons =
       page.querySelectorAll(
@@ -1259,7 +808,15 @@
     ma7alakBindStoryCardClicks();
 
     /*
-     * Start the live Story system in the background.
+     * Load the live shop directory first.
+     * No placeholder cards are created: only active Supabase rows
+     * become real shop cards when the visitor selects filters.
+     */
+    await ma7alakLoadShopProfiles();
+
+    /*
+     * Start the existing live Story system after shop data exists,
+     * so shop_slug keeps linking each owner's Story to its shop.
      */
     ma7alakStartStorySystem();
 
@@ -1844,6 +1401,79 @@
       }
     );
 
+  }
+
+
+  /* =========================================================
+     LOAD ACTIVE SHOP DIRECTORY DATA FROM SUPABASE
+  ========================================================= */
+
+  async function ma7alakLoadShopProfiles(){
+
+    const client =
+      await ma7alakLoadSupabase();
+
+    if(!client){
+      console.error(
+        "Ma7alak Shops: Supabase client could not load."
+      );
+      shops = [];
+      return false;
+    }
+
+    const { data, error } =
+      await client
+        .from("shop_profiles")
+        .select(
+          "shop_slug,shop_name,arabic_name,profile_image_url,shop_url,area,category,category_name,location,verified,featured,featured_red,is_active"
+        )
+        .eq("is_active", true)
+        .order("shop_name", { ascending:true });
+
+    if(error){
+      console.error(
+        "Ma7alak Shops: could not load shop_profiles.",
+        error
+      );
+      shops = [];
+      return false;
+    }
+
+    shops =
+      (data || [])
+        .filter(
+          function(row){
+            return row && String(row.shop_slug || "").trim();
+          }
+        )
+        .map(
+          function(row){
+
+            const slug =
+              String(row.shop_slug || "").trim();
+
+            return {
+              id:slug,
+              name:String(row.shop_name || slug).trim(),
+              arabic:String(row.arabic_name || "").trim(),
+              area:String(row.area || "").trim(),
+              category:String(row.category || "").trim(),
+              categoryName:String(row.category_name || "").trim(),
+              location:String(row.location || "").trim(),
+              image:String(row.profile_image_url || "").trim(),
+              url:String(
+                row.shop_url ||
+                ("https://ma7alak.com/" + encodeURIComponent(slug))
+              ).trim(),
+              verified:row.verified === true,
+              featured:row.featured === true,
+              redFeatured:row.featured_red === true
+            };
+
+          }
+        );
+
+    return true;
   }
 
 
@@ -3170,10 +2800,14 @@
 })();
 
 /* =========================================================
-   WHAT CHANGED
-   - Converted the original Hostinger HTML/CSS/JS block into one GitHub-ready .js file.
-   - Removed the outer <style> and <script> tags.
-   - The original CSS is injected automatically by JavaScript.
-   - The original shops-page JavaScript logic was kept unchanged.
-   - No shop data, story-ring logic, story viewer logic, filtering, layout, or page behavior was intentionally changed.
+   WHAT CHANGED — SUPABASE SHOP DIRECTORY
+   - Based directly on the exact GitHub-ready Show Shops code supplied by the user.
+   - Removed the hardcoded const shops = [...] catalog.
+   - Shops now load live from public.shop_profiles through Supabase at page load.
+   - Only rows with is_active = true are loaded.
+   - No empty placeholder shop cards are created.
+   - Database rows are normalized into the SAME shop object shape the existing code expects.
+   - shop_slug becomes shop.id, preserving the existing Story-to-shop connection.
+   - Existing Story ring, Story viewer, filtering, search, card design and mobile two-card layout were not intentionally changed.
+   - Adding a future shop to shop_profiles no longer requires editing this GitHub file.
 ========================================================= */
