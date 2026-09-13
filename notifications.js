@@ -202,7 +202,7 @@ let showAllNotifications = false;
    Opening the bell does NOT clear this Set.
 */
 
-let highlightedStories =
+let highlightedNotifications =
   new Set();
 
 
@@ -1817,6 +1817,575 @@ function escapeAttribute(
 
 
 /* =========================================================
+   STORY + REEL NOTIFICATIONS — LATEST PER SHOP
+   ---------------------------------------------------------
+   - One Story row per shop.
+   - One Reel row per shop.
+   - A newer Story/Reel REUSES that shop's row.
+   - Seen row = faded/normal background.
+   - New post = same row becomes highlighted again + new time.
+========================================================= */
+
+const MA7ALAK_REELS_LIVE_CACHE_KEY =
+  "ma7alak_live_reels_catalog_v1";
+
+const MA7ALAK_REEL_NOTIFICATION_STATE_KEY =
+  "ma7alak_reel_notification_state_v1";
+
+let currentReelsState = {
+  reelIds:[],
+  reels:[]
+};
+
+
+function normalizeStringArray(values){
+
+  if(!Array.isArray(values)){
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      values
+        .map(function(value){
+          return String(value || "").trim();
+        })
+        .filter(Boolean)
+    )
+  );
+
+}
+
+
+function getReelNotificationState(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        MA7ALAK_REEL_NOTIFICATION_STATE_KEY
+      );
+
+    const parsed =
+      raw ? JSON.parse(raw) : null;
+
+    if(!parsed || typeof parsed !== "object"){
+      throw new Error("EMPTY_REEL_NOTIFICATION_STATE");
+    }
+
+    return {
+      initialized:Boolean(parsed.initialized),
+      known:normalizeStringArray(parsed.known),
+      seen:normalizeStringArray(parsed.seen),
+      detectedAt:
+        parsed.detectedAt &&
+        typeof parsed.detectedAt === "object"
+          ? parsed.detectedAt
+          : {}
+    };
+
+  }
+  catch(error){
+
+    return {
+      initialized:false,
+      known:[],
+      seen:[],
+      detectedAt:{}
+    };
+
+  }
+
+}
+
+
+function saveReelNotificationState(state){
+
+  try{
+
+    localStorage.setItem(
+      MA7ALAK_REEL_NOTIFICATION_STATE_KEY,
+      JSON.stringify({
+        initialized:Boolean(state.initialized),
+        known:normalizeStringArray(state.known),
+        seen:normalizeStringArray(state.seen),
+        detectedAt:
+          state.detectedAt &&
+          typeof state.detectedAt === "object"
+            ? state.detectedAt
+            : {}
+      })
+    );
+
+  }
+  catch(error){}
+
+}
+
+
+function getReelFingerprintId(
+  fingerprint
+){
+
+  return String(
+    fingerprint || ""
+  ).split("::")[0].trim();
+
+}
+
+
+function deriveReelShopKey(
+  reel,
+  fingerprint
+){
+
+  const shopUrl =
+    String(
+      reel && reel.shopUrl
+        ? reel.shopUrl
+        : ""
+    ).trim();
+
+  if(shopUrl){
+
+    try{
+
+      const parsed =
+        new URL(
+          shopUrl,
+          window.location.origin
+        );
+
+      const path =
+        parsed.pathname
+          .replace(/^\/+|\/+$/g,"")
+          .trim();
+
+      if(path){
+        return path.toLowerCase();
+      }
+
+    }
+    catch(error){}
+
+  }
+
+  const reelId =
+    getReelFingerprintId(
+      fingerprint
+    );
+
+  if(reelId){
+
+    const cleaned =
+      reelId.replace(
+        /-\d+$/,
+        ""
+      );
+
+    if(cleaned){
+      return cleaned.toLowerCase();
+    }
+
+  }
+
+  return String(
+    reel && reel.shop
+      ? reel.shop
+      : "shop"
+  )
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"") || "shop";
+
+}
+
+
+function findReelForFingerprint(
+  fingerprint,
+  reels
+){
+
+  const reelId =
+    getReelFingerprintId(
+      fingerprint
+    );
+
+  if(!reelId){
+    return null;
+  }
+
+  return (
+    reels || []
+  ).find(
+    function(reel){
+
+      return String(
+        reel && reel.id
+          ? reel.id
+          : ""
+      ).trim() === reelId;
+
+    }
+  ) || null;
+
+}
+
+
+function readReelsFromHeaderCache(){
+
+  try{
+
+    const cached =
+      JSON.parse(
+        localStorage.getItem(
+          MA7ALAK_REELS_LIVE_CACHE_KEY
+        ) || "{}"
+      );
+
+    return {
+      reelIds:normalizeStringArray(
+        cached.reelIds || []
+      ),
+      reels:Array.isArray(cached.reels)
+        ? cached.reels
+        : []
+    };
+
+  }
+  catch(error){
+
+    return {
+      reelIds:[],
+      reels:[]
+    };
+
+  }
+
+}
+
+
+function syncReelNotificationState(
+  reelIds,
+  reels
+){
+
+  const ids =
+    normalizeStringArray(
+      reelIds || []
+    );
+
+  const catalog =
+    Array.isArray(reels)
+      ? reels.filter(Boolean)
+      : [];
+
+  if(!ids.length){
+    return;
+  }
+
+  currentReelsState = {
+    reelIds:ids,
+    reels:catalog.length
+      ? catalog
+      : currentReelsState.reels
+  };
+
+  const state =
+    getReelNotificationState();
+
+  const now =
+    Date.now();
+
+  /*
+     First run after installing this version:
+     current Reels become the baseline, so old Reels do NOT
+     suddenly appear as brand-new notifications.
+  */
+  if(!state.initialized){
+
+    state.initialized = true;
+    state.known = ids.slice();
+    state.seen = ids.slice();
+
+    ids.forEach(
+      function(id,index){
+
+        if(!state.detectedAt[id]){
+          state.detectedAt[id] =
+            new Date(
+              now - index
+            ).toISOString();
+        }
+
+      }
+    );
+
+    saveReelNotificationState(
+      state
+    );
+
+    return;
+
+  }
+
+  const knownSet =
+    new Set(
+      state.known
+    );
+
+  ids.forEach(
+    function(id,index){
+
+      if(!knownSet.has(id)){
+
+        state.known.push(id);
+
+        /*
+           This is the moment this visitor first received the new Reel.
+           It becomes the notification time shown in the panel.
+        */
+        state.detectedAt[id] =
+          new Date(
+            now - index
+          ).toISOString();
+
+      }
+      else if(!state.detectedAt[id]){
+
+        state.detectedAt[id] =
+          new Date(
+            now - index
+          ).toISOString();
+
+      }
+
+    }
+  );
+
+  /* Keep state reasonably small. */
+  const keep =
+    new Set(
+      state.known.slice(-250)
+    );
+
+  state.known =
+    state.known.filter(
+      function(id){
+        return keep.has(id);
+      }
+    );
+
+  state.seen =
+    state.seen.filter(
+      function(id){
+        return keep.has(id);
+      }
+    );
+
+  Object.keys(
+    state.detectedAt
+  ).forEach(
+    function(id){
+
+      if(!keep.has(id)){
+        delete state.detectedAt[id];
+      }
+
+    }
+  );
+
+  saveReelNotificationState(
+    state
+  );
+
+}
+
+
+function buildReelNotifications(){
+
+  const cached =
+    readReelsFromHeaderCache();
+
+  if(cached.reelIds.length){
+
+    syncReelNotificationState(
+      cached.reelIds,
+      cached.reels
+    );
+
+  }
+
+  const reelIds =
+    currentReelsState.reelIds.length
+      ? currentReelsState.reelIds
+      : cached.reelIds;
+
+  const reels =
+    currentReelsState.reels.length
+      ? currentReelsState.reels
+      : cached.reels;
+
+  if(!reelIds.length){
+    return [];
+  }
+
+  const state =
+    getReelNotificationState();
+
+  const seenSet =
+    new Set(
+      state.seen
+    );
+
+  const latestByShop =
+    new Map();
+
+  reelIds.forEach(
+    function(fingerprint){
+
+      const reel =
+        findReelForFingerprint(
+          fingerprint,
+          reels
+        );
+
+      if(!reel){
+        return;
+      }
+
+      const shopKey =
+        deriveReelShopKey(
+          reel,
+          fingerprint
+        );
+
+      const createdAt =
+        state.detectedAt[fingerprint] ||
+        new Date().toISOString();
+
+      const candidate = {
+        key:"reel:" + shopKey,
+        type:"reel",
+        id:fingerprint,
+        reel_id:String(reel.id || "").trim(),
+        shop_slug:shopKey,
+        shop_name:String(reel.shop || "").trim(),
+        shop_url:String(reel.shopUrl || "").trim(),
+        icon:String(reel.icon || "").trim(),
+        created_at:createdAt,
+        seen:seenSet.has(fingerprint)
+      };
+
+      const existing =
+        latestByShop.get(
+          shopKey
+        );
+
+      if(
+        !existing ||
+        new Date(candidate.created_at).getTime() >
+        new Date(existing.created_at).getTime()
+      ){
+
+        latestByShop.set(
+          shopKey,
+          candidate
+        );
+
+      }
+
+    }
+  );
+
+  return Array.from(
+    latestByShop.values()
+  );
+
+}
+
+
+function markReelFingerprintAsSeen(
+  fingerprint
+){
+
+  const id =
+    String(
+      fingerprint || ""
+    ).trim();
+
+  if(!id){
+    return;
+  }
+
+  const state =
+    getReelNotificationState();
+
+  const seenSet =
+    new Set(
+      state.seen
+    );
+
+  seenSet.add(id);
+
+  state.seen =
+    Array.from(
+      seenSet
+    );
+
+  saveReelNotificationState(
+    state
+  );
+
+}
+
+
+function markAllCurrentReelsAsSeen(){
+
+  const reelNotifications =
+    notifications.filter(
+      function(notification){
+        return notification.type === "reel";
+      }
+    );
+
+  if(!reelNotifications.length){
+    return;
+  }
+
+  const state =
+    getReelNotificationState();
+
+  const seenSet =
+    new Set(
+      state.seen
+    );
+
+  reelNotifications.forEach(
+    function(notification){
+
+      if(notification.id){
+        seenSet.add(
+          String(notification.id)
+        );
+      }
+
+    }
+  );
+
+  state.seen =
+    Array.from(
+      seenSet
+    );
+
+  saveReelNotificationState(
+    state
+  );
+
+}
+
+
+/* =========================================================
    LOAD NOTIFICATIONS
 ========================================================= */
 
@@ -1827,14 +2396,6 @@ async function loadNotifications(){
     const client =
       await loadMa7alakSupabase();
 
-
-    /*
-       Notifications older than 48 hours
-       automatically disappear.
-
-       The 48-hour cutoff is calculated
-       every time notifications are loaded.
-    */
 
     const notificationCutoff =
       new Date(
@@ -1899,132 +2460,32 @@ async function loadNotifications(){
       stories || [];
 
 
-    if(
-      activeStories.length === 0
-    ){
-
-      notifications = [];
-
-      notificationBadgeCount = 0;
-
-      highlightedStories.clear();
-
-      showAllNotifications = false;
-
-      updateNotificationBadge();
-
-      renderNotifications();
-
-      return;
-
-    }
-
-
     /* -------------------------------------------------------
-       GET SEEN STORIES
+       ONE STORY ROW PER SHOP — KEEP ONLY LATEST STORY
     ------------------------------------------------------- */
 
-    const storyIds =
-      activeStories.map(
-        function(story){
+    const latestStoryByShop =
+      new Map();
 
-          return story.id;
-
-        }
-      );
-
-
-    const {
-      data:seenRows,
-      error:seenError
-    } = await client
-
-      .from(
-        "story_notification_views"
-      )
-
-      .select(
-        "story_id,seen_at"
-      )
-
-      .eq(
-        "visitor_id",
-        visitorId
-      )
-
-      .in(
-        "story_id",
-        storyIds
-      );
-
-
-    if(seenError){
-
-      console.error(
-        "Ma7alak notification views:",
-        seenError
-      );
-
-    }
-
-
-    const seenSet =
-      new Set(
-        (
-          seenRows || []
-        ).map(
-          function(row){
-
-            return row.story_id;
-
-          }
-        )
-      );
-
-
-    /* -------------------------------------------------------
-       BUILD NOTIFICATIONS
-    ------------------------------------------------------- */
-
-    notifications =
-      activeStories.map(
-        function(story){
-
-          return {
-
-            ...story,
-
-            seen:
-              seenSet.has(
-                story.id
-              )
-
-          };
-
-        }
-      );
-
-
-    /*
-       Only ADD new highlights.
-
-       NEVER clear existing highlights here.
-
-       This means refreshing data cannot
-       accidentally remove individual highlights.
-    */
-
-    notifications.forEach(
+    activeStories.forEach(
       function(story){
 
         if(
-          !story.seen
+          !story ||
+          !story.shop_slug
+        ){
+          return;
+        }
+
+        if(
+          !latestStoryByShop.has(
+            story.shop_slug
+          )
         ){
 
-          highlightedStories.add(
-            String(
-              story.id
-            )
+          latestStoryByShop.set(
+            story.shop_slug,
+            story
           );
 
         }
@@ -2033,55 +2494,172 @@ async function loadNotifications(){
     );
 
 
-    /*
-       Remove highlights ONLY for stories
-       that are no longer in the 48-hour
-       notification list.
-    */
+    const latestStories =
+      Array.from(
+        latestStoryByShop.values()
+      );
 
-    const activeIdSet =
-      new Set(
-        activeStories.map(
+
+    /* -------------------------------------------------------
+       GET SEEN STATE FOR ONLY THE LATEST STORY OF EACH SHOP
+    ------------------------------------------------------- */
+
+    let storyNotifications = [];
+
+    if(latestStories.length){
+
+      const storyIds =
+        latestStories.map(
+          function(story){
+            return story.id;
+          }
+        );
+
+
+      const {
+        data:seenRows,
+        error:seenError
+      } = await client
+
+        .from(
+          "story_notification_views"
+        )
+
+        .select(
+          "story_id,seen_at"
+        )
+
+        .eq(
+          "visitor_id",
+          visitorId
+        )
+
+        .in(
+          "story_id",
+          storyIds
+        );
+
+
+      if(seenError){
+
+        console.error(
+          "Ma7alak notification views:",
+          seenError
+        );
+
+      }
+
+
+      const seenSet =
+        new Set(
+          (
+            seenRows || []
+          ).map(
+            function(row){
+              return row.story_id;
+            }
+          )
+        );
+
+
+      storyNotifications =
+        latestStories.map(
           function(story){
 
-            return String(
-              story.id
+            return {
+              ...story,
+              key:
+                "story:" +
+                story.shop_slug,
+              type:"story",
+              seen:seenSet.has(
+                story.id
+              )
+            };
+
+          }
+        );
+
+    }
+
+
+    /* -------------------------------------------------------
+       LIVE REEL NOTIFICATIONS
+    ------------------------------------------------------- */
+
+    const reelNotifications =
+      buildReelNotifications();
+
+
+    /* -------------------------------------------------------
+       COMBINE + SORT
+    ------------------------------------------------------- */
+
+    notifications =
+      storyNotifications
+        .concat(
+          reelNotifications
+        )
+        .sort(
+          function(a,b){
+
+            return (
+              new Date(
+                b.created_at || 0
+              ).getTime() -
+              new Date(
+                a.created_at || 0
+              ).getTime()
             );
 
+          }
+        );
+
+
+    /* -------------------------------------------------------
+       HIGHLIGHT ONLY CURRENT UNREAD ROWS
+       key is type + shop, so the SAME row gets reused.
+       A newer story/reel has a different ID and becomes unread again.
+    ------------------------------------------------------- */
+
+    notifications.forEach(
+      function(notification){
+
+        if(!notification.seen){
+
+          highlightedNotifications.add(
+            notification.key
+          );
+
+        }
+
+      }
+    );
+
+
+    const activeKeySet =
+      new Set(
+        notifications.map(
+          function(notification){
+            return notification.key;
           }
         )
       );
 
 
-    highlightedStories =
+    highlightedNotifications =
       new Set(
         Array.from(
-          highlightedStories
+          highlightedNotifications
         ).filter(
-          function(id){
-
-            return activeIdSet.has(
-              id
-            );
-
+          function(key){
+            return activeKeySet.has(key);
           }
         )
       );
 
 
-    /*
-       Badge.
-
-       If panel is open:
-       badge stays zero.
-
-       If panel is closed:
-       unseen stories create badge.
-    */
-
-    if(
-      notificationsOpen
-    ){
+    if(notificationsOpen){
 
       notificationBadgeCount =
         0;
@@ -2091,10 +2669,8 @@ async function loadNotifications(){
 
       notificationBadgeCount =
         notifications.filter(
-          function(story){
-
-            return !story.seen;
-
+          function(notification){
+            return !notification.seen;
           }
         ).length;
 
@@ -2105,12 +2681,6 @@ async function loadNotifications(){
 
     renderNotifications();
 
-
-    /*
-       Refresh shop profile data so
-       every notification has the
-       correct image and name.
-    */
 
     await loadShopProfiles();
 
@@ -2210,9 +2780,7 @@ function renderNotifications(){
 
 
   if(!list){
-
     return;
-
   }
 
 
@@ -2255,17 +2823,6 @@ function renderNotifications(){
   }
 
 
-  /*
-     FACEBOOK-STYLE DISPLAY
-
-     Default:
-     show only the latest 6.
-
-     After clicking
-     "See previous notifications":
-     show everything.
-  */
-
   const visibleNotifications =
     showAllNotifications
       ? notifications
@@ -2278,40 +2835,51 @@ function renderNotifications(){
   list.innerHTML =
     visibleNotifications
       .map(
-        function(story){
+        function(notification){
 
-          const storyId =
+          const notificationKey =
             String(
-              story.id
+              notification.key || ""
             );
 
-
-          /*
-             Highlight is controlled ONLY
-             by this specific story ID.
-          */
 
           const highlighted =
-            highlightedStories.has(
-              storyId
+            highlightedNotifications.has(
+              notificationKey
             );
+
+
+          const isReel =
+            notification.type === "reel";
 
 
           const shopName =
-            getShopName(
-              story.shop_slug
+            isReel && notification.shop_name
+              ? notification.shop_name
+              : getShopName(
+                  notification.shop_slug
+                );
+
+
+          const profileImage =
+            getShopProfileImage(
+              notification.shop_slug
             );
 
 
           const shopImage =
-            getShopProfileImage(
-              story.shop_slug
-            );
+            isReel
+              ? (
+                  profileImage ||
+                  notification.icon ||
+                  ""
+                )
+              : profileImage;
 
 
           const time =
             formatNotificationTime(
-              story.created_at
+              notification.created_at
             );
 
 
@@ -2332,7 +2900,7 @@ function renderNotifications(){
                   if(!this.parentElement.querySelector('.fallback-emoji')){
                     this.parentElement.insertAdjacentHTML(
                       'beforeend',
-                      '<span class=&quot;fallback-emoji&quot;>🔥</span>'
+                      '<span class=&quot;fallback-emoji&quot;>${isReel ? "▶️" : "🔥"}</span>'
                     );
                   }
                 "
@@ -2348,7 +2916,7 @@ function renderNotifications(){
               <span
                 class="fallback-emoji"
               >
-                🔥
+                ${isReel ? "▶️" : "🔥"}
               </span>
 
             `;
@@ -2364,8 +2932,11 @@ function renderNotifications(){
                 ma7alak-notification-item
                 ${highlighted ? "highlighted" : ""}
               "
-              data-story-id="${escapeAttribute(storyId)}"
-              data-shop-slug="${escapeAttribute(story.shop_slug)}"
+              data-notification-key="${escapeAttribute(notificationKey)}"
+              data-notification-type="${escapeAttribute(notification.type || "story")}"
+              data-notification-id="${escapeAttribute(String(notification.id || ""))}"
+              data-shop-slug="${escapeAttribute(notification.shop_slug || "")}"
+              data-shop-url="${escapeAttribute(notification.shop_url || "")}"
             >
 
               <div
@@ -2389,7 +2960,7 @@ function renderNotifications(){
                     ${escapeHtml(shopName)}
                   </strong>
 
-                  added a new story
+                  ${isReel ? "added a new Reel" : "added a new story"}
 
                 </p>
 
@@ -2415,13 +2986,6 @@ function renderNotifications(){
       )
       .join("");
 
-
-  /*
-     SEE PREVIOUS NOTIFICATIONS
-
-     Only shown when there are more
-     than 6 notifications.
-  */
 
   if(
     !showAllNotifications &&
@@ -2451,13 +3015,10 @@ function renderNotifications(){
       function(event){
 
         event.preventDefault();
-
         event.stopPropagation();
-
 
         showAllNotifications =
           true;
-
 
         renderNotifications();
 
@@ -2472,10 +3033,6 @@ function renderNotifications(){
   }
 
 
-  /* -------------------------------------------------------
-     CLICK EACH NOTIFICATION
-  ------------------------------------------------------- */
-
   list
     .querySelectorAll(
       ".ma7alak-notification-item"
@@ -2487,46 +3044,92 @@ function renderNotifications(){
           "click",
           async function(){
 
-            const storyId =
+            const notificationKey =
               String(
-                item.dataset.storyId
+                item.dataset.notificationKey || ""
+              );
+
+
+            const notificationType =
+              String(
+                item.dataset.notificationType || "story"
+              );
+
+
+            const notificationId =
+              String(
+                item.dataset.notificationId || ""
               );
 
 
             const shopSlug =
-              item.dataset.shopSlug;
+              item.dataset.shopSlug || "";
 
 
-            /*
-               Remove ONLY this story's
-               highlight.
-            */
+            const shopUrl =
+              item.dataset.shopUrl || "";
 
-            highlightedStories.delete(
-              storyId
+
+            highlightedNotifications.delete(
+              notificationKey
             );
 
 
-            /*
-               Mark ONLY this story as seen.
-            */
+            if(
+              notificationType === "reel"
+            ){
 
-            await markSingleStoryAsSeen(
-              storyId
-            );
+              markReelFingerprintAsSeen(
+                notificationId
+              );
+
+            }
+            else{
+
+              await markSingleStoryAsSeen(
+                notificationId
+              );
+
+            }
 
 
-            /*
-               Other highlighted
-               notifications remain highlighted.
-            */
+            notifications =
+              notifications.map(
+                function(notification){
+
+                  if(
+                    notification.key ===
+                    notificationKey
+                  ){
+
+                    return {
+                      ...notification,
+                      seen:true
+                    };
+
+                  }
+
+                  return notification;
+
+                }
+              );
+
 
             renderNotifications();
 
 
-            /*
-               Open the shop.
-            */
+            if(
+              notificationType === "reel" &&
+              shopUrl
+            ){
+
+              window.location.href =
+                shopUrl;
+
+              return;
+
+            }
+
 
             if(shopSlug){
 
@@ -2561,6 +3164,21 @@ async function markSingleStoryAsSeen(
       await loadMa7alakSupabase();
 
 
+    const numericStoryId =
+      Number(
+        storyId
+      );
+
+
+    if(
+      !Number.isFinite(
+        numericStoryId
+      )
+    ){
+      return;
+    }
+
+
     await client
 
       .from(
@@ -2573,10 +3191,7 @@ async function markSingleStoryAsSeen(
             visitorId,
 
           story_id:
-            Number(
-              storyId
-            )
-
+            numericStoryId
         },
         {
           onConflict:
@@ -2602,15 +3217,6 @@ async function markSingleStoryAsSeen(
 
 /* =========================================================
    MARK ALL CURRENT NOTIFICATIONS AS SEEN
-   ---------------------------------------------------------
-   Opening the Notifications panel means the visitor has
-   seen the CURRENT notification batch.
-
-   This writes every current Story notification into
-   story_notification_views, so the 60-second refresh cannot
-   bring the same badge back again.
-
-   Only a newly-added Story can create a new badge afterward.
 ========================================================= */
 
 async function markAllCurrentNotificationsAsSeen(){
@@ -2628,14 +3234,19 @@ async function markAllCurrentNotificationsAsSeen(){
       await loadMa7alakSupabase();
 
 
-    const rows =
+    const storyRows =
       notifications
+        .filter(
+          function(notification){
+            return notification.type === "story";
+          }
+        )
         .map(
-          function(story){
+          function(notification){
 
             const storyId =
               Number(
-                story.id
+                notification.id
               );
 
 
@@ -2661,54 +3272,48 @@ async function markAllCurrentNotificationsAsSeen(){
         .filter(Boolean);
 
 
-    if(
-      !rows.length
-    ){
-      return;
-    }
+    if(storyRows.length){
+
+      const {
+        error
+      } =
+        await client
+          .from(
+            "story_notification_views"
+          )
+          .upsert(
+            storyRows,
+            {
+              onConflict:
+                "visitor_id,story_id",
+
+              ignoreDuplicates:
+                true
+            }
+          );
 
 
-    const {
-      error
-    } =
-      await client
-        .from(
-          "story_notification_views"
-        )
-        .upsert(
-          rows,
-          {
-            onConflict:
-              "visitor_id,story_id",
+      if(error){
 
-            ignoreDuplicates:
-              true
-          }
+        console.error(
+          "Ma7alak mark all story notifications:",
+          error
         );
 
-
-    if(error){
-
-      console.error(
-        "Ma7alak mark all notifications:",
-        error
-      );
-
-      return;
+      }
 
     }
 
 
-    /*
-       Update the local state immediately.
-       No need to wait for the next database refresh.
-    */
+    markAllCurrentReelsAsSeen();
+
+
     notifications =
       notifications.map(
-        function(story){
+        function(notification){
 
           return {
-            ...story,
+            ...notification,
             seen:true
           };
 
@@ -2716,11 +3321,7 @@ async function markAllCurrentNotificationsAsSeen(){
       );
 
 
-    /*
-       Opening Notifications now means the current batch
-       has been read, so remove their unread highlights too.
-    */
-    highlightedStories.clear();
+    highlightedNotifications.clear();
 
   }
   catch(error){
@@ -2748,9 +3349,7 @@ async function openNotifications(){
 
 
   if(!panel){
-
     return;
-
   }
 
 
@@ -2758,28 +3357,11 @@ async function openNotifications(){
     true;
 
 
-  /*
-     First get the latest current notification batch.
-  */
-
   await loadNotifications();
 
 
-  /*
-     IMPORTANT:
-     Opening Notifications means all notifications that
-     currently exist have now been seen by this visitor.
-
-     Persist that state in story_notification_views so the
-     minute refresh cannot make the same badge reappear.
-  */
-
   await markAllCurrentNotificationsAsSeen();
 
-
-  /*
-     Current batch is now read.
-  */
 
   notificationBadgeCount =
     0;
@@ -2823,14 +3405,6 @@ function closeNotifications(){
   }
 
 
-  /*
-     Keep badge at zero after
-     opening notifications.
-
-     A new story will create
-     a new badge.
-  */
-
   notificationBadgeCount =
     0;
 
@@ -2841,7 +3415,7 @@ function closeNotifications(){
 
 
 /* =========================================================
-   REALTIME
+   STORY REALTIME
 ========================================================= */
 
 async function setupRealtime(){
@@ -2888,25 +3462,14 @@ async function setupRealtime(){
           async function(){
 
             /*
-               New story.
-
-               Reload everything.
+               Same shop posts again:
+               loadNotifications() keeps only its newest Story,
+               so the old row is REUSED automatically.
             */
-
             await loadNotifications();
 
 
-            /*
-               If panel is open:
-               no badge.
-
-               If panel is closed:
-               show badge.
-            */
-
-            if(
-              notificationsOpen
-            ){
+            if(notificationsOpen){
 
               notificationBadgeCount =
                 0;
@@ -2916,10 +3479,8 @@ async function setupRealtime(){
 
               notificationBadgeCount =
                 notifications.filter(
-                  function(story){
-
-                    return !story.seen;
-
+                  function(notification){
+                    return !notification.seen;
                   }
                 ).length;
 
@@ -2949,6 +3510,114 @@ async function setupRealtime(){
 
 
 /* =========================================================
+   LIVE REELS BRIDGE
+   ---------------------------------------------------------
+   The existing Header/Reels system already sends:
+   MA7ALAK_REELS_STATE
+
+   We listen to the SAME message here.
+   No Reel panel code is changed.
+========================================================= */
+
+function setupReelNotificationBridge(){
+
+  const cached =
+    readReelsFromHeaderCache();
+
+  if(cached.reelIds.length){
+
+    syncReelNotificationState(
+      cached.reelIds,
+      cached.reels
+    );
+
+  }
+
+
+  window.addEventListener(
+    "message",
+    function(event){
+
+      if(
+        !event.data ||
+        event.data.type !==
+          "MA7ALAK_REELS_STATE"
+      ){
+        return;
+      }
+
+
+      const reelIds =
+        normalizeStringArray(
+          event.data.reelIds || []
+        );
+
+
+      const reels =
+        Array.isArray(
+          event.data.reels
+        )
+          ? event.data.reels
+          : [];
+
+
+      if(!reelIds.length){
+        return;
+      }
+
+
+      syncReelNotificationState(
+        reelIds,
+        reels
+      );
+
+
+      loadNotifications();
+
+    }
+  );
+
+
+  /*
+     Request the current Reel catalog from Hostinger/Reels embeds.
+     This matches the existing header bridge and does not move/alter them.
+  */
+  setTimeout(
+    function(){
+
+      document.querySelectorAll(
+        "iframe"
+      ).forEach(
+        function(frame){
+
+          try{
+
+            if(frame.contentWindow){
+
+              frame.contentWindow.postMessage(
+                {
+                  type:
+                    "MA7ALAK_REQUEST_REELS_STATE"
+                },
+                "*"
+              );
+
+            }
+
+          }
+          catch(error){}
+
+        }
+      );
+
+    },
+    450
+  );
+
+}
+
+
+/* =========================================================
    AUTO REFRESH
 ========================================================= */
 
@@ -2963,14 +3632,6 @@ function startNotificationRefresh(){
   }
 
 
-  /*
-     Refresh every minute.
-
-     This also automatically removes
-     notifications that pass the 48-hour
-     cutoff.
-  */
-
   refreshTimer =
     setInterval(
       async function(){
@@ -2978,9 +3639,7 @@ function startNotificationRefresh(){
         await loadNotifications();
 
 
-        if(
-          notificationsOpen
-        ){
+        if(notificationsOpen){
 
           notificationBadgeCount =
             0;
@@ -2990,10 +3649,8 @@ function startNotificationRefresh(){
 
           notificationBadgeCount =
             notifications.filter(
-              function(story){
-
-                return !story.seen;
-
+              function(notification){
+                return !notification.seen;
               }
             ).length;
 
@@ -3022,6 +3679,8 @@ async function startMa7alakNotifications(){
     await loadMa7alakSupabase();
 
     await loadShopProfiles();
+
+    setupReelNotificationBridge();
 
     await loadNotifications();
 
@@ -3066,14 +3725,19 @@ else{
 
 })();
 
+
 /* =========================================================
-   WHAT CHANGED — NOTIFICATION READ STATE FIX
+   WHAT CHANGED — STORY + REEL SMART NOTIFICATIONS
    =========================================================
-   1. Fixed the notification badge returning a few seconds/minutes after the bell was opened.
-   2. Opening Notifications now marks every CURRENT notification as seen in story_notification_views.
-   3. Current notification highlights are cleared when the panel is opened.
-   4. The badge stays at 0 after closing or during normal refreshes.
-   5. Only a newly-added Story can create a new notification badge afterward.
-   6. Existing notification history remains visible inside the panel.
-   7. Existing individual notification click behavior, 48-hour expiry, Realtime INSERT listener, profile images, and phone UI are preserved.
+   1. Stories now use ONE notification row per shop.
+   2. If the same shop posts again, its row updates to the newest Story.
+   3. Opening Notifications marks the current row read and fades it.
+   4. A later Story from that same shop makes the SAME row new/highlighted again.
+   5. Reels now appear in the SAME notification panel.
+   6. Reels use shop name + shop profile/icon + "added a new Reel".
+   7. Reels also use ONE row per shop and update/re-highlight on a newer Reel.
+   8. Existing Story realtime, 48-hour Story window, badge, bell shake,
+      phone UI, shop profile images and existing Reel panel/header remain intact.
+   9. Existing Reels are seeded as the baseline on first run, so deployment
+      does not create fake notifications for old Reels.
 ========================================================= */
