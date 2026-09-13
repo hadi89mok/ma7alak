@@ -404,6 +404,7 @@ function injectNotificationCSS(){
 
   style.textContent = `
 
+
 /* =========================================================
    NOTIFICATION BELL
 ========================================================= */
@@ -994,6 +995,8 @@ function injectNotificationCSS(){
   font-size:19px;
 
 }
+
+
 .ma7alak-notification-icon img{
 
   width:100%;
@@ -1295,6 +1298,7 @@ function injectNotificationCSS(){
 
 
   `;
+
 
   document.head.appendChild(
     style
@@ -1987,6 +1991,7 @@ async function loadNotifications(){
         function(story){
 
           return {
+
             ...story,
 
             seen:
@@ -1998,7 +2003,9 @@ async function loadNotifications(){
 
         }
       );
-        /*
+
+
+    /*
        Only ADD new highlights.
 
        NEVER clear existing highlights here.
@@ -2390,9 +2397,7 @@ function renderNotifications(){
                 <div
                   class="ma7alak-notification-time"
                 >
-
                   ${escapeHtml(time)}
-
                 </div>
 
               </div>
@@ -2557,9 +2562,11 @@ async function markSingleStoryAsSeen(
 
 
     await client
+
       .from(
         "story_notification_views"
       )
+
       .upsert(
         {
           visitor_id:
@@ -2569,6 +2576,7 @@ async function markSingleStoryAsSeen(
             Number(
               storyId
             )
+
         },
         {
           onConflict:
@@ -2593,6 +2601,141 @@ async function markSingleStoryAsSeen(
 
 
 /* =========================================================
+   MARK ALL CURRENT NOTIFICATIONS AS SEEN
+   ---------------------------------------------------------
+   Opening the Notifications panel means the visitor has
+   seen the CURRENT notification batch.
+
+   This writes every current Story notification into
+   story_notification_views, so the 60-second refresh cannot
+   bring the same badge back again.
+
+   Only a newly-added Story can create a new badge afterward.
+========================================================= */
+
+async function markAllCurrentNotificationsAsSeen(){
+
+  if(
+    !notifications.length
+  ){
+    return;
+  }
+
+
+  try{
+
+    const client =
+      await loadMa7alakSupabase();
+
+
+    const rows =
+      notifications
+        .map(
+          function(story){
+
+            const storyId =
+              Number(
+                story.id
+              );
+
+
+            if(
+              !Number.isFinite(
+                storyId
+              )
+            ){
+              return null;
+            }
+
+
+            return {
+              visitor_id:
+                visitorId,
+
+              story_id:
+                storyId
+            };
+
+          }
+        )
+        .filter(Boolean);
+
+
+    if(
+      !rows.length
+    ){
+      return;
+    }
+
+
+    const {
+      error
+    } =
+      await client
+        .from(
+          "story_notification_views"
+        )
+        .upsert(
+          rows,
+          {
+            onConflict:
+              "visitor_id,story_id",
+
+            ignoreDuplicates:
+              true
+          }
+        );
+
+
+    if(error){
+
+      console.error(
+        "Ma7alak mark all notifications:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    /*
+       Update the local state immediately.
+       No need to wait for the next database refresh.
+    */
+    notifications =
+      notifications.map(
+        function(story){
+
+          return {
+            ...story,
+            seen:true
+          };
+
+        }
+      );
+
+
+    /*
+       Opening Notifications now means the current batch
+       has been read, so remove their unread highlights too.
+    */
+    highlightedStories.clear();
+
+  }
+  catch(error){
+
+    console.error(
+      "Ma7alak mark all notifications:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
    OPEN NOTIFICATIONS
 ========================================================= */
 
@@ -2604,9 +2747,7 @@ async function openNotifications(){
     );
 
 
-  if(
-    !panel
-  ){
+  if(!panel){
 
     return;
 
@@ -2618,12 +2759,26 @@ async function openNotifications(){
 
 
   /*
-     INSTANT OPEN:
+     First get the latest current notification batch.
+  */
 
-     Open the panel immediately using whatever
-     notification data is already in memory.
+  await loadNotifications();
 
-     Do NOT wait for Supabase before showing it.
+
+  /*
+     IMPORTANT:
+     Opening Notifications means all notifications that
+     currently exist have now been seen by this visitor.
+
+     Persist that state in story_notification_views so the
+     minute refresh cannot make the same badge reappear.
+  */
+
+  await markAllCurrentNotificationsAsSeen();
+
+
+  /*
+     Current batch is now read.
   */
 
   notificationBadgeCount =
@@ -2632,49 +2787,13 @@ async function openNotifications(){
 
   updateNotificationBadge();
 
+
   renderNotifications();
 
 
   panel.classList.add(
     "open"
   );
-
-
-  /*
-     Refresh latest notifications in the background.
-
-     This keeps the button feeling instant while still
-     updating the panel with fresh Supabase data.
-  */
-
-  try{
-
-    await loadNotifications();
-
-
-    if(
-      notificationsOpen
-    ){
-
-      notificationBadgeCount =
-        0;
-
-
-      updateNotificationBadge();
-
-      renderNotifications();
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      "Ma7alak instant notification refresh:",
-      error
-    );
-
-  }
 
 }
 
@@ -2945,19 +3064,16 @@ else{
 }
 
 
-/* =========================================================
-   END NOTIFICATIONS
-========================================================= */
-
 })();
 
 /* =========================================================
-   WHAT CHANGED
+   WHAT CHANGED — NOTIFICATION READ STATE FIX
    =========================================================
-
-   1. Notification panel now opens instantly when the bell is pressed.
-   2. It no longer waits for Supabase/network requests before becoming visible.
-   3. Existing notifications render immediately.
-   4. Fresh notifications still load from Supabase in the background.
-   5. All other notification behavior remains unchanged.
+   1. Fixed the notification badge returning a few seconds/minutes after the bell was opened.
+   2. Opening Notifications now marks every CURRENT notification as seen in story_notification_views.
+   3. Current notification highlights are cleared when the panel is opened.
+   4. The badge stays at 0 after closing or during normal refreshes.
+   5. Only a newly-added Story can create a new notification badge afterward.
+   6. Existing notification history remains visible inside the panel.
+   7. Existing individual notification click behavior, 48-hour expiry, Realtime INSERT listener, profile images, and phone UI are preserved.
 ========================================================= */
