@@ -1633,7 +1633,8 @@
 
 
   async function ma7alakOpenShopStories(
-    shop
+    shop,
+    targetStoryId
   ){
 
     const client =
@@ -1759,6 +1760,24 @@
 
     ma7alakStoryIndex =
       0;
+
+    if(
+      targetStoryId !== undefined &&
+      targetStoryId !== null &&
+      String(targetStoryId).trim() !== ""
+    ){
+
+      const targetIndex =
+        ma7alakStoryItems.findIndex(
+          function(item){
+            return String(item.id) === String(targetStoryId);
+          }
+        );
+
+      if(targetIndex !== -1){
+        ma7alakStoryIndex = targetIndex;
+      }
+    }
 
     ma7alakRenderStoryViewer();
 
@@ -2406,6 +2425,29 @@
   );
 
 
+  function ma7alakOpenStoryFromURL(){
+
+    const params = new URLSearchParams(window.location.search);
+    const storyId = params.get("story");
+    const shopSlug = params.get("shop");
+
+    if(!storyId || !shopSlug){
+      return;
+    }
+
+    const shop = shops.find(function(item){
+      return String(item.id) === String(shopSlug);
+    });
+
+    if(!shop){
+      return;
+    }
+
+    ma7alakOpenShopStories(shop, storyId);
+
+  }
+
+
   async function ma7alakStartStorySystem(){
 
     const client =
@@ -2420,6 +2462,9 @@
     await ma7alakLoadActiveStoryShops();
 
     ma7alakBindStoryCardClicks();
+
+    /* Push notification: open exact Story from URL. */
+    ma7alakOpenStoryFromURL();
 
     if(
       ma7alakStoryChannel
