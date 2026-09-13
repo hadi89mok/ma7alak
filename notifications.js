@@ -220,6 +220,146 @@ let notificationBadgeCount = 0;
 
 
 /* =========================================================
+   FACEBOOK-STYLE BADGE ACKNOWLEDGEMENT
+   ---------------------------------------------------------
+   - Opening the bell clears the RED NUMBER immediately.
+   - Rows stay highlighted until THAT row is clicked.
+   - A newer Story/Reel creates a new signature, so the badge
+     comes back for the new activity.
+========================================================= */
+
+const MA7ALAK_BADGE_ACK_KEY =
+  "ma7alak_notification_badge_ack_v1";
+
+let lastShopProfilesLoadAt = 0;
+
+
+function getNotificationSignature(notification){
+
+  if(!notification){
+    return "";
+  }
+
+  return [
+    String(notification.type || "story"),
+    String(notification.shop_slug || ""),
+    String(notification.id || "")
+  ].join(":");
+
+}
+
+
+function getBadgeAcknowledgedSet(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        MA7ALAK_BADGE_ACK_KEY
+      );
+
+    const parsed =
+      raw ? JSON.parse(raw) : [];
+
+    return new Set(
+      Array.isArray(parsed)
+        ? parsed.map(function(value){
+            return String(value || "");
+          }).filter(Boolean)
+        : []
+    );
+
+  }
+  catch(error){
+
+    return new Set();
+
+  }
+
+}
+
+
+function saveBadgeAcknowledgedSet(set){
+
+  try{
+
+    const values =
+      Array.from(set || [])
+        .filter(Boolean)
+        .slice(-500);
+
+    localStorage.setItem(
+      MA7ALAK_BADGE_ACK_KEY,
+      JSON.stringify(values)
+    );
+
+  }
+  catch(error){}
+
+}
+
+
+function acknowledgeCurrentBadgeNotifications(){
+
+  const acknowledged =
+    getBadgeAcknowledgedSet();
+
+  notifications.forEach(
+    function(notification){
+
+      const signature =
+        getNotificationSignature(
+          notification
+        );
+
+      if(signature){
+        acknowledged.add(signature);
+      }
+
+    }
+  );
+
+  saveBadgeAcknowledgedSet(
+    acknowledged
+  );
+
+  notificationBadgeCount = 0;
+
+  updateNotificationBadge();
+
+}
+
+
+function calculateBadgeCount(){
+
+  if(notificationsOpen){
+    return 0;
+  }
+
+  const acknowledged =
+    getBadgeAcknowledgedSet();
+
+  return notifications.filter(
+    function(notification){
+
+      const signature =
+        getNotificationSignature(
+          notification
+        );
+
+      return (
+        !notification.seen &&
+        signature &&
+        !acknowledged.has(signature)
+      );
+
+    }
+  ).length;
+
+}
+
+
+/* =========================================================
    VISITOR ID
 ========================================================= */
 
@@ -2659,22 +2799,8 @@ async function loadNotifications(){
       );
 
 
-    if(notificationsOpen){
-
-      notificationBadgeCount =
-        0;
-
-    }
-    else{
-
-      notificationBadgeCount =
-        notifications.filter(
-          function(notification){
-            return !notification.seen;
-          }
-        ).length;
-
-    }
+    notificationBadgeCount =
+      calculateBadgeCount();
 
 
     updateNotificationBadge();
@@ -2682,7 +2808,21 @@ async function loadNotifications(){
     renderNotifications();
 
 
-    await loadShopProfiles();
+    /*
+       Do not re-query shop_profiles every fast refresh.
+       Profile data changes rarely, notifications change often.
+    */
+    if(
+      !lastShopProfilesLoadAt ||
+      Date.now() - lastShopProfilesLoadAt > 60000
+    ){
+
+      lastShopProfilesLoadAt =
+        Date.now();
+
+      loadShopProfiles();
+
+    }
 
   }
   catch(error){
@@ -2766,6 +2906,316 @@ function updateNotificationBadge(){
 
 }
 
+
+
+/* =========================================================
+   OPEN EXACT REEL FROM NOTIFICATION
+   ---------------------------------------------------------
+   Uses the existing premium header Reel viewer WITHOUT
+   rewriting it. We open the viewer, detect its current Reel,
+   then move through the existing viewer until the exact
+   notification Reel ID/video is active.
+========================================================= */
+
+function getNotificationReelCatalog(){
+
+  const cached =
+    readReelsFromHeaderCache();
+
+  const liveReels =
+    currentReelsState.reels &&
+    currentReelsState.reels.length
+      ? currentReelsState.reels
+      : cached.reels;
+
+  return Array.isArray(liveReels)
+    ? liveReels.filter(Boolean)
+    : [];
+
+}
+
+
+function normalizeMediaUrl(value){
+
+  try{
+
+    return new URL(
+      String(value || ""),
+      window.location.href
+    ).href;
+
+  }
+  catch(error){
+
+    return String(value || "").trim();
+
+  }
+
+}
+
+
+function openExactReelFromNotification(
+  fingerprint
+){
+
+  const targetId =
+    getReelFingerprintId(
+      fingerprint
+    );
+
+  if(!targetId){
+    return false;
+  }
+
+
+  const catalog =
+    getNotificationReelCatalog();
+
+
+  const targetIndex =
+    catalog.findIndex(
+      function(reel){
+
+        return String(
+          reel && reel.id
+            ? reel.id
+            : ""
+        ).trim() === targetId;
+
+      }
+    );
+
+
+  if(targetIndex < 0){
+    return false;
+  }
+
+
+  const targetReel =
+    catalog[targetIndex];
+
+
+  const reelButton =
+    document.getElementById(
+      "ma7alak-header-reels"
+    );
+
+
+  const viewer =
+    document.getElementById(
+      "ma7alakGlobalReelViewer"
+    );
+
+
+  const video =
+    document.getElementById(
+      "ma7alakGlobalReelVideo"
+    );
+
+
+  /*
+     If the existing viewer is not open yet, use its own real
+     header button first. This keeps ALL of the existing header's
+     working Reel logic intact.
+  */
+  if(
+    viewer &&
+    !viewer.classList.contains("open") &&
+    reelButton
+  ){
+
+    try{
+      reelButton.click();
+    }
+    catch(error){}
+
+  }
+  else if(
+    !viewer &&
+    reelButton
+  ){
+
+    try{
+      reelButton.click();
+    }
+    catch(error){}
+
+  }
+
+
+  const trySelectExact =
+    function(){
+
+      const activeViewer =
+        document.getElementById(
+          "ma7alakGlobalReelViewer"
+        );
+
+      const activeVideo =
+        document.getElementById(
+          "ma7alakGlobalReelVideo"
+        );
+
+
+      if(
+        !activeViewer ||
+        !activeVideo
+      ){
+        return false;
+      }
+
+
+      const targetVideoUrl =
+        normalizeMediaUrl(
+          targetReel.video
+        );
+
+
+      const currentVideoUrl =
+        normalizeMediaUrl(
+          activeVideo.currentSrc ||
+          activeVideo.src ||
+          ""
+        );
+
+
+      if(
+        currentVideoUrl &&
+        targetVideoUrl &&
+        currentVideoUrl === targetVideoUrl
+      ){
+
+        return true;
+
+      }
+
+
+      let currentIndex =
+        catalog.findIndex(
+          function(reel){
+
+            return (
+              normalizeMediaUrl(
+                reel && reel.video
+                  ? reel.video
+                  : ""
+              ) === currentVideoUrl
+            );
+
+          }
+        );
+
+
+      /*
+         The viewer always has an active catalog Reel after its
+         own header button opens. If the src has not propagated
+         yet, retry a few milliseconds later.
+      */
+      if(currentIndex < 0){
+        return false;
+      }
+
+
+      let steps =
+        (
+          targetIndex -
+          currentIndex +
+          catalog.length
+        ) % catalog.length;
+
+
+      while(steps > 0){
+
+        document.dispatchEvent(
+          new KeyboardEvent(
+            "keydown",
+            {
+              key:"ArrowUp",
+              bubbles:true
+            }
+          )
+        );
+
+        steps -= 1;
+
+      }
+
+
+      return true;
+
+    };
+
+
+  if(trySelectExact()){
+    return true;
+  }
+
+
+  /*
+     Header/player DOM can need one frame after the button click.
+     Retry quickly; this still feels instant to the visitor.
+  */
+  let attempts = 0;
+
+  const retryTimer =
+    setInterval(
+      function(){
+
+        attempts += 1;
+
+        if(
+          trySelectExact() ||
+          attempts >= 12
+        ){
+
+          clearInterval(
+            retryTimer
+          );
+
+        }
+
+      },
+      35
+    );
+
+
+  return true;
+
+}
+
+
+/* =========================================================
+   FAST REEL STATE REQUEST
+========================================================= */
+
+function requestCurrentReelsState(){
+
+  document.querySelectorAll(
+    "iframe"
+  ).forEach(
+    function(frame){
+
+      try{
+
+        if(frame.contentWindow){
+
+          frame.contentWindow.postMessage(
+            {
+              type:
+                "MA7ALAK_REQUEST_REELS_STATE"
+            },
+            "*"
+          );
+
+        }
+
+      }
+      catch(error){}
+
+    }
+  );
+
+}
 
 /* =========================================================
    RENDER
@@ -3070,6 +3520,61 @@ function renderNotifications(){
               item.dataset.shopUrl || "";
 
 
+            /*
+               FACEBOOK STYLE:
+               Clicking the ROW is what removes its unread background.
+               Merely opening the bell never changes this row state.
+            */
+
+            let contentOpened =
+              false;
+
+
+            if(
+              notificationType === "reel"
+            ){
+
+              contentOpened =
+                openExactReelFromNotification(
+                  notificationId
+                );
+
+
+              /*
+                 If the exact Reel viewer is unavailable on this page,
+                 fall back to the shop URL instead of doing nothing.
+              */
+              if(
+                !contentOpened &&
+                shopUrl
+              ){
+
+                contentOpened =
+                  true;
+
+                window.location.href =
+                  shopUrl;
+
+              }
+
+            }
+            else{
+
+              /*
+                 Story click keeps the existing shop-page behavior.
+                 The click itself counts as reading this notification.
+              */
+              contentOpened =
+                Boolean(shopSlug);
+
+            }
+
+
+            if(!contentOpened){
+              return;
+            }
+
+
             highlightedNotifications.delete(
               notificationKey
             );
@@ -3086,7 +3591,11 @@ function renderNotifications(){
             }
             else{
 
-              await markSingleStoryAsSeen(
+              /*
+                 Do not delay navigation/UI waiting on Supabase.
+                 Save the read state in the background.
+              */
+              markSingleStoryAsSeen(
                 notificationId
               );
 
@@ -3119,19 +3628,9 @@ function renderNotifications(){
 
 
             if(
-              notificationType === "reel" &&
-              shopUrl
+              notificationType === "story" &&
+              shopSlug
             ){
-
-              window.location.href =
-                shopUrl;
-
-              return;
-
-            }
-
-
-            if(shopSlug){
 
               window.location.href =
                 "/" +
@@ -3340,7 +3839,7 @@ async function markAllCurrentNotificationsAsSeen(){
    OPEN NOTIFICATIONS
 ========================================================= */
 
-async function openNotifications(){
+function openNotifications(){
 
   const panel =
     document.getElementById(
@@ -3357,25 +3856,36 @@ async function openNotifications(){
     true;
 
 
-  await loadNotifications();
-
-
-  await markAllCurrentNotificationsAsSeen();
-
-
-  notificationBadgeCount =
-    0;
-
-
-  updateNotificationBadge();
+  /*
+     INSTANT OPEN:
+     Never wait for Supabase before showing the panel.
+  */
+  panel.classList.add(
+    "open"
+  );
 
 
   renderNotifications();
 
 
-  panel.classList.add(
-    "open"
-  );
+  /*
+     FACEBOOK-STYLE BADGE:
+     Opening the bell acknowledges the current badge count only.
+     It does NOT mark any notification row as read.
+  */
+  acknowledgeCurrentBadgeNotifications();
+
+
+  /*
+     Refresh in the background after the panel is already visible.
+  */
+  loadNotifications();
+
+
+  /*
+     Ask the live Reel embed for its newest state immediately too.
+  */
+  requestCurrentReelsState();
 
 }
 
@@ -3406,7 +3916,7 @@ function closeNotifications(){
 
 
   notificationBadgeCount =
-    0;
+    calculateBadgeCount();
 
 
   updateNotificationBadge();
@@ -3466,25 +3976,15 @@ async function setupRealtime(){
                loadNotifications() keeps only its newest Story,
                so the old row is REUSED automatically.
             */
+            /*
+               Realtime INSERT = update immediately.
+               No page refresh required.
+            */
             await loadNotifications();
 
 
-            if(notificationsOpen){
-
-              notificationBadgeCount =
-                0;
-
-            }
-            else{
-
-              notificationBadgeCount =
-                notifications.filter(
-                  function(notification){
-                    return !notification.seen;
-                  }
-                ).length;
-
-            }
+            notificationBadgeCount =
+              calculateBadgeCount();
 
 
             updateNotificationBadge();
@@ -3494,7 +3994,25 @@ async function setupRealtime(){
           }
         )
 
-        .subscribe();
+        .subscribe(
+          function(status){
+
+            if(
+              status === "CHANNEL_ERROR" ||
+              status === "TIMED_OUT"
+            ){
+
+              setTimeout(
+                function(){
+                  setupRealtime();
+                },
+                1200
+              );
+
+            }
+
+          }
+        );
 
   }
   catch(error){
@@ -3572,7 +4090,20 @@ function setupReelNotificationBridge(){
       );
 
 
-      loadNotifications();
+      loadNotifications()
+        .then(
+          function(){
+
+            notificationBadgeCount =
+              calculateBadgeCount();
+
+            updateNotificationBadge();
+
+            renderNotifications();
+
+          }
+        )
+        .catch(function(){});
 
     }
   );
@@ -3583,35 +4114,8 @@ function setupReelNotificationBridge(){
      This matches the existing header bridge and does not move/alter them.
   */
   setTimeout(
-    function(){
-
-      document.querySelectorAll(
-        "iframe"
-      ).forEach(
-        function(frame){
-
-          try{
-
-            if(frame.contentWindow){
-
-              frame.contentWindow.postMessage(
-                {
-                  type:
-                    "MA7ALAK_REQUEST_REELS_STATE"
-                },
-                "*"
-              );
-
-            }
-
-          }
-          catch(error){}
-
-        }
-      );
-
-    },
-    450
+    requestCurrentReelsState,
+    80
   );
 
 }
@@ -3632,35 +4136,22 @@ function startNotificationRefresh(){
   }
 
 
+  /*
+     REALTIME is the primary path.
+     This 1.5 second refresh is only a safety net in case Hostinger
+     or the browser misses a realtime/message event.
+  */
   refreshTimer =
     setInterval(
-      async function(){
+      function(){
 
-        await loadNotifications();
+        requestCurrentReelsState();
 
-
-        if(notificationsOpen){
-
-          notificationBadgeCount =
-            0;
-
-        }
-        else{
-
-          notificationBadgeCount =
-            notifications.filter(
-              function(notification){
-                return !notification.seen;
-              }
-            ).length;
-
-        }
-
-
-        updateNotificationBadge();
+        loadNotifications()
+          .catch(function(){});
 
       },
-      60000
+      1500
     );
 
 }
@@ -3722,6 +4213,20 @@ else{
 
 }
 
+
+
+/* =========================================================
+   V2 — LIVE / INSTANT / FACEBOOK-STYLE READ STATE
+   =========================================================
+   1. Bell panel opens immediately; no Supabase wait.
+   2. Opening bell clears only the red number badge.
+   3. Notification row highlight remains until that row is clicked.
+   4. New Story/Reel gets a new signature and brings the badge back.
+   5. Story realtime INSERT updates immediately.
+   6. Reel state messages update immediately.
+   7. 1.5s backup refresh requests Story + Reel state if an event is missed.
+   8. Reel notification opens the exact Reel ID in the existing header viewer.
+========================================================= */
 
 })();
 
