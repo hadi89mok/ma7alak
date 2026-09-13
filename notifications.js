@@ -2967,219 +2967,44 @@ function openExactReelFromNotification(
     return false;
   }
 
-
-  const catalog =
-    getNotificationReelCatalog();
-
-
-  const targetIndex =
-    catalog.findIndex(
-      function(reel){
-
-        return String(
-          reel && reel.id
-            ? reel.id
-            : ""
-        ).trim() === targetId;
-
-      }
-    );
-
-
-  if(targetIndex < 0){
-    return false;
-  }
-
-
-  const targetReel =
-    catalog[targetIndex];
-
-
-  const reelButton =
-    document.getElementById(
-      "ma7alak-header-reels"
-    );
-
-
-  const viewer =
-    document.getElementById(
-      "ma7alakGlobalReelViewer"
-    );
-
-
-  const video =
-    document.getElementById(
-      "ma7alakGlobalReelVideo"
-    );
-
-
   /*
-     If the existing viewer is not open yet, use its own real
-     header button first. This keeps ALL of the existing header's
-     working Reel logic intact.
+     NEW EXACT-ID PATH.
+     The premium header owns the Reel viewer/catalog, so ask it to
+     open this exact reel_id directly. No random Reel, no ArrowUp
+     stepping, and no video-URL comparison. This also works when two
+     Reel rows intentionally use the same Bunny video URL.
   */
   if(
-    viewer &&
-    !viewer.classList.contains("open") &&
-    reelButton
+    typeof window.ma7alakOpenExactReel ===
+      "function"
   ){
-
     try{
-      reelButton.click();
+      return window.ma7alakOpenExactReel(
+        targetId
+      ) !== false;
     }
     catch(error){}
-
-  }
-  else if(
-    !viewer &&
-    reelButton
-  ){
-
-    try{
-      reelButton.click();
-    }
-    catch(error){}
-
   }
 
-
-  const trySelectExact =
-    function(){
-
-      const activeViewer =
-        document.getElementById(
-          "ma7alakGlobalReelViewer"
-        );
-
-      const activeVideo =
-        document.getElementById(
-          "ma7alakGlobalReelVideo"
-        );
-
-
-      if(
-        !activeViewer ||
-        !activeVideo
-      ){
-        return false;
-      }
-
-
-      const targetVideoUrl =
-        normalizeMediaUrl(
-          targetReel.video
-        );
-
-
-      const currentVideoUrl =
-        normalizeMediaUrl(
-          activeVideo.currentSrc ||
-          activeVideo.src ||
-          ""
-        );
-
-
-      if(
-        currentVideoUrl &&
-        targetVideoUrl &&
-        currentVideoUrl === targetVideoUrl
-      ){
-
-        return true;
-
-      }
-
-
-      let currentIndex =
-        catalog.findIndex(
-          function(reel){
-
-            return (
-              normalizeMediaUrl(
-                reel && reel.video
-                  ? reel.video
-                  : ""
-              ) === currentVideoUrl
-            );
-
+  /* Load-order fallback. The header listens for this event and keeps
+     the exact Reel ID pending until its live catalog is available. */
+  try{
+    window.dispatchEvent(
+      new CustomEvent(
+        "MA7ALAK_OPEN_EXACT_REEL",
+        {
+          detail:{
+            reelId:targetId
           }
-        );
-
-
-      /*
-         The viewer always has an active catalog Reel after its
-         own header button opens. If the src has not propagated
-         yet, retry a few milliseconds later.
-      */
-      if(currentIndex < 0){
-        return false;
-      }
-
-
-      let steps =
-        (
-          targetIndex -
-          currentIndex +
-          catalog.length
-        ) % catalog.length;
-
-
-      while(steps > 0){
-
-        document.dispatchEvent(
-          new KeyboardEvent(
-            "keydown",
-            {
-              key:"ArrowUp",
-              bubbles:true
-            }
-          )
-        );
-
-        steps -= 1;
-
-      }
-
-
-      return true;
-
-    };
-
-
-  if(trySelectExact()){
-    return true;
-  }
-
-
-  /*
-     Header/player DOM can need one frame after the button click.
-     Retry quickly; this still feels instant to the visitor.
-  */
-  let attempts = 0;
-
-  const retryTimer =
-    setInterval(
-      function(){
-
-        attempts += 1;
-
-        if(
-          trySelectExact() ||
-          attempts >= 12
-        ){
-
-          clearInterval(
-            retryTimer
-          );
-
         }
-
-      },
-      35
+      )
     );
 
-
-  return true;
+    return true;
+  }
+  catch(error){
+    return false;
+  }
 
 }
 
@@ -4245,4 +4070,11 @@ else{
       phone UI, shop profile images and existing Reel panel/header remain intact.
    9. Existing Reels are seeded as the baseline on first run, so deployment
       does not create fake notifications for old Reels.
+========================================================= */
+
+
+/* =========================================================
+   EXACT REEL NOTIFICATION FIX
+   - Notification rows now open the exact reel_id directly.
+   - Removed random-first + video-URL matching/ArrowUp stepping path.
 ========================================================= */
