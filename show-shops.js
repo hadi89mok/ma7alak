@@ -1445,6 +1445,257 @@
      LOAD ACTIVE SHOP DIRECTORY DATA FROM SUPABASE
   ========================================================= */
 
+  /* =========================================================
+     ACTUAL OWNER PAGE LOGO DETECTION
+     ---------------------------------------------------------
+     IMPORTANT:
+     The OWNER PAGE is the source of truth.
+
+     For each shop, Show Shops opens the shop's real public page
+     and looks for:
+
+       const STORY_CIRCLE_IMAGE_URL = "https://...";
+
+     The detected URL replaces shop_profiles.profile_image_url
+     for the directory card + directory Story viewer.
+
+     NO 30-MINUTE CACHE:
+     This check runs again whenever Show Shops is freshly loaded.
+  ========================================================= */
+
+  function ma7alakExtractOwnerPageLogo(
+    html
+  ){
+
+    const source =
+      String(html || "");
+
+
+    /*
+       Main supported format:
+
+       const STORY_CIRCLE_IMAGE_URL =
+         "https://example.com/image.jpg";
+
+       Also supports let / var and single quotes.
+    */
+    const match =
+      source.match(
+        /(?:const|let|var)\s+STORY_CIRCLE_IMAGE_URL\s*=\s*["']([^"']+)["']\s*;?/i
+      );
+
+
+    if(
+      match &&
+      match[1]
+    ){
+
+      return String(
+        match[1]
+      ).trim();
+
+    }
+
+
+    /*
+       Optional future-safe HTML marker:
+
+       <meta
+         name="ma7alak-shop-logo"
+         content="https://example.com/image.jpg"
+       >
+    */
+    try{
+
+      const parser =
+        new DOMParser();
+
+      const doc =
+        parser.parseFromString(
+          source,
+          "text/html"
+        );
+
+      const meta =
+        doc.querySelector(
+          'meta[name="ma7alak-shop-logo"]'
+        );
+
+      if(
+        meta &&
+        meta.content
+      ){
+
+        return String(
+          meta.content
+        ).trim();
+
+      }
+
+    }
+
+    catch(error){}
+
+
+    return "";
+  }
+
+
+  async function ma7alakDetectOwnerPageLogo(
+    shop
+  ){
+
+    if(
+      !shop ||
+      !shop.url
+    ){
+
+      return "";
+
+    }
+
+
+    let pageURL;
+
+    try{
+
+      pageURL =
+        new URL(
+          shop.url,
+          window.location.origin
+        );
+
+    }
+
+    catch(error){
+
+      return "";
+
+    }
+
+
+    /*
+       Owner pages must be on the same Ma7alak origin.
+       This keeps the browser request safe and avoids CORS issues.
+    */
+    if(
+      pageURL.origin !==
+      window.location.origin
+    ){
+
+      return "";
+
+    }
+
+
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        function(){
+          controller.abort();
+        },
+        5000
+      );
+
+
+    try{
+
+      const response =
+        await fetch(
+          pageURL.href,
+          {
+            method:"GET",
+            credentials:"same-origin",
+            cache:"no-store",
+            signal:controller.signal
+          }
+        );
+
+
+      clearTimeout(
+        timeout
+      );
+
+
+      if(
+        !response.ok
+      ){
+
+        return "";
+
+      }
+
+
+      const html =
+        await response.text();
+
+
+      return ma7alakExtractOwnerPageLogo(
+        html
+      );
+
+    }
+
+    catch(error){
+
+      clearTimeout(
+        timeout
+      );
+
+      return "";
+
+    }
+
+  }
+
+
+  async function ma7alakAttachOwnerPageLogos(){
+
+    if(
+      !Array.isArray(shops) ||
+      !shops.length
+    ){
+
+      return;
+
+    }
+
+
+    await Promise.all(
+      shops.map(
+        async function(shop){
+
+          const detected =
+            await ma7alakDetectOwnerPageLogo(
+              shop
+            );
+
+
+          if(
+            detected
+          ){
+
+            /*
+               OWNER PAGE WINS.
+               profile_image_url remains only as fallback.
+            */
+            shop.image =
+              detected;
+
+            shop.imageSource =
+              "owner-page";
+
+          }
+
+        }
+      )
+    );
+
+  }
+
+
   async function ma7alakLoadShopProfiles(){
 
     const client =
@@ -1509,6 +1760,15 @@
 
           }
         );
+
+
+    /*
+       IMPORTANT:
+       Supabase profile_image_url is only the fallback.
+       The real owner page STORY_CIRCLE_IMAGE_URL wins.
+    */
+    await ma7alakAttachOwnerPageLogos();
+
 
     return true;
   }
@@ -2837,16 +3097,17 @@
 })();
 
 /* =========================================================
-   WHAT CHANGED — DYNAMIC AREAS + CATEGORIES
-   - Based directly on the last confirmed working Supabase-live Show Shops code.
-   - Removed hardcoded Area buttons from the page markup.
-   - Removed hardcoded Category buttons from the page markup.
-   - Area buttons now build automatically from active shop_profiles rows.
-   - Category buttons now build automatically from categories used by shops inside the selected Area.
-   - category_name controls the visible category label; category remains the filter key.
-   - Added automatic category icons with a safe shop fallback icon for new categories.
-   - If a new active shop uses a new Area, that Area appears automatically after refresh.
-   - If a shop uses a new Category, that Category appears automatically inside its Area after refresh.
-   - No GitHub edit is needed just to add future Areas or Categories.
-   - Existing search, shop cards, Story linking/viewer and mobile two-card layout were preserved.
+   WHAT CHANGED — OWNER PAGE LOGO IS NOW THE SOURCE
+   =========================================================
+   1. Corrected the direction of the logo sync.
+   2. The actual public OWNER SHOP PAGE is now the source of truth for the directory image.
+   3. Show Shops reads each shop's shop_url and looks inside that page for:
+        const STORY_CIRCLE_IMAGE_URL = "https://...";
+   4. When found, that URL replaces shop.image in the GitHub Show Shops directory.
+   5. The exact same detected image is also used by the directory Story viewer because it already uses shop.image.
+   6. public.shop_profiles.profile_image_url is still kept as a fallback only.
+   7. Removed the 30-minute logo cache entirely.
+   8. A fresh Show Shops page load checks the actual owner page again, so changing STORY_CIRCLE_IMAGE_URL can appear after refresh.
+   9. Existing Supabase shop loading, dynamic Areas, dynamic Categories, search, cards, Story rings/viewer, filtering and phone-first two-card layout were preserved.
+   10. No change is required to the owner page Story code: keep STORY_CIRCLE_IMAGE_URL manually on each owner page.
 ========================================================= */
