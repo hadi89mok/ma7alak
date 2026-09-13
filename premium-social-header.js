@@ -2346,6 +2346,9 @@ body.ma7alak-login-open{
   const REELS_SEEN_STORAGE_KEY =
     "ma7alak_seen_reel_fingerprints_v2";
 
+  const REELS_LIVE_CACHE_KEY =
+    "ma7alak_live_reels_catalog_v1";
+
   /*
      CLEAN BASELINE FOR THIS VERSION.
      These are the five Reels that already existed when V12 was made.
@@ -2472,6 +2475,22 @@ body.ma7alak-login-open{
     }
 
     currentReelIds = normalized;
+
+    try{
+      const cached = JSON.parse(
+        localStorage.getItem(REELS_LIVE_CACHE_KEY) || "{}"
+      );
+
+      cached.reelIds = normalized;
+      cached.savedAt = Date.now();
+
+      localStorage.setItem(
+        REELS_LIVE_CACHE_KEY,
+        JSON.stringify(cached)
+      );
+    }
+    catch(error){}
+
     updateReelsBadge();
   }
 
@@ -2486,6 +2505,129 @@ body.ma7alak-login-open{
 
     saveSeenReelIds(Array.from(seen));
     updateReelsBadge();
+  }
+
+  /* =========================================================
+     HOSTINGER LAZY REELS EMBED HYDRATION
+     ---------------------------------------------------------
+     Hostinger can leave Embed iframes unloaded until they approach
+     the viewport. That made Reel notifications + the header player
+     stay stale after refresh until the visitor scrolled to Reels.
+
+     Force already-present lazy iframes to load immediately and keep
+     watching for iframes Hostinger inserts later.
+  ========================================================= */
+  function hydrateLazyIframe(frame){
+    if(!frame){return;}
+
+    try{
+      frame.setAttribute("loading","eager");
+      frame.loading = "eager";
+
+      const currentSrc = String(
+        frame.getAttribute("src") || ""
+      ).trim();
+
+      const lazySrc = String(
+        frame.getAttribute("data-src") ||
+        frame.getAttribute("data-lazy-src") ||
+        frame.getAttribute("data-original-src") ||
+        frame.getAttribute("data-url") ||
+        ""
+      ).trim();
+
+      if(
+        lazySrc &&
+        (
+          !currentSrc ||
+          currentSrc === "about:blank" ||
+          currentSrc.indexOf("javascript:") === 0
+        )
+      ){
+        frame.setAttribute("src",lazySrc);
+      }
+    }
+    catch(error){}
+  }
+
+  function hydrateAllLazyIframes(){
+    document.querySelectorAll("iframe").forEach(
+      hydrateLazyIframe
+    );
+  }
+
+  function watchLazyIframes(){
+    hydrateAllLazyIframes();
+
+    const iframeObserver = new MutationObserver(function(mutations){
+      let needsHydration = false;
+
+      mutations.forEach(function(mutation){
+        if(mutation.type === "childList"){
+          mutation.addedNodes.forEach(function(node){
+            if(!node || node.nodeType !== 1){return;}
+
+            if(
+              node.tagName === "IFRAME" ||
+              (node.querySelector && node.querySelector("iframe"))
+            ){
+              needsHydration = true;
+            }
+          });
+        }
+
+        if(
+          mutation.type === "attributes" &&
+          mutation.target &&
+          mutation.target.tagName === "IFRAME"
+        ){
+          needsHydration = true;
+        }
+      });
+
+      if(needsHydration){
+        hydrateAllLazyIframes();
+        setTimeout(requestReelsState,80);
+        setTimeout(requestReelsState,400);
+      }
+    });
+
+    iframeObserver.observe(
+      document.documentElement,
+      {
+        childList:true,
+        subtree:true,
+        attributes:true,
+        attributeFilter:[
+          "src",
+          "data-src",
+          "data-lazy-src",
+          "data-original-src",
+          "data-url",
+          "loading"
+        ]
+      }
+    );
+  }
+
+  function restoreCachedReelsState(){
+    try{
+      const cached = JSON.parse(
+        localStorage.getItem(REELS_LIVE_CACHE_KEY) || "null"
+      );
+
+      if(!cached){return;}
+
+      if(Array.isArray(cached.reelIds) && cached.reelIds.length){
+        currentReelIds = normalizeReelIds(cached.reelIds);
+        updateReelsBadge();
+      }
+
+      if(Array.isArray(cached.reels) && cached.reels.length){
+        setGlobalReelsFromLiveData(cached.reels,false);
+      }
+    }
+    catch(error){}
   }
 
   function requestReelsState(){
@@ -2575,6 +2717,8 @@ body.ma7alak-login-open{
     document.querySelectorAll("iframe").forEach(
       function(frame){
         try{
+          hydrateLazyIframe(frame);
+
           if(frame.contentWindow){
             frame.contentWindow.postMessage(
               {type:"MA7ALAK_REQUEST_REELS_STATE"},
@@ -2587,7 +2731,7 @@ body.ma7alak-login-open{
     );
   }
 
-  function setGlobalReelsFromLiveData(reels){
+  function setGlobalReelsFromLiveData(reels,saveCache){
     if(!Array.isArray(reels) || !reels.length){
       return;
     }
@@ -2618,6 +2762,23 @@ body.ma7alak-login-open{
     }
 
     MA7ALAK_GLOBAL_REELS = normalized;
+
+    if(saveCache !== false){
+      try{
+        const cached = JSON.parse(
+          localStorage.getItem(REELS_LIVE_CACHE_KEY) || "{}"
+        );
+
+        cached.reels = normalized;
+        cached.savedAt = Date.now();
+
+        localStorage.setItem(
+          REELS_LIVE_CACHE_KEY,
+          JSON.stringify(cached)
+        );
+      }
+      catch(error){}
+    }
 
     if(ma7alakGlobalReelIndex >= MA7ALAK_GLOBAL_REELS.length){
       ma7alakGlobalReelIndex = 0;
@@ -4355,6 +4516,11 @@ body.ma7alak-login-open{
     await refreshHeaderAuthState();
     setupInstantHeart();
 
+    /* Restore last known live Reel catalog immediately after refresh,
+       then force Hostinger's lazy Reels iframe to initialize now. */
+    restoreCachedReelsState();
+    watchLazyIframes();
+
     /*
       Inject the direct Reel viewer into the real page FIRST, then
       attach its controls and finally attach the header Reel button.
@@ -4469,4 +4635,15 @@ body.ma7alak-login-open{
    - Preserves working inline Login/Logout overlay.
    - Preserves Supabase shop_owners verification.
    - Header Reel viewer consumes live Reel panel catalog.
+========================================================= */
+
+
+/* =========================================================
+   V26 — HOSTINGER LAZY REELS REFRESH FIX
+   1. Preserves inline Login/Logout panel.
+   2. Preserves live Reel catalog bridge and global Reel player.
+   3. Forces Hostinger lazy Embed iframes to load before scrolling.
+   4. Watches delayed iframe insertion and re-requests Reel state.
+   5. Caches the last live Reel IDs/catalog in localStorage so refresh
+      does not temporarily remove the Reel badge/player catalog.
 ========================================================= */
