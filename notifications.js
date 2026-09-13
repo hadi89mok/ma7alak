@@ -2724,8 +2724,89 @@ async function loadNotifications(){
 
 
     /* -------------------------------------------------------
-       LIVE REEL NOTIFICATIONS
+       LIVE REEL NOTIFICATIONS — DIRECT DATABASE SOURCE
+       -------------------------------------------------------
+       IMPORTANT:
+       Do NOT depend on the Reels embed being visible/loaded.
+       Hostinger can lazy-load that embed only after scrolling,
+       which made the bell wait until the visitor reached Reels.
+
+       We read shop_reels DIRECTLY here on every notification
+       refresh. The existing 1.5s backup refresh therefore makes
+       new Admin Panel Reels appear in the bell even if Realtime
+       or the Reel iframe/header bridge is late.
     ------------------------------------------------------- */
+
+    const {
+      data:directReels,
+      error:directReelsError
+    } = await client
+      .from("shop_reels")
+      .select(
+        "reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,caption,sort_order,active,created_at"
+      )
+      .eq("active", true)
+      .order("sort_order", { ascending:true })
+      .order("created_at", { ascending:false });
+
+    if(!directReelsError){
+
+      const directReelIds =
+        (directReels || [])
+          .map(function(row){
+            return String(row.reel_id || "").trim();
+          })
+          .filter(Boolean);
+
+      const directReelCatalog =
+        (directReels || [])
+          .map(function(row){
+            return {
+              id:String(row.reel_id || "").trim(),
+              shop:String(row.shop_name || row.shop_slug || "Shop").trim(),
+              shopSlug:String(row.shop_slug || "").trim(),
+              shopUrl:String(
+                row.shop_url ||
+                (row.shop_slug
+                  ? ("https://ma7alak.com/" + row.shop_slug)
+                  : "")
+              ).trim(),
+              icon:String(row.shop_icon || "").trim(),
+              video:String(row.video_url || "").trim(),
+              created_at:row.created_at || null
+            };
+          })
+          .filter(function(reel){
+            return reel.id;
+          });
+
+      if(directReelIds.length){
+        syncReelNotificationState(
+          directReelIds,
+          directReelCatalog
+        );
+
+        currentReelsState = {
+          reelIds:directReelIds,
+          reels:directReelCatalog
+        };
+
+        try{
+          localStorage.setItem(
+            MA7ALAK_REELS_LIVE_CACHE_KEY,
+            JSON.stringify(currentReelsState)
+          );
+        }
+        catch(error){}
+      }
+
+    }
+    else{
+      console.error(
+        "Ma7alak notifications direct reels:",
+        directReelsError
+      );
+    }
 
     const reelNotifications =
       buildReelNotifications();
