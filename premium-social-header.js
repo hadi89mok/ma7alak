@@ -2539,7 +2539,39 @@ body.ma7alak-login-open{
       setCurrentReelIds(localIds);
     }
 
-    /* Ask every Hostinger Embed iframe for its Reel IDs. */
+    const localReels = Array.from(
+      document.querySelectorAll(
+        ".ma7alak-reel[data-reel-id]"
+      )
+    ).map(function(reel){
+      const video = reel.querySelector(".ma7alak-video");
+      const sourceEl = video ? video.querySelector("source") : null;
+      const info = reel.querySelector(".reel-info strong");
+      const iconEl = reel.querySelector(".reel-shop-icon");
+
+      const id = String(reel.getAttribute("data-reel-id") || "").trim();
+      const videoUrl = String(
+        (video && (video.currentSrc || video.getAttribute("src"))) ||
+        (sourceEl && sourceEl.getAttribute("src")) ||
+        ""
+      ).trim();
+
+      if(!id || !videoUrl){return null;}
+
+      return {
+        id:id,
+        shop:String(reel.getAttribute("data-shop-name") || (info ? info.textContent : "") || "").trim(),
+        shopUrl:String(reel.getAttribute("data-shop-url") || "").trim(),
+        icon:String(reel.getAttribute("data-shop-icon") || (iconEl ? iconEl.getAttribute("src") : "") || "").trim(),
+        video:videoUrl
+      };
+    }).filter(Boolean);
+
+    if(localReels.length){
+      setGlobalReelsFromLiveData(localReels);
+    }
+
+    /* Ask every Hostinger Embed iframe for its Reel IDs + full Reel data. */
     document.querySelectorAll("iframe").forEach(
       function(frame){
         try{
@@ -2555,6 +2587,44 @@ body.ma7alak-login-open{
     );
   }
 
+  function setGlobalReelsFromLiveData(reels){
+    if(!Array.isArray(reels) || !reels.length){
+      return;
+    }
+
+    const normalized = reels
+      .map(function(reel){
+        if(!reel){return null;}
+
+        const id = String(reel.id || "").trim();
+        const video = String(reel.video || "").trim();
+
+        if(!id || !video){
+          return null;
+        }
+
+        return {
+          id:id,
+          shop:String(reel.shop || "").trim(),
+          shopUrl:String(reel.shopUrl || "").trim(),
+          icon:String(reel.icon || "").trim(),
+          video:video
+        };
+      })
+      .filter(Boolean);
+
+    if(!normalized.length){
+      return;
+    }
+
+    MA7ALAK_GLOBAL_REELS = normalized;
+
+    if(ma7alakGlobalReelIndex >= MA7ALAK_GLOBAL_REELS.length){
+      ma7alakGlobalReelIndex = 0;
+    }
+  }
+
+
   window.addEventListener(
     "message",
     function(event){
@@ -2567,6 +2637,10 @@ body.ma7alak-login-open{
 
       setCurrentReelIds(
         event.data.reelIds || []
+      );
+
+      setGlobalReelsFromLiveData(
+        event.data.reels || []
       );
     }
   );
@@ -3678,7 +3752,7 @@ body.ma7alak-login-open{
      catalog used by the working Reels V5 section.
   ========================================================= */
 
-  const MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://ma7alak.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
+  let MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://ma7alak.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
 
   let ma7alakGlobalReelIndex = 0;
   let ma7alakGlobalTouchStartY = 0;
@@ -4387,4 +4461,12 @@ body.ma7alak-login-open{
       are preserved.
    10. Existing header, Reels, Likes, Notifications, Search and shop
        profile functionality were kept intact.
+========================================================= */
+
+
+/* =========================================================
+   LIVE REELS + INLINE LOGIN MERGED BUILD
+   - Preserves working inline Login/Logout overlay.
+   - Preserves Supabase shop_owners verification.
+   - Header Reel viewer consumes live Reel panel catalog.
 ========================================================= */
