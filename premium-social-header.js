@@ -2518,12 +2518,9 @@ body.ma7alak-login-open{
      watching for iframes Hostinger inserts later.
   ========================================================= */
   function hydrateLazyIframe(frame){
-    if(!frame){return;}
+    if(!frame || frame.dataset.ma7alakHydrated === "1"){return;}
 
     try{
-      frame.setAttribute("loading","eager");
-      frame.loading = "eager";
-
       const currentSrc = String(
         frame.getAttribute("src") || ""
       ).trim();
@@ -2536,6 +2533,7 @@ body.ma7alak-login-open{
         ""
       ).trim();
 
+      /* Only touch a genuinely lazy/blank iframe once. */
       if(
         lazySrc &&
         (
@@ -2544,6 +2542,8 @@ body.ma7alak-login-open{
           currentSrc.indexOf("javascript:") === 0
         )
       ){
+        frame.dataset.ma7alakHydrated = "1";
+        frame.setAttribute("loading","eager");
         frame.setAttribute("src",lazySrc);
       }
     }
@@ -2557,38 +2557,36 @@ body.ma7alak-login-open{
   }
 
   function watchLazyIframes(){
+    /* One lightweight startup pass. */
     hydrateAllLazyIframes();
 
+    /* Only watch for NEW iframe nodes. Never watch iframe attributes. */
     const iframeObserver = new MutationObserver(function(mutations){
-      let needsHydration = false;
+      let foundNewIframe = false;
 
       mutations.forEach(function(mutation){
-        if(mutation.type === "childList"){
-          mutation.addedNodes.forEach(function(node){
-            if(!node || node.nodeType !== 1){return;}
+        if(mutation.type !== "childList"){return;}
 
-            if(
-              node.tagName === "IFRAME" ||
-              (node.querySelector && node.querySelector("iframe"))
-            ){
-              needsHydration = true;
-            }
-          });
-        }
+        mutation.addedNodes.forEach(function(node){
+          if(!node || node.nodeType !== 1){return;}
 
-        if(
-          mutation.type === "attributes" &&
-          mutation.target &&
-          mutation.target.tagName === "IFRAME"
-        ){
-          needsHydration = true;
-        }
+          if(node.tagName === "IFRAME"){
+            hydrateLazyIframe(node);
+            foundNewIframe = true;
+            return;
+          }
+
+          if(node.querySelectorAll){
+            node.querySelectorAll("iframe").forEach(function(frame){
+              hydrateLazyIframe(frame);
+              foundNewIframe = true;
+            });
+          }
+        });
       });
 
-      if(needsHydration){
-        hydrateAllLazyIframes();
-        setTimeout(requestReelsState,80);
-        setTimeout(requestReelsState,400);
+      if(foundNewIframe){
+        setTimeout(requestReelsState,250);
       }
     });
 
@@ -2596,16 +2594,7 @@ body.ma7alak-login-open{
       document.documentElement,
       {
         childList:true,
-        subtree:true,
-        attributes:true,
-        attributeFilter:[
-          "src",
-          "data-src",
-          "data-lazy-src",
-          "data-original-src",
-          "data-url",
-          "loading"
-        ]
+        subtree:true
       }
     );
   }
@@ -2717,8 +2706,6 @@ body.ma7alak-login-open{
     document.querySelectorAll("iframe").forEach(
       function(frame){
         try{
-          hydrateLazyIframe(frame);
-
           if(frame.contentWindow){
             frame.contentWindow.postMessage(
               {type:"MA7ALAK_REQUEST_REELS_STATE"},
@@ -4516,8 +4503,8 @@ body.ma7alak-login-open{
     await refreshHeaderAuthState();
     setupInstantHeart();
 
-    /* Restore last known live Reel catalog immediately after refresh,
-       then force Hostinger's lazy Reels iframe to initialize now. */
+    /* Restore last known live Reel catalog immediately after refresh.
+       Perform only a lightweight one-time lazy iframe check. */
     restoreCachedReelsState();
     watchLazyIframes();
 
