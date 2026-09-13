@@ -1298,382 +1298,6 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   }
 }
 
-
-/* =========================================================
-   INLINE OWNER LOGIN — PREMIUM PHONE-FIRST
-========================================================= */
-
-#ma7alak-login-overlay{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  height:100dvh;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:
-    max(16px,env(safe-area-inset-top))
-    14px
-    max(16px,env(safe-area-inset-bottom));
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(13px) saturate(110%);
-  -webkit-backdrop-filter:blur(13px) saturate(110%);
-  z-index:2147483647;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-}
-
-#ma7alak-login-overlay.open{
-  display:flex;
-}
-
-#ma7alak-login-panel{
-  position:relative;
-  width:min(440px,100%);
-  max-height:calc(100dvh - 28px);
-  overflow:auto;
-  padding:34px 22px 22px;
-  border:1px solid rgba(217,164,65,.28);
-  border-radius:27px;
-  background:
-    radial-gradient(circle at 12% 0%,rgba(217,164,65,.15),transparent 34%),
-    radial-gradient(circle at 100% 100%,rgba(153,83,25,.10),transparent 38%),
-    linear-gradient(145deg,rgba(27,28,30,.985),rgba(8,9,10,.985));
-  box-shadow:
-    0 30px 85px rgba(0,0,0,.68),
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 0 38px rgba(217,164,65,.055);
-  font-family:Arial,"Segoe UI",sans-serif;
-  color:#fff;
-  isolation:isolate;
-}
-
-.ma7alak-login-glow{
-  position:absolute;
-  width:150px;
-  height:150px;
-  border-radius:50%;
-  pointer-events:none;
-  filter:blur(46px);
-  opacity:.65;
-  z-index:-1;
-}
-
-.ma7alak-login-glow-one{
-  top:-55px;
-  right:-45px;
-  background:rgba(217,164,65,.17);
-}
-
-.ma7alak-login-glow-two{
-  bottom:-60px;
-  left:-55px;
-  background:rgba(175,92,25,.11);
-}
-
-#ma7alak-login-close{
-  position:absolute;
-  top:11px;
-  right:11px;
-  width:39px;
-  height:39px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:50%;
-  background:rgba(255,255,255,.035);
-  color:rgba(255,255,255,.82);
-  font-size:26px;
-  line-height:1;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-
-#ma7alak-login-close:active{
-  transform:scale(.91);
-}
-
-.ma7alak-login-brand{
-  position:relative;
-  z-index:2;
-  text-align:center;
-  padding:0 20px;
-  margin-bottom:24px;
-}
-
-.ma7alak-login-brand-small{
-  margin-bottom:8px;
-  color:#e8ba63;
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:2.4px;
-}
-
-#ma7alak-login-title{
-  margin:0;
-  color:#fff;
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:28px;
-  line-height:1.1;
-  font-weight:800;
-  text-shadow:0 4px 16px rgba(0,0,0,.32);
-}
-
-#ma7alak-login-title span{
-  background:linear-gradient(105deg,#fff4d5,#efc66e 45%,#fff7e4 75%,#d9a441);
-  background-size:220% 100%;
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
-  color:transparent;
-  animation:ma7alakLoginTitleShine 4s ease-in-out infinite;
-  -webkit-animation:ma7alakLoginTitleShine 4s ease-in-out infinite;
-}
-
-@keyframes ma7alakLoginTitleShine{
-  from{background-position:120% 50%;}
-  to{background-position:-120% 50%;}
-}
-
-@-webkit-keyframes ma7alakLoginTitleShine{
-  from{background-position:120% 50%;}
-  to{background-position:-120% 50%;}
-}
-
-.ma7alak-login-brand p{
-  max-width:320px;
-  margin:10px auto 0;
-  color:rgba(255,255,255,.54);
-  font-size:12px;
-  line-height:1.55;
-}
-
-#ma7alak-inline-login-form{
-  position:relative;
-  z-index:2;
-}
-
-.ma7alak-login-label{
-  display:block;
-  margin:0 0 7px 2px;
-  color:rgba(255,255,255,.79);
-  font-size:12px;
-  font-weight:800;
-}
-
-.ma7alak-login-input-wrap{
-  position:relative;
-  margin-bottom:15px;
-}
-
-.ma7alak-login-input-icon{
-  position:absolute;
-  left:15px;
-  top:50%;
-  transform:translateY(-50%);
-  width:20px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-  color:#e9b75c;
-  font-size:15px;
-  z-index:2;
-}
-
-.ma7alak-login-input{
-  width:100%;
-  height:53px;
-  padding:0 15px 0 46px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  outline:none;
-  background:rgba(255,255,255,.045);
-  color:#fff;
-  font:600 14px/1 Arial,"Segoe UI",sans-serif;
-  direction:ltr;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
-  transition:
-    border-color .18s ease,
-    background .18s ease,
-    box-shadow .18s ease;
-}
-
-.ma7alak-login-password-input{
-  padding-right:48px;
-}
-
-.ma7alak-login-input::placeholder{
-  color:rgba(255,255,255,.30);
-}
-
-.ma7alak-login-input:focus{
-  border-color:rgba(217,164,65,.58);
-  background:rgba(255,255,255,.065);
-  box-shadow:0 0 0 4px rgba(217,164,65,.075);
-}
-
-.ma7alak-login-password-toggle{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  width:37px;
-  height:37px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:rgba(255,255,255,.48);
-  font-size:17px;
-  cursor:pointer;
-  z-index:3;
-  -webkit-tap-highlight-color:transparent;
-}
-
-.ma7alak-login-password-toggle:active{
-  transform:translateY(-50%) scale(.90);
-}
-
-.ma7alak-inline-login-button{
-  width:100%;
-  min-height:54px;
-  margin-top:4px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:9px;
-  border:0;
-  border-radius:17px;
-  background:linear-gradient(135deg,#f3c66e,#d99b35 55%,#b97822);
-  color:#111;
-  font:900 15px/1 Arial,"Segoe UI",sans-serif;
-  cursor:pointer;
-  box-shadow:
-    0 14px 32px rgba(184,119,30,.22),
-    inset 0 1px 0 rgba(255,255,255,.38);
-  -webkit-tap-highlight-color:transparent;
-  transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
-}
-
-.ma7alak-inline-login-button:active{
-  transform:scale(.975);
-}
-
-.ma7alak-inline-login-button:disabled{
-  opacity:.58;
-  cursor:default;
-}
-
-.ma7alak-inline-login-spinner{
-  width:18px;
-  height:18px;
-  display:none;
-  border:2px solid rgba(0,0,0,.23);
-  border-top-color:#111;
-  border-radius:50%;
-  animation:ma7alakInlineLoginSpin .7s linear infinite;
-  -webkit-animation:ma7alakInlineLoginSpin .7s linear infinite;
-}
-
-@keyframes ma7alakInlineLoginSpin{
-  to{transform:rotate(360deg);}
-}
-
-@-webkit-keyframes ma7alakInlineLoginSpin{
-  to{-webkit-transform:rotate(360deg);}
-}
-
-.ma7alak-inline-login-message{
-  display:none;
-  margin-top:13px;
-  padding:11px 12px;
-  border-radius:13px;
-  font-size:12px;
-  font-weight:700;
-  line-height:1.45;
-  text-align:center;
-}
-
-.ma7alak-inline-login-message.error{
-  display:block;
-  color:#ffc2c2;
-  background:rgba(180,45,45,.12);
-  border:1px solid rgba(255,90,90,.20);
-}
-
-.ma7alak-inline-login-message.success{
-  display:block;
-  color:#c7f3d5;
-  background:rgba(50,180,100,.10);
-  border:1px solid rgba(80,210,125,.20);
-}
-
-.ma7alak-login-bottom{
-  position:relative;
-  z-index:2;
-  margin-top:18px;
-  color:rgba(255,255,255,.36);
-  font-size:10px;
-  font-weight:650;
-  text-align:center;
-  line-height:1.5;
-}
-
-body.ma7alak-login-open{
-  overflow:hidden!important;
-  touch-action:none;
-}
-
-@media(max-width:600px){
-  #ma7alak-login-overlay{
-    align-items:center;
-    padding:
-      max(12px,env(safe-area-inset-top))
-      10px
-      max(12px,env(safe-area-inset-bottom));
-  }
-
-  #ma7alak-login-panel{
-    width:100%;
-    max-width:410px;
-    padding:31px 16px 18px;
-    border-radius:23px;
-  }
-
-  #ma7alak-login-title{
-    font-size:25px;
-  }
-
-  .ma7alak-login-brand p{
-    font-size:11px;
-  }
-
-  .ma7alak-login-input{
-    height:52px;
-    font-size:14px;
-  }
-
-  .ma7alak-inline-login-button{
-    min-height:53px;
-  }
-}
-
-@media(max-width:360px){
-  #ma7alak-login-panel{
-    padding:29px 13px 16px;
-    border-radius:21px;
-  }
-
-  #ma7alak-login-title{
-    font-size:23px;
-  }
-}
-
 `;
 
     document.head.appendChild(style);
@@ -1844,82 +1468,19 @@ body.ma7alak-login-open{
       </a>
 
       <a
-        id="ma7alak-header-auth-action"
         class="ma7alak-header-menu-link"
-        href="#"
-        role="button"
-        aria-label="Login"
+        href="https://ma7alak.com/login"
       >
-        <span id="ma7alak-header-auth-icon" class="ma7alak-header-menu-icon">↪</span>
+        <span class="ma7alak-header-menu-icon">↪</span>
         <span class="ma7alak-header-menu-text">
-          <span id="ma7alak-header-auth-main" class="ma7alak-header-menu-main">Login</span>
-          <span id="ma7alak-header-auth-sub" class="ma7alak-header-menu-sub">Shop owner access</span>
+          <span class="ma7alak-header-menu-main">Login</span>
+          <span class="ma7alak-header-menu-sub">Shop owner access</span>
         </span>
       </a>
 
     </div>
   </div>
 </header>
-
-
-<div id="ma7alak-login-overlay" aria-hidden="true">
-  <div id="ma7alak-login-panel" role="dialog" aria-modal="true" aria-labelledby="ma7alak-login-title">
-
-    <button id="ma7alak-login-close" type="button" aria-label="Close login">×</button>
-
-    <div class="ma7alak-login-glow ma7alak-login-glow-one" aria-hidden="true"></div>
-    <div class="ma7alak-login-glow ma7alak-login-glow-two" aria-hidden="true"></div>
-
-    <div class="ma7alak-login-brand">
-      <div class="ma7alak-login-brand-small">MA7ALAK FOR BUSINESS</div>
-      <h2 id="ma7alak-login-title">Marhaba to <span>Ma7alak</span></h2>
-      <p>Sign in to manage your shop, Stories, photos and videos.</p>
-    </div>
-
-    <form id="ma7alak-inline-login-form" autocomplete="on">
-
-      <label class="ma7alak-login-label" for="ma7alak-login-email">Email</label>
-      <div class="ma7alak-login-input-wrap">
-        <span class="ma7alak-login-input-icon" aria-hidden="true">✉</span>
-        <input
-          id="ma7alak-login-email"
-          class="ma7alak-login-input"
-          type="email"
-          placeholder="example@email.com"
-          autocomplete="email"
-          required
-        >
-      </div>
-
-      <label class="ma7alak-login-label" for="ma7alak-login-password">Password</label>
-      <div class="ma7alak-login-input-wrap">
-        <span class="ma7alak-login-input-icon" aria-hidden="true">🔒</span>
-        <input
-          id="ma7alak-login-password"
-          class="ma7alak-login-input ma7alak-login-password-input"
-          type="password"
-          placeholder="Enter your password"
-          autocomplete="current-password"
-          required
-        >
-        <button id="ma7alak-login-password-toggle" class="ma7alak-login-password-toggle" type="button" aria-label="Show password">👁</button>
-      </div>
-
-      <button id="ma7alak-inline-login-button" class="ma7alak-inline-login-button" type="submit">
-        <span id="ma7alak-inline-login-spinner" class="ma7alak-inline-login-spinner" aria-hidden="true"></span>
-        <span id="ma7alak-inline-login-button-text">Log In</span>
-      </button>
-
-      <div id="ma7alak-inline-login-message" class="ma7alak-inline-login-message" role="status" aria-live="polite"></div>
-
-    </form>
-
-    <div class="ma7alak-login-bottom">
-      This login is for registered Ma7alak shop owners.
-    </div>
-
-  </div>
-</div>
 
 <div id="ma7alak-header-search-overlay" aria-hidden="true">
   <div id="ma7alak-header-search-panel" role="dialog" aria-modal="true" aria-label="Search shops">
@@ -2346,9 +1907,6 @@ body.ma7alak-login-open{
   const REELS_SEEN_STORAGE_KEY =
     "ma7alak_seen_reel_fingerprints_v2";
 
-  const REELS_LIVE_CACHE_KEY =
-    "ma7alak_live_reels_catalog_v1";
-
   /*
      CLEAN BASELINE FOR THIS VERSION.
      These are the five Reels that already existed when V12 was made.
@@ -2475,22 +2033,6 @@ body.ma7alak-login-open{
     }
 
     currentReelIds = normalized;
-
-    try{
-      const cached = JSON.parse(
-        localStorage.getItem(REELS_LIVE_CACHE_KEY) || "{}"
-      );
-
-      cached.reelIds = normalized;
-      cached.savedAt = Date.now();
-
-      localStorage.setItem(
-        REELS_LIVE_CACHE_KEY,
-        JSON.stringify(cached)
-      );
-    }
-    catch(error){}
-
     updateReelsBadge();
   }
 
@@ -2505,129 +2047,6 @@ body.ma7alak-login-open{
 
     saveSeenReelIds(Array.from(seen));
     updateReelsBadge();
-  }
-
-  /* =========================================================
-     HOSTINGER LAZY REELS EMBED HYDRATION
-     ---------------------------------------------------------
-     Hostinger can leave Embed iframes unloaded until they approach
-     the viewport. That made Reel notifications + the header player
-     stay stale after refresh until the visitor scrolled to Reels.
-
-     Force already-present lazy iframes to load immediately and keep
-     watching for iframes Hostinger inserts later.
-  ========================================================= */
-  function hydrateLazyIframe(frame){
-    if(!frame){return;}
-
-    try{
-      frame.setAttribute("loading","eager");
-      frame.loading = "eager";
-
-      const currentSrc = String(
-        frame.getAttribute("src") || ""
-      ).trim();
-
-      const lazySrc = String(
-        frame.getAttribute("data-src") ||
-        frame.getAttribute("data-lazy-src") ||
-        frame.getAttribute("data-original-src") ||
-        frame.getAttribute("data-url") ||
-        ""
-      ).trim();
-
-      if(
-        lazySrc &&
-        (
-          !currentSrc ||
-          currentSrc === "about:blank" ||
-          currentSrc.indexOf("javascript:") === 0
-        )
-      ){
-        frame.setAttribute("src",lazySrc);
-      }
-    }
-    catch(error){}
-  }
-
-  function hydrateAllLazyIframes(){
-    document.querySelectorAll("iframe").forEach(
-      hydrateLazyIframe
-    );
-  }
-
-  function watchLazyIframes(){
-    hydrateAllLazyIframes();
-
-    const iframeObserver = new MutationObserver(function(mutations){
-      let needsHydration = false;
-
-      mutations.forEach(function(mutation){
-        if(mutation.type === "childList"){
-          mutation.addedNodes.forEach(function(node){
-            if(!node || node.nodeType !== 1){return;}
-
-            if(
-              node.tagName === "IFRAME" ||
-              (node.querySelector && node.querySelector("iframe"))
-            ){
-              needsHydration = true;
-            }
-          });
-        }
-
-        if(
-          mutation.type === "attributes" &&
-          mutation.target &&
-          mutation.target.tagName === "IFRAME"
-        ){
-          needsHydration = true;
-        }
-      });
-
-      if(needsHydration){
-        hydrateAllLazyIframes();
-        setTimeout(requestReelsState,80);
-        setTimeout(requestReelsState,400);
-      }
-    });
-
-    iframeObserver.observe(
-      document.documentElement,
-      {
-        childList:true,
-        subtree:true,
-        attributes:true,
-        attributeFilter:[
-          "src",
-          "data-src",
-          "data-lazy-src",
-          "data-original-src",
-          "data-url",
-          "loading"
-        ]
-      }
-    );
-  }
-
-  function restoreCachedReelsState(){
-    try{
-      const cached = JSON.parse(
-        localStorage.getItem(REELS_LIVE_CACHE_KEY) || "null"
-      );
-
-      if(!cached){return;}
-
-      if(Array.isArray(cached.reelIds) && cached.reelIds.length){
-        currentReelIds = normalizeReelIds(cached.reelIds);
-        updateReelsBadge();
-      }
-
-      if(Array.isArray(cached.reels) && cached.reels.length){
-        setGlobalReelsFromLiveData(cached.reels,false);
-      }
-    }
-    catch(error){}
   }
 
   function requestReelsState(){
@@ -2717,8 +2136,6 @@ body.ma7alak-login-open{
     document.querySelectorAll("iframe").forEach(
       function(frame){
         try{
-          hydrateLazyIframe(frame);
-
           if(frame.contentWindow){
             frame.contentWindow.postMessage(
               {type:"MA7ALAK_REQUEST_REELS_STATE"},
@@ -2731,7 +2148,54 @@ body.ma7alak-login-open{
     );
   }
 
-  function setGlobalReelsFromLiveData(reels,saveCache){
+  /* =========================================================
+     EXACT REEL OPENING
+     Used by in-site notifications + phone push deep links.
+     Reel ID is the source of truth (never the video URL).
+  ========================================================= */
+  let ma7alakPendingExactReelId = null;
+
+  function openGlobalReelById(reelId){
+    const targetId = String(reelId || "").trim();
+
+    if(!targetId){
+      return false;
+    }
+
+    const targetIndex =
+      MA7ALAK_GLOBAL_REELS.findIndex(function(reel){
+        return String(reel && reel.id ? reel.id : "").trim() === targetId;
+      });
+
+    if(targetIndex === -1){
+      /* The live iframe/catalog may not have answered yet. Keep the
+         exact ID pending and ask for fresh Reel state immediately. */
+      ma7alakPendingExactReelId = targetId;
+      try{ requestReelsState(); }catch(error){}
+      return true;
+    }
+
+    ma7alakPendingExactReelId = null;
+    loadGlobalReel(targetIndex, null);
+    return true;
+  }
+
+  /* Direct API for notifications.js on the same page. */
+  window.ma7alakOpenExactReel = openGlobalReelById;
+
+  /* Event fallback so scripts do not depend on load order. */
+  window.addEventListener(
+    "MA7ALAK_OPEN_EXACT_REEL",
+    function(event){
+      const reelId =
+        event && event.detail
+          ? event.detail.reelId
+          : "";
+      openGlobalReelById(reelId);
+    }
+  );
+
+  function setGlobalReelsFromLiveData(reels){
     if(!Array.isArray(reels) || !reels.length){
       return;
     }
@@ -2761,27 +2225,24 @@ body.ma7alak-login-open{
       return;
     }
 
+    /*
+      Replace the old hardcoded viewer catalog with the LIVE Reel panel.
+      This means every Reel added to the panel automatically becomes
+      available in the header Reel player too.
+    */
     MA7ALAK_GLOBAL_REELS = normalized;
-
-    if(saveCache !== false){
-      try{
-        const cached = JSON.parse(
-          localStorage.getItem(REELS_LIVE_CACHE_KEY) || "{}"
-        );
-
-        cached.reels = normalized;
-        cached.savedAt = Date.now();
-
-        localStorage.setItem(
-          REELS_LIVE_CACHE_KEY,
-          JSON.stringify(cached)
-        );
-      }
-      catch(error){}
-    }
 
     if(ma7alakGlobalReelIndex >= MA7ALAK_GLOBAL_REELS.length){
       ma7alakGlobalReelIndex = 0;
+    }
+
+    /* If a notification/deep link arrived before the live catalog,
+       open the exact Reel now that the catalog is ready. */
+    if(ma7alakPendingExactReelId){
+      const pendingId = ma7alakPendingExactReelId;
+      setTimeout(function(){
+        openGlobalReelById(pendingId);
+      },0);
     }
   }
 
@@ -2805,730 +2266,6 @@ body.ma7alak-login-open{
       );
     }
   );
-
-
-  /* =========================================================
-     INLINE OWNER LOGIN / LOGOUT
-     ---------------------------------------------------------
-     Opens on top of the current page. No navigation to /login.
-  ========================================================= */
-
-  function getHeaderAuthElements(){
-    return {
-      action:document.getElementById("ma7alak-header-auth-action"),
-      icon:document.getElementById("ma7alak-header-auth-icon"),
-      main:document.getElementById("ma7alak-header-auth-main"),
-      sub:document.getElementById("ma7alak-header-auth-sub")
-    };
-  }
-
-
-  function setHeaderAuthState(loggedIn){
-
-    const auth =
-      getHeaderAuthElements();
-
-    if(!auth.action){
-      return;
-    }
-
-    auth.action.dataset.authState =
-      loggedIn ? "logout" : "login";
-
-    auth.action.setAttribute(
-      "aria-label",
-      loggedIn ? "Logout" : "Login"
-    );
-
-    if(auth.icon){
-      auth.icon.textContent =
-        loggedIn ? "↩" : "↪";
-    }
-
-    if(auth.main){
-      auth.main.textContent =
-        loggedIn ? "Logout" : "Login";
-    }
-
-    if(auth.sub){
-      auth.sub.textContent =
-        loggedIn
-          ? "Sign out of your shop"
-          : "Shop owner access";
-    }
-
-  }
-
-
-  async function refreshHeaderAuthState(){
-
-    const supabaseClient =
-      getClient();
-
-    if(!supabaseClient){
-      setHeaderAuthState(false);
-      return false;
-    }
-
-    try{
-
-      const result =
-        await supabaseClient.auth.getSession();
-
-      const loggedIn =
-        Boolean(
-          result &&
-          result.data &&
-          result.data.session &&
-          result.data.session.user
-        );
-
-      setHeaderAuthState(loggedIn);
-
-      return loggedIn;
-
-    }
-    catch(error){
-
-      console.error(
-        "MA7ALAK header auth state:",
-        error
-      );
-
-      setHeaderAuthState(false);
-
-      return false;
-    }
-
-  }
-
-
-  function clearInlineLoginMessage(){
-
-    const message =
-      document.getElementById(
-        "ma7alak-inline-login-message"
-      );
-
-    if(!message){
-      return;
-    }
-
-    message.textContent = "";
-    message.className =
-      "ma7alak-inline-login-message";
-  }
-
-
-  function showInlineLoginMessage(
-    text,
-    type
-  ){
-
-    const message =
-      document.getElementById(
-        "ma7alak-inline-login-message"
-      );
-
-    if(!message){
-      return;
-    }
-
-    message.textContent =
-      text || "";
-
-    message.className =
-      "ma7alak-inline-login-message " +
-      (type || "error");
-  }
-
-
-  function setInlineLoginLoading(
-    loading
-  ){
-
-    const button =
-      document.getElementById(
-        "ma7alak-inline-login-button"
-      );
-
-    const text =
-      document.getElementById(
-        "ma7alak-inline-login-button-text"
-      );
-
-    const spinner =
-      document.getElementById(
-        "ma7alak-inline-login-spinner"
-      );
-
-    if(button){
-      button.disabled =
-        Boolean(loading);
-    }
-
-    if(text){
-      text.textContent =
-        loading
-          ? "Signing in..."
-          : "Log In";
-    }
-
-    if(spinner){
-      spinner.style.display =
-        loading
-          ? "block"
-          : "none";
-    }
-
-  }
-
-
-  function openInlineLogin(){
-
-    const overlay =
-      document.getElementById(
-        "ma7alak-login-overlay"
-      );
-
-    const email =
-      document.getElementById(
-        "ma7alak-login-email"
-      );
-
-    if(!overlay){
-      return;
-    }
-
-    clearInlineLoginMessage();
-    setInlineLoginLoading(false);
-
-    overlay.classList.add("open");
-
-    overlay.setAttribute(
-      "aria-hidden",
-      "false"
-    );
-
-    document.body.classList.add(
-      "ma7alak-login-open"
-    );
-
-    setTimeout(function(){
-      if(email){
-        try{
-          email.focus({
-            preventScroll:true
-          });
-        }
-        catch(error){
-          email.focus();
-        }
-      }
-    },120);
-  }
-
-
-  function closeInlineLogin(){
-
-    const overlay =
-      document.getElementById(
-        "ma7alak-login-overlay"
-      );
-
-    if(!overlay){
-      return;
-    }
-
-    overlay.classList.remove("open");
-
-    overlay.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-    document.body.classList.remove(
-      "ma7alak-login-open"
-    );
-
-    setInlineLoginLoading(false);
-  }
-
-
-  async function verifyInlineShopOwner(
-    userId
-  ){
-
-    const supabaseClient =
-      getClient();
-
-    if(!supabaseClient){
-      return {
-        success:false,
-        error:"Login service is not ready. Please try again."
-      };
-    }
-
-    try{
-
-      const result =
-        await supabaseClient
-          .from("shop_owners")
-          .select("shop_slug,owner_name")
-          .eq("user_id",userId)
-          .maybeSingle();
-
-      if(result.error){
-        console.error(
-          "MA7ALAK owner verification:",
-          result.error
-        );
-
-        return {
-          success:false,
-          error:"We could not verify this shop account. Please try again."
-        };
-      }
-
-      if(
-        !result.data ||
-        !result.data.shop_slug
-      ){
-        return {
-          success:false,
-          error:"This account is not linked to a Ma7alak shop."
-        };
-      }
-
-      try{
-        sessionStorage.setItem(
-          "ma7alak_shop_slug",
-          result.data.shop_slug
-        );
-
-        sessionStorage.setItem(
-          "ma7alak_owner_name",
-          result.data.owner_name || ""
-        );
-      }
-      catch(error){}
-
-      return {
-        success:true,
-        shop:result.data
-      };
-
-    }
-    catch(error){
-
-      console.error(
-        "MA7ALAK verify owner error:",
-        error
-      );
-
-      return {
-        success:false,
-        error:"Something went wrong while checking your account."
-      };
-    }
-  }
-
-
-  function setupInlineLogin(){
-
-    const overlay =
-      document.getElementById(
-        "ma7alak-login-overlay"
-      );
-
-    const panel =
-      document.getElementById(
-        "ma7alak-login-panel"
-      );
-
-    const close =
-      document.getElementById(
-        "ma7alak-login-close"
-      );
-
-    const form =
-      document.getElementById(
-        "ma7alak-inline-login-form"
-      );
-
-    const email =
-      document.getElementById(
-        "ma7alak-login-email"
-      );
-
-    const password =
-      document.getElementById(
-        "ma7alak-login-password"
-      );
-
-    const passwordToggle =
-      document.getElementById(
-        "ma7alak-login-password-toggle"
-      );
-
-    const auth =
-      getHeaderAuthElements();
-
-    if(
-      !overlay ||
-      !panel ||
-      !form ||
-      !auth.action
-    ){
-      return;
-    }
-
-
-    auth.action.addEventListener(
-      "click",
-      async function(event){
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const menu =
-          document.getElementById(
-            "ma7alak-header-menu-panel"
-          );
-
-        const menuButton =
-          document.getElementById(
-            "ma7alak-header-menu-button"
-          );
-
-        if(menu){
-          menu.classList.remove("open");
-          menu.setAttribute(
-            "aria-hidden",
-            "true"
-          );
-        }
-
-        if(menuButton){
-          menuButton.classList.remove("open");
-          menuButton.setAttribute(
-            "aria-expanded",
-            "false"
-          );
-        }
-
-
-        const supabaseClient =
-          getClient();
-
-        if(!supabaseClient){
-          openInlineLogin();
-          showInlineLoginMessage(
-            "Login service is still loading. Please try again.",
-            "error"
-          );
-          return;
-        }
-
-
-        const sessionResult =
-          await supabaseClient.auth.getSession();
-
-        const loggedIn =
-          Boolean(
-            sessionResult &&
-            sessionResult.data &&
-            sessionResult.data.session &&
-            sessionResult.data.session.user
-          );
-
-
-        if(loggedIn){
-
-          try{
-            await supabaseClient.auth.signOut();
-          }
-          catch(error){
-            console.error(
-              "MA7ALAK logout:",
-              error
-            );
-          }
-
-          try{
-            sessionStorage.removeItem(
-              "ma7alak_shop_slug"
-            );
-            sessionStorage.removeItem(
-              "ma7alak_owner_name"
-            );
-          }
-          catch(error){}
-
-          hideOwnerProfile();
-          setHeaderAuthState(false);
-
-          return;
-        }
-
-
-        openInlineLogin();
-      }
-    );
-
-
-    if(close){
-      close.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          closeInlineLogin();
-        }
-      );
-    }
-
-
-    overlay.addEventListener(
-      "click",
-      function(event){
-
-        if(event.target === overlay){
-          closeInlineLogin();
-        }
-
-      }
-    );
-
-
-    panel.addEventListener(
-      "click",
-      function(event){
-        event.stopPropagation();
-      }
-    );
-
-
-    if(passwordToggle){
-
-      passwordToggle.addEventListener(
-        "click",
-        function(){
-
-          if(!password){
-            return;
-          }
-
-          const showing =
-            password.type === "text";
-
-          password.type =
-            showing
-              ? "password"
-              : "text";
-
-          passwordToggle.textContent =
-            showing
-              ? "👁"
-              : "🙈";
-
-          passwordToggle.setAttribute(
-            "aria-label",
-            showing
-              ? "Show password"
-              : "Hide password"
-          );
-
-        }
-      );
-
-    }
-
-
-    form.addEventListener(
-      "submit",
-      async function(event){
-
-        event.preventDefault();
-
-        clearInlineLoginMessage();
-
-        const emailValue =
-          email
-            ? email.value.trim()
-            : "";
-
-        const passwordValue =
-          password
-            ? password.value
-            : "";
-
-
-        if(
-          !emailValue ||
-          !passwordValue
-        ){
-          showInlineLoginMessage(
-            "Enter your email and password.",
-            "error"
-          );
-          return;
-        }
-
-
-        const supabaseClient =
-          getClient();
-
-        if(!supabaseClient){
-          showInlineLoginMessage(
-            "Login service is not ready. Please try again.",
-            "error"
-          );
-          return;
-        }
-
-
-        setInlineLoginLoading(true);
-
-
-        try{
-
-          const result =
-            await supabaseClient
-              .auth
-              .signInWithPassword({
-                email:emailValue,
-                password:passwordValue
-              });
-
-
-          if(result.error){
-
-            let errorText =
-              "Incorrect email or password.";
-
-            const rawError =
-              String(
-                result.error.message || ""
-              ).toLowerCase();
-
-            if(
-              rawError.includes(
-                "email not confirmed"
-              )
-            ){
-              errorText =
-                "Please confirm your email first.";
-            }
-
-            showInlineLoginMessage(
-              errorText,
-              "error"
-            );
-
-            setInlineLoginLoading(false);
-
-            return;
-          }
-
-
-          if(
-            !result.data ||
-            !result.data.user
-          ){
-            showInlineLoginMessage(
-              "Login failed. Please try again.",
-              "error"
-            );
-
-            setInlineLoginLoading(false);
-
-            return;
-          }
-
-
-          const verification =
-            await verifyInlineShopOwner(
-              result.data.user.id
-            );
-
-
-          if(!verification.success){
-
-            await supabaseClient.auth.signOut();
-
-            showInlineLoginMessage(
-              verification.error,
-              "error"
-            );
-
-            setHeaderAuthState(false);
-            setInlineLoginLoading(false);
-
-            return;
-          }
-
-
-          showInlineLoginMessage(
-            "Logged in successfully.",
-            "success"
-          );
-
-          setHeaderAuthState(true);
-
-          await loadOwnerProfile();
-
-
-          setTimeout(function(){
-
-            setInlineLoginLoading(false);
-
-            closeInlineLogin();
-
-            if(password){
-              password.value = "";
-            }
-
-          },450);
-
-
-        }
-        catch(error){
-
-          console.error(
-            "MA7ALAK inline login:",
-            error
-          );
-
-          showInlineLoginMessage(
-            "Something went wrong. Please try again.",
-            "error"
-          );
-
-          setInlineLoginLoading(false);
-        }
-
-      }
-    );
-
-
-    document.addEventListener(
-      "keydown",
-      function(event){
-
-        if(
-          event.key === "Escape" &&
-          overlay.classList.contains(
-            "open"
-          )
-        ){
-          closeInlineLogin();
-        }
-
-      }
-    );
-
-  }
-
 
   function setupHeaderMenu(){
 
@@ -4491,35 +3228,13 @@ body.ma7alak-login-open{
   function setupAuthListener(){
     const supabaseClient=getClient();
     if(!supabaseClient){return;}
-
-    supabaseClient.auth.onAuthStateChange(function(event,session){
-
-      setHeaderAuthState(
-        Boolean(
-          session &&
-          session.user
-        )
-      );
-
-      setTimeout(
-        loadOwnerProfile,
-        80
-      );
-
-    });
+    supabaseClient.auth.onAuthStateChange(function(){setTimeout(loadOwnerProfile,80);});
   }
 
   async function start(){
     setupScrollEffect();
     setupHeaderMenu();
-    setupInlineLogin();
-    await refreshHeaderAuthState();
     setupInstantHeart();
-
-    /* Restore last known live Reel catalog immediately after refresh,
-       then force Hostinger's lazy Reels iframe to initialize now. */
-    restoreCachedReelsState();
-    watchLazyIframes();
 
     /*
       Inject the direct Reel viewer into the real page FIRST, then
@@ -4528,6 +3243,18 @@ body.ma7alak-login-open{
     injectGlobalReelViewer();
     setupGlobalReelViewer();
     setupReelsButton();
+
+    /* Phone push deep link: https://ma7alak.com/?reel=REEL_ID
+       Store it until the live Supabase Reel catalog arrives. */
+    try{
+      const reelFromURL =
+        new URLSearchParams(window.location.search).get("reel");
+
+      if(reelFromURL){
+        ma7alakPendingExactReelId = String(reelFromURL).trim();
+      }
+    }catch(error){}
+
     requestReelsState();
     setTimeout(requestReelsState,500);
     setTimeout(requestReelsState,1600);
@@ -4610,40 +3337,19 @@ body.ma7alak-login-open{
 ========================================================= */
 
 /* =========================================================
-   WHAT CHANGED — INLINE PREMIUM LOGIN / LOGOUT
-   =========================================================
-   1. Login no longer opens /login or another page.
-   2. Pressing Login in the header menu opens a premium phone-first
-      login panel directly over the current Ma7alak page.
-   3. Login panel uses the same Supabase email/password authentication
-      and shop_owners verification logic from the previous login page.
-   4. All login-panel text is English except "Marhaba to Ma7alak".
-   5. Successful login stays on the current page and closes the panel.
-   6. The website immediately refreshes the authenticated owner profile.
-   7. When logged in, the header menu action changes from Login to Logout.
-   8. Pressing Logout signs out directly, hides the owner profile and
-      changes the menu action back to Login.
-   9. Password show/hide, errors, loading state and owner verification
-      are preserved.
-   10. Existing header, Reels, Likes, Notifications, Search and shop
-       profile functionality were kept intact.
+   LIVE REELS HEADER SYNC FIX
+   1. Header viewer no longer stays locked to old hardcoded reels.
+   2. Accepts full live Reel catalog from MA7ALAK_REELS_STATE.
+   3. New panel reels automatically become playable from header icon.
+   4. Existing favorites, random opening, swipe, sound and badge remain.
 ========================================================= */
 
 
 /* =========================================================
-   LIVE REELS + INLINE LOGIN MERGED BUILD
-   - Preserves working inline Login/Logout overlay.
-   - Preserves Supabase shop_owners verification.
-   - Header Reel viewer consumes live Reel panel catalog.
-========================================================= */
-
-
-/* =========================================================
-   V26 — HOSTINGER LAZY REELS REFRESH FIX
-   1. Preserves inline Login/Logout panel.
-   2. Preserves live Reel catalog bridge and global Reel player.
-   3. Forces Hostinger lazy Embed iframes to load before scrolling.
-   4. Watches delayed iframe insertion and re-requests Reel state.
-   5. Caches the last live Reel IDs/catalog in localStorage so refresh
-      does not temporarily remove the Reel badge/player catalog.
+   EXACT REEL NOTIFICATION FIX
+   - In-site Reel notifications open by exact reel_id.
+   - Phone push deep links support ?reel=<reel_id>.
+   - No random Reel is opened first.
+   - Duplicate video URLs are safe because reel_id is authoritative.
+   - Existing shop click in the Reel viewer still uses reel.shopUrl.
 ========================================================= */
