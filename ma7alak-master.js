@@ -217,22 +217,18 @@
     "story-upload-panel.js"
   );
 
+     loadScript(
+    "homepage-story-likes.js   "
+  );
 
-  /* =========================================================
-     DOZE 3ALE
-  ========================================================= */
 
-  if (
-    PATH ===
-    "/doze-3ale"
-  ) {
+     loadScript(
+    " show-shops.js"
+  );
 
-    loadScript(
-      "doze-3ale-complete.js"
-    );
 
-  }
 
+  
 
   /* =========================================================
      ADMIN
