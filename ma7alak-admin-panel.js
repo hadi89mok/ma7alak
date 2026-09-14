@@ -324,6 +324,18 @@
   const cancelEditButton = document.getElementById("ma-admin-cancel-edit");
   const saveEditButton = document.getElementById("ma-admin-save-edit");
 
+  /*
+     IMPORTANT:
+     The Directory Control V2 layer adds/selects fields dynamically.
+     Browser native required-field validation could block the submit event
+     before our JavaScript save handler ever runs, making Save Changes look
+     completely dead. All Edit Shop validation is handled explicitly below.
+  */
+  if(editForm){
+    editForm.noValidate = true;
+    editForm.setAttribute("novalidate", "novalidate");
+  }
+
   const ownerCard = document.getElementById("ma-admin-owner-card");
   const ownerForm = document.getElementById("ma-admin-owner-form");
   const ownerStatus = document.getElementById("ma-admin-owner-status");
@@ -3306,6 +3318,22 @@
 
   cancelEditButton.addEventListener("click", closeEditShop);
 
+  /*
+     Extra Hostinger/mobile safety: always route the Save button through the
+     form submit handler even when browser constraint validation would normally
+     suppress the submit event.
+  */
+  if(saveEditButton){
+    saveEditButton.addEventListener("click", function(event){
+      event.preventDefault();
+      if(editForm.requestSubmit){
+        editForm.requestSubmit();
+      }else{
+        editForm.dispatchEvent(new Event("submit", { bubbles:true, cancelable:true }));
+      }
+    });
+  }
+
 
   editForm.addEventListener("submit", async function(event){
 
@@ -3317,6 +3345,22 @@
     if(!slug){
       setStatus(editStatus, "No shop selected.", "error");
       return;
+    }
+
+    /*
+       Sync the visible Directory Control selectors into the real shop fields
+       at the exact moment Save is clicked. This removes any timing dependency
+       on `change` events or the 80ms Edit Shop sync helper.
+    */
+    const editCitySmart = document.getElementById("ma-edit-city-v2");
+    const editAreaSmart = document.getElementById("ma-edit-v2-area-smart");
+    const editCategorySmart = document.getElementById("ma-edit-v2-category-smart");
+
+    if(editAreaSmart && normalizedText(editAreaSmart.value)){
+      editArea.value = normalizedText(editAreaSmart.value);
+    }
+    if(editCategorySmart && normalizedText(editCategorySmart.value)){
+      editCategory.value = normalizedText(editCategorySmart.value);
     }
 
     const name = normalizedText(editName.value);
@@ -3349,7 +3393,7 @@
         arabic_name: normalizedText(editArabic.value) || null,
         profile_image_url: normalizedText(editImage.value) || null,
         shop_url: normalizedText(editUrl.value) || ("https://ma7alak.com/" + slug),
-        city: normalizedText(document.getElementById("ma-edit-city-v2") && document.getElementById("ma-edit-city-v2").value) || null,
+        city: normalizedText(editCitySmart && editCitySmart.value) || null,
         area: area || null,
         category: category,
         category_name: finalCardLabel,
@@ -3861,9 +3905,23 @@
         const areaInput=byId(areaInputId), catInput=byId(categoryInputId), catName=byId(categoryNameId);
         if(!areaInput || !catInput || byId(cityId)) return;
 
+        /*
+           These original inputs become hidden after smart controls are added.
+           Never leave native `required` on hidden/managed fields because the
+           browser can cancel form submission before our save handler runs.
+        */
+        areaInput.required = false;
+        areaInput.removeAttribute("required");
+        catInput.required = false;
+        catInput.removeAttribute("required");
+        if(catName){
+          catName.required = false;
+          catName.removeAttribute("required");
+        }
+
         const cityWrap=document.createElement("div");
         cityWrap.className="ma-v2-field";
-        cityWrap.innerHTML=`<label>City / Region *</label><select id="${cityId}" class="ma-v2-smart-select" required></select><small>Select the main Lebanon city/region first. "da7ye" stays exactly da7ye.</small>`;
+        cityWrap.innerHTML=`<label>City / Region</label><select id="${cityId}" class="ma-v2-smart-select"></select><small>Select the main Lebanon city/region. Existing shops can still be saved while this is empty.</small>`;
         areaInput.closest("label").parentNode.insertBefore(cityWrap, areaInput.closest("label"));
 
         const areaWrap=document.createElement("div");
@@ -3874,7 +3932,7 @@
 
         const catWrap=document.createElement("div");
         catWrap.className="ma-v2-field";
-        catWrap.innerHTML=`<label>Main Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select" required></select><small>This controls where the shop appears in Directory filters. It does NOT control the text shown on the card.</small>`;
+        catWrap.innerHTML=`<label>Main Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select"></select><small>This controls where the shop appears in Directory filters. It does NOT control the text shown on the card.</small>`;
         catInput.closest("label").parentNode.insertBefore(catWrap,catInput.closest("label"));
 
         areaInput.closest("label").classList.add("ma-v2-original-hidden");
