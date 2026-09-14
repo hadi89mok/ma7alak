@@ -1,38 +1,65 @@
 /* =========================================================
-   MA7ALAK â€” DOZE 3ALE FULL PAGE BACKGROUND
-   HOSTINGER BACKGROUND OVERRIDE / KILLER
-   Activates ONLY on https://ma7alak.com/doze-3ale
-   ========================================================= */
-(function(){
+   MA7ALAK — DOZE 3ALE FULL-PAGE CREPE BACKGROUND
+   OVERLAY METHOD — HOSTINGER SAFE
+   Activates ONLY on: https://ma7alak.com/doze-3ale
+
+   METHOD:
+   - Does NOT try to make Hostinger backgrounds transparent.
+   - Places the decorative crepe/chocolate layer ABOVE Hostinger's page
+     background, but BELOW all real page content.
+   - pointer-events:none so it never blocks taps/clicks.
+========================================================= */
+
+(function () {
   "use strict";
 
-  const TARGET = "/doze-3ale";
-  const STYLE_ID = "m7-doze-full-bg-style";
-  const BG_ID = "m7-doze-full-bg";
-  const MARK = "data-m7-doze-transparent";
+  const TARGET_PATH = "/doze-3ale";
+  const STYLE_ID = "ma7alak-doze-overlay-bg-style";
+  const BG_ID = "ma7alak-doze-overlay-bg";
 
-  function pathOK(){
-    let p = (location.pathname || "/").replace(/\/+$/,"") || "/";
-    return p === TARGET;
+  function normalizePath(path) {
+    let p = String(path || "/").replace(/\/+/g, "/");
+    if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
+    return p;
   }
 
-  if(!pathOK()) return;
+  function isTargetPage() {
+    return normalizePath(window.location.pathname) === TARGET_PATH;
+  }
 
-  function addStyle(){
-    if(document.getElementById(STYLE_ID)) return;
+  function removeDozeBackground() {
+    const bg = document.getElementById(BG_ID);
+    const style = document.getElementById(STYLE_ID);
 
-    const st = document.createElement("style");
-    st.id = STYLE_ID;
-    st.textContent = `
-      html, body{
+    if (bg) bg.remove();
+    if (style) style.remove();
+
+    document.documentElement.classList.remove("ma7alak-doze-overlay-active");
+    document.body.classList.remove("ma7alak-doze-overlay-active");
+  }
+
+  function installStyle() {
+    if (document.getElementById(STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+
+    style.textContent = `
+      html.ma7alak-doze-overlay-active,
+      body.ma7alak-doze-overlay-active{
         min-height:100%!important;
-        background:#120806!important;
       }
 
-      body{
+      body.ma7alak-doze-overlay-active{
         position:relative!important;
+        isolation:isolate!important;
       }
 
+      /*
+        IMPORTANT:
+        This layer sits ABOVE Hostinger's own background,
+        but BELOW your actual content.
+      */
       #${BG_ID}{
         position:fixed!important;
         inset:0!important;
@@ -40,15 +67,43 @@
         height:100vh!important;
         width:100dvw!important;
         height:100dvh!important;
-        z-index:0!important;
+        z-index:2147483000!important;
         pointer-events:none!important;
         overflow:hidden!important;
+        opacity:1!important;
+
         background:
-          radial-gradient(circle at 14% 18%, rgba(126,58,26,.30), transparent 28%),
-          radial-gradient(circle at 86% 24%, rgba(92,40,17,.26), transparent 31%),
-          radial-gradient(circle at 18% 82%, rgba(94,41,19,.28), transparent 30%),
-          radial-gradient(circle at 83% 77%, rgba(130,64,31,.20), transparent 31%),
-          linear-gradient(180deg,#1c0d08 0%,#100705 46%,#180a06 100%)!important;
+          radial-gradient(circle at 14% 17%, rgba(130,62,28,.24), transparent 29%),
+          radial-gradient(circle at 86% 22%, rgba(95,41,18,.21), transparent 30%),
+          radial-gradient(circle at 17% 83%, rgba(103,47,21,.22), transparent 31%),
+          radial-gradient(circle at 84% 77%, rgba(139,68,31,.18), transparent 31%),
+          linear-gradient(180deg,
+            rgba(27,13,8,.91) 0%,
+            rgba(13,7,5,.89) 46%,
+            rgba(22,10,6,.91) 100%
+          )!important;
+      }
+
+      /*
+        Put real page UI above our decorative overlay.
+        We deliberately use an even higher z-index.
+      */
+      body.ma7alak-doze-overlay-active > *:not(#${BG_ID}){
+        position:relative!important;
+        z-index:2147483001!important;
+      }
+
+      /*
+        Hostinger often nests the page inside one root wrapper.
+        Keep the wrapper and its children above the background.
+      */
+      body.ma7alak-doze-overlay-active main,
+      body.ma7alak-doze-overlay-active #root,
+      body.ma7alak-doze-overlay-active #__next,
+      body.ma7alak-doze-overlay-active [class*="website"],
+      body.ma7alak-doze-overlay-active [class*="page-content"]{
+        position:relative!important;
+        z-index:2147483001!important;
       }
 
       #${BG_ID} svg{
@@ -59,49 +114,90 @@
         display:block!important;
       }
 
-      #${BG_ID}::after{
-        content:"";
-        position:absolute;
-        inset:0;
+      #${BG_ID} .m7-dark-center{
+        position:absolute!important;
+        left:50%!important;
+        top:50%!important;
+        width:min(900px,92vw)!important;
+        height:120vh!important;
+        transform:translate(-50%,-50%)!important;
         background:
-          radial-gradient(ellipse at 50% 48%,
-            rgba(7,4,3,.20) 0%,
-            rgba(7,4,3,.35) 45%,
-            rgba(4,2,2,.66) 100%);
+          radial-gradient(
+            ellipse at center,
+            rgba(6,4,3,.42) 0%,
+            rgba(7,4,3,.31) 48%,
+            rgba(7,4,3,.08) 72%,
+            transparent 100%
+          )!important;
+        filter:blur(8px)!important;
       }
 
-      /* Everything real stays above our background. */
-      body > *:not(#${BG_ID}){
-        position:relative;
-        z-index:1;
+      #${BG_ID} .m7-vignette{
+        position:absolute!important;
+        inset:0!important;
+        background:
+          radial-gradient(
+            ellipse at center,
+            rgba(0,0,0,0) 34%,
+            rgba(0,0,0,.18) 64%,
+            rgba(0,0,0,.48) 100%
+          )!important;
       }
 
-      /* Elements identified by the JS as HOSTINGER layout/background shells only. */
-      [${MARK}="1"]{
-        background-color:transparent!important;
-        background-image:none!important;
+      #${BG_ID} .m7-crepe-a{
+        transform-box:fill-box;
+        transform-origin:center;
+        animation:m7CrepeFloatA 10s ease-in-out infinite;
       }
 
-      /* Common Hostinger/Zyro page shells. */
-      #root,
-      #__next,
-      main,
-      .website-content,
-      .page-content,
-      [class*="website-content"],
-      [class*="page-content"],
-      [class*="layout__section"],
-      [class*="section-wrapper"],
-      [class*="block-wrapper"],
-      [class*="block-background"],
-      [class*="section-background"]{
-        background-color:transparent!important;
+      #${BG_ID} .m7-crepe-b{
+        transform-box:fill-box;
+        transform-origin:center;
+        animation:m7CrepeFloatB 12s ease-in-out infinite;
+      }
+
+      #${BG_ID} .m7-choco-gloss{
+        animation:m7ChocoGloss 7s ease-in-out infinite;
+      }
+
+      @keyframes m7CrepeFloatA{
+        0%,100%{transform:translate3d(0,0,0) rotate(-1deg);}
+        50%{transform:translate3d(0,-8px,0) rotate(1deg);}
+      }
+
+      @keyframes m7CrepeFloatB{
+        0%,100%{transform:translate3d(0,0,0) rotate(1deg);}
+        50%{transform:translate3d(0,9px,0) rotate(-1deg);}
+      }
+
+      @keyframes m7ChocoGloss{
+        0%,100%{opacity:.55;}
+        50%{opacity:.90;}
       }
 
       @media(max-width:600px){
         #${BG_ID} svg{
-          width:118%!important;
-          left:-9%!important;
+          width:120%!important;
+          left:-10%!important;
+        }
+
+        #${BG_ID} .m7-dark-center{
+          width:96vw!important;
+          background:
+            radial-gradient(
+              ellipse at center,
+              rgba(5,3,2,.48) 0%,
+              rgba(6,4,3,.37) 50%,
+              rgba(6,4,3,.10) 76%,
+              transparent 100%
+            )!important;
+        }
+      }
+
+      @media(max-width:380px){
+        #${BG_ID} svg{
+          width:128%!important;
+          left:-14%!important;
         }
       }
 
@@ -110,180 +206,150 @@
           animation:none!important;
         }
       }
-
-      @keyframes m7CrepeDriftA{
-        0%,100%{transform:translate3d(0,0,0) rotate(-2deg)}
-        50%{transform:translate3d(0,-10px,0) rotate(1deg)}
-      }
-      @keyframes m7CrepeDriftB{
-        0%,100%{transform:translate3d(0,0,0) rotate(2deg)}
-        50%{transform:translate3d(0,9px,0) rotate(-1deg)}
-      }
-      @keyframes m7Gloss{
-        0%,100%{opacity:.58}
-        50%{opacity:.92}
-      }
-
-      #${BG_ID} .crepeA{animation:m7CrepeDriftA 10s ease-in-out infinite}
-      #${BG_ID} .crepeB{animation:m7CrepeDriftB 12s ease-in-out infinite}
-      #${BG_ID} .gloss{animation:m7Gloss 7s ease-in-out infinite}
     `;
-    document.head.appendChild(st);
+
+    document.head.appendChild(style);
   }
 
-  function addBackground(){
-    if(document.getElementById(BG_ID)) return;
+  function makeBackground() {
+    if (document.getElementById(BG_ID)) return;
 
     const bg = document.createElement("div");
     bg.id = BG_ID;
-    bg.setAttribute("aria-hidden","true");
+    bg.setAttribute("aria-hidden", "true");
 
     bg.innerHTML = `
       <svg viewBox="0 0 1440 2560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="m7c" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#f2c487"/>
-            <stop offset=".28" stop-color="#dda25f"/>
-            <stop offset=".58" stop-color="#bb733a"/>
-            <stop offset=".82" stop-color="#e0a361"/>
-            <stop offset="1" stop-color="#915022"/>
+          <linearGradient id="m7Crepe" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f4c98e"/>
+            <stop offset="28%" stop-color="#dfa45f"/>
+            <stop offset="58%" stop-color="#be7439"/>
+            <stop offset="82%" stop-color="#e2a763"/>
+            <stop offset="100%" stop-color="#925025"/>
           </linearGradient>
-          <linearGradient id="m7ch" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#8c4828"/>
-            <stop offset=".25" stop-color="#562515"/>
-            <stop offset=".6" stop-color="#2e1009"/>
-            <stop offset="1" stop-color="#160604"/>
+
+          <linearGradient id="m7CrepeHi" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ffe7ba" stop-opacity=".72"/>
+            <stop offset="52%" stop-color="#f4bd7a" stop-opacity=".20"/>
+            <stop offset="100%" stop-color="#7a3518" stop-opacity=".06"/>
           </linearGradient>
-          <radialGradient id="m7nut" cx=".3" cy=".25" r=".8">
-            <stop offset="0" stop-color="#d5a06b"/>
-            <stop offset=".45" stop-color="#96582f"/>
-            <stop offset="1" stop-color="#47210f"/>
+
+          <linearGradient id="m7Chocolate" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#955332"/>
+            <stop offset="24%" stop-color="#5d2919"/>
+            <stop offset="58%" stop-color="#2d1109"/>
+            <stop offset="78%" stop-color="#713821"/>
+            <stop offset="100%" stop-color="#180704"/>
+          </linearGradient>
+
+          <radialGradient id="m7Nut" cx="35%" cy="28%" r="75%">
+            <stop offset="0%" stop-color="#d8a46c"/>
+            <stop offset="42%" stop-color="#9b5d33"/>
+            <stop offset="100%" stop-color="#472211"/>
           </radialGradient>
-          <filter id="m7sh" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#000" flood-opacity=".52"/>
+
+          <filter id="m7Shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#000" flood-opacity=".48"/>
           </filter>
         </defs>
 
-        <!-- left/top folded crepe -->
-        <g class="crepeA" filter="url(#m7sh)" opacity=".90">
-          <path d="M-210 160 C45 86 260 160 398 345 C486 463 465 611 362 735 C228 898 32 940 -186 880 Z" fill="url(#m7c)"/>
-          <path d="M-80 263 C74 195 243 226 342 356 C285 344 225 349 170 374 C63 423 -14 516 -75 632 Z" fill="#ffe0a9" opacity=".23"/>
-          <path d="M42 269 C128 328 194 403 205 499 C213 568 188 629 144 685" fill="none" stroke="url(#m7ch)" stroke-width="48" stroke-linecap="round"/>
-          <path class="gloss" d="M62 278 C132 333 170 399 177 462" fill="none" stroke="#d79769" stroke-opacity=".28" stroke-width="9" stroke-linecap="round"/>
+        <!-- TOP LEFT CREPE -->
+        <g class="m7-crepe-a" filter="url(#m7Shadow)" opacity=".88">
+          <path d="M-215 160 C38 83 258 151 403 343 C489 457 470 612 365 738 C231 899 36 943 -190 881 Z"
+                fill="url(#m7Crepe)"/>
+          <path d="M-84 265 C71 196 244 225 346 357 C286 344 225 350 167 378 C61 428 -15 519 -77 634 Z"
+                fill="url(#m7CrepeHi)"/>
+          <path d="M43 270 C133 330 198 405 207 501 C214 568 190 630 145 687"
+                fill="none" stroke="url(#m7Chocolate)" stroke-width="50" stroke-linecap="round"/>
+          <path class="m7-choco-gloss" d="M65 281 C133 334 174 402 180 463"
+                fill="none" stroke="#d99b73" stroke-opacity=".28" stroke-width="9" stroke-linecap="round"/>
         </g>
 
-        <!-- right/bottom folded crepe -->
-        <g class="crepeB" filter="url(#m7sh)" opacity=".88">
-          <path d="M1082 1770 C1204 1607 1425 1536 1640 1620 L1644 2345 C1440 2414 1240 2328 1129 2181 C1035 2057 1018 1871 1082 1770 Z" fill="url(#m7c)"/>
-          <path d="M1195 1714 C1290 1647 1414 1629 1518 1664 C1414 1736 1365 1842 1371 1952 C1376 2050 1414 2122 1484 2196 C1330 2201 1203 2127 1148 2011 C1103 1916 1117 1792 1195 1714 Z" fill="#ffe2ad" opacity=".19"/>
-          <path d="M1460 1659 C1348 1741 1285 1835 1283 1947 C1281 2043 1325 2128 1410 2209" fill="none" stroke="url(#m7ch)" stroke-width="50" stroke-linecap="round"/>
-          <path class="gloss" d="M1443 1674 C1366 1737 1325 1809 1314 1882" fill="none" stroke="#d9986b" stroke-opacity=".25" stroke-width="9" stroke-linecap="round"/>
+        <!-- BOTTOM RIGHT CREPE -->
+        <g class="m7-crepe-b" filter="url(#m7Shadow)" opacity=".87">
+          <path d="M1080 1768 C1207 1602 1426 1535 1644 1618 L1647 2348 C1437 2416 1240 2326 1127 2179 C1033 2054 1018 1870 1080 1768 Z"
+                fill="url(#m7Crepe)"/>
+          <path d="M1194 1713 C1290 1645 1416 1628 1520 1664 C1415 1737 1366 1842 1370 1954 C1375 2052 1414 2124 1485 2198 C1328 2201 1201 2128 1146 2011 C1101 1913 1116 1792 1194 1713 Z"
+                fill="url(#m7CrepeHi)" opacity=".74"/>
+          <path d="M1461 1658 C1348 1742 1283 1836 1282 1949 C1280 2044 1326 2128 1411 2210"
+                fill="none" stroke="url(#m7Chocolate)" stroke-width="51" stroke-linecap="round"/>
+          <path class="m7-choco-gloss" d="M1443 1673 C1367 1737 1326 1811 1315 1883"
+                fill="none" stroke="#da9b71" stroke-opacity=".25" stroke-width="9" stroke-linecap="round"/>
         </g>
 
-        <!-- subtle chocolate splash, top right -->
-        <g opacity=".48">
-          <path d="M1121 228 C1250 142 1394 159 1513 268 C1571 322 1604 382 1647 453 C1511 400 1400 409 1301 456 C1229 490 1171 540 1119 607 C1116 448 1112 332 1121 228 Z" fill="url(#m7ch)"/>
-          <circle cx="1248" cy="211" r="28" fill="#6b301b"/>
-          <circle cx="1382" cy="179" r="17" fill="#8a4728"/>
+        <!-- TOP RIGHT CHOCOLATE SPLASH -->
+        <g opacity=".42">
+          <path d="M1116 226 C1248 140 1394 157 1516 267 C1574 320 1607 382 1652 455 C1515 400 1400 408 1299 457 C1227 491 1167 542 1117 610 C1112 450 1109 332 1116 226 Z"
+                fill="url(#m7Chocolate)"/>
+          <circle cx="1245" cy="209" r="27" fill="#70331e"/>
+          <circle cx="1384" cy="177" r="17" fill="#934b2b"/>
         </g>
 
-        <!-- hazelnuts -->
-        <g opacity=".80">
-          <ellipse cx="1120" cy="707" rx="43" ry="36" fill="url(#m7nut)" filter="url(#m7sh)"/>
-          <ellipse cx="1255" cy="804" rx="31" ry="26" fill="url(#m7nut)" filter="url(#m7sh)"/>
-          <ellipse cx="242" cy="1749" rx="37" ry="31" fill="url(#m7nut)" filter="url(#m7sh)"/>
+        <!-- HAZELNUT DETAILS -->
+        <g opacity=".74">
+          <ellipse cx="1118" cy="706" rx="43" ry="36" fill="url(#m7Nut)" filter="url(#m7Shadow)"/>
+          <ellipse cx="1258" cy="805" rx="31" ry="26" fill="url(#m7Nut)" filter="url(#m7Shadow)"/>
+          <ellipse cx="243" cy="1748" rx="37" ry="31" fill="url(#m7Nut)" filter="url(#m7Shadow)"/>
         </g>
 
-        <!-- cocoa glow -->
-        <g fill="#d28a57" opacity=".10">
-          <circle cx="330" cy="1100" r="8"/>
-          <circle cx="1110" cy="1160" r="10"/>
-          <circle cx="1190" cy="1360" r="6"/>
-          <circle cx="224" cy="1450" r="8"/>
-          <circle cx="1040" cy="1500" r="7"/>
-          <circle cx="385" cy="2070" r="6"/>
+        <!-- COCOA DUST -->
+        <g fill="#d08b5c" opacity=".09">
+          <circle cx="331" cy="1101" r="8"/>
+          <circle cx="1111" cy="1160" r="10"/>
+          <circle cx="1191" cy="1361" r="6"/>
+          <circle cx="223" cy="1451" r="8"/>
+          <circle cx="1041" cy="1499" r="7"/>
+          <circle cx="383" cy="2070" r="6"/>
         </g>
       </svg>
+
+      <div class="m7-dark-center"></div>
+      <div class="m7-vignette"></div>
     `;
 
     document.body.prepend(bg);
   }
 
-  /* 
-     Hostinger's problem is not the background itself:
-     each builder section can paint an opaque background over the body.
-     We clear ONLY large page-layout shells, not cards/components.
-  */
-  function clearHostingerSectionBackgrounds(){
-    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-
-    const candidates = document.querySelectorAll(
-      'main, section, #root, #__next, .website-content, .page-content, ' +
-      '[class*="section"], [class*="block"], [class*="layout"], [class*="background"]'
-    );
-
-    candidates.forEach(el => {
-      if(el.id === BG_ID || el.closest("#" + BG_ID)) return;
-      if(el.closest("header") || el.closest("nav")) return;
-
-      const r = el.getBoundingClientRect();
-      if(r.width < vw * 0.84 || r.height < 80) return;
-
-      /*
-        Keep obvious inner cards/widgets alone. Hostinger layout shells are
-        usually full-width; compact/custom cards won't pass this test.
-      */
-      const cs = getComputedStyle(el);
-      const bgImage = cs.backgroundImage;
-      const bgColor = cs.backgroundColor;
-
-      const looksLikePageShell =
-        el === document.body ||
-        el === document.documentElement ||
-        el.tagName === "MAIN" ||
-        el.tagName === "SECTION" ||
-        /section|block|layout|background|content/i.test(String(el.className));
-
-      if(!looksLikePageShell) return;
-
-      if(bgImage !== "none" || (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent")){
-        el.setAttribute(MARK,"1");
-        el.style.setProperty("background-color","transparent","important");
-        el.style.setProperty("background-image","none","important");
-      }
-    });
-  }
-
-  function run(){
-    if(!pathOK()) return;
-    if(!document.body){
-      document.addEventListener("DOMContentLoaded", run, {once:true});
+  function run() {
+    if (!isTargetPage()) {
+      removeDozeBackground();
       return;
     }
 
-    addStyle();
-    addBackground();
-    clearHostingerSectionBackgrounds();
-
-    /* Hostinger can repaint/rebuild sections after initial load. */
-    setTimeout(clearHostingerSectionBackgrounds, 300);
-    setTimeout(clearHostingerSectionBackgrounds, 1000);
-    setTimeout(clearHostingerSectionBackgrounds, 2500);
-
-    if(!window.__M7_DOZE_BG_OBSERVER__){
-      let timer = 0;
-      window.__M7_DOZE_BG_OBSERVER__ = new MutationObserver(() => {
-        clearTimeout(timer);
-        timer = setTimeout(clearHostingerSectionBackgrounds, 80);
-      });
-      window.__M7_DOZE_BG_OBSERVER__.observe(document.body,{
-        childList:true,
-        subtree:true,
-        attributes:true,
-        attributeFilter:["class","style"]
-      });
+    if (!document.body) {
+      document.addEventListener("DOMContentLoaded", run, { once: true });
+      return;
     }
+
+    document.documentElement.classList.add("ma7alak-doze-overlay-active");
+    document.body.classList.add("ma7alak-doze-overlay-active");
+
+    installStyle();
+    makeBackground();
   }
+
+  function handleRouteChange() {
+    setTimeout(run, 40);
+  }
+
+  const push = history.pushState;
+  const replace = history.replaceState;
+
+  history.pushState = function () {
+    const result = push.apply(this, arguments);
+    handleRouteChange();
+    return result;
+  };
+
+  history.replaceState = function () {
+    const result = replace.apply(this, arguments);
+    handleRouteChange();
+    return result;
+  };
+
+  window.addEventListener("popstate", handleRouteChange);
+  window.addEventListener("pageshow", handleRouteChange);
 
   run();
 })();
