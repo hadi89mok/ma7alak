@@ -1,4228 +1,3010 @@
 /* =========================================================
-   MA7ALAK PREMIUM SOCIAL HEADER — GITHUB READY
-   Converted from the exact Hostinger Custom Code version.
-   Load this file with a normal <script src="..."></script> tag.
-   ========================================================= */
+   MA7ALAK — PREMIUM SHOPS DIRECTORY
+   GITHUB-READY JAVASCRIPT
+========================================================= */
+
 (function(){
   "use strict";
 
-  /*
-     CRITICAL HOSTINGER SAFETY:
-     Run this header ONLY in the real top-level website page.
-     Do NOT run inside any Hostinger Embed/custom-code iframe.
-  */
-  if(window.self !== window.top){
-    return;
+  if(!document.getElementById("ma7alak-show-shops-github-style")){
+    const style = document.createElement("style");
+    style.id = "ma7alak-show-shops-github-style";
+    style.textContent = "/* =========================================================\n   MA7ALAK SHOPS — GLOBAL FOUNDATION\n========================================================= */\n\nhtml.ma7alak-shops-page-active,\nhtml.ma7alak-shops-page-active body{\n\n  background:#080706 !important;\n\n  color:#fff !important;\n\n}\n\n\nbody.ma7alak-shops-body{\n\n  background:#080706 !important;\n\n  color:#fff !important;\n\n}\n\n\n/* =========================================================\n   MAIN PAGE\n========================================================= */\n\n#ma7alak-shops-page{\n\n  --gold:#f5b83f;\n  --gold-light:#ffd982;\n  --gold-soft:#d69a42;\n\n  --cream:#f7efe4;\n\n  --white:#ffffff;\n\n  --muted:#b9b0a6;\n  --muted2:#8f877e;\n\n  --glass:rgba(46,35,27,.60);\n  --glass-light:rgba(255,255,255,.075);\n\n  --border:rgba(255,255,255,.20);\n  --gold-border:rgba(245,184,63,.55);\n\n  position:relative;\n\n  width:100%;\n\n  max-width:1500px;\n\n  margin:0 auto;\n\n  padding:\n    40px 42px 80px;\n\n  box-sizing:border-box;\n\n  overflow:hidden;\n\n  color:#fff;\n\n  font-family:\n    Inter,\n    -apple-system,\n    BlinkMacSystemFont,\n    \"Segoe UI\",\n    Roboto,\n    Arial,\n    sans-serif;\n\n}\n\n\n/* =========================================================\n   CINEMATIC BACKGROUND\n========================================================= */\n\n#ma7alak-shops-page .ma7alak-background{\n\n  position:absolute;\n\n  inset:0;\n\n  z-index:-10;\n\n  overflow:hidden;\n\n  background:\n\n    linear-gradient(\n      180deg,\n      rgba(4,3,2,.25),\n      rgba(5,4,3,.82) 58%,\n      #080706 100%\n    );\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-image{\n\n  position:absolute;\n\n  inset:0;\n\n  width:100%;\n\n  height:100%;\n\n  object-fit:cover;\n\n  object-position:center top;\n\n  opacity:.38;\n\n  filter:\n    saturate(.75)\n    contrast(1.08)\n    brightness(.72);\n\n  transform:scale(1.03);\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-overlay{\n\n  position:absolute;\n\n  inset:0;\n\n  background:\n\n    radial-gradient(\n      circle at 50% 12%,\n      rgba(188,116,39,.28),\n      transparent 34%\n    ),\n\n    radial-gradient(\n      circle at 15% 58%,\n      rgba(172,103,35,.15),\n      transparent 30%\n    ),\n\n    radial-gradient(\n      circle at 88% 65%,\n      rgba(230,160,67,.13),\n      transparent 32%\n    ),\n\n    linear-gradient(\n      180deg,\n      rgba(8,7,5,.05),\n      rgba(8,7,5,.62) 50%,\n      #080706 92%\n    );\n\n}\n\n\n#ma7alak-shops-page .ma7alak-background-vignette{\n\n  position:absolute;\n\n  inset:0;\n\n  box-shadow:\n    inset 0 0 180px rgba(0,0,0,.72);\n\n}\n\n\n/* =========================================================\n   TOP BRAND\n========================================================= */\n\n.ma7alak-top-brand{\n\n  position:relative;\n\n  text-align:center;\n\n  padding-top:4px;\n\n  margin-bottom:25px;\n\n}\n\n\n.ma7alak-brand-name{\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:52px;\n\n  line-height:1;\n\n  font-weight:700;\n\n  letter-spacing:-2px;\n\n  color:#fff;\n\n  text-shadow:\n    0 5px 30px rgba(0,0,0,.7);\n\n}\n\n\n.ma7alak-brand-subtitle{\n\n  margin-top:9px;\n\n  font-size:9px;\n\n  line-height:1;\n\n  letter-spacing:5px;\n\n  color:#c7bdb1;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-brand-rule{\n\n  width:75px;\n\n  height:1px;\n\n  margin:17px auto 0;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      var(--gold),\n      transparent\n    );\n\n  opacity:.8;\n\n}\n\n\n/* =========================================================\n   DECORATIVE SIDE TEXT\n========================================================= */\n\n.ma7alak-side-left{\n\n  position:absolute;\n\n  left:4px;\n\n  top:28px;\n\n  width:120px;\n\n  color:#d8c8b5;\n\n  font-size:8px;\n\n  letter-spacing:5px;\n\n  line-height:2;\n\n  text-transform:uppercase;\n\n  opacity:.72;\n\n}\n\n\n.ma7alak-side-right{\n\n  position:absolute;\n\n  right:4px;\n\n  top:25px;\n\n  color:#f0d4a8;\n\n  font-family:\n    \"Brush Script MT\",\n    cursive;\n\n  font-size:19px;\n\n  line-height:1.05;\n\n  transform:rotate(-7deg);\n\n  opacity:.82;\n\n}\n\n\n/* =========================================================\n   HERO\n========================================================= */\n\n.ma7alak-hero{\n\n  text-align:center;\n\n  margin:\n    24px auto 32px;\n\n}\n\n\n.ma7alak-hero-icon{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  width:48px;\n\n  height:48px;\n\n  margin:0 auto 8px;\n\n  color:var(--gold);\n\n  font-size:32px;\n\n  filter:\n    drop-shadow(\n      0 0 16px rgba(245,184,63,.24)\n    );\n\n}\n\n\n.ma7alak-hero h1{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:\n    clamp(48px,6vw,74px);\n\n  line-height:1;\n\n  letter-spacing:-2px;\n\n  color:#fff;\n\n  text-shadow:\n    0 5px 35px rgba(0,0,0,.7);\n\n}\n\n\n.ma7alak-hero h1 span{\n\n  color:var(--gold);\n\n  text-shadow:\n    0 0 35px rgba(245,184,63,.16);\n\n}\n\n\n.ma7alak-hero p{\n\n  margin:\n    11px auto 0;\n\n  max-width:650px;\n\n  color:#c1b8af;\n\n  font-size:15px;\n\n  line-height:1.6;\n\n}\n\n\n/* =========================================================\n   SEARCH\n========================================================= */\n\n.ma7alak-search-wrapper{\n\n  width:100%;\n\n  max-width:860px;\n\n  margin:\n    0 auto 25px;\n\n  position:relative;\n\n}\n\n\n.ma7alak-search{\n\n  width:100%;\n\n  height:60px;\n\n  padding:\n    0 60px 0 22px;\n\n  box-sizing:border-box;\n\n  border-radius:18px;\n\n  border:\n    1px solid rgba(255,255,255,.25);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(45,36,29,.72),\n      rgba(24,20,17,.65)\n    );\n\n  backdrop-filter:blur(22px);\n\n  -webkit-backdrop-filter:blur(22px);\n\n  color:#fff;\n\n  outline:none;\n\n  font-size:14px;\n\n  box-shadow:\n    0 18px 55px rgba(0,0,0,.34),\n    inset 0 1px rgba(255,255,255,.09);\n\n  transition:\n    border-color .25s ease,\n    box-shadow .25s ease;\n\n}\n\n\n.ma7alak-search::placeholder{\n\n  color:#9f968d;\n\n}\n\n\n.ma7alak-search:focus{\n\n  border-color:\n    rgba(245,184,63,.70);\n\n  box-shadow:\n    0 0 0 4px rgba(245,184,63,.07),\n    0 20px 60px rgba(0,0,0,.38);\n\n}\n\n\n.ma7alak-search-icon{\n\n  position:absolute;\n\n  right:21px;\n\n  top:50%;\n\n  transform:translateY(-50%);\n\n  width:25px;\n\n  height:25px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  color:#e3d7c9;\n\n  font-size:25px;\n\n  pointer-events:none;\n\n}\n\n\n/* =========================================================\n   FILTER AREA\n========================================================= */\n\n.ma7alak-filter-block{\n\n  margin-bottom:20px;\n\n}\n\n\n.ma7alak-filter-label{\n\n  margin:\n    0 0 10px 2px;\n\n  color:#d1c6bb;\n\n  font-size:12px;\n\n  font-weight:600;\n\n}\n\n\n.ma7alak-area-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:9px;\n\n}\n\n\n.ma7alak-area-button{\n\n  min-height:51px;\n\n  border-radius:14px;\n\n  border:\n    1px solid rgba(255,255,255,.20);\n\n  background:\n    rgba(22,19,17,.68);\n\n  backdrop-filter:blur(14px);\n\n  -webkit-backdrop-filter:blur(14px);\n\n  color:#e9e2da;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:8px;\n\n  cursor:pointer;\n\n  transition:\n    transform .22s ease,\n    border-color .22s ease,\n    background .22s ease,\n    box-shadow .22s ease;\n\n}\n\n\n.ma7alak-area-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(245,184,63,.55);\n\n  background:\n    rgba(75,51,28,.55);\n\n}\n\n\n.ma7alak-area-button.active{\n\n  border-color:\n    var(--gold);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(170,105,29,.42),\n      rgba(77,49,25,.45)\n    );\n\n  color:#ffe1a1;\n\n  box-shadow:\n    0 0 25px rgba(245,184,63,.09),\n    inset 0 1px rgba(255,255,255,.08);\n\n}\n\n\n.ma7alak-area-button .icon{\n\n  font-size:16px;\n\n}\n\n\n/* =========================================================\n   CATEGORY\n========================================================= */\n\n.ma7alak-category-section{\n\n  display:none;\n\n  padding-top:2px;\n\n  animation:\n    ma7alakSectionIn .42s ease both;\n\n}\n\n\n.ma7alak-category-section.visible{\n\n  display:block;\n\n}\n\n\n.ma7alak-category-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:9px;\n\n}\n\n\n.ma7alak-category-button{\n\n  min-height:58px;\n\n  padding:\n    9px 12px;\n\n  border-radius:15px;\n\n  border:\n    1px solid rgba(255,255,255,.19);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(41,34,29,.68),\n      rgba(21,19,17,.62)\n    );\n\n  color:#e9e2da;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  cursor:pointer;\n\n  transition:.22s ease;\n\n}\n\n\n.ma7alak-category-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(245,184,63,.52);\n\n}\n\n\n.ma7alak-category-button.active{\n\n  border-color:\n    var(--gold);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(174,109,29,.42),\n      rgba(75,48,26,.40)\n    );\n\n  color:#ffe7b2;\n\n  box-shadow:\n    0 0 25px rgba(245,184,63,.08);\n\n}\n\n\n.ma7alak-category-icon{\n\n  font-size:20px;\n\n}\n\n\n/* =========================================================\n   RESULTS\n========================================================= */\n\n.ma7alak-results{\n\n  display:none;\n\n  margin-top:30px;\n\n  animation:\n    ma7alakSectionIn .45s ease both;\n\n}\n\n\n.ma7alak-results.visible{\n\n  display:block;\n\n}\n\n\n.ma7alak-results-top{\n\n  display:flex;\n\n  align-items:flex-end;\n\n  justify-content:space-between;\n\n  gap:20px;\n\n  padding-bottom:15px;\n\n  border-bottom:\n    1px solid rgba(255,255,255,.13);\n\n}\n\n\n.ma7alak-results-kicker{\n\n  margin-bottom:6px;\n\n  color:#c2975b;\n\n  font-size:9px;\n\n  font-weight:700;\n\n  letter-spacing:3px;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-results-title{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:31px;\n\n  line-height:1.05;\n\n  color:#fff;\n\n  letter-spacing:-.7px;\n\n}\n\n\n.ma7alak-results-subtitle{\n\n  margin:\n    7px 0 0;\n\n  color:#aaa198;\n\n  font-size:12px;\n\n}\n\n\n.ma7alak-results-count{\n\n  padding:\n    8px 13px;\n\n  border-radius:999px;\n\n  white-space:nowrap;\n\n  border:\n    1px solid rgba(245,184,63,.30);\n\n  background:\n    rgba(245,184,63,.065);\n\n  color:#d6b47b;\n\n  font-size:10px;\n\n  font-weight:700;\n\n}\n\n\n/* =========================================================\n   SHOP GRID\n========================================================= */\n\n.ma7alak-shop-grid{\n\n  display:grid;\n\n  grid-template-columns:\n    repeat(4,minmax(0,1fr));\n\n  gap:12px;\n\n  padding-top:14px;\n\n}\n\n\n/* =========================================================\n   SHOP CARD\n========================================================= */\n\n.ma7alak-shop-card{\n\n  position:relative;\n\n  min-width:0;\n\n  padding:\n    20px 13px 13px;\n\n  border-radius:20px;\n\n  border:\n    1px solid rgba(255,255,255,.22);\n\n  background:\n\n    radial-gradient(\n      circle at 50% 10%,\n      rgba(198,126,48,.17),\n      transparent 42%\n    ),\n\n    linear-gradient(\n      145deg,\n      rgba(75,58,45,.72),\n      rgba(28,24,21,.72)\n    );\n\n  backdrop-filter:blur(19px);\n\n  -webkit-backdrop-filter:blur(19px);\n\n  box-shadow:\n    0 18px 48px rgba(0,0,0,.38),\n    inset 0 1px rgba(255,255,255,.10);\n\n  text-align:center;\n\n  overflow:hidden;\n\n  transition:\n    transform .28s ease,\n    border-color .28s ease,\n    box-shadow .28s ease;\n\n}\n\n\n.ma7alak-shop-card::before{\n\n  content:\"\";\n\n  position:absolute;\n\n  width:190px;\n\n  height:190px;\n\n  left:50%;\n\n  top:-110px;\n\n  transform:translateX(-50%);\n\n  border-radius:50%;\n\n  background:\n    radial-gradient(\n      circle,\n      rgba(229,159,69,.19),\n      transparent 68%\n    );\n\n  pointer-events:none;\n\n}\n\n\n.ma7alak-shop-card::after{\n\n  content:\"\";\n\n  position:absolute;\n\n  left:-80%;\n\n  top:0;\n\n  width:55%;\n\n  height:100%;\n\n  transform:skewX(-18deg);\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(255,255,255,.035),\n      transparent\n    );\n\n  transition:\n    left .7s ease;\n\n  pointer-events:none;\n\n}\n\n\n.ma7alak-shop-card:hover{\n\n  transform:translateY(-6px);\n\n  border-color:\n    rgba(245,184,63,.48);\n\n  box-shadow:\n    0 27px 65px rgba(0,0,0,.48),\n    0 0 35px rgba(245,184,63,.06),\n    inset 0 1px rgba(255,255,255,.12);\n\n}\n\n\n.ma7alak-shop-card:hover::after{\n\n  left:130%;\n\n}\n\n\n/* =========================================================\n   CIRCULAR SHOP IMAGE\n========================================================= */\n\n.ma7alak-shop-image-link{\n\n  width:100%;\n\n  display:flex;\n\n  justify-content:center;\n\n  align-items:center;\n\n  text-decoration:none;\n\n  position:relative;\n\n  z-index:2;\n\n}\n\n\n.ma7alak-shop-image-ring{\n\n  position:relative;\n\n  width:146px;\n\n  height:146px;\n\n  padding:4px;\n\n  border-radius:50%;\n\n  box-sizing:border-box;\n\n  background:\n    linear-gradient(\n      145deg,\n      #fff0c6,\n      #d99a47 36%,\n      #76502d 70%,\n      #2c2118\n    );\n\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.16),\n    0 13px 35px rgba(0,0,0,.48),\n    0 0 27px rgba(230,158,68,.11);\n\n  transition:\n    transform .3s ease,\n    box-shadow .3s ease;\n\n}\n\n\n.ma7alak-shop-card:hover\n.ma7alak-shop-image-ring{\n\n  transform:scale(1.035);\n\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.22),\n    0 16px 42px rgba(0,0,0,.55),\n    0 0 38px rgba(245,184,63,.17);\n\n}\n\n\n.ma7alak-shop-image-inner{\n\n  width:100%;\n\n  height:100%;\n\n  border-radius:50%;\n\n  overflow:hidden;\n\n  background:#15110d;\n\n  border:\n    3px solid rgba(15,12,9,.84);\n\n  box-sizing:border-box;\n\n}\n\n\n.ma7alak-shop-image-inner img{\n\n  display:block;\n\n  width:100%;\n\n  height:100%;\n\n  object-fit:cover;\n\n  object-position:center;\n\n}\n\n\n/* =========================================================\n   VERIFIED BADGE\n========================================================= */\n\n.ma7alak-verified-badge{\n\n  position:absolute;\n\n  right:calc(50% - 74px);\n\n  bottom:0;\n\n  width:27px;\n\n  height:27px;\n\n  border-radius:50%;\n\n  background:#1688ef;\n\n  border:\n    2px solid #fff;\n\n  color:#fff;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  font-size:14px;\n\n  font-weight:900;\n\n  box-shadow:\n    0 5px 16px rgba(0,0,0,.40);\n\n}\n\n\n/* =========================================================\n   SHOP CONTENT\n========================================================= */\n\n.ma7alak-shop-content{\n\n  position:relative;\n\n  z-index:3;\n\n  margin-top:15px;\n\n}\n\n\n.ma7alak-shop-title-row{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  flex-wrap:wrap;\n\n  gap:5px;\n\n}\n\n\n.ma7alak-shop-name{\n\n  margin:0;\n\n  color:#fff;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:20px;\n\n  line-height:1.15;\n\n  font-weight:700;\n\n  letter-spacing:-.2px;\n\n}\n\n\n.ma7alak-shop-arabic{\n\n  min-height:21px;\n\n  margin-top:4px;\n\n  direction:rtl;\n\n  color:#e5ddd4;\n\n  font-size:13px;\n\n  font-weight:600;\n\n  line-height:1.5;\n\n}\n\n\n/* =========================================================\n   CATEGORY PILL\n========================================================= */\n\n.ma7alak-shop-category-pill{\n\n  display:inline-flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  margin-top:8px;\n\n  padding:\n    5px 12px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(225,164,91,.45);\n\n  background:\n    rgba(181,110,40,.16);\n\n  color:#d9b98a;\n\n  font-size:8px;\n\n  font-weight:800;\n\n  letter-spacing:1px;\n\n  text-transform:uppercase;\n\n}\n\n\n/* =========================================================\n   LOCATION\n========================================================= */\n\n.ma7alak-shop-location{\n\n  display:flex;\n\n  justify-content:center;\n\n  align-items:center;\n\n  gap:5px;\n\n  margin-top:9px;\n\n  color:#bdb5ad;\n\n  font-size:10px;\n\n  line-height:1.3;\n\n}\n\n\n.ma7alak-location-icon{\n\n  font-size:13px;\n\n}\n\n\n/* =========================================================\n   FEATURED\n========================================================= */\n\n.ma7alak-featured{\n\n  display:inline-flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:5px;\n\n  margin-top:9px;\n\n  padding:\n    5px 10px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(245,184,63,.78);\n\n  background:\n    rgba(171,106,26,.13);\n\n  color:#ffd15e;\n\n  font-size:8px;\n\n  font-weight:800;\n\n  letter-spacing:.8px;\n\n  text-transform:uppercase;\n\n  box-shadow:\n    0 0 17px rgba(245,184,63,.08);\n\n  animation:\n    ma7alakFeaturedGlow 2.6s ease-in-out infinite;\n\n}\n\n\n.ma7alak-featured.red{\n\n  border-color:\n    rgba(255,91,91,.75);\n\n  color:#ff8585;\n\n  background:\n    rgba(170,40,40,.11);\n\n  animation:\n    ma7alakRedGlow 2.6s ease-in-out infinite;\n\n}\n\n\n/* =========================================================\n   VIEW PROFILE\n========================================================= */\n\n.ma7alak-profile-button{\n\n  width:100%;\n\n  min-height:43px;\n\n  margin-top:12px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  box-sizing:border-box;\n\n  border-radius:13px;\n\n  border:\n    1px solid rgba(232,174,101,.58);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(179,115,52,.48),\n      rgba(112,69,34,.34)\n    );\n\n  color:#fff;\n\n  text-decoration:none;\n\n  font-size:11px;\n\n  font-weight:700;\n\n  transition:.22s ease;\n\n}\n\n\n.ma7alak-profile-button:hover{\n\n  transform:translateY(-2px);\n\n  border-color:\n    rgba(255,207,111,.9);\n\n  background:\n    linear-gradient(\n      135deg,\n      rgba(205,137,58,.57),\n      rgba(120,73,35,.42)\n    );\n\n  box-shadow:\n    0 9px 25px rgba(0,0,0,.30);\n\n}\n\n\n.ma7alak-profile-arrow{\n\n  font-size:17px;\n\n  transition:\n    transform .2s ease;\n\n}\n\n\n.ma7alak-profile-button:hover\n.ma7alak-profile-arrow{\n\n  transform:translateX(4px);\n\n}\n\n\n/* =========================================================\n   EMPTY\n========================================================= */\n\n.ma7alak-empty{\n\n  display:none;\n\n  padding:\n    50px 20px;\n\n  text-align:center;\n\n  border-radius:22px;\n\n  border:\n    1px solid rgba(255,255,255,.14);\n\n  background:\n    rgba(255,255,255,.045);\n\n  margin-top:15px;\n\n}\n\n\n.ma7alak-empty-icon{\n\n  font-size:40px;\n\n  margin-bottom:10px;\n\n}\n\n\n.ma7alak-empty h3{\n\n  margin:0 0 6px;\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:24px;\n\n}\n\n\n.ma7alak-empty p{\n\n  margin:0;\n\n  color:#999189;\n\n  font-size:12px;\n\n}\n\n\n/* =========================================================\n   CHANGE AREA\n========================================================= */\n\n.ma7alak-change-area{\n\n  display:none;\n\n  margin:\n    20px auto 0;\n\n  padding:\n    8px 14px;\n\n  border-radius:999px;\n\n  border:\n    1px solid rgba(255,255,255,.15);\n\n  background:\n    rgba(255,255,255,.04);\n\n  color:#aaa29a;\n\n  font-size:11px;\n\n  cursor:pointer;\n\n}\n\n\n.ma7alak-change-area.visible{\n\n  display:block;\n\n}\n\n\n/* =========================================================\n   BUSINESS CTA\n========================================================= */\n\n.ma7alak-business-cta{\n\n  margin-top:45px;\n\n  min-height:125px;\n\n  padding:\n    25px 28px;\n\n  box-sizing:border-box;\n\n  border-radius:22px;\n\n  border:\n    1px solid rgba(245,184,63,.38);\n\n  background:\n\n    radial-gradient(\n      circle at 75% 50%,\n      rgba(226,155,59,.22),\n      transparent 38%\n    ),\n\n    linear-gradient(\n      135deg,\n      rgba(42,33,26,.82),\n      rgba(19,16,14,.78)\n    );\n\n  backdrop-filter:blur(18px);\n\n  -webkit-backdrop-filter:blur(18px);\n\n  box-shadow:\n    0 20px 60px rgba(0,0,0,.38),\n    inset 0 1px rgba(255,255,255,.08);\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:space-between;\n\n  gap:25px;\n\n}\n\n\n.ma7alak-business-small{\n\n  margin-bottom:6px;\n\n  color:#b48a54;\n\n  font-size:8px;\n\n  letter-spacing:3px;\n\n  font-weight:800;\n\n  text-transform:uppercase;\n\n}\n\n\n.ma7alak-business-cta h2{\n\n  margin:0;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  color:#fff;\n\n  font-size:27px;\n\n  line-height:1.15;\n\n}\n\n\n.ma7alak-business-cta h2 span{\n\n  color:#efc477;\n\n}\n\n\n.ma7alak-business-cta p{\n\n  margin:\n    6px 0 0;\n\n  color:#a9a097;\n\n  font-size:11px;\n\n}\n\n\n.ma7alak-add-button{\n\n  min-width:180px;\n\n  height:52px;\n\n  padding:\n    0 22px;\n\n  border-radius:14px;\n\n  background:\n    linear-gradient(\n      135deg,\n      #ffc958,\n      #d88b29\n    );\n\n  color:#241608;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:8px;\n\n  text-decoration:none;\n\n  font-size:12px;\n\n  font-weight:800;\n\n  box-shadow:\n    0 12px 32px rgba(214,137,36,.24);\n\n  transition:.23s ease;\n\n}\n\n\n.ma7alak-add-button:hover{\n\n  transform:translateY(-3px);\n\n  box-shadow:\n    0 17px 40px rgba(214,137,36,.35);\n\n}\n\n\n/* =========================================================\n   FOOTER\n========================================================= */\n\n.ma7alak-footer{\n\n  margin-top:35px;\n\n  padding-top:25px;\n\n  border-top:\n    1px solid rgba(255,255,255,.10);\n\n  text-align:center;\n\n}\n\n\n.ma7alak-footer-features{\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:0;\n\n}\n\n\n.ma7alak-footer-feature{\n\n  min-width:190px;\n\n  padding:\n    0 25px;\n\n  display:flex;\n\n  align-items:center;\n\n  justify-content:center;\n\n  gap:9px;\n\n  color:#d4cbc1;\n\n  font-size:10px;\n\n}\n\n\n.ma7alak-footer-feature + .ma7alak-footer-feature{\n\n  border-left:\n    1px solid rgba(255,255,255,.16);\n\n}\n\n\n.ma7alak-footer-feature-icon{\n\n  color:#efc27a;\n\n  font-size:22px;\n\n}\n\n\n.ma7alak-footer-feature-text{\n\n  text-align:left;\n\n}\n\n\n.ma7alak-footer-feature-text strong{\n\n  display:block;\n\n  color:#eee6dc;\n\n  font-size:10px;\n\n}\n\n\n.ma7alak-footer-feature-text span{\n\n  display:block;\n\n  margin-top:2px;\n\n  color:#777069;\n\n  font-size:8px;\n\n}\n\n\n.ma7alak-footer-logo{\n\n  margin-top:23px;\n\n  font-family:\n    Georgia,\n    serif;\n\n  color:#ded5cb;\n\n  font-size:24px;\n\n}\n\n\n.ma7alak-footer-tagline{\n\n  margin-top:5px;\n\n  color:#766e67;\n\n  font-size:7px;\n\n  letter-spacing:3px;\n\n  text-transform:uppercase;\n\n}\n\n\n/* =========================================================\n   ANIMATIONS\n========================================================= */\n\n@keyframes ma7alakSectionIn{\n\n  from{\n\n    opacity:0;\n\n    transform:translateY(13px);\n\n  }\n\n  to{\n\n    opacity:1;\n\n    transform:translateY(0);\n\n  }\n\n}\n\n\n@keyframes ma7alakFeaturedGlow{\n\n  0%,\n  100%{\n\n    box-shadow:\n      0 0 0 rgba(245,184,63,0);\n\n  }\n\n  50%{\n\n    box-shadow:\n      0 0 19px rgba(245,184,63,.16);\n\n  }\n\n}\n\n\n@keyframes ma7alakRedGlow{\n\n  0%,\n  100%{\n\n    box-shadow:\n      0 0 0 rgba(255,80,80,0);\n\n  }\n\n  50%{\n\n    box-shadow:\n      0 0 20px rgba(255,80,80,.15);\n\n  }\n\n}\n\n\n/* =========================================================\n   TABLET\n========================================================= */\n\n@media(max-width:1050px){\n\n  #ma7alak-shops-page{\n\n    padding-left:20px;\n\n    padding-right:20px;\n\n  }\n\n\n  .ma7alak-shop-grid{\n\n    grid-template-columns:\n      repeat(3,minmax(0,1fr));\n\n  }\n\n}\n\n\n/* =========================================================\n   MOBILE\n========================================================= */\n\n@media(max-width:700px){\n\n  #ma7alak-shops-page{\n\n    padding:\n      27px 9px 55px;\n\n  }\n\n\n  .ma7alak-side-left{\n\n    display:none;\n\n  }\n\n\n  .ma7alak-side-right{\n\n    right:3px;\n\n    top:10px;\n\n    font-size:14px;\n\n  }\n\n\n  .ma7alak-brand-name{\n\n    font-size:39px;\n\n  }\n\n\n  .ma7alak-brand-subtitle{\n\n    font-size:7px;\n\n    letter-spacing:3px;\n\n  }\n\n\n  .ma7alak-hero{\n\n    margin-top:20px;\n\n    margin-bottom:23px;\n\n  }\n\n\n  .ma7alak-hero-icon{\n\n    width:39px;\n\n    height:39px;\n\n    font-size:26px;\n\n  }\n\n\n  .ma7alak-hero h1{\n\n    font-size:47px;\n\n    letter-spacing:-1.7px;\n\n  }\n\n\n  .ma7alak-hero p{\n\n    padding:0 16px;\n\n    font-size:13px;\n\n  }\n\n\n  .ma7alak-search{\n\n    height:55px;\n\n    border-radius:16px;\n\n    font-size:12px;\n\n  }\n\n\n  .ma7alak-search-wrapper{\n\n    margin-bottom:21px;\n\n  }\n\n\n  .ma7alak-filter-label{\n\n    font-size:11px;\n\n  }\n\n\n  .ma7alak-area-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-area-button{\n\n    min-height:49px;\n\n    border-radius:13px;\n\n    font-size:11px;\n\n  }\n\n\n  .ma7alak-category-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-category-button{\n\n    min-height:55px;\n\n    border-radius:13px;\n\n    font-size:10px;\n\n    padding:\n      8px 5px;\n\n  }\n\n\n  .ma7alak-category-icon{\n\n    font-size:17px;\n\n  }\n\n\n  .ma7alak-results{\n\n    margin-top:25px;\n\n  }\n\n\n  .ma7alak-results-top{\n\n    align-items:flex-start;\n\n    flex-direction:column;\n\n    gap:9px;\n\n  }\n\n\n  .ma7alak-results-title{\n\n    font-size:27px;\n\n  }\n\n\n  .ma7alak-results-subtitle{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-results-count{\n\n    font-size:9px;\n\n  }\n\n\n  /* =====================================================\n     TWO LARGE CARDS PER ROW\n  ===================================================== */\n\n  .ma7alak-shop-grid{\n\n    grid-template-columns:\n      repeat(2,minmax(0,1fr));\n\n    gap:9px;\n\n    padding-top:11px;\n\n  }\n\n\n  .ma7alak-shop-card{\n\n    padding:\n      15px 7px 9px;\n\n    border-radius:18px;\n\n  }\n\n\n  .ma7alak-shop-image-ring{\n\n    width:118px;\n\n    height:118px;\n\n    padding:4px;\n\n  }\n\n\n  .ma7alak-shop-image-inner{\n\n    border-width:2px;\n\n  }\n\n\n  .ma7alak-verified-badge{\n\n    right:calc(50% - 61px);\n\n    width:23px;\n\n    height:23px;\n\n    font-size:12px;\n\n    border-width:2px;\n\n  }\n\n\n  .ma7alak-shop-content{\n\n    margin-top:11px;\n\n  }\n\n\n  .ma7alak-shop-name{\n\n    font-size:16px;\n\n  }\n\n\n  .ma7alak-shop-arabic{\n\n    font-size:10px;\n\n    margin-top:3px;\n\n  }\n\n\n  .ma7alak-shop-category-pill{\n\n    margin-top:7px;\n\n    padding:\n      5px 7px;\n\n    font-size:6.5px;\n\n    letter-spacing:.5px;\n\n  }\n\n\n  .ma7alak-shop-location{\n\n    margin-top:7px;\n\n    font-size:8px;\n\n  }\n\n\n  .ma7alak-location-icon{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-featured{\n\n    margin-top:7px;\n\n    padding:\n      5px 7px;\n\n    font-size:6.5px;\n\n    letter-spacing:.4px;\n\n  }\n\n\n  .ma7alak-profile-button{\n\n    min-height:37px;\n\n    margin-top:9px;\n\n    border-radius:11px;\n\n    font-size:9px;\n\n    gap:5px;\n\n  }\n\n\n  .ma7alak-profile-arrow{\n\n    font-size:13px;\n\n  }\n\n\n  /* CTA */\n\n  .ma7alak-business-cta{\n\n    margin-top:35px;\n\n    padding:\n      23px 15px;\n\n    border-radius:19px;\n\n    flex-direction:column;\n\n    text-align:center;\n\n    gap:17px;\n\n  }\n\n\n  .ma7alak-business-cta h2{\n\n    font-size:24px;\n\n  }\n\n\n  .ma7alak-business-cta p{\n\n    font-size:10px;\n\n  }\n\n\n  .ma7alak-add-button{\n\n    width:100%;\n\n    min-height:50px;\n\n    height:50px;\n\n  }\n\n\n  /* FOOTER */\n\n  .ma7alak-footer-features{\n\n    flex-direction:column;\n\n    gap:17px;\n\n  }\n\n\n  .ma7alak-footer-feature{\n\n    min-width:0;\n\n    padding:0;\n\n  }\n\n\n  .ma7alak-footer-feature + .ma7alak-footer-feature{\n\n    border-left:none;\n\n  }\n\n}\n\n\n/* =========================================================\n   VERY SMALL PHONES\n========================================================= */\n\n@media(max-width:390px){\n\n  #ma7alak-shops-page{\n\n    padding-left:6px;\n\n    padding-right:6px;\n\n  }\n\n\n  .ma7alak-shop-grid{\n\n    gap:7px;\n\n  }\n\n\n  .ma7alak-shop-card{\n\n    padding-left:5px;\n\n    padding-right:5px;\n\n  }\n\n\n  .ma7alak-shop-image-ring{\n\n    width:105px;\n\n    height:105px;\n\n  }\n\n\n  .ma7alak-verified-badge{\n\n    right:calc(50% - 54px);\n\n    width:21px;\n\n    height:21px;\n\n  }\n\n\n  .ma7alak-shop-name{\n\n    font-size:14px;\n\n  }\n\n\n  .ma7alak-shop-arabic{\n\n    font-size:9px;\n\n  }\n\n\n  .ma7alak-shop-location{\n\n    font-size:7.5px;\n\n  }\n\n\n  .ma7alak-profile-button{\n\n    font-size:8px;\n\n  }\n\n}\n\n\n\n/* =========================================================\n   MA7ALAK — LIVE STORY RING + STORY VIEWER\n   ========================================================= */\n\n.ma7alak-shop-image-link{\n  cursor:pointer;\n}\n\n.ma7alak-shop-image-ring.ma7alak-has-story{\n  padding:5px;\n  background:\n    conic-gradient(\n      from 0deg,\n      #ffd86b 0deg,\n      #f5a623 65deg,\n      #ffcc66 130deg,\n      #fff0b0 190deg,\n      #f5a623 250deg,\n      #ffd86b 315deg,\n      #ffd86b 360deg\n    );\n  box-shadow:\n    0 0 0 1px rgba(255,255,255,.18),\n    0 13px 35px rgba(0,0,0,.48),\n    0 0 30px rgba(245,184,63,.28);\n}\n\n/* Instagram-style expanding pulse. The shop image stays completely still. */\n.ma7alak-shop-image-ring.ma7alak-has-story::after{\n  content:\"\";\n  position:absolute;\n  left:50%;\n  top:50%;\n  width:100%;\n  height:100%;\n  box-sizing:border-box;\n  border:3px solid rgba(255,216,107,.95);\n  border-radius:50%;\n  transform:translate(-50%,-50%) scale(.92);\n  opacity:0;\n  pointer-events:none;\n  z-index:5;\n  animation:ma7alakInstagramStoryPulse 1.8s ease-out infinite;\n}\n\n@keyframes ma7alakInstagramStoryPulse{\n  0%{\n    transform:translate(-50%,-50%) scale(.92);\n    opacity:.95;\n  }\n  45%{\n    transform:translate(-50%,-50%) scale(1.08);\n    opacity:.62;\n  }\n  100%{\n    transform:translate(-50%,-50%) scale(1.28);\n    opacity:0;\n  }\n}\n\n.ma7alak-shop-image-ring.ma7alak-has-story\n.ma7alak-shop-image-inner{\n  border-width:3px;\n  border-color:#080706;\n}\n\n@keyframes ma7alakShopStorySnake{\n  from{\n    transform:rotate(0deg);\n  }\n  to{\n    transform:rotate(360deg);\n  }\n}\n\n/* Keep the image itself upright while the outer ring rotates. */\n.ma7alak-shop-image-ring.ma7alak-has-story\n.ma7alak-shop-image-inner{\n  transform:rotate(0deg);\n}\n\n.ma7alak-story-viewer{\n  position:fixed;\n  inset:0;\n  z-index:2147483000;\n  display:none;\n  align-items:center;\n  justify-content:center;\n  padding:18px;\n  box-sizing:border-box;\n  background:rgba(0,0,0,.88);\n  backdrop-filter:blur(18px);\n  -webkit-backdrop-filter:blur(18px);\n}\n\n.ma7alak-story-viewer.visible{\n  display:flex;\n}\n\n.ma7alak-story-viewer-backdrop{\n  position:absolute;\n  inset:0;\n}\n\n.ma7alak-story-viewer-shell{\n  position:relative;\n  z-index:2;\n  width:min(430px,94vw);\n  height:min(820px,92vh);\n  border-radius:24px;\n  overflow:hidden;\n  background:#080706;\n  border:1px solid rgba(255,255,255,.14);\n  box-shadow:\n    0 30px 100px rgba(0,0,0,.72),\n    0 0 55px rgba(245,184,63,.08);\n}\n\n.ma7alak-story-viewer-progress{\n  position:absolute;\n  z-index:10;\n  top:12px;\n  left:12px;\n  right:12px;\n  display:flex;\n  gap:4px;\n  pointer-events:none;\n}\n\n.ma7alak-story-progress-item{\n  position:relative;\n  flex:1;\n  height:3px;\n  overflow:hidden;\n  border-radius:999px;\n  background:rgba(255,255,255,.28);\n}\n\n.ma7alak-story-progress-item.done{\n  background:#fff;\n}\n\n.ma7alak-story-progress-item.current{\n  background:rgba(255,255,255,.28);\n}\n\n.ma7alak-story-progress-item.current::after{\n  content:\"\";\n  position:absolute;\n  inset:0;\n  transform-origin:left center;\n  transform:scaleX(0);\n  background:#fff;\n}\n\n.ma7alak-story-viewer-top{\n  position:absolute;\n  z-index:11;\n  top:26px;\n  left:14px;\n  right:14px;\n  display:flex;\n  align-items:center;\n  justify-content:space-between;\n  gap:10px;\n  pointer-events:none;\n}\n\n.ma7alak-story-viewer-shop{\n  min-width:0;\n  pointer-events:auto;\n  cursor:pointer;\n  -webkit-tap-highlight-color:transparent;\n  touch-action:manipulation;\n  text-decoration:none;\n  display:flex;\n  align-items:center;\n  gap:8px;\n  color:#fff;\n  text-shadow:0 2px 8px rgba(0,0,0,.65);\n}\n\n.ma7alak-story-viewer-shop-image{\n  width:34px;\n  height:34px;\n  flex:0 0 34px;\n  border-radius:50%;\n  object-fit:cover;\n  border:2px solid rgba(255,255,255,.9);\n  box-shadow:0 4px 15px rgba(0,0,0,.45);\n}\n\n.ma7alak-story-viewer-shop-name{\n  min-width:0;\n  overflow:hidden;\n  text-overflow:ellipsis;\n  white-space:nowrap;\n  font-size:12px;\n  font-weight:700;\n}\n\n.ma7alak-story-viewer-close{\n  pointer-events:auto;\n  width:36px;\n  height:36px;\n  flex:0 0 36px;\n  border:0;\n  border-radius:50%;\n  background:rgba(0,0,0,.38);\n  color:#fff;\n  font-size:25px;\n  line-height:1;\n  cursor:pointer;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  backdrop-filter:blur(10px);\n  -webkit-backdrop-filter:blur(10px);\n}\n\n.ma7alak-story-viewer-media{\n  width:100%;\n  height:100%;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  background:#050403;\n}\n\n.ma7alak-story-viewer-media img,\n.ma7alak-story-viewer-media video{\n  width:100%;\n  height:100%;\n  object-fit:contain;\n  background:#050403;\n}\n\n.ma7alak-story-viewer-tap-left,\n.ma7alak-story-viewer-tap-right,\n.ma7alak-story-viewer-tap-left:hover,\n.ma7alak-story-viewer-tap-right:hover,\n.ma7alak-story-viewer-tap-left:focus,\n.ma7alak-story-viewer-tap-right:focus,\n.ma7alak-story-viewer-tap-left:focus-visible,\n.ma7alak-story-viewer-tap-right:focus-visible,\n.ma7alak-story-viewer-tap-left:active,\n.ma7alak-story-viewer-tap-right:active{\n  position:absolute !important;\n  z-index:8 !important;\n  top:0 !important;\n  bottom:0 !important;\n  width:35% !important;\n  height:auto !important;\n  min-width:0 !important;\n  min-height:0 !important;\n  padding:0 !important;\n  margin:0 !important;\n  border:0 !important;\n  border-radius:0 !important;\n  outline:0 !important;\n  background:transparent !important;\n  background-color:transparent !important;\n  background-image:none !important;\n  box-shadow:none !important;\n  color:transparent !important;\n  text-shadow:none !important;\n  appearance:none !important;\n  -webkit-appearance:none !important;\n  -webkit-tap-highlight-color:transparent !important;\n  transform:none !important;\n  opacity:1 !important;\n  cursor:pointer !important;\n}\n\n.ma7alak-story-viewer-tap-left{\n  left:0 !important;\n  right:auto !important;\n}\n\n.ma7alak-story-viewer-tap-right{\n  right:0 !important;\n  left:auto !important;\n}\n\n.ma7alak-story-viewer-tap-left::before,\n.ma7alak-story-viewer-tap-left::after,\n.ma7alak-story-viewer-tap-right::before,\n.ma7alak-story-viewer-tap-right::after{\n  content:none !important;\n  display:none !important;\n}\n\n.ma7alak-story-viewer-loading{\n  position:absolute;\n  z-index:9;\n  inset:0;\n  display:none;\n  align-items:center;\n  justify-content:center;\n  color:#fff;\n  font-size:12px;\n  background:rgba(0,0,0,.18);\n  pointer-events:none;\n}\n\n.ma7alak-story-viewer-loading.visible{\n  display:flex;\n}\n\n.ma7alak-story-viewer-loading::before{\n  content:\"\";\n  width:28px;\n  height:28px;\n  border:2px solid rgba(255,255,255,.25);\n  border-top-color:#fff;\n  border-radius:50%;\n  animation:ma7alakStorySpin .7s linear infinite;\n}\n\n@keyframes ma7alakStorySpin{\n  to{\n    transform:rotate(360deg);\n  }\n}\n\n@media(max-width:700px){\n\n  .ma7alak-shop-image-ring.ma7alak-has-story{\n    padding:5px;\n  }\n\n  .ma7alak-story-viewer{\n    padding:0;\n  }\n\n  .ma7alak-story-viewer-shell{\n    width:100vw;\n    height:100dvh;\n    max-width:none;\n    max-height:none;\n    border-radius:0;\n    border:0;\n  }\n\n  .ma7alak-story-viewer-progress{\n    top:10px;\n    left:9px;\n    right:9px;\n  }\n\n  .ma7alak-story-viewer-top{\n    top:23px;\n  }\n}";
+    (document.head || document.documentElement).appendChild(style);
   }
+})();
+
+(function(){
+
+  "use strict";
+
 
   /* =========================================================
-     MA7ALAK PREMIUM SOCIAL HEADER
-     HOSTINGER GLOBAL CUSTOM CODE SAFE VERSION
-
-     This version uses JavaScript to inject the header into
-     document.body. It does NOT place raw <header> markup
-     directly inside Hostinger's Custom Code container.
+     ONLY RUN ON ACTUAL SHOPS PAGE
   ========================================================= */
 
-  if(window.__MA7ALAK_PREMIUM_HEADER_LOADED__){
+  function getPath(){
+
+    return window.location.pathname
+      .replace(/\/+/g,"/")
+      .replace(/\/$/,"")
+      .toLowerCase();
+
+  }
+
+
+  if(
+    getPath() !== "/shwf-almhlat-"
+  ){
+
     return;
-  }
-  window.__MA7ALAK_PREMIUM_HEADER_LOADED__ = true;
 
-
-  function whenBodyReady(callback){
-    if(document.body){
-      callback();
-      return;
-    }
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      callback,
-      {once:true}
-    );
   }
 
 
-  function loadSupabase(){
-    return new Promise(function(resolve,reject){
+  /* =========================================================
+     PAGE CLASSES
+  ========================================================= */
 
-      if(
-        window.supabase &&
-        typeof window.supabase.createClient === "function"
-      ){
-        resolve();
-        return;
-      }
+  document.documentElement.classList.add(
+    "ma7alak-shops-page-active"
+  );
 
-      const existing =
-        document.querySelector(
-          'script[data-ma7alak-header-supabase="1"]'
-        );
 
-      if(existing){
-        existing.addEventListener("load",function(){ resolve(); },{once:true});
-        existing.addEventListener("error",reject,{once:true});
-        return;
-      }
-
-      const script =
-        document.createElement("script");
-
-      script.src =
-        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-
-      script.async = true;
-      script.dataset.ma7alakHeaderSupabase = "1";
-
-      script.onload = function(){
-        resolve();
-      };
-
-      script.onerror = function(){
-        reject(
-          new Error("Could not load Supabase JS")
-        );
-      };
-
-      document.head.appendChild(script);
-
-    });
-  }
-
-
-  function injectHeaderCSS(){
-    if(
-      document.getElementById(
-        "ma7alak-premium-social-header-style"
-      )
-    ){
-      return;
-    }
-
-    const style =
-      document.createElement("style");
-
-    style.id =
-      "ma7alak-premium-social-header-style";
-
-    style.textContent = `
-:root{
-  --m7-gold:#d9a441;
-  --m7-gold-soft:#efc66e;
-  --m7-bg:#08090a;
-  --m7-panel:rgba(13,15,16,.94);
-  --m7-line:rgba(217,164,65,.23);
-  --m7-white:#f5f5f5;
-  --m7-muted:rgba(255,255,255,.58);
-  --m7-header-h:76px;
-}
-
-#ma7alak-social-header,
-#ma7alak-social-header *{
-  box-sizing:border-box;
-}
-
-body.ma7alak-header-page{
-  padding-top:calc(var(--m7-header-h) + 18px)!important;
-}
-
-/* =========================================================
-   HOMEPAGE-THEME HEADER BACKDROP
-   ---------------------------------------------------------
-   This is intentionally ABSOLUTE, not fixed.
-   It sits behind the header only at the top of the page and
-   scrolls away naturally while the floating header stays fixed.
-   It does NOT replace/change the rest of the webpage background.
-========================================================= */
-#ma7alak-header-theme-backdrop{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  width:100%;
-  height:calc(var(--m7-header-h) + 58px);
-  overflow:hidden;
-  pointer-events:none;
-  z-index:2147482500;
-
-  background:
-    radial-gradient(
-      circle at 12% 18%,
-      rgba(125,33,23,.34) 0,
-      rgba(125,33,23,.14) 22%,
-      transparent 46%
-    ),
-    radial-gradient(
-      circle at 84% 14%,
-      rgba(217,164,65,.20) 0,
-      rgba(217,164,65,.08) 24%,
-      transparent 46%
-    ),
-    radial-gradient(
-      circle at 54% -30%,
-      rgba(202,72,31,.16) 0,
-      transparent 52%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(8,9,11,.99) 0%,
-      rgba(12,12,14,.98) 45%,
-      rgba(13,13,15,.94) 72%,
-      rgba(13,13,15,.15) 96%,
-      rgba(13,13,15,0) 100%
-    );
-}
-
-#ma7alak-header-theme-backdrop::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  opacity:.48;
-  background:
-    linear-gradient(
-      110deg,
-      transparent 0 18%,
-      rgba(255,255,255,.018) 28%,
-      transparent 39% 62%,
-      rgba(217,164,65,.025) 72%,
-      transparent 84%
-    );
-}
-
-#ma7alak-header-theme-backdrop::after{
-  content:"";
-  position:absolute;
-  left:7%;
-  right:7%;
-  bottom:9px;
-  height:1px;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(217,164,65,.10),
-      rgba(217,164,65,.28),
-      rgba(217,164,65,.10),
-      transparent
-    );
-  filter:blur(.2px);
-}
-
-
-
-#ma7alak-social-header{
-  position:fixed;
-  top:max(10px,env(safe-area-inset-top));
-  left:50%;
-  transform:translateX(-50%);
-
-  /* Compact floating header shell */
-  width:min(1180px,calc(100vw - 24px));
-  min-height:var(--m7-header-h);
-
-  display:grid;
-  grid-template-columns:auto minmax(220px,440px) 1fr auto auto;
-  align-items:center;
-  gap:14px;
-  padding:8px 12px 8px 16px;
-
-  border:1px solid rgba(217,164,65,.20)!important;
-  border-radius:24px!important;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(25,26,28,.88),
-      rgba(11,12,13,.86)
-    )!important;
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.34),
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 0 0 1px rgba(217,164,65,.025) inset!important;
-
-  backdrop-filter:blur(18px) saturate(125%)!important;
-  -webkit-backdrop-filter:blur(18px) saturate(125%)!important;
-
-  z-index:2147483000;
-  font-family:Arial,"Segoe UI",sans-serif;
-  color:#fff;
-
-  transition:
-    background .22s ease,
-    border-color .22s ease,
-    box-shadow .22s ease,
-    transform .22s ease;
-}
-
-#ma7alak-social-header.ma7alak-scrolled{
-  border-color:rgba(217,164,65,.30)!important;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(22,23,25,.95),
-      rgba(8,9,10,.94)
-    )!important;
-
-  box-shadow:
-    0 18px 42px rgba(0,0,0,.46),
-    0 1px 0 rgba(255,255,255,.045) inset,
-    0 0 22px rgba(217,164,65,.035)!important;
-
-  backdrop-filter:blur(22px) saturate(135%)!important;
-  -webkit-backdrop-filter:blur(22px) saturate(135%)!important;
-}
-
-.ma7alak-header-brand{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:170px;
-  height:62px;
-  padding:0 8px;
-  text-decoration:none!important;
-  -webkit-tap-highlight-color:transparent;
-  overflow:visible;
-}
-
-.ma7alak-header-logo{
-  display:block;
-  width:auto;
-  height:60px;
-  max-width:168px;
-  object-fit:contain;
-  object-position:center;
-  filter:
-    drop-shadow(0 7px 16px rgba(0,0,0,.34))
-    drop-shadow(0 0 9px rgba(217,164,65,.07));
-  transition:
-    transform .2s ease,
-    filter .2s ease;
-}
-
-.ma7alak-header-brand:hover .ma7alak-header-logo{
-  transform:translateY(-1px) scale(1.025);
-  filter:
-    drop-shadow(0 8px 18px rgba(0,0,0,.38))
-    drop-shadow(0 0 12px rgba(217,164,65,.12));
-}
-
-/* =========================================================
-   MENU BUTTON + DROPDOWN
-========================================================= */
-
-.ma7alak-header-menu-wrap{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-#ma7alak-header-menu-button{
-  position:relative;
-  width:44px;
-  height:44px;
-  flex:0 0 44px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  padding:0;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:14px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(31,33,35,.90),
-      rgba(15,16,18,.90)
-    );
-  color:#f5e1b7;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 8px 18px rgba(0,0,0,.20);
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  transition:
-    transform .18s ease,
-    border-color .18s ease,
-    background .18s ease,
-    box-shadow .18s ease;
-}
-
-#ma7alak-header-menu-button:hover{
-  border-color:rgba(217,164,65,.42);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(44,39,31,.94),
-      rgba(19,17,15,.94)
-    );
-  box-shadow:
-    0 8px 22px rgba(0,0,0,.26),
-    0 0 18px rgba(217,164,65,.07);
-}
-
-#ma7alak-header-menu-button:active{
-  transform:scale(.94);
-}
-
-#ma7alak-header-menu-button span{
-  display:block;
-  width:19px;
-  height:2px;
-  border-radius:999px;
-  background:currentColor;
-  transition:
-    transform .22s ease,
-    opacity .18s ease;
-}
-
-#ma7alak-header-menu-button.open span:nth-child(1){
-  transform:translateY(6px) rotate(45deg);
-}
-#ma7alak-header-menu-button.open span:nth-child(2){
-  opacity:0;
-}
-#ma7alak-header-menu-button.open span:nth-child(3){
-  transform:translateY(-6px) rotate(-45deg);
-}
-
-#ma7alak-header-menu-panel{
-  position:absolute;
-  top:calc(100% + 12px);
-  right:0;
-  width:230px;
-  padding:9px;
-  border:1px solid rgba(217,164,65,.22);
-  border-radius:19px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(24,25,27,.98),
-      rgba(10,11,12,.98)
-    );
-  box-shadow:
-    0 22px 50px rgba(0,0,0,.48),
-    inset 0 1px 0 rgba(255,255,255,.045);
-  backdrop-filter:blur(22px) saturate(135%);
-  -webkit-backdrop-filter:blur(22px) saturate(135%);
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-  transform:translateY(-7px) scale(.98);
-  transform-origin:top right;
-  transition:
-    opacity .18s ease,
-    visibility .18s ease,
-    transform .18s ease;
-  z-index:2147483646;
-}
-
-#ma7alak-header-menu-panel.open{
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-  transform:translateY(0) scale(1);
-}
-
-.ma7alak-header-menu-link{
-  min-height:48px;
-  padding:0 13px;
-  display:flex;
-  align-items:center;
-  gap:11px;
-  border-radius:13px;
-  color:rgba(255,255,255,.90)!important;
-  text-decoration:none!important;
-  font-size:13px;
-  font-weight:750;
-  letter-spacing:.05px;
-  transition:
-    background .18s ease,
-    color .18s ease,
-    transform .18s ease;
-}
-
-.ma7alak-header-menu-link + .ma7alak-header-menu-link{
-  margin-top:4px;
-}
-
-.ma7alak-header-menu-link:hover{
-  background:rgba(217,164,65,.10);
-  color:#ffe3a8!important;
-  transform:translateX(2px);
-}
-
-.ma7alak-header-menu-icon{
-  width:33px;
-  height:33px;
-  flex:0 0 33px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(217,164,65,.18);
-  border-radius:10px;
-  background:rgba(217,164,65,.055);
-  color:#e3b55b;
-  font-size:16px;
-}
-
-.ma7alak-header-menu-text{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-}
-
-.ma7alak-header-menu-main{
-  color:inherit;
-  line-height:1.1;
-}
-
-.ma7alak-header-menu-sub{
-  margin-top:4px;
-  color:rgba(255,255,255,.38);
-  font-size:9px;
-  font-weight:650;
-  letter-spacing:.25px;
-}
-
-.ma7alak-header-search-wrap{position:relative;width:100%;}
-#ma7alak-header-search{
-  width:100%;
-  height:48px;
-  padding:0 48px 0 47px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:999px;
-  outline:none;
-  background:linear-gradient(180deg,rgba(31,33,35,.92),rgba(18,20,22,.91));
-  color:#fff;
-  font:600 13px/1 Arial,"Segoe UI",sans-serif;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18);
-  transition:.2s ease;
-}
-#ma7alak-header-search::placeholder{color:rgba(255,255,255,.38);}
-#ma7alak-header-search:focus{
-  border-color:rgba(217,164,65,.55);
-  background:rgba(25,27,28,.98);
-  box-shadow:0 0 0 3px rgba(217,164,65,.07),inset 0 1px 0 rgba(255,255,255,.05);
-}
-.ma7alak-header-search-icon{
-  position:absolute;
-  left:16px;
-  top:50%;
-  transform:translateY(-50%);
-  width:21px;
-  height:21px;
-  color:var(--m7-gold-soft);
-  pointer-events:none;
-}
-.ma7alak-header-search-kbd{
-  position:absolute;
-  right:11px;
-  top:50%;
-  transform:translateY(-50%);
-  min-width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 7px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:9px;
-  background:rgba(255,255,255,.035);
-  color:rgba(255,255,255,.32);
-  font-size:10px;
-  font-weight:800;
-  pointer-events:none;
-}
-
-.ma7alak-header-nav{
-  min-width:0;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-end;
-  height:56px;
-}
-.ma7alak-header-nav-item{
-  position:relative;
-  min-width:76px;
-  height:56px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  border:0;
-  border-radius:15px;
-  background:transparent;
-  color:rgba(255,255,255,.80);
-  cursor:pointer;
-  font-family:Arial,"Segoe UI",sans-serif;
-  transition:.18s ease;
-  -webkit-tap-highlight-color:transparent;
-}
-.ma7alak-header-nav-item:hover{color:#fff;background:rgba(255,255,255,.045);}
-.ma7alak-header-nav-item:active{transform:scale(.93);}
-.ma7alak-header-nav-item::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-10px;
-  width:0;
-  height:2px;
-  transform:translateX(-50%);
-  border-radius:20px;
-  background:var(--m7-gold-soft);
-  box-shadow:0 0 12px rgba(217,164,65,.35);
-  transition:width .2s ease;
-}
-.ma7alak-header-nav-item.ma7alak-active::after,
-.ma7alak-header-nav-item:hover::after{width:30px;}
-.ma7alak-header-nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
-.ma7alak-header-nav-icon svg{width:24px;height:24px;display:block;}
-
-#ma7alak-reels-badge{
-  position:absolute;
-  top:3px;
-  right:13px;
-  min-width:18px;
-  height:18px;
-  padding:0 5px;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:2px solid rgba(10,11,12,.96);
-  border-radius:999px;
-  background:#e53935;
-  color:#fff;
-  font-size:10px;
-  font-weight:900;
-  line-height:1;
-  letter-spacing:-.2px;
-  box-shadow:
-    0 3px 10px rgba(0,0,0,.42),
-    0 0 12px rgba(229,57,53,.28);
-  pointer-events:none;
-  z-index:5;
-  transform-origin:center;
-}
-
-#ma7alak-reels-badge.visible{
-  display:flex;
-  animation:ma7alakReelsBadgePop .28s cubic-bezier(.2,.9,.25,1.2);
-}
-
-@keyframes ma7alakReelsBadgePop{
-  0%{transform:scale(.55);opacity:0;}
-  70%{transform:scale(1.12);opacity:1;}
-  100%{transform:scale(1);opacity:1;}
-}
-
-.ma7alak-header-nav-label{color:inherit;font-size:10px;font-weight:750;line-height:1;}
-
-#ma7alak-header-likes-slot,
-#ma7alak-header-notification-slot{
-  position:relative;
-  min-width:76px;
-  height:56px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  padding-top:4px;
-  border-radius:15px;
-  transition:background .18s ease;
-}
-#ma7alak-header-likes-slot:hover,
-#ma7alak-header-notification-slot:hover{background:rgba(255,255,255,.045);}
-.ma7alak-integrated-label{
-  position:absolute;
-  bottom:4px;
-  left:0;
-  right:0;
-  color:rgba(255,255,255,.80);
-  font-size:10px;
-  font-weight:750;
-  line-height:1;
-  text-align:center;
-  pointer-events:none;
-}
-
-/* =========================================================
-   INSTANT HEART PLACEHOLDER
-   ---------------------------------------------------------
-   The real Story Likes GitHub script can load a moment later.
-   This placeholder is rendered by the header itself instantly,
-   then disappears the moment the real Likes control exists.
-========================================================= */
-#ma7alak-instant-likes-placeholder{
-  width:34px;
-  height:34px;
-  min-width:34px;
-  padding:0;
-  margin:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:0;
-  border-radius:50%;
-  background:transparent;
-  color:#ff4d5a;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  animation:ma7alakInstantHeartPop .22s cubic-bezier(.2,.9,.25,1.18);
-}
-
-#ma7alak-instant-likes-placeholder svg{
-  width:23px;
-  height:23px;
-  display:block;
-  filter:drop-shadow(0 2px 7px rgba(255,77,90,.18));
-}
-
-#ma7alak-instant-likes-placeholder:active{
-  transform:scale(.90);
-}
-
-@keyframes ma7alakInstantHeartPop{
-  0%{opacity:0;transform:scale(.55);}
-  70%{opacity:1;transform:scale(1.10);}
-  100%{opacity:1;transform:scale(1);}
-}
-
-#ma7alak-social-header #ma7alak-story-likes-wrapper,
-#ma7alak-social-header #ma7alak-notification-wrapper{
-  position:static!important;
-  top:auto!important;
-  left:auto!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:auto!important;
-  height:auto!important;
-  margin:0!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  transform:none!important;
-  z-index:20!important;
-}
-
-#ma7alak-social-header #ma7alak-story-likes-button,
-#ma7alak-social-header #ma7alak-notification-bell{
-  width:34px!important;
-  height:34px!important;
-  min-width:34px!important;
-  min-height:34px!important;
-  border:0!important;
-  border-radius:11px!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  transform:none!important;
-}
-#ma7alak-social-header #ma7alak-story-likes-button:hover,
-#ma7alak-social-header #ma7alak-notification-bell:hover{background:rgba(255,255,255,.06)!important;transform:none!important;}
-#ma7alak-social-header #ma7alak-story-likes-button:active,
-#ma7alak-social-header #ma7alak-notification-bell:active{transform:scale(.90)!important;}
-#ma7alak-social-header #ma7alak-story-likes-icon,
-#ma7alak-social-header #ma7alak-notification-bell-icon{width:23px!important;height:23px!important;}
-
-#ma7alak-story-likes-panel,
-#ma7alak-notification-panel{z-index:2147483647!important;}
-
-#ma7alak-header-owner{
-  position:relative;
-  min-width:194px;
-  height:60px;
-  display:none;
-  align-items:center;
-  gap:11px;
-  padding:3px 14px 3px 6px;
-  margin-right:10px;
-  border-left:1px solid rgba(255,255,255,.09);
-  text-decoration:none!important;
-  color:#fff!important;
-  border-radius:0 15px 15px 0;
-  cursor:pointer;
-  transition:.18s ease;
-  -webkit-tap-highlight-color:transparent;
-}
-#ma7alak-header-owner.visible{display:flex;}
-#ma7alak-header-owner:hover{background:rgba(255,255,255,.045);}
-#ma7alak-header-owner:active{transform:scale(.98);}
-.ma7alak-owner-avatar-wrap{
-  position:relative;
-  width:54px;
-  height:54px;
-  flex:0 0 54px;
-  padding:3px;
-  border-radius:50%;
-  background:transparent;
-  box-shadow:0 0 0 1px rgba(217,164,65,.16),0 0 20px rgba(217,164,65,.13);
-  isolation:isolate;
-  transform-origin:50% 50%;
-  animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-  -webkit-animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-  will-change:transform;
-  -webkit-backface-visibility:hidden;
-  backface-visibility:hidden;
-}
-
-.ma7alak-owner-avatar-wrap::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:
-    conic-gradient(
-      from 0deg,
-      #6b4a18 0deg,
-      #efc66e 56deg,
-      #8c6421 116deg,
-      #f6d98f 184deg,
-      #8b6220 246deg,
-      #efc66e 306deg,
-      #6b4a18 360deg
-    );
-  z-index:-1;
-  transform-origin:50% 50%;
-  /* V23: ring itself is static; the whole shop circle rotates instead. */
-  animation:none!important;
-  -webkit-animation:none!important;
-}
-
-@keyframes ma7alakOwnerCircleSpin{
-  from{transform:translateZ(0) rotate(0deg);}
-  to{transform:translateZ(0) rotate(360deg);}
-}
-
-@-webkit-keyframes ma7alakOwnerCircleSpin{
-  from{-webkit-transform:translateZ(0) rotate(0deg);}
-  to{-webkit-transform:translateZ(0) rotate(360deg);}
-}
-
-.ma7alak-owner-avatar-inner{
-  position:relative;
-  z-index:1;
-  width:100%;
-  height:100%;
-  padding:2px;
-  border-radius:50%;
-  background:#090a0b;
-  overflow:hidden;
-}
-.ma7alak-owner-avatar{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-  border-radius:50%;
-  background:linear-gradient(145deg,#2a2c2e,#0c0d0e);
-}
-.ma7alak-owner-avatar-fallback{
-  width:100%;
-  height:100%;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  background:linear-gradient(145deg,#292b2d,#101112);
-  color:var(--m7-gold-soft);
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:17px;
-  font-weight:900;
-}
-.ma7alak-owner-copy{min-width:0;display:flex;flex-direction:column;}
-#ma7alak-header-owner-name{
-  max-width:118px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:#fff;
-  font-size:13px;
-  font-weight:800;
-  line-height:1.15;
-}
-.ma7alak-owner-sub{margin-top:4px;color:var(--m7-gold-soft);font-size:9px;font-weight:750;}
-
-#ma7alak-header-search-overlay{
-  position:fixed;
-  inset:0;
-  display:none;
-  background:rgba(0,0,0,.58);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  z-index:2147483200;
-}
-#ma7alak-header-search-overlay.open{display:block;animation:ma7alakSearchFade .16s ease-out;}
-@keyframes ma7alakSearchFade{from{opacity:0}to{opacity:1}}
-#ma7alak-header-search-panel{
-  position:absolute;
-  top:max(96px,calc(env(safe-area-inset-top) + 84px));
-  left:50%;
-  transform:translateX(-50%);
-  width:min(680px,calc(100vw - 24px));
-  max-height:min(650px,calc(100vh - 120px));
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  border:1px solid rgba(217,164,65,.22);
-  border-radius:24px;
-  background:radial-gradient(circle at 15% 0%,rgba(217,164,65,.07),transparent 30%),rgba(11,12,13,.975);
-  box-shadow:0 30px 80px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,255,255,.04);
-}
-.ma7alak-search-panel-head{padding:14px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
-.ma7alak-search-panel-field{position:relative;flex:1;}
-#ma7alak-overlay-search-input{
-  width:100%;
-  height:48px;
-  padding:0 44px 0 45px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  outline:none;
-  background:rgba(255,255,255,.055);
-  color:#fff;
-  font-size:14px;
-  font-weight:650;
-}
-#ma7alak-overlay-search-input:focus{border-color:rgba(217,164,65,.48);box-shadow:0 0 0 3px rgba(217,164,65,.07);}
-.ma7alak-overlay-search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--m7-gold-soft);}
-#ma7alak-search-clear{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  width:30px;
-  height:30px;
-  border:0;
-  border-radius:50%;
-  background:rgba(255,255,255,.06);
-  color:rgba(255,255,255,.60);
-  cursor:pointer;
-}
-#ma7alak-search-close{
-  width:42px;
-  height:42px;
-  flex:0 0 42px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:13px;
-  background:rgba(255,255,255,.035);
-  color:#fff;
-  font-size:24px;
-  line-height:1;
-  cursor:pointer;
-}
-.ma7alak-search-panel-title{padding:16px 18px 7px;color:rgba(255,255,255,.38);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase;}
-#ma7alak-search-results{flex:1;min-height:120px;padding:7px 10px 14px;overflow-y:auto;overscroll-behavior:contain;}
-#ma7alak-search-results::-webkit-scrollbar{width:6px;}
-#ma7alak-search-results::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(217,164,65,.25);}
-.ma7alak-search-result{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px;
-  border:1px solid transparent;
-  border-radius:16px;
-  color:#fff;
-  text-decoration:none!important;
-  transition:.16s ease;
-}
-.ma7alak-search-result:hover{background:rgba(255,255,255,.045);border-color:rgba(217,164,65,.13);transform:translateX(2px);}
-.ma7alak-search-result-img{width:48px;height:48px;flex:0 0 48px;object-fit:cover;border-radius:13px;border:1px solid rgba(255,255,255,.09);background:#181a1b;}
-.ma7alak-search-result-fallback{width:48px;height:48px;flex:0 0 48px;display:flex;align-items:center;justify-content:center;border-radius:13px;border:1px solid rgba(217,164,65,.15);background:linear-gradient(145deg,#222426,#101112);color:var(--m7-gold-soft);font-family:Georgia,"Times New Roman",serif;font-weight:900;}
-.ma7alak-search-result-copy{min-width:0;flex:1;}
-.ma7alak-search-result-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;}
-.ma7alak-search-result-meta{margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.42);font-size:10px;font-weight:650;}
-.ma7alak-search-result-arrow{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex:0 0 34px;border-radius:11px;background:rgba(255,255,255,.035);color:var(--m7-gold-soft);font-size:18px;}
-.ma7alak-search-empty{min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
-.ma7alak-search-empty-icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid rgba(217,164,65,.16);border-radius:15px;background:rgba(217,164,65,.05);color:var(--m7-gold-soft);}
-.ma7alak-search-empty-title{color:rgba(255,255,255,.75);font-size:13px;font-weight:800;}
-.ma7alak-search-empty-text{margin-top:5px;color:rgba(255,255,255,.34);font-size:10px;}
-
-#ma7alak-mobile-search-button{display:none;}
-
-@media(max-width:900px){
-  :root{--m7-header-h:64px;}
-  body.ma7alak-header-page{padding-top:calc(var(--m7-header-h) + 16px)!important;}
-
-  #ma7alak-header-theme-backdrop{
-    height:calc(var(--m7-header-h) + 48px);
-    background:
-      radial-gradient(
-        circle at 8% 16%,
-        rgba(125,33,23,.32) 0,
-        rgba(125,33,23,.12) 25%,
-        transparent 52%
-      ),
-      radial-gradient(
-        circle at 88% 12%,
-        rgba(217,164,65,.17) 0,
-        rgba(217,164,65,.06) 24%,
-        transparent 48%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(8,9,11,.99) 0%,
-        rgba(12,12,14,.97) 55%,
-        rgba(13,13,15,.82) 80%,
-        rgba(13,13,15,0) 100%
-      );
-  }
-
-  #ma7alak-social-header{
-    top:max(8px,env(safe-area-inset-top));
-    width:calc(100vw - 14px);
-    min-height:60px;
-    grid-template-columns:auto 1fr auto auto;
-    gap:4px;
-    padding:5px 7px 5px 12px;
-
-    border-radius:22px!important;
-    border:1px solid rgba(217,164,65,.22)!important;
-
-    background:
-      linear-gradient(
-        180deg,
-        rgba(24,25,27,.92),
-        rgba(10,11,12,.90)
-      )!important;
-
-    box-shadow:
-      0 12px 30px rgba(0,0,0,.38),
-      0 1px 0 rgba(255,255,255,.035) inset!important;
-
-    backdrop-filter:blur(18px) saturate(125%)!important;
-    -webkit-backdrop-filter:blur(18px) saturate(125%)!important;
-  }
-
-  #ma7alak-social-header.ma7alak-scrolled{
-    border-color:rgba(217,164,65,.34)!important;
-    background:
-      linear-gradient(
-        180deg,
-        rgba(20,21,23,.97),
-        rgba(7,8,9,.96)
-      )!important;
-    box-shadow:
-      0 15px 36px rgba(0,0,0,.48),
-      0 0 18px rgba(217,164,65,.035)!important;
-  }
-  .ma7alak-header-brand{
-    min-width:96px;
-    width:96px;
-    height:56px;
-    padding:0 6px 0 4px;
-    justify-content:center;
-  }
-
-  .ma7alak-header-logo{
-    height:54px;
-    max-width:90px;
-  }
-
-  #ma7alak-header-menu-button{
-    width:40px;
-    height:40px;
-    flex-basis:40px;
-    border-radius:13px;
-  }
-
-  #ma7alak-header-menu-panel{
-    width:min(230px,calc(100vw - 28px));
-    top:calc(100% + 10px);
-    right:0;
-  }
-  .ma7alak-header-search-wrap{display:none;}
-  .ma7alak-header-nav{justify-content:flex-end;height:48px;}
-  .ma7alak-header-nav-item{min-width:45px;width:45px;height:48px;border-radius:13px;}
-  .ma7alak-header-nav-icon,.ma7alak-header-nav-icon svg{width:22px;height:22px;}
-  #ma7alak-reels-badge{top:1px;right:3px;min-width:17px;height:17px;font-size:9px;padding:0 4px;}
-  .ma7alak-header-nav-label,.ma7alak-integrated-label{display:none;}
-  .ma7alak-header-nav-item::after{bottom:-5px;}
-  .ma7alak-header-nav-item.ma7alak-active::after,.ma7alak-header-nav-item:hover::after{width:22px;}
-  #ma7alak-mobile-search-button{display:flex;}
-  #ma7alak-header-likes-slot,#ma7alak-header-notification-slot{min-width:45px;width:45px;height:48px;justify-content:center;padding:0;}
-  #ma7alak-social-header #ma7alak-story-likes-button,#ma7alak-social-header #ma7alak-notification-bell{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;border-radius:12px!important;}
-  #ma7alak-header-owner{min-width:0;width:47px;height:48px;flex:0 0 47px;padding:0 0 0 5px;border-left:1px solid rgba(255,255,255,.08);border-radius:0;}
-  .ma7alak-owner-avatar-wrap{
-    width:40px;
-    height:40px;
-    flex-basis:40px;
-    transform-origin:center center;
-  }
-  #ma7alak-social-header .ma7alak-owner-avatar-wrap{
-    animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-    -webkit-animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-  }
-
-  .ma7alak-owner-copy{display:none;}
-  #ma7alak-header-search-panel{top:max(78px,calc(env(safe-area-inset-top) + 68px));width:calc(100vw - 14px);max-height:calc(100dvh - 92px);border-radius:20px;}
-  .ma7alak-search-panel-head{padding:10px;}
-  .ma7alak-search-panel-title{padding-top:12px;}
-}
-
-@media(max-width:480px){
-  .ma7alak-header-brand{
-    width:88px;
-    min-width:88px;
-    height:54px;
-    padding-left:4px;
-    padding-right:6px;
-  }
-
-  .ma7alak-header-logo{
-    height:51px;
-    max-width:82px;
-  }
-  .ma7alak-header-nav-item{min-width:42px;width:42px;}
-  #ma7alak-header-likes-slot,#ma7alak-header-notification-slot{min-width:42px;width:42px;}
-  #ma7alak-header-owner{width:43px;flex-basis:43px;}
-  .ma7alak-owner-avatar-wrap{
-    width:38px;
-    height:38px;
-    flex-basis:38px;
-    transform-origin:center center;
-  }
-}
-
-@media(prefers-reduced-motion:reduce){
-  #ma7alak-social-header *,
-  #ma7alak-header-search-overlay *{
-    animation:none!important;
-    transition:none!important;
-  }
-
-  /*
-     IMPORTANT:
-     The owner's decorative gold ring is intentionally kept animated.
-     This selector is more specific than the rule above, so mobile
-     reduced-motion settings cannot accidentally stop the ring.
-  */
-  #ma7alak-social-header .ma7alak-owner-avatar-wrap{
-    animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-    -webkit-animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
-  }
-}
-    
-
-/* =========================================================
-   V15 — NAV ORDER + OWNER SHOP CIRCLE TUNING
-========================================================= */
-
-#ma7alak-header-owner.visible{
-  margin-right:10px;
-}
-
-#ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-  width:54px!important;
-  height:54px!important;
-  flex:0 0 54px!important;
-}
-
-@media(max-width:760px){
-  #ma7alak-header-owner.visible{
-    margin-right:12px!important;
-    width:55px!important;
-    flex-basis:55px!important;
-  }
-
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:52px!important;
-    height:52px!important;
-    flex:0 0 52px!important;
-  }
-}
-
-@media(max-width:480px){
-  #ma7alak-header-owner.visible{
-    margin-right:11px!important;
-    width:54px!important;
-    flex-basis:54px!important;
-  }
-
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:52px!important;
-    height:52px!important;
-    flex:0 0 52px!important;
-  }
-}
-
-@media(max-width:390px){
-  #ma7alak-header-owner.visible{
-    margin-right:9px!important;
-    width:52px!important;
-    flex-basis:52px!important;
-  }
-
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:50px!important;
-    height:50px!important;
-    flex:0 0 50px!important;
-  }
-}
-
-/* =========================================================
-   V24 — PHONE HEADER MICRO-TUNING ONLY
-   ========================================================= */
-
-/* Heart/Likes is owner-only. It stays hidden until shop ownership is confirmed. */
-#ma7alak-header-likes-slot{
-  display:none!important;
-}
-body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
-  display:flex!important;
-}
-
-/* Slightly larger Reels glyph so it visually matches the other phone icons. */
-#ma7alak-header-reels .ma7alak-header-nav-icon,
-#ma7alak-header-reels .ma7alak-header-nav-icon svg{
-  width:24px!important;
-  height:24px!important;
-}
-
-/* Very light animated theme glow that travels around the header panel border. */
-@property --m7-panel-glow-angle{
-  syntax:"<angle>";
-  inherits:false;
-  initial-value:0deg;
-}
-
-#ma7alak-social-header{
-  isolation:isolate;
-}
-
-#ma7alak-social-header::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius:inherit;
-  padding:1.15px;
-  pointer-events:none;
-  z-index:0;
-  opacity:.72;
-  background:
-    conic-gradient(
-      from var(--m7-panel-glow-angle),
-      transparent 0deg,
-      transparent 250deg,
-      rgba(120,31,24,.05) 270deg,
-      rgba(217,164,65,.28) 291deg,
-      rgba(255,226,158,.40) 301deg,
-      rgba(217,164,65,.18) 312deg,
-      rgba(120,31,24,.04) 328deg,
-      transparent 346deg,
-      transparent 360deg
-    );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-  mask-composite:exclude;
-  animation:ma7alakPanelGlowOrbit 7.5s linear infinite;
-  -webkit-animation:ma7alakPanelGlowOrbit 7.5s linear infinite;
-}
-
-#ma7alak-social-header > *{
-  position:relative;
-  z-index:1;
-}
-
-@keyframes ma7alakPanelGlowOrbit{
-  from{--m7-panel-glow-angle:0deg;}
-  to{--m7-panel-glow-angle:360deg;}
-}
-
-@-webkit-keyframes ma7alakPanelGlowOrbit{
-  from{--m7-panel-glow-angle:0deg;}
-  to{--m7-panel-glow-angle:360deg;}
-}
-
-/* PHONE-FIRST: enlarge the left Ma7alak/eye mark and move it closer to the left
-   edge while keeping a safe gap from the rounded panel corner. */
-@media(max-width:900px){
-  .ma7alak-header-brand{
-    min-width:100px!important;
-    width:100px!important;
-    padding-left:1px!important;
-    padding-right:6px!important;
-    margin-left:-3px!important;
-  }
-
-  .ma7alak-header-logo{
-    height:58px!important;
-    max-width:96px!important;
-  }
-
-  /* Shop/owner circle stays clearly smaller than the left Ma7alak circle. */
-  #ma7alak-header-owner.visible{
-    width:51px!important;
-    flex-basis:51px!important;
-    margin-right:13px!important;
-  }
-
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:48px!important;
-    height:48px!important;
-    flex:0 0 48px!important;
-  }
-}
-
-@media(max-width:390px){
-  .ma7alak-header-brand{
-    min-width:94px!important;
-    width:94px!important;
-    margin-left:-2px!important;
-  }
-
-  .ma7alak-header-logo{
-    height:55px!important;
-    max-width:90px!important;
-  }
-
-  #ma7alak-header-owner.visible{
-    width:48px!important;
-    flex-basis:48px!important;
-    margin-right:10px!important;
-  }
-
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:45px!important;
-    height:45px!important;
-    flex:0 0 45px!important;
-  }
-}
-
-
-/* =========================================================
-   INLINE OWNER LOGIN / LOGOUT — SAME PAGE
-========================================================= */
-#ma7alak-login-overlay{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  height:100dvh;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
-  background:rgba(0,0,0,.74);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  z-index:2147483647;
-}
-
-#ma7alak-login-overlay.open{
-  display:flex;
-  animation:ma7alakLoginFade .18s ease-out;
-}
-
-@keyframes ma7alakLoginFade{
-  from{opacity:0}
-  to{opacity:1}
-}
-
-#ma7alak-login-panel{
-  position:relative;
-  width:min(430px,100%);
-  overflow:hidden;
-  padding:34px 22px 22px;
-  border:1px solid rgba(217,164,65,.25);
-  border-radius:26px;
-  background:
-    radial-gradient(circle at 12% 0%,rgba(217,164,65,.10),transparent 32%),
-    linear-gradient(180deg,rgba(25,26,28,.99),rgba(9,10,11,.99));
-  box-shadow:
-    0 30px 80px rgba(0,0,0,.72),
-    inset 0 1px 0 rgba(255,255,255,.05);
-  color:#fff;
-}
-
-#ma7alak-login-close{
-  position:absolute;
-  top:12px;
-  right:12px;
-  width:38px;
-  height:38px;
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:12px;
-  background:rgba(255,255,255,.045);
-  color:#fff;
-  font-size:25px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.ma7alak-login-brand{
-  margin-bottom:22px;
-  text-align:center;
-}
-
-.ma7alak-login-brand-small{
-  margin-bottom:8px;
-  color:var(--m7-gold-soft);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:1.5px;
-}
-
-#ma7alak-login-title{
-  margin:0;
-  color:#fff;
-  font-size:27px;
-  line-height:1.12;
-}
-
-#ma7alak-login-title span{
-  color:var(--m7-gold-soft);
-}
-
-.ma7alak-login-brand p{
-  margin:9px auto 0;
-  max-width:330px;
-  color:rgba(255,255,255,.48);
-  font-size:11px;
-  line-height:1.5;
-}
-
-.ma7alak-login-label{
-  display:block;
-  margin:13px 2px 7px;
-  color:rgba(255,255,255,.67);
-  font-size:10px;
-  font-weight:800;
-}
-
-.ma7alak-login-input-wrap{
-  position:relative;
-}
-
-.ma7alak-login-input{
-  width:100%;
-  height:54px;
-  padding:0 46px 0 16px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  outline:none;
-  background:rgba(255,255,255,.05);
-  color:#fff;
-  font-size:14px;
-  font-weight:650;
-}
-
-.ma7alak-login-input:focus{
-  border-color:rgba(217,164,65,.50);
-  box-shadow:0 0 0 3px rgba(217,164,65,.07);
-}
-
-#ma7alak-login-password-toggle{
-  position:absolute;
-  top:50%;
-  right:10px;
-  transform:translateY(-50%);
-  width:36px;
-  height:36px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:rgba(255,255,255,.55);
-  cursor:pointer;
-  font-size:17px;
-}
-
-.ma7alak-inline-login-message{
-  min-height:18px;
-  margin:12px 2px 0;
-  font-size:10px;
-  font-weight:750;
-  line-height:1.4;
-}
-
-.ma7alak-inline-login-message.error{
-  color:#ff7777;
-}
-
-.ma7alak-inline-login-message.success{
-  color:#8de39d;
-}
-
-#ma7alak-inline-login-button{
-  width:100%;
-  min-height:54px;
-  margin-top:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:9px;
-  border:1px solid rgba(239,198,110,.42);
-  border-radius:16px;
-  background:
-    linear-gradient(180deg,rgba(217,164,65,.95),rgba(156,105,26,.96));
-  color:#100d08;
-  font-size:13px;
-  font-weight:900;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(217,164,65,.12);
-}
-
-#ma7alak-inline-login-button:disabled{
-  opacity:.65;
-  cursor:wait;
-}
-
-#ma7alak-inline-login-spinner{
-  width:16px;
-  height:16px;
-  display:none;
-  border:2px solid rgba(16,13,8,.25);
-  border-top-color:#100d08;
-  border-radius:50%;
-  animation:ma7alakLoginSpin .7s linear infinite;
-}
-
-@keyframes ma7alakLoginSpin{
-  to{transform:rotate(360deg)}
-}
-
-@media(max-width:480px){
-  #ma7alak-login-panel{
-    padding:31px 16px 18px;
-    border-radius:23px;
-  }
-
-  #ma7alak-login-title{
-    font-size:25px;
-  }
-
-  .ma7alak-login-brand p{
-    font-size:11px;
-  }
-
-  .ma7alak-login-input{
-    height:52px;
-    font-size:14px;
-  }
-
-  #ma7alak-inline-login-button{
-    min-height:53px;
-  }
-}
-
-`;
-
-    document.head.appendChild(style);
-  }
-
-
-  function injectHeaderHTML(){
-    if(
-      document.getElementById(
-        "ma7alak-social-header"
-      )
-    ){
-      return;
-    }
+  if(document.body){
 
     document.body.classList.add(
-      "ma7alak-header-page"
+      "ma7alak-shops-body"
     );
 
-    /*
-      Theme backdrop is separate from the fixed header.
-      Because it is position:absolute, it stays at page-top and
-      disappears naturally when the visitor scrolls down.
-    */
+  }
+
+
+  /* =========================================================
+     SHOP DATA — LIVE FROM SUPABASE
+
+     Shops are no longer hardcoded in this GitHub file.
+     Active rows from public.shop_profiles are loaded at runtime
+     and normalized into the exact object shape the existing
+     filters, cards and Story system already use.
+  ========================================================= */
+
+  let shops = [];
+
+
+  /* =========================================================
+     BUILD PAGE
+  ========================================================= */
+
+  const page =
+    document.createElement("div");
+
+
+  page.id =
+    "ma7alak-shops-page";
+
+
+  page.innerHTML = `
+
+    <!-- =====================================================
+         BRAND
+    ====================================================== -->
+
+    <div class="ma7alak-top-brand">
+
+      <div class="ma7alak-side-left">
+
+        EXPLORE<br>
+        SHOP LOCAL<br>
+        BE PART OF IT
+
+      </div>
+
+
+      <div class="ma7alak-side-right">
+
+        Lebanon<br>
+        Local<br>
+        Always ♡
+
+      </div>
+
+
+      <div class="ma7alak-brand-name">
+        Ma7alak
+      </div>
+
+
+      <div class="ma7alak-brand-subtitle">
+
+        SUPPORT LOCAL
+        &nbsp; • &nbsp;
+        DISCOVER MORE
+
+      </div>
+
+
+      <div class="ma7alak-brand-rule"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="ma7alak-hero">
+
+      <div class="ma7alak-hero-icon">
+        ☕
+      </div>
+
+
+      <h1>
+
+        Discover
+        <span>Shops.</span>
+
+      </h1>
+
+
+      <p>
+
+        Discover amazing local businesses,
+        hidden gems and places worth seeing around you.
+
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <div class="ma7alak-search-wrapper">
+
+      <input
+        id="ma7alak-shop-search"
+        class="ma7alak-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Search shops, places or categories..."
+      >
+
+
+      <div class="ma7alak-search-icon">
+        ⌕
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         AREA
+    ====================================================== -->
+
+    <div class="ma7alak-filter-block">
+
+      <div class="ma7alak-filter-label">
+        Select Area
+      </div>
+
+
+      <div
+        id="ma7alak-area-grid"
+        class="ma7alak-area-grid"
+      ></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CATEGORY
+    ====================================================== -->
+
+    <section
+      id="ma7alak-category-section"
+      class="ma7alak-category-section"
+    >
+
+      <div class="ma7alak-filter-label">
+        Select Category
+      </div>
+
+
+      <div
+        id="ma7alak-category-grid"
+        class="ma7alak-category-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTS
+    ====================================================== -->
+
+    <section
+      id="ma7alak-results"
+      class="ma7alak-results"
+    >
+
+      <div class="ma7alak-results-top">
+
+        <div>
+
+          <div
+            id="ma7alak-results-kicker"
+            class="ma7alak-results-kicker"
+          >
+            SELECTED AREA
+          </div>
+
+
+          <h2
+            id="ma7alak-results-title"
+            class="ma7alak-results-title"
+          >
+            Cafés & Coffee Spots
+          </h2>
+
+
+          <p
+            id="ma7alak-results-subtitle"
+            class="ma7alak-results-subtitle"
+          >
+            Discover local businesses around you.
+          </p>
+
+        </div>
+
+
+        <div
+          id="ma7alak-results-count"
+          class="ma7alak-results-count"
+        >
+          0 shops
+        </div>
+
+      </div>
+
+
+      <div
+        id="ma7alak-shop-grid"
+        class="ma7alak-shop-grid"
+      ></div>
+
+
+      <div
+        id="ma7alak-empty"
+        class="ma7alak-empty"
+      >
+
+        <div class="ma7alak-empty-icon">
+          🔎
+        </div>
+
+
+        <h3>
+          Nothing found yet
+        </h3>
+
+
+        <p>
+          Try another shop, area or category.
+        </p>
+
+      </div>
+
+
+      <button
+        id="ma7alak-change-area"
+        class="ma7alak-change-area"
+      >
+
+        ← Change area
+
+      </button>
+
+    </section>
+
+
+    <!-- =====================================================
+         BUSINESS CTA
+    ====================================================== -->
+
+    <section class="ma7alak-business-cta">
+
+      <div>
+
+        <div class="ma7alak-business-small">
+          FOR LOCAL BUSINESSES
+        </div>
+
+
+        <h2>
+
+          Your shop belongs on
+          <span>Ma7alak.</span>
+
+        </h2>
+
+
+        <p>
+
+          Reach more people.
+          Grow your business.
+          Be part of something local.
+
+        </p>
+
+      </div>
+
+
+      <a
+        class="ma7alak-add-button"
+        href="https://ma7alak.com/dhyf-mhlk-"
+        onclick="
+          window.top.location.href='https://ma7alak.com/dhyf-mhlk-';
+          return false;
+        "
+      >
+
+        Add Your Shop
+
+        <span>
+          →
+        </span>
+
+      </a>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="ma7alak-footer">
+
+      <div class="ma7alak-footer-features">
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ♡
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              Support Local
+            </strong>
+
+            <span>
+              Stronger Communities
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ◈
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              Discover More
+            </strong>
+
+            <span>
+              Hidden Gems
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="ma7alak-footer-feature">
+
+          <div class="ma7alak-footer-feature-icon">
+            ✦
+          </div>
+
+          <div class="ma7alak-footer-feature-text">
+
+            <strong>
+              A Stronger Lebanon
+            </strong>
+
+            <span>
+              Together
+            </span>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="ma7alak-footer-logo">
+        Ma7alak
+      </div>
+
+
+      <div class="ma7alak-footer-tagline">
+        More Than A Place • A Community
+      </div>
+
+    </footer>
+
+  `;
+
+
+  /* =========================================================
+     HEADER DETECTION
+  ========================================================= */
+
+  function findHeader(){
+
+    const selectors = [
+
+      "header",
+
+      "[role='banner']",
+
+      ".site-header",
+
+      ".main-header",
+
+      ".website-header",
+
+      ".header",
+
+      "nav"
+
+    ];
+
+
+    for(
+      const selector of selectors
+    ){
+
+      const found =
+        document.querySelector(selector);
+
+
+      if(found){
+
+        return found;
+
+      }
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /* =========================================================
+     INSERT PAGE
+  ========================================================= */
+
+  function insertPage(){
+
     if(
-      !document.getElementById(
-        "ma7alak-header-theme-backdrop"
+      document.getElementById(
+        "ma7alak-shops-page"
       )
     ){
-      const themeBackdrop =
-        document.createElement("div");
 
-      themeBackdrop.id =
-        "ma7alak-header-theme-backdrop";
+      return true;
 
-      themeBackdrop.setAttribute(
-        "aria-hidden",
-        "true"
+    }
+
+
+    const header =
+      findHeader();
+
+
+    if(header){
+
+      header.insertAdjacentElement(
+        "afterend",
+        page
       );
+
+      return true;
+
+    }
+
+
+    if(document.body){
 
       document.body.insertBefore(
-        themeBackdrop,
+        page,
         document.body.firstChild
       );
+
+      return true;
+
     }
 
-    const holder =
-      document.createElement("div");
 
-    holder.id =
-      "ma7alak-premium-header-root";
+    return false;
 
-    holder.innerHTML = `
-<header id="ma7alak-social-header">
-  <a class="ma7alak-header-brand" href="https://ma7alak.com/" aria-label="Ma7alak Home">
-    <img
-      class="ma7alak-header-logo"
-      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/020e2776-1fe4-4b32-9ac0-8e1358911397-removebg-preview.png?auto=format,compress&w=264&fit=max"
-      alt="Ma7alak"
-      width="264"
-      height="88"
-      decoding="async"
-      fetchpriority="low"
-    >
-  </a>
-
-  <div class="ma7alak-header-search-wrap">
-    <svg class="ma7alak-header-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/>
-      <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-    </svg>
-    <input id="ma7alak-header-search" type="search" autocomplete="off" placeholder="Search shops, categories, or locations..." aria-label="Search Ma7alak">
-    <div class="ma7alak-header-search-kbd">⌘ K</div>
-  </div>
-
-  <nav class="ma7alak-header-nav" aria-label="Main navigation">
-    <div id="ma7alak-header-likes-slot" aria-label="Story Likes">
-      <button
-        id="ma7alak-instant-likes-placeholder"
-        type="button"
-        aria-label="Story Likes"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M12 21s-7.1-4.35-9.45-8.38C.75 9.54 1.4 5.7 4.65 4.35c2.06-.86 4.3-.2 5.7 1.45L12 7.72l1.65-1.92c1.4-1.65 3.64-2.31 5.7-1.45 3.25 1.35 3.9 5.19 2.1 8.27C19.1 16.65 12 21 12 21Z"
-            fill="currentColor"
-          />
-        </svg>
-      </button>
-      <span class="ma7alak-integrated-label">Likes</span>
-    </div>
-
-    <button id="ma7alak-header-reels" class="ma7alak-header-nav-item" type="button" aria-label="Reels">
-      <span class="ma7alak-header-nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="3.5" y="4" width="17" height="16" rx="4" stroke="currentColor" stroke-width="1.8"/>
-          <path d="M8 4L11 8M14 4L17 8M3.8 8H20.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          <path d="M10 11.2L15.1 14L10 16.8V11.2Z" fill="currentColor"/>
-        </svg>
-      </span>
-      <span id="ma7alak-reels-badge" aria-hidden="true">0</span>
-      <span class="ma7alak-header-nav-label">Reels</span>
-    </button>
-
-    <div id="ma7alak-header-notification-slot" aria-label="Notifications">
-      <span class="ma7alak-integrated-label">Notifications</span>
-    </div>
-
-    <button id="ma7alak-mobile-search-button" class="ma7alak-header-nav-item" type="button" aria-label="Search">
-      <span class="ma7alak-header-nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/>
-          <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <span class="ma7alak-header-nav-label">Search</span>
-    </button>
-  </nav>
-
-  <a id="ma7alak-header-owner" href="#" aria-label="Open your shop">
-    <div class="ma7alak-owner-avatar-wrap">
-      <div class="ma7alak-owner-avatar-inner">
-        <img id="ma7alak-header-owner-image" class="ma7alak-owner-avatar" src="" alt="">
-        <div id="ma7alak-header-owner-fallback" class="ma7alak-owner-avatar-fallback">M</div>
-      </div>
-    </div>
-    <div class="ma7alak-owner-copy">
-      <div id="ma7alak-header-owner-name">Your Shop</div>
-      <div class="ma7alak-owner-sub">View Your Page →</div>
-    </div>
-  </a>
-
-  <div class="ma7alak-header-menu-wrap">
-    <button
-      id="ma7alak-header-menu-button"
-      type="button"
-      aria-label="Open menu"
-      aria-expanded="false"
-      aria-controls="ma7alak-header-menu-panel"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <div id="ma7alak-header-menu-panel" aria-hidden="true">
-
-      <a
-        class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/dhyf-mhlk-"
-      >
-        <span class="ma7alak-header-menu-icon">＋</span>
-        <span class="ma7alak-header-menu-text">
-          <span class="ma7alak-header-menu-main">ضيف محلك</span>
-          <span class="ma7alak-header-menu-sub">Add your shop</span>
-        </span>
-      </a>
-
-      <a
-        class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/shwf-almhlat-"
-      >
-        <span class="ma7alak-header-menu-icon">⌕</span>
-        <span class="ma7alak-header-menu-text">
-          <span class="ma7alak-header-menu-main">شوف المحلات</span>
-          <span class="ma7alak-header-menu-sub">Explore shops</span>
-        </span>
-      </a>
-
-      <a
-        id="ma7alak-header-auth-action"
-        class="ma7alak-header-menu-link"
-        href="#"
-        role="button"
-        aria-label="Login"
-        data-auth-state="login"
-      >
-        <span id="ma7alak-header-auth-icon" class="ma7alak-header-menu-icon">↪</span>
-        <span class="ma7alak-header-menu-text">
-          <span id="ma7alak-header-auth-main" class="ma7alak-header-menu-main">Login</span>
-          <span id="ma7alak-header-auth-sub" class="ma7alak-header-menu-sub">Shop owner access</span>
-        </span>
-      </a>
-
-    </div>
-  </div>
-</header>
-
-
-<div id="ma7alak-login-overlay" aria-hidden="true">
-  <div id="ma7alak-login-panel" role="dialog" aria-modal="true" aria-labelledby="ma7alak-login-title">
-    <button id="ma7alak-login-close" type="button" aria-label="Close login">×</button>
-
-    <div class="ma7alak-login-brand">
-      <div class="ma7alak-login-brand-small">MA7ALAK FOR BUSINESS</div>
-      <h2 id="ma7alak-login-title">Marhaba to <span>Ma7alak</span></h2>
-      <p>Sign in to manage your shop, Stories, photos and videos.</p>
-    </div>
-
-    <form id="ma7alak-inline-login-form" autocomplete="on">
-      <label class="ma7alak-login-label" for="ma7alak-login-email">Email</label>
-      <div class="ma7alak-login-input-wrap">
-        <input
-          id="ma7alak-login-email"
-          class="ma7alak-login-input"
-          type="email"
-          placeholder="example@email.com"
-          autocomplete="email"
-          required
-        >
-      </div>
-
-      <label class="ma7alak-login-label" for="ma7alak-login-password">Password</label>
-      <div class="ma7alak-login-input-wrap">
-        <input
-          id="ma7alak-login-password"
-          class="ma7alak-login-input"
-          type="password"
-          placeholder="Your password"
-          autocomplete="current-password"
-          required
-        >
-        <button id="ma7alak-login-password-toggle" type="button" aria-label="Show password">◉</button>
-      </div>
-
-      <div id="ma7alak-inline-login-message" class="ma7alak-inline-login-message"></div>
-
-      <button id="ma7alak-inline-login-button" type="submit">
-        <span id="ma7alak-inline-login-spinner" aria-hidden="true"></span>
-        <span id="ma7alak-inline-login-button-text">Log In</span>
-      </button>
-    </form>
-  </div>
-</div>
-
-<div id="ma7alak-header-search-overlay" aria-hidden="true">
-  <div id="ma7alak-header-search-panel" role="dialog" aria-modal="true" aria-label="Search shops">
-    <div class="ma7alak-search-panel-head">
-      <div class="ma7alak-search-panel-field">
-        <svg class="ma7alak-overlay-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/>
-          <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-        </svg>
-        <input id="ma7alak-overlay-search-input" type="search" autocomplete="off" placeholder="Search Ma7alak shops..." aria-label="Search shops">
-        <button id="ma7alak-search-clear" type="button" aria-label="Clear search">×</button>
-      </div>
-      <button id="ma7alak-search-close" type="button" aria-label="Close search">×</button>
-    </div>
-    <div class="ma7alak-search-panel-title">Shops</div>
-    <div id="ma7alak-search-results"></div>
-  </div>
-</div>
-    `;
-
-    document.body.appendChild(holder);
   }
 
 
-  whenBodyReady(async function(){
+  /* =========================================================
+     STATE
+  ========================================================= */
 
-    injectHeaderCSS();
-    injectHeaderHTML();
+  let selectedArea =
+    null;
 
-    try{
-      await loadSupabase();
-    }
-    catch(error){
-      console.error(
-        "MA7ALAK header Supabase loader:",
-        error
+
+  let selectedCategory =
+    null;
+
+
+  let searchTerm =
+    "";
+
+
+  /* =========================================================
+     ELEMENT REFERENCES
+  ========================================================= */
+
+  let areaButtons;
+
+  let categoryButtons;
+
+  let areaGrid;
+
+  let categoryGrid;
+
+  let categorySection;
+
+  let results;
+
+  let shopGrid;
+
+  let resultCount;
+
+  let resultsTitle;
+
+  let resultsSubtitle;
+
+  let resultsKicker;
+
+  let empty;
+
+  let changeArea;
+
+  let searchInput;
+
+
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
+
+  async function initialize(){
+
+    areaGrid =
+      page.querySelector(
+        "#ma7alak-area-grid"
       );
-    }
 
 
-    /* =========================================================
-       ORIGINAL HEADER FUNCTIONALITY
-       ========================================================= */
+    categoryGrid =
+      page.querySelector(
+        "#ma7alak-category-grid"
+      );
 
-"use strict";
 
-  const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
-  const SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+    areaButtons =
+      page.querySelectorAll(
+        ".ma7alak-area-button"
+      );
 
-  let client=null;
-  let shopProfiles=[];
-  let ownerShop=null;
-  let searchTimer=null;
 
-  function getClient(){
-    if(client){return client;}
-    if(!window.supabase||typeof window.supabase.createClient!=="function"){return null;}
-    client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    return client;
+    categoryButtons =
+      page.querySelectorAll(
+        ".ma7alak-category-button"
+      );
+
+
+    categorySection =
+      page.querySelector(
+        "#ma7alak-category-section"
+      );
+
+
+    results =
+      page.querySelector(
+        "#ma7alak-results"
+      );
+
+
+    shopGrid =
+      page.querySelector(
+        "#ma7alak-shop-grid"
+      );
+
+
+    resultCount =
+      page.querySelector(
+        "#ma7alak-results-count"
+      );
+
+
+    resultsTitle =
+      page.querySelector(
+        "#ma7alak-results-title"
+      );
+
+
+    resultsSubtitle =
+      page.querySelector(
+        "#ma7alak-results-subtitle"
+      );
+
+
+    resultsKicker =
+      page.querySelector(
+        "#ma7alak-results-kicker"
+      );
+
+
+    empty =
+      page.querySelector(
+        "#ma7alak-empty"
+      );
+
+
+    changeArea =
+      page.querySelector(
+        "#ma7alak-change-area"
+      );
+
+
+    searchInput =
+      page.querySelector(
+        "#ma7alak-shop-search"
+      );
+
+
+    ma7alakBindStoryCardClicks();
+
+    /*
+     * Load the live shop directory first.
+     * No placeholder cards are created: only active Supabase rows
+     * become real shop cards when the visitor selects filters.
+     */
+    await ma7alakLoadShopProfiles();
+
+    /*
+     * Build Area buttons from the live shop rows.
+     * Category buttons are then built dynamically for the selected area.
+     */
+    ma7alakRenderDynamicAreas();
+
+    bindEvents();
+
+    /*
+     * Start the existing live Story system after shop data exists,
+     * so shop_slug keeps linking each owner's Story to its shop.
+     */
+    ma7alakStartStorySystem();
+    ma7alakStartDirectoryRealtime();
+
   }
 
-  function escapeHTML(value){
-    return String(value==null?"":value)
+
+  /* =========================================================
+     DYNAMIC AREA + CATEGORY FILTERS
+  ========================================================= */
+
+  function ma7alakEscapeHtml(value){
+
+    return String(value ?? "")
       .replace(/&/g,"&amp;")
       .replace(/</g,"&lt;")
       .replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;")
       .replace(/'/g,"&#039;");
+
   }
 
-  function prettyShopName(slug){
-    return String(slug||"Shop")
-      .split("-")
-      .filter(Boolean)
-      .map(function(part){return part.charAt(0).toUpperCase()+part.slice(1);})
-      .join(" ");
-  }
 
-  function initials(name){
-    const parts=String(name||"M").trim().split(/\s+/).filter(Boolean);
-    if(!parts.length){return "M";}
-    return parts.slice(0,2).map(function(part){return part.charAt(0).toUpperCase();}).join("");
-  }
+  let ma7alakLiveCategoryIcons = new Map();
 
-  function integrateExistingControls(){
-    const likesSlot=document.getElementById("ma7alak-header-likes-slot");
-    const notificationSlot=document.getElementById("ma7alak-header-notification-slot");
-    const likesWrapper=document.getElementById("ma7alak-story-likes-wrapper");
-    const notificationWrapper=document.getElementById("ma7alak-notification-wrapper");
-    const instantHeart=document.getElementById("ma7alak-instant-likes-placeholder");
+  function ma7alakCategoryIcon(category,name){
 
-    if(likesSlot&&likesWrapper&&likesWrapper.parentNode!==likesSlot){
-      const label=likesSlot.querySelector(".ma7alak-integrated-label");
-      likesSlot.insertBefore(likesWrapper,label||null);
+    const exactKey = String(category || "").trim();
+
+    if(ma7alakLiveCategoryIcons.has(exactKey)){
+      return ma7alakLiveCategoryIcons.get(exactKey) || "🏪";
     }
 
-    /*
-      As soon as the real Story Likes control exists, remove the
-      temporary instant heart. No flicker / second icon remains.
-    */
-    if(likesWrapper&&instantHeart){
-      instantHeart.remove();
-    }
+    const text =
+      (String(category || "") + " " + String(name || ""))
+        .toLowerCase();
 
-    if(notificationSlot&&notificationWrapper&&notificationWrapper.parentNode!==notificationSlot){
-      const label=notificationSlot.querySelector(".ma7alak-integrated-label");
-      notificationSlot.insertBefore(notificationWrapper,label||null);
-    }
+    if(text.includes("cafe") || text.includes("coffee")) return "☕";
+    if(text.includes("food") || text.includes("restaurant") || text.includes("kiosk")) return "🍴";
+    if(text.includes("cloth") || text.includes("fashion")) return "👕";
+    if(text.includes("tattoo") || text.includes("piercing") || text.includes("makeup") || text.includes("beauty")) return "✦";
+    if(text.includes("gym") || text.includes("fitness")) return "🏋";
+    if(text.includes("barber") || text.includes("salon") || text.includes("hair")) return "✂";
+    if(text.includes("phone") || text.includes("mobile") || text.includes("electronic")) return "📱";
+    if(text.includes("service")) return "⚒";
+
+    return "🏪";
+
   }
 
-  function setupInstantHeart(){
-    const instantHeart=document.getElementById("ma7alak-instant-likes-placeholder");
-    if(!instantHeart){return;}
 
-    instantHeart.addEventListener("click",function(event){
-      event.preventDefault();
-      event.stopPropagation();
+  function ma7alakRenderDynamicAreas(){
 
-      integrateExistingControls();
+    const areas =
+      Array.from(
+        new Set(
+          shops
+            .map(shop => String(shop.area || "").trim())
+            .filter(Boolean)
+        )
+      )
+      .sort((a,b) =>
+        a.localeCompare(b,undefined,{sensitivity:"base"})
+      );
 
-      const realButton=document.getElementById("ma7alak-story-likes-button");
+    areaGrid.innerHTML =
+      areas
+        .map(area => `
+          <button
+            class="ma7alak-area-button"
+            data-area="${ma7alakEscapeHtml(area)}"
+            type="button"
+          >
+            <span class="icon">📍</span>
+            ${ma7alakEscapeHtml(area)}
+          </button>
+        `)
+        .join("");
 
-      if(realButton){
-        realButton.click();
-        return;
-      }
+    areaButtons =
+      page.querySelectorAll(
+        ".ma7alak-area-button"
+      );
 
-      /*
-        The GitHub Likes script may still be finishing its first load.
-        Retry briefly so a very fast tap right after refresh still works.
-      */
-      let tries=0;
-      const retry=setInterval(function(){
-        tries++;
-        integrateExistingControls();
+  }
 
-        const button=document.getElementById("ma7alak-story-likes-button");
 
-        if(button){
-          clearInterval(retry);
-          button.click();
+  function ma7alakRenderDynamicCategories(area){
+
+    const categoryMap =
+      new Map();
+
+    shops.forEach(
+      shop => {
+
+        if(shop.area !== area){
           return;
         }
 
-        if(tries>=20){
-          clearInterval(retry);
+        const key =
+          String(shop.category || "").trim();
+
+        if(!key){
+          return;
         }
-      },100);
-    });
-  }
 
-  function startControlIntegrationWatcher(){
-    integrateExistingControls();
+        const name =
+          String(
+            shop.categoryName ||
+            key
+          ).trim();
 
-    const observer=new MutationObserver(function(){
-      integrateExistingControls();
-    });
+        if(!categoryMap.has(key)){
+          categoryMap.set(
+            key,
+            name
+          );
+        }
 
-    observer.observe(
-      document.documentElement,
-      {childList:true,subtree:true}
+      }
     );
 
-    /*
-      Very fast checks during initial page boot so the real heart snaps
-      into the header almost immediately after its GitHub script creates it.
-    */
-    let fastTries=0;
-    const fastTimer=setInterval(function(){
-      fastTries++;
-      integrateExistingControls();
-      if(fastTries>=50){clearInterval(fastTimer);}
-    },50);
+    const categories =
+      Array.from(
+        categoryMap.entries()
+      )
+      .sort((a,b) =>
+        a[1].localeCompare(b[1],undefined,{sensitivity:"base"})
+      );
 
-    let tries=0;
-    const timer=setInterval(function(){
-      tries++;
-      integrateExistingControls();
-      if(tries>=60){clearInterval(timer);}
-    },500);
-  }
+    categoryGrid.innerHTML =
+      categories
+        .map(([key,name]) => `
+          <button
+            class="ma7alak-category-button"
+            data-category="${ma7alakEscapeHtml(key)}"
+            type="button"
+          >
+            <span class="ma7alak-category-icon">
+              ${ma7alakCategoryIcon(key,name)}
+            </span>
+            ${ma7alakEscapeHtml(name)}
+          </button>
+        `)
+        .join("");
 
-  async function loadOwnerProfile(){
-    const supabaseClient=getClient();
-    if(!supabaseClient){return;}
+    categoryButtons =
+      page.querySelectorAll(
+        ".ma7alak-category-button"
+      );
 
-    try{
-      const sessionResult=await supabaseClient.auth.getSession();
-      const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
-
-      if(!session||!session.user){hideOwnerProfile();return;}
-
-      const ownerResult=await supabaseClient
-        .from("shop_owners")
-        .select("shop_slug")
-        .eq("user_id",session.user.id)
-        .limit(1)
-        .maybeSingle();
-
-      if(ownerResult.error||!ownerResult.data||!ownerResult.data.shop_slug){
-        hideOwnerProfile();
-        return;
-      }
-
-      const slug=String(ownerResult.data.shop_slug).trim();
-
-      const profileResult=await supabaseClient
-        .from("shop_profiles")
-        .select("shop_slug,shop_name,profile_image_url")
-        .eq("shop_slug",slug)
-        .maybeSingle();
-
-      const profile=(profileResult&&!profileResult.error&&profileResult.data)
-        ? profileResult.data
-        : {shop_slug:slug,shop_name:prettyShopName(slug),profile_image_url:""};
-
-      ownerShop={
-        shop_slug:slug,
-        shop_name:profile.shop_name||prettyShopName(slug),
-        profile_image_url:profile.profile_image_url||""
-      };
-
-      renderOwnerProfile();
-    }
-    catch(error){
-      console.error("MA7ALAK header owner profile:",error);
-      hideOwnerProfile();
-    }
-  }
-
-  function hideOwnerProfile(){
-    ownerShop=null;
-    document.body.classList.remove("ma7alak-owner-heart-visible");
-    const owner=document.getElementById("ma7alak-header-owner");
-    if(owner){owner.classList.remove("visible");owner.removeAttribute("href");}
-  }
-
-  function renderOwnerProfile(){
-    if(!ownerShop){hideOwnerProfile();return;}
-
-    const owner=document.getElementById("ma7alak-header-owner");
-    const name=document.getElementById("ma7alak-header-owner-name");
-    const image=document.getElementById("ma7alak-header-owner-image");
-    const fallback=document.getElementById("ma7alak-header-owner-fallback");
-    if(!owner){return;}
-
-    owner.href="/"+encodeURIComponent(ownerShop.shop_slug);
-    if(name){name.textContent=ownerShop.shop_name;}
-
-    if(image&&fallback){
-      if(ownerShop.profile_image_url){
-        image.style.display="block";
-        fallback.style.display="none";
-        image.src=ownerShop.profile_image_url;
-        image.alt=ownerShop.shop_name;
-        image.onerror=function(){
-          image.style.display="none";
-          fallback.style.display="flex";
-          fallback.textContent=initials(ownerShop.shop_name);
-        };
-      }else{
-        image.style.display="none";
-        fallback.style.display="flex";
-        fallback.textContent=initials(ownerShop.shop_name);
-      }
-    }
-
-    owner.classList.add("visible");
-    document.body.classList.add("ma7alak-owner-heart-visible");
-  }
-
-  async function loadShopProfiles(){
-    const supabaseClient=getClient();
-    if(!supabaseClient){return [];}
-
-    try{
-      const result=await supabaseClient
-        .from("shop_profiles")
-        .select("shop_slug,shop_name,profile_image_url")
-        .order("shop_name",{ascending:true});
-
-      if(result.error){throw result.error;}
-      shopProfiles=(result.data||[]).filter(function(shop){return shop&&shop.shop_slug;});
-      return shopProfiles;
-    }
-    catch(error){
-      console.error("MA7ALAK header shop search:",error);
-      shopProfiles=[];
-      return [];
-    }
-  }
-
-  function openSearch(initialValue){
-    const overlay=document.getElementById("ma7alak-header-search-overlay");
-    const input=document.getElementById("ma7alak-overlay-search-input");
-    if(!overlay||!input){return;}
-
-    overlay.classList.add("open");
-    overlay.setAttribute("aria-hidden","false");
-    document.documentElement.style.overflow="hidden";
-    document.body.style.overflow="hidden";
-    input.value=String(initialValue||"");
-    renderSearchResults(input.value);
-    setTimeout(function(){input.focus();input.select();},50);
-  }
-
-  function closeSearch(){
-    const overlay=document.getElementById("ma7alak-header-search-overlay");
-    if(!overlay){return;}
-    overlay.classList.remove("open");
-    overlay.setAttribute("aria-hidden","true");
-    document.documentElement.style.overflow="";
-    document.body.style.overflow="";
-  }
-
-  function renderSearchResults(query){
-    const results=document.getElementById("ma7alak-search-results");
-    if(!results){return;}
-
-    const normalized=String(query||"").trim().toLowerCase();
-    let matches=shopProfiles.slice();
-
-    if(normalized){
-      matches=shopProfiles.filter(function(shop){
-        const haystack=(String(shop.shop_name||"")+" "+String(shop.shop_slug||"")).toLowerCase();
-        return haystack.includes(normalized);
-      });
-    }
-
-    matches=matches.slice(0,12);
-
-    if(!matches.length){
-      results.innerHTML=`
-        <div class="ma7alak-search-empty">
-          <div class="ma7alak-search-empty-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="ma7alak-search-empty-title">No shops found</div>
-          <div class="ma7alak-search-empty-text">Try another shop name.</div>
-        </div>`;
-      return;
-    }
-
-    results.innerHTML=matches.map(function(shop){
-      const slug=String(shop.shop_slug);
-      const name=String(shop.shop_name||prettyShopName(slug));
-      const image=String(shop.profile_image_url||"");
-      const mediaHTML=image
-        ? `<img class="ma7alak-search-result-img" src="${escapeHTML(image)}" alt="${escapeHTML(name)}" loading="lazy">`
-        : `<div class="ma7alak-search-result-fallback">${escapeHTML(initials(name))}</div>`;
-
-      return `
-        <a class="ma7alak-search-result" href="/${encodeURIComponent(slug)}">
-          ${mediaHTML}
-          <div class="ma7alak-search-result-copy">
-            <div class="ma7alak-search-result-name">${escapeHTML(name)}</div>
-            <div class="ma7alak-search-result-meta">View shop on Ma7alak</div>
-          </div>
-          <div class="ma7alak-search-result-arrow">→</div>
-        </a>`;
-    }).join("");
-  }
-
-  function setupSearchEvents(){
-    const desktopInput=document.getElementById("ma7alak-header-search");
-    const mobileButton=document.getElementById("ma7alak-mobile-search-button");
-    const overlayInput=document.getElementById("ma7alak-overlay-search-input");
-    const closeButton=document.getElementById("ma7alak-search-close");
-    const clearButton=document.getElementById("ma7alak-search-clear");
-    const overlay=document.getElementById("ma7alak-header-search-overlay");
-
-    if(desktopInput){
-      desktopInput.addEventListener("focus",function(){openSearch(desktopInput.value);});
-      desktopInput.addEventListener("keydown",function(event){
-        if(event.key==="Enter"){event.preventDefault();openSearch(desktopInput.value);}
-      });
-    }
-
-    if(mobileButton){mobileButton.addEventListener("click",function(){openSearch("");});}
-
-    if(overlayInput){
-      overlayInput.addEventListener("input",function(){
-        clearTimeout(searchTimer);
-        searchTimer=setTimeout(function(){renderSearchResults(overlayInput.value);},70);
-      });
-    }
-
-    if(clearButton){
-      clearButton.addEventListener("click",function(){
-        if(!overlayInput){return;}
-        overlayInput.value="";
-        overlayInput.focus();
-        renderSearchResults("");
-      });
-    }
-
-    if(closeButton){closeButton.addEventListener("click",closeSearch);}
-
-    if(overlay){
-      overlay.addEventListener("click",function(event){if(event.target===overlay){closeSearch();}});
-    }
-
-    document.addEventListener("keydown",function(event){
-      if((event.ctrlKey||event.metaKey)&&String(event.key).toLowerCase()==="k"){
-        event.preventDefault();
-        openSearch("");
-        return;
-      }
-      if(event.key==="Escape"&&overlay&&overlay.classList.contains("open")){closeSearch();}
-    });
   }
 
 
   /* =========================================================
-     INLINE OWNER LOGIN / LOGOUT
-     Opens over the CURRENT page. Never navigates to /login.
+     EVENTS
   ========================================================= */
 
-  function getHeaderAuthElements(){
-    return {
-      action:document.getElementById("ma7alak-header-auth-action"),
-      icon:document.getElementById("ma7alak-header-auth-icon"),
-      main:document.getElementById("ma7alak-header-auth-main"),
-      sub:document.getElementById("ma7alak-header-auth-sub")
-    };
-  }
+  function bindEvents(){
 
-  function setHeaderAuthState(loggedIn){
-    const auth=getHeaderAuthElements();
-    if(!auth.action){return;}
 
-    auth.action.dataset.authState=loggedIn ? "logout" : "login";
-    auth.action.setAttribute("aria-label",loggedIn ? "Logout" : "Login");
+    /* AREA — DYNAMIC BUTTONS */
 
-    if(auth.icon){
-      auth.icon.textContent=loggedIn ? "↩" : "↪";
-    }
+    areaGrid.addEventListener(
+      "click",
+      function(event){
 
-    if(auth.main){
-      auth.main.textContent=loggedIn ? "Logout" : "Login";
-    }
+        const button =
+          event.target.closest(
+            ".ma7alak-area-button"
+          );
 
-    if(auth.sub){
-      auth.sub.textContent=loggedIn
-        ? "Sign out of your shop"
-        : "Shop owner access";
-    }
-  }
-
-  async function refreshHeaderAuthState(){
-    const supabaseClient=getClient();
-
-    if(!supabaseClient){
-      setHeaderAuthState(false);
-      return false;
-    }
-
-    try{
-      const result=await supabaseClient.auth.getSession();
-      const loggedIn=Boolean(
-        result &&
-        result.data &&
-        result.data.session &&
-        result.data.session.user
-      );
-
-      setHeaderAuthState(loggedIn);
-      return loggedIn;
-    }
-    catch(error){
-      console.error("MA7ALAK header auth state:",error);
-      setHeaderAuthState(false);
-      return false;
-    }
-  }
-
-  function clearInlineLoginMessage(){
-    const message=document.getElementById("ma7alak-inline-login-message");
-    if(!message){return;}
-    message.textContent="";
-    message.className="ma7alak-inline-login-message";
-  }
-
-  function showInlineLoginMessage(messageText,type){
-    const message=document.getElementById("ma7alak-inline-login-message");
-    if(!message){return;}
-    message.textContent=String(messageText||"");
-    message.className="ma7alak-inline-login-message "+(type||"error");
-  }
-
-  function setInlineLoginLoading(loading){
-    const button=document.getElementById("ma7alak-inline-login-button");
-    const label=document.getElementById("ma7alak-inline-login-button-text");
-    const spinner=document.getElementById("ma7alak-inline-login-spinner");
-
-    if(button){button.disabled=Boolean(loading);}
-    if(label){label.textContent=loading ? "Signing in..." : "Log In";}
-    if(spinner){spinner.style.display=loading ? "block" : "none";}
-  }
-
-  function openInlineLogin(){
-    const overlay=document.getElementById("ma7alak-login-overlay");
-    const email=document.getElementById("ma7alak-login-email");
-
-    if(!overlay){return;}
-
-    clearInlineLoginMessage();
-    setInlineLoginLoading(false);
-
-    overlay.classList.add("open");
-    overlay.setAttribute("aria-hidden","false");
-
-    document.documentElement.style.overflow="hidden";
-    document.body.style.overflow="hidden";
-
-    setTimeout(function(){
-      if(email){email.focus();}
-    },60);
-  }
-
-  function closeInlineLogin(){
-    const overlay=document.getElementById("ma7alak-login-overlay");
-    if(!overlay){return;}
-
-    overlay.classList.remove("open");
-    overlay.setAttribute("aria-hidden","true");
-
-    document.documentElement.style.overflow="";
-    document.body.style.overflow="";
-  }
-
-  async function verifyInlineShopOwner(userId){
-    const supabaseClient=getClient();
-
-    if(!supabaseClient){
-      return {
-        success:false,
-        error:"Could not connect. Please try again."
-      };
-    }
-
-    try{
-      const ownerResult=await supabaseClient
-        .from("shop_owners")
-        .select("shop_slug")
-        .eq("user_id",userId)
-        .limit(1)
-        .maybeSingle();
-
-      if(
-        ownerResult.error ||
-        !ownerResult.data ||
-        !ownerResult.data.shop_slug
-      ){
-        return {
-          success:false,
-          error:"This account is not linked to a Ma7alak shop."
-        };
-      }
-
-      return {
-        success:true,
-        shop_slug:String(ownerResult.data.shop_slug).trim()
-      };
-    }
-    catch(error){
-      return {
-        success:false,
-        error:"Could not verify your shop. Please try again."
-      };
-    }
-  }
-
-  function setupInlineLogin(){
-    const action=document.getElementById("ma7alak-header-auth-action");
-    const overlay=document.getElementById("ma7alak-login-overlay");
-    const close=document.getElementById("ma7alak-login-close");
-    const form=document.getElementById("ma7alak-inline-login-form");
-    const password=document.getElementById("ma7alak-login-password");
-    const toggle=document.getElementById("ma7alak-login-password-toggle");
-
-    if(action){
-      action.addEventListener("click",async function(event){
-        event.preventDefault();
-        event.stopPropagation();
-
-        const state=action.dataset.authState || "login";
-
-        if(state==="logout"){
-          const supabaseClient=getClient();
-
-          if(!supabaseClient){return;}
-
-          try{
-            await supabaseClient.auth.signOut();
-          }
-          catch(error){
-            console.error("MA7ALAK logout:",error);
-          }
-
-          try{
-            sessionStorage.removeItem("ma7alak_owner_slug");
-            sessionStorage.removeItem("ma7alak_owner_name");
-          }
-          catch(error){}
-
-          hideOwnerProfile();
-          setHeaderAuthState(false);
+        if(!button){
           return;
         }
 
-        openInlineLogin();
-      });
-    }
+        selectedArea =
+          button.dataset.area;
 
-    if(close){
-      close.addEventListener("click",function(event){
-        event.preventDefault();
-        closeInlineLogin();
-      });
-    }
+        selectedCategory =
+          null;
 
-    if(overlay){
-      overlay.addEventListener("click",function(event){
-        if(event.target===overlay){
-          closeInlineLogin();
-        }
-      });
-    }
+        areaButtons =
+          page.querySelectorAll(
+            ".ma7alak-area-button"
+          );
 
-    if(toggle && password){
-      toggle.addEventListener("click",function(event){
-        event.preventDefault();
-
-        const showing=password.type==="text";
-        password.type=showing ? "password" : "text";
-        toggle.setAttribute(
-          "aria-label",
-          showing ? "Show password" : "Hide password"
+        areaButtons.forEach(
+          item => {
+            item.classList.remove(
+              "active"
+            );
+          }
         );
-        toggle.textContent=showing ? "◉" : "◎";
-      });
-    }
 
-    document.addEventListener("keydown",function(event){
-      if(
-        event.key==="Escape" &&
-        overlay &&
-        overlay.classList.contains("open")
-      ){
-        closeInlineLogin();
+        button.classList.add(
+          "active"
+        );
+
+        ma7alakRenderDynamicCategories(
+          selectedArea
+        );
+
+        categorySection.classList.add(
+          "visible"
+        );
+
+        results.classList.remove(
+          "visible"
+        );
+
+        searchInput.value =
+          "";
+
+        searchTerm =
+          "";
+
+        setTimeout(
+          function(){
+            categorySection.scrollIntoView({
+              behavior:"smooth",
+              block:"center"
+            });
+          },
+          80
+        );
+
       }
-    });
+    );
 
-    if(form){
-      form.addEventListener("submit",async function(event){
-        event.preventDefault();
 
-        const email=document.getElementById("ma7alak-login-email");
-        const passwordInput=document.getElementById("ma7alak-login-password");
-        const emailValue=String(email ? email.value : "").trim();
-        const passwordValue=String(passwordInput ? passwordInput.value : "");
+    /* CATEGORY — DYNAMIC BUTTONS */
 
-        clearInlineLoginMessage();
+    categoryGrid.addEventListener(
+      "click",
+      function(event){
 
-        if(!emailValue || !passwordValue){
-          showInlineLoginMessage("Enter your email and password.","error");
+        const button =
+          event.target.closest(
+            ".ma7alak-category-button"
+          );
+
+        if(
+          !button ||
+          !selectedArea
+        ){
           return;
         }
 
-        const supabaseClient=getClient();
+        selectedCategory =
+          button.dataset.category;
 
-        if(!supabaseClient){
-          showInlineLoginMessage("Could not connect. Please try again.","error");
-          return;
-        }
+        categoryButtons =
+          page.querySelectorAll(
+            ".ma7alak-category-button"
+          );
 
-        setInlineLoginLoading(true);
-
-        try{
-          const result=await supabaseClient.auth.signInWithPassword({
-            email:emailValue,
-            password:passwordValue
-          });
-
-          if(result.error){
-            let errorText="Incorrect email or password.";
-
-            if(
-              String(result.error.message||"")
-                .toLowerCase()
-                .includes("email not confirmed")
-            ){
-              errorText="Please confirm your email first.";
-            }
-
-            showInlineLoginMessage(errorText,"error");
-            setInlineLoginLoading(false);
-            return;
+        categoryButtons.forEach(
+          item => {
+            item.classList.remove(
+              "active"
+            );
           }
+        );
 
-          if(!result.data || !result.data.user){
-            showInlineLoginMessage("Login failed. Please try again.","error");
-            setInlineLoginLoading(false);
-            return;
-          }
+        button.classList.add(
+          "active"
+        );
 
-          /* =========================================================
-             ADMIN LOGIN ROUTE
-             ---------------------------------------------------------
-             The authenticated site-admin account skips the shop-owner
-             lookup and is sent directly to the private admin page.
-             Supabase has already verified the email/password above.
-          ========================================================= */
-          const signedInEmail=String(result.data.user.email || "")
+        renderResults();
+
+        setTimeout(
+          function(){
+            results.scrollIntoView({
+              behavior:"smooth",
+              block:"start"
+            });
+          },
+          100
+        );
+
+      }
+    );
+
+
+    /* SEARCH */
+
+    searchInput.addEventListener(
+      "input",
+      function(){
+
+        searchTerm =
+          this.value
             .trim()
             .toLowerCase();
 
-          if(signedInEmail === "hadizeboss89@gmail.com"){
-            try{
-              sessionStorage.removeItem("ma7alak_owner_slug");
-              sessionStorage.removeItem("ma7alak_owner_name");
-            }
-            catch(error){}
 
-            showInlineLoginMessage("Admin login successful. Opening Admin Panel...","success");
-            setHeaderAuthState(true);
-            setInlineLoginLoading(false);
+        if(
+          selectedArea &&
+          selectedCategory
+        ){
 
-            setTimeout(function(){
-              window.location.href="https://ma7alak.com/admin";
-            },350);
-            return;
-          }
+          renderResults();
 
-          const verification=await verifyInlineShopOwner(result.data.user.id);
-
-          if(!verification.success){
-            await supabaseClient.auth.signOut();
-            showInlineLoginMessage(verification.error,"error");
-            setHeaderAuthState(false);
-            setInlineLoginLoading(false);
-            return;
-          }
-
-          try{
-            sessionStorage.setItem("ma7alak_owner_slug",verification.shop_slug);
-          }
-          catch(error){}
-
-          showInlineLoginMessage("Logged in successfully.","success");
-          setHeaderAuthState(true);
-
-          await loadOwnerProfile();
-
-          setInlineLoginLoading(false);
-
-          setTimeout(function(){
-            closeInlineLogin();
-          },500);
         }
-        catch(error){
-          console.error("MA7ALAK inline login:",error);
-          showInlineLoginMessage("Login failed. Please try again.","error");
-          setInlineLoginLoading(false);
-        }
-      });
-    }
-  }
 
-  /* =========================================================
-     REELS NEW-ITEM NOTIFICATION BADGE
-     ---------------------------------------------------------
-     The Reels Embed sends the current Reel IDs to this header.
-     We remember which Reel IDs this visitor has already seen.
-     Any newly-added Reel IDs become the red notification count.
-  ========================================================= */
-
-  const REELS_SEEN_STORAGE_KEY =
-    "ma7alak_seen_reel_fingerprints_v2";
-
-  /*
-     CLEAN BASELINE FOR THIS VERSION.
-     These are the five Reels that already existed when V12 was made.
-     They are treated as old. Any Reel added after this version becomes
-     a notification automatically.
-  */
-  const REELS_BASELINE_V2 = [
-    "masaya-cafe-2::https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4::https://ma7alak.com/masaya-cafe",
-    "zee-tattoo-1::https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4::https://ma7alak.com/Zee-Tattoo&-Piercing",
-    "masaya-cafe-1::https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4::https://ma7alak.com/masaya-cafe",
-    "doze-3ale-1::https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4::https://ma7alak.com/doze-3ale",
-    "doze-3ale-2::https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4::https://ma7alak.com/doze-3ale"
-  ];
-
-  let currentReelIds = [];
-
-  function normalizeReelIds(ids){
-    if(!Array.isArray(ids)){return [];}
-
-    return Array.from(
-      new Set(
-        ids
-          .map(function(id){return String(id || "").trim();})
-          .filter(Boolean)
-      )
-    );
-  }
-
-  function getSeenReelIds(){
-    try{
-      const raw = localStorage.getItem(
-        REELS_SEEN_STORAGE_KEY
-      );
-
-      const parsed = raw ? JSON.parse(raw) : [];
-      return normalizeReelIds(parsed);
-    }
-    catch(error){
-      return [];
-    }
-  }
-
-  function saveSeenReelIds(ids){
-    try{
-      localStorage.setItem(
-        REELS_SEEN_STORAGE_KEY,
-        JSON.stringify(normalizeReelIds(ids))
-      );
-    }
-    catch(error){}
-  }
-
-  function updateReelsBadge(){
-    const badge = document.getElementById(
-      "ma7alak-reels-badge"
-    );
-
-    if(!badge){return;}
-
-    const seenIds = getSeenReelIds();
-
-    /*
-      First run: seed ONLY the known old Reels.
-      Storage access below is guarded so private/restricted browsers
-      can never break Reels opening or badge rendering.
-    */
-    let hasBaseline = false;
-
-    try{
-      hasBaseline =
-        localStorage.getItem(
-          REELS_SEEN_STORAGE_KEY
-        ) !== null;
-    }
-    catch(error){
-      hasBaseline = false;
-    }
-
-    if(!hasBaseline){
-      saveSeenReelIds(REELS_BASELINE_V2);
-    }
-
-    const seenSet = new Set(
-      hasBaseline
-        ? seenIds
-        : normalizeReelIds(REELS_BASELINE_V2)
-    );
-
-    const newCount = currentReelIds.filter(
-      function(id){return !seenSet.has(id);}
-    ).length;
-
-    badge.textContent =
-      newCount > 99 ? "99+" : String(newCount);
-
-    badge.classList.toggle(
-      "visible",
-      newCount > 0
-    );
-
-    const button = document.getElementById(
-      "ma7alak-header-reels"
-    );
-
-    if(button){
-      button.setAttribute(
-        "aria-label",
-        newCount > 0
-          ? "Reels, " + newCount + " new"
-          : "Reels"
-      );
-    }
-  }
-
-  function setCurrentReelIds(ids){
-    const normalized=normalizeReelIds(ids);
-
-    /*
-      Never wipe a valid Reel state with an empty/late response.
-      Hostinger pages can contain several embeds and delayed messages.
-    */
-    if(!normalized.length){
-      return;
-    }
-
-    currentReelIds = normalized;
-    updateReelsBadge();
-  }
-
-  function markCurrentReelsSeen(){
-    if(!currentReelIds.length){return;}
-
-    const seen = new Set(getSeenReelIds());
-
-    currentReelIds.forEach(function(id){
-      seen.add(id);
-    });
-
-    saveSeenReelIds(Array.from(seen));
-    updateReelsBadge();
-  }
-
-  function requestReelsState(){
-    /* Same-document Reels fallback. */
-    const localIds = Array.from(
-      document.querySelectorAll(
-        ".ma7alak-reel[data-reel-id]"
-      )
-    ).map(function(reel){
-
-      const reelId =
-        String(
-          reel.getAttribute("data-reel-id") || ""
-        ).trim();
-
-      const video =
-        reel.querySelector(".ma7alak-video");
-
-      const source =
-        video
-          ? (
-              video.currentSrc ||
-              video.getAttribute("src") ||
-              (
-                video.querySelector("source")
-                  ? video.querySelector("source").getAttribute("src")
-                  : ""
-              ) ||
-              ""
-            )
-          : "";
-
-      const shopUrl =
-        String(
-          reel.getAttribute("data-shop-url") || ""
-        ).trim();
-
-      /*
-        Use a fingerprint, not only data-reel-id.
-        If a Reel is replaced/updated but an old numeric ID is reused,
-        the new media still counts as a new Reel notification.
-      */
-      return [
-        reelId,
-        String(source || "").trim(),
-        shopUrl
-      ].join("::");
-    }).filter(Boolean);
-
-    if(localIds.length && !ma7alakDirectReelsReady){
-      setCurrentReelIds(localIds);
-    }
-
-    const localReels = Array.from(
-      document.querySelectorAll(
-        ".ma7alak-reel[data-reel-id]"
-      )
-    ).map(function(reel){
-      const video = reel.querySelector(".ma7alak-video");
-      const sourceEl = video ? video.querySelector("source") : null;
-      const info = reel.querySelector(".reel-info strong");
-      const iconEl = reel.querySelector(".reel-shop-icon");
-
-      const id = String(reel.getAttribute("data-reel-id") || "").trim();
-      const videoUrl = String(
-        (video && (video.currentSrc || video.getAttribute("src"))) ||
-        (sourceEl && sourceEl.getAttribute("src")) ||
-        ""
-      ).trim();
-
-      if(!id || !videoUrl){return null;}
-
-      return {
-        id:id,
-        shop:String(reel.getAttribute("data-shop-name") || (info ? info.textContent : "") || "").trim(),
-        shopUrl:String(reel.getAttribute("data-shop-url") || "").trim(),
-        icon:String(reel.getAttribute("data-shop-icon") || (iconEl ? iconEl.getAttribute("src") : "") || "").trim(),
-        video:videoUrl
-      };
-    }).filter(Boolean);
-
-    if(localReels.length && !ma7alakDirectReelsReady){
-      setGlobalReelsFromLiveData(localReels);
-    }
-
-    /* Ask every Hostinger Embed iframe for its Reel IDs + full Reel data. */
-    document.querySelectorAll("iframe").forEach(
-      function(frame){
-        try{
-          if(frame.contentWindow){
-            frame.contentWindow.postMessage(
-              {type:"MA7ALAK_REQUEST_REELS_STATE"},
-              "*"
-            );
-          }
-        }
-        catch(error){}
       }
     );
+
+
+    /* CHANGE AREA */
+
+    changeArea.addEventListener(
+      "click",
+      function(){
+
+        selectedArea =
+          null;
+
+
+        selectedCategory =
+          null;
+
+
+        searchTerm =
+          "";
+
+
+        searchInput.value =
+          "";
+
+
+        results.classList.remove(
+          "visible"
+        );
+
+
+        categorySection.classList.remove(
+          "visible"
+        );
+
+
+        categoryGrid.innerHTML =
+          "";
+
+
+        categoryButtons =
+          page.querySelectorAll(
+            ".ma7alak-category-button"
+          );
+
+
+        areaButtons.forEach(
+          item => {
+
+            item.classList.remove(
+              "active"
+            );
+
+          }
+        );
+
+
+        categoryButtons.forEach(
+          item => {
+
+            item.classList.remove(
+              "active"
+            );
+
+          }
+        );
+
+
+        page.querySelector(
+          ".ma7alak-area-grid"
+        ).scrollIntoView({
+
+          behavior:"smooth",
+
+          block:"center"
+
+        });
+
+      }
+    );
+
   }
 
+
   /* =========================================================
-     EXACT REEL OPENING
-     Used by in-site notifications + phone push deep links.
-     Reel ID is the source of truth (never the video URL).
+     RENDER RESULTS
   ========================================================= */
-  let ma7alakPendingExactReelId = null;
 
-  function openGlobalReelById(reelId){
-    const targetId = String(reelId || "").trim();
+  function renderResults(){
 
-    if(!targetId){
+    if(
+      !selectedArea ||
+      !selectedCategory
+    ){
+
+      return;
+
+    }
+
+
+    results.classList.add(
+      "visible"
+    );
+
+
+    const categoryButton =
+      page.querySelector(
+        '.ma7alak-category-button[data-category="' +
+        selectedCategory +
+        '"]'
+      );
+
+
+    let categoryName =
+      categoryButton
+        ? categoryButton.textContent.trim()
+        : "Shops";
+
+
+    let filtered =
+      shops.filter(
+        shop => {
+
+          if(
+            shop.area !== selectedArea
+          ){
+
+            return false;
+
+          }
+
+
+          if(
+            shop.category !== selectedCategory
+          ){
+
+            return false;
+
+          }
+
+
+          if(
+            !searchTerm
+          ){
+
+            return true;
+
+          }
+
+
+          const searchable = (
+
+            shop.name +
+            " " +
+            shop.arabic +
+            " " +
+            shop.area +
+            " " +
+            shop.categoryName +
+            " " +
+            shop.location
+
+          ).toLowerCase();
+
+
+          return searchable.includes(
+            searchTerm
+          );
+
+        }
+      );
+
+
+    resultsKicker.textContent =
+      selectedArea.toUpperCase();
+
+
+    resultsTitle.textContent =
+      categoryName;
+
+
+    resultsSubtitle.textContent =
+      filtered.length +
+      (
+        filtered.length === 1
+          ? " local shop"
+          : " local shops"
+      ) +
+      " found in " +
+      selectedArea;
+
+
+    resultCount.textContent =
+      filtered.length +
+      (
+        filtered.length === 1
+          ? " shop"
+          : " shops"
+      );
+
+
+    shopGrid.innerHTML =
+      "";
+
+
+    if(
+      filtered.length === 0
+    ){
+
+      empty.style.display =
+        "block";
+
+
+      changeArea.classList.add(
+        "visible"
+      );
+
+
+      return;
+
+    }
+
+
+    empty.style.display =
+      "none";
+
+
+    changeArea.classList.add(
+      "visible"
+    );
+
+
+    filtered.forEach(
+      shop => {
+
+        shopGrid.appendChild(
+          createShopCard(shop)
+        );
+
+      }
+    );
+
+  }
+
+
+
+  /* =========================================================
+     LIVE STORIES — SUPABASE
+     ========================================================= */
+
+  const MA7ALAK_SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
+
+  const MA7ALAK_SUPABASE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
+  let ma7alakSupabaseClient =
+    null;
+
+  let ma7alakActiveStoryShops =
+    new Set();
+
+  /*
+   * Story IDs already viewed by this visitor.
+   * Stored locally so a viewed shop does not keep
+   * showing the "new story" animation after opening it.
+   */
+  const MA7ALAK_VIEWED_STORIES_KEY =
+    "ma7alak_viewed_story_ids";
+
+  let ma7alakViewedStoryIds =
+    new Set();
+
+  try{
+    const savedViewedStories =
+      JSON.parse(
+        localStorage.getItem(
+          MA7ALAK_VIEWED_STORIES_KEY
+        ) || "[]"
+      );
+
+    if(Array.isArray(savedViewedStories)){
+      ma7alakViewedStoryIds =
+        new Set(
+          savedViewedStories.map(
+            function(id){
+              return String(id);
+            }
+          )
+        );
+    }
+  }catch(e){}
+
+  function ma7alakSaveViewedStories(){
+    try{
+      localStorage.setItem(
+        MA7ALAK_VIEWED_STORIES_KEY,
+        JSON.stringify(
+          Array.from(ma7alakViewedStoryIds)
+        )
+      );
+    }catch(e){}
+  }
+
+  function ma7alakMarkStoriesViewed(stories){
+    (stories || []).forEach(
+      function(story){
+        if(story && story.id != null){
+          ma7alakViewedStoryIds.add(
+            String(story.id)
+          );
+        }
+      }
+    );
+
+    ma7alakSaveViewedStories();
+  }
+
+  let ma7alakStoryViewer =
+    null;
+
+  let ma7alakStoryItems =
+    [];
+
+  let ma7alakStoryIndex =
+    0;
+
+  let ma7alakStoryTimer =
+    null;
+
+  let ma7alakStoryViewerShop =
+    null;
+
+  let ma7alakStoryChannel =
+    null;
+
+  let ma7alakStoryLoaded =
+    false;
+
+
+  function ma7alakGetSupabaseClient(){
+
+    if(
+      ma7alakSupabaseClient
+    ){
+
+      return ma7alakSupabaseClient;
+
+    }
+
+    if(
+      window.supabase &&
+      typeof window.supabase.createClient === "function"
+    ){
+
+      ma7alakSupabaseClient =
+        window.supabase.createClient(
+          MA7ALAK_SUPABASE_URL,
+          MA7ALAK_SUPABASE_KEY
+        );
+
+      return ma7alakSupabaseClient;
+
+    }
+
+    return null;
+
+  }
+
+
+  function ma7alakLoadSupabase(){
+
+    return new Promise(
+      function(resolve){
+
+        const existing =
+          ma7alakGetSupabaseClient();
+
+        if(existing){
+
+          resolve(existing);
+
+          return;
+
+        }
+
+        const script =
+          document.createElement("script");
+
+        script.src =
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+        script.onload =
+          function(){
+
+            resolve(
+              ma7alakGetSupabaseClient()
+            );
+
+          };
+
+        script.onerror =
+          function(){
+
+            resolve(null);
+
+          };
+
+        document.head.appendChild(
+          script
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     LOAD ACTIVE SHOP DIRECTORY DATA FROM SUPABASE
+  ========================================================= */
+
+  async function ma7alakLoadShopProfiles(){
+
+    const client =
+      await ma7alakLoadSupabase();
+
+    if(!client){
+      console.error(
+        "Ma7alak Shops: Supabase client could not load."
+      );
+      shops = [];
       return false;
     }
 
-    const targetIndex =
-      MA7ALAK_GLOBAL_REELS.findIndex(function(reel){
-        return String(reel && reel.id ? reel.id : "").trim() === targetId;
-      });
+    const { data:categoryRows, error:categoryError } =
+      await client
+        .from("shop_categories")
+        .select("category_key,category_name,icon,is_active")
+        .eq("is_active", true)
+        .order("sort_order", { ascending:true });
 
-    if(targetIndex === -1){
-      /*
-        Keep the exact ID pending and refresh directly from Supabase.
-        The lazy Hostinger Reel iframe is only a fallback if DB refresh
-        is unavailable.
-      */
-      ma7alakPendingExactReelId = targetId;
-
-      loadLiveReelsDirectlyFromDatabase()
-        .then(function(loaded){
-          if(!loaded){
-            try{ requestReelsState(); }catch(error){}
-          }
-        })
-        .catch(function(){
-          try{ requestReelsState(); }catch(error){}
-        });
-
-      return true;
+    if(!categoryError){
+      ma7alakLiveCategoryIcons = new Map(
+        (categoryRows || []).map(row => [
+          String(row.category_key || "").trim(),
+          String(row.icon || "🏪").trim() || "🏪"
+        ])
+      );
     }
 
-    ma7alakPendingExactReelId = null;
-    loadGlobalReel(targetIndex, null);
+    const { data, error } =
+      await client
+        .from("shop_profiles")
+        .select(
+          "shop_slug,shop_name,arabic_name,profile_image_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active"
+        )
+        .eq("is_active", true)
+        .order("shop_name", { ascending:true });
+
+    if(error){
+      console.error(
+        "Ma7alak Shops: could not load shop_profiles.",
+        error
+      );
+      shops = [];
+      return false;
+    }
+
+    shops =
+      (data || [])
+        .filter(
+          function(row){
+            return row && String(row.shop_slug || "").trim();
+          }
+        )
+        .map(
+          function(row){
+
+            const slug =
+              String(row.shop_slug || "").trim();
+
+            return {
+              id:slug,
+              name:String(row.shop_name || slug).trim(),
+              arabic:String(row.arabic_name || "").trim(),
+              city:String(row.city || "").trim(),
+              area:String(row.area || "").trim(),
+              category:String(row.category || "").trim(),
+              categoryName:String(row.category_name || "").trim(),
+              location:String(row.location || "").trim(),
+              image:String(row.profile_image_url || "").trim(),
+              url:String(
+                row.shop_url ||
+                ("https://ma7alak.com/" + encodeURIComponent(slug))
+              ).trim(),
+              verified:row.verified === true,
+              featured:row.featured === true,
+              redFeatured:row.featured_red === true
+            };
+
+          }
+        );
+
     return true;
   }
 
-  /* Direct API for notifications.js on the same page. */
-  window.ma7alakOpenExactReel = openGlobalReelById;
-
-  /* Event fallback so scripts do not depend on load order. */
-  window.addEventListener(
-    "MA7ALAK_OPEN_EXACT_REEL",
-    function(event){
-      const reelId =
-        event && event.detail
-          ? event.detail.reelId
-          : "";
-      openGlobalReelById(reelId);
-    }
-  );
 
 
-  /* =========================================================
-     DIRECT LIVE REELS FROM SUPABASE
-     ---------------------------------------------------------
-     Lightweight fix for Hostinger lazy-loaded Reels embeds:
-     - No polling loop added.
-     - Reads shop_reels only when needed.
-     - Header Reel button no longer depends on scrolling to the
-       Reels section before it knows the current active catalog.
-     - Deleted/inactive Reels disappear immediately on next open.
-  ========================================================= */
+  let ma7alakDirectoryRealtimeChannel = null;
+  let ma7alakDirectoryRefreshTimer = null;
 
-  let ma7alakLiveReelsLoadPromise = null;
-  let ma7alakDirectReelsReady = false;
-  let ma7alakReelsRealtimeChannel = null;
+  async function ma7alakRefreshDirectoryLive(){
+    clearTimeout(ma7alakDirectoryRefreshTimer);
+    ma7alakDirectoryRefreshTimer = setTimeout(async function(){
+      const oldArea = selectedArea;
+      const oldCategory = selectedCategory;
+      const ok = await ma7alakLoadShopProfiles();
+      if(!ok) return;
+      ma7alakRenderDynamicAreas();
 
-  async function loadLiveReelsDirectlyFromDatabase(){
-    if(ma7alakLiveReelsLoadPromise){
-      return ma7alakLiveReelsLoadPromise;
-    }
+      if(oldArea && shops.some(s => s.area === oldArea)){
+        selectedArea = oldArea;
+        const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
+        if(btn) btn.classList.add("active");
+        ma7alakRenderDynamicCategories(oldArea);
+        categorySection.classList.add("visible");
 
-    ma7alakLiveReelsLoadPromise = (async function(){
-      const supabaseClient=getClient();
-
-      if(!supabaseClient){
-        return false;
-      }
-
-      try{
-        const result=await supabaseClient
-          .from("shop_reels")
-          .select(
-            "reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,sort_order,active,created_at"
-          )
-          .eq("active",true)
-          .order("created_at",{ascending:false});
-
-        if(result.error){
-          throw result.error;
+        if(oldCategory && shops.some(s=>s.area===oldArea && s.category===oldCategory)){
+          selectedCategory = oldCategory;
+          const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
+          if(cbtn) cbtn.classList.add("active");
+          renderResults();
+        }else{
+          selectedCategory = null;
+          results.classList.remove("visible");
         }
-
-        /*
-          From this moment the database is the source of truth.
-          Old/lazy iframe messages are no longer allowed to overwrite
-          the current Reel list, badge state, shop URL or video URL.
-        */
-        ma7alakDirectReelsReady = true;
-
-        const rows=Array.isArray(result.data)
-          ? result.data
-          : [];
-
-        /*
-          IMPORTANT:
-          An empty successful result must also clear the old hardcoded
-          fallback catalog. Otherwise deleted Reels could remain playable.
-        */
-        if(!rows.length){
-          MA7ALAK_GLOBAL_REELS=[];
-          currentReelIds=[];
-          updateReelsBadge();
-          return true;
-        }
-
-        const liveReels=rows
-          .map(function(row){
-            if(!row){return null;}
-
-            const id=String(row.reel_id||"").trim();
-            const video=String(row.video_url||"").trim();
-            const slug=String(row.shop_slug||"").trim();
-
-            if(!id || !video){
-              return null;
-            }
-
-            return {
-              id:id,
-              shop:String(
-                row.shop_name ||
-                prettyShopName(slug)
-              ).trim(),
-              shopUrl:String(
-                row.shop_url ||
-                (slug ? "https://ma7alak.com/"+encodeURIComponent(slug) : "")
-              ).trim(),
-              icon:String(row.shop_icon||"").trim(),
-              video:video
-            };
-          })
-          .filter(Boolean);
-
-        if(!liveReels.length){
-          MA7ALAK_GLOBAL_REELS=[];
-          currentReelIds=[];
-          updateReelsBadge();
-          return true;
-        }
-
-        setGlobalReelsFromLiveData(liveReels);
-
-        /*
-          Keep the existing Reel badge/fingerprint system compatible
-          with the current iframe version.
-        */
-        setCurrentReelIds(
-          liveReels.map(function(reel){
-            return [
-              reel.id,
-              reel.video,
-              reel.shopUrl
-            ].join("::");
-          })
-        );
-
-        return true;
+      }else{
+        selectedArea = null;
+        selectedCategory = null;
+        categorySection.classList.remove("visible");
+        results.classList.remove("visible");
       }
-      catch(error){
-        /*
-          Safe fallback:
-          if Supabase is temporarily unavailable, leave the currently
-          loaded catalog untouched so the Reel button still works.
-        */
-        console.error(
-          "MA7ALAK direct live Reels:",
-          error
-        );
+    },80);
+  }
 
-        return false;
-      }
-      finally{
-        ma7alakLiveReelsLoadPromise=null;
-      }
-    })();
-
-    return ma7alakLiveReelsLoadPromise;
+  async function ma7alakStartDirectoryRealtime(){
+    const client = await ma7alakLoadSupabase();
+    if(!client || ma7alakDirectoryRealtimeChannel) return;
+    ma7alakDirectoryRealtimeChannel = client
+      .channel("ma7alak-live-directory-v2")
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},ma7alakRefreshDirectoryLive)
+      .subscribe();
   }
 
 
-  function startDirectReelsRealtime(){
-    const supabaseClient=getClient();
-    if(!supabaseClient){return;}
+  function ma7alakSetStoryRing(
+    shopSlug,
+    active
+  ){
 
-    if(ma7alakReelsRealtimeChannel){
-      return;
-    }
+    const rings =
+      page.querySelectorAll(
+        '.ma7alak-shop-image-ring[data-shop-slug="' +
+        CSS.escape(shopSlug) +
+        '"]'
+      );
 
-    try{
-      ma7alakReelsRealtimeChannel =
-        supabaseClient
-          .channel("ma7alak-header-live-shop-reels")
-          .on(
-            "postgres_changes",
-            {
-              event:"*",
-              schema:"public",
-              table:"shop_reels"
-            },
-            function(){
-              loadLiveReelsDirectlyFromDatabase().catch(function(){});
-            }
-          )
-          .subscribe();
-    }
-    catch(error){
-      console.error("MA7ALAK header Reels realtime:",error);
-    }
+    rings.forEach(
+      function(ring){
+
+        ring.classList.toggle(
+          "ma7alak-has-story",
+          !!active
+        );
+
+      }
+    );
+
   }
 
 
+  function ma7alakRefreshStoryRings(){
 
-  function setGlobalReelsFromLiveData(reels){
-    if(!Array.isArray(reels) || !reels.length){
+    ma7alakActiveStoryShops.forEach(
+      function(slug){
+
+        ma7alakSetStoryRing(
+          slug,
+          true
+        );
+
+      }
+    );
+
+  }
+
+
+  async function ma7alakLoadActiveStoryShops(){
+
+    const client =
+      ma7alakGetSupabaseClient();
+
+    if(!client){
+
       return;
+
     }
 
-    const normalized = reels
-      .map(function(reel){
-        if(!reel){return null;}
+    const now =
+      new Date().toISOString();
 
-        const id = String(reel.id || "").trim();
-        const video = String(reel.video || "").trim();
+    const result =
+      await client
+        .from("shop_stories")
+        .select(
+          "shop_slug,id,expires_at,created_at"
+        )
+        .gt(
+          "expires_at",
+          now
+        );
 
-        if(!id || !video){
-          return null;
+    if(result.error){
+
+      console.warn(
+        "Ma7alak stories:",
+        result.error
+      );
+
+      return;
+
+    }
+
+    ma7alakActiveStoryShops =
+      new Set(
+        (result.data || [])
+          .filter(
+            function(row){
+              return row &&
+                row.shop_slug &&
+                !ma7alakViewedStoryIds.has(
+                  String(row.id)
+                );
+            }
+          )
+          .map(
+            function(row){
+              return row.shop_slug;
+            }
+          )
+          .filter(Boolean)
+      );
+
+    ma7alakStoryLoaded =
+      true;
+
+    page
+      .querySelectorAll(
+        ".ma7alak-shop-image-ring.ma7alak-has-story"
+      )
+      .forEach(
+        function(ring){
+          ring.classList.remove(
+            "ma7alak-has-story"
+          );
         }
+      );
 
-        return {
-          id:id,
-          shop:String(reel.shop || "").trim(),
-          shopUrl:String(reel.shopUrl || "").trim(),
-          icon:String(reel.icon || "").trim(),
-          video:video
-        };
-      })
-      .filter(Boolean);
+    ma7alakRefreshStoryRings();
 
-    if(!normalized.length){
+  }
+
+
+  async function ma7alakOpenShopStories(
+    shop,
+    targetStoryId
+  ){
+
+    const client =
+      ma7alakGetSupabaseClient();
+
+    if(!client){
+
       return;
+
     }
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    ma7alakStoryViewerShop =
+      shop;
+
+    if(!ma7alakStoryViewer){
+
+      ma7alakCreateStoryViewer();
+
+    }
+
+    ma7alakStoryViewer.classList.add(
+      "visible"
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+
+    if(document.body){
+
+      document.body.style.overflow =
+        "hidden";
+
+    }
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-loading"
+      )
+      .classList.add(
+        "visible"
+      );
+
+    const now =
+      new Date().toISOString();
+
+    const result =
+      await client
+        .from("shop_stories")
+        .select(
+          "id,shop_slug,media_type,storage_path,expires_at,created_at"
+        )
+        .eq(
+          "shop_slug",
+          shop.id
+        )
+        .gt(
+          "expires_at",
+          now
+        )
+        .order(
+          "created_at",
+          {
+            ascending:true
+          }
+        );
+
+    if(result.error){
+
+      console.warn(
+        "Ma7alak story viewer:",
+        result.error
+      );
+
+      ma7alakCloseStoryViewer();
+
+      return;
+
+    }
+
+    ma7alakStoryItems =
+      result.data || [];
 
     /*
-      Replace the old hardcoded viewer catalog with the LIVE Reel panel.
-      This means every Reel added to the panel automatically becomes
-      available in the header Reel player too.
-    */
-    MA7ALAK_GLOBAL_REELS = normalized;
+     * Opening the story means the visitor has seen it.
+     * Mark the current active stories as viewed immediately
+     * so the ring stops pulsing without needing a refresh.
+     */
+    ma7alakMarkStoriesViewed(
+      ma7alakStoryItems
+    );
 
-    if(ma7alakGlobalReelIndex >= MA7ALAK_GLOBAL_REELS.length){
-      ma7alakGlobalReelIndex = 0;
-    }
+    ma7alakActiveStoryShops.delete(
+      shop.id
+    );
 
-    /* If a notification/deep link arrived before the live catalog,
-       open the exact Reel now that the catalog is ready. */
-    if(ma7alakPendingExactReelId){
-      const pendingId = ma7alakPendingExactReelId;
-      setTimeout(function(){
-        openGlobalReelById(pendingId);
-      },0);
-    }
-  }
+    ma7alakSetStoryRing(
+      shop.id,
+      false
+    );
 
+    if(
+      ma7alakStoryItems.length === 0
+    ){
 
-  window.addEventListener(
-    "message",
-    function(event){
-      if(
-        !event.data ||
-        event.data.type !== "MA7ALAK_REELS_STATE"
-      ){
-        return;
-      }
-
-      /*
-        Once direct Supabase data has loaded, ignore Reel catalog/state
-        coming from Hostinger's lazy iframe. That iframe can be stale
-        before it scrolls into view and was the reason old/deleted Reels
-        and old shop URLs came back.
-      */
-      if(ma7alakDirectReelsReady){
-        return;
-      }
-
-      setCurrentReelIds(
-        event.data.reelIds || []
+      ma7alakActiveStoryShops.delete(
+        shop.id
       );
 
-      setGlobalReelsFromLiveData(
-        event.data.reels || []
-      );
-    }
-  );
-
-  function setupHeaderMenu(){
-
-    const button =
-      document.getElementById(
-        "ma7alak-header-menu-button"
+      ma7alakSetStoryRing(
+        shop.id,
+        false
       );
 
-    const panel =
-      document.getElementById(
-        "ma7alak-header-menu-panel"
-      );
+      ma7alakCloseStoryViewer();
 
-    if(!button || !panel){
       return;
-    }
-
-    function setMenuOpen(open){
-
-      const shouldOpen =
-        Boolean(open);
-
-      button.classList.toggle(
-        "open",
-        shouldOpen
-      );
-
-      panel.classList.toggle(
-        "open",
-        shouldOpen
-      );
-
-      button.setAttribute(
-        "aria-expanded",
-        shouldOpen ? "true" : "false"
-      );
-
-      panel.setAttribute(
-        "aria-hidden",
-        shouldOpen ? "false" : "true"
-      );
 
     }
 
-    button.addEventListener(
-      "click",
-      function(event){
+    ma7alakStoryIndex =
+      0;
 
-        event.preventDefault();
-        event.stopPropagation();
+    if(
+      targetStoryId !== undefined &&
+      targetStoryId !== null &&
+      String(targetStoryId).trim() !== ""
+    ){
 
-        setMenuOpen(
-          !panel.classList.contains(
-            "open"
-          )
+      const targetIndex =
+        ma7alakStoryItems.findIndex(
+          function(item){
+            return String(item.id) === String(targetStoryId);
+          }
         );
 
+      if(targetIndex !== -1){
+        ma7alakStoryIndex = targetIndex;
       }
-    );
+    }
 
-    panel.addEventListener(
-      "click",
-      function(event){
-        event.stopPropagation();
-      }
-    );
+    ma7alakRenderStoryViewer();
 
-    document.addEventListener(
-      "click",
-      function(){
-        setMenuOpen(false);
-      }
-    );
+  }
 
-    document.addEventListener(
-      "keydown",
-      function(event){
 
-        if(event.key === "Escape"){
-          setMenuOpen(false);
-        }
+  function ma7alakStoryURL(
+    storagePath
+  ){
 
-      }
-    );
-
-    window.addEventListener(
-      "scroll",
-      function(){
-        setMenuOpen(false);
-      },
-      {passive:true}
+    return (
+      MA7ALAK_SUPABASE_URL +
+      "/storage/v1/object/public/shop-stories/" +
+      storagePath
     );
 
   }
 
 
+  function ma7alakCreateStoryViewer(){
 
-  /* =========================================================
-     GLOBAL REELS VIEWER INJECTION
-     ---------------------------------------------------------
-     V22 FIX:
-     Hostinger Global Custom Code must not depend on raw HTML
-     placed outside the JavaScript block. The stable header itself
-     already follows this rule. So the Reel viewer and its CSS are
-     now injected into the real top-level document.body/head by JS.
-  ========================================================= */
-
-  function injectGlobalReelViewer(){
-    if(
-      document.getElementById(
-        "ma7alakGlobalReelViewer"
-      )
-    ){
-      return;
-    }
-
-    if(
-      !document.getElementById(
-        "ma7alak-global-reel-viewer-style"
-      )
-    ){
-      const style =
-        document.createElement("style");
-
-      style.id =
-        "ma7alak-global-reel-viewer-style";
-
-      style.textContent = `
-#ma7alakGlobalReelViewer{
-    position:fixed;
-    inset:0;
-    width:100vw;
-    height:100dvh;
-    background:#000;
-    z-index:2147483646;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    touch-action:none;
-  }
-
-  #ma7alakGlobalReelViewer.open{
-    display:flex;
-  }
-
-  #ma7alakGlobalReelVideo{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    max-width:100vw;
-    max-height:100dvh;
-    object-fit:contain!important;
-    object-position:center!important;
-    background:#000;
-    opacity:0;
-    transform:translate3d(0,0,0) scale(.985);
-    transition:
-      opacity .22s ease,
-      transform .32s cubic-bezier(.2,.8,.2,1);
-  }
-
-  #ma7alakGlobalReelVideo.ready{
-    opacity:1;
-    transform:translate3d(0,0,0) scale(1);
-  }
-
-  #ma7alakGlobalReelShop{
-    position:absolute;
-    top:max(22px,env(safe-area-inset-top));
-    left:max(18px,env(safe-area-inset-left));
-    z-index:5;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(12,12,14,.62);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    color:#fff;
-    border-radius:999px;
-    padding:7px 12px 7px 7px;
-    cursor:pointer;
-    box-shadow:0 10px 34px rgba(0,0,0,.3);
-  }
-
-  #ma7alakGlobalReelShopIcon{
-    width:38px;
-    height:38px;
-    border-radius:50%;
-    object-fit:cover;
-    border:1px solid rgba(226,180,91,.55);
-    background:#111;
-  }
-
-  .ma7alak-global-reel-shop-text{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    line-height:1.12;
-  }
-
-  .ma7alak-global-reel-shop-text strong{
-    color:#fff;
-    font-size:13px;
-    font-weight:800;
-  }
-
-  .ma7alak-global-reel-shop-text small{
-    color:rgba(255,255,255,.62);
-    font-size:10px;
-    margin-top:3px;
-  }
-
-  .ma7alak-global-reel-shop-arrow{
-    color:#e2b45b;
-    font-size:18px;
-    font-weight:900;
-  }
-
-  #ma7alakGlobalReelClose,
-  #ma7alakGlobalReelFavorite,
-  #ma7alakGlobalReelPrev,
-  #ma7alakGlobalReelNext{
-    position:absolute;
-    z-index:6;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(12,12,14,.58);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    color:#fff;
-    cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-  }
-
-  #ma7alakGlobalReelClose{
-    top:max(24px,env(safe-area-inset-top));
-    right:max(18px,env(safe-area-inset-right));
-    width:44px;
-    height:44px;
-    border-radius:50%;
-    font-size:31px;
-    line-height:1;
-  }
-
-  #ma7alakGlobalReelFavorite{
-    right:max(18px,env(safe-area-inset-right));
-    bottom:calc(max(82px,env(safe-area-inset-bottom)) + 8px);
-    width:48px;
-    height:48px;
-    border-radius:50%;
-    font-size:28px;
-    color:#f2c96c;
-    padding:0 0 3px 0!important;
-    line-height:1!important;
-    text-align:center;
-  }
-
-  #ma7alakGlobalReelFavorite.active{
-    background:rgba(217,164,65,.19);
-    border-color:rgba(226,180,91,.55);
-  }
-
-  #ma7alakGlobalReelPrev,
-  #ma7alakGlobalReelNext{
-    right:max(18px,env(safe-area-inset-right));
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    font-size:25px;
-  }
-
-  #ma7alakGlobalReelPrev{
-    top:42%;
-  }
-
-  #ma7alakGlobalReelNext{
-    top:calc(42% + 54px);
-  }
-
-
-  /* V23 phone-first: swipe only, no up/down arrow controls. */
-  #ma7alakGlobalReelPrev,
-  #ma7alakGlobalReelNext{
-    display:none!important;
-  }
-
-  .ma7alak-global-reel-hint{
-    position:absolute;
-    left:50%;
-    bottom:max(22px,env(safe-area-inset-bottom));
-    transform:translateX(-50%);
-    z-index:5;
-    color:rgba(255,255,255,.68);
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:.2px;
-    background:rgba(0,0,0,.32);
-    border:1px solid rgba(255,255,255,.08);
-    padding:7px 12px;
-    border-radius:999px;
-    pointer-events:none;
-  }
-
-  @media (max-width:700px){
-    #ma7alakGlobalReelVideo{
-      object-fit:contain!important;
-      object-position:center!important;
-      width:100%!important;
-      height:100%!important;
-      max-width:100vw!important;
-      max-height:100dvh!important;
-    }
-
-    #ma7alakGlobalReelShop{
-      top:max(16px,env(safe-area-inset-top));
-      left:max(12px,env(safe-area-inset-left));
-      max-width:calc(100vw - 88px);
-    }
-
-    #ma7alakGlobalReelClose{
-      top:max(16px,env(safe-area-inset-top));
-      right:max(12px,env(safe-area-inset-right));
-    }
-
-    #ma7alakGlobalReelFavorite,
-    #ma7alakGlobalReelPrev,
-    #ma7alakGlobalReelNext{
-      right:max(12px,env(safe-area-inset-right));
-    }
-
-    #ma7alakGlobalReelPrev{
-      top:43%;
-    }
-
-    #ma7alakGlobalReelNext{
-      top:calc(43% + 52px);
-    }
-  }
-      `;
-
-      document.head.appendChild(style);
-    }
-
-    const holder =
+    ma7alakStoryViewer =
       document.createElement("div");
 
-    holder.id =
-      "ma7alak-global-reel-viewer-root";
+    ma7alakStoryViewer.className =
+      "ma7alak-story-viewer";
 
-    holder.innerHTML = `
-<div id="ma7alakGlobalReelViewer" aria-hidden="true">
-  <button id="ma7alakGlobalReelShop" type="button">
-    <img id="ma7alakGlobalReelShopIcon" src="" alt="">
-    <span class="ma7alak-global-reel-shop-text">
-      <strong id="ma7alakGlobalReelShopName">Shop</strong>
-      <small>View shop</small>
-    </span>
-    <span class="ma7alak-global-reel-shop-arrow">→</span>
-  </button>
+    ma7alakStoryViewer.innerHTML = `
 
-  <button id="ma7alakGlobalReelClose" type="button" aria-label="Close">×</button>
-  <button id="ma7alakGlobalReelFavorite" type="button" aria-label="Add to favorites">☆</button>
+      <div
+        class="ma7alak-story-viewer-backdrop"
+      ></div>
 
-  <video
-    id="ma7alakGlobalReelVideo"
-    playsinline
-    webkit-playsinline
-    loop
-    preload="metadata"
-  ></video>
+      <div
+        class="ma7alak-story-viewer-shell"
+      >
 
-  <div class="ma7alak-global-reel-hint">Swipe</div>
-</div>
+        <div
+          class="ma7alak-story-viewer-progress"
+        ></div>
+
+        <div
+          class="ma7alak-story-viewer-top"
+        >
+
+          <a
+            class="ma7alak-story-viewer-shop"
+            href="#"
+            aria-label="Open shop"
+          >
+
+            <img
+              class="ma7alak-story-viewer-shop-image"
+              alt=""
+            >
+
+            <div
+              class="ma7alak-story-viewer-shop-name"
+            ></div>
+
+          </a>
+
+          <button
+            type="button"
+            class="ma7alak-story-viewer-close"
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div
+          class="ma7alak-story-viewer-media"
+        ></div>
+
+        <button
+          type="button"
+          class="ma7alak-story-viewer-tap-left"
+          aria-label="Previous story"
+        ></button>
+
+        <button
+          type="button"
+          class="ma7alak-story-viewer-tap-right"
+          aria-label="Next story"
+        ></button>
+
+        <div
+          class="ma7alak-story-viewer-loading"
+        ></div>
+
+      </div>
+
     `;
 
-    document.body.appendChild(holder);
+    document.body.appendChild(
+      ma7alakStoryViewer
+    );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-backdrop"
+      )
+      .addEventListener(
+        "click",
+        ma7alakCloseStoryViewer
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-close"
+      )
+      .addEventListener(
+        "click",
+        ma7alakCloseStoryViewer
+      );
+
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-shop"
+      )
+      .addEventListener(
+        "click",
+        function(event){
+          event.stopPropagation();
+
+          const shop =
+            ma7alakStoryViewerShop;
+
+          if(!shop){
+            event.preventDefault();
+            return;
+          }
+
+          const shopUrl =
+            String(
+              shop.url ||
+              (shop.id
+                ? "https://ma7alak.com/" + encodeURIComponent(shop.id)
+                : "")
+            ).trim();
+
+          if(!shopUrl){
+            event.preventDefault();
+            return;
+          }
+
+          this.href = shopUrl;
+        }
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-tap-left"
+      )
+      .addEventListener(
+        "click",
+        function(){
+          ma7alakPreviousStory();
+        }
+      );
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-tap-right"
+      )
+      .addEventListener(
+        "click",
+        function(){
+          ma7alakNextStory();
+        }
+      );
+
+  }
+
+
+  function ma7alakRenderStoryViewer(){
+
+    if(
+      !ma7alakStoryViewer ||
+      !ma7alakStoryItems.length
+    ){
+
+      return;
+
+    }
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    const story =
+      ma7alakStoryItems[
+        ma7alakStoryIndex
+      ];
+
+    const progress =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-progress"
+      );
+
+    progress.innerHTML =
+      ma7alakStoryItems
+        .map(
+          function(item,index){
+
+            return `
+              <div
+                class="
+                  ma7alak-story-progress-item
+                  ${index < ma7alakStoryIndex ? "done" : ""}
+                  ${index === ma7alakStoryIndex ? "current" : ""}
+                "
+              ></div>
+            `;
+
+          }
+        )
+        .join("");
+
+    const shopImage =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-shop-image"
+      );
+
+    shopImage.src =
+      ma7alakStoryViewerShop.image;
+
+    shopImage.alt =
+      ma7alakStoryViewerShop.name;
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-shop-name"
+      )
+      .textContent =
+      ma7alakStoryViewerShop.name;
+
+    const storyShopLink =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-shop"
+      );
+
+    if(storyShopLink){
+      storyShopLink.href =
+        String(
+          ma7alakStoryViewerShop.url ||
+          (ma7alakStoryViewerShop.id
+            ? "https://ma7alak.com/" +
+              encodeURIComponent(
+                ma7alakStoryViewerShop.id
+              )
+            : "#")
+        );
+    }
+
+    const media =
+      ma7alakStoryViewer.querySelector(
+        ".ma7alak-story-viewer-media"
+      );
+
+    media.innerHTML =
+      "";
+
+    ma7alakStoryViewer
+      .querySelector(
+        ".ma7alak-story-viewer-loading"
+      )
+      .classList.remove(
+        "visible"
+      );
+
+    const url =
+      ma7alakStoryURL(
+        story.storage_path
+      );
+
+    if(
+      story.media_type === "video"
+    ){
+
+      const video =
+        document.createElement("video");
+
+      video.src =
+        url;
+
+      video.autoplay =
+        true;
+
+      video.playsInline =
+        true;
+
+      video.controls =
+        false;
+
+      video.muted =
+        false;
+
+      video.preload =
+        "auto";
+
+      video.setAttribute(
+        "playsinline",
+        ""
+      );
+
+      video.setAttribute(
+        "webkit-playsinline",
+        ""
+      );
+
+      video.addEventListener(
+        "ended",
+        function(){
+
+          ma7alakNextStory();
+
+        }
+      );
+
+      video.addEventListener(
+        "waiting",
+        function(){
+
+          ma7alakStoryViewer
+            .querySelector(
+              ".ma7alak-story-viewer-loading"
+            )
+            .classList.add(
+              "visible"
+            );
+
+        }
+      );
+
+      video.addEventListener(
+        "playing",
+        function(){
+
+          ma7alakStoryViewer
+            .querySelector(
+              ".ma7alak-story-viewer-loading"
+            )
+            .classList.remove(
+              "visible"
+            );
+
+        }
+      );
+
+      media.appendChild(
+        video
+      );
+
+      video.play()
+        .catch(
+          function(){
+
+            /*
+             * Some mobile browsers block
+             * unmuted autoplay. In that case
+             * the user can tap the story and
+             * playback will start normally.
+             */
+
+          }
+        );
+
+    }else{
+
+      const image =
+        document.createElement("img");
+
+      image.src =
+        url;
+
+      image.alt =
+        ma7alakStoryViewerShop.name;
+
+      image.addEventListener(
+        "load",
+        function(){
+
+          ma7alakStoryTimer =
+            setTimeout(
+              ma7alakNextStory,
+              5000
+            );
+
+        }
+      );
+
+      media.appendChild(
+        image
+      );
+
+    }
+
+    const currentProgress =
+      progress.querySelector(
+        ".current"
+      );
+
+    if(currentProgress){
+
+      if(
+        story.media_type === "image"
+      ){
+
+        currentProgress
+          .style
+          .setProperty(
+            "transition",
+            "transform 5s linear"
+          );
+
+        currentProgress
+          .style
+          .setProperty(
+            "transform-origin",
+            "left center"
+          );
+
+        currentProgress
+          .style
+          .setProperty(
+            "transform",
+            "scaleX(1)"
+          );
+
+      }else{
+
+        const video =
+          media.querySelector(
+            "video"
+          );
+
+        if(video){
+
+          const updateProgress =
+            function(){
+
+              if(
+                video.duration &&
+                isFinite(video.duration)
+              ){
+
+                currentProgress.style
+                  .width =
+                  (
+                    video.currentTime /
+                    video.duration *
+                    100
+                  ) +
+                  "%";
+
+              }
+
+            };
+
+          video.addEventListener(
+            "timeupdate",
+            updateProgress
+          );
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  function ma7alakNextStory(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryIndex <
+      ma7alakStoryItems.length - 1
+    ){
+
+      ma7alakStoryIndex++;
+
+      ma7alakRenderStoryViewer();
+
+      return;
+
+    }
+
+    /*
+     * We reached the end.
+     * The shop's active story ring stops.
+     */
+    ma7alakActiveStoryShops.delete(
+      ma7alakStoryViewerShop.id
+    );
+
+    ma7alakSetStoryRing(
+      ma7alakStoryViewerShop.id,
+      false
+    );
+
+    ma7alakCloseStoryViewer();
+
+  }
+
+
+  function ma7alakPreviousStory(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryIndex > 0
+    ){
+
+      ma7alakStoryIndex--;
+
+      ma7alakRenderStoryViewer();
+
+    }
+
+  }
+
+
+  function ma7alakCloseStoryViewer(){
+
+    clearTimeout(
+      ma7alakStoryTimer
+    );
+
+    if(
+      ma7alakStoryViewer
+    ){
+
+      const video =
+        ma7alakStoryViewer.querySelector(
+          "video"
+        );
+
+      if(video){
+
+        video.pause();
+
+      }
+
+      ma7alakStoryViewer.classList.remove(
+        "visible"
+      );
+
+    }
+
+    document.documentElement.style.overflow =
+      "";
+
+    if(document.body){
+
+      document.body.style.overflow =
+        "";
+
+    }
+
+  }
+
+
+  function ma7alakBindStoryCardClicks(){
+
+    if(!shopGrid){
+
+      return;
+
+    }
+
+    if(
+      shopGrid.dataset.storyClickBound === "1"
+    ){
+
+      return;
+
+    }
+
+    shopGrid.dataset.storyClickBound =
+      "1";
+
+    /* Capture the click before any link/navigation handler can follow the shop URL. */
+    shopGrid.addEventListener(
+      "click",
+      function(event){
+
+        const link =
+          event.target.closest(
+            ".ma7alak-shop-image-link"
+          );
+
+        if(!link){
+
+          return;
+
+        }
+
+        const ring =
+          link.querySelector(
+            ".ma7alak-shop-image-ring"
+          );
+
+        if(
+          !ring ||
+          !ring.classList.contains(
+            "ma7alak-has-story"
+          )
+        ){
+
+          return;
+
+        }
+
+        const slug =
+          ring.dataset.shopSlug;
+
+        const shop =
+          shops.find(
+            function(item){
+              return item.id === slug;
+            }
+          );
+
+        if(!shop){
+
+          return;
+
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        ma7alakOpenShopStories(
+          shop
+        );
+
+      }
+    );
+
+  }
+
+  /* =========================================================
+     STORY RING CLICK — HARD NAVIGATION OVERRIDE
+     If a shop has a live story, tapping its ring opens
+     the story viewer instead of navigating to the shop page.
+  ========================================================= */
+  document.addEventListener(
+    "click",
+    function(event){
+
+      const link =
+        event.target.closest &&
+        event.target.closest(
+          ".ma7alak-shop-image-link"
+        );
+
+      if(!link){
+        return;
+      }
+
+      const ring =
+        link.querySelector(
+          ".ma7alak-shop-image-ring"
+        );
+
+      if(!ring || !ring.classList.contains("ma7alak-has-story")){
+        return;
+      }
+
+      const slug =
+        ring.dataset.shopSlug;
+
+      const shop =
+        shops.find(function(item){
+          return String(item.id) === String(slug);
+        });
+
+      if(!shop){
+        return;
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      ma7alakOpenShopStories(shop);
+
+    },
+    true
+  );
+
+
+  function ma7alakOpenStoryFromURL(){
+
+    const params = new URLSearchParams(window.location.search);
+    const storyId = params.get("story");
+    const shopSlug = params.get("shop");
+
+    if(!storyId || !shopSlug){
+      return;
+    }
+
+    const shop = shops.find(function(item){
+      return String(item.id) === String(shopSlug);
+    });
+
+    if(!shop){
+      return;
+    }
+
+    ma7alakOpenShopStories(shop, storyId);
+
+  }
+
+
+  async function ma7alakStartStorySystem(){
+
+    const client =
+      await ma7alakLoadSupabase();
+
+    if(!client){
+
+      return;
+
+    }
+
+    await ma7alakLoadActiveStoryShops();
+
+    ma7alakBindStoryCardClicks();
+
+    /* Push notification: open exact Story from URL. */
+    ma7alakOpenStoryFromURL();
+
+    if(
+      ma7alakStoryChannel
+    ){
+
+      try{
+        await client.removeChannel(
+          ma7alakStoryChannel
+        );
+      }catch(e){}
+
+    }
+
+    ma7alakStoryChannel =
+      client
+        .channel(
+          "ma7alak-shops-live-stories"
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"shop_stories"
+          },
+          function(payload){
+
+            const row =
+              payload.new;
+
+            if(
+              !row ||
+              !row.shop_slug
+            ){
+
+              return;
+
+            }
+
+            const expires =
+              new Date(
+                row.expires_at
+              ).getTime();
+
+            if(
+              expires <= Date.now()
+            ){
+
+              return;
+
+            }
+
+            /*
+             * A newly inserted story has a new ID, so it is
+             * automatically treated as unseen even if this shop
+             * was viewed before.
+             */
+            ma7alakViewedStoryIds.delete(
+              String(row.id)
+            );
+            ma7alakSaveViewedStories();
+
+            ma7alakActiveStoryShops.add(
+              row.shop_slug
+            );
+
+            ma7alakSetStoryRing(
+              row.shop_slug,
+              true
+            );
+
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"DELETE",
+            schema:"public",
+            table:"shop_stories"
+          },
+          function(payload){
+
+            const slug =
+              payload.old &&
+              payload.old.shop_slug;
+
+            if(!slug){
+
+              return;
+
+            }
+
+            /*
+             * Re-query because there may be
+             * another active story for this shop.
+             */
+            ma7alakLoadActiveStoryShops();
+
+          }
+        )
+        .subscribe();
+
+    /*
+     * Stories expire after 24 hours. Re-check
+     * periodically so the ring disappears even
+     * when no database DELETE event occurs.
+     */
+    /*
+     * Fast fallback polling. Realtime normally updates the ring
+     * instantly; this catches cases where Supabase Realtime is
+     * delayed/not enabled for the table. Maximum delay is ~2 sec.
+     */
+    if(!window.ma7alakStoryFallbackTimer){
+      window.ma7alakStoryFallbackTimer =
+        setInterval(
+          ma7alakLoadActiveStoryShops,
+          2000
+        );
+    }
+
   }
 
 
   /* =========================================================
-     GLOBAL REELS VIEWER LOGIC
-     ---------------------------------------------------------
-     This deliberately does NOT talk to the offscreen Reels iframe.
-     The header button opens a random Reel immediately from the same
-     catalog used by the working Reels V5 section.
+     CREATE SHOP CARD
   ========================================================= */
 
-  let MA7ALAK_GLOBAL_REELS = [];
+  function createShopCard(shop){
 
-  let ma7alakGlobalReelIndex = 0;
-  let ma7alakGlobalTouchStartY = 0;
-  let ma7alakGlobalTouchStartX = 0;
-  let ma7alakGlobalTouchStartTime = 0;
-  let ma7alakGlobalFavoriteIds = new Set();
+    const card =
+      document.createElement("article");
 
-  function getGlobalReelElements(){
-    return {
-      viewer:document.getElementById("ma7alakGlobalReelViewer"),
-      video:document.getElementById("ma7alakGlobalReelVideo"),
-      close:document.getElementById("ma7alakGlobalReelClose"),
-      favorite:document.getElementById("ma7alakGlobalReelFavorite"),
-      shop:document.getElementById("ma7alakGlobalReelShop"),
-      shopName:document.getElementById("ma7alakGlobalReelShopName"),
-      shopIcon:document.getElementById("ma7alakGlobalReelShopIcon"),
-      prev:document.getElementById("ma7alakGlobalReelPrev"),
-      next:document.getElementById("ma7alakGlobalReelNext")
-    };
+
+    card.className =
+      "ma7alak-shop-card";
+
+
+    const verifiedHTML =
+      shop.verified
+
+        ? `
+
+          <div
+            class="ma7alak-verified-badge"
+            title="Verified"
+          >
+            ✓
+          </div>
+
+        `
+
+        : "";
+
+
+    let featuredHTML =
+      "";
+
+
+    if(shop.featured){
+
+      featuredHTML = `
+
+        <div
+          class="
+            ma7alak-featured
+            ${shop.redFeatured ? "red" : ""}
+          "
+        >
+
+          ★ FEATURED
+
+        </div>
+
+      `;
+
+    }
+
+
+    card.innerHTML = `
+
+
+      <!-- SHOP IMAGE -->
+
+      <a
+        class="ma7alak-shop-image-link"
+        href="${shop.url}"
+        onclick="
+          window.top.location.href='${shop.url}';
+          return false;
+        "
+      >
+
+        <div
+          class="ma7alak-shop-image-ring"
+          data-shop-slug="${escapeHTML(shop.id)}"
+        >
+
+          <div class="ma7alak-shop-image-inner">
+
+            <img
+              src="${shop.image}"
+              alt="${escapeHTML(shop.name)}"
+              loading="lazy"
+            >
+
+          </div>
+
+
+          ${verifiedHTML}
+
+        </div>
+
+      </a>
+
+
+      <!-- SHOP INFORMATION -->
+
+      <div class="ma7alak-shop-content">
+
+
+        <div class="ma7alak-shop-title-row">
+
+          <h3 class="ma7alak-shop-name">
+
+            ${escapeHTML(shop.name)}
+
+          </h3>
+
+        </div>
+
+
+        <div class="ma7alak-shop-arabic">
+
+          ${escapeHTML(shop.arabic)}
+
+        </div>
+
+
+        <div class="ma7alak-shop-category-pill">
+
+          ${escapeHTML(shop.categoryName)}
+
+        </div>
+
+
+        <div class="ma7alak-shop-location">
+
+          <span class="ma7alak-location-icon">
+            📍
+          </span>
+
+          <span>
+            ${escapeHTML(shop.location)}
+          </span>
+
+        </div>
+
+
+        ${featuredHTML}
+
+
+        <a
+          class="ma7alak-profile-button"
+          href="${shop.url}"
+          onclick="
+            window.top.location.href='${shop.url}';
+            return false;
+          "
+        >
+
+          View Profile
+
+          <span class="ma7alak-profile-arrow">
+            →
+          </span>
+
+        </a>
+
+
+      </div>
+
+    `;
+
+
+    return card;
+
   }
 
-  function getGlobalVisitorId(){
-    let id = localStorage.getItem("ma7alak_visitor_id");
 
-    if(!id){
-      try{
-        id = crypto.randomUUID();
-      }
-      catch(error){
-        id = "visitor-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-      }
+  /* =========================================================
+     ESCAPE HTML
+  ========================================================= */
 
-      localStorage.setItem(
-        "ma7alak_visitor_id",
-        id
+  function escapeHTML(value){
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /'/g,
+        "&#039;"
       );
-    }
 
-    return id;
   }
 
-  async function loadGlobalFavoriteIds(){
-    const client = getClient();
-    if(!client){return;}
 
-    try{
-      const result = await client
-        .from("ma7alak_favorites")
-        .select("reel_id")
-        .eq("visitor_id",getGlobalVisitorId());
+  /* =========================================================
+     INSERT WITH RETRIES
+  ========================================================= */
 
-      if(result.error){return;}
+  let attempts =
+    0;
 
-      ma7alakGlobalFavoriteIds =
-        new Set(
-          (result.data || []).map(function(row){
-            return row.reel_id;
-          })
-        );
 
-      updateGlobalFavoriteButton();
-    }
-    catch(error){}
-  }
+  function start(){
 
-  function updateGlobalFavoriteButton(){
-    const el = getGlobalReelElements();
-    const reel = MA7ALAK_GLOBAL_REELS[ma7alakGlobalReelIndex];
+    attempts++;
 
-    if(!el.favorite || !reel){return;}
-
-    const active =
-      ma7alakGlobalFavoriteIds.has(
-        reel.id
-      );
-
-    el.favorite.classList.toggle(
-      "active",
-      active
-    );
-
-    el.favorite.textContent =
-      active ? "★" : "☆";
-
-    el.favorite.setAttribute(
-      "aria-label",
-      active
-        ? "Remove from favorites"
-        : "Add to favorites"
-    );
-  }
-
-  async function toggleGlobalFavorite(){
-    const client = getClient();
-    const reel = MA7ALAK_GLOBAL_REELS[ma7alakGlobalReelIndex];
-
-    if(!client || !reel){return;}
-
-    const visitorId = getGlobalVisitorId();
-    const active = ma7alakGlobalFavoriteIds.has(reel.id);
-
-    try{
-      if(active){
-        const result = await client
-          .from("ma7alak_favorites")
-          .delete()
-          .eq("visitor_id",visitorId)
-          .eq("reel_id",reel.id);
-
-        if(!result.error){
-          ma7alakGlobalFavoriteIds.delete(reel.id);
-        }
-      }
-      else{
-        const result = await client
-          .from("ma7alak_favorites")
-          .insert({
-            visitor_id:visitorId,
-            reel_id:reel.id,
-            shop_name:reel.shop
-          });
-
-        if(!result.error){
-          ma7alakGlobalFavoriteIds.add(reel.id);
-        }
-      }
-
-      updateGlobalFavoriteButton();
-
-      try{
-        window.dispatchEvent(
-          new CustomEvent(
-            "ma7alakFavoritesChanged"
-          )
-        );
-      }
-      catch(error){}
-    }
-    catch(error){}
-  }
-
-  function loadGlobalReel(index,direction){
-    if(!MA7ALAK_GLOBAL_REELS.length){return;}
-
-    const el = getGlobalReelElements();
-
-    if(!el.viewer || !el.video){return;}
-
-    if(index < 0){
-      index = MA7ALAK_GLOBAL_REELS.length - 1;
-    }
-
-    if(index >= MA7ALAK_GLOBAL_REELS.length){
-      index = 0;
-    }
-
-    ma7alakGlobalReelIndex = index;
-
-    const reel =
-      MA7ALAK_GLOBAL_REELS[index];
-
-    el.video.pause();
-    el.video.classList.remove("ready");
-
-    if(direction === "next"){
-      el.video.style.transform =
-        "translate3d(0,55px,0) scale(.985)";
-    }
-    else if(direction === "prev"){
-      el.video.style.transform =
-        "translate3d(0,-55px,0) scale(.985)";
-    }
-    else{
-      el.video.style.transform =
-        "translate3d(0,0,0) scale(.985)";
-    }
-
-    el.video.src = reel.video;
-    el.video.loop = true;
-    el.video.playsInline = true;
-    el.video.muted = false;
-
-    if(el.shopName){
-      el.shopName.textContent = reel.shop;
-    }
-
-    if(el.shop){
-      el.shop.dataset.shopUrl =
-        reel.shopUrl || "";
-    }
-
-    if(el.shopIcon){
-      if(reel.icon){
-        el.shopIcon.src = reel.icon;
-        el.shopIcon.style.display = "block";
-      }
-      else{
-        el.shopIcon.removeAttribute("src");
-        el.shopIcon.style.display = "none";
-      }
-    }
-
-    updateGlobalFavoriteButton();
-
-    el.viewer.classList.add("open");
-    el.viewer.setAttribute("aria-hidden","false");
-
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-
-    const start = function(){
-      requestAnimationFrame(function(){
-        el.video.classList.add("ready");
-        el.video.style.transform =
-          "translate3d(0,0,0) scale(1)";
-      });
-
-      const p = el.video.play();
-
-      if(p && typeof p.catch === "function"){
-        p.catch(function(){
-          el.video.muted = true;
-          el.video.play().catch(function(){});
-        });
-      }
-    };
-
-    if(el.video.readyState >= 2){
-      start();
-    }
-    else{
-      el.video.addEventListener(
-        "loadeddata",
-        start,
-        {once:true}
-      );
-    }
-  }
-
-  function openRandomGlobalReel(){
-    if(!MA7ALAK_GLOBAL_REELS.length){return;}
-
-    let randomIndex =
-      Math.floor(
-        Math.random() *
-        MA7ALAK_GLOBAL_REELS.length
-      );
 
     if(
-      MA7ALAK_GLOBAL_REELS.length > 1 &&
-      randomIndex === ma7alakGlobalReelIndex
+      insertPage()
     ){
-      randomIndex =
-        (randomIndex + 1) %
-        MA7ALAK_GLOBAL_REELS.length;
-    }
 
-    loadGlobalReel(
-      randomIndex,
-      null
-    );
+      initialize();
 
-    /*
-      The fixed Reel viewer already fills the full viewport.
-      Do NOT request browser-native fullscreen here: on some Android
-      browsers it can apply its own video scaling/cropping and make
-      a contained Reel appear zoomed.
-    */
-
-    loadGlobalFavoriteIds();
-  }
-
-  function nextGlobalReel(){
-    loadGlobalReel(
-      ma7alakGlobalReelIndex + 1,
-      "next"
-    );
-  }
-
-  function previousGlobalReel(){
-    loadGlobalReel(
-      ma7alakGlobalReelIndex - 1,
-      "prev"
-    );
-  }
-
-  function closeGlobalReel(){
-    const el = getGlobalReelElements();
-
-    if(!el.viewer || !el.video){return;}
-
-    el.video.pause();
-    el.video.muted = true;
-    el.video.classList.remove("ready");
-    el.video.removeAttribute("src");
-    el.video.load();
-
-    el.viewer.classList.remove("open");
-    el.viewer.setAttribute("aria-hidden","true");
-
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-
-    try{
-      if(document.fullscreenElement){
-        const req = document.exitFullscreen();
-        if(req && typeof req.catch === "function"){
-          req.catch(function(){});
-        }
-      }
-      else if(document.webkitFullscreenElement && document.webkitExitFullscreen){
-        document.webkitExitFullscreen();
-      }
-    }
-    catch(error){}
-  }
-
-  function setupGlobalReelViewer(){
-    const el = getGlobalReelElements();
-
-    if(!el.viewer){return;}
-
-    if(el.close){
-      el.close.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          closeGlobalReel();
-        }
-      );
-    }
-
-    if(el.favorite){
-      el.favorite.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          toggleGlobalFavorite();
-        }
-      );
-    }
-
-    if(el.shop){
-      el.shop.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          event.stopPropagation();
-
-          const reel =
-            MA7ALAK_GLOBAL_REELS[
-              ma7alakGlobalReelIndex
-            ];
-
-          if(reel && reel.shopUrl){
-            window.top.location.href =
-              reel.shopUrl;
-          }
-        }
-      );
-    }
-
-    if(el.prev){
-      el.prev.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          previousGlobalReel();
-        }
-      );
-    }
-
-    if(el.next){
-      el.next.addEventListener(
-        "click",
-        function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          nextGlobalReel();
-        }
-      );
-    }
-
-    el.viewer.addEventListener(
-      "touchstart",
-      function(event){
-        const touch =
-          event.touches &&
-          event.touches[0];
-
-        if(!touch){return;}
-
-        ma7alakGlobalTouchStartX =
-          touch.clientX;
-
-        ma7alakGlobalTouchStartY =
-          touch.clientY;
-
-        ma7alakGlobalTouchStartTime =
-          Date.now();
-      },
-      {passive:true}
-    );
-
-    el.viewer.addEventListener(
-      "touchend",
-      function(event){
-        const touch =
-          event.changedTouches &&
-          event.changedTouches[0];
-
-        if(!touch){return;}
-
-        const dx =
-          touch.clientX -
-          ma7alakGlobalTouchStartX;
-
-        const dy =
-          touch.clientY -
-          ma7alakGlobalTouchStartY;
-
-        const elapsed =
-          Date.now() -
-          ma7alakGlobalTouchStartTime;
-
-        if(
-          elapsed > 700 ||
-          Math.abs(dy) < 50 ||
-          Math.abs(dy) <
-            Math.abs(dx)
-        ){
-          return;
-        }
-
-        if(dy < 0){
-          nextGlobalReel();
-        }
-        else{
-          previousGlobalReel();
-        }
-      },
-      {passive:true}
-    );
-
-    document.addEventListener(
-      "keydown",
-      function(event){
-        if(
-          !el.viewer.classList.contains(
-            "open"
-          )
-        ){
-          return;
-        }
-
-        if(event.key === "Escape"){
-          closeGlobalReel();
-        }
-
-        if(
-          event.key === "ArrowUp" ||
-          event.key === "ArrowRight"
-        ){
-          nextGlobalReel();
-        }
-
-        if(
-          event.key === "ArrowDown" ||
-          event.key === "ArrowLeft"
-        ){
-          previousGlobalReel();
-        }
-      }
-    );
-
-    document.addEventListener(
-      "fullscreenchange",
-      function(){
-        if(
-          !document.fullscreenElement &&
-          el.viewer.classList.contains(
-            "open"
-          )
-        ){
-          /*
-            Do NOT automatically close here. Some browsers reject or
-            exit native fullscreen while the fixed overlay should stay
-            open exactly like a normal Reel viewer.
-          */
-        }
-      }
-    );
-  }
-
-
-  function setupReelsButton(){
-    const button =
-      document.getElementById(
-        "ma7alak-header-reels"
-      );
-
-    if(!button){
       return;
+
     }
 
-    button.addEventListener(
-      "click",
-      async function(event){
-        event.preventDefault();
-        event.stopPropagation();
 
-        button.classList.add(
-          "ma7alak-active"
-        );
-
-        /*
-          FRESH CATALOG FIRST:
-          Read active Reels directly from Supabase on demand.
-          This does NOT add another polling loop and does NOT depend
-          on Hostinger loading the Reels section/iframe.
-        */
-        let directLoaded=false;
-
-        try{
-          directLoaded=
-            await loadLiveReelsDirectlyFromDatabase();
-        }
-        catch(error){}
-
-        if(!directLoaded && !MA7ALAK_GLOBAL_REELS.length){
-          try{ requestReelsState(); }catch(error){}
-        }
-
-        /*
-          Keep the existing direct top-level viewer, random selection,
-          favorites, sound and swipe behavior.
-        */
-        openRandomGlobalReel();
-
-        try{
-          markCurrentReelsSeen();
-        }
-        catch(error){}
-
-        setTimeout(function(){
-          button.classList.remove(
-            "ma7alak-active"
-          );
-        },700);
-      }
-    );
-  }
-
-  function setupScrollEffect(){
-    const header=document.getElementById("ma7alak-social-header");
-    if(!header){return;}
-    function update(){
-      if(window.scrollY>24){header.classList.add("ma7alak-scrolled");}
-      else{header.classList.remove("ma7alak-scrolled");}
-    }
-    update();
-    window.addEventListener("scroll",update,{passive:true});
-  }
-
-  function setupAuthListener(){
-    const supabaseClient=getClient();
-    if(!supabaseClient){return;}
-
-    supabaseClient.auth.onAuthStateChange(function(event,session){
-      setHeaderAuthState(
-        Boolean(
-          session &&
-          session.user
-        )
-      );
+    if(
+      attempts < 35
+    ){
 
       setTimeout(
-        loadOwnerProfile,
-        80
+        start,
+        350
       );
-    });
-  }
 
-  async function start(){
-    setupScrollEffect();
-    setupHeaderMenu();
-    setupInlineLogin();
-    await refreshHeaderAuthState();
-    setupInstantHeart();
-
-    /*
-      Inject the direct Reel viewer into the real page FIRST, then
-      attach its controls and finally attach the header Reel button.
-    */
-    injectGlobalReelViewer();
-    setupGlobalReelViewer();
-    setupReelsButton();
-
-    /* Phone push deep link: https://ma7alak.com/?reel=REEL_ID
-       Store it until the live Supabase Reel catalog arrives. */
-    try{
-      const reelFromURL =
-        new URLSearchParams(window.location.search).get("reel");
-
-      if(reelFromURL){
-        ma7alakPendingExactReelId = String(reelFromURL).trim();
-      }
-    }catch(error){}
-
-    /*
-      Load the authoritative Reel catalog directly from Supabase.
-      If that succeeds, the lazy Hostinger iframe is never allowed
-      to replace it with old Reel data.
-    */
-    const directReelsLoaded =
-      await loadLiveReelsDirectlyFromDatabase();
-
-    startDirectReelsRealtime();
-
-    /*
-      Keep the existing iframe bridge only as a fallback for a temporary
-      Supabase failure. No 3-second iframe polling loop is needed anymore.
-    */
-    if(!directReelsLoaded){
-      requestReelsState();
-      setTimeout(requestReelsState,500);
-      setTimeout(requestReelsState,1600);
     }
 
-    setupSearchEvents();
-    startControlIntegrationWatcher();
-    await loadShopProfiles();
-    renderSearchResults("");
-    await loadOwnerProfile();
-    setupAuthListener();
   }
 
-  await start();
+
+  /* =========================================================
+     START AFTER DOM
+  ========================================================= */
+
+  if(
+    document.readyState === "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      start
+    );
+
+  }else{
+
+    start();
+
+  }
 
 
-  });
+  /* =========================================================
+     HOSTINGER HEADER WATCH
+  ========================================================= */
+
+  const observer =
+    new MutationObserver(
+      function(){
+
+        if(
+          !document.getElementById(
+            "ma7alak-shops-page"
+          )
+        ){
+
+          start();
+
+        }
+
+      }
+    );
+
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
+
 
 })();
 
-
 /* =========================================================
-     WHAT CHANGED
-     =========================================================
-     1. V22 is based directly on V21 / stable V15 header logic.
-     2. FOUND the V21 bug: the new Reel viewer HTML/CSS was placed as
-        raw markup BEFORE the script, while this Hostinger global header
-        is intentionally designed to inject UI through JavaScript only.
-     3. The Reel viewer HTML is now created with JavaScript and appended
-        directly to the real top-level document.body.
-     4. The Reel viewer CSS is now injected into document.head by JS.
-     5. The viewer is injected BEFORE setupGlobalReelViewer() and
-        setupReelsButton(), so the button always has a real viewer to open.
-     6. Header Reels button still opens a RANDOM Reel immediately, without
-        scrolling, iframe messaging, MutationObserver, iframe moving or
-        lazy-load hacks.
-     7. Same current Reel catalog: Masaya Cafe, Zee Tattoo and Doze 3ale,
-        with shop name, icon, shop page, video, favorites, swipe and sound.
-     8. Actual working Reels V5 section stays completely untouched.
-     9. Stable V15 Search, Notifications, Likes, owner profile, Reel badge,
-        navigation order, header backdrop, logo and menu remain unchanged.
-========================================================= */
-
-
-/* =========================================================
-     WHAT CHANGED — V23 PHONE-FIRST UI TUNING
-     =========================================================
-     1. Based directly on the confirmed-working V22. Reel opening/data logic was not rewritten.
-     2. Removed the visible Reel up/down arrow buttons. Vertical swipe still changes Reels.
-     3. Changed the Reel hint from “↑ Swipe ↓” to simply “Swipe”.
-     4. Corrected the Favorite star visual centering inside its round button.
-     5. Made the owner/shop circle larger on phones while keeping safe spacing from the header edges.
-     6. Increased the gap between the owner/shop circle and the 3-line menu button.
-     7. Removed the spinning ring effect. The complete owner/shop circle now rotates slowly instead.
-     8. Added standard + WebKit animation rules, translateZ(0), will-change, and backface handling for phone browsers.
-     9. Very small phones (390px and below) get a slightly smaller 50px circle so the header remains usable.
-========================================================= */
-
-
-/* =========================================================
-     WHAT CHANGED — V24 PHONE HEADER POLISH
-     =========================================================
-     1. Based directly on confirmed-working V23. Reel opening/video logic was not changed.
-     2. Enlarged the left Ma7alak/eye mark slightly and moved it farther left while keeping safe space from the rounded panel corner.
-     3. Reduced the owner/shop profile circle so it is visibly smaller than the left Ma7alak circle.
-     4. Story Likes/heart is now hidden by default and appears only after a real shop owner is confirmed from shop_owners.
-     5. Made the Reels glyph slightly larger so it visually matches the other phone navigation icons.
-     6. Swapped the Reels and Notifications positions in the header. Their existing functionality was not rewritten.
-     7. Added a very light gold/burgundy moving glow around the complete header panel border, matching the existing Ma7alak theme.
-     8. Kept V23 owner-circle rotation, direct random Reels viewer, Reel badge, search, notifications, menu and Supabase logic intact.
-========================================================= */
-
-/* =========================================================
-   LIVE REELS HEADER SYNC FIX
-   1. Header viewer no longer stays locked to old hardcoded reels.
-   2. Accepts full live Reel catalog from MA7ALAK_REELS_STATE.
-   3. New panel reels automatically become playable from header icon.
-   4. Existing favorites, random opening, swipe, sound and badge remain.
-========================================================= */
-
-
-/* =========================================================
-   EXACT REEL NOTIFICATION FIX
-   - In-site Reel notifications open by exact reel_id.
-   - Phone push deep links support ?reel=<reel_id>.
-   - No random Reel is opened first.
-   - Duplicate video URLs are safe because reel_id is authoritative.
-   - Existing shop click in the Reel viewer still uses reel.shopUrl.
-========================================================= */
-
-
-/* =========================================================
-   DIRECT SUPABASE REELS + FULL-VIDEO FIX
-   - Header Reel button now refreshes active shop_reels directly
-     from Supabase before opening.
-   - No extra polling loop was added.
-   - No scroll to the Reels section is required.
-   - Deleted/inactive Reels are removed from the header viewer.
-   - Existing iframe Reel bridge remains as fallback.
-   - Phone Reel video changed from object-fit:cover to contain,
-     so the full video frame is visible instead of being cropped.
-   - Swipe, favorites, sound, exact-Reel opening and login logic
-     were not rewritten.
-========================================================= */
-
-
-/* =========================================================
-   AUTHORITATIVE REELS FIX — NO LAZY-IFRAME OVERRIDE
-   ---------------------------------------------------------
-   Root causes fixed:
-   1. Old hardcoded Reel catalog removed completely.
-   2. shop_reels is authoritative as soon as direct DB load succeeds.
-   3. Lazy Hostinger iframe messages can no longer overwrite fresh DB
-      Reel IDs, videos, badges or shop URLs after refresh.
-   4. One Supabase Realtime channel refreshes Reel state when rows change.
-      No repeating Reel iframe polling loop was added.
-   5. Browser-native fullscreen request removed; fixed viewport viewer
-      remains full-screen visually.
-   6. Reel video is forced to object-fit:contain !important on phone
-      and desktop to prevent crop/zoom.
+   WHAT CHANGED — DYNAMIC AREAS + CATEGORIES
+   - Based directly on the last confirmed working Supabase-live Show Shops code.
+   - Removed hardcoded Area buttons from the page markup.
+   - Removed hardcoded Category buttons from the page markup.
+   - Area buttons now build automatically from active shop_profiles rows.
+   - Category buttons now build automatically from categories used by shops inside the selected Area.
+   - category_name controls the visible category label; category remains the filter key.
+   - Added automatic category icons with a safe shop fallback icon for new categories.
+   - If a new active shop uses a new Area, that Area appears automatically after refresh.
+   - If a shop uses a new Category, that Category appears automatically inside its Area after refresh.
+   - No GitHub edit is needed just to add future Areas or Categories.
+   - Existing search, shop cards, Story linking/viewer and mobile two-card layout were preserved.
 ========================================================= */
