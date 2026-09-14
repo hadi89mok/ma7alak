@@ -2693,7 +2693,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
       ].join("::");
     }).filter(Boolean);
 
-    if(localIds.length){
+    if(localIds.length && !ma7alakDirectReelsReady){
       setCurrentReelIds(localIds);
     }
 
@@ -2725,7 +2725,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
       };
     }).filter(Boolean);
 
-    if(localReels.length){
+    if(localReels.length && !ma7alakDirectReelsReady){
       setGlobalReelsFromLiveData(localReels);
     }
 
@@ -2765,10 +2765,23 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
       });
 
     if(targetIndex === -1){
-      /* The live iframe/catalog may not have answered yet. Keep the
-         exact ID pending and ask for fresh Reel state immediately. */
+      /*
+        Keep the exact ID pending and refresh directly from Supabase.
+        The lazy Hostinger Reel iframe is only a fallback if DB refresh
+        is unavailable.
+      */
       ma7alakPendingExactReelId = targetId;
-      try{ requestReelsState(); }catch(error){}
+
+      loadLiveReelsDirectlyFromDatabase()
+        .then(function(loaded){
+          if(!loaded){
+            try{ requestReelsState(); }catch(error){}
+          }
+        })
+        .catch(function(){
+          try{ requestReelsState(); }catch(error){}
+        });
+
       return true;
     }
 
@@ -2805,6 +2818,8 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   ========================================================= */
 
   let ma7alakLiveReelsLoadPromise = null;
+  let ma7alakDirectReelsReady = false;
+  let ma7alakReelsRealtimeChannel = null;
 
   async function loadLiveReelsDirectlyFromDatabase(){
     if(ma7alakLiveReelsLoadPromise){
@@ -2825,12 +2840,18 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
             "reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,sort_order,active,created_at"
           )
           .eq("active",true)
-          .order("sort_order",{ascending:true})
           .order("created_at",{ascending:false});
 
         if(result.error){
           throw result.error;
         }
+
+        /*
+          From this moment the database is the source of truth.
+          Old/lazy iframe messages are no longer allowed to overwrite
+          the current Reel list, badge state, shop URL or video URL.
+        */
+        ma7alakDirectReelsReady = true;
 
         const rows=Array.isArray(result.data)
           ? result.data
@@ -2868,7 +2889,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
               ).trim(),
               shopUrl:String(
                 row.shop_url ||
-                (slug ? "/"+encodeURIComponent(slug) : "")
+                (slug ? "https://ma7alak.com/"+encodeURIComponent(slug) : "")
               ).trim(),
               icon:String(row.shop_icon||"").trim(),
               video:video
@@ -2921,6 +2942,38 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
     return ma7alakLiveReelsLoadPromise;
   }
+
+
+  function startDirectReelsRealtime(){
+    const supabaseClient=getClient();
+    if(!supabaseClient){return;}
+
+    if(ma7alakReelsRealtimeChannel){
+      return;
+    }
+
+    try{
+      ma7alakReelsRealtimeChannel =
+        supabaseClient
+          .channel("ma7alak-header-live-shop-reels")
+          .on(
+            "postgres_changes",
+            {
+              event:"*",
+              schema:"public",
+              table:"shop_reels"
+            },
+            function(){
+              loadLiveReelsDirectlyFromDatabase().catch(function(){});
+            }
+          )
+          .subscribe();
+    }
+    catch(error){
+      console.error("MA7ALAK header Reels realtime:",error);
+    }
+  }
+
 
 
   function setGlobalReelsFromLiveData(reels){
@@ -2982,6 +3035,16 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
         !event.data ||
         event.data.type !== "MA7ALAK_REELS_STATE"
       ){
+        return;
+      }
+
+      /*
+        Once direct Supabase data has loaded, ignore Reel catalog/state
+        coming from Hostinger's lazy iframe. That iframe can be stale
+        before it scrolls into view and was the reason old/deleted Reels
+        and old shop URLs came back.
+      */
+      if(ma7alakDirectReelsReady){
         return;
       }
 
@@ -3145,7 +3208,10 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
     inset:0;
     width:100%;
     height:100%;
-    object-fit:contain;
+    max-width:100vw;
+    max-height:100dvh;
+    object-fit:contain!important;
+    object-position:center!important;
     background:#000;
     opacity:0;
     transform:translate3d(0,0,0) scale(.985);
@@ -3301,8 +3367,12 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
   @media (max-width:700px){
     #ma7alakGlobalReelVideo{
-      object-fit:contain;
-      object-position:center;
+      object-fit:contain!important;
+      object-position:center!important;
+      width:100%!important;
+      height:100%!important;
+      max-width:100vw!important;
+      max-height:100dvh!important;
     }
 
     #ma7alakGlobalReelShop{
@@ -3379,7 +3449,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
      catalog used by the working Reels V5 section.
   ========================================================= */
 
-  let MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://ma7alak.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
+  let MA7ALAK_GLOBAL_REELS = [];
 
   let ma7alakGlobalReelIndex = 0;
   let ma7alakGlobalTouchStartY = 0;
@@ -3643,34 +3713,11 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
     );
 
     /*
-      Because THIS function runs directly from the real header click,
-      native fullscreen has valid user activation and can work normally.
-      The overlay already fills the viewport, so failure is harmless.
+      The fixed Reel viewer already fills the full viewport.
+      Do NOT request browser-native fullscreen here: on some Android
+      browsers it can apply its own video scaling/cropping and make
+      a contained Reel appear zoomed.
     */
-    const viewer =
-      document.getElementById(
-        "ma7alakGlobalReelViewer"
-      );
-
-    if(viewer){
-      try{
-        if(viewer.requestFullscreen){
-          const req =
-            viewer.requestFullscreen();
-
-          if(
-            req &&
-            typeof req.catch === "function"
-          ){
-            req.catch(function(){});
-          }
-        }
-        else if(viewer.webkitRequestFullscreen){
-          viewer.webkitRequestFullscreen();
-        }
-      }
-      catch(error){}
-    }
 
     loadGlobalFavoriteIds();
   }
@@ -3927,14 +3974,21 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
           This does NOT add another polling loop and does NOT depend
           on Hostinger loading the Reels section/iframe.
         */
+        let directLoaded=false;
+
         try{
-          await loadLiveReelsDirectlyFromDatabase();
+          directLoaded=
+            await loadLiveReelsDirectlyFromDatabase();
         }
         catch(error){}
 
+        if(!directLoaded && !MA7ALAK_GLOBAL_REELS.length){
+          try{ requestReelsState(); }catch(error){}
+        }
+
         /*
           Keep the existing direct top-level viewer, random selection,
-          fullscreen attempt, favorites, sound and swipe behavior.
+          favorites, sound and swipe behavior.
         */
         openRandomGlobalReel();
 
@@ -4009,25 +4063,24 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
     }catch(error){}
 
     /*
-      Prime the header Reel catalog directly from Supabase once.
-      This is one lightweight request, not a polling loop.
-      The existing iframe bridge remains as a fallback/compatibility path.
+      Load the authoritative Reel catalog directly from Supabase.
+      If that succeeds, the lazy Hostinger iframe is never allowed
+      to replace it with old Reel data.
     */
-    loadLiveReelsDirectlyFromDatabase().catch(function(){});
+    const directReelsLoaded =
+      await loadLiveReelsDirectlyFromDatabase();
 
-    requestReelsState();
-    setTimeout(requestReelsState,500);
-    setTimeout(requestReelsState,1600);
+    startDirectReelsRealtime();
 
     /*
-      Keep checking for newly-added Reels while the visitor stays
-      on the page. This fixes Hostinger/Embed cases where Reels are
-      updated after the initial header load.
+      Keep the existing iframe bridge only as a fallback for a temporary
+      Supabase failure. No 3-second iframe polling loop is needed anymore.
     */
-    setInterval(
-      requestReelsState,
-      3000
-    );
+    if(!directReelsLoaded){
+      requestReelsState();
+      setTimeout(requestReelsState,500);
+      setTimeout(requestReelsState,1600);
+    }
 
     setupSearchEvents();
     startControlIntegrationWatcher();
@@ -4127,4 +4180,21 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
      so the full video frame is visible instead of being cropped.
    - Swipe, favorites, sound, exact-Reel opening and login logic
      were not rewritten.
+========================================================= */
+
+
+/* =========================================================
+   AUTHORITATIVE REELS FIX — NO LAZY-IFRAME OVERRIDE
+   ---------------------------------------------------------
+   Root causes fixed:
+   1. Old hardcoded Reel catalog removed completely.
+   2. shop_reels is authoritative as soon as direct DB load succeeds.
+   3. Lazy Hostinger iframe messages can no longer overwrite fresh DB
+      Reel IDs, videos, badges or shop URLs after refresh.
+   4. One Supabase Realtime channel refreshes Reel state when rows change.
+      No repeating Reel iframe polling loop was added.
+   5. Browser-native fullscreen request removed; fixed viewport viewer
+      remains full-screen visually.
+   6. Reel video is forced to object-fit:contain !important on phone
+      and desktop to prevent crop/zoom.
 ========================================================= */
