@@ -2792,6 +2792,137 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
     }
   );
 
+
+  /* =========================================================
+     DIRECT LIVE REELS FROM SUPABASE
+     ---------------------------------------------------------
+     Lightweight fix for Hostinger lazy-loaded Reels embeds:
+     - No polling loop added.
+     - Reads shop_reels only when needed.
+     - Header Reel button no longer depends on scrolling to the
+       Reels section before it knows the current active catalog.
+     - Deleted/inactive Reels disappear immediately on next open.
+  ========================================================= */
+
+  let ma7alakLiveReelsLoadPromise = null;
+
+  async function loadLiveReelsDirectlyFromDatabase(){
+    if(ma7alakLiveReelsLoadPromise){
+      return ma7alakLiveReelsLoadPromise;
+    }
+
+    ma7alakLiveReelsLoadPromise = (async function(){
+      const supabaseClient=getClient();
+
+      if(!supabaseClient){
+        return false;
+      }
+
+      try{
+        const result=await supabaseClient
+          .from("shop_reels")
+          .select(
+            "reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,sort_order,active,created_at"
+          )
+          .eq("active",true)
+          .order("sort_order",{ascending:true})
+          .order("created_at",{ascending:false});
+
+        if(result.error){
+          throw result.error;
+        }
+
+        const rows=Array.isArray(result.data)
+          ? result.data
+          : [];
+
+        /*
+          IMPORTANT:
+          An empty successful result must also clear the old hardcoded
+          fallback catalog. Otherwise deleted Reels could remain playable.
+        */
+        if(!rows.length){
+          MA7ALAK_GLOBAL_REELS=[];
+          currentReelIds=[];
+          updateReelsBadge();
+          return true;
+        }
+
+        const liveReels=rows
+          .map(function(row){
+            if(!row){return null;}
+
+            const id=String(row.reel_id||"").trim();
+            const video=String(row.video_url||"").trim();
+            const slug=String(row.shop_slug||"").trim();
+
+            if(!id || !video){
+              return null;
+            }
+
+            return {
+              id:id,
+              shop:String(
+                row.shop_name ||
+                prettyShopName(slug)
+              ).trim(),
+              shopUrl:String(
+                row.shop_url ||
+                (slug ? "/"+encodeURIComponent(slug) : "")
+              ).trim(),
+              icon:String(row.shop_icon||"").trim(),
+              video:video
+            };
+          })
+          .filter(Boolean);
+
+        if(!liveReels.length){
+          MA7ALAK_GLOBAL_REELS=[];
+          currentReelIds=[];
+          updateReelsBadge();
+          return true;
+        }
+
+        setGlobalReelsFromLiveData(liveReels);
+
+        /*
+          Keep the existing Reel badge/fingerprint system compatible
+          with the current iframe version.
+        */
+        setCurrentReelIds(
+          liveReels.map(function(reel){
+            return [
+              reel.id,
+              reel.video,
+              reel.shopUrl
+            ].join("::");
+          })
+        );
+
+        return true;
+      }
+      catch(error){
+        /*
+          Safe fallback:
+          if Supabase is temporarily unavailable, leave the currently
+          loaded catalog untouched so the Reel button still works.
+        */
+        console.error(
+          "MA7ALAK direct live Reels:",
+          error
+        );
+
+        return false;
+      }
+      finally{
+        ma7alakLiveReelsLoadPromise=null;
+      }
+    })();
+
+    return ma7alakLiveReelsLoadPromise;
+  }
+
+
   function setGlobalReelsFromLiveData(reels){
     if(!Array.isArray(reels) || !reels.length){
       return;
@@ -3170,7 +3301,8 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
   @media (max-width:700px){
     #ma7alakGlobalReelVideo{
-      object-fit:cover;
+      object-fit:contain;
+      object-position:center;
     }
 
     #ma7alakGlobalReelShop{
@@ -3781,7 +3913,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
     button.addEventListener(
       "click",
-      function(event){
+      async function(event){
         event.preventDefault();
         event.stopPropagation();
 
@@ -3790,10 +3922,19 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
         );
 
         /*
-          DIRECT TOP-LEVEL OPEN.
-          No iframe. No scrolling. No postMessage. No lazy-load race.
-          Opens one random Reel immediately from the same current V5
-          Reel catalog.
+          FRESH CATALOG FIRST:
+          Read active Reels directly from Supabase on demand.
+          This does NOT add another polling loop and does NOT depend
+          on Hostinger loading the Reels section/iframe.
+        */
+        try{
+          await loadLiveReelsDirectlyFromDatabase();
+        }
+        catch(error){}
+
+        /*
+          Keep the existing direct top-level viewer, random selection,
+          fullscreen attempt, favorites, sound and swipe behavior.
         */
         openRandomGlobalReel();
 
@@ -3866,6 +4007,13 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
         ma7alakPendingExactReelId = String(reelFromURL).trim();
       }
     }catch(error){}
+
+    /*
+      Prime the header Reel catalog directly from Supabase once.
+      This is one lightweight request, not a polling loop.
+      The existing iframe bridge remains as a fallback/compatibility path.
+    */
+    loadLiveReelsDirectlyFromDatabase().catch(function(){});
 
     requestReelsState();
     setTimeout(requestReelsState,500);
@@ -3964,4 +4112,19 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
    - No random Reel is opened first.
    - Duplicate video URLs are safe because reel_id is authoritative.
    - Existing shop click in the Reel viewer still uses reel.shopUrl.
+========================================================= */
+
+
+/* =========================================================
+   DIRECT SUPABASE REELS + FULL-VIDEO FIX
+   - Header Reel button now refreshes active shop_reels directly
+     from Supabase before opening.
+   - No extra polling loop was added.
+   - No scroll to the Reels section is required.
+   - Deleted/inactive Reels are removed from the header viewer.
+   - Existing iframe Reel bridge remains as fallback.
+   - Phone Reel video changed from object-fit:cover to contain,
+     so the full video frame is visible instead of being cropped.
+   - Swipe, favorites, sound, exact-Reel opening and login logic
+     were not rewritten.
 ========================================================= */
