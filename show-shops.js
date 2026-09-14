@@ -735,6 +735,7 @@
 
   let ma7alakLiveCategoryIcons = new Map();
   let ma7alakLiveCategoryNames = new Map();
+  let ma7alakLiveCityNames = new Map();
 
   /*
      Directory filter identity and card label are intentionally separate.
@@ -743,8 +744,18 @@
      - ma7alakLiveCategoryNames = official Directory Control category label
   */
   function ma7alakShopRegion(shop){
+    if(!shop) return "";
+
+    const area=String(shop.area || "").trim();
+    if(area) return area;
+
+    const cityKey=String(shop.city || "").trim();
+    if(!cityKey) return "";
+
     return String(
-      (shop && (shop.area || shop.city)) || ""
+      ma7alakLiveCityNames.get(cityKey) ||
+      ma7alakLiveCityNames.get(cityKey.toLocaleLowerCase()) ||
+      cityKey
     ).trim();
   }
 
@@ -834,6 +845,7 @@
         const name =
           String(
             ma7alakLiveCategoryNames.get(key) ||
+            ma7alakLiveCategoryNames.get(key.toLocaleLowerCase()) ||
             key
           ).trim();
 
@@ -1474,19 +1486,36 @@
         .order("sort_order", { ascending:true });
 
     if(!categoryError){
-      ma7alakLiveCategoryIcons = new Map(
-        (categoryRows || []).map(row => [
-          String(row.category_key || "").trim(),
-          String(row.icon || "🏪").trim() || "🏪"
-        ])
-      );
+      ma7alakLiveCategoryIcons = new Map();
+      ma7alakLiveCategoryNames = new Map();
+      (categoryRows || []).forEach(row => {
+        const key=String(row.category_key || "").trim();
+        const name=String(row.category_name || row.category_key || "").trim();
+        const icon=String(row.icon || "🏪").trim() || "🏪";
+        if(!key) return;
+        ma7alakLiveCategoryIcons.set(key,icon);
+        ma7alakLiveCategoryIcons.set(key.toLocaleLowerCase(),icon);
+        ma7alakLiveCategoryNames.set(key,name);
+        ma7alakLiveCategoryNames.set(key.toLocaleLowerCase(),name);
+      });
+    }
 
-      ma7alakLiveCategoryNames = new Map(
-        (categoryRows || []).map(row => [
-          String(row.category_key || "").trim(),
-          String(row.category_name || row.category_key || "").trim()
-        ])
-      );
+    const { data:cityRows, error:cityError } =
+      await client
+        .from("shop_cities")
+        .select("city_key,city_name,is_active")
+        .eq("is_active", true)
+        .order("sort_order", { ascending:true });
+
+    if(!cityError){
+      ma7alakLiveCityNames = new Map();
+      (cityRows || []).forEach(row => {
+        const key=String(row.city_key || "").trim();
+        const name=String(row.city_name || row.city_key || "").trim();
+        if(!key) return;
+        ma7alakLiveCityNames.set(key,name);
+        ma7alakLiveCityNames.set(key.toLocaleLowerCase(),name);
+      });
     }
 
     const { data, error } =
@@ -2874,6 +2903,7 @@
           ${escapeHTML(
             shop.categoryName ||
             ma7alakLiveCategoryNames.get(shop.category) ||
+            ma7alakLiveCategoryNames.get(String(shop.category || "").toLocaleLowerCase()) ||
             shop.category
           )}
 
