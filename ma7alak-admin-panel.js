@@ -740,7 +740,7 @@
     const { data, error } =
       await supabaseClient
         .from("shop_profiles")
-        .select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url,area,category,category_name,location,verified,featured,featured_red,is_active")
+        .select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active")
         .order("shop_name", { ascending:true });
 
     if(error){
@@ -2122,7 +2122,7 @@
 
     const rows = managedShops.filter(function(shop){
       if(!term) return true;
-      return [shop.shop_name, shop.arabic_name, shop.shop_slug, shop.area, shop.category_name, shop.location]
+      return [shop.shop_name, shop.arabic_name, shop.shop_slug, shop.city, shop.area, shop.category_name, shop.location]
         .some(function(value){
           return String(value || "").toLowerCase().includes(term);
         });
@@ -2140,7 +2140,7 @@
       const slug = escapeHtml(shop.shop_slug || "");
       const name = escapeHtml(shop.shop_name || shop.shop_slug || "Shop");
       const image = escapeHtml(shop.profile_image_url || "");
-      const meta = [shop.area, shop.category_name || shop.category, shop.location].filter(Boolean).map(escapeHtml).join(" • ");
+      const meta = [shop.city, shop.area, shop.category_name || shop.category, shop.location].filter(Boolean).map(escapeHtml).join(" • ");
 
       const imageHtml = image
         ? '<img src="' + image + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=&quot;ma-admin-shop-thumb-fallback&quot;>🏪</div>\'">'
@@ -2757,6 +2757,8 @@
             ) || null,
           shop_url:
             finalShopUrl,
+          city:
+            normalizedText(document.getElementById("ma-shop-city-v2") && document.getElementById("ma-shop-city-v2").value) || null,
           area:
             area,
           category:
@@ -3269,6 +3271,7 @@
         arabic_name: normalizedText(editArabic.value) || null,
         profile_image_url: normalizedText(editImage.value) || null,
         shop_url: normalizedText(editUrl.value) || ("https://ma7alak.com/" + slug),
+        city: normalizedText(document.getElementById("ma-edit-city-v2") && document.getElementById("ma-edit-city-v2").value) || null,
         area: area,
         category: category,
         category_name: categoryName,
@@ -3585,6 +3588,273 @@
   updatePreview();
 
   verifyAdmin();
+
+
+  /* =========================================================
+     MA7ALAK ADMIN V2 — LIVE DIRECTORY CONTROL CENTER
+     SAFE ADD-ON:
+     - Does NOT alter Gallery / Videos / Live Reels logic.
+     - Categories, Cities/Regions and Areas are Supabase-driven.
+     - Realtime refreshes admin controls without page refresh.
+  ========================================================= */
+  (function ma7alakAdminV2(){
+
+    let v2Categories = [];
+    let v2Cities = [];
+    let v2Areas = [];
+    let v2Realtime = null;
+
+    const byId = id => document.getElementById(id);
+    const esc = value => escapeHtml(value == null ? "" : String(value));
+
+    function keyify(value){
+      return normalizedText(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g,"-")
+        .replace(/^-+|-+$/g,"");
+    }
+
+    function installV2Styles(){
+      const style = document.createElement("style");
+      style.id = "ma-admin-v2-styles";
+      style.textContent = `
+        #ma-admin-v2-hub{margin:0 0 18px}
+        .ma-v2-hero{border:1px solid rgba(245,184,63,.26);background:linear-gradient(135deg,rgba(245,184,63,.10),rgba(255,255,255,.025));border-radius:22px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+        .ma-v2-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+        .ma-v2-title h2{margin:0;font-size:20px}.ma-v2-live{font-size:11px;font-weight:800;color:#a9ffbd;background:rgba(41,190,91,.12);border:1px solid rgba(41,190,91,.28);padding:7px 10px;border-radius:999px}
+        .ma-v2-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .ma-v2-tab{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#fff;border-radius:14px;padding:12px 8px;font-weight:800;cursor:pointer}
+        .ma-v2-tab.active{border-color:#f5b83f;background:rgba(245,184,63,.12);color:#ffd982}
+        .ma-v2-panel{display:none;margin-top:14px}.ma-v2-panel.active{display:block}
+        .ma-v2-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:12px}
+        .ma-v2-form.area-form{grid-template-columns:1fr 1fr 1fr auto}
+        .ma-v2-form input,.ma-v2-form select,.ma-v2-smart-select{width:100%;min-height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#111315;color:#fff;padding:0 12px;box-sizing:border-box}
+        .ma-v2-add{min-height:46px;border:0;border-radius:12px;padding:0 16px;background:#f5b83f;color:#17110a;font-weight:900;cursor:pointer}
+        .ma-v2-list{display:grid;gap:8px}
+        .ma-v2-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);padding:11px 12px;border-radius:14px}
+        .ma-v2-row-main{display:flex;align-items:center;gap:10px;min-width:0}.ma-v2-row-icon{font-size:24px;width:34px;text-align:center}
+        .ma-v2-row-text{min-width:0}.ma-v2-row-text strong,.ma-v2-row-text span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ma-v2-row-text span{font-size:11px;opacity:.58;margin-top:3px}
+        .ma-v2-row-actions{display:flex;gap:6px}.ma-v2-row-actions button{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:7px 9px;cursor:pointer}.ma-v2-row-actions button[data-delete]{color:#ff9b9b}
+        .ma-v2-field{margin:10px 0}.ma-v2-field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#d9d9d9}
+        .ma-v2-field small{display:block;margin-top:6px;opacity:.58}
+        .ma-v2-original-hidden{display:none!important}
+        @media(max-width:700px){.ma-v2-tabs{grid-template-columns:1fr}.ma-v2-form,.ma-v2-form.area-form{grid-template-columns:1fr}.ma-v2-row{align-items:flex-start}.ma-v2-row-actions{flex-direction:column}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function installHub(){
+      if(byId("ma-admin-v2-hub")) return;
+      const dashboardEl = byId("ma-admin-dashboard");
+      if(!dashboardEl) return;
+
+      const hub = document.createElement("section");
+      hub.id = "ma-admin-v2-hub";
+      hub.className = "ma-admin-card";
+      hub.innerHTML = `
+        <div class="ma-v2-hero">
+          <div class="ma-v2-title"><div><h2>Directory Control</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Categories, cities/regions and areas — live across Ma7alak.</div></div><span class="ma-v2-live">● LIVE</span></div>
+          <div class="ma-v2-tabs">
+            <button class="ma-v2-tab active" data-v2-tab="categories">🏷️ Categories</button>
+            <button class="ma-v2-tab" data-v2-tab="cities">📍 Cities / Regions</button>
+            <button class="ma-v2-tab" data-v2-tab="areas">🗺️ Areas</button>
+          </div>
+          <div class="ma-v2-panel active" data-v2-panel="categories">
+            <form id="ma-v2-category-form" class="ma-v2-form">
+              <input id="ma-v2-category-name" placeholder="Category name e.g. Pet Shops" required>
+              <input id="ma-v2-category-icon" placeholder="Icon e.g. 🐾" maxlength="12" required>
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-category-list" class="ma-v2-list"></div>
+          </div>
+          <div class="ma-v2-panel" data-v2-panel="cities">
+            <form id="ma-v2-city-form" class="ma-v2-form">
+              <input id="ma-v2-city-name" placeholder="City / region e.g. Beirut" required>
+              <input id="ma-v2-city-key" placeholder="ID auto-generated">
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-city-list" class="ma-v2-list"></div>
+          </div>
+          <div class="ma-v2-panel" data-v2-panel="areas">
+            <form id="ma-v2-area-form" class="ma-v2-form area-form">
+              <select id="ma-v2-area-city" required></select>
+              <input id="ma-v2-area-name" placeholder="Area e.g. Hamra" required>
+              <input id="ma-v2-area-key" placeholder="ID auto-generated">
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-area-list" class="ma-v2-list"></div>
+          </div>
+        </div>`;
+      dashboardEl.insertBefore(hub, dashboardEl.firstChild);
+
+      hub.addEventListener("click", async function(e){
+        const tab = e.target.closest("[data-v2-tab]");
+        if(tab){
+          hub.querySelectorAll("[data-v2-tab]").forEach(x=>x.classList.toggle("active",x===tab));
+          hub.querySelectorAll("[data-v2-panel]").forEach(x=>x.classList.toggle("active",x.dataset.v2Panel===tab.dataset.v2Tab));
+          return;
+        }
+        const btn = e.target.closest("button[data-delete]");
+        if(!btn) return;
+        const type = btn.dataset.delete;
+        const key = btn.dataset.key;
+        if(!confirm("Delete this "+type+"?")) return;
+        try{
+          if(type==="category"){
+            const used = managedShops.some(s=>s.category===key);
+            if(used) throw new Error("This category is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_categories").delete().eq("category_key",key); if(error) throw error;
+          } else if(type==="city"){
+            const used = managedShops.some(s=>s.city===key);
+            if(used) throw new Error("This city/region is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_cities").delete().eq("city_key",key); if(error) throw error;
+          } else if(type==="area"){
+            const row=v2Areas.find(a=>a.area_key===key);
+            const used = row && managedShops.some(s=>s.area===row.area_name);
+            if(used) throw new Error("This area is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_areas").delete().eq("area_key",key); if(error) throw error;
+          }
+          await loadV2Taxonomy();
+        }catch(err){ alert(err.message||"Delete failed."); }
+      });
+    }
+
+    function installSmartShopFields(){
+      function addSmartFields(areaInputId, categoryInputId, categoryNameId, cityId, prefix){
+        const areaInput=byId(areaInputId), catInput=byId(categoryInputId), catName=byId(categoryNameId);
+        if(!areaInput || !catInput || byId(cityId)) return;
+
+        const cityWrap=document.createElement("div");
+        cityWrap.className="ma-v2-field";
+        cityWrap.innerHTML=`<label>City / Region *</label><select id="${cityId}" class="ma-v2-smart-select" required></select><small>Select the main Lebanon city/region first. "da7ye" stays exactly da7ye.</small>`;
+        areaInput.closest("label").parentNode.insertBefore(cityWrap, areaInput.closest("label"));
+
+        const areaWrap=document.createElement("div");
+        areaWrap.className="ma-v2-field";
+        areaWrap.innerHTML=`<label>Area *</label><select id="${prefix}-area-smart" class="ma-v2-smart-select" required></select>`;
+        areaInput.closest("label").insertAdjacentElement("afterend",areaWrap);
+
+        const catWrap=document.createElement("div");
+        catWrap.className="ma-v2-field";
+        catWrap.innerHTML=`<label>Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select" required></select><small>Icon + name come from Directory Control automatically.</small>`;
+        catInput.closest("label").parentNode.insertBefore(catWrap,catInput.closest("label"));
+
+        areaInput.closest("label").classList.add("ma-v2-original-hidden");
+        catInput.closest("label").classList.add("ma-v2-original-hidden");
+        catName.closest("label").classList.add("ma-v2-original-hidden");
+
+        const citySel=byId(cityId), areaSel=byId(prefix+"-area-smart"), catSel=byId(prefix+"-category-smart");
+
+        citySel.addEventListener("change",()=>{ renderSmartAreas(citySel,areaSel); areaInput.value=areaSel.value||""; });
+        areaSel.addEventListener("change",()=>{ areaInput.value=areaSel.value||""; });
+        catSel.addEventListener("change",()=>{
+          const row=v2Categories.find(c=>c.category_key===catSel.value);
+          catInput.value=catSel.value||"";
+          catName.value=row?row.category_name:"";
+        });
+      }
+
+      addSmartFields("ma-shop-area","ma-shop-category","ma-shop-category-name","ma-shop-city-v2","ma-shop-v2");
+      addSmartFields("ma-edit-area","ma-edit-category","ma-edit-category-name","ma-edit-city-v2","ma-edit-v2");
+    }
+
+    function renderSmartAreas(citySel,areaSel,currentArea){
+      if(!citySel||!areaSel) return;
+      const rows=v2Areas.filter(a=>a.city_key===citySel.value && a.is_active!==false);
+      areaSel.innerHTML='<option value="">Choose area…</option>'+rows.map(a=>`<option value="${esc(a.area_name)}">${esc(a.area_name)}</option>`).join("");
+      if(currentArea) areaSel.value=currentArea;
+    }
+
+    function refreshSmartFields(){
+      ["ma-shop-city-v2","ma-edit-city-v2"].forEach(id=>{
+        const sel=byId(id); if(!sel)return;
+        const old=sel.value;
+        sel.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
+        if(old) sel.value=old;
+      });
+      ["ma-shop-v2-category-smart","ma-edit-v2-category-smart"].forEach(id=>{
+        const sel=byId(id); if(!sel)return;
+        const old=sel.value;
+        sel.innerHTML='<option value="">Choose category…</option>'+v2Categories.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.category_key)}">${esc(c.icon)} ${esc(c.category_name)}</option>`).join("");
+        if(old) sel.value=old;
+      });
+      renderSmartAreas(byId("ma-shop-city-v2"),byId("ma-shop-v2-area-smart"));
+      renderSmartAreas(byId("ma-edit-city-v2"),byId("ma-edit-v2-area-smart"));
+    }
+
+    function renderV2Lists(){
+      const catList=byId("ma-v2-category-list");
+      const cityList=byId("ma-v2-city-list");
+      const areaListV2=byId("ma-v2-area-list");
+      const areaCity=byId("ma-v2-area-city");
+      if(catList) catList.innerHTML=v2Categories.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">${esc(c.icon)}</div><div class="ma-v2-row-text"><strong>${esc(c.category_name)}</strong><span>${esc(c.category_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="category" data-key="${esc(c.category_key)}">Delete</button></div></div>`).join("");
+      if(cityList) cityList.innerHTML=v2Cities.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">📍</div><div class="ma-v2-row-text"><strong>${esc(c.city_name)}</strong><span>${esc(c.city_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="city" data-key="${esc(c.city_key)}">Delete</button></div></div>`).join("");
+      if(areaListV2) areaListV2.innerHTML=v2Areas.map(a=>{const c=v2Cities.find(x=>x.city_key===a.city_key);return `<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">🗺️</div><div class="ma-v2-row-text"><strong>${esc(a.area_name)}</strong><span>${esc(c?c.city_name:a.city_key)} • ${esc(a.area_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="area" data-key="${esc(a.area_key)}">Delete</button></div></div>`}).join("");
+      if(areaCity) areaCity.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
+    }
+
+    async function loadV2Taxonomy(){
+      const [cats,cities,areas] = await Promise.all([
+        supabaseClient.from("shop_categories").select("*").order("sort_order",{ascending:true}).order("category_name",{ascending:true}),
+        supabaseClient.from("shop_cities").select("*").order("sort_order",{ascending:true}).order("city_name",{ascending:true}),
+        supabaseClient.from("shop_areas").select("*").order("sort_order",{ascending:true}).order("area_name",{ascending:true})
+      ]);
+      if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
+      v2Categories=cats.data||[]; v2Cities=cities.data||[]; v2Areas=areas.data||[];
+      renderV2Lists(); refreshSmartFields();
+    }
+
+    function bindV2Forms(){
+      byId("ma-v2-category-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const name=normalizedText(byId("ma-v2-category-name").value), icon=normalizedText(byId("ma-v2-category-icon").value)||"🏪", key=keyify(name);
+        if(!name||!key)return;
+        const {error}=await supabaseClient.from("shop_categories").insert({category_key:key,category_name:name,icon});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+      byId("ma-v2-city-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const name=normalizedText(byId("ma-v2-city-name").value), key=keyify(byId("ma-v2-city-key").value)||keyify(name);
+        if(!name||!key)return;
+        const {error}=await supabaseClient.from("shop_cities").insert({city_key:key,city_name:name});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+      byId("ma-v2-area-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const city=byId("ma-v2-area-city").value, name=normalizedText(byId("ma-v2-area-name").value), key=keyify(byId("ma-v2-area-key").value)||keyify(city+"-"+name);
+        if(!city||!name||!key)return;
+        const {error}=await supabaseClient.from("shop_areas").insert({area_key:key,area_name:name,city_key:city});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+    }
+
+    function syncEditSmartFields(){
+      const slug=normalizedText(editOriginalSlug.value);
+      const shop=getManagedShop(slug);
+      if(!shop)return;
+      const citySel=byId("ma-edit-city-v2"), areaSel=byId("ma-edit-v2-area-smart"), catSel=byId("ma-edit-v2-category-smart");
+      if(citySel){citySel.value=shop.city||""; renderSmartAreas(citySel,areaSel,shop.area||"");}
+      if(catSel)catSel.value=shop.category||"";
+    }
+
+    function installRealtime(){
+      if(v2Realtime) return;
+      v2Realtime=supabaseClient.channel("ma7alak-admin-directory-v2")
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},async()=>{await loadManagedShops();})
+        .subscribe();
+    }
+
+    async function bootV2(){
+      installV2Styles(); installHub(); installSmartShopFields(); bindV2Forms();
+      try{ await loadV2Taxonomy(); installRealtime(); }catch(err){ console.warn("MA7ALAK Admin V2 taxonomy setup needed:",err); }
+      manageShopList.addEventListener("click",()=>setTimeout(syncEditSmartFields,80));
+    }
+
+    bootV2();
+  })();
 
 })();
 
