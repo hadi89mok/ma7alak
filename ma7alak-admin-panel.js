@@ -3743,6 +3743,173 @@
         .replace(/^-+|-+$/g,"");
     }
 
+    function sameText(a,b){
+      return normalizedText(a).toLocaleLowerCase() === normalizedText(b).toLocaleLowerCase();
+    }
+
+    function preferredDisplayName(rows, field){
+      const values=(rows||[])
+        .map(row=>normalizedText(row && row[field]))
+        .filter(Boolean);
+      if(!values.length) return "";
+
+      /* Prefer a deliberately-capitalized spelling such as Beirut / Da7ye. */
+      const styled=values.find(value => /[A-Z]/.test(value) && value !== value.toUpperCase());
+      return styled || values[0];
+    }
+
+    function preferredCanonicalRow(rows, keyField){
+      if(!rows || !rows.length) return null;
+      return rows.find(row=>{
+        const key=normalizedText(row && row[keyField]);
+        return key && key === key.toLowerCase();
+      }) || rows[0];
+    }
+
+    function buildDuplicateGroups(rows, keyField, nameField){
+      const groups=[];
+      (rows||[]).forEach(row=>{
+        const key=normalizedText(row && row[keyField]).toLocaleLowerCase();
+        const name=normalizedText(row && row[nameField]).toLocaleLowerCase();
+        let group=groups.find(g => (key && g.keys.has(key)) || (name && g.names.has(name)));
+        if(!group){
+          group={rows:[],keys:new Set(),names:new Set()};
+          groups.push(group);
+        }
+        group.rows.push(row);
+        if(key) group.keys.add(key);
+        if(name) group.names.add(name);
+      });
+
+      /* Bridge groups that became connected through a different key/name. */
+      let merged=true;
+      while(merged){
+        merged=false;
+        outer: for(let i=0;i<groups.length;i++){
+          for(let j=i+1;j<groups.length;j++){
+            const a=groups[i], b=groups[j];
+            const overlap=[...a.keys].some(x=>b.keys.has(x)) || [...a.names].some(x=>b.names.has(x));
+            if(overlap){
+              b.rows.forEach(r=>a.rows.push(r));
+              b.keys.forEach(x=>a.keys.add(x));
+              b.names.forEach(x=>a.names.add(x));
+              groups.splice(j,1);
+              merged=true;
+              break outer;
+            }
+          }
+        }
+      }
+      return groups;
+    }
+
+    let taxonomyMergeRunning=false;
+
+    async function mergeDuplicateTaxonomy(cats,cities,areas){
+      if(taxonomyMergeRunning) return false;
+      taxonomyMergeRunning=true;
+      let changed=false;
+
+      try{
+        /* CATEGORIES: one case-insensitive identity; move shops before deleting duplicates. */
+        for(const group of buildDuplicateGroups(cats,"category_key","category_name")){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"category_key");
+          const canonicalKey=normalizedText(canonical.category_key).toLowerCase();
+          const displayName=preferredDisplayName(group.rows,"category_name") || canonicalKey;
+          const icon=normalizedText(canonical.icon) || normalizedText((group.rows.find(r=>r.icon)||{}).icon) || "🏪";
+
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_categories")
+            .update({category_name:displayName,icon})
+            .eq("category_key",canonical.category_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldKey=normalizedText(row.category_key);
+            if(oldKey && oldKey!==canonical.category_key){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({category:canonical.category_key}).eq("category",oldKey);
+              if(profileError) throw profileError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_categories").delete().eq("category_key",row.category_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+
+        /* CITIES / REGIONS: preserve lowercase internal key, preserve nicest visible capitalization. */
+        for(const group of buildDuplicateGroups(cities,"city_key","city_name")){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"city_key");
+          const displayName=preferredDisplayName(group.rows,"city_name") || normalizedText(canonical.city_key);
+
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_cities")
+            .update({city_name:displayName})
+            .eq("city_key",canonical.city_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldKey=normalizedText(row.city_key);
+            if(oldKey && oldKey!==canonical.city_key){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({city:canonical.city_key}).eq("city",oldKey);
+              if(profileError) throw profileError;
+              const {error:areaCityError}=await supabaseClient.from("shop_areas").update({city_key:canonical.city_key}).eq("city_key",oldKey);
+              if(areaCityError) throw areaCityError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_cities").delete().eq("city_key",row.city_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+
+        /* Re-read areas after city merges, because their city_key may just have changed. */
+        const {data:freshAreas,error:freshAreasError}=await supabaseClient.from("shop_areas").select("*");
+        if(freshAreasError) throw freshAreasError;
+        const areaGroups=[];
+        (freshAreas||[]).forEach(row=>{
+          const city=normalizedText(row.city_key).toLocaleLowerCase();
+          const name=normalizedText(row.area_name).toLocaleLowerCase();
+          const key=city+"::"+name;
+          let group=areaGroups.find(g=>g.key===key);
+          if(!group){group={key,rows:[]};areaGroups.push(group);}
+          group.rows.push(row);
+        });
+
+        for(const group of areaGroups){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"area_key");
+          const displayName=preferredDisplayName(group.rows,"area_name") || normalizedText(canonical.area_name);
+          const oldCanonicalName=normalizedText(canonical.area_name);
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_areas")
+            .update({area_name:displayName})
+            .eq("area_key",canonical.area_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          if(oldCanonicalName && oldCanonicalName!==displayName){
+            const {error:p0}=await supabaseClient.from("shop_profiles").update({area:displayName}).eq("area",oldCanonicalName);
+            if(p0) throw p0;
+          }
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldName=normalizedText(row.area_name);
+            if(oldName && oldName!==displayName){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:displayName}).eq("area",oldName);
+              if(profileError) throw profileError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_areas").delete().eq("area_key",row.area_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+      } finally {
+        taxonomyMergeRunning=false;
+      }
+
+      return changed;
+    }
+
     function installV2Styles(){
       const style = document.createElement("style");
       style.id = "ma-admin-v2-styles";
@@ -4002,14 +4169,27 @@
     }
 
     async function loadV2Taxonomy(){
-      const [cats,cities,areas] = await Promise.all([
+      let [cats,cities,areas] = await Promise.all([
         supabaseClient.from("shop_categories").select("*").order("sort_order",{ascending:true}).order("category_name",{ascending:true}),
         supabaseClient.from("shop_cities").select("*").order("sort_order",{ascending:true}).order("city_name",{ascending:true}),
         supabaseClient.from("shop_areas").select("*").order("sort_order",{ascending:true}).order("area_name",{ascending:true})
       ]);
       if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
+
+      /* Automatically collapse old case-only duplicates (Beirut/beirut, Da7ye/da7ye, etc.). */
+      const merged = await mergeDuplicateTaxonomy(cats.data||[],cities.data||[],areas.data||[]);
+      if(merged){
+        [cats,cities,areas] = await Promise.all([
+          supabaseClient.from("shop_categories").select("*").order("sort_order",{ascending:true}).order("category_name",{ascending:true}),
+          supabaseClient.from("shop_cities").select("*").order("sort_order",{ascending:true}).order("city_name",{ascending:true}),
+          supabaseClient.from("shop_areas").select("*").order("sort_order",{ascending:true}).order("area_name",{ascending:true})
+        ]);
+        if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
+      }
+
       v2Categories=cats.data||[]; v2Cities=cities.data||[]; v2Areas=areas.data||[];
       window.__MA7ALAK_V2_CATEGORIES__ = v2Categories;
+      window.__MA7ALAK_V2_CITIES__ = v2Cities;
       renderV2Lists(); refreshSmartFields();
     }
 
@@ -4018,20 +4198,65 @@
         e.preventDefault();
         const name=normalizedText(byId("ma-v2-category-name").value), icon=normalizedText(byId("ma-v2-category-icon").value)||"🏪", key=keyify(name);
         if(!name||!key)return;
+
+        const duplicate=v2Categories.find(row=>sameText(row.category_key,key)||sameText(row.category_name,name));
+        if(duplicate){
+          const {error}=await supabaseClient.from("shop_categories")
+            .update({category_name:name,icon})
+            .eq("category_key",duplicate.category_key);
+          if(error){alert(error.message);return;}
+          e.target.reset();
+          await loadV2Taxonomy();
+          return;
+        }
+
         const {error}=await supabaseClient.from("shop_categories").insert({category_key:key,category_name:name,icon});
         if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
       });
+
       byId("ma-v2-city-form").addEventListener("submit",async e=>{
         e.preventDefault();
-        const name=normalizedText(byId("ma-v2-city-name").value), key=keyify(byId("ma-v2-city-key").value)||keyify(name);
+        const name=normalizedText(byId("ma-v2-city-name").value), requestedKey=normalizedText(byId("ma-v2-city-key").value), key=keyify(requestedKey)||keyify(name);
         if(!name||!key)return;
+
+        const duplicate=v2Cities.find(row=>sameText(row.city_key,key)||sameText(row.city_name,name));
+        if(duplicate){
+          /* Same city typed with different capitalization: update visible name instead of creating another row. */
+          const {error}=await supabaseClient.from("shop_cities")
+            .update({city_name:name})
+            .eq("city_key",duplicate.city_key);
+          if(error){alert(error.message);return;}
+          e.target.reset();
+          await loadV2Taxonomy();
+          return;
+        }
+
         const {error}=await supabaseClient.from("shop_cities").insert({city_key:key,city_name:name});
         if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
       });
+
       byId("ma-v2-area-form").addEventListener("submit",async e=>{
         e.preventDefault();
         const city=byId("ma-v2-area-city").value, name=normalizedText(byId("ma-v2-area-name").value), key=keyify(byId("ma-v2-area-key").value)||keyify(city+"-"+name);
         if(!city||!name||!key)return;
+
+        const duplicate=v2Areas.find(row=>sameText(row.city_key,city)&&(sameText(row.area_key,key)||sameText(row.area_name,name)));
+        if(duplicate){
+          const oldName=normalizedText(duplicate.area_name);
+          const {error}=await supabaseClient.from("shop_areas")
+            .update({area_name:name})
+            .eq("area_key",duplicate.area_key);
+          if(error){alert(error.message);return;}
+          if(oldName && oldName!==name){
+            const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:name}).eq("area",oldName);
+            if(profileError){alert(profileError.message);return;}
+          }
+          e.target.reset();
+          await loadV2Taxonomy();
+          await loadManagedShops();
+          return;
+        }
+
         const {error}=await supabaseClient.from("shop_areas").insert({area_key:key,area_name:name,city_key:city});
         if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
       });
