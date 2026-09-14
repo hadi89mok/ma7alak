@@ -734,6 +734,19 @@
 
 
   let ma7alakLiveCategoryIcons = new Map();
+  let ma7alakLiveCategoryNames = new Map();
+
+  /*
+     Directory filter identity and card label are intentionally separate.
+     - shop.category = stable category/filter key assigned by Admin
+     - shop.categoryName = free text shown only on the shop card
+     - ma7alakLiveCategoryNames = official Directory Control category label
+  */
+  function ma7alakShopRegion(shop){
+    return String(
+      (shop && (shop.area || shop.city)) || ""
+    ).trim();
+  }
 
   function ma7alakCategoryIcon(category,name){
 
@@ -767,7 +780,7 @@
       Array.from(
         new Set(
           shops
-            .map(shop => String(shop.area || "").trim())
+            .map(shop => ma7alakShopRegion(shop))
             .filter(Boolean)
         )
       )
@@ -807,7 +820,7 @@
     shops.forEach(
       shop => {
 
-        if(shop.area !== area){
+        if(ma7alakShopRegion(shop) !== area){
           return;
         }
 
@@ -820,7 +833,7 @@
 
         const name =
           String(
-            shop.categoryName ||
+            ma7alakLiveCategoryNames.get(key) ||
             key
           ).trim();
 
@@ -1162,7 +1175,11 @@
               " " +
               shop.arabic +
               " " +
-              shop.area +
+              ma7alakShopRegion(shop) +
+              " " +
+              shop.category +
+              " " +
+              (ma7alakLiveCategoryNames.get(shop.category) || "") +
               " " +
               shop.categoryName +
               " " +
@@ -1174,7 +1191,7 @@
           }
 
           return (
-            shop.area === selectedArea &&
+            ma7alakShopRegion(shop) === selectedArea &&
             shop.category === selectedCategory
           );
 
@@ -1463,6 +1480,13 @@
           String(row.icon || "🏪").trim() || "🏪"
         ])
       );
+
+      ma7alakLiveCategoryNames = new Map(
+        (categoryRows || []).map(row => [
+          String(row.category_key || "").trim(),
+          String(row.category_name || row.category_key || "").trim()
+        ])
+      );
     }
 
     const { data, error } =
@@ -1535,14 +1559,14 @@
       if(!ok) return;
       ma7alakRenderDynamicAreas();
 
-      if(oldArea && shops.some(s => (s.city || s.area) === oldArea)){
+      if(oldArea && shops.some(s => ma7alakShopRegion(s) === oldArea)){
         selectedArea = oldArea;
         const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
         if(btn) btn.classList.add("active");
         ma7alakRenderDynamicCategories(oldArea);
         categorySection.classList.add("visible");
 
-        if(oldCategory && shops.some(s=>(s.city || s.area)===oldArea && s.category===oldCategory)){
+        if(oldCategory && shops.some(s=>ma7alakShopRegion(s)===oldArea && s.category===oldCategory)){
           selectedCategory = oldCategory;
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
@@ -1560,16 +1584,44 @@
     },80);
   }
 
+  let ma7alakDirectoryFallbackTimer = null;
+
   async function ma7alakStartDirectoryRealtime(){
     const client = await ma7alakLoadSupabase();
-    if(!client || ma7alakDirectoryRealtimeChannel) return;
-    ma7alakDirectoryRealtimeChannel = client
-      .channel("ma7alak-live-directory-v2")
-      .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},ma7alakRefreshDirectoryLive)
-      .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},ma7alakRefreshDirectoryLive)
-      .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},ma7alakRefreshDirectoryLive)
-      .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},ma7alakRefreshDirectoryLive)
-      .subscribe();
+    if(!client) return;
+
+    if(!ma7alakDirectoryRealtimeChannel){
+      ma7alakDirectoryRealtimeChannel = client
+        .channel("ma7alak-live-directory-v3")
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},ma7alakRefreshDirectoryLive)
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},ma7alakRefreshDirectoryLive)
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},ma7alakRefreshDirectoryLive)
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},ma7alakRefreshDirectoryLive)
+        .subscribe();
+    }
+
+    /*
+       Realtime is the primary path. This lightweight fallback means an
+       already-open Directory still updates even if a Supabase publication
+       or mobile connection temporarily misses a Realtime event.
+    */
+    if(!ma7alakDirectoryFallbackTimer){
+      ma7alakDirectoryFallbackTimer = setInterval(function(){
+        if(!document.hidden){
+          ma7alakRefreshDirectoryLive();
+        }
+      }, 1500);
+    }
+
+    if(!window.__MA7ALAK_DIRECTORY_VISIBILITY_REFRESH__){
+      window.__MA7ALAK_DIRECTORY_VISIBILITY_REFRESH__ = true;
+      window.addEventListener("focus", ma7alakRefreshDirectoryLive);
+      document.addEventListener("visibilitychange", function(){
+        if(!document.hidden){
+          ma7alakRefreshDirectoryLive();
+        }
+      });
+    }
   }
 
 
@@ -2819,7 +2871,11 @@
 
         <div class="ma7alak-shop-category-pill">
 
-          ${escapeHTML(shop.categoryName)}
+          ${escapeHTML(
+            shop.categoryName ||
+            ma7alakLiveCategoryNames.get(shop.category) ||
+            shop.category
+          )}
 
         </div>
 
