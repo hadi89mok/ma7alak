@@ -1298,6 +1298,222 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   }
 }
 
+
+/* =========================================================
+   INLINE OWNER LOGIN / LOGOUT — SAME PAGE
+========================================================= */
+#ma7alak-login-overlay{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
+  background:rgba(0,0,0,.74);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  z-index:2147483647;
+}
+
+#ma7alak-login-overlay.open{
+  display:flex;
+  animation:ma7alakLoginFade .18s ease-out;
+}
+
+@keyframes ma7alakLoginFade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+#ma7alak-login-panel{
+  position:relative;
+  width:min(430px,100%);
+  overflow:hidden;
+  padding:34px 22px 22px;
+  border:1px solid rgba(217,164,65,.25);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(217,164,65,.10),transparent 32%),
+    linear-gradient(180deg,rgba(25,26,28,.99),rgba(9,10,11,.99));
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.72),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  color:#fff;
+}
+
+#ma7alak-login-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:38px;
+  height:38px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:12px;
+  background:rgba(255,255,255,.045);
+  color:#fff;
+  font-size:25px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.ma7alak-login-brand{
+  margin-bottom:22px;
+  text-align:center;
+}
+
+.ma7alak-login-brand-small{
+  margin-bottom:8px;
+  color:var(--m7-gold-soft);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.5px;
+}
+
+#ma7alak-login-title{
+  margin:0;
+  color:#fff;
+  font-size:27px;
+  line-height:1.12;
+}
+
+#ma7alak-login-title span{
+  color:var(--m7-gold-soft);
+}
+
+.ma7alak-login-brand p{
+  margin:9px auto 0;
+  max-width:330px;
+  color:rgba(255,255,255,.48);
+  font-size:11px;
+  line-height:1.5;
+}
+
+.ma7alak-login-label{
+  display:block;
+  margin:13px 2px 7px;
+  color:rgba(255,255,255,.67);
+  font-size:10px;
+  font-weight:800;
+}
+
+.ma7alak-login-input-wrap{
+  position:relative;
+}
+
+.ma7alak-login-input{
+  width:100%;
+  height:54px;
+  padding:0 46px 0 16px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  outline:none;
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  font-size:14px;
+  font-weight:650;
+}
+
+.ma7alak-login-input:focus{
+  border-color:rgba(217,164,65,.50);
+  box-shadow:0 0 0 3px rgba(217,164,65,.07);
+}
+
+#ma7alak-login-password-toggle{
+  position:absolute;
+  top:50%;
+  right:10px;
+  transform:translateY(-50%);
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:rgba(255,255,255,.55);
+  cursor:pointer;
+  font-size:17px;
+}
+
+.ma7alak-inline-login-message{
+  min-height:18px;
+  margin:12px 2px 0;
+  font-size:10px;
+  font-weight:750;
+  line-height:1.4;
+}
+
+.ma7alak-inline-login-message.error{
+  color:#ff7777;
+}
+
+.ma7alak-inline-login-message.success{
+  color:#8de39d;
+}
+
+#ma7alak-inline-login-button{
+  width:100%;
+  min-height:54px;
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  border:1px solid rgba(239,198,110,.42);
+  border-radius:16px;
+  background:
+    linear-gradient(180deg,rgba(217,164,65,.95),rgba(156,105,26,.96));
+  color:#100d08;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(217,164,65,.12);
+}
+
+#ma7alak-inline-login-button:disabled{
+  opacity:.65;
+  cursor:wait;
+}
+
+#ma7alak-inline-login-spinner{
+  width:16px;
+  height:16px;
+  display:none;
+  border:2px solid rgba(16,13,8,.25);
+  border-top-color:#100d08;
+  border-radius:50%;
+  animation:ma7alakLoginSpin .7s linear infinite;
+}
+
+@keyframes ma7alakLoginSpin{
+  to{transform:rotate(360deg)}
+}
+
+@media(max-width:480px){
+  #ma7alak-login-panel{
+    padding:31px 16px 18px;
+    border-radius:23px;
+  }
+
+  #ma7alak-login-title{
+    font-size:25px;
+  }
+
+  .ma7alak-login-brand p{
+    font-size:11px;
+  }
+
+  .ma7alak-login-input{
+    height:52px;
+    font-size:14px;
+  }
+
+  #ma7alak-inline-login-button{
+    min-height:53px;
+  }
+}
+
 `;
 
     document.head.appendChild(style);
@@ -1468,19 +1684,70 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
       </a>
 
       <a
+        id="ma7alak-header-auth-action"
         class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/login"
+        href="#"
+        role="button"
+        aria-label="Login"
+        data-auth-state="login"
       >
-        <span class="ma7alak-header-menu-icon">↪</span>
+        <span id="ma7alak-header-auth-icon" class="ma7alak-header-menu-icon">↪</span>
         <span class="ma7alak-header-menu-text">
-          <span class="ma7alak-header-menu-main">Login</span>
-          <span class="ma7alak-header-menu-sub">Shop owner access</span>
+          <span id="ma7alak-header-auth-main" class="ma7alak-header-menu-main">Login</span>
+          <span id="ma7alak-header-auth-sub" class="ma7alak-header-menu-sub">Shop owner access</span>
         </span>
       </a>
 
     </div>
   </div>
 </header>
+
+
+<div id="ma7alak-login-overlay" aria-hidden="true">
+  <div id="ma7alak-login-panel" role="dialog" aria-modal="true" aria-labelledby="ma7alak-login-title">
+    <button id="ma7alak-login-close" type="button" aria-label="Close login">×</button>
+
+    <div class="ma7alak-login-brand">
+      <div class="ma7alak-login-brand-small">MA7ALAK FOR BUSINESS</div>
+      <h2 id="ma7alak-login-title">Marhaba to <span>Ma7alak</span></h2>
+      <p>Sign in to manage your shop, Stories, photos and videos.</p>
+    </div>
+
+    <form id="ma7alak-inline-login-form" autocomplete="on">
+      <label class="ma7alak-login-label" for="ma7alak-login-email">Email</label>
+      <div class="ma7alak-login-input-wrap">
+        <input
+          id="ma7alak-login-email"
+          class="ma7alak-login-input"
+          type="email"
+          placeholder="example@email.com"
+          autocomplete="email"
+          required
+        >
+      </div>
+
+      <label class="ma7alak-login-label" for="ma7alak-login-password">Password</label>
+      <div class="ma7alak-login-input-wrap">
+        <input
+          id="ma7alak-login-password"
+          class="ma7alak-login-input"
+          type="password"
+          placeholder="Your password"
+          autocomplete="current-password"
+          required
+        >
+        <button id="ma7alak-login-password-toggle" type="button" aria-label="Show password">◉</button>
+      </div>
+
+      <div id="ma7alak-inline-login-message" class="ma7alak-inline-login-message"></div>
+
+      <button id="ma7alak-inline-login-button" type="submit">
+        <span id="ma7alak-inline-login-spinner" aria-hidden="true"></span>
+        <span id="ma7alak-inline-login-button-text">Log In</span>
+      </button>
+    </form>
+  </div>
+</div>
 
 <div id="ma7alak-header-search-overlay" aria-hidden="true">
   <div id="ma7alak-header-search-panel" role="dialog" aria-modal="true" aria-label="Search shops">
@@ -1894,6 +2161,336 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
       }
       if(event.key==="Escape"&&overlay&&overlay.classList.contains("open")){closeSearch();}
     });
+  }
+
+
+  /* =========================================================
+     INLINE OWNER LOGIN / LOGOUT
+     Opens over the CURRENT page. Never navigates to /login.
+  ========================================================= */
+
+  function getHeaderAuthElements(){
+    return {
+      action:document.getElementById("ma7alak-header-auth-action"),
+      icon:document.getElementById("ma7alak-header-auth-icon"),
+      main:document.getElementById("ma7alak-header-auth-main"),
+      sub:document.getElementById("ma7alak-header-auth-sub")
+    };
+  }
+
+  function setHeaderAuthState(loggedIn){
+    const auth=getHeaderAuthElements();
+    if(!auth.action){return;}
+
+    auth.action.dataset.authState=loggedIn ? "logout" : "login";
+    auth.action.setAttribute("aria-label",loggedIn ? "Logout" : "Login");
+
+    if(auth.icon){
+      auth.icon.textContent=loggedIn ? "↩" : "↪";
+    }
+
+    if(auth.main){
+      auth.main.textContent=loggedIn ? "Logout" : "Login";
+    }
+
+    if(auth.sub){
+      auth.sub.textContent=loggedIn
+        ? "Sign out of your shop"
+        : "Shop owner access";
+    }
+  }
+
+  async function refreshHeaderAuthState(){
+    const supabaseClient=getClient();
+
+    if(!supabaseClient){
+      setHeaderAuthState(false);
+      return false;
+    }
+
+    try{
+      const result=await supabaseClient.auth.getSession();
+      const loggedIn=Boolean(
+        result &&
+        result.data &&
+        result.data.session &&
+        result.data.session.user
+      );
+
+      setHeaderAuthState(loggedIn);
+      return loggedIn;
+    }
+    catch(error){
+      console.error("MA7ALAK header auth state:",error);
+      setHeaderAuthState(false);
+      return false;
+    }
+  }
+
+  function clearInlineLoginMessage(){
+    const message=document.getElementById("ma7alak-inline-login-message");
+    if(!message){return;}
+    message.textContent="";
+    message.className="ma7alak-inline-login-message";
+  }
+
+  function showInlineLoginMessage(messageText,type){
+    const message=document.getElementById("ma7alak-inline-login-message");
+    if(!message){return;}
+    message.textContent=String(messageText||"");
+    message.className="ma7alak-inline-login-message "+(type||"error");
+  }
+
+  function setInlineLoginLoading(loading){
+    const button=document.getElementById("ma7alak-inline-login-button");
+    const label=document.getElementById("ma7alak-inline-login-button-text");
+    const spinner=document.getElementById("ma7alak-inline-login-spinner");
+
+    if(button){button.disabled=Boolean(loading);}
+    if(label){label.textContent=loading ? "Signing in..." : "Log In";}
+    if(spinner){spinner.style.display=loading ? "block" : "none";}
+  }
+
+  function openInlineLogin(){
+    const overlay=document.getElementById("ma7alak-login-overlay");
+    const email=document.getElementById("ma7alak-login-email");
+
+    if(!overlay){return;}
+
+    clearInlineLoginMessage();
+    setInlineLoginLoading(false);
+
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden","false");
+
+    document.documentElement.style.overflow="hidden";
+    document.body.style.overflow="hidden";
+
+    setTimeout(function(){
+      if(email){email.focus();}
+    },60);
+  }
+
+  function closeInlineLogin(){
+    const overlay=document.getElementById("ma7alak-login-overlay");
+    if(!overlay){return;}
+
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden","true");
+
+    document.documentElement.style.overflow="";
+    document.body.style.overflow="";
+  }
+
+  async function verifyInlineShopOwner(userId){
+    const supabaseClient=getClient();
+
+    if(!supabaseClient){
+      return {
+        success:false,
+        error:"Could not connect. Please try again."
+      };
+    }
+
+    try{
+      const ownerResult=await supabaseClient
+        .from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id",userId)
+        .limit(1)
+        .maybeSingle();
+
+      if(
+        ownerResult.error ||
+        !ownerResult.data ||
+        !ownerResult.data.shop_slug
+      ){
+        return {
+          success:false,
+          error:"This account is not linked to a Ma7alak shop."
+        };
+      }
+
+      return {
+        success:true,
+        shop_slug:String(ownerResult.data.shop_slug).trim()
+      };
+    }
+    catch(error){
+      return {
+        success:false,
+        error:"Could not verify your shop. Please try again."
+      };
+    }
+  }
+
+  function setupInlineLogin(){
+    const action=document.getElementById("ma7alak-header-auth-action");
+    const overlay=document.getElementById("ma7alak-login-overlay");
+    const close=document.getElementById("ma7alak-login-close");
+    const form=document.getElementById("ma7alak-inline-login-form");
+    const password=document.getElementById("ma7alak-login-password");
+    const toggle=document.getElementById("ma7alak-login-password-toggle");
+
+    if(action){
+      action.addEventListener("click",async function(event){
+        event.preventDefault();
+        event.stopPropagation();
+
+        const state=action.dataset.authState || "login";
+
+        if(state==="logout"){
+          const supabaseClient=getClient();
+
+          if(!supabaseClient){return;}
+
+          try{
+            await supabaseClient.auth.signOut();
+          }
+          catch(error){
+            console.error("MA7ALAK logout:",error);
+          }
+
+          try{
+            sessionStorage.removeItem("ma7alak_owner_slug");
+            sessionStorage.removeItem("ma7alak_owner_name");
+          }
+          catch(error){}
+
+          hideOwnerProfile();
+          setHeaderAuthState(false);
+          return;
+        }
+
+        openInlineLogin();
+      });
+    }
+
+    if(close){
+      close.addEventListener("click",function(event){
+        event.preventDefault();
+        closeInlineLogin();
+      });
+    }
+
+    if(overlay){
+      overlay.addEventListener("click",function(event){
+        if(event.target===overlay){
+          closeInlineLogin();
+        }
+      });
+    }
+
+    if(toggle && password){
+      toggle.addEventListener("click",function(event){
+        event.preventDefault();
+
+        const showing=password.type==="text";
+        password.type=showing ? "password" : "text";
+        toggle.setAttribute(
+          "aria-label",
+          showing ? "Show password" : "Hide password"
+        );
+        toggle.textContent=showing ? "◉" : "◎";
+      });
+    }
+
+    document.addEventListener("keydown",function(event){
+      if(
+        event.key==="Escape" &&
+        overlay &&
+        overlay.classList.contains("open")
+      ){
+        closeInlineLogin();
+      }
+    });
+
+    if(form){
+      form.addEventListener("submit",async function(event){
+        event.preventDefault();
+
+        const email=document.getElementById("ma7alak-login-email");
+        const passwordInput=document.getElementById("ma7alak-login-password");
+        const emailValue=String(email ? email.value : "").trim();
+        const passwordValue=String(passwordInput ? passwordInput.value : "");
+
+        clearInlineLoginMessage();
+
+        if(!emailValue || !passwordValue){
+          showInlineLoginMessage("Enter your email and password.","error");
+          return;
+        }
+
+        const supabaseClient=getClient();
+
+        if(!supabaseClient){
+          showInlineLoginMessage("Could not connect. Please try again.","error");
+          return;
+        }
+
+        setInlineLoginLoading(true);
+
+        try{
+          const result=await supabaseClient.auth.signInWithPassword({
+            email:emailValue,
+            password:passwordValue
+          });
+
+          if(result.error){
+            let errorText="Incorrect email or password.";
+
+            if(
+              String(result.error.message||"")
+                .toLowerCase()
+                .includes("email not confirmed")
+            ){
+              errorText="Please confirm your email first.";
+            }
+
+            showInlineLoginMessage(errorText,"error");
+            setInlineLoginLoading(false);
+            return;
+          }
+
+          if(!result.data || !result.data.user){
+            showInlineLoginMessage("Login failed. Please try again.","error");
+            setInlineLoginLoading(false);
+            return;
+          }
+
+          const verification=await verifyInlineShopOwner(result.data.user.id);
+
+          if(!verification.success){
+            await supabaseClient.auth.signOut();
+            showInlineLoginMessage(verification.error,"error");
+            setHeaderAuthState(false);
+            setInlineLoginLoading(false);
+            return;
+          }
+
+          try{
+            sessionStorage.setItem("ma7alak_owner_slug",verification.shop_slug);
+          }
+          catch(error){}
+
+          showInlineLoginMessage("Logged in successfully.","success");
+          setHeaderAuthState(true);
+
+          await loadOwnerProfile();
+
+          setInlineLoginLoading(false);
+
+          setTimeout(function(){
+            closeInlineLogin();
+          },500);
+        }
+        catch(error){
+          console.error("MA7ALAK inline login:",error);
+          showInlineLoginMessage("Login failed. Please try again.","error");
+          setInlineLoginLoading(false);
+        }
+      });
+    }
   }
 
   /* =========================================================
@@ -3228,12 +3825,27 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   function setupAuthListener(){
     const supabaseClient=getClient();
     if(!supabaseClient){return;}
-    supabaseClient.auth.onAuthStateChange(function(){setTimeout(loadOwnerProfile,80);});
+
+    supabaseClient.auth.onAuthStateChange(function(event,session){
+      setHeaderAuthState(
+        Boolean(
+          session &&
+          session.user
+        )
+      );
+
+      setTimeout(
+        loadOwnerProfile,
+        80
+      );
+    });
   }
 
   async function start(){
     setupScrollEffect();
     setupHeaderMenu();
+    setupInlineLogin();
+    await refreshHeaderAuthState();
     setupInstantHeart();
 
     /*
