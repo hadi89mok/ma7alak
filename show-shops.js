@@ -1534,14 +1534,14 @@
       if(!ok) return;
       ma7alakRenderDynamicAreas();
 
-      if(oldArea && shops.some(s => s.area === oldArea)){
+      if(oldArea && shops.some(s => (s.city || s.area) === oldArea)){
         selectedArea = oldArea;
         const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
         if(btn) btn.classList.add("active");
         ma7alakRenderDynamicCategories(oldArea);
         categorySection.classList.add("visible");
 
-        if(oldCategory && shops.some(s=>s.area===oldArea && s.category===oldCategory)){
+        if(oldCategory && shops.some(s=>(s.city || s.area)===oldArea && s.category===oldCategory)){
           selectedCategory = oldCategory;
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
@@ -3005,6 +3005,6 @@
    - Added automatic category icons with a safe shop fallback icon for new categories.
    - If a new active shop uses a new Area, that Area appears automatically after refresh.
    - If a shop uses a new Category, that Category appears automatically inside its Area after refresh.
-   - No GitHub edit is needed just to add future Areas or Categories.
+   - No GitHub edit is needed just to add future Cities / Regions or Categories.
    - Existing search, shop cards, Story linking/viewer and mobile two-card layout were preserved.
 ========================================================= */
