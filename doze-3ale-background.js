@@ -52,17 +52,24 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      html.ma7alak-doze-bg-active,
-      body.ma7alak-doze-bg-active{
+      html.ma7alak-doze-bg-active{
         background:#120906!important;
+        min-height:100%!important;
+      }
+
+      body.ma7alak-doze-bg-active{
         min-height:100%!important;
       }
 
       body.ma7alak-doze-bg-active{
         position:relative!important;
         isolation:isolate!important;
+        background:transparent!important;
       }
 
+      /* HOSTINGER STACKING FIX:
+         Keep the page artwork inside the body's stacking context instead
+         of putting it behind html/body where mobile browsers can hide it. */
       #${BG_ID}{
         position:fixed!important;
         inset:0!important;
@@ -72,12 +79,26 @@
         height:100dvh!important;
         pointer-events:none!important;
         overflow:hidden!important;
-        z-index:-2147483647!important;
+        z-index:0!important;
         background:
           radial-gradient(circle at 50% 18%,rgba(117,55,25,.19),transparent 34%),
           radial-gradient(circle at 17% 78%,rgba(92,35,16,.23),transparent 31%),
           radial-gradient(circle at 86% 70%,rgba(130,61,24,.20),transparent 34%),
           linear-gradient(180deg,#1a0d08 0%,#100705 48%,#160a06 100%)!important;
+      }
+
+      body.ma7alak-doze-bg-active > *:not(#${BG_ID}){
+        position:relative;
+        z-index:1;
+      }
+
+      /* Hostinger's outer page shells can otherwise paint an opaque page
+         color over the fixed background. Only the outer shells are cleared;
+         cards/components keep their own styling. */
+      body.ma7alak-doze-bg-active > div:not(#${BG_ID}),
+      body.ma7alak-doze-bg-active > main,
+      body.ma7alak-doze-bg-active > #root{
+        background-color:transparent!important;
       }
 
       #${BG_ID} .m7-bg-svg{
