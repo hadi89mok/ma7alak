@@ -1,17 +1,12 @@
 /* =========================================================
-   MA7ALAK MASTER GITHUB LOADER
+   MA7ALAK MASTER LOADER — EXACT COMMIT VERSION
    ---------------------------------------------------------
-   Put ONLY this one loader in Hostinger Custom Website Code.
-
-   It loads the correct GitHub JavaScript files automatically.
-
-   Repo:
-   https://github.com/hadi89mok/ma7alak
-
    IMPORTANT:
-   - Keep this file in the ROOT of the repo.
-   - Recommended filename: ma7alak-master.js
-   - Child scripts are loaded from @main.
+   Hostinger bootstrap sets window.__MA7ALAK_GITHUB_SHA__ to
+   the latest GitHub commit SHA before loading this file.
+
+   Every child script is then loaded from THAT SAME SHA.
+   This completely avoids stale jsDelivr @main child files.
 ========================================================= */
 
 (function () {
@@ -23,8 +18,13 @@
 
   window.__MA7ALAK_MASTER_LOADER__ = true;
 
+  const VERSION =
+    String(window.__MA7ALAK_GITHUB_SHA__ || "main").trim();
+
   const BASE =
-    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/";
+    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@" +
+    VERSION +
+    "/";
 
   /* =========================================================
      PAGE
@@ -41,8 +41,7 @@
       value.length > 1 &&
       value.endsWith("/")
     ) {
-      value =
-        value.slice(0, -1);
+      value = value.slice(0, -1);
     }
 
     return value || "/";
@@ -57,16 +56,11 @@
      SCRIPT LOADER
   ========================================================= */
 
-  const loadedFiles =
-    new Set();
+  const loadedFiles = new Set();
 
-  function loadScript(
-    filename,
-    options
-  ) {
+  function loadScript(filename, options) {
 
-    options =
-      options || {};
+    options = options || {};
 
     if (
       !filename ||
@@ -77,223 +71,139 @@
 
     loadedFiles.add(filename);
 
-    return new Promise(
-      function (
-        resolve,
-        reject
-      ) {
+    return new Promise(function (resolve, reject) {
 
-        const existing =
-          document.querySelector(
-            'script[data-ma7alak-github-file="' +
-            filename +
-            '"]'
-          );
+      const existing =
+        document.querySelector(
+          'script[data-ma7alak-github-file="' +
+          filename +
+          '"]'
+        );
 
-        if (existing) {
+      if (existing) {
 
-          if (
-            existing.dataset.ma7alakLoaded ===
-            "1"
-          ) {
-            resolve();
-            return;
-          }
-
-          existing.addEventListener(
-            "load",
-            resolve,
-            {
-              once:true
-            }
-          );
-
-          existing.addEventListener(
-            "error",
-            reject,
-            {
-              once:true
-            }
-          );
-
+        if (
+          existing.dataset.ma7alakLoaded === "1"
+        ) {
+          resolve();
           return;
         }
 
-        const script =
-          document.createElement(
-            "script"
+        existing.addEventListener(
+          "load",
+          resolve,
+          { once:true }
+        );
+
+        existing.addEventListener(
+          "error",
+          reject,
+          { once:true }
+        );
+
+        return;
+      }
+
+      const script =
+        document.createElement("script");
+
+      script.src =
+        BASE +
+        filename;
+
+      script.async =
+        options.async === true;
+
+      script.defer =
+        options.defer === true;
+
+      script.dataset.ma7alakGithubFile =
+        filename;
+
+      script.dataset.ma7alakGithubVersion =
+        VERSION;
+
+      script.addEventListener(
+        "load",
+        function () {
+
+          script.dataset.ma7alakLoaded = "1";
+
+          console.log(
+            "MA7ALAK loaded:",
+            filename,
+            "commit:",
+            VERSION
           );
 
-        script.src =
-          BASE +
-          filename +
-          "?v=" +
-          Date.now();
+          resolve();
+        },
+        { once:true }
+      );
 
-        script.async =
-          options.async === true;
+      script.addEventListener(
+        "error",
+        function (error) {
 
-        script.defer =
-          options.defer === true;
+          console.error(
+            "MA7ALAK failed to load:",
+            filename,
+            "commit:",
+            VERSION,
+            error
+          );
 
-        script.dataset.ma7alakGithubFile =
-          filename;
+          reject(error);
+        },
+        { once:true }
+      );
 
-        script.addEventListener(
-          "load",
-          function () {
-
-            script.dataset.ma7alakLoaded =
-              "1";
-
-            console.log(
-              "MA7ALAK loaded:",
-              filename
-            );
-
-            resolve();
-
-          },
-          {
-            once:true
-          }
-        );
-
-        script.addEventListener(
-          "error",
-          function (error) {
-
-            console.error(
-              "MA7ALAK failed to load:",
-              filename,
-              error
-            );
-
-            reject(error);
-
-          },
-          {
-            once:true
-          }
-        );
-
-        (
-          document.head ||
-          document.documentElement
-        ).appendChild(
-          script
-        );
-
-      }
-    );
-
+      (
+        document.head ||
+        document.documentElement
+      ).appendChild(script);
+    });
   }
-
 
   /* =========================================================
      GLOBAL WEBSITE FILES
-     ---------------------------------------------------------
-     These are available throughout Ma7alak.
   ========================================================= */
 
-  loadScript(
-    "premium-social-header.js"
-  );
-
-  loadScript(
-    "notifications.js"
-  );
-
-  loadScript(
-    "ma7alak-live-presence.js"
-  );
-
-  loadScript(
-    "story-upload-panel.js"
-  );
-
-  loadScript(
-    "homepage-story-likes.js"
-  );
-
-  loadScript(
-    "show-shops.js"
-  );
-
-     loadScript(
-    "ma7alak-fresh-navigation.js"
-  );
-
+  loadScript("premium-social-header.js");
+  loadScript("notifications.js");
+  loadScript("ma7alak-live-presence.js");
+  loadScript("story-upload-panel.js");
+  loadScript("homepage-story-likes.js");
+  loadScript("show-shops.js");
+  loadScript("ma7alak-fresh-navigation.js");
 
   /* =========================================================
      DOZE 3ALE
   ========================================================= */
 
-  if (
-    PATH ===
-    "/doze-3ale"
-  ) {
-
-    loadScript(
-      "doze-3ale-complete.js"
-    );
-
+  if (PATH === "/doze-3ale") {
+    loadScript("doze-3ale-complete.js");
   }
-
 
   /* =========================================================
      ADMIN
-     IMPORTANT:
      Admin panel runs ONLY on /admin
   ========================================================= */
 
-  if (
-    PATH ===
-    "/admin"
-  ) {
-
-    loadScript(
-      "ma7alak-admin-panel.js"
-    );
-
+  if (PATH === "/admin") {
+    loadScript("ma7alak-admin-panel.js");
   }
-
-
-  /* =========================================================
-     FUTURE SHOP FILES
-     ---------------------------------------------------------
-     Add future shops here later.
-
-     Example:
-
-     if(PATH === "/masaya-cafe"){
-       loadScript("masaya-cafe.js");
-     }
-
-     if(PATH === "/zee-tattoos-and-piercing"){
-       loadScript("zee-tattoos-and-piercing.js");
-     }
-  ========================================================= */
-
 
   /* =========================================================
      DEBUG HELPER
   ========================================================= */
 
   window.ma7alakMasterLoader = {
-
-    path:
-      PATH,
-
-    base:
-      BASE,
-
-    load:
-      loadScript,
-
-    loadedFiles:
-      loadedFiles
-
+    path: PATH,
+    version: VERSION,
+    base: BASE,
+    load: loadScript,
+    loadedFiles: loadedFiles
   };
 
 })();
