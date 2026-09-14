@@ -16,7 +16,7 @@
   }
 
   /* IMPORTANT: This private admin app must NEVER load on public pages. */
-  const ADMIN_PATH = "/admin-koko89";
+  const ADMIN_PATH = "/admin";
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (currentPath !== ADMIN_PATH) {
