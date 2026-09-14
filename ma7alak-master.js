@@ -220,6 +220,10 @@
     "show-shops.js"
   );
 
+     loadScript(
+    "ma7alak-fresh-navigation.js"
+  );
+
 
   /* =========================================================
      DOZE 3ALE
