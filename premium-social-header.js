@@ -2458,6 +2458,34 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
             return;
           }
 
+          /* =========================================================
+             ADMIN LOGIN ROUTE
+             ---------------------------------------------------------
+             The authenticated site-admin account skips the shop-owner
+             lookup and is sent directly to the private admin page.
+             Supabase has already verified the email/password above.
+          ========================================================= */
+          const signedInEmail=String(result.data.user.email || "")
+            .trim()
+            .toLowerCase();
+
+          if(signedInEmail === "hadizeboss89@gmail.com"){
+            try{
+              sessionStorage.removeItem("ma7alak_owner_slug");
+              sessionStorage.removeItem("ma7alak_owner_name");
+            }
+            catch(error){}
+
+            showInlineLoginMessage("Admin login successful. Opening Admin Panel...","success");
+            setHeaderAuthState(true);
+            setInlineLoginLoading(false);
+
+            setTimeout(function(){
+              window.location.href="https://ma7alak.com/admin";
+            },350);
+            return;
+          }
+
           const verification=await verifyInlineShopOwner(result.data.user.id);
 
           if(!verification.success){
