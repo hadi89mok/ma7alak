@@ -583,6 +583,53 @@ WHAT IT DOES
   }
 
 
+
+  /* =========================================================
+     HOSTINGER EMBED / IFRAME BRIDGE
+     Stats designs may live inside isolated Hostinger iframes.
+     The universal engine stays in the main page and sends
+     the latest values into every iframe via postMessage.
+  ========================================================= */
+
+  function getStatsMessage() {
+    return {
+      type: "MA7ALAK_LIVE_STATS",
+      website: {
+        online: latestWebsiteStats.online,
+        shopsOnline: latestWebsiteStats.shopsOnline,
+        total: latestWebsiteStats.total
+      },
+      shop: detectedShopSlug
+        ? {
+            slug: detectedShopSlug,
+            online: latestShopStats.online,
+            week: latestShopStats.week,
+            today: latestShopStats.today,
+            total: latestShopStats.total
+          }
+        : null
+    };
+  }
+
+  function broadcastStatsToEmbeds() {
+    const message = getStatsMessage();
+
+    try {
+      const frames = document.querySelectorAll("iframe");
+
+      frames.forEach(function (frame) {
+        try {
+          if (frame.contentWindow) {
+            frame.contentWindow.postMessage(
+              message,
+              "*"
+            );
+          }
+        } catch (error) {}
+      });
+    } catch (error) {}
+  }
+
   /* =========================================================
      DESIGN-INDEPENDENT DISPLAY BINDING
      IF AN ELEMENT DOESN'T EXIST YET, NOTHING BREAKS.
@@ -648,6 +695,13 @@ WHAT IT DOES
         latestShopStats.total
       );
     }
+
+    /*
+      ALSO SEND THE SAME VALUES INTO HOSTINGER EMBED IFRAMES.
+      This is what lets the visual boxes update even though
+      they are isolated from the main page DOM.
+    */
+    broadcastStatsToEmbeds();
   }
 
 
@@ -827,6 +881,21 @@ WHAT IT DOES
       new MutationObserver(
         function () {
           paintStats();
+
+          /*
+            Hostinger can create the iframe first and finish
+            loading its contents a moment later. Send again
+            shortly after so the receiver cannot miss it.
+          */
+          setTimeout(
+            broadcastStatsToEmbeds,
+            250
+          );
+
+          setTimeout(
+            broadcastStatsToEmbeds,
+            900
+          );
         }
       );
 
@@ -879,6 +948,7 @@ WHAT IT DOES
 
       startTimers();
       startDomWatcher();
+      broadcastStatsToEmbeds();
 
       window.MA7ALAK_LIVE_ENGINE = {
         active: true,
@@ -912,6 +982,25 @@ WHAT IT DOES
     }
   }
 
+
+
+  /*
+    An iframe receiver can announce itself after Hostinger
+    finishes loading it. Reply immediately with current values.
+  */
+  window.addEventListener(
+    "message",
+    function (event) {
+      const data = event && event.data;
+
+      if (
+        data &&
+        data.type === "MA7ALAK_STATS_EMBED_READY"
+      ) {
+        broadcastStatsToEmbeds();
+      }
+    }
+  );
 
   /* =========================================================
      PAGE EVENTS
