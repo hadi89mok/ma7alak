@@ -1,12 +1,11 @@
 /* =========================================================
-   MA7ALAK MASTER LOADER — EXACT COMMIT VERSION
+   MA7ALAK MASTER LOADER — SAFE WORKING VERSION
    ---------------------------------------------------------
-   IMPORTANT:
-   Hostinger bootstrap sets window.__MA7ALAK_GITHUB_SHA__ to
-   the latest GitHub commit SHA before loading this file.
+   Keeps the current working @main system for all files.
 
-   Every child script is then loaded from THAT SAME SHA.
-   This completely avoids stale jsDelivr @main child files.
+   ONLY show-shops.js is pinned to its confirmed working
+   exact commit so jsDelivr cannot serve the stale @main
+   version for that file.
 ========================================================= */
 
 (function () {
@@ -18,13 +17,15 @@
 
   window.__MA7ALAK_MASTER_LOADER__ = true;
 
-  const VERSION =
-    String(window.__MA7ALAK_GITHUB_SHA__ || "main").trim();
+  const VERSION = "main";
 
   const BASE =
     "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@" +
     VERSION +
     "/";
+
+  const SHOW_SHOPS_VERSION =
+    "d4114b60d2fc0d7817deec3975c94b89a87592d7";
 
   /* =========================================================
      PAGE
@@ -62,14 +63,20 @@
 
     options = options || {};
 
+    const fileVersion =
+      String(options.version || VERSION).trim();
+
+    const fileKey =
+      filename + "@" + fileVersion;
+
     if (
       !filename ||
-      loadedFiles.has(filename)
+      loadedFiles.has(fileKey)
     ) {
       return Promise.resolve();
     }
 
-    loadedFiles.add(filename);
+    loadedFiles.add(fileKey);
 
     return new Promise(function (resolve, reject) {
 
@@ -77,6 +84,8 @@
         document.querySelector(
           'script[data-ma7alak-github-file="' +
           filename +
+          '"][data-ma7alak-github-version="' +
+          fileVersion +
           '"]'
         );
 
@@ -108,8 +117,12 @@
         document.createElement("script");
 
       script.src =
-        BASE +
-        filename;
+        "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@" +
+        fileVersion +
+        "/" +
+        filename +
+        "?v=" +
+        Date.now();
 
       script.async =
         options.async === true;
@@ -121,7 +134,7 @@
         filename;
 
       script.dataset.ma7alakGithubVersion =
-        VERSION;
+        fileVersion;
 
       script.addEventListener(
         "load",
@@ -132,8 +145,8 @@
           console.log(
             "MA7ALAK loaded:",
             filename,
-            "commit:",
-            VERSION
+            "version:",
+            fileVersion
           );
 
           resolve();
@@ -148,8 +161,8 @@
           console.error(
             "MA7ALAK failed to load:",
             filename,
-            "commit:",
-            VERSION,
+            "version:",
+            fileVersion,
             error
           );
 
@@ -174,7 +187,20 @@
   loadScript("ma7alak-live-presence.js");
   loadScript("story-upload-panel.js");
   loadScript("homepage-story-likes.js");
-  loadScript("show-shops.js");
+
+  /*
+     IMPORTANT:
+     show-shops.js is pinned to the exact confirmed-working
+     commit because jsDelivr @main was serving an older copy.
+  */
+  loadScript(
+    "show-shops.js",
+    {
+      version:
+        SHOW_SHOPS_VERSION
+    }
+  );
+
   loadScript("ma7alak-fresh-navigation.js");
 
   /* =========================================================
@@ -202,6 +228,7 @@
     path: PATH,
     version: VERSION,
     base: BASE,
+    showShopsVersion: SHOW_SHOPS_VERSION,
     load: loadScript,
     loadedFiles: loadedFiles
   };
