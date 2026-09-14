@@ -181,17 +181,6 @@
   /* =========================================================
      GLOBAL WEBSITE FILES
   ========================================================= */
-
-  loadScript("premium-social-header.js");
-  loadScript("notifications.js");
-  loadScript("ma7alak-live-presence.js");
-  loadScript("story-upload-panel.js");
-  loadScript("homepage-story-likes.js");
-
-  /*
-     IMPORTANT:
-     show-shops.js is pinned to the exact confirmed-working
-     commit because jsDelivr @main was serving an older copy.
   */
   loadScript(
     "show-shops.js",
@@ -201,6 +190,11 @@
     }
   );
 
+  loadScript("premium-social-header.js");
+  loadScript("notifications.js");
+  loadScript("ma7alak-live-presence.js");
+  loadScript("story-upload-panel.js");
+  loadScript("homepage-story-likes.js");
   loadScript("ma7alak-fresh-navigation.js");
 
   /* =========================================================
