@@ -2755,8 +2755,7 @@
         !slug ||
         !name ||
         !selectedCity ||
-        !category ||
-        !categoryName
+        !category
       ){
         setStatus(
           shopStatus,
@@ -2765,6 +2764,16 @@
         );
         return;
       }
+
+      const selectedTaxonomyCategory =
+        (window.__MA7ALAK_V2_CATEGORIES__ || []).find(function(row){
+          return row && row.category_key === category;
+        });
+
+      const finalCardLabel =
+        categoryName ||
+        (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
+        category;
 
       addShopButton.disabled = true;
       addShopButton.innerHTML =
@@ -2823,7 +2832,7 @@
           category:
             category,
           category_name:
-            categoryName,
+            finalCardLabel,
           location:
             normalizedText(
               shopLocation.value
@@ -3315,10 +3324,20 @@
     const category = normalizedText(editCategory.value);
     const categoryName = normalizedText(editCategoryName.value);
 
-    if(!name || !area || !category || !categoryName){
-      setStatus(editStatus, "Fill all required fields first.", "error");
+    if(!name || !category){
+      setStatus(editStatus, "Shop Name and Main Category are required.", "error");
       return;
     }
+
+    const selectedTaxonomyCategory =
+      (window.__MA7ALAK_V2_CATEGORIES__ || []).find(function(row){
+        return row && row.category_key === category;
+      });
+
+    const finalCardLabel =
+      categoryName ||
+      (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
+      category;
 
     saveEditButton.disabled = true;
     saveEditButton.textContent = "Saving…";
@@ -3331,9 +3350,9 @@
         profile_image_url: normalizedText(editImage.value) || null,
         shop_url: normalizedText(editUrl.value) || ("https://ma7alak.com/" + slug),
         city: normalizedText(document.getElementById("ma-edit-city-v2") && document.getElementById("ma-edit-city-v2").value) || null,
-        area: area,
+        area: area || null,
         category: category,
-        category_name: categoryName,
+        category_name: finalCardLabel,
         location: normalizedText(editLocation.value) || null,
         verified: editVerified.checked,
         featured: editFeatured.checked,
@@ -3357,6 +3376,13 @@
         .eq("shop_slug", slug);
 
       if(error) throw error;
+
+      /* Immediate local admin update; Realtime handles other open pages/tabs. */
+      const localShop = getManagedShop(slug);
+      if(localShop){
+        Object.assign(localShop, payload);
+      }
+      renderManagedShops();
 
       await logAdminActivity(
         "shop_edited",
@@ -3759,6 +3785,52 @@
           hub.querySelectorAll("[data-v2-panel]").forEach(x=>x.classList.toggle("active",x.dataset.v2Panel===tab.dataset.v2Tab));
           return;
         }
+        const editBtn = e.target.closest("button[data-edit]");
+        if(editBtn){
+          const type = editBtn.dataset.edit;
+          const key = editBtn.dataset.key;
+          try{
+            if(type==="category"){
+              const row=v2Categories.find(c=>c.category_key===key);
+              if(!row) return;
+              const name=prompt("Category name", row.category_name||"");
+              if(name===null) return;
+              const icon=prompt("Category icon", row.icon||"🏪");
+              if(icon===null) return;
+              const cleanName=normalizedText(name), cleanIcon=normalizedText(icon)||"🏪";
+              if(!cleanName) throw new Error("Category name cannot be empty.");
+              const {error}=await supabaseClient.from("shop_categories").update({category_name:cleanName,icon:cleanIcon}).eq("category_key",key);
+              if(error) throw error;
+            }else if(type==="city"){
+              const row=v2Cities.find(c=>c.city_key===key);
+              if(!row) return;
+              const name=prompt("City / Region name", row.city_name||"");
+              if(name===null) return;
+              const cleanName=normalizedText(name);
+              if(!cleanName) throw new Error("City / Region name cannot be empty.");
+              const {error}=await supabaseClient.from("shop_cities").update({city_name:cleanName}).eq("city_key",key);
+              if(error) throw error;
+            }else if(type==="area"){
+              const row=v2Areas.find(a=>a.area_key===key);
+              if(!row) return;
+              const name=prompt("Area name", row.area_name||"");
+              if(name===null) return;
+              const cleanName=normalizedText(name);
+              if(!cleanName) throw new Error("Area name cannot be empty.");
+              const oldName=normalizedText(row.area_name);
+              const {error}=await supabaseClient.from("shop_areas").update({area_name:cleanName}).eq("area_key",key);
+              if(error) throw error;
+              if(oldName && oldName!==cleanName){
+                const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:cleanName}).eq("area",oldName);
+                if(profileError) throw profileError;
+              }
+            }
+            await loadV2Taxonomy();
+            await loadManagedShops();
+          }catch(err){ alert(err.message||"Edit failed."); }
+          return;
+        }
+
         const btn = e.target.closest("button[data-delete]");
         if(!btn) return;
         const type = btn.dataset.delete;
@@ -3802,21 +3874,33 @@
 
         const catWrap=document.createElement("div");
         catWrap.className="ma-v2-field";
-        catWrap.innerHTML=`<label>Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select" required></select><small>Icon + name come from Directory Control automatically.</small>`;
+        catWrap.innerHTML=`<label>Main Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select" required></select><small>This controls where the shop appears in Directory filters. It does NOT control the text shown on the card.</small>`;
         catInput.closest("label").parentNode.insertBefore(catWrap,catInput.closest("label"));
 
         areaInput.closest("label").classList.add("ma-v2-original-hidden");
         catInput.closest("label").classList.add("ma-v2-original-hidden");
-        catName.closest("label").classList.add("ma-v2-original-hidden");
+
+        /* Keep category_name visible as a completely independent card label. */
+        const cardLabelWrap = catName.closest("label");
+        if(cardLabelWrap){
+          cardLabelWrap.classList.remove("ma-v2-original-hidden");
+          const title = cardLabelWrap.querySelector("span");
+          if(title) title.textContent = "Shop Card Label";
+          catName.placeholder = "e.g. Crepes • Chocolate • Street Kiosk";
+          const oldSmall = cardLabelWrap.querySelector("small");
+          if(oldSmall) oldSmall.remove();
+          const help = document.createElement("small");
+          help.textContent = "Free text shown under the Arabic name on the public shop card. This does not change the Main Category.";
+          cardLabelWrap.appendChild(help);
+        }
 
         const citySel=byId(cityId), areaSel=byId(prefix+"-area-smart"), catSel=byId(prefix+"-category-smart");
 
         citySel.addEventListener("change",()=>{ renderSmartAreas(citySel,areaSel); areaInput.value=areaSel.value||""; });
         areaSel.addEventListener("change",()=>{ areaInput.value=areaSel.value||""; });
         catSel.addEventListener("change",()=>{
-          const row=v2Categories.find(c=>c.category_key===catSel.value);
+          /* Main category assignment only. Never overwrite the custom card label. */
           catInput.value=catSel.value||"";
-          catName.value=row?row.category_name:"";
         });
       }
 
@@ -3853,9 +3937,9 @@
       const cityList=byId("ma-v2-city-list");
       const areaListV2=byId("ma-v2-area-list");
       const areaCity=byId("ma-v2-area-city");
-      if(catList) catList.innerHTML=v2Categories.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">${esc(c.icon)}</div><div class="ma-v2-row-text"><strong>${esc(c.category_name)}</strong><span>${esc(c.category_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="category" data-key="${esc(c.category_key)}">Delete</button></div></div>`).join("");
-      if(cityList) cityList.innerHTML=v2Cities.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">📍</div><div class="ma-v2-row-text"><strong>${esc(c.city_name)}</strong><span>${esc(c.city_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="city" data-key="${esc(c.city_key)}">Delete</button></div></div>`).join("");
-      if(areaListV2) areaListV2.innerHTML=v2Areas.map(a=>{const c=v2Cities.find(x=>x.city_key===a.city_key);return `<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">🗺️</div><div class="ma-v2-row-text"><strong>${esc(a.area_name)}</strong><span>${esc(c?c.city_name:a.city_key)} • ${esc(a.area_key)}</span></div></div><div class="ma-v2-row-actions"><button data-delete="area" data-key="${esc(a.area_key)}">Delete</button></div></div>`}).join("");
+      if(catList) catList.innerHTML=v2Categories.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">${esc(c.icon)}</div><div class="ma-v2-row-text"><strong>${esc(c.category_name)}</strong><span>${esc(c.category_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="category" data-key="${esc(c.category_key)}">Edit</button><button data-delete="category" data-key="${esc(c.category_key)}">Delete</button></div></div>`).join("");
+      if(cityList) cityList.innerHTML=v2Cities.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">📍</div><div class="ma-v2-row-text"><strong>${esc(c.city_name)}</strong><span>${esc(c.city_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="city" data-key="${esc(c.city_key)}">Edit</button><button data-delete="city" data-key="${esc(c.city_key)}">Delete</button></div></div>`).join("");
+      if(areaListV2) areaListV2.innerHTML=v2Areas.map(a=>{const c=v2Cities.find(x=>x.city_key===a.city_key);return `<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">🗺️</div><div class="ma-v2-row-text"><strong>${esc(a.area_name)}</strong><span>${esc(c?c.city_name:a.city_key)} • ${esc(a.area_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="area" data-key="${esc(a.area_key)}">Edit</button><button data-delete="area" data-key="${esc(a.area_key)}">Delete</button></div></div>`}).join("");
       if(areaCity) areaCity.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
     }
 
@@ -3867,6 +3951,7 @@
       ]);
       if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
       v2Categories=cats.data||[]; v2Cities=cities.data||[]; v2Areas=areas.data||[];
+      window.__MA7ALAK_V2_CATEGORIES__ = v2Categories;
       renderV2Lists(); refreshSmartFields();
     }
 
@@ -3934,10 +4019,10 @@
         el.hidden = !enabled;
       });
 
-      if(!enabled){
-        if(shopArea) shopArea.value = "";
-        if(editArea) editArea.value = "";
-      }
+      /*
+         Hiding optional Area controls must never erase the shop's saved area.
+         The old behavior cleared editArea and made Edit Shop appear broken.
+      */
     }
 
     function bindAreaMode(){
