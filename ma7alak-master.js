@@ -1,11 +1,10 @@
 /* =========================================================
-   MA7ALAK MASTER LOADER — SAFE WORKING VERSION
+   MA7ALAK MASTER LOADER
    ---------------------------------------------------------
-   Keeps the current working @main system for all files.
+   show-shops.js is NOT loaded here.
 
-   ONLY show-shops.js is pinned to its confirmed working
-   exact commit so jsDelivr cannot serve the stale @main
-   version for that file.
+   show-shops.js is loaded DIRECTLY from Hostinger using
+   its confirmed-working exact GitHub commit.
 ========================================================= */
 
 (function () {
@@ -23,9 +22,6 @@
     "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@" +
     VERSION +
     "/";
-
-  const SHOW_SHOPS_VERSION =
-    "d4114b60d2fc0d7817deec3975c94b89a87592d7";
 
   /* =========================================================
      PAGE
@@ -63,20 +59,14 @@
 
     options = options || {};
 
-    const fileVersion =
-      String(options.version || VERSION).trim();
-
-    const fileKey =
-      filename + "@" + fileVersion;
-
     if (
       !filename ||
-      loadedFiles.has(fileKey)
+      loadedFiles.has(filename)
     ) {
       return Promise.resolve();
     }
 
-    loadedFiles.add(fileKey);
+    loadedFiles.add(filename);
 
     return new Promise(function (resolve, reject) {
 
@@ -84,8 +74,6 @@
         document.querySelector(
           'script[data-ma7alak-github-file="' +
           filename +
-          '"][data-ma7alak-github-version="' +
-          fileVersion +
           '"]'
         );
 
@@ -117,9 +105,7 @@
         document.createElement("script");
 
       script.src =
-        "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@" +
-        fileVersion +
-        "/" +
+        BASE +
         filename +
         "?v=" +
         Date.now();
@@ -134,7 +120,7 @@
         filename;
 
       script.dataset.ma7alakGithubVersion =
-        fileVersion;
+        VERSION;
 
       script.addEventListener(
         "load",
@@ -144,9 +130,7 @@
 
           console.log(
             "MA7ALAK loaded:",
-            filename,
-            "version:",
-            fileVersion
+            filename
           );
 
           resolve();
@@ -161,8 +145,6 @@
           console.error(
             "MA7ALAK failed to load:",
             filename,
-            "version:",
-            fileVersion,
             error
           );
 
@@ -181,37 +163,39 @@
   /* =========================================================
      GLOBAL WEBSITE FILES
   ========================================================= */
-  */
-  loadScript(
-    "show-shops.js",
-    {
-      version:
-        SHOW_SHOPS_VERSION
-    }
-  );
 
   loadScript("premium-social-header.js");
+
   loadScript("notifications.js");
+
   loadScript("ma7alak-live-presence.js");
+
   loadScript("story-upload-panel.js");
+
   loadScript("homepage-story-likes.js");
+
+  /*
+     IMPORTANT:
+
+     DO NOT LOAD show-shops.js HERE.
+
+     Hostinger loads show-shops.js directly from its
+     confirmed-working exact commit.
+  */
+
   loadScript("ma7alak-fresh-navigation.js");
 
-  /* =========================================================
-     DOZE 3ALE
-  ========================================================= */
-
-  if (PATH === "/doze-3ale") {
-    loadScript("doze-3ale-complete.js");
-  }
-
+ 
   /* =========================================================
      ADMIN
-     Admin panel runs ONLY on /admin
   ========================================================= */
 
   if (PATH === "/admin") {
-    loadScript("ma7alak-admin-panel.js");
+
+    loadScript(
+      "ma7alak-admin-panel.js"
+    );
+
   }
 
   /* =========================================================
@@ -219,12 +203,17 @@
   ========================================================= */
 
   window.ma7alakMasterLoader = {
+
     path: PATH,
+
     version: VERSION,
+
     base: BASE,
-    showShopsVersion: SHOW_SHOPS_VERSION,
+
     load: loadScript,
+
     loadedFiles: loadedFiles
+
   };
 
 })();
