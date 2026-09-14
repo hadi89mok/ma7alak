@@ -17,11 +17,17 @@
   "use strict";
 
   /* ---------------------------------------------------------
-     HOSTINGER SAFETY
+     HOSTINGER LIVE + EDITOR MODE
+     ---------------------------------------------------------
+     LIVE SITE:
+       - Runs ONLY on /doze-3ale
+
+     HOSTINGER EDITOR:
+       - The editor renders the page inside an iframe.
+       - We allow that iframe so the Doze design can be seen
+         while editing.
+       - Published pages still keep the exact route protection.
   --------------------------------------------------------- */
-  if(window.self !== window.top){
-    return;
-  }
 
   const TARGET_PATH = "/doze-3ale";
   const APP_ID = "ma7alak-doze-github-app";
@@ -35,7 +41,26 @@
     return p;
   }
 
-  if(normalizePath(window.location.pathname) !== TARGET_PATH){
+  const IS_IFRAME =
+    window.self !== window.top;
+
+  const CURRENT_PATH =
+    normalizePath(window.location.pathname);
+
+  const IS_LIVE_DOZE_PAGE =
+    !IS_IFRAME &&
+    CURRENT_PATH === TARGET_PATH;
+
+  /*
+     Hostinger editor preview is an iframe and may not expose the
+     public /doze-3ale pathname inside that frame. Allow the iframe
+     only for editor rendering. This exception never applies to a
+     normal published top-level page.
+  */
+  const IS_HOSTINGER_EDITOR_FRAME =
+    IS_IFRAME;
+
+  if(!IS_LIVE_DOZE_PAGE && !IS_HOSTINGER_EDITOR_FRAME){
     return;
   }
 
@@ -1173,6 +1198,17 @@
 
           }
 
+          /*
+             Prevent the live uploader bridge from firing into
+             Hostinger's editor shell while previewing the page.
+          */
+          if(window.self !== window.top){
+            console.log(
+              "MA7ALAK: uploader bridge disabled in Hostinger editor preview."
+            );
+            return;
+          }
+
 
           try{
 
@@ -2118,6 +2154,15 @@
         function enterNativeFullscreen(
           screen
         ){
+
+          /*
+             Hostinger editor runs inside an iframe.
+             Show the Story viewer there, but do not request
+             browser-native fullscreen from the editor canvas.
+          */
+          if(window.self !== window.top){
+            return;
+          }
 
           try{
 
