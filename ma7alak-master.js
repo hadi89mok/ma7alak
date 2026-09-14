@@ -210,22 +210,20 @@
     "story-upload-panel.js"
   );
 
+   loadScript(
+    "homepage-story-likes.js"
+  );
 
-  /* =========================================================
-     DOZE 3ALE
-  ========================================================= */
+   
+ loadScript(
+    "show-shops.js"
+  );
 
-  if (
-    PATH ===
-    "/doze-3ale"
-  ) {
-
+   
     loadScript(
-      "doze-3ale-complete.js"
-    );
-
-  }
-
+    "homepage-story-likes.js"
+  );
+ 
 
   /* =========================================================
      ADMIN
