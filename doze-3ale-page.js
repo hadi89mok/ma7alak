@@ -103,3 +103,43 @@
     console.error("[Ma7alak Doze] Loader error:", error);
   });
 })();
+
+
+/* =========================================================
+   MA7ALAK HOSTINGER BACKGROUND SAFETY
+   Keep the GitHub-loaded Doze module transparent so the
+   Hostinger page/section background remains in control.
+   This does NOT alter Story fullscreen/media backgrounds.
+========================================================= */
+(function(){
+  function applyMa7alakTransparentHostBackground(){
+    if(document.getElementById('ma7alak-host-bg-safety')) return;
+    var style=document.createElement('style');
+    style.id='ma7alak-host-bg-safety';
+    style.textContent=`
+      #ma7alak-doze-mount,
+      #ma7alak-doze-mount > *,
+      #ma7alak-story-wrapper,
+      #ma7alak-shop-identity {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+
+      /* Remove the added chocolate panel behind the shop identity. */
+      #ma7alak-shop-identity::before {
+        content: none !important;
+        display: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',applyMa7alakTransparentHostBackground,{once:true});
+  }else{
+    applyMa7alakTransparentHostBackground();
+  }
+})();
