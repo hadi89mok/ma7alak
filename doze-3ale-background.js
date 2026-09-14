@@ -41,6 +41,26 @@
     document.body.classList.remove("ma7alak-doze-bg-active");
   }
 
+  function updateBackgroundHeight() {
+    if (!isDozePage()) return;
+
+    const bg = document.getElementById(BG_ID);
+    if (!bg) return;
+
+    const doc = document.documentElement;
+    const body = document.body;
+
+    const pageHeight = Math.max(
+      body ? body.scrollHeight : 0,
+      body ? body.offsetHeight : 0,
+      doc ? doc.scrollHeight : 0,
+      doc ? doc.offsetHeight : 0,
+      window.innerHeight
+    );
+
+    bg.style.setProperty("--ma7alak-doze-page-height", pageHeight + "px");
+  }
+
   function installBackground() {
     if (!isDozePage()) {
       removeBackground();
@@ -71,12 +91,12 @@
          Keep the page artwork inside the body's stacking context instead
          of putting it behind html/body where mobile browsers can hide it. */
       #${BG_ID}{
-        position:fixed!important;
-        inset:0!important;
-        width:100vw!important;
-        height:100vh!important;
-        width:100dvw!important;
-        height:100dvh!important;
+        position:absolute!important;
+        left:0!important;
+        top:0!important;
+        width:100%!important;
+        height:var(--ma7alak-doze-page-height, 100vh)!important;
+        min-height:100vh!important;
         pointer-events:none!important;
         overflow:hidden!important;
         z-index:0!important;
@@ -97,8 +117,14 @@
          cards/components keep their own styling. */
       body.ma7alak-doze-bg-active > div:not(#${BG_ID}),
       body.ma7alak-doze-bg-active > main,
-      body.ma7alak-doze-bg-active > #root{
+      body.ma7alak-doze-bg-active > #root,
+      body.ma7alak-doze-bg-active main,
+      body.ma7alak-doze-bg-active section,
+      body.ma7alak-doze-bg-active [data-section-id],
+      body.ma7alak-doze-bg-active [class*="section-wrapper"],
+      body.ma7alak-doze-bg-active [class*="page-section"]{
         background-color:transparent!important;
+        background-image:none!important;
       }
 
       #${BG_ID} .m7-bg-svg{
@@ -395,6 +421,22 @@
 
     document.head.appendChild(style);
     document.body.prepend(bg);
+
+    updateBackgroundHeight();
+
+    requestAnimationFrame(updateBackgroundHeight);
+    setTimeout(updateBackgroundHeight, 250);
+    setTimeout(updateBackgroundHeight, 1000);
+    setTimeout(updateBackgroundHeight, 2500);
+
+    if (!window.__MA7ALAK_DOZE_BG_RESIZE_OBSERVER__) {
+      window.__MA7ALAK_DOZE_BG_RESIZE_OBSERVER__ = new ResizeObserver(function () {
+        updateBackgroundHeight();
+      });
+
+      window.__MA7ALAK_DOZE_BG_RESIZE_OBSERVER__.observe(document.documentElement);
+      window.__MA7ALAK_DOZE_BG_RESIZE_OBSERVER__.observe(document.body);
+    }
   }
 
   function boot() {
@@ -431,6 +473,10 @@
 
   window.addEventListener("popstate", handleRouteChange);
   window.addEventListener("pageshow", handleRouteChange);
+  window.addEventListener("resize", updateBackgroundHeight, { passive:true });
+  window.addEventListener("orientationchange", function(){
+    setTimeout(updateBackgroundHeight, 250);
+  });
 
   boot();
 })();
