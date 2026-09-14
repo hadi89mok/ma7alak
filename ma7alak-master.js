@@ -24,7 +24,7 @@
   window.__MA7ALAK_MASTER_LOADER__ = true;
 
   const BASE =
-    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/";
+    "https://raw.githubusercontent.com/hadi89mok/ma7alak/main/";
 
   /* =========================================================
      PAGE
@@ -124,9 +124,16 @@
             "script"
           );
 
+        /*
+           CACHE BUSTER:
+           Always request a fresh RAW GitHub copy of child scripts after a GitHub update.
+           Hostinger itself never needs to be edited again.
+        */
         script.src =
           BASE +
-          filename;
+          filename +
+          "?v=" +
+          Date.now();
 
         script.async =
           options.async === true;
@@ -210,20 +217,22 @@
     "story-upload-panel.js"
   );
 
-   loadScript(
-    "homepage-story-likes.js"
-  );
 
-   
- loadScript(
-    "show-shops.js"
-  );
+  /* =========================================================
+     DOZE 3ALE
+  ========================================================= */
 
-   
+  if (
+    PATH ===
+    "/doze-3ale"
+  ) {
+
     loadScript(
-    "homepage-story-likes.js"
-  );
- 
+      "doze-3ale-complete.js"
+    );
+
+  }
+
 
   /* =========================================================
      ADMIN
