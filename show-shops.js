@@ -709,6 +709,7 @@
      * so shop_slug keeps linking each owner's Story to its shop.
      */
     ma7alakStartStorySystem();
+    ma7alakStartDirectoryRealtime();
 
   }
 
@@ -729,7 +730,15 @@
   }
 
 
+  let ma7alakLiveCategoryIcons = new Map();
+
   function ma7alakCategoryIcon(category,name){
+
+    const exactKey = String(category || "").trim();
+
+    if(ma7alakLiveCategoryIcons.has(exactKey)){
+      return ma7alakLiveCategoryIcons.get(exactKey) || "🏪";
+    }
 
     const text =
       (String(category || "") + " " + String(name || ""))
@@ -1439,11 +1448,27 @@
       return false;
     }
 
+    const { data:categoryRows, error:categoryError } =
+      await client
+        .from("shop_categories")
+        .select("category_key,category_name,icon,is_active")
+        .eq("is_active", true)
+        .order("sort_order", { ascending:true });
+
+    if(!categoryError){
+      ma7alakLiveCategoryIcons = new Map(
+        (categoryRows || []).map(row => [
+          String(row.category_key || "").trim(),
+          String(row.icon || "🏪").trim() || "🏪"
+        ])
+      );
+    }
+
     const { data, error } =
       await client
         .from("shop_profiles")
         .select(
-          "shop_slug,shop_name,arabic_name,profile_image_url,shop_url,area,category,category_name,location,verified,featured,featured_red,is_active"
+          "shop_slug,shop_name,arabic_name,profile_image_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active"
         )
         .eq("is_active", true)
         .order("shop_name", { ascending:true });
@@ -1474,6 +1499,7 @@
               id:slug,
               name:String(row.shop_name || slug).trim(),
               arabic:String(row.arabic_name || "").trim(),
+              city:String(row.city || "").trim(),
               area:String(row.area || "").trim(),
               category:String(row.category || "").trim(),
               categoryName:String(row.category_name || "").trim(),
@@ -1492,6 +1518,57 @@
         );
 
     return true;
+  }
+
+
+
+  let ma7alakDirectoryRealtimeChannel = null;
+  let ma7alakDirectoryRefreshTimer = null;
+
+  async function ma7alakRefreshDirectoryLive(){
+    clearTimeout(ma7alakDirectoryRefreshTimer);
+    ma7alakDirectoryRefreshTimer = setTimeout(async function(){
+      const oldArea = selectedArea;
+      const oldCategory = selectedCategory;
+      const ok = await ma7alakLoadShopProfiles();
+      if(!ok) return;
+      ma7alakRenderDynamicAreas();
+
+      if(oldArea && shops.some(s => s.area === oldArea)){
+        selectedArea = oldArea;
+        const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
+        if(btn) btn.classList.add("active");
+        ma7alakRenderDynamicCategories(oldArea);
+        categorySection.classList.add("visible");
+
+        if(oldCategory && shops.some(s=>s.area===oldArea && s.category===oldCategory)){
+          selectedCategory = oldCategory;
+          const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
+          if(cbtn) cbtn.classList.add("active");
+          renderResults();
+        }else{
+          selectedCategory = null;
+          results.classList.remove("visible");
+        }
+      }else{
+        selectedArea = null;
+        selectedCategory = null;
+        categorySection.classList.remove("visible");
+        results.classList.remove("visible");
+      }
+    },80);
+  }
+
+  async function ma7alakStartDirectoryRealtime(){
+    const client = await ma7alakLoadSupabase();
+    if(!client || ma7alakDirectoryRealtimeChannel) return;
+    ma7alakDirectoryRealtimeChannel = client
+      .channel("ma7alak-live-directory-v2")
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},ma7alakRefreshDirectoryLive)
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},ma7alakRefreshDirectoryLive)
+      .subscribe();
   }
 
 
