@@ -1,6 +1,6 @@
 /* =========================================================
    MA7ALAK OPENING HEADER — GITHUB / CUSTOM CODE VERSION
-   V7 — HOMEPAGE ONLY + HOSTINGER SECTION BACKGROUND + FOREGROUND FIX
+   V8 — HOMEPAGE ONLY + HOSTINGER SECTION FOREGROUND CONTENT LAYER
 
    POSITION options:
    "under-premium"   -> directly under Premium Panel
@@ -21,8 +21,8 @@
 
   if (ma7alakPath !== "/") return;
 
-  if (window.__MA7ALAK_OPENING_HEADER_V7__) return;
-  window.__MA7ALAK_OPENING_HEADER_V7__ = true;
+  if (window.__MA7ALAK_OPENING_HEADER_V8__) return;
+  window.__MA7ALAK_OPENING_HEADER_V8__ = true;
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
@@ -49,155 +49,144 @@
 
   function placeRoot(root) {
     /*
-       V6:
-       Put the opening header INSIDE Hostinger's first real content section.
-       This means the hero uses the ACTUAL Hostinger section background
-       instead of sitting in a separate BODY area.
+       V8:
+       Find Hostinger Section 1, then place the opening header in the
+       section's FOREGROUND CONTENT layer — never inside its background
+       image/overlay layer.
 
-       We deliberately ignore our own injected Ma7alak elements, scripts,
-       styles, header backdrop, and fixed premium header.
+       This preserves the real Hostinger section background while keeping
+       the complete opening header visible and in normal document flow.
     */
     if (!document.body) return false;
 
-    function isOurElement(el) {
-      if (!el || el.nodeType !== 1) return true;
-      if (el === root) return true;
-      if (el.id === "ma7alak-social-header") return true;
-      if (el.id === "ma7alak-header-theme-backdrop") return true;
-      if (el.id === ROOT_ID) return true;
-      if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") return true;
-      return false;
+    function helper(el){
+      if(!el || el.nodeType !== 1) return true;
+      if(el === root || el.id === ROOT_ID) return true;
+      if(el.id === "ma7alak-social-header") return true;
+      if(el.id === "ma7alak-header-theme-backdrop") return true;
+      return /^(SCRIPT|STYLE|LINK|NOSCRIPT)$/.test(el.tagName);
     }
 
-    function visible(el) {
-      if (!el || !el.getBoundingClientRect) return false;
-      const cs = getComputedStyle(el);
-      if (cs.display === "none" || cs.visibility === "hidden") return false;
-      const r = el.getBoundingClientRect();
-      return r.width > 120 && r.height > 40;
+    function visible(el){
+      if(!el || !el.getBoundingClientRect) return false;
+      const cs=getComputedStyle(el);
+      if(cs.display==="none" || cs.visibility==="hidden") return false;
+      const r=el.getBoundingClientRect();
+      return r.width>120 && r.height>40;
     }
 
-    function looksLikeSection(el) {
-      if (!el || isOurElement(el) || !visible(el)) return false;
-
-      const tag = (el.tagName || "").toLowerCase();
-      const cls = String(el.className || "").toLowerCase();
-      const id = String(el.id || "").toLowerCase();
-      const role = String(el.getAttribute("role") || "").toLowerCase();
-
-      if (tag === "section") return true;
-      if (role === "region") return true;
-
+    function isBackgroundLike(el){
+      if(!el) return false;
+      const cls=String(el.className||"").toLowerCase();
+      const id=String(el.id||"").toLowerCase();
+      const aria=String(el.getAttribute("aria-label")||"").toLowerCase();
       return (
-        cls.includes("section") ||
-        id.includes("section") ||
-        cls.includes("block") ||
-        cls.includes("layout") ||
-        cls.includes("builder") ||
-        cls.includes("website")
+        cls.includes("background") || cls.includes("overlay") ||
+        cls.includes("backdrop") || cls.includes("bg-") ||
+        cls.includes("__bg") || id.includes("background") ||
+        id.includes("overlay") || aria.includes("background")
       );
     }
 
-    function sectionHasRealBackground(el) {
-      try {
-        const cs = getComputedStyle(el);
-        const bgc = cs.backgroundColor || "";
-        const bgi = cs.backgroundImage || "none";
-        const transparent =
-          bgc === "transparent" ||
-          bgc === "rgba(0, 0, 0, 0)" ||
-          bgc === "rgba(0,0,0,0)";
-        return bgi !== "none" || !transparent;
-      } catch (_) {
-        return false;
-      }
+    function sectionScore(el){
+      if(helper(el) || !visible(el)) return -999;
+      const tag=(el.tagName||"").toLowerCase();
+      const cls=String(el.className||"").toLowerCase();
+      const id=String(el.id||"").toLowerCase();
+      const role=String(el.getAttribute("role")||"").toLowerCase();
+      let score=0;
+      if(tag==="section") score+=100;
+      if(role==="region") score+=60;
+      if(cls.includes("section") || id.includes("section")) score+=50;
+      if(cls.includes("block")) score+=20;
+      if(isBackgroundLike(el)) score-=200;
+      return score;
     }
 
-    /* First try explicit/semantic Hostinger-like sections in document order. */
-    const candidates = Array.from(document.querySelectorAll(
-      'main section, section, main [class*="section"], [class*="section"], main [class*="block"], [role="region"]'
-    )).filter(function(el){
-      return looksLikeSection(el);
-    });
+    const semantic=Array.from(document.querySelectorAll(
+      'main section, section, [role="region"], main [class*="section"], [class*="section"]'
+    )).filter(visible).filter(function(el){ return !helper(el); });
 
-    let target = candidates.find(sectionHasRealBackground) || candidates[0] || null;
-
-    /*
-       Hostinger can wrap the visible section in generic DIVs.
-       If no semantic section was found, inspect the first real visible
-       BODY branch and descend until we reach a useful content container.
-    */
-    if (!target) {
-      let node = Array.from(document.body.children).find(function(el){
-        return !isOurElement(el) && visible(el);
-      }) || null;
-
-      while (node) {
-        if (looksLikeSection(node) || sectionHasRealBackground(node)) {
-          target = node;
-          break;
-        }
-
-        const children = Array.from(node.children || []).filter(function(el){
-          return !isOurElement(el) && visible(el);
-        });
-
-        if (!children.length) break;
-        node = children[0];
-      }
-    }
-
-    if (!target) {
-      /* Safe fallback: keep V5 behavior rather than sending it to bottom. */
-      const firstRealPageNode = Array.from(document.body.children).find(function(el){
-        return !isOurElement(el);
+    let target=null;
+    if(semantic.length){
+      semantic.sort(function(x,y){
+        const xr=x.getBoundingClientRect(), yr=y.getBoundingClientRect();
+        const topDiff=Math.abs(xr.top)-Math.abs(yr.top);
+        if(Math.abs(topDiff)>8) return topDiff;
+        return sectionScore(y)-sectionScore(x);
       });
+      target=semantic.find(function(el){return !isBackgroundLike(el);}) || semantic[0];
+    }
 
-      if (firstRealPageNode) {
-        document.body.insertBefore(root, firstRealPageNode);
-      } else {
-        document.body.prepend(root);
-      }
+    /* Fallback: first substantial normal-flow page container. */
+    if(!target){
+      target=Array.from(document.body.children).find(function(el){
+        if(helper(el) || !visible(el) || isBackgroundLike(el)) return false;
+        const cs=getComputedStyle(el);
+        return cs.position!=="fixed";
+      }) || null;
+    }
+
+    if(!target){
+      document.body.prepend(root);
       return true;
     }
 
     /*
-       Put it at the beginning of Section 1, but after non-visual helper
-       nodes such as STYLE/SCRIPT when present.
+       Hostinger sections commonly contain:
+       - background/overlay children
+       - one foreground content/layout wrapper
+
+       Prefer that foreground wrapper when it is clearly a normal-flow
+       container. Otherwise insert directly into the section before its
+       first non-background visual child.
     */
-    const firstVisualChild = Array.from(target.children || []).find(function(el){
-      return el.tagName !== "STYLE" && el.tagName !== "SCRIPT" && el.tagName !== "LINK";
+    const children=Array.from(target.children||[]).filter(function(el){
+      return !helper(el) && visible(el);
     });
 
-    if (firstVisualChild) {
-      target.insertBefore(root, firstVisualChild);
-    } else {
-      target.appendChild(root);
+    const foreground=children.find(function(el){
+      if(isBackgroundLike(el)) return false;
+      const cs=getComputedStyle(el);
+      const cls=String(el.className||"").toLowerCase();
+      const id=String(el.id||"").toLowerCase();
+      return (
+        cs.position!=="absolute" &&
+        cs.position!=="fixed" &&
+        (
+          cls.includes("content") || cls.includes("container") ||
+          cls.includes("layout") || cls.includes("wrapper") ||
+          id.includes("content") || id.includes("container")
+        )
+      );
+    }) || null;
+
+    if(foreground){
+      const first=Array.from(foreground.children||[]).find(function(el){
+        return !helper(el) && !isBackgroundLike(el);
+      });
+      if(first) foreground.insertBefore(root,first);
+      else foreground.appendChild(root);
+      root.dataset.ma7alakHostingerLayer="foreground";
+    }else{
+      const firstContent=children.find(function(el){
+        return !isBackgroundLike(el);
+      });
+      if(firstContent) target.insertBefore(root,firstContent);
+      else target.appendChild(root);
+      root.dataset.ma7alakHostingerLayer="section";
     }
 
-    root.dataset.ma7alakHostingerSection = "1";
+    root.dataset.ma7alakHostingerSection="1";
 
-    /*
-       V7 FOREGROUND FIX:
-       Keep the hero INSIDE Hostinger Section 1 so the real Hostinger
-       background remains behind it, but raise our component above
-       Hostinger's background/overlay layers.
-    */
-    try {
-      const targetStyle = getComputedStyle(target);
-
-      if (targetStyle.position === "static") {
-        target.style.position = "relative";
-      }
-
-      root.style.setProperty("position", "relative", "important");
-      root.style.setProperty("z-index", "2147481000", "important");
-      root.style.setProperty("isolation", "isolate", "important");
-      root.style.setProperty("background", "transparent", "important");
-      root.style.setProperty("background-color", "transparent", "important");
-      root.style.setProperty("visibility", "visible", "important");
-      root.style.setProperty("opacity", "1", "important");
-    } catch (_) {}
+    try{
+      root.style.setProperty("position","relative","important");
+      root.style.setProperty("z-index","20","important");
+      root.style.setProperty("isolation","isolate","important");
+      root.style.setProperty("background","transparent","important");
+      root.style.setProperty("visibility","visible","important");
+      root.style.setProperty("opacity","1","important");
+    }catch(_){}
 
     return true;
   }
@@ -273,7 +262,6 @@
         }
 
         #${ROOT_ID} .ma7alak-ultra-hero-content {
-          position: relative !important;
           z-index: 5 !important;
         }
       `;
