@@ -1,102 +1,23 @@
 /* =========================================================
- MA7ALAK OWNER SOCIAL HEART V3
- Full replacement for homepage-story-likes.js
- - normal proportion heart SVG
- - real styled X close button (no white box)
- - panel opens instantly
- - guest text = "Someone followed you"
- - signed viewer keeps name + avatar
- - repeated follow/unfollow by same actor is shown once
+ MA7ALAK OWNER SOCIAL HEART V4
+ - owner-only activity heart
+ - signed follower username/avatar enrichment from viewer_profiles
+ - guest fallback preserved
 ========================================================= */
 (function(){
 "use strict";
-if(window.__M7_OWNER_SOCIAL_V3__)return;
-window.__M7_OWNER_SOCIAL_V3__=true;
+if(window.__M7_OWNER_SOCIAL_V4__)return;window.__M7_OWNER_SOCIAL_V4__=true;
 let c=null,owner=null,rows=[],ch=null,loading=false;
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const heartSVG=`<svg viewBox="0 0 24 24" width="25" height="25" fill="none" aria-hidden="true"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.3 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-async function ready(){
-  for(let i=0;i<120&&!window.Ma7alakOwnerAuth;i++)await new Promise(r=>setTimeout(r,75));
-  await window.Ma7alakOwnerAuth?.ready?.();
-  owner=window.Ma7alakOwnerAuth?.owner;
-  if(!owner)return;
-  c=window.Ma7alakOwnerAuth.client;
-  mount();load();subscribe();
-}
-function mount(){
-  document.getElementById("ma7alak-story-likes-wrapper")?.remove();
-  document.getElementById("m7-owner-heart-v3-css")?.remove();
-  const s=document.createElement("style");s.id="m7-owner-heart-v3-css";
-  s.textContent=`
-#ma7alak-story-likes-wrapper{position:fixed;top:max(18px,env(safe-area-inset-top));right:78px;z-index:2147483646;font-family:Arial,"Segoe UI",sans-serif}
-#ma7alak-story-likes-button{width:48px;height:48px;padding:0;display:grid;place-items:center;border-radius:50%;border:1px solid #d9a44155;background:#121212e8;color:#fff;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
-#ma7alak-story-likes-button svg{display:block;width:25px;height:25px}
-#m7-heart-badge{position:absolute;right:-4px;top:-4px;background:#e53935;border:2px solid #111;border-radius:20px;min-width:19px;height:19px;padding:0 4px;color:#fff;font:900 10px Arial;display:none;place-items:center}
-#m7-owner-social-panel{display:none;position:fixed;right:18px;top:76px;width:min(390px,calc(100vw - 28px));max-height:min(620px,calc(100dvh - 90px));overflow:hidden;background:#0d0d0df8;border:1px solid #d9a44144;border-radius:20px;box-shadow:0 25px 80px #000a;color:#fff}
-#m7-owner-social-panel.open{display:flex;flex-direction:column}
-#m7sn-head{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 9px 16px;border-bottom:1px solid #ffffff0f}
-#m7sn-head b{font-size:17px}
-#m7sn-close{width:34px;height:34px;padding:0;display:grid;place-items:center;border:1px solid #ffffff16;border-radius:50%;background:#ffffff0b;color:#ddd;font:400 20px/1 Arial;cursor:pointer}
-#m7sn-close:hover{background:#ffffff14;color:#fff}
-#m7sn-list{padding:8px;overflow:auto}
-.m7sn{display:flex;align-items:center;gap:11px;padding:11px;border-radius:14px}
-.m7sn.new{background:#ff2d5516}
-.m7sn img,.m7sn .av{width:44px;height:44px;flex:0 0 44px;border-radius:50%;object-fit:cover;background:#29221e;display:grid;place-items:center}
-.m7sn-copy{min-width:0;flex:1;line-height:1.25}.m7sn-copy b{font-size:14px}.m7sn-copy small{display:block;color:#999;margin-top:4px;font-size:11px}
-.m7sn-empty{padding:28px;text-align:center;color:#999}`;
-  document.head.appendChild(s);
-  const w=document.createElement("div");w.id="ma7alak-story-likes-wrapper";
-  w.innerHTML=`<button id="ma7alak-story-likes-button" type="button" aria-label="Shop activity">${heartSVG}<span id="m7-heart-badge">0</span></button>
-  <div id="m7-owner-social-panel" aria-hidden="true"><div id="m7sn-head"><b>Activity</b><button id="m7sn-close" type="button" aria-label="Close">×</button></div><div id="m7sn-list"><div class="m7sn-empty">Loading…</div></div></div>`;
-  document.body.appendChild(w);
-  const panel=document.getElementById("m7-owner-social-panel");
-  document.getElementById("ma7alak-story-likes-button").onclick=e=>{
-    e.preventDefault();e.stopPropagation();
-    const open=!panel.classList.contains("open");
-    panel.classList.toggle("open",open);panel.setAttribute("aria-hidden",String(!open));
-    if(open){render();markSeen();}
-  };
-  document.getElementById("m7sn-close").onclick=e=>{e.preventDefault();e.stopPropagation();panel.classList.remove("open");panel.setAttribute("aria-hidden","true")};
-}
-function actorKey(x){
-  return String(x.actor_user_id||x.actor_id||x.actor_visitor_id||x.visitor_id||x.actor_name||x.actor_avatar||"guest");
-}
-function cleanRows(input){
-  const seen=new Set(),out=[];
-  for(const x of input||[]){
-    const key=(x.type||"")+"|"+actorKey(x);
-    if(x.type==="follow"&&seen.has(key))continue;
-    seen.add(key);out.push(x);
-  }
-  return out;
-}
-function render(){
-  const b=document.getElementById("m7-heart-badge"),list=document.getElementById("m7sn-list");
-  if(!b||!list)return;
-  const clean=cleanRows(rows),n=clean.filter(x=>!x.seen).length;
-  b.textContent=n>99?"99+":n;b.style.display=n?"grid":"none";
-  list.innerHTML=clean.length?clean.map(x=>{
-    const signed=!!(x.actor_name&&String(x.actor_name).toLowerCase()!=="guest");
-    const name=x.type==="follow"?(signed?x.actor_name:"Someone"):(signed?x.actor_name:"Someone");
-    const txt=x.type==="follow"?"followed you":"loved your story";
-    return `<div class="m7sn ${x.seen?"":"new"}">${x.actor_avatar?`<img src="${esc(x.actor_avatar)}" alt="">`:`<div class="av">👤</div>`}<div class="m7sn-copy"><b>${esc(name)}</b> ${txt}<small>${esc(new Date(x.created_at).toLocaleString())}</small></div></div>`;
-  }).join(""):'<div class="m7sn-empty">No activity yet.</div>';
-}
-async function load(){
-  if(loading||!c)return;loading=true;
-  try{const r=await c.rpc("ma7alak_get_my_owner_notifications");if(r.error){console.warn(r.error);return}rows=r.data||[];render();}
-  finally{loading=false}
-}
-async function markSeen(){
-  const b=document.getElementById("m7-heart-badge");if(b)b.style.display="none";
-  rows=rows.map(x=>({...x,seen:true}));render();
-  try{await c.rpc("ma7alak_mark_my_owner_notifications_seen")}catch(_){}
-}
-function subscribe(){
-  if(ch)try{c.removeChannel(ch)}catch(_){}
-  ch=c.channel("m7-owner-social-v3-"+owner.shop_slug)
-    .on("postgres_changes",{event:"INSERT",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>load())
-    .subscribe();
-}
+async function ready(){for(let i=0;i<120&&!window.Ma7alakOwnerAuth;i++)await new Promise(r=>setTimeout(r,75));await window.Ma7alakOwnerAuth?.ready?.();owner=window.Ma7alakOwnerAuth?.owner;if(!owner)return;c=window.Ma7alakOwnerAuth.client;mount();load();subscribe()}
+function mount(){document.getElementById("ma7alak-story-likes-wrapper")?.remove();document.getElementById("m7-owner-heart-v4-css")?.remove();const s=document.createElement("style");s.id="m7-owner-heart-v4-css";s.textContent=`#ma7alak-story-likes-wrapper{position:fixed;top:max(18px,env(safe-area-inset-top));right:78px;z-index:2147483646;font-family:Arial,"Segoe UI",sans-serif}#ma7alak-story-likes-button{width:48px;height:48px;padding:0;display:grid;place-items:center;border-radius:50%;border:1px solid #d9a44155;background:#121212e8;color:#fff;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}#ma7alak-story-likes-button svg{display:block;width:25px;height:25px}#m7-heart-badge{position:absolute;right:-4px;top:-4px;background:#e53935;border:2px solid #111;border-radius:20px;min-width:19px;height:19px;padding:0 4px;color:#fff;font:900 10px Arial;display:none;place-items:center}#m7-owner-social-panel{display:none;position:fixed;right:18px;top:76px;width:min(390px,calc(100vw - 28px));max-height:min(620px,calc(100dvh - 90px));overflow:hidden;background:#0d0d0df8;border:1px solid #d9a44144;border-radius:20px;box-shadow:0 25px 80px #000a;color:#fff}#m7-owner-social-panel.open{display:flex;flex-direction:column}#m7sn-head{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 9px 16px;border-bottom:1px solid #ffffff0f}#m7sn-head b{font-size:17px}#m7sn-close{width:34px;height:34px;padding:0;display:grid;place-items:center;border:1px solid #ffffff16;border-radius:50%;background:#ffffff0b;color:#ddd;font:400 20px/1 Arial;cursor:pointer}#m7sn-list{padding:8px;overflow:auto}.m7sn{display:flex;align-items:center;gap:11px;padding:11px;border-radius:14px}.m7sn.new{background:#ff2d5516}.m7sn img,.m7sn .av{width:44px;height:44px;flex:0 0 44px;border-radius:50%;object-fit:cover;background:#29221e;display:grid;place-items:center}.m7sn-copy{min-width:0;flex:1;line-height:1.25}.m7sn-copy b{font-size:14px}.m7sn-copy small{display:block;color:#999;margin-top:4px;font-size:11px}.m7sn-empty{padding:28px;text-align:center;color:#999}`;document.head.appendChild(s);const w=document.createElement("div");w.id="ma7alak-story-likes-wrapper";w.innerHTML=`<button id="ma7alak-story-likes-button" type="button" aria-label="Shop activity">${heartSVG}<span id="m7-heart-badge">0</span></button><div id="m7-owner-social-panel" aria-hidden="true"><div id="m7sn-head"><b>Activity</b><button id="m7sn-close" type="button" aria-label="Close">×</button></div><div id="m7sn-list"><div class="m7sn-empty">Loading…</div></div></div>`;document.body.appendChild(w);const panel=document.getElementById("m7-owner-social-panel");document.getElementById("ma7alak-story-likes-button").onclick=e=>{e.preventDefault();e.stopPropagation();const open=!panel.classList.contains("open");panel.classList.toggle("open",open);panel.setAttribute("aria-hidden",String(!open));if(open){render();markSeen()}};document.getElementById("m7sn-close").onclick=e=>{e.preventDefault();e.stopPropagation();panel.classList.remove("open");panel.setAttribute("aria-hidden","true")}}
+function actorKey(x){return String(x.actor_user_id||x.actor_id||x.actor_visitor_id||x.visitor_id||x.actor_name||x.actor_avatar||"guest")}
+function cleanRows(input){const seen=new Set(),out=[];for(const x of input||[]){const key=(x.type||"")+"|"+actorKey(x);if(x.type==="follow"&&seen.has(key))continue;seen.add(key);out.push(x)}return out}
+function render(){const b=document.getElementById("m7-heart-badge"),list=document.getElementById("m7sn-list");if(!b||!list)return;const clean=cleanRows(rows),n=clean.filter(x=>!x.seen).length;b.textContent=n>99?"99+":n;b.style.display=n?"grid":"none";list.innerHTML=clean.length?clean.map(x=>{const signed=!!(x.actor_name&&String(x.actor_name).toLowerCase()!=="guest"),name=signed?x.actor_name:"Someone",txt=x.type==="follow"?"followed you":"loved your story";return `<div class="m7sn ${x.seen?"":"new"}">${x.actor_avatar?`<img src="${esc(x.actor_avatar)}" alt="">`:`<div class="av">👤</div>`}<div class="m7sn-copy"><b>${esc(name)}</b> ${txt}<small>${esc(new Date(x.created_at).toLocaleString())}</small></div></div>`}).join(""):'<div class="m7sn-empty">No activity yet.</div>'}
+async function enrichViewerIdentity(input){const list=Array.isArray(input)?input:[],ids=[...new Set(list.map(x=>String(x.actor_user_id||x.actor_id||"").trim()).filter(Boolean))];if(!ids.length)return list;try{const r=await c.from("viewer_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);if(r.error)return list;const map=new Map((r.data||[]).map(p=>[String(p.user_id),p]));return list.map(x=>{const id=String(x.actor_user_id||x.actor_id||"").trim(),p=map.get(id);if(!p)return x;const display=String(p.username||p.display_name||"").trim();return {...x,actor_name:display||x.actor_name,actor_avatar:String(p.avatar_url||x.actor_avatar||"").trim()}})}catch(_){return list}}
+async function load(){if(loading||!c)return;loading=true;try{const r=await c.rpc("ma7alak_get_my_owner_notifications");if(r.error){console.warn(r.error);return}rows=await enrichViewerIdentity(r.data||[]);render()}finally{loading=false}}
+async function markSeen(){const b=document.getElementById("m7-heart-badge");if(b)b.style.display="none";rows=rows.map(x=>({...x,seen:true}));render();try{await c.rpc("ma7alak_mark_my_owner_notifications_seen")}catch(_){}}
+function subscribe(){if(ch)try{c.removeChannel(ch)}catch(_){}ch=c.channel("m7-owner-social-v4-"+owner.shop_slug).on("postgres_changes",{event:"INSERT",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>load()).subscribe()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ready,{once:true});else ready();
 })();
