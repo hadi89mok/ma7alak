@@ -1,6 +1,6 @@
 /* =========================================================
    MA7ALAK OPENING HEADER — GITHUB / CUSTOM CODE VERSION
-   V6 — INSIDE HOSTINGER FIRST SECTION + REAL SECTION BACKGROUND
+   V7 — HOMEPAGE ONLY + HOSTINGER SECTION BACKGROUND + FOREGROUND FIX
 
    POSITION options:
    "under-premium"   -> directly under Premium Panel
@@ -14,8 +14,15 @@
   "use strict";
 
   if (window.self !== window.top) return;
-  if (window.__MA7ALAK_OPENING_HEADER_V6__) return;
-  window.__MA7ALAK_OPENING_HEADER_V6__ = true;
+
+  /* V7: HOMEPAGE ONLY — never load on shops, admin, or other pages. */
+  const ma7alakPath =
+    (window.location.pathname || "/").replace(/\\/+$/, "") || "/";
+
+  if (ma7alakPath !== "/") return;
+
+  if (window.__MA7ALAK_OPENING_HEADER_V7__) return;
+  window.__MA7ALAK_OPENING_HEADER_V7__ = true;
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
@@ -169,6 +176,29 @@
     }
 
     root.dataset.ma7alakHostingerSection = "1";
+
+    /*
+       V7 FOREGROUND FIX:
+       Keep the hero INSIDE Hostinger Section 1 so the real Hostinger
+       background remains behind it, but raise our component above
+       Hostinger's background/overlay layers.
+    */
+    try {
+      const targetStyle = getComputedStyle(target);
+
+      if (targetStyle.position === "static") {
+        target.style.position = "relative";
+      }
+
+      root.style.setProperty("position", "relative", "important");
+      root.style.setProperty("z-index", "2147481000", "important");
+      root.style.setProperty("isolation", "isolate", "important");
+      root.style.setProperty("background", "transparent", "important");
+      root.style.setProperty("background-color", "transparent", "important");
+      root.style.setProperty("visibility", "visible", "important");
+      root.style.setProperty("opacity", "1", "important");
+    } catch (_) {}
+
     return true;
   }
 
@@ -224,6 +254,27 @@
           padding: 0 !important;
           border: 0 !important;
           box-shadow: none !important;
+          position: relative !important;
+          z-index: 2147481000 !important;
+          isolation: isolate !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          background: transparent !important;
+        }
+
+        #${ROOT_ID} .ma7alak-ultra-hero {
+          position: relative !important;
+          z-index: 2 !important;
+          isolation: isolate !important;
+        }
+
+        #${ROOT_ID} .ma7alak-ultra-hero-image {
+          z-index: 0 !important;
+        }
+
+        #${ROOT_ID} .ma7alak-ultra-hero-content {
+          position: relative !important;
+          z-index: 5 !important;
         }
       `;
       document.head.appendChild(transparentFix);
