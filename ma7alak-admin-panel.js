@@ -18,6 +18,7 @@
   /* IMPORTANT: This private admin app must NEVER load on public pages. */
   const ADMIN_PATH = "/admin";
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+
   if (currentPath !== ADMIN_PATH) {
     return;
   }
@@ -39,3 +40,4358 @@
   }
 
   function injectAdminMarkup() {
+    if (document.getElementById("ma7alak-admin-app")) {
+      return;
+    }
+
+    const holder = document.createElement("div");
+    holder.id = "ma7alak-admin-github-mount";
+    holder.innerHTML = decodeBase64Utf8(HTML_B64);
+
+    document.body.appendChild(holder);
+  }
+
+  function injectAdminStyles() {
+    if (document.getElementById("ma7alak-admin-github-styles")) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = "ma7alak-admin-github-styles";
+    style.textContent = decodeBase64Utf8(CSS_B64);
+
+    document.head.appendChild(style);
+  }
+
+  function ensureSupabase() {
+    return new Promise(function (resolve, reject) {
+      if (
+        window.supabase &&
+        typeof window.supabase.createClient === "function"
+      ) {
+        resolve();
+        return;
+      }
+
+      const existing =
+        document.querySelector(
+          'script[src*="@supabase/supabase-js"]'
+        );
+
+      if (existing) {
+        const waitStarted = Date.now();
+
+        const waitForSupabase = setInterval(function () {
+          if (
+            window.supabase &&
+            typeof window.supabase.createClient === "function"
+          ) {
+            clearInterval(waitForSupabase);
+            resolve();
+            return;
+          }
+
+          if (Date.now() - waitStarted > 15000) {
+            clearInterval(waitForSupabase);
+            reject(
+              new Error(
+                "Supabase library did not become available."
+              )
+            );
+          }
+        }, 100);
+
+        return;
+      }
+
+      const script = document.createElement("script");
+
+      script.src =
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+      script.async = true;
+
+      script.onload = function () {
+        if (
+          window.supabase &&
+          typeof window.supabase.createClient === "function"
+        ) {
+          resolve();
+        }
+        else {
+          reject(
+            new Error(
+              "Supabase loaded but createClient is unavailable."
+            )
+          );
+        }
+      };
+
+      script.onerror = function () {
+        reject(
+          new Error(
+            "Could not load the Supabase library."
+          )
+        );
+      };
+
+      document.head.appendChild(script);
+    });
+  }
+
+  async function startMa7alakAdmin() {
+    injectAdminStyles();
+    injectAdminMarkup();
+
+    try {
+      await ensureSupabase();
+    }
+    catch (error) {
+      console.error(
+        "MA7ALAK ADMIN: Supabase load failed:",
+        error
+      );
+
+      const loginStatus =
+        document.getElementById(
+          "ma-admin-login-status"
+        );
+
+      if (loginStatus) {
+        loginStatus.textContent =
+          "Could not load Supabase. Refresh the page and try again.";
+        loginStatus.classList.add("is-error");
+      }
+
+      return;
+    }
+
+    /* =========================================================
+       ORIGINAL ADMIN PANEL JAVASCRIPT
+       Preserved from your working file.
+    ========================================================= */
+
+(function(){
+
+  "use strict";
+
+  const SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+  const loginView =
+    document.getElementById("ma-admin-login-view");
+
+  const dashboard =
+    document.getElementById("ma-admin-dashboard");
+
+  const logoutButton =
+    document.getElementById("ma-admin-logout");
+
+  const loginForm =
+    document.getElementById("ma-admin-login-form");
+
+  const shopForm =
+    document.getElementById("ma-admin-shop-form");
+
+  const loginStatus =
+    document.getElementById("ma-admin-login-status");
+
+  const shopStatus =
+    document.getElementById("ma-admin-shop-status");
+
+  const loginButton =
+    document.getElementById("ma-admin-login-btn");
+
+  const addShopButton =
+    document.getElementById("ma-admin-add-shop-btn");
+
+  const emailInput =
+    document.getElementById("ma-admin-email");
+
+  const passwordInput =
+    document.getElementById("ma-admin-password");
+
+  const userEmailLabel =
+    document.getElementById("ma-admin-user-email");
+
+  const shopName =
+    document.getElementById("ma-shop-name");
+
+  const shopArabic =
+    document.getElementById("ma-shop-arabic");
+
+  const shopSlug =
+    document.getElementById("ma-shop-slug");
+
+  const shopImage =
+    document.getElementById("ma-shop-image");
+
+  const shopImageFile =
+    document.getElementById("ma-shop-image-file");
+
+  const shopUrl =
+    document.getElementById("ma-shop-url");
+
+  const shopArea =
+    document.getElementById("ma-shop-area");
+
+  const shopLocation =
+    document.getElementById("ma-shop-location");
+
+  const shopCategory =
+    document.getElementById("ma-shop-category");
+
+  const shopCategoryName =
+    document.getElementById("ma-shop-category-name");
+
+  const shopVerified =
+    document.getElementById("ma-shop-verified");
+
+  const shopFeatured =
+    document.getElementById("ma-shop-featured");
+
+  const shopRed =
+    document.getElementById("ma-shop-red");
+
+  const shopActive =
+    document.getElementById("ma-shop-active");
+
+  const areaList =
+    document.getElementById("ma-area-list");
+
+  const categoryList =
+    document.getElementById("ma-category-list");
+
+  const imagePreviewWrap =
+    document.getElementById("ma-image-preview-wrap");
+
+  const imagePreview =
+    document.getElementById("ma-image-preview");
+
+  const previewText =
+    document.getElementById("ma-admin-preview-text");
+
+
+  const manageShopList =
+    document.getElementById("ma-admin-shop-list");
+
+  const manageShopSearch =
+    document.getElementById("ma-admin-shop-search");
+
+  const manageShopCount =
+    document.getElementById("ma-admin-shop-count");
+
+  const manageStatus =
+    document.getElementById("ma-admin-manage-status");
+
+  const refreshShopsButton =
+    document.getElementById("ma-admin-refresh-shops");
+
+  const editCard =
+    document.getElementById("ma-admin-edit-card");
+
+  const editForm =
+    document.getElementById("ma-admin-edit-form");
+
+  const editStatus =
+    document.getElementById("ma-admin-edit-status");
+
+  const editOriginalSlug =
+    document.getElementById("ma-edit-original-slug");
+
+  const editName = document.getElementById("ma-edit-name");
+  const editArabic = document.getElementById("ma-edit-arabic");
+  const editSlug = document.getElementById("ma-edit-slug");
+  const editImage = document.getElementById("ma-edit-image");
+  const editUrl = document.getElementById("ma-edit-url");
+  const editArea = document.getElementById("ma-edit-area");
+  const editLocation = document.getElementById("ma-edit-location");
+  const editCategory = document.getElementById("ma-edit-category");
+  const editCategoryName = document.getElementById("ma-edit-category-name");
+  const editVerified = document.getElementById("ma-edit-verified");
+  const editFeatured = document.getElementById("ma-edit-featured");
+  const editRed = document.getElementById("ma-edit-red");
+  const editActive = document.getElementById("ma-edit-active");
+  const cancelEditButton = document.getElementById("ma-admin-cancel-edit");
+  const saveEditButton = document.getElementById("ma-admin-save-edit");
+
+  /*
+     IMPORTANT:
+     The Directory Control V2 layer adds/selects fields dynamically.
+     Browser native required-field validation could block the submit event
+     before our JavaScript save handler ever runs, making Save Changes look
+     completely dead. All Edit Shop validation is handled explicitly below.
+  */
+  if(editForm){
+    editForm.noValidate = true;
+    editForm.setAttribute("novalidate", "novalidate");
+  }
+
+  const ownerCard = document.getElementById("ma-admin-owner-card");
+  const ownerForm = document.getElementById("ma-admin-owner-form");
+  const ownerStatus = document.getElementById("ma-admin-owner-status");
+  const ownerShopSlug = document.getElementById("ma-owner-shop-slug");
+  const ownerSelectedName = document.getElementById("ma-owner-selected-name");
+  const ownerSelectedSlug = document.getElementById("ma-owner-selected-slug");
+  const ownerEmail = document.getElementById("ma-owner-email");
+  const ownerPassword = document.getElementById("ma-owner-password");
+  const createOwnerButton = document.getElementById("ma-admin-create-owner");
+  const cancelOwnerButton = document.getElementById("ma-admin-cancel-owner");
+  const ownerLoading = document.getElementById("ma-owner-loading");
+  const ownerExistingPanel = document.getElementById("ma-owner-existing-panel");
+  const ownerCurrentEmail = document.getElementById("ma-owner-current-email");
+  const ownerResetPassword = document.getElementById("ma-owner-reset-password");
+  const resetOwnerPasswordButton = document.getElementById("ma-admin-reset-owner-password");
+  const deleteOwnerButton = document.getElementById("ma-admin-delete-owner");
+  const closeOwnerButton = document.getElementById("ma-admin-close-owner");
+  const postAddOwner = document.getElementById("ma-admin-post-add-owner");
+  const postAddOwnerTitle = document.getElementById("ma-admin-post-add-owner-title");
+  const postAddOwnerButton = document.getElementById("ma-admin-post-add-owner-btn");
+
+  const activityList = document.getElementById("ma-admin-activity-list");
+  const activityStatus = document.getElementById("ma-admin-activity-status");
+  const refreshActivityButton = document.getElementById("ma-admin-refresh-activity");
+
+  const galleryCard = document.getElementById("ma-admin-gallery-card");
+  const galleryShopSlug = document.getElementById("ma-gallery-shop-slug");
+  const gallerySelectedName = document.getElementById("ma-gallery-selected-name");
+  const gallerySelectedSlug = document.getElementById("ma-gallery-selected-slug");
+  const galleryFileInput = document.getElementById("ma-gallery-file-input");
+  const galleryUrlInput = document.getElementById("ma-gallery-url-input");
+  const galleryAddUrlButton = document.getElementById("ma-gallery-add-url");
+  const galleryRefreshButton = document.getElementById("ma-gallery-refresh");
+  const galleryCloseButton = document.getElementById("ma-gallery-close");
+  const galleryList = document.getElementById("ma-gallery-list");
+  const galleryStatus = document.getElementById("ma-gallery-upload-progress");
+
+
+  const videoCard = document.getElementById("ma-admin-video-card");
+  const videoShopSlug = document.getElementById("ma-video-shop-slug");
+  const videoSelectedName = document.getElementById("ma-video-selected-name");
+  const videoSelectedSlug = document.getElementById("ma-video-selected-slug");
+  const videoFileInput = document.getElementById("ma-video-file-input");
+  const videoUrlInput = document.getElementById("ma-video-url-input");
+  const videoAddUrlButton = document.getElementById("ma-video-add-url");
+  const videoRefreshButton = document.getElementById("ma-video-refresh");
+  const videoCloseButton = document.getElementById("ma-video-close");
+  const videoList = document.getElementById("ma-video-list");
+  const videoStatus = document.getElementById("ma-video-upload-progress");
+
+  const reelsCard = document.getElementById("ma-admin-reels-card");
+  const reelsShopSlug = document.getElementById("ma-reels-shop-slug");
+  const reelsSelectedName = document.getElementById("ma-reels-selected-name");
+  const reelsSelectedSlug = document.getElementById("ma-reels-selected-slug");
+  const reelsFileInput = document.getElementById("ma-reels-file-input");
+  const reelsVideoUrl = document.getElementById("ma-reels-video-url");
+  const reelsCaption = document.getElementById("ma-reels-caption");
+  const reelsPublishButton = document.getElementById("ma-reels-publish");
+  const reelsRefreshButton = document.getElementById("ma-reels-refresh");
+  const reelsCloseButton = document.getElementById("ma-reels-close");
+  const reelsList = document.getElementById("ma-reels-list");
+  const reelsStatus = document.getElementById("ma-reels-status");
+  const reelsOwnerLimit = document.getElementById("ma-reels-owner-limit");
+  const reelsSaveLimitButton = document.getElementById("ma-reels-save-limit");
+  const reelsLimitStatus = document.getElementById("ma-reels-limit-status");
+
+  let currentReelsShop = null;
+  let pendingReelStoragePath = "";
+  let pendingReelPublicUrl = "";
+
+  let managedShops = [];
+  let lastAddedShopSlug = "";
+
+
+  function setStatus(element, message, type){
+
+    element.textContent = message || "";
+
+    element.classList.remove(
+      "is-error",
+      "is-success"
+    );
+
+    if(type === "error"){
+      element.classList.add("is-error");
+    }
+
+    if(type === "success"){
+      element.classList.add("is-success");
+    }
+  }
+
+
+  function normalizeSlug(value){
+
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+
+  function normalizedText(value){
+    return String(value || "").trim();
+  }
+
+
+  function activityLabel(action){
+    const labels = {
+      shop_added: "Shop added",
+      shop_edited: "Shop edited",
+      shop_activated: "Shop activated",
+      shop_hidden: "Shop hidden",
+      shop_featured: "Shop featured",
+      shop_unfeatured: "Shop unfeatured",
+      shop_deleted: "Shop deleted",
+      owner_created: "Owner account created",
+      owner_password_changed: "Owner password changed",
+      owner_deleted: "Owner account deleted"
+    };
+    return labels[action] || String(action || "Admin action").replace(/_/g, " ");
+  }
+
+
+  function activityIcon(action){
+    if(action === "shop_added") return "➕";
+    if(action === "shop_edited") return "✏️";
+    if(action === "shop_activated") return "🟢";
+    if(action === "shop_hidden") return "🙈";
+    if(action === "shop_featured" || action === "shop_unfeatured") return "⭐";
+    if(action === "shop_deleted") return "🗑️";
+    if(action === "owner_created") return "👤";
+    if(action === "owner_password_changed") return "🔑";
+    if(action === "owner_deleted") return "🚫";
+    return "•";
+  }
+
+
+  function formatActivityTime(value){
+    const date = new Date(value);
+    if(Number.isNaN(date.getTime())) return "";
+    try{
+      return date.toLocaleString([], {
+        year:"numeric",
+        month:"short",
+        day:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+    }catch(_){
+      return date.toLocaleString();
+    }
+  }
+
+
+  async function logAdminActivity(action, shopSlugValue, details){
+    try{
+      const { error } = await supabaseClient.rpc("log_admin_activity", {
+        p_action: action,
+        p_shop_slug: shopSlugValue || null,
+        p_details: details || {}
+      });
+      if(error){
+        console.warn("Admin activity log failed:", error);
+        return false;
+      }
+      return true;
+    }catch(error){
+      console.warn("Admin activity log failed:", error);
+      return false;
+    }
+  }
+
+
+  function renderAdminActivity(rows){
+    if(!activityList) return;
+
+    const items = Array.isArray(rows) ? rows : [];
+    if(!items.length){
+      activityList.innerHTML = '<div class="ma-admin-activity-empty">No admin activity recorded yet.</div>';
+      return;
+    }
+
+    activityList.innerHTML = items.map(function(item){
+      const action = normalizedText(item.action);
+      const shopSlugValue = normalizedText(item.shop_slug);
+      const adminEmail = normalizedText(item.admin_email) || "Admin";
+      const time = formatActivityTime(item.created_at);
+      const details = item.details && typeof item.details === "object" ? item.details : {};
+      const shopNameValue = normalizedText(details.shop_name);
+      const ownerEmailValue = normalizedText(details.owner_email);
+
+      let title = activityLabel(action);
+      if(shopNameValue){
+        title += " — " + shopNameValue;
+      }
+
+      let extra = "";
+      if(ownerEmailValue && action !== "owner_password_changed"){
+        extra = '<span>' + escapeHtml(ownerEmailValue) + '</span>';
+      }
+
+      return '' +
+        '<div class="ma-admin-activity-item">' +
+          '<div class="ma-admin-activity-icon">' + escapeHtml(activityIcon(action)) + '</div>' +
+          '<div class="ma-admin-activity-main">' +
+            '<div class="ma-admin-activity-title">' + escapeHtml(title) + '</div>' +
+            '<div class="ma-admin-activity-meta">' +
+              (shopSlugValue ? '<span class="ma-admin-activity-shop">/' + escapeHtml(shopSlugValue) + '</span>' : '') +
+              '<span>' + escapeHtml(adminEmail) + '</span>' +
+              (time ? '<span>' + escapeHtml(time) + '</span>' : '') +
+              extra +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join("");
+  }
+
+
+  async function loadAdminActivity(){
+    if(!activityList || !activityStatus) return;
+
+    setStatus(activityStatus, "Loading activity…");
+
+    const { data, error } = await supabaseClient
+      .from("admin_activity_log")
+      .select("id,admin_user_id,admin_email,action,shop_slug,details,created_at")
+      .order("created_at", { ascending:false })
+      .limit(40);
+
+    if(error){
+      setStatus(activityStatus, error.message || "Could not load admin activity.", "error");
+      renderAdminActivity([]);
+      return;
+    }
+
+    setStatus(activityStatus, "");
+    renderAdminActivity(data || []);
+  }
+
+
+  function showLogin(){
+
+    loginView.hidden = false;
+    dashboard.hidden = true;
+    logoutButton.hidden = true;
+
+    userEmailLabel.textContent = "";
+  }
+
+
+  function showDashboard(email){
+
+    loginView.hidden = true;
+    dashboard.hidden = false;
+    logoutButton.hidden = false;
+
+    userEmailLabel.textContent =
+      email || "Admin";
+  }
+
+
+  async function verifyAdmin(){
+
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await supabaseClient.auth.getSession();
+
+    if(sessionError){
+      showLogin();
+      return false;
+    }
+
+    const session =
+      sessionData &&
+      sessionData.session;
+
+    if(!session){
+      showLogin();
+      return false;
+    }
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "is_site_admin"
+      );
+
+    if(error || data !== true){
+
+      await supabaseClient.auth.signOut();
+
+      showLogin();
+
+      setStatus(
+        loginStatus,
+        "This account is not a Ma7alak site admin.",
+        "error"
+      );
+
+      return false;
+    }
+
+    showDashboard(
+      session.user &&
+      session.user.email
+    );
+
+    await loadExistingDirectoryValues();
+    await loadManagedShops();
+    await loadAdminActivity();
+
+    return true;
+  }
+
+
+  async function loadExistingDirectoryValues(){
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("shop_profiles")
+        .select(
+          "area,category,category_name"
+        )
+        .eq("is_active", true);
+
+    if(error){
+      console.warn(
+        "Could not load existing filters:",
+        error
+      );
+      return;
+    }
+
+    const areas =
+      Array.from(
+        new Set(
+          (data || [])
+            .map(row => normalizedText(row.area))
+            .filter(Boolean)
+        )
+      ).sort(
+        (a,b) => a.localeCompare(b)
+      );
+
+    const categoriesMap =
+      new Map();
+
+    (data || []).forEach(row => {
+
+      const category =
+        normalizedText(row.category);
+
+      if(!category){
+        return;
+      }
+
+      const display =
+        normalizedText(row.category_name);
+
+      if(!categoriesMap.has(category)){
+        categoriesMap.set(
+          category,
+          display
+        );
+      }
+    });
+
+
+    areaList.innerHTML =
+      areas
+        .map(area => {
+          return (
+            '<option value="' +
+            escapeHtml(area) +
+            '"></option>'
+          );
+        })
+        .join("");
+
+
+    categoryList.innerHTML =
+      Array.from(categoriesMap.entries())
+        .sort(
+          (a,b) => a[0].localeCompare(b[0])
+        )
+        .map(([category, label]) => {
+
+          const optionLabel =
+            label
+              ? ' label="' + escapeHtml(label) + '"'
+              : "";
+
+          return (
+            '<option value="' +
+            escapeHtml(category) +
+            '"' +
+            optionLabel +
+            '></option>'
+          );
+        })
+        .join("");
+  }
+
+
+  async function loadManagedShops(){
+
+    setStatus(manageStatus, "Loading shops…");
+
+    const { data, error } =
+      await supabaseClient
+        .from("shop_profiles")
+        .select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active")
+        .order("shop_name", { ascending:true });
+
+    if(error){
+      setStatus(manageStatus, error.message || "Could not load shops.", "error");
+      return;
+    }
+
+    managedShops = data || [];
+    setStatus(manageStatus, "");
+    renderManagedShops();
+    loadVisibleOwnerBadges();
+  }
+
+
+  async function loadVisibleOwnerBadges(){
+
+    const badges = Array.from(
+      manageShopList.querySelectorAll("[data-owner-badge]")
+    );
+
+    for(const badge of badges){
+      const slug = badge.getAttribute("data-owner-badge") || "";
+      if(!slug) continue;
+
+      try{
+        const data = await invokeOwnerManager({
+          action:"status",
+          shop_slug:slug
+        });
+
+        if(data && data.owner_exists){
+          badge.textContent = "Account Active";
+          badge.classList.add("linked");
+        }else{
+          badge.textContent = "No Account";
+          badge.classList.remove("linked");
+        }
+      }catch(error){
+        console.warn("Owner badge failed for", slug, error);
+        badge.textContent = "Owner status unavailable";
+        badge.classList.remove("linked");
+      }
+    }
+  }
+
+
+  function getShopCompleteness(shop){
+
+    const missing = [];
+
+    if(!normalizedText(shop.shop_url)){
+      missing.push("shop URL");
+    }
+
+    if(!normalizedText(shop.category)){
+      missing.push("category ID");
+    }
+
+    if(!normalizedText(shop.category_name)){
+      missing.push("category name");
+    }
+
+    if(!normalizedText(shop.location)){
+      missing.push("location");
+    }
+
+    return {
+      ready: missing.length === 0,
+      missing: missing
+    };
+  }
+
+
+  function completenessMessage(result){
+    if(result.ready){
+      return "";
+    }
+
+    return "Missing: " + result.missing.join(", ");
+  }
+
+
+
+  async function requireGalleryAdmin(){
+
+    const { data, error } =
+      await supabaseClient.rpc("is_site_admin");
+
+    if(error || data !== true){
+      throw new Error("Admin session is no longer valid. Login again.");
+    }
+
+    return true;
+  }
+
+
+  function cleanGalleryFileName(name){
+
+    const raw = String(name || "image")
+      .toLowerCase()
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 70);
+
+    return raw || "image";
+  }
+
+
+  function galleryExtension(file){
+
+    const fromName =
+      String(file && file.name || "")
+        .split(".")
+        .pop()
+        .toLowerCase();
+
+    if(["jpg","jpeg","png","webp","gif"].includes(fromName)){
+      return fromName === "jpeg" ? "jpg" : fromName;
+    }
+
+    const mime = String(file && file.type || "").toLowerCase();
+
+    if(mime === "image/png") return "png";
+    if(mime === "image/webp") return "webp";
+    if(mime === "image/gif") return "gif";
+
+    return "jpg";
+  }
+
+
+  async function nextGallerySortOrder(shopSlugValue){
+
+    const { data, error } =
+      await supabaseClient
+        .from("shop_gallery")
+        .select("sort_order")
+        .eq("shop_slug", shopSlugValue)
+        .order("sort_order", { ascending:false })
+        .limit(1);
+
+    if(error) throw error;
+
+    if(!data || !data.length){
+      return 0;
+    }
+
+    return Number(data[0].sort_order || 0) + 1;
+  }
+
+
+  function renderGalleryItems(rows){
+
+    const items = Array.isArray(rows) ? rows : [];
+
+    if(!items.length){
+      galleryList.innerHTML =
+        '<div class="ma-gallery-empty">No gallery images yet.</div>';
+      return;
+    }
+
+    galleryList.innerHTML = items.map(function(item){
+
+      const id = String(item.id);
+      const url = escapeHtml(item.image_url || "");
+      const featured = item.is_featured === true;
+
+      return '' +
+        '<article class="ma-gallery-item ' + (featured ? 'is-featured' : '') + '" data-gallery-id="' + id + '">' +
+          (featured ? '<span class="ma-gallery-featured-badge">FEATURED</span>' : '') +
+          '<img src="' + url + '" alt="" loading="lazy">' +
+          '<div class="ma-gallery-item-actions">' +
+            '<button type="button" data-gallery-action="feature">' + (featured ? 'Featured ✓' : 'Set Featured') + '</button>' +
+            '<button type="button" data-gallery-action="delete">Delete</button>' +
+          '</div>' +
+        '</article>';
+    }).join("");
+  }
+
+
+  async function loadGalleryItems(){
+
+    const slug = normalizedText(galleryShopSlug.value);
+
+    if(!slug){
+      renderGalleryItems([]);
+      return;
+    }
+
+    setStatus(galleryStatus, "Loading gallery…");
+
+    const { data, error } =
+      await supabaseClient
+        .from("shop_gallery")
+        .select("id,shop_slug,image_url,storage_path,sort_order,is_featured,created_at")
+        .eq("shop_slug", slug)
+        .order("sort_order", { ascending:true })
+        .order("created_at", { ascending:true });
+
+    if(error){
+      setStatus(galleryStatus, error.message || "Could not load gallery.", "error");
+      renderGalleryItems([]);
+      return;
+    }
+
+    setStatus(galleryStatus, "");
+    renderGalleryItems(data || []);
+  }
+
+
+  async function openGalleryManager(shop){
+
+    if(!shop) return;
+
+    try{
+      await requireGalleryAdmin();
+    }catch(error){
+      setStatus(manageStatus, error.message || "Admin check failed.", "error");
+      return;
+    }
+
+    galleryShopSlug.value = shop.shop_slug || "";
+    gallerySelectedName.textContent = shop.shop_name || shop.shop_slug || "Shop";
+    gallerySelectedSlug.textContent = "/" + (shop.shop_slug || "");
+    galleryUrlInput.value = "";
+    galleryFileInput.value = "";
+    setStatus(galleryStatus, "");
+
+    galleryCard.hidden = false;
+
+    await loadGalleryItems();
+
+    window.setTimeout(function(){
+      galleryCard.scrollIntoView({ behavior:"smooth", block:"start" });
+    }, 30);
+  }
+
+
+  function closeGalleryManager(){
+    galleryCard.hidden = true;
+    galleryShopSlug.value = "";
+    galleryFileInput.value = "";
+    galleryUrlInput.value = "";
+    galleryList.innerHTML = "";
+    setStatus(galleryStatus, "");
+  }
+
+
+  async function addGalleryUrl(){
+
+    const slug = normalizedText(galleryShopSlug.value);
+    const url = normalizedText(galleryUrlInput.value);
+
+    if(!slug){
+      setStatus(galleryStatus, "No shop selected.", "error");
+      return;
+    }
+
+    if(!/^https?:\/\//i.test(url)){
+      setStatus(galleryStatus, "Enter a valid image URL.", "error");
+      return;
+    }
+
+    galleryAddUrlButton.disabled = true;
+
+    try{
+      await requireGalleryAdmin();
+
+      const sortOrder = await nextGallerySortOrder(slug);
+
+      const { count, error: countError } =
+        await supabaseClient
+          .from("shop_gallery")
+          .select("id", { count:"exact", head:true })
+          .eq("shop_slug", slug);
+
+      if(countError) throw countError;
+
+      const { error } =
+        await supabaseClient
+          .from("shop_gallery")
+          .insert({
+            shop_slug: slug,
+            image_url: url,
+            storage_path: null,
+            sort_order: sortOrder,
+            is_featured: Number(count || 0) === 0
+          });
+
+      if(error) throw error;
+
+      galleryUrlInput.value = "";
+
+      await logAdminActivity(
+        "gallery_image_added",
+        slug,
+        { source:"url" }
+      );
+
+      setStatus(galleryStatus, "Image URL added.", "success");
+      await loadGalleryItems();
+
+    }catch(error){
+      setStatus(galleryStatus, error.message || "Could not add image URL.", "error");
+    }finally{
+      galleryAddUrlButton.disabled = false;
+    }
+  }
+
+
+  async function uploadGalleryFiles(files){
+
+    const slug = normalizedText(galleryShopSlug.value);
+    const selected = Array.from(files || []);
+
+    if(!slug || !selected.length){
+      return;
+    }
+
+    const invalid = selected.find(function(file){
+      return !/^image\/(jpeg|png|webp|gif)$/i.test(String(file.type || ""));
+    });
+
+    if(invalid){
+      setStatus(galleryStatus, "Only JPG, PNG, WEBP and GIF images are allowed.", "error");
+      galleryFileInput.value = "";
+      return;
+    }
+
+    try{
+      await requireGalleryAdmin();
+
+      let sortOrder = await nextGallerySortOrder(slug);
+
+      const { count, error: countError } =
+        await supabaseClient
+          .from("shop_gallery")
+          .select("id", { count:"exact", head:true })
+          .eq("shop_slug", slug);
+
+      if(countError) throw countError;
+
+      let makeFeatured = Number(count || 0) === 0;
+
+      for(let index = 0; index < selected.length; index++){
+
+        const file = selected[index];
+
+        setStatus(
+          galleryStatus,
+          "Uploading " + (index + 1) + " of " + selected.length + "…"
+        );
+
+        const ext = galleryExtension(file);
+        const base = cleanGalleryFileName(file.name);
+        const unique =
+          Date.now() + "-" +
+          Math.random().toString(36).slice(2,10);
+
+        const storagePath =
+          slug + "/" + unique + "-" + base + "." + ext;
+
+        const { error: uploadError } =
+          await supabaseClient
+            .storage
+            .from("shop-gallery")
+            .upload(
+              storagePath,
+              file,
+              {
+                cacheControl:"3600",
+                upsert:false,
+                contentType:file.type || undefined
+              }
+            );
+
+        if(uploadError) throw uploadError;
+
+        const { data: publicData } =
+          supabaseClient
+            .storage
+            .from("shop-gallery")
+            .getPublicUrl(storagePath);
+
+        const publicUrl =
+          publicData &&
+          publicData.publicUrl;
+
+        if(!publicUrl){
+          await supabaseClient.storage.from("shop-gallery").remove([storagePath]);
+          throw new Error("Could not create the public image URL.");
+        }
+
+        const { error: insertError } =
+          await supabaseClient
+            .from("shop_gallery")
+            .insert({
+              shop_slug: slug,
+              image_url: publicUrl,
+              storage_path: storagePath,
+              sort_order: sortOrder++,
+              is_featured: makeFeatured
+            });
+
+        if(insertError){
+          await supabaseClient.storage.from("shop-gallery").remove([storagePath]);
+          throw insertError;
+        }
+
+        makeFeatured = false;
+      }
+
+      await logAdminActivity(
+        "gallery_image_uploaded",
+        slug,
+        { count:selected.length }
+      );
+
+      setStatus(
+        galleryStatus,
+        selected.length === 1
+          ? "Image uploaded successfully."
+          : selected.length + " images uploaded successfully.",
+        "success"
+      );
+
+      galleryFileInput.value = "";
+      await loadGalleryItems();
+
+    }catch(error){
+      setStatus(galleryStatus, error.message || "Upload failed.", "error");
+      galleryFileInput.value = "";
+    }
+  }
+
+
+  async function setGalleryFeatured(id){
+
+    const slug = normalizedText(galleryShopSlug.value);
+
+    if(!slug || !id) return;
+
+    await requireGalleryAdmin();
+
+    const { error: clearError } =
+      await supabaseClient
+        .from("shop_gallery")
+        .update({ is_featured:false })
+        .eq("shop_slug", slug);
+
+    if(clearError) throw clearError;
+
+    const { error } =
+      await supabaseClient
+        .from("shop_gallery")
+        .update({ is_featured:true })
+        .eq("id", id)
+        .eq("shop_slug", slug);
+
+    if(error) throw error;
+
+    await logAdminActivity(
+      "gallery_featured_changed",
+      slug,
+      { gallery_id:String(id) }
+    );
+  }
+
+
+  async function deleteGalleryItem(id){
+
+    const slug = normalizedText(galleryShopSlug.value);
+
+    if(!slug || !id) return;
+
+    await requireGalleryAdmin();
+
+    const { data, error: loadError } =
+      await supabaseClient
+        .from("shop_gallery")
+        .select("id,storage_path,is_featured")
+        .eq("id", id)
+        .eq("shop_slug", slug)
+        .maybeSingle();
+
+    if(loadError) throw loadError;
+    if(!data) throw new Error("Gallery image not found.");
+
+    const { error: deleteError } =
+      await supabaseClient
+        .from("shop_gallery")
+        .delete()
+        .eq("id", id)
+        .eq("shop_slug", slug);
+
+    if(deleteError) throw deleteError;
+
+    if(data.storage_path){
+      const { error: storageError } =
+        await supabaseClient
+          .storage
+          .from("shop-gallery")
+          .remove([data.storage_path]);
+
+      if(storageError){
+        console.warn("Storage delete warning:", storageError);
+      }
+    }
+
+    if(data.is_featured){
+      const { data: nextItems, error: nextError } =
+        await supabaseClient
+          .from("shop_gallery")
+          .select("id")
+          .eq("shop_slug", slug)
+          .order("sort_order", { ascending:true })
+          .limit(1);
+
+      if(!nextError && nextItems && nextItems[0]){
+        await supabaseClient
+          .from("shop_gallery")
+          .update({ is_featured:true })
+          .eq("id", nextItems[0].id);
+      }
+    }
+
+    await logAdminActivity(
+      "gallery_image_deleted",
+      slug,
+      { gallery_id:String(id) }
+    );
+  }
+
+
+  async function requireVideoAdmin(){
+    const { data, error } = await supabaseClient.rpc("is_site_admin");
+    if(error || data !== true){
+      throw new Error("Admin session is no longer valid. Login again.");
+    }
+    return true;
+  }
+
+  function cleanVideoFileName(name){
+    const raw = String(name || "video")
+      .toLowerCase()
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 70);
+    return raw || "video";
+  }
+
+  function videoExtension(file){
+    const fromName = String(file && file.name || "").split(".").pop().toLowerCase();
+    if(["mp4","webm","mov"].includes(fromName)) return fromName;
+    const mime = String(file && file.type || "").toLowerCase();
+    if(mime === "video/webm") return "webm";
+    if(mime === "video/quicktime") return "mov";
+    return "mp4";
+  }
+
+  async function nextVideoSortOrder(shopSlugValue){
+    const { data, error } = await supabaseClient
+      .from("shop_videos")
+      .select("sort_order")
+      .eq("shop_slug", shopSlugValue)
+      .order("sort_order", { ascending:false })
+      .limit(1);
+    if(error) throw error;
+    if(!data || !data.length) return 0;
+    return Number(data[0].sort_order || 0) + 1;
+  }
+
+  function renderVideoItems(rows){
+    const items = Array.isArray(rows) ? rows : [];
+    if(!items.length){
+      videoList.innerHTML = '<div class="ma-video-empty">No videos yet.</div>';
+      return;
+    }
+
+    videoList.innerHTML = items.map(function(item){
+      const id = String(item.id);
+      const url = escapeHtml(item.video_url || "");
+      return '' +
+        '<article class="ma-video-item" data-video-id="' + id + '">' +
+          '<video muted playsinline preload="metadata" src="' + url + '"></video>' +
+          '<div class="ma-video-item-actions">' +
+            '<button type="button" data-video-action="delete">Delete Video</button>' +
+          '</div>' +
+        '</article>';
+    }).join("");
+  }
+
+  async function loadVideoItems(){
+    const slug = normalizedText(videoShopSlug.value);
+    if(!slug){ renderVideoItems([]); return; }
+
+    setStatus(videoStatus, "Loading videos…");
+
+    const { data, error } = await supabaseClient
+      .from("shop_videos")
+      .select("id,shop_slug,video_url,storage_path,sort_order,created_at")
+      .eq("shop_slug", slug)
+      .order("sort_order", { ascending:true })
+      .order("created_at", { ascending:true });
+
+    if(error){
+      setStatus(videoStatus, error.message || "Could not load videos.", "error");
+      renderVideoItems([]);
+      return;
+    }
+
+    setStatus(videoStatus, "");
+    renderVideoItems(data || []);
+  }
+
+  async function openVideoManager(shop){
+    if(!shop) return;
+    try{ await requireVideoAdmin(); }
+    catch(error){
+      setStatus(manageStatus, error.message || "Admin check failed.", "error");
+      return;
+    }
+
+    videoShopSlug.value = shop.shop_slug || "";
+    videoSelectedName.textContent = shop.shop_name || shop.shop_slug || "Shop";
+    videoSelectedSlug.textContent = "/" + (shop.shop_slug || "");
+    videoUrlInput.value = "";
+    videoFileInput.value = "";
+    setStatus(videoStatus, "");
+    videoCard.hidden = false;
+
+    await loadVideoItems();
+
+    window.setTimeout(function(){
+      videoCard.scrollIntoView({ behavior:"smooth", block:"start" });
+    }, 30);
+  }
+
+  function closeVideoManager(){
+    videoCard.hidden = true;
+    videoShopSlug.value = "";
+    videoFileInput.value = "";
+    videoUrlInput.value = "";
+    videoList.innerHTML = "";
+    setStatus(videoStatus, "");
+  }
+
+  async function addVideoUrl(){
+    const slug = normalizedText(videoShopSlug.value);
+    const url = normalizedText(videoUrlInput.value);
+
+    if(!slug){ setStatus(videoStatus, "No shop selected.", "error"); return; }
+    if(!/^https?:\/\//i.test(url)){
+      setStatus(videoStatus, "Enter a valid direct video URL.", "error");
+      return;
+    }
+
+    videoAddUrlButton.disabled = true;
+
+    try{
+      await requireVideoAdmin();
+      const sortOrder = await nextVideoSortOrder(slug);
+
+      const { error } = await supabaseClient
+        .from("shop_videos")
+        .insert({
+          shop_slug:slug,
+          video_url:url,
+          storage_path:null,
+          sort_order:sortOrder
+        });
+
+      if(error) throw error;
+
+      videoUrlInput.value = "";
+      await logAdminActivity("video_added", slug, { source:"url" });
+      setStatus(videoStatus, "Video URL added.", "success");
+      await loadVideoItems();
+
+    }catch(error){
+      setStatus(videoStatus, error.message || "Could not add video URL.", "error");
+    }finally{
+      videoAddUrlButton.disabled = false;
+    }
+  }
+
+  async function uploadVideoFiles(files){
+    const slug = normalizedText(videoShopSlug.value);
+    const selected = Array.from(files || []);
+    if(!slug || !selected.length) return;
+
+    const invalid = selected.find(function(file){
+      const type = String(file.type || "").toLowerCase();
+      const ext = String(file.name || "").split(".").pop().toLowerCase();
+      return !(type === "video/mp4" || type === "video/webm" || type === "video/quicktime" || ["mp4","webm","mov"].includes(ext));
+    });
+
+    if(invalid){
+      setStatus(videoStatus, "Only MP4, WEBM and MOV videos are allowed.", "error");
+      videoFileInput.value = "";
+      return;
+    }
+
+    try{
+      await requireVideoAdmin();
+      let sortOrder = await nextVideoSortOrder(slug);
+
+      for(let index = 0; index < selected.length; index++){
+        const file = selected[index];
+
+        setStatus(videoStatus, "Uploading " + (index + 1) + " of " + selected.length + "…");
+
+        const ext = videoExtension(file);
+        const base = cleanVideoFileName(file.name);
+        const unique = Date.now() + "-" + Math.random().toString(36).slice(2,10);
+        const storagePath = slug + "/" + unique + "-" + base + "." + ext;
+
+        const { error:uploadError } = await supabaseClient
+          .storage
+          .from("shop-videos")
+          .upload(storagePath, file, {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type || undefined
+          });
+
+        if(uploadError) throw uploadError;
+
+        const { data:publicData } = supabaseClient.storage.from("shop-videos").getPublicUrl(storagePath);
+        const publicUrl = publicData && publicData.publicUrl;
+
+        if(!publicUrl){
+          await supabaseClient.storage.from("shop-videos").remove([storagePath]);
+          throw new Error("Could not create the public video URL.");
+        }
+
+        const { error:insertError } = await supabaseClient
+          .from("shop_videos")
+          .insert({
+            shop_slug:slug,
+            video_url:publicUrl,
+            storage_path:storagePath,
+            sort_order:sortOrder++
+          });
+
+        if(insertError){
+          await supabaseClient.storage.from("shop-videos").remove([storagePath]);
+          throw insertError;
+        }
+      }
+
+      await logAdminActivity("video_uploaded", slug, { count:selected.length });
+      setStatus(videoStatus, selected.length === 1 ? "Video uploaded successfully." : selected.length + " videos uploaded successfully.", "success");
+      videoFileInput.value = "";
+      await loadVideoItems();
+
+    }catch(error){
+      setStatus(videoStatus, error.message || "Video upload failed.", "error");
+      videoFileInput.value = "";
+    }
+  }
+
+  async function deleteVideoItem(id){
+    const slug = normalizedText(videoShopSlug.value);
+    if(!slug || !id) return;
+
+    await requireVideoAdmin();
+
+    const { data, error:loadError } = await supabaseClient
+      .from("shop_videos")
+      .select("id,storage_path")
+      .eq("id", id)
+      .eq("shop_slug", slug)
+      .maybeSingle();
+
+    if(loadError) throw loadError;
+    if(!data) throw new Error("Video not found.");
+
+    const { error:deleteError } = await supabaseClient
+      .from("shop_videos")
+      .delete()
+      .eq("id", id)
+      .eq("shop_slug", slug);
+
+    if(deleteError) throw deleteError;
+
+    if(data.storage_path){
+      const { error:storageError } = await supabaseClient.storage.from("shop-videos").remove([data.storage_path]);
+      if(storageError) console.warn("Video storage delete warning:", storageError);
+    }
+
+    await logAdminActivity("video_deleted", slug, { video_id:String(id) });
+  }
+
+
+  async function requireReelsAdmin(){
+    const { data:adminCheck, error:adminError } =
+      await supabaseClient.rpc("is_site_admin");
+
+    if(adminError || adminCheck !== true){
+      throw new Error("Admin session is no longer valid. Login again.");
+    }
+
+    return true;
+  }
+
+
+  function getReelStoragePathFromUrl(url){
+    const value = String(url || "").trim();
+    const marker = "/storage/v1/object/public/shop-videos/";
+    const index = value.indexOf(marker);
+
+    if(index === -1){
+      return "";
+    }
+
+    try{
+      return decodeURIComponent(
+        value.slice(index + marker.length).split("?")[0]
+      );
+    }catch(_){
+      return value.slice(index + marker.length).split("?")[0];
+    }
+  }
+
+
+  async function cleanupPendingReelUpload(){
+    const storagePath = pendingReelStoragePath;
+
+    pendingReelStoragePath = "";
+    pendingReelPublicUrl = "";
+
+    if(!storagePath){
+      return;
+    }
+
+    try{
+      const { error } = await supabaseClient
+        .storage
+        .from("shop-videos")
+        .remove([storagePath]);
+
+      if(error){
+        console.warn("Pending Reel cleanup warning:", error);
+      }
+    }catch(error){
+      console.warn("Pending Reel cleanup warning:", error);
+    }
+  }
+
+
+  async function uploadReelFromDevice(file){
+    const slug = normalizedText(reelsShopSlug.value);
+
+    if(!slug || !file){
+      return;
+    }
+
+    const type = String(file.type || "").toLowerCase();
+    const extFromName = String(file.name || "").split(".").pop().toLowerCase();
+    const allowed =
+      type === "video/mp4" ||
+      type === "video/webm" ||
+      type === "video/quicktime" ||
+      ["mp4","webm","mov"].includes(extFromName);
+
+    if(!allowed){
+      setStatus(
+        reelsStatus,
+        "Only MP4, WEBM and MOV videos are allowed.",
+        "error"
+      );
+      reelsFileInput.value = "";
+      return;
+    }
+
+    reelsFileInput.disabled = true;
+    reelsPublishButton.disabled = true;
+
+    try{
+      await requireReelsAdmin();
+      await cleanupPendingReelUpload();
+
+      setStatus(
+        reelsStatus,
+        "Uploading Reel from device…"
+      );
+
+      const ext = videoExtension(file);
+      const base = cleanVideoFileName(file.name);
+      const unique =
+        Date.now() + "-" +
+        Math.random().toString(36).slice(2,10);
+
+      const storagePath =
+        "reels/" + slug + "/" + unique + "-" + base + "." + ext;
+
+      const { error:uploadError } = await supabaseClient
+        .storage
+        .from("shop-videos")
+        .upload(
+          storagePath,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type || undefined
+          }
+        );
+
+      if(uploadError){
+        throw uploadError;
+      }
+
+      const { data:publicData } = supabaseClient
+        .storage
+        .from("shop-videos")
+        .getPublicUrl(storagePath);
+
+      const publicUrl = publicData && publicData.publicUrl;
+
+      if(!publicUrl){
+        await supabaseClient
+          .storage
+          .from("shop-videos")
+          .remove([storagePath]);
+
+        throw new Error("Could not create the public Reel URL.");
+      }
+
+      pendingReelStoragePath = storagePath;
+      pendingReelPublicUrl = publicUrl;
+      reelsVideoUrl.value = publicUrl;
+
+      setStatus(
+        reelsStatus,
+        "Upload complete. Add a caption if you want, then tap Publish Live Reel.",
+        "success"
+      );
+    }
+    catch(error){
+      setStatus(
+        reelsStatus,
+        error && error.message
+          ? error.message
+          : "Reel upload failed.",
+        "error"
+      );
+
+      reelsFileInput.value = "";
+    }
+    finally{
+      reelsFileInput.disabled = false;
+      reelsPublishButton.disabled = false;
+    }
+  }
+
+
+  async function nextReelSortOrder(){
+    const { data, error } = await supabaseClient
+      .from("shop_reels")
+      .select("sort_order")
+      .order("sort_order", { ascending:false })
+      .limit(1);
+
+    if(error) throw error;
+    if(!data || !data.length) return 0;
+
+    return Number(data[0].sort_order || 0) + 1;
+  }
+
+
+  function makeReelId(slug){
+    return (
+      String(slug || "reel")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "") +
+      "-" +
+      Date.now().toString(36) +
+      "-" +
+      Math.random().toString(36).slice(2,7)
+    );
+  }
+
+
+  function renderReelItems(rows){
+    const items = Array.isArray(rows) ? rows : [];
+
+    if(!items.length){
+      reelsList.innerHTML =
+        '<div class="ma-video-empty">No live Reels for this shop yet.</div>';
+      return;
+    }
+
+    reelsList.innerHTML =
+      items.map(function(item){
+
+        const reelId =
+          escapeHtml(item.reel_id || "");
+
+        const videoUrl =
+          escapeHtml(item.video_url || "");
+
+        const caption =
+          escapeHtml(item.caption || "");
+
+        const statusText =
+          item.active === false
+            ? "Hidden"
+            : "Live";
+
+        return '' +
+          '<article class="ma-video-item" data-reel-id="' + reelId + '">' +
+            '<video muted playsinline preload="metadata" src="' + videoUrl + '"></video>' +
+            '<div class="ma-reel-admin-meta">' +
+              '<strong>' + (caption || "Reel") + '</strong>' +
+              '<span>' + statusText + '</span>' +
+              '<span class="ma-reel-admin-id">' + reelId + '</span>' +
+            '</div>' +
+            '<div class="ma-video-item-actions">' +
+              '<button type="button" data-reel-action="delete">Delete Reel</button>' +
+            '</div>' +
+          '</article>';
+      }).join("");
+  }
+
+
+  async function loadReelItems(){
+    const slug =
+      normalizedText(reelsShopSlug.value);
+
+    if(!slug){
+      renderReelItems([]);
+      return;
+    }
+
+    setStatus(
+      reelsStatus,
+      "Loading live Reels…"
+    );
+
+    const { data, error } =
+      await supabaseClient
+        .from("shop_reels")
+        .select("reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,caption,sort_order,active,created_at")
+        .eq("shop_slug", slug)
+        .order("sort_order", { ascending:true })
+        .order("created_at", { ascending:false });
+
+    if(error){
+      setStatus(
+        reelsStatus,
+        error.message || "Could not load Reels.",
+        "error"
+      );
+
+      renderReelItems([]);
+      return;
+    }
+
+    setStatus(
+      reelsStatus,
+      ""
+    );
+
+    renderReelItems(
+      data || []
+    );
+  }
+
+
+  async function loadOwnerReelLimit(){
+    const slug = normalizedText(reelsShopSlug.value);
+    if(!slug || !reelsOwnerLimit) return;
+    setStatus(reelsLimitStatus, "Loading owner Reel limit…");
+    const { data, error } = await supabaseClient.from("shop_reel_limits").select("reel_limit").eq("shop_slug", slug).maybeSingle();
+    if(error){ reelsOwnerLimit.value = "0"; setStatus(reelsLimitStatus, error.message || "Could not load owner Reel limit.", "error"); return; }
+    reelsOwnerLimit.value = String(data ? Number(data.reel_limit || 0) : 0);
+    setStatus(reelsLimitStatus, "");
+  }
+
+  async function saveOwnerReelLimit(){
+    const slug = normalizedText(reelsShopSlug.value);
+    if(!slug) throw new Error("No shop selected.");
+    await requireReelsAdmin();
+    const limit = Number(reelsOwnerLimit.value);
+    if(!Number.isInteger(limit) || limit < 0 || limit > 100) throw new Error("Reel limit must be a whole number from 0 to 100.");
+    const { error } = await supabaseClient.from("shop_reel_limits").upsert({ shop_slug:slug, reel_limit:limit }, { onConflict:"shop_slug" });
+    if(error) throw error;
+    await logAdminActivity("owner_reel_limit_changed", slug, { reel_limit:limit });
+    setStatus(reelsLimitStatus, "Owner Reel limit saved: " + limit + ".", "success");
+  }
+
+
+  async function openReelsManager(shop){
+    if(!shop) return;
+
+    try{
+      await requireReelsAdmin();
+    }
+    catch(error){
+      setStatus(
+        manageStatus,
+        error.message || "Admin check failed.",
+        "error"
+      );
+      return;
+    }
+
+    currentReelsShop =
+      shop;
+
+    reelsShopSlug.value =
+      shop.shop_slug || "";
+
+    reelsSelectedName.textContent =
+      shop.shop_name ||
+      shop.shop_slug ||
+      "Shop";
+
+    reelsSelectedSlug.textContent =
+      "/" + (shop.shop_slug || "");
+
+    reelsVideoUrl.value =
+      "";
+
+    reelsFileInput.value =
+      "";
+
+    pendingReelStoragePath =
+      "";
+
+    pendingReelPublicUrl =
+      "";
+
+    reelsCaption.value =
+      "";
+
+    setStatus(
+      reelsStatus,
+      ""
+    );
+
+    reelsCard.hidden =
+      false;
+
+    await Promise.all([loadReelItems(), loadOwnerReelLimit()]);
+
+    window.setTimeout(
+      function(){
+        reelsCard.scrollIntoView({
+          behavior:"smooth",
+          block:"start"
+        });
+      },
+      30
+    );
+  }
+
+
+  function closeReelsManager(){
+    cleanupPendingReelUpload();
+
+    reelsCard.hidden =
+      true;
+
+    reelsShopSlug.value =
+      "";
+
+    reelsFileInput.value =
+      "";
+
+    reelsVideoUrl.value =
+      "";
+
+    reelsCaption.value =
+      "";
+
+    reelsList.innerHTML =
+      "";
+
+    currentReelsShop =
+      null;
+
+    setStatus(
+      reelsStatus,
+      ""
+    );
+  }
+
+
+  async function publishLiveReel(){
+    const slug =
+      normalizedText(reelsShopSlug.value);
+
+    const videoUrl =
+      normalizedText(reelsVideoUrl.value);
+
+    const caption =
+      normalizedText(reelsCaption.value);
+
+    if(!slug){
+      setStatus(
+        reelsStatus,
+        "No shop selected.",
+        "error"
+      );
+      return;
+    }
+
+    if(!/^https?:\/\//i.test(videoUrl)){
+      setStatus(
+        reelsStatus,
+        "Enter a valid direct video URL.",
+        "error"
+      );
+      return;
+    }
+
+    const shop =
+      currentReelsShop ||
+      getManagedShop(slug);
+
+    if(!shop){
+      setStatus(
+        reelsStatus,
+        "Could not find this shop.",
+        "error"
+      );
+      return;
+    }
+
+    reelsPublishButton.disabled =
+      true;
+
+    reelsPublishButton.textContent =
+      "Publishing…";
+
+    try{
+      await requireReelsAdmin();
+
+      const sortOrder =
+        await nextReelSortOrder();
+
+      const reelId =
+        makeReelId(slug);
+
+      const shopName =
+        normalizedText(
+          shop.shop_name ||
+          slug
+        );
+
+      const shopUrl =
+        normalizedText(
+          shop.shop_url ||
+          ("https://ma7alak.com/" + encodeURIComponent(slug))
+        );
+
+      const shopIcon =
+        normalizedText(
+          shop.profile_image_url || ""
+        );
+
+      const { error } =
+        await supabaseClient
+          .from("shop_reels")
+          .insert({
+            reel_id:reelId,
+            shop_slug:slug,
+            shop_name:shopName,
+            shop_url:shopUrl,
+            shop_icon:shopIcon,
+            video_url:videoUrl,
+            caption:caption,
+            sort_order:sortOrder,
+            active:true
+          });
+
+      if(error) throw error;
+
+      await logAdminActivity(
+        "reel_published",
+        slug,
+        {
+          reel_id:reelId,
+          source:pendingReelStoragePath ? "device_upload" : "direct_url"
+        }
+      );
+
+      pendingReelStoragePath =
+        "";
+
+      pendingReelPublicUrl =
+        "";
+
+      reelsFileInput.value =
+        "";
+
+      reelsVideoUrl.value =
+        "";
+
+      reelsCaption.value =
+        "";
+
+      setStatus(
+        reelsStatus,
+        "Reel published LIVE successfully.",
+        "success"
+      );
+
+      await loadReelItems();
+    }
+    catch(error){
+      setStatus(
+        reelsStatus,
+        error.message || "Could not publish Reel.",
+        "error"
+      );
+    }
+    finally{
+      reelsPublishButton.disabled =
+        false;
+
+      reelsPublishButton.textContent =
+        "Publish Live Reel";
+    }
+  }
+
+
+  async function deleteLiveReel(reelId){
+    const slug =
+      normalizedText(reelsShopSlug.value);
+
+    if(!slug || !reelId){
+      return;
+    }
+
+    await requireReelsAdmin();
+
+    const { data:reelRow, error:loadError } =
+      await supabaseClient
+        .from("shop_reels")
+        .select("reel_id,video_url")
+        .eq("reel_id", reelId)
+        .eq("shop_slug", slug)
+        .maybeSingle();
+
+    if(loadError) throw loadError;
+
+    const { error } =
+      await supabaseClient
+        .from("shop_reels")
+        .delete()
+        .eq("reel_id", reelId)
+        .eq("shop_slug", slug);
+
+    if(error) throw error;
+
+    const storagePath =
+      reelRow
+        ? getReelStoragePathFromUrl(reelRow.video_url)
+        : "";
+
+    if(storagePath && storagePath.indexOf("reels/") === 0){
+      const { error:storageError } = await supabaseClient
+        .storage
+        .from("shop-videos")
+        .remove([storagePath]);
+
+      if(storageError){
+        console.warn("Reel storage delete warning:", storageError);
+      }
+    }
+
+    await logAdminActivity(
+      "reel_deleted",
+      slug,
+      {
+        reel_id:String(reelId)
+      }
+    );
+  }
+
+
+  function renderManagedShops(){
+
+    const term = normalizedText(manageShopSearch.value).toLowerCase();
+
+    const rows = managedShops.filter(function(shop){
+      if(!term) return true;
+      return [shop.shop_name, shop.arabic_name, shop.shop_slug, shop.city, shop.area, shop.category_name, shop.location]
+        .some(function(value){
+          return String(value || "").toLowerCase().includes(term);
+        });
+    });
+
+    manageShopCount.textContent = rows.length + (rows.length === 1 ? " shop" : " shops");
+
+    if(!rows.length){
+      manageShopList.innerHTML = '<div class="ma-admin-empty">No shops found.</div>';
+      return;
+    }
+
+    manageShopList.innerHTML = rows.map(function(shop){
+
+      const slug = escapeHtml(shop.shop_slug || "");
+      const name = escapeHtml(shop.shop_name || shop.shop_slug || "Shop");
+      const image = escapeHtml(shop.profile_image_url || "");
+      const meta = [shop.city, shop.area, shop.category_name || shop.category, shop.location].filter(Boolean).map(escapeHtml).join(" • ");
+
+      const imageHtml = image
+        ? '<img src="' + image + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=&quot;ma-admin-shop-thumb-fallback&quot;>🏪</div>\'">'
+        : '<div class="ma-admin-shop-thumb-fallback">🏪</div>';
+
+      const completeness = getShopCompleteness(shop);
+      const completenessText = completeness.ready
+        ? ""
+        : completenessMessage(completeness);
+
+      let badges = '';
+      badges += '<span class="ma-admin-shop-badge ' + (shop.is_active ? 'active' : '') + '">' + (shop.is_active ? 'Active' : 'Hidden') + '</span>';
+      badges += '<span class="ma-admin-shop-badge ' + (completeness.ready ? 'ready' : 'incomplete') + '">' + (completeness.ready ? '✓ Ready' : '⚠ Incomplete') + '</span>';
+      if(shop.verified) badges += '<span class="ma-admin-shop-badge">Verified</span>';
+      if(shop.featured) badges += '<span class="ma-admin-shop-badge featured">Featured</span>';
+      if(shop.featured_red) badges += '<span class="ma-admin-shop-badge red">Red Featured</span>';
+
+      const completenessNote = completeness.ready
+        ? ''
+        : '<div class="ma-admin-completeness-note">' + escapeHtml(completenessText) + '</div>';
+
+      return '' +
+        '<article class="ma-admin-shop-item ' + (shop.is_active ? '' : 'is-inactive') + '" data-slug="' + slug + '">' +
+          '<div class="ma-admin-shop-thumb">' + imageHtml + '</div>' +
+          '<div class="ma-admin-shop-info">' +
+            '<div class="ma-admin-shop-name-row"><div class="ma-admin-shop-name">' + name + '</div><span class="ma-admin-owner-state" data-owner-badge="' + slug + '">Checking owner…</span></div>' +
+            '<div class="ma-admin-shop-slug">/' + slug + '</div>' +
+            '<div class="ma-admin-shop-meta">' + meta + '</div>' +
+            '<div class="ma-admin-shop-badges">' + badges + '</div>' +
+            completenessNote +
+          '</div>' +
+          '<div class="ma-admin-shop-actions">' +
+            '<button class="ma-shop-action" type="button" data-action="edit">Edit</button>' +
+            '<button class="ma-shop-action" type="button" data-action="active">' + (shop.is_active ? 'Hide' : 'Activate') + '</button>' +
+            '<button class="ma-shop-action feature" type="button" data-action="featured">' + (shop.featured ? 'Unfeature' : 'Feature') + '</button>' +
+            '<button class="ma-shop-action owner" type="button" data-action="owner">Owner Access</button>' +
+            '<button class="ma-shop-action gallery" type="button" data-action="gallery">Gallery</button>' +
+            '<button class="ma-shop-action video" type="button" data-action="video">Videos</button>' +
+            '<button class="ma-shop-action feature" type="button" data-action="reels">🔥 Reels</button>' +
+            '<button class="ma-shop-action danger" type="button" data-action="delete">Delete</button>' +
+          '</div>' +
+        '</article>';
+    }).join("");
+  }
+
+
+  async function invokeOwnerManager(body){
+
+    const { data: adminCheck, error: adminError } =
+      await supabaseClient.rpc("is_site_admin");
+
+    if(adminError || adminCheck !== true){
+      throw new Error("Admin session is no longer valid. Login again.");
+    }
+
+    const { data, error } =
+      await supabaseClient.functions.invoke("create-shop-owner", {
+        body: body
+      });
+
+    if(error){
+      let message = error.message || "Owner management request failed.";
+
+      if(error.context && typeof error.context.json === "function"){
+        try{
+          const errorBody = await error.context.json();
+          if(errorBody && errorBody.error){
+            message = errorBody.error;
+          }
+        }catch(_){}
+      }
+
+      throw new Error(message);
+    }
+
+    if(!data || data.success !== true){
+      throw new Error(
+        data && data.error
+          ? data.error
+          : "Owner management request failed."
+      );
+    }
+
+    return data;
+  }
+
+
+  function showOwnerLoading(show){
+    ownerLoading.hidden = !show;
+  }
+
+
+  function showCreateOwnerState(){
+    ownerExistingPanel.hidden = true;
+    ownerForm.hidden = false;
+    ownerCurrentEmail.textContent = "";
+    ownerResetPassword.value = "";
+  }
+
+
+  function showExistingOwnerState(email){
+    ownerForm.hidden = true;
+    ownerExistingPanel.hidden = false;
+    ownerCurrentEmail.textContent = email || "Email unavailable";
+    ownerResetPassword.value = "";
+  }
+
+
+  async function loadOwnerAccessStatus(){
+
+    const shopSlugValue = normalizedText(ownerShopSlug.value);
+
+    if(!shopSlugValue){
+      throw new Error("No shop selected.");
+    }
+
+    showOwnerLoading(true);
+    ownerForm.hidden = true;
+    ownerExistingPanel.hidden = true;
+
+    try{
+      const data = await invokeOwnerManager({
+        action: "status",
+        shop_slug: shopSlugValue
+      });
+
+      if(data.owner_exists){
+        showExistingOwnerState(data.email || "");
+      }else{
+        showCreateOwnerState();
+      }
+    }finally{
+      showOwnerLoading(false);
+    }
+  }
+
+
+  async function openOwnerAccess(shop){
+
+    if(!shop) return;
+
+    ownerShopSlug.value = shop.shop_slug || "";
+    ownerSelectedName.textContent = shop.shop_name || shop.shop_slug || "Shop";
+    ownerSelectedSlug.textContent = "/" + (shop.shop_slug || "");
+    ownerEmail.value = "";
+    ownerPassword.value = "";
+    ownerResetPassword.value = "";
+    setStatus(ownerStatus, "");
+
+    ownerCard.hidden = false;
+
+    window.setTimeout(function(){
+      ownerCard.scrollIntoView({ behavior:"smooth", block:"start" });
+    }, 30);
+
+    try{
+      await loadOwnerAccessStatus();
+
+      if(!ownerForm.hidden){
+        window.setTimeout(function(){ ownerEmail.focus(); }, 50);
+      }
+    }catch(error){
+      console.error("Owner status failed:", error);
+      setStatus(
+        ownerStatus,
+        error && error.message ? error.message : "Could not load owner account.",
+        "error"
+      );
+    }
+  }
+
+
+  function closeOwnerAccess(){
+    ownerCard.hidden = true;
+    ownerForm.reset();
+    ownerExistingPanel.hidden = true;
+    ownerForm.hidden = true;
+    ownerShopSlug.value = "";
+    ownerResetPassword.value = "";
+    showOwnerLoading(false);
+    setStatus(ownerStatus, "");
+  }
+
+
+  function getManagedShop(slug){
+    return managedShops.find(function(shop){
+      return shop.shop_slug === slug;
+    }) || null;
+  }
+
+
+  function openEditShop(shop){
+
+    if(!shop) return;
+
+    editOriginalSlug.value = shop.shop_slug || "";
+    editSlug.value = shop.shop_slug || "";
+    editName.value = shop.shop_name || "";
+    editArabic.value = shop.arabic_name || "";
+    editImage.value = shop.profile_image_url || "";
+    editUrl.value = shop.shop_url || "";
+    editArea.value = shop.area || "";
+    editLocation.value = shop.location || "";
+    editCategory.value = shop.category || "";
+    editCategoryName.value = shop.category_name || "";
+    editVerified.checked = shop.verified === true;
+    editFeatured.checked = shop.featured === true;
+    editRed.checked = shop.featured_red === true;
+    editActive.checked = shop.is_active === true;
+
+    document.getElementById("ma-admin-edit-subtitle").textContent = "Editing " + (shop.shop_name || shop.shop_slug);
+    setStatus(editStatus, "");
+    editCard.hidden = false;
+
+    editCard.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+
+  function closeEditShop(){
+    editCard.hidden = true;
+    editForm.reset();
+    setStatus(editStatus, "");
+  }
+
+
+  async function updateShopFlag(slug, field, value){
+
+    const { error } = await supabaseClient
+      .from("shop_profiles")
+      .update({ [field]: value })
+      .eq("shop_slug", slug);
+
+    if(error) throw error;
+
+    const local = getManagedShop(slug);
+    if(local) local[field] = value;
+
+    if(field === "is_active"){
+      await logAdminActivity(
+        value ? "shop_activated" : "shop_hidden",
+        slug,
+        { shop_name: local && local.shop_name ? local.shop_name : slug }
+      );
+    }
+
+    if(field === "featured"){
+      await logAdminActivity(
+        value ? "shop_featured" : "shop_unfeatured",
+        slug,
+        { shop_name: local && local.shop_name ? local.shop_name : slug }
+      );
+    }
+
+    renderManagedShops();
+    loadAdminActivity();
+  }
+
+
+
+  function escapeHtml(value){
+
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+
+  function autoFillShopUrl(){
+
+    const slug =
+      normalizeSlug(shopSlug.value);
+
+    if(!slug){
+      return;
+    }
+
+    if(
+      !shopUrl.value.trim() ||
+      shopUrl.dataset.auto === "true"
+    ){
+      shopUrl.value =
+        "https://ma7alak.com/" + slug;
+
+      shopUrl.dataset.auto = "true";
+    }
+  }
+
+
+  function updatePreview(){
+
+    const name =
+      normalizedText(shopName.value) ||
+      "Shop name";
+
+    const slug =
+      normalizeSlug(shopSlug.value) ||
+      "shop-slug";
+
+    const area =
+      normalizedText(shopArea.value) ||
+      "Area";
+
+    const category =
+      normalizedText(shopCategoryName.value) ||
+      normalizedText(shopCategory.value) ||
+      "Category";
+
+    previewText.textContent =
+      name +
+      " • " +
+      area +
+      " • " +
+      category +
+      " • /" +
+      slug;
+  }
+
+
+  shopName.addEventListener(
+    "input",
+    function(){
+
+      if(!shopSlug.dataset.manual){
+        shopSlug.value =
+          normalizeSlug(
+            shopName.value
+          );
+
+        autoFillShopUrl();
+      }
+
+      updatePreview();
+    }
+  );
+
+
+  shopSlug.addEventListener(
+    "input",
+    function(){
+
+      shopSlug.dataset.manual = "true";
+
+      const caret =
+        shopSlug.selectionStart;
+
+      const cleaned =
+        normalizeSlug(
+          shopSlug.value
+        );
+
+      if(shopSlug.value !== cleaned){
+        shopSlug.value = cleaned;
+
+        try{
+          shopSlug.setSelectionRange(
+            caret,
+            caret
+          );
+        }catch(_){}
+      }
+
+      autoFillShopUrl();
+      updatePreview();
+    }
+  );
+
+
+  shopUrl.addEventListener(
+    "input",
+    function(){
+      shopUrl.dataset.auto = "false";
+    }
+  );
+
+
+  [
+    shopArea,
+    shopCategory,
+    shopCategoryName
+  ].forEach(input => {
+    input.addEventListener(
+      "input",
+      updatePreview
+    );
+  });
+
+
+  shopImage.addEventListener(
+    "input",
+    function(){
+
+      const url =
+        normalizedText(shopImage.value);
+
+      if(!url){
+        imagePreviewWrap.hidden = true;
+        imagePreview.removeAttribute("src");
+        return;
+      }
+
+      imagePreview.src = url;
+      imagePreviewWrap.hidden = false;
+    }
+  );
+
+
+  imagePreview.addEventListener(
+    "error",
+    function(){
+      imagePreviewWrap.hidden = true;
+    }
+  );
+
+
+  loginForm.addEventListener(
+    "submit",
+    async function(event){
+
+      event.preventDefault();
+
+      setStatus(
+        loginStatus,
+        ""
+      );
+
+      const email =
+        normalizedText(emailInput.value);
+
+      const password =
+        passwordInput.value;
+
+      if(!email || !password){
+        setStatus(
+          loginStatus,
+          "Enter your admin email and password.",
+          "error"
+        );
+        return;
+      }
+
+      loginButton.disabled = true;
+      loginButton.textContent =
+        "Checking…";
+
+      try{
+
+        const {
+          error
+        } =
+          await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if(error){
+          throw error;
+        }
+
+        const isAdmin =
+          await verifyAdmin();
+
+        if(!isAdmin){
+          return;
+        }
+
+        passwordInput.value = "";
+
+        setStatus(
+          loginStatus,
+          ""
+        );
+
+      }catch(error){
+
+        setStatus(
+          loginStatus,
+          error &&
+          error.message
+            ? error.message
+            : "Login failed.",
+          "error"
+        );
+
+      }finally{
+
+        loginButton.disabled = false;
+        loginButton.textContent =
+          "Login";
+      }
+    }
+  );
+
+
+  logoutButton.addEventListener(
+    "click",
+    async function(){
+
+      logoutButton.disabled = true;
+
+      try{
+        await supabaseClient.auth.signOut();
+      }finally{
+
+        logoutButton.disabled = false;
+
+        showLogin();
+
+        setStatus(
+          loginStatus,
+          "Logged out.",
+          "success"
+        );
+      }
+    }
+  );
+
+
+
+  async function uploadNewShopProfileImage(slug){
+    if(!shopImageFile || !shopImageFile.files || !shopImageFile.files[0]){
+      return "";
+    }
+
+    const file = shopImageFile.files[0];
+
+    if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type || "")){
+      throw new Error("Profile image must be JPG, PNG, WEBP or GIF.");
+    }
+
+    const maxBytes = 12 * 1024 * 1024;
+    if(file.size > maxBytes){
+      throw new Error("Profile image must be smaller than 12 MB.");
+    }
+
+    const ext =
+      ((file.name || "").split(".").pop() || "jpg")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g,"") || "jpg";
+
+    const storagePath =
+      "profiles/" +
+      slug +
+      "/" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).slice(2,8) +
+      "." +
+      ext;
+
+    const { error:uploadError } =
+      await supabaseClient
+        .storage
+        .from("shop-gallery")
+        .upload(storagePath, file, {
+          cacheControl:"3600",
+          upsert:false,
+          contentType:file.type || undefined
+        });
+
+    if(uploadError) throw uploadError;
+
+    const { data:publicData } =
+      supabaseClient
+        .storage
+        .from("shop-gallery")
+        .getPublicUrl(storagePath);
+
+    return publicData && publicData.publicUrl
+      ? publicData.publicUrl
+      : "";
+  }
+
+  shopForm.addEventListener(
+    "submit",
+    async function(event){
+
+      event.preventDefault();
+
+      setStatus(
+        shopStatus,
+        ""
+      );
+
+      const slug =
+        normalizeSlug(
+          shopSlug.value
+        );
+
+      const name =
+        normalizedText(
+          shopName.value
+        );
+
+      const area =
+        "";
+
+      const category =
+        normalizedText(
+          shopCategory.value
+        );
+
+      const categoryName =
+        normalizedText(
+          shopCategoryName.value
+        );
+
+      const selectedCity =
+        normalizedText(
+          document.getElementById("ma-shop-city-v2") &&
+          document.getElementById("ma-shop-city-v2").value
+        );
+
+      if(
+        !slug ||
+        !name ||
+        !selectedCity ||
+        !category
+      ){
+        setStatus(
+          shopStatus,
+          "Fill all required fields first.",
+          "error"
+        );
+        return;
+      }
+
+      const selectedTaxonomyCategory =
+        (window.__MA7ALAK_V2_CATEGORIES__ || []).find(function(row){
+          return row && row.category_key === category;
+        });
+
+      const finalCardLabel =
+        categoryName ||
+        (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
+        category;
+
+      addShopButton.disabled = true;
+      addShopButton.innerHTML =
+        "Adding shop…";
+
+      try{
+
+        const {
+          data: adminCheck,
+          error: adminError
+        } =
+          await supabaseClient.rpc(
+            "is_site_admin"
+          );
+
+        if(
+          adminError ||
+          adminCheck !== true
+        ){
+          throw new Error(
+            "Admin session is no longer valid. Login again."
+          );
+        }
+
+        const finalShopUrl =
+          normalizedText(
+            shopUrl.value
+          ) ||
+          (
+            "https://ma7alak.com/" +
+            slug
+          );
+
+        const uploadedProfileImage =
+          await uploadNewShopProfileImage(slug);
+
+        const payload = {
+          shop_slug: slug,
+          shop_name: name,
+          arabic_name:
+            normalizedText(
+              shopArabic.value
+            ) || null,
+          profile_image_url:
+            uploadedProfileImage ||
+            normalizedText(
+              shopImage.value
+            ) ||
+            null,
+          shop_url:
+            finalShopUrl,
+          city:
+            selectedCity || null,
+          area:
+            area,
+          category:
+            category,
+          category_name:
+            finalCardLabel,
+          location:
+            normalizedText(
+              shopLocation.value
+            ) || null,
+          verified:
+            shopVerified.checked,
+          featured:
+            shopFeatured.checked,
+          featured_red:
+            shopRed.checked,
+          is_active:
+            shopActive.checked
+        };
+
+        if(payload.is_active){
+          const completeness = getShopCompleteness(payload);
+
+          if(!completeness.ready){
+            throw new Error(
+              "Cannot publish this shop yet. " + completenessMessage(completeness) + ". Turn Active OFF to save it as hidden, or complete those fields first."
+            );
+          }
+        }
+
+        const {
+          error
+        } =
+          await supabaseClient
+            .from("shop_profiles")
+            .insert(payload);
+
+        if(error){
+
+          if(
+            error.code === "23505"
+          ){
+            throw new Error(
+              'A shop with slug "' +
+              slug +
+              '" already exists. Nothing was overwritten.'
+            );
+          }
+
+          throw error;
+        }
+
+        await logAdminActivity(
+          "shop_added",
+          slug,
+          { shop_name: name }
+        );
+        loadAdminActivity();
+
+        setStatus(
+          shopStatus,
+          'Shop "' +
+          name +
+          '" was added successfully. It can now appear automatically in Full Shops.',
+          "success"
+        );
+
+        lastAddedShopSlug = slug;
+        postAddOwnerTitle.textContent = name + " was added";
+        postAddOwner.hidden = false;
+
+        shopForm.reset();
+
+        shopActive.checked = true;
+
+        shopSlug.dataset.manual = "";
+        shopUrl.dataset.auto = "";
+
+        imagePreviewWrap.hidden = true;
+        imagePreview.removeAttribute("src");
+
+        updatePreview();
+
+        await loadExistingDirectoryValues();
+        await loadManagedShops();
+
+        window.scrollTo({
+          top:
+            document.getElementById(
+              "ma-admin-dashboard"
+            ).offsetTop,
+          behavior:"smooth"
+        });
+
+      }catch(error){
+
+        console.error(
+          "Add shop failed:",
+          error
+        );
+
+        setStatus(
+          shopStatus,
+          error &&
+          error.message
+            ? error.message
+            : "Could not add shop.",
+          "error"
+        );
+
+      }finally{
+
+        addShopButton.disabled = false;
+
+        addShopButton.innerHTML =
+          "<span>＋</span> Add Shop";
+      }
+    }
+  );
+
+
+  postAddOwnerButton.addEventListener("click", function(){
+    const shop = getManagedShop(lastAddedShopSlug);
+    if(!shop){
+      setStatus(shopStatus, "Could not find the newly added shop. Refresh and try again.", "error");
+      return;
+    }
+    openOwnerAccess(shop);
+  });
+
+
+  refreshActivityButton.addEventListener("click", async function(){
+    refreshActivityButton.disabled = true;
+    try{
+      await loadAdminActivity();
+    }finally{
+      refreshActivityButton.disabled = false;
+    }
+  });
+
+
+  manageShopSearch.addEventListener("input", function(){
+    renderManagedShops();
+    loadVisibleOwnerBadges();
+  });
+
+
+  refreshShopsButton.addEventListener("click", async function(){
+    refreshShopsButton.disabled = true;
+    try{
+      await loadManagedShops();
+      await loadExistingDirectoryValues();
+    }finally{
+      refreshShopsButton.disabled = false;
+    }
+  });
+
+
+  manageShopList.addEventListener("click", async function(event){
+
+    const button = event.target.closest("button[data-action]");
+    if(!button) return;
+
+    const card = button.closest(".ma-admin-shop-item");
+    if(!card) return;
+
+    const slug = card.dataset.slug;
+    const shop = getManagedShop(slug);
+    if(!shop) return;
+
+    const action = button.dataset.action;
+
+    if(action === "edit"){
+      openEditShop(shop);
+      return;
+    }
+
+    if(action === "owner"){
+      openOwnerAccess(shop);
+      return;
+    }
+
+    if(action === "gallery"){
+      openGalleryManager(shop);
+      return;
+    }
+
+    if(action === "video"){
+      openVideoManager(shop);
+      return;
+    }
+
+    if(action === "reels"){
+      openReelsManager(shop);
+      return;
+    }
+
+    button.disabled = true;
+
+    try{
+
+      if(action === "active"){
+
+        if(!shop.is_active){
+          const completeness = getShopCompleteness(shop);
+
+          if(!completeness.ready){
+            setStatus(
+              manageStatus,
+              'Cannot activate "' + (shop.shop_name || slug) + '" yet. ' + completenessMessage(completeness) + '.',
+              "error"
+            );
+            return;
+          }
+        }
+
+        await updateShopFlag(slug, "is_active", !shop.is_active);
+        await loadExistingDirectoryValues();
+        return;
+      }
+
+      if(action === "featured"){
+        await updateShopFlag(slug, "featured", !shop.featured);
+        return;
+      }
+
+      if(action === "delete"){
+
+        const confirmed = window.confirm(
+          'Delete "' + (shop.shop_name || slug) + '" from shop_profiles?\\n\\nThis does NOT delete its owner account or Story media.'
+        );
+
+        if(!confirmed) return;
+
+        const { error } = await supabaseClient
+          .from("shop_profiles")
+          .delete()
+          .eq("shop_slug", slug);
+
+        if(error) throw error;
+
+        if(editOriginalSlug.value === slug){
+          closeEditShop();
+        }
+
+        await logAdminActivity(
+          "shop_deleted",
+          slug,
+          { shop_name: shop.shop_name || slug }
+        );
+        loadAdminActivity();
+
+        await loadManagedShops();
+        await loadExistingDirectoryValues();
+      }
+
+    }catch(error){
+      setStatus(manageStatus, error.message || "Action failed.", "error");
+    }finally{
+      button.disabled = false;
+    }
+  });
+
+
+  cancelOwnerButton.addEventListener("click", closeOwnerAccess);
+  closeOwnerButton.addEventListener("click", closeOwnerAccess);
+
+
+  ownerForm.addEventListener("submit", async function(event){
+
+    event.preventDefault();
+    setStatus(ownerStatus, "");
+
+    const shopSlugValue = normalizedText(ownerShopSlug.value);
+    const email = normalizedText(ownerEmail.value).toLowerCase();
+    const password = String(ownerPassword.value || "");
+
+    if(!shopSlugValue){
+      setStatus(ownerStatus, "No shop selected.", "error");
+      return;
+    }
+
+    if(!email){
+      setStatus(ownerStatus, "Enter the owner's email.", "error");
+      return;
+    }
+
+    if(password.length < 8){
+      setStatus(ownerStatus, "Password must be at least 8 characters.", "error");
+      return;
+    }
+
+    createOwnerButton.disabled = true;
+    createOwnerButton.textContent = "Creating owner…";
+
+    try{
+      const data = await invokeOwnerManager({
+        action: "create",
+        email: email,
+        password: password,
+        shop_slug: shopSlugValue
+      });
+
+      ownerPassword.value = "";
+
+      setStatus(
+        ownerStatus,
+        'Owner account created for "' +
+          (data.shop_name || shopSlugValue) +
+          '". Login email: ' + email,
+        "success"
+      );
+
+      await logAdminActivity(
+        "owner_created",
+        shopSlugValue,
+        {
+          shop_name: data.shop_name || shopSlugValue,
+          owner_email: email
+        }
+      );
+      loadAdminActivity();
+
+      await loadOwnerAccessStatus();
+
+      const badge = manageShopList.querySelector(
+        '[data-owner-badge="' + CSS.escape(shopSlugValue) + '"]'
+      );
+      if(badge){
+        badge.textContent = "Account Active";
+        badge.classList.add("linked");
+      }
+
+      if(lastAddedShopSlug === shopSlugValue){
+        postAddOwner.hidden = true;
+      }
+
+    }catch(error){
+
+      console.error("Create owner failed:", error);
+
+      setStatus(
+        ownerStatus,
+        error && error.message
+          ? error.message
+          : "Could not create owner account.",
+        "error"
+      );
+
+    }finally{
+      createOwnerButton.disabled = false;
+      createOwnerButton.textContent = "Create Owner Account";
+    }
+  });
+
+
+  resetOwnerPasswordButton.addEventListener("click", async function(){
+
+    setStatus(ownerStatus, "");
+
+    const shopSlugValue = normalizedText(ownerShopSlug.value);
+    const password = String(ownerResetPassword.value || "");
+
+    if(password.length < 8){
+      setStatus(ownerStatus, "New password must be at least 8 characters.", "error");
+      return;
+    }
+
+    resetOwnerPasswordButton.disabled = true;
+    resetOwnerPasswordButton.textContent = "Changing password…";
+
+    try{
+      const data = await invokeOwnerManager({
+        action: "reset_password",
+        password: password,
+        shop_slug: shopSlugValue
+      });
+
+      ownerResetPassword.value = "";
+
+      setStatus(
+        ownerStatus,
+        "Owner password changed successfully for " +
+          (data.email || "this owner") + ".",
+        "success"
+      );
+
+      await logAdminActivity(
+        "owner_password_changed",
+        shopSlugValue,
+        { owner_email: data.email || "" }
+      );
+      loadAdminActivity();
+
+    }catch(error){
+      console.error("Reset owner password failed:", error);
+      setStatus(
+        ownerStatus,
+        error && error.message
+          ? error.message
+          : "Could not change owner password.",
+        "error"
+      );
+    }finally{
+      resetOwnerPasswordButton.disabled = false;
+      resetOwnerPasswordButton.textContent = "Change Owner Password";
+    }
+  });
+
+
+  deleteOwnerButton.addEventListener("click", async function(){
+
+    setStatus(ownerStatus, "");
+
+    const shopSlugValue = normalizedText(ownerShopSlug.value);
+    const email = ownerCurrentEmail.textContent || "this owner";
+
+    const confirmed = window.confirm(
+      'Delete owner account "' + email + '"?\n\n' +
+      'This removes the Supabase login and disconnects it from /' +
+      shopSlugValue + '.\n\n' +
+      'The shop profile and Stories are NOT deleted.'
+    );
+
+    if(!confirmed) return;
+
+    deleteOwnerButton.disabled = true;
+    deleteOwnerButton.textContent = "Deleting owner…";
+
+    try{
+      const data = await invokeOwnerManager({
+        action: "delete_owner",
+        shop_slug: shopSlugValue
+      });
+
+      setStatus(
+        ownerStatus,
+        "Owner account deleted. This shop can now be assigned a new owner.",
+        "success"
+      );
+
+      ownerEmail.value = "";
+      ownerPassword.value = "";
+
+      await logAdminActivity(
+        "owner_deleted",
+        shopSlugValue,
+        { owner_email: email }
+      );
+      loadAdminActivity();
+
+      await loadOwnerAccessStatus();
+
+      const badge = manageShopList.querySelector(
+        '[data-owner-badge="' + CSS.escape(shopSlugValue) + '"]'
+      );
+      if(badge){
+        badge.textContent = "No Account";
+        badge.classList.remove("linked");
+      }
+
+    }catch(error){
+      console.error("Delete owner failed:", error);
+      setStatus(
+        ownerStatus,
+        error && error.message
+          ? error.message
+          : "Could not delete owner account.",
+        "error"
+      );
+    }finally{
+      deleteOwnerButton.disabled = false;
+      deleteOwnerButton.textContent = "Delete Owner Account";
+    }
+  });
+
+
+  cancelEditButton.addEventListener("click", closeEditShop);
+
+  /*
+     Extra Hostinger/mobile safety: always route the Save button through the
+     form submit handler even when browser constraint validation would normally
+     suppress the submit event.
+  */
+  if(saveEditButton){
+    saveEditButton.addEventListener("click", function(event){
+      event.preventDefault();
+      if(editForm.requestSubmit){
+        editForm.requestSubmit();
+      }else{
+        editForm.dispatchEvent(new Event("submit", { bubbles:true, cancelable:true }));
+      }
+    });
+  }
+
+
+  editForm.addEventListener("submit", async function(event){
+
+    event.preventDefault();
+    setStatus(editStatus, "");
+
+    const slug = normalizedText(editOriginalSlug.value);
+
+    if(!slug){
+      setStatus(editStatus, "No shop selected.", "error");
+      return;
+    }
+
+    /*
+       Sync the visible Directory Control selectors into the real shop fields
+       at the exact moment Save is clicked. This removes any timing dependency
+       on `change` events or the 80ms Edit Shop sync helper.
+    */
+    const editCitySmart = document.getElementById("ma-edit-city-v2");
+    const editAreaSmart = document.getElementById("ma-edit-v2-area-smart");
+    const editCategorySmart = document.getElementById("ma-edit-v2-category-smart");
+
+    if(editAreaSmart && normalizedText(editAreaSmart.value)){
+      editArea.value = normalizedText(editAreaSmart.value);
+    }
+    if(editCategorySmart && normalizedText(editCategorySmart.value)){
+      editCategory.value = normalizedText(editCategorySmart.value);
+    }
+
+    const name = normalizedText(editName.value);
+    const area = normalizedText(editArea.value);
+    const category = normalizedText(editCategory.value);
+    const categoryName = normalizedText(editCategoryName.value);
+
+    if(!name || !category){
+      setStatus(editStatus, "Shop Name and Main Category are required.", "error");
+      return;
+    }
+
+    const selectedTaxonomyCategory =
+      (window.__MA7ALAK_V2_CATEGORIES__ || []).find(function(row){
+        return row && row.category_key === category;
+      });
+
+    const finalCardLabel =
+      categoryName ||
+      (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
+      category;
+
+    saveEditButton.disabled = true;
+    saveEditButton.textContent = "Saving…";
+
+    try{
+
+      const payload = {
+        shop_name: name,
+        arabic_name: normalizedText(editArabic.value) || null,
+        profile_image_url: normalizedText(editImage.value) || null,
+        shop_url: normalizedText(editUrl.value) || ("https://ma7alak.com/" + slug),
+        city: normalizedText(editCitySmart && editCitySmart.value) || null,
+        area: area || null,
+        category: category,
+        category_name: finalCardLabel,
+        location: normalizedText(editLocation.value) || null,
+        verified: editVerified.checked,
+        featured: editFeatured.checked,
+        featured_red: editRed.checked,
+        is_active: editActive.checked
+      };
+
+      if(payload.is_active){
+        const completeness = getShopCompleteness(payload);
+
+        if(!completeness.ready){
+          throw new Error(
+            "Cannot publish this shop yet. " + completenessMessage(completeness) + ". Turn Active OFF to save it as hidden, or complete those fields first."
+          );
+        }
+      }
+
+      const { error } = await supabaseClient
+        .from("shop_profiles")
+        .update(payload)
+        .eq("shop_slug", slug);
+
+      if(error) throw error;
+
+      /* Immediate local admin update; Realtime handles other open pages/tabs. */
+      const localShop = getManagedShop(slug);
+      if(localShop){
+        Object.assign(localShop, payload);
+      }
+      renderManagedShops();
+
+      await logAdminActivity(
+        "shop_edited",
+        slug,
+        { shop_name: name }
+      );
+      loadAdminActivity();
+
+      setStatus(editStatus, "Changes saved successfully.", "success");
+
+      await loadManagedShops();
+      await loadExistingDirectoryValues();
+
+    }catch(error){
+      setStatus(editStatus, error.message || "Could not save changes.", "error");
+    }finally{
+      saveEditButton.disabled = false;
+      saveEditButton.textContent = "Save Changes";
+    }
+  });
+
+
+
+  galleryCloseButton.addEventListener("click", closeGalleryManager);
+
+  galleryRefreshButton.addEventListener("click", async function(){
+    galleryRefreshButton.disabled = true;
+    try{
+      await loadGalleryItems();
+    }finally{
+      galleryRefreshButton.disabled = false;
+    }
+  });
+
+  galleryAddUrlButton.addEventListener("click", addGalleryUrl);
+
+  galleryUrlInput.addEventListener("keydown", function(event){
+    if(event.key === "Enter"){
+      event.preventDefault();
+      addGalleryUrl();
+    }
+  });
+
+  galleryFileInput.addEventListener("change", function(){
+    uploadGalleryFiles(galleryFileInput.files);
+  });
+
+  galleryList.addEventListener("click", async function(event){
+
+    const button = event.target.closest("button[data-gallery-action]");
+    if(!button) return;
+
+    const item = button.closest(".ma-gallery-item");
+    if(!item) return;
+
+    const id = item.dataset.galleryId;
+    const action = button.dataset.galleryAction;
+
+    button.disabled = true;
+
+    try{
+
+      if(action === "feature"){
+        await setGalleryFeatured(id);
+        setStatus(galleryStatus, "Featured image updated.", "success");
+        await loadGalleryItems();
+        return;
+      }
+
+      if(action === "delete"){
+
+        const confirmed = window.confirm(
+          "Delete this gallery image?\\n\\nIf it was uploaded from your device, the stored file will also be removed."
+        );
+
+        if(!confirmed) return;
+
+        await deleteGalleryItem(id);
+        setStatus(galleryStatus, "Image deleted.", "success");
+        await loadGalleryItems();
+      }
+
+    }catch(error){
+      setStatus(galleryStatus, error.message || "Gallery action failed.", "error");
+    }finally{
+      button.disabled = false;
+    }
+  });
+
+
+  videoCloseButton.addEventListener("click", closeVideoManager);
+
+  videoRefreshButton.addEventListener("click", async function(){
+    videoRefreshButton.disabled = true;
+    try{ await loadVideoItems(); }
+    finally{ videoRefreshButton.disabled = false; }
+  });
+
+  videoAddUrlButton.addEventListener("click", addVideoUrl);
+
+  videoUrlInput.addEventListener("keydown", function(event){
+    if(event.key === "Enter"){
+      event.preventDefault();
+      addVideoUrl();
+    }
+  });
+
+  videoFileInput.addEventListener("change", function(){
+    uploadVideoFiles(videoFileInput.files);
+  });
+
+  videoList.addEventListener("click", async function(event){
+    const button = event.target.closest("button[data-video-action]");
+    if(!button) return;
+
+    const item = button.closest(".ma-video-item");
+    if(!item) return;
+
+    const id = item.dataset.videoId;
+    const action = button.dataset.videoAction;
+
+    button.disabled = true;
+
+    try{
+      if(action === "delete"){
+        const confirmed = window.confirm(
+          "Delete this video?\n\nIf it was uploaded from your device, the stored file will also be removed."
+        );
+        if(!confirmed) return;
+        await deleteVideoItem(id);
+        setStatus(videoStatus, "Video deleted.", "success");
+        await loadVideoItems();
+      }
+    }catch(error){
+      setStatus(videoStatus, error.message || "Video action failed.", "error");
+    }finally{
+      button.disabled = false;
+    }
+  });
+
+
+
+
+  reelsCloseButton.addEventListener(
+    "click",
+    closeReelsManager
+  );
+
+  if(reelsSaveLimitButton){
+    reelsSaveLimitButton.addEventListener("click", async function(){
+      reelsSaveLimitButton.disabled = true;
+      setStatus(reelsLimitStatus, "Saving owner Reel limit…");
+      try{ await saveOwnerReelLimit(); }
+      catch(error){ setStatus(reelsLimitStatus, error.message || "Could not save owner Reel limit.", "error"); }
+      finally{ reelsSaveLimitButton.disabled = false; }
+    });
+  }
+
+  reelsRefreshButton.addEventListener(
+    "click",
+    async function(){
+      reelsRefreshButton.disabled =
+        true;
+
+      try{
+        await loadReelItems();
+      }
+      finally{
+        reelsRefreshButton.disabled =
+          false;
+      }
+    }
+  );
+
+  reelsPublishButton.addEventListener(
+    "click",
+    publishLiveReel
+  );
+
+  reelsFileInput.addEventListener(
+    "change",
+    function(){
+      const file =
+        reelsFileInput.files &&
+        reelsFileInput.files[0];
+
+      if(file){
+        uploadReelFromDevice(file);
+      }
+    }
+  );
+
+  reelsVideoUrl.addEventListener(
+    "input",
+    function(){
+      if(
+        pendingReelStoragePath &&
+        pendingReelPublicUrl &&
+        normalizedText(reelsVideoUrl.value) !== pendingReelPublicUrl
+      ){
+        cleanupPendingReelUpload();
+        reelsFileInput.value = "";
+      }
+    }
+  );
+
+  reelsVideoUrl.addEventListener(
+    "keydown",
+    function(event){
+      if(event.key === "Enter"){
+        event.preventDefault();
+        publishLiveReel();
+      }
+    }
+  );
+
+  reelsList.addEventListener(
+    "click",
+    async function(event){
+      const button =
+        event.target.closest(
+          "button[data-reel-action]"
+        );
+
+      if(!button){
+        return;
+      }
+
+      const item =
+        button.closest(
+          ".ma-video-item"
+        );
+
+      if(!item){
+        return;
+      }
+
+      const reelId =
+        item.dataset.reelId;
+
+      const action =
+        button.dataset.reelAction;
+
+      if(action !== "delete"){
+        return;
+      }
+
+      const confirmed =
+        window.confirm(
+          "Delete this live Reel?\\n\\nIt will disappear from Ma7alak immediately."
+        );
+
+      if(!confirmed){
+        return;
+      }
+
+      button.disabled =
+        true;
+
+      try{
+        await deleteLiveReel(
+          reelId
+        );
+
+        setStatus(
+          reelsStatus,
+          "Reel deleted.",
+          "success"
+        );
+
+        await loadReelItems();
+      }
+      catch(error){
+        setStatus(
+          reelsStatus,
+          error.message || "Reel action failed.",
+          "error"
+        );
+      }
+      finally{
+        button.disabled =
+          false;
+      }
+    }
+  );
+
+
+  supabaseClient.auth.onAuthStateChange(
+    function(event){
+
+      if(event === "SIGNED_OUT"){
+        showLogin();
+      }
+    }
+  );
+
+
+  updatePreview();
+
+  verifyAdmin();
+
+
+  /* =========================================================
+     MA7ALAK ADMIN V2 — LIVE DIRECTORY CONTROL CENTER
+     SAFE ADD-ON:
+     - Does NOT alter Gallery / Videos / Live Reels logic.
+     - Categories, Cities/Regions and Areas are Supabase-driven.
+     - Realtime refreshes admin controls without page refresh.
+  ========================================================= */
+  (function ma7alakAdminV2(){
+
+    let v2Categories = [];
+    let v2Cities = [];
+    let v2Areas = [];
+    let v2Realtime = null;
+
+    const byId = id => document.getElementById(id);
+    const esc = value => escapeHtml(value == null ? "" : String(value));
+
+    function keyify(value){
+      return normalizedText(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g,"-")
+        .replace(/^-+|-+$/g,"");
+    }
+
+    function sameText(a,b){
+      return normalizedText(a).toLocaleLowerCase() === normalizedText(b).toLocaleLowerCase();
+    }
+
+    function preferredDisplayName(rows, field){
+      const values=(rows||[])
+        .map(row=>normalizedText(row && row[field]))
+        .filter(Boolean);
+      if(!values.length) return "";
+
+      /* Prefer a deliberately-capitalized spelling such as Beirut / Da7ye. */
+      const styled=values.find(value => /[A-Z]/.test(value) && value !== value.toUpperCase());
+      return styled || values[0];
+    }
+
+    function preferredCanonicalRow(rows, keyField){
+      if(!rows || !rows.length) return null;
+      return rows.find(row=>{
+        const key=normalizedText(row && row[keyField]);
+        return key && key === key.toLowerCase();
+      }) || rows[0];
+    }
+
+    function buildDuplicateGroups(rows, keyField, nameField){
+      const groups=[];
+      (rows||[]).forEach(row=>{
+        const key=normalizedText(row && row[keyField]).toLocaleLowerCase();
+        const name=normalizedText(row && row[nameField]).toLocaleLowerCase();
+        let group=groups.find(g => (key && g.keys.has(key)) || (name && g.names.has(name)));
+        if(!group){
+          group={rows:[],keys:new Set(),names:new Set()};
+          groups.push(group);
+        }
+        group.rows.push(row);
+        if(key) group.keys.add(key);
+        if(name) group.names.add(name);
+      });
+
+      /* Bridge groups that became connected through a different key/name. */
+      let merged=true;
+      while(merged){
+        merged=false;
+        outer: for(let i=0;i<groups.length;i++){
+          for(let j=i+1;j<groups.length;j++){
+            const a=groups[i], b=groups[j];
+            const overlap=[...a.keys].some(x=>b.keys.has(x)) || [...a.names].some(x=>b.names.has(x));
+            if(overlap){
+              b.rows.forEach(r=>a.rows.push(r));
+              b.keys.forEach(x=>a.keys.add(x));
+              b.names.forEach(x=>a.names.add(x));
+              groups.splice(j,1);
+              merged=true;
+              break outer;
+            }
+          }
+        }
+      }
+      return groups;
+    }
+
+    let taxonomyMergeRunning=false;
+
+    async function mergeDuplicateTaxonomy(cats,cities,areas){
+      if(taxonomyMergeRunning) return false;
+      taxonomyMergeRunning=true;
+      let changed=false;
+
+      try{
+        /* CATEGORIES: one case-insensitive identity; move shops before deleting duplicates. */
+        for(const group of buildDuplicateGroups(cats,"category_key","category_name")){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"category_key");
+          const canonicalKey=normalizedText(canonical.category_key).toLowerCase();
+          const displayName=preferredDisplayName(group.rows,"category_name") || canonicalKey;
+          const icon=normalizedText(canonical.icon) || normalizedText((group.rows.find(r=>r.icon)||{}).icon) || "🏪";
+
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_categories")
+            .update({category_name:displayName,icon})
+            .eq("category_key",canonical.category_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldKey=normalizedText(row.category_key);
+            if(oldKey && oldKey!==canonical.category_key){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({category:canonical.category_key}).eq("category",oldKey);
+              if(profileError) throw profileError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_categories").delete().eq("category_key",row.category_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+
+        /* CITIES / REGIONS: preserve lowercase internal key, preserve nicest visible capitalization. */
+        for(const group of buildDuplicateGroups(cities,"city_key","city_name")){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"city_key");
+          const displayName=preferredDisplayName(group.rows,"city_name") || normalizedText(canonical.city_key);
+
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_cities")
+            .update({city_name:displayName})
+            .eq("city_key",canonical.city_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldKey=normalizedText(row.city_key);
+            if(oldKey && oldKey!==canonical.city_key){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({city:canonical.city_key}).eq("city",oldKey);
+              if(profileError) throw profileError;
+              const {error:areaCityError}=await supabaseClient.from("shop_areas").update({city_key:canonical.city_key}).eq("city_key",oldKey);
+              if(areaCityError) throw areaCityError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_cities").delete().eq("city_key",row.city_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+
+        /* Re-read areas after city merges, because their city_key may just have changed. */
+        const {data:freshAreas,error:freshAreasError}=await supabaseClient.from("shop_areas").select("*");
+        if(freshAreasError) throw freshAreasError;
+        const areaGroups=[];
+        (freshAreas||[]).forEach(row=>{
+          const city=normalizedText(row.city_key).toLocaleLowerCase();
+          const name=normalizedText(row.area_name).toLocaleLowerCase();
+          const key=city+"::"+name;
+          let group=areaGroups.find(g=>g.key===key);
+          if(!group){group={key,rows:[]};areaGroups.push(group);}
+          group.rows.push(row);
+        });
+
+        for(const group of areaGroups){
+          if(group.rows.length < 2) continue;
+          const canonical=preferredCanonicalRow(group.rows,"area_key");
+          const displayName=preferredDisplayName(group.rows,"area_name") || normalizedText(canonical.area_name);
+          const oldCanonicalName=normalizedText(canonical.area_name);
+          const {error:updateCanonicalError}=await supabaseClient.from("shop_areas")
+            .update({area_name:displayName})
+            .eq("area_key",canonical.area_key);
+          if(updateCanonicalError) throw updateCanonicalError;
+
+          if(oldCanonicalName && oldCanonicalName!==displayName){
+            const {error:p0}=await supabaseClient.from("shop_profiles").update({area:displayName}).eq("area",oldCanonicalName);
+            if(p0) throw p0;
+          }
+
+          for(const row of group.rows){
+            if(row===canonical) continue;
+            const oldName=normalizedText(row.area_name);
+            if(oldName && oldName!==displayName){
+              const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:displayName}).eq("area",oldName);
+              if(profileError) throw profileError;
+            }
+            const {error:deleteError}=await supabaseClient.from("shop_areas").delete().eq("area_key",row.area_key);
+            if(deleteError) throw deleteError;
+          }
+          changed=true;
+        }
+      } finally {
+        taxonomyMergeRunning=false;
+      }
+
+      return changed;
+    }
+
+    function installV2Styles(){
+      const style = document.createElement("style");
+      style.id = "ma-admin-v2-styles";
+      style.textContent = `
+        #ma-admin-v2-hub{margin:0 0 18px}
+        .ma-v2-hero{border:1px solid rgba(245,184,63,.26);background:linear-gradient(135deg,rgba(245,184,63,.10),rgba(255,255,255,.025));border-radius:22px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+        .ma-v2-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+        .ma-v2-title h2{margin:0;font-size:20px}.ma-v2-live{font-size:11px;font-weight:800;color:#a9ffbd;background:rgba(41,190,91,.12);border:1px solid rgba(41,190,91,.28);padding:7px 10px;border-radius:999px}
+        .ma-v2-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .ma-v2-tab{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#fff;border-radius:14px;padding:12px 8px;font-weight:800;cursor:pointer}
+        .ma-v2-tab.active{border-color:#f5b83f;background:rgba(245,184,63,.12);color:#ffd982}
+        .ma-v2-panel{display:none;margin-top:14px}.ma-v2-panel.active{display:block}
+        .ma-v2-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:12px}
+        .ma-v2-form.area-form{grid-template-columns:1fr 1fr 1fr auto}
+        .ma-v2-form input,.ma-v2-form select,.ma-v2-smart-select{width:100%;min-height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#111315;color:#fff;padding:0 12px;box-sizing:border-box}
+        .ma-v2-add{min-height:46px;border:0;border-radius:12px;padding:0 16px;background:#f5b83f;color:#17110a;font-weight:900;cursor:pointer}
+        .ma-v2-list{display:grid;gap:8px}
+        .ma-v2-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);padding:11px 12px;border-radius:14px}
+        .ma-v2-row-main{display:flex;align-items:center;gap:10px;min-width:0}.ma-v2-row-icon{font-size:24px;width:34px;text-align:center}
+        .ma-v2-row-text{min-width:0}.ma-v2-row-text strong,.ma-v2-row-text span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ma-v2-row-text span{font-size:11px;opacity:.58;margin-top:3px}
+        .ma-v2-row-actions{display:flex;gap:6px}.ma-v2-row-actions button{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:7px 9px;cursor:pointer}.ma-v2-row-actions button[data-delete]{color:#ff9b9b}
+        .ma-v2-field{margin:10px 0}.ma-v2-field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#d9d9d9}
+        .ma-v2-field small{display:block;margin-top:6px;opacity:.58}
+        .ma-v2-original-hidden{display:none!important}
+        @media(max-width:700px){.ma-v2-tabs{grid-template-columns:1fr}.ma-v2-form,.ma-v2-form.area-form{grid-template-columns:1fr}.ma-v2-row{align-items:flex-start}.ma-v2-row-actions{flex-direction:column}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function installHub(){
+      if(byId("ma-admin-v2-hub")) return;
+      const dashboardEl = byId("ma-admin-dashboard");
+      if(!dashboardEl) return;
+
+      const hub = document.createElement("section");
+      hub.id = "ma-admin-v2-hub";
+      hub.className = "ma-admin-card";
+      hub.innerHTML = `
+        <div class="ma-v2-hero">
+          <div class="ma-v2-title"><div><h2>Directory Control</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Categories, cities/regions and areas — live across Ma7alak.</div></div><span class="ma-v2-live">● LIVE</span></div>
+          <div class="ma-v2-tabs">
+            <button class="ma-v2-tab active" data-v2-tab="categories">🏷️ Categories</button>
+            <button class="ma-v2-tab" data-v2-tab="cities">📍 Cities / Regions</button>
+            <button class="ma-v2-tab" data-v2-tab="areas">🗺️ Areas <span id="ma-v2-area-state">OFF</span></button>
+          </div>
+          <div class="ma-v2-panel active" data-v2-panel="categories">
+            <form id="ma-v2-category-form" class="ma-v2-form">
+              <input id="ma-v2-category-name" placeholder="Category name e.g. Pet Shops" required>
+              <input id="ma-v2-category-icon" placeholder="Icon e.g. 🍓🍡 or 🐾" required>
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-category-list" class="ma-v2-list"></div>
+          </div>
+          <div class="ma-v2-panel" data-v2-panel="cities">
+            <form id="ma-v2-city-form" class="ma-v2-form">
+              <input id="ma-v2-city-name" placeholder="City / region e.g. Beirut" required>
+              <input id="ma-v2-city-key" placeholder="ID auto-generated">
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-city-list" class="ma-v2-list"></div>
+          </div>
+          <div class="ma-v2-panel" data-v2-panel="areas">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px">
+              <div><strong>Area system</strong><div style="font-size:11px;opacity:.6;margin-top:3px">OFF for now. Shops use City / Region only.</div></div>
+              <button id="ma-v2-toggle-areas" class="ma-v2-add" type="button">Start Areas</button>
+            </div>
+            <div id="ma-v2-area-controls" hidden>
+            <form id="ma-v2-area-form" class="ma-v2-form area-form">
+              <select id="ma-v2-area-city" required></select>
+              <input id="ma-v2-area-name" placeholder="Area e.g. Hamra" required>
+              <input id="ma-v2-area-key" placeholder="ID auto-generated">
+              <button class="ma-v2-add">+ Add</button>
+            </form>
+            <div id="ma-v2-area-list" class="ma-v2-list"></div>
+            </div>
+          </div>
+        </div>`;
+      dashboardEl.insertBefore(hub, dashboardEl.firstChild);
+
+      hub.addEventListener("click", async function(e){
+        const tab = e.target.closest("[data-v2-tab]");
+        if(tab){
+          hub.querySelectorAll("[data-v2-tab]").forEach(x=>x.classList.toggle("active",x===tab));
+          hub.querySelectorAll("[data-v2-panel]").forEach(x=>x.classList.toggle("active",x.dataset.v2Panel===tab.dataset.v2Tab));
+          return;
+        }
+        const editBtn = e.target.closest("button[data-edit]");
+        if(editBtn){
+          const type = editBtn.dataset.edit;
+          const key = editBtn.dataset.key;
+          try{
+            if(type==="category"){
+              const row=v2Categories.find(c=>c.category_key===key);
+              if(!row) return;
+              const name=prompt("Category name", row.category_name||"");
+              if(name===null) return;
+              const icon=prompt("Category icon", row.icon||"🏪");
+              if(icon===null) return;
+              const cleanName=normalizedText(name), cleanIcon=normalizedText(icon)||"🏪";
+              if(!cleanName) throw new Error("Category name cannot be empty.");
+              const {error}=await supabaseClient.from("shop_categories").update({category_name:cleanName,icon:cleanIcon}).eq("category_key",key);
+              if(error) throw error;
+            }else if(type==="city"){
+              const row=v2Cities.find(c=>c.city_key===key);
+              if(!row) return;
+              const name=prompt("City / Region name", row.city_name||"");
+              if(name===null) return;
+              const cleanName=normalizedText(name);
+              if(!cleanName) throw new Error("City / Region name cannot be empty.");
+              const {error}=await supabaseClient.from("shop_cities").update({city_name:cleanName}).eq("city_key",key);
+              if(error) throw error;
+            }else if(type==="area"){
+              const row=v2Areas.find(a=>a.area_key===key);
+              if(!row) return;
+              const name=prompt("Area name", row.area_name||"");
+              if(name===null) return;
+              const cleanName=normalizedText(name);
+              if(!cleanName) throw new Error("Area name cannot be empty.");
+              const oldName=normalizedText(row.area_name);
+              const {error}=await supabaseClient.from("shop_areas").update({area_name:cleanName}).eq("area_key",key);
+              if(error) throw error;
+              if(oldName && oldName!==cleanName){
+                const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:cleanName}).eq("area",oldName);
+                if(profileError) throw profileError;
+              }
+            }
+            await loadV2Taxonomy();
+            await loadManagedShops();
+          }catch(err){ alert(err.message||"Edit failed."); }
+          return;
+        }
+
+        const btn = e.target.closest("button[data-delete]");
+        if(!btn) return;
+        const type = btn.dataset.delete;
+        const key = btn.dataset.key;
+        if(!confirm("Delete this "+type+"?")) return;
+        try{
+          if(type==="category"){
+            const used = managedShops.some(s=>s.category===key);
+            if(used) throw new Error("This category is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_categories").delete().eq("category_key",key); if(error) throw error;
+          } else if(type==="city"){
+            const used = managedShops.some(s=>s.city===key);
+            if(used) throw new Error("This city/region is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_cities").delete().eq("city_key",key); if(error) throw error;
+          } else if(type==="area"){
+            const row=v2Areas.find(a=>a.area_key===key);
+            const used = row && managedShops.some(s=>s.area===row.area_name);
+            if(used) throw new Error("This area is assigned to a shop. Move those shops first.");
+            const {error}=await supabaseClient.from("shop_areas").delete().eq("area_key",key); if(error) throw error;
+          }
+          await loadV2Taxonomy();
+        }catch(err){ alert(err.message||"Delete failed."); }
+      });
+    }
+
+    function installSmartShopFields(){
+      function addSmartFields(areaInputId, categoryInputId, categoryNameId, cityId, prefix){
+        const areaInput=byId(areaInputId), catInput=byId(categoryInputId), catName=byId(categoryNameId);
+        if(!areaInput || !catInput || byId(cityId)) return;
+
+        /*
+           These original inputs become hidden after smart controls are added.
+           Never leave native `required` on hidden/managed fields because the
+           browser can cancel form submission before our save handler runs.
+        */
+        areaInput.required = false;
+        areaInput.removeAttribute("required");
+        catInput.required = false;
+        catInput.removeAttribute("required");
+        if(catName){
+          catName.required = false;
+          catName.removeAttribute("required");
+        }
+
+        const cityWrap=document.createElement("div");
+        cityWrap.className="ma-v2-field";
+        cityWrap.innerHTML=`<label>City / Region</label><select id="${cityId}" class="ma-v2-smart-select"></select><small>Select the main Lebanon city/region. Existing shops can still be saved while this is empty.</small>`;
+        areaInput.closest("label").parentNode.insertBefore(cityWrap, areaInput.closest("label"));
+
+        const areaWrap=document.createElement("div");
+        areaWrap.className="ma-v2-field ma-v2-area-shop-field";
+        areaWrap.hidden=true;
+        areaWrap.innerHTML=`<label>Area</label><select id="${prefix}-area-smart" class="ma-v2-smart-select"></select>`;
+        areaInput.closest("label").insertAdjacentElement("afterend",areaWrap);
+
+        const catWrap=document.createElement("div");
+        catWrap.className="ma-v2-field";
+        catWrap.innerHTML=`<label>Main Category *</label><select id="${prefix}-category-smart" class="ma-v2-smart-select"></select><small>This controls where the shop appears in Directory filters. It does NOT control the text shown on the card.</small>`;
+        catInput.closest("label").parentNode.insertBefore(catWrap,catInput.closest("label"));
+
+        areaInput.closest("label").classList.add("ma-v2-original-hidden");
+        catInput.closest("label").classList.add("ma-v2-original-hidden");
+
+        /* Keep category_name visible as a completely independent card label. */
+        const cardLabelWrap = catName.closest("label");
+        if(cardLabelWrap){
+          cardLabelWrap.classList.remove("ma-v2-original-hidden");
+          const title = cardLabelWrap.querySelector("span");
+          if(title) title.textContent = "Shop Card Label";
+          catName.placeholder = "e.g. Crepes • Chocolate • Street Kiosk";
+          const oldSmall = cardLabelWrap.querySelector("small");
+          if(oldSmall) oldSmall.remove();
+          const help = document.createElement("small");
+          help.textContent = "Free text shown under the Arabic name on the public shop card. This does not change the Main Category.";
+          cardLabelWrap.appendChild(help);
+        }
+
+        const citySel=byId(cityId), areaSel=byId(prefix+"-area-smart"), catSel=byId(prefix+"-category-smart");
+
+        citySel.addEventListener("change",()=>{ renderSmartAreas(citySel,areaSel); areaInput.value=areaSel.value||""; });
+        areaSel.addEventListener("change",()=>{ areaInput.value=areaSel.value||""; });
+        catSel.addEventListener("change",()=>{
+          /* Main category assignment only. Never overwrite the custom card label. */
+          catInput.value=catSel.value||"";
+        });
+      }
+
+      addSmartFields("ma-shop-area","ma-shop-category","ma-shop-category-name","ma-shop-city-v2","ma-shop-v2");
+      addSmartFields("ma-edit-area","ma-edit-category","ma-edit-category-name","ma-edit-city-v2","ma-edit-v2");
+    }
+
+    function renderSmartAreas(citySel,areaSel,currentArea){
+      if(!citySel||!areaSel) return;
+      const rows=v2Areas.filter(a=>a.city_key===citySel.value && a.is_active!==false);
+      areaSel.innerHTML='<option value="">Choose area…</option>'+rows.map(a=>`<option value="${esc(a.area_name)}">${esc(a.area_name)}</option>`).join("");
+      if(currentArea) areaSel.value=currentArea;
+    }
+
+    function refreshSmartFields(){
+      ["ma-shop-city-v2","ma-edit-city-v2"].forEach(id=>{
+        const sel=byId(id); if(!sel)return;
+        const old=sel.value;
+        sel.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
+        if(old) sel.value=old;
+      });
+      ["ma-shop-v2-category-smart","ma-edit-v2-category-smart"].forEach(id=>{
+        const sel=byId(id); if(!sel)return;
+        const old=sel.value;
+        sel.innerHTML='<option value="">Choose category…</option>'+v2Categories.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.category_key)}">${esc(c.icon)} ${esc(c.category_name)}</option>`).join("");
+        if(old) sel.value=old;
+      });
+      renderSmartAreas(byId("ma-shop-city-v2"),byId("ma-shop-v2-area-smart"));
+      renderSmartAreas(byId("ma-edit-city-v2"),byId("ma-edit-v2-area-smart"));
+    }
+
+    function renderV2Lists(){
+      const catList=byId("ma-v2-category-list");
+      const cityList=byId("ma-v2-city-list");
+      const areaListV2=byId("ma-v2-area-list");
+      const areaCity=byId("ma-v2-area-city");
+      if(catList) catList.innerHTML=v2Categories.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">${esc(c.icon)}</div><div class="ma-v2-row-text"><strong>${esc(c.category_name)}</strong><span>${esc(c.category_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="category" data-key="${esc(c.category_key)}">Edit</button><button data-delete="category" data-key="${esc(c.category_key)}">Delete</button></div></div>`).join("");
+      if(cityList) cityList.innerHTML=v2Cities.map(c=>`<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">📍</div><div class="ma-v2-row-text"><strong>${esc(c.city_name)}</strong><span>${esc(c.city_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="city" data-key="${esc(c.city_key)}">Edit</button><button data-delete="city" data-key="${esc(c.city_key)}">Delete</button></div></div>`).join("");
+      if(areaListV2) areaListV2.innerHTML=v2Areas.map(a=>{const c=v2Cities.find(x=>x.city_key===a.city_key);return `<div class="ma-v2-row"><div class="ma-v2-row-main"><div class="ma-v2-row-icon">🗺️</div><div class="ma-v2-row-text"><strong>${esc(a.area_name)}</strong><span>${esc(c?c.city_name:a.city_key)} • ${esc(a.area_key)}</span></div></div><div class="ma-v2-row-actions"><button data-edit="area" data-key="${esc(a.area_key)}">Edit</button><button data-delete="area" data-key="${esc(a.area_key)}">Delete</button></div></div>`}).join("");
+      if(areaCity) areaCity.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
+    }
+
+    async function loadV2Taxonomy(){
+      let [cats,cities,areas] = await Promise.all([
+        supabaseClient.from("shop_categories").select("*").order("sort_order",{ascending:true}).order("category_name",{ascending:true}),
+        supabaseClient.from("shop_cities").select("*").order("sort_order",{ascending:true}).order("city_name",{ascending:true}),
+        supabaseClient.from("shop_areas").select("*").order("sort_order",{ascending:true}).order("area_name",{ascending:true})
+      ]);
+      if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
+
+      /* Automatically collapse old case-only duplicates (Beirut/beirut, Da7ye/da7ye, etc.). */
+      const merged = await mergeDuplicateTaxonomy(cats.data||[],cities.data||[],areas.data||[]);
+      if(merged){
+        [cats,cities,areas] = await Promise.all([
+          supabaseClient.from("shop_categories").select("*").order("sort_order",{ascending:true}).order("category_name",{ascending:true}),
+          supabaseClient.from("shop_cities").select("*").order("sort_order",{ascending:true}).order("city_name",{ascending:true}),
+          supabaseClient.from("shop_areas").select("*").order("sort_order",{ascending:true}).order("area_name",{ascending:true})
+        ]);
+        if(cats.error) throw cats.error; if(cities.error) throw cities.error; if(areas.error) throw areas.error;
+      }
+
+      v2Categories=cats.data||[]; v2Cities=cities.data||[]; v2Areas=areas.data||[];
+      window.__MA7ALAK_V2_CATEGORIES__ = v2Categories;
+      window.__MA7ALAK_V2_CITIES__ = v2Cities;
+      renderV2Lists(); refreshSmartFields();
+    }
+
+    function bindV2Forms(){
+      byId("ma-v2-category-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const name=normalizedText(byId("ma-v2-category-name").value), icon=normalizedText(byId("ma-v2-category-icon").value)||"🏪", key=keyify(name);
+        if(!name||!key)return;
+
+        const duplicate=v2Categories.find(row=>sameText(row.category_key,key)||sameText(row.category_name,name));
+        if(duplicate){
+          const {error}=await supabaseClient.from("shop_categories")
+            .update({category_name:name,icon})
+            .eq("category_key",duplicate.category_key);
+          if(error){alert(error.message);return;}
+          e.target.reset();
+          await loadV2Taxonomy();
+          return;
+        }
+
+        const {error}=await supabaseClient.from("shop_categories").insert({category_key:key,category_name:name,icon});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+
+      byId("ma-v2-city-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const name=normalizedText(byId("ma-v2-city-name").value), requestedKey=normalizedText(byId("ma-v2-city-key").value), key=keyify(requestedKey)||keyify(name);
+        if(!name||!key)return;
+
+        const duplicate=v2Cities.find(row=>sameText(row.city_key,key)||sameText(row.city_name,name));
+        if(duplicate){
+          /* Same city typed with different capitalization: update visible name instead of creating another row. */
+          const {error}=await supabaseClient.from("shop_cities")
+            .update({city_name:name})
+            .eq("city_key",duplicate.city_key);
+          if(error){alert(error.message);return;}
+          e.target.reset();
+          await loadV2Taxonomy();
+          return;
+        }
+
+        const {error}=await supabaseClient.from("shop_cities").insert({city_key:key,city_name:name});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+
+      byId("ma-v2-area-form").addEventListener("submit",async e=>{
+        e.preventDefault();
+        const city=byId("ma-v2-area-city").value, name=normalizedText(byId("ma-v2-area-name").value), key=keyify(byId("ma-v2-area-key").value)||keyify(city+"-"+name);
+        if(!city||!name||!key)return;
+
+        const duplicate=v2Areas.find(row=>sameText(row.city_key,city)&&(sameText(row.area_key,key)||sameText(row.area_name,name)));
+        if(duplicate){
+          const oldName=normalizedText(duplicate.area_name);
+          const {error}=await supabaseClient.from("shop_areas")
+            .update({area_name:name})
+            .eq("area_key",duplicate.area_key);
+          if(error){alert(error.message);return;}
+          if(oldName && oldName!==name){
+            const {error:profileError}=await supabaseClient.from("shop_profiles").update({area:name}).eq("area",oldName);
+            if(profileError){alert(profileError.message);return;}
+          }
+          e.target.reset();
+          await loadV2Taxonomy();
+          await loadManagedShops();
+          return;
+        }
+
+        const {error}=await supabaseClient.from("shop_areas").insert({area_key:key,area_name:name,city_key:city});
+        if(error){alert(error.message);return;} e.target.reset(); await loadV2Taxonomy();
+      });
+    }
+
+    function syncEditSmartFields(){
+      const slug=normalizedText(editOriginalSlug.value);
+      const shop=getManagedShop(slug);
+      if(!shop)return;
+      const citySel=byId("ma-edit-city-v2"), areaSel=byId("ma-edit-v2-area-smart"), catSel=byId("ma-edit-v2-category-smart");
+      if(citySel){citySel.value=shop.city||""; renderSmartAreas(citySel,areaSel,shop.area||"");}
+      if(catSel)catSel.value=shop.category||"";
+    }
+
+    function installRealtime(){
+      if(v2Realtime) return;
+      v2Realtime=supabaseClient.channel("ma7alak-admin-directory-v2")
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},()=>loadV2Taxonomy().catch(console.warn))
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},async()=>{await loadManagedShops();})
+        .subscribe();
+    }
+
+
+    const AREA_MODE_KEY = "ma7alak_admin_areas_enabled_v2";
+
+    function areasEnabled(){
+      return localStorage.getItem(AREA_MODE_KEY) === "1";
+    }
+
+    function applyAreaMode(){
+      const enabled = areasEnabled();
+      const controls = byId("ma-v2-area-controls");
+      const toggle = byId("ma-v2-toggle-areas");
+      const state = byId("ma-v2-area-state");
+
+      if(controls) controls.hidden = !enabled;
+      if(toggle) toggle.textContent = enabled ? "Stop Areas" : "Start Areas";
+      if(state) state.textContent = enabled ? "ON" : "OFF";
+
+      document.querySelectorAll(".ma-v2-area-shop-field").forEach(el=>{
+        el.hidden = !enabled;
+      });
+
+      /*
+         Hiding optional Area controls must never erase the shop's saved area.
+         The old behavior cleared editArea and made Edit Shop appear broken.
+      */
+    }
+
+    function bindAreaMode(){
+      const toggle = byId("ma-v2-toggle-areas");
+      if(!toggle) return;
+      toggle.addEventListener("click", function(){
+        const next = !areasEnabled();
+        localStorage.setItem(AREA_MODE_KEY, next ? "1" : "0");
+        applyAreaMode();
+      });
+      applyAreaMode();
+    }
+
+    function bindActivityToggle(){
+      const toggle = byId("ma-admin-toggle-activity");
+      const body = byId("ma-admin-activity-body");
+      if(!toggle || !body) return;
+
+      toggle.addEventListener("click", async function(){
+        body.hidden = !body.hidden;
+        refreshActivityButton.hidden = body.hidden;
+        toggle.textContent = body.hidden ? "Show Activity" : "Hide Activity";
+        if(!body.hidden){
+          await loadAdminActivity();
+        }
+      });
+    }
+
+    async function bootV2(){
+      installV2Styles(); installHub(); installSmartShopFields(); bindV2Forms(); bindAreaMode(); bindActivityToggle();
+      try{ await loadV2Taxonomy(); installRealtime(); }catch(err){ console.warn("MA7ALAK Admin V2 taxonomy setup needed:",err); }
+      manageShopList.addEventListener("click",()=>setTimeout(syncEditSmartFields,80));
+    }
+
+    bootV2();
+  })();
+
+})();
+
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      startMa7alakAdmin,
+      { once: true }
+    );
+  }
+  else {
+    startMa7alakAdmin();
+  }
+
+})();
