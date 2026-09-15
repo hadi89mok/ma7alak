@@ -143,7 +143,7 @@
 }
 
 body.ma7alak-header-page{
-  padding-top:calc(var(--m7-header-h) + 18px)!important;
+  padding-top:calc(var(--m7-header-h) + 7px)!important;
 }
 
 /* =========================================================
@@ -1400,6 +1400,20 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 }
 body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   display:none!important;
+}
+
+
+/* =========================================================
+   PREMIUM -> OPENING HEADER TIGHT JOIN
+   Keep a tiny clean gap without touching.
+========================================================= */
+body.ma7alak-header-page.ma7alak-premium-homepage{
+  padding-top:calc(var(--m7-header-h) + 7px)!important;
+}
+@media (max-width:900px){
+  body.ma7alak-header-page.ma7alak-premium-homepage{
+    padding-top:calc(var(--m7-header-h) + 7px)!important;
+  }
 }
 
 `;
