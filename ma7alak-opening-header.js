@@ -1,6 +1,6 @@
 /* =========================================================
    MA7ALAK OPENING HEADER — GITHUB / CUSTOM CODE VERSION
-   V5 — VISUAL TOP PLACEMENT UNDER FIXED PREMIUM HEADER + TRANSPARENT BACKGROUND
+   V6 — INSIDE HOSTINGER FIRST SECTION + REAL SECTION BACKGROUND
 
    POSITION options:
    "under-premium"   -> directly under Premium Panel
@@ -14,8 +14,8 @@
   "use strict";
 
   if (window.self !== window.top) return;
-  if (window.__MA7ALAK_OPENING_HEADER_V5__) return;
-  window.__MA7ALAK_OPENING_HEADER_V5__ = true;
+  if (window.__MA7ALAK_OPENING_HEADER_V6__) return;
+  window.__MA7ALAK_OPENING_HEADER_V6__ = true;
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
@@ -42,34 +42,133 @@
 
   function placeRoot(root) {
     /*
-       FIX:
-       #ma7alak-social-header is position:fixed and is appended near the
-       end of BODY. Inserting the hero after that DOM node sends it to
-       the bottom of the website.
+       V6:
+       Put the opening header INSIDE Hostinger's first real content section.
+       This means the hero uses the ACTUAL Hostinger section background
+       instead of sitting in a separate BODY area.
 
-       The Premium Header code already adds top padding to BODY.
-       Therefore the correct visual location is the FIRST real item in
-       the normal page flow. This puts the hero directly beneath the
-       fixed Premium Header on screen.
+       We deliberately ignore our own injected Ma7alak elements, scripts,
+       styles, header backdrop, and fixed premium header.
     */
     if (!document.body) return false;
 
-    const firstRealPageNode = Array.from(document.body.children).find(function(el){
-      return (
-        el !== root &&
-        el.id !== "ma7alak-social-header" &&
-        el.id !== "ma7alak-header-theme-backdrop" &&
-        el.tagName !== "SCRIPT" &&
-        el.tagName !== "STYLE"
-      );
-    });
-
-    if (firstRealPageNode) {
-      document.body.insertBefore(root, firstRealPageNode);
-    } else {
-      document.body.prepend(root);
+    function isOurElement(el) {
+      if (!el || el.nodeType !== 1) return true;
+      if (el === root) return true;
+      if (el.id === "ma7alak-social-header") return true;
+      if (el.id === "ma7alak-header-theme-backdrop") return true;
+      if (el.id === ROOT_ID) return true;
+      if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") return true;
+      return false;
     }
 
+    function visible(el) {
+      if (!el || !el.getBoundingClientRect) return false;
+      const cs = getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden") return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 120 && r.height > 40;
+    }
+
+    function looksLikeSection(el) {
+      if (!el || isOurElement(el) || !visible(el)) return false;
+
+      const tag = (el.tagName || "").toLowerCase();
+      const cls = String(el.className || "").toLowerCase();
+      const id = String(el.id || "").toLowerCase();
+      const role = String(el.getAttribute("role") || "").toLowerCase();
+
+      if (tag === "section") return true;
+      if (role === "region") return true;
+
+      return (
+        cls.includes("section") ||
+        id.includes("section") ||
+        cls.includes("block") ||
+        cls.includes("layout") ||
+        cls.includes("builder") ||
+        cls.includes("website")
+      );
+    }
+
+    function sectionHasRealBackground(el) {
+      try {
+        const cs = getComputedStyle(el);
+        const bgc = cs.backgroundColor || "";
+        const bgi = cs.backgroundImage || "none";
+        const transparent =
+          bgc === "transparent" ||
+          bgc === "rgba(0, 0, 0, 0)" ||
+          bgc === "rgba(0,0,0,0)";
+        return bgi !== "none" || !transparent;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    /* First try explicit/semantic Hostinger-like sections in document order. */
+    const candidates = Array.from(document.querySelectorAll(
+      'main section, section, main [class*="section"], [class*="section"], main [class*="block"], [role="region"]'
+    )).filter(function(el){
+      return looksLikeSection(el);
+    });
+
+    let target = candidates.find(sectionHasRealBackground) || candidates[0] || null;
+
+    /*
+       Hostinger can wrap the visible section in generic DIVs.
+       If no semantic section was found, inspect the first real visible
+       BODY branch and descend until we reach a useful content container.
+    */
+    if (!target) {
+      let node = Array.from(document.body.children).find(function(el){
+        return !isOurElement(el) && visible(el);
+      }) || null;
+
+      while (node) {
+        if (looksLikeSection(node) || sectionHasRealBackground(node)) {
+          target = node;
+          break;
+        }
+
+        const children = Array.from(node.children || []).filter(function(el){
+          return !isOurElement(el) && visible(el);
+        });
+
+        if (!children.length) break;
+        node = children[0];
+      }
+    }
+
+    if (!target) {
+      /* Safe fallback: keep V5 behavior rather than sending it to bottom. */
+      const firstRealPageNode = Array.from(document.body.children).find(function(el){
+        return !isOurElement(el);
+      });
+
+      if (firstRealPageNode) {
+        document.body.insertBefore(root, firstRealPageNode);
+      } else {
+        document.body.prepend(root);
+      }
+      return true;
+    }
+
+    /*
+       Put it at the beginning of Section 1, but after non-visual helper
+       nodes such as STYLE/SCRIPT when present.
+    */
+    const firstVisualChild = Array.from(target.children || []).find(function(el){
+      return el.tagName !== "STYLE" && el.tagName !== "SCRIPT" && el.tagName !== "LINK";
+    });
+
+    if (firstVisualChild) {
+      target.insertBefore(root, firstVisualChild);
+    } else {
+      target.appendChild(root);
+    }
+
+    root.dataset.ma7alakHostingerSection = "1";
     return true;
   }
 
