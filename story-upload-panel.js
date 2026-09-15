@@ -2076,6 +2076,18 @@
 
       }
 
+      /*
+         Normal + click must show the Story/Reel chooser first.
+         The real Story uploader opens only after Add Story is chosen.
+      */
+      if(
+        event.data.__ma7alakOpenStoryNow !== true
+      ){
+
+        return;
+
+      }
+
 
       const shopSlug =
         String(
@@ -2173,7 +2185,6 @@
 
   let activeSlug="";
   let originalSource=null;
-  let storyPassThrough=false;
 
   function injectChooser(){
     if(document.getElementById("ma7alak-owner-add-chooser")) return;
@@ -2211,24 +2222,14 @@
     document.getElementById("ma7alak-owner-add-story").addEventListener("click",function(){
       close();
 
-      /*
-         ADD STORY FIX:
-         Allow exactly one normal Story uploader request to pass through
-         the chooser's capture listener into the untouched b212 uploader.
-      */
-      storyPassThrough=true;
-
       window.postMessage(
         {
           type:"MA7ALAK_OPEN_STORY_UPLOADER",
-          shopSlug:activeSlug
+          shopSlug:activeSlug,
+          __ma7alakOpenStoryNow:true
         },
         "*"
       );
-
-      setTimeout(function(){
-        storyPassThrough=false;
-      },1000);
     });
 
     document.getElementById("ma7alak-owner-add-reel").addEventListener("click",function(){
@@ -2249,17 +2250,11 @@
     document.getElementById("ma7alak-owner-add-chooser").classList.add("active");
   }
 
-  // Capture phase is intentional: it prevents the original b212 uploader
-  // from opening immediately, so the owner sees the choice first.
+  // Normal + request -> chooser. Explicit Story request -> Story uploader.
   window.addEventListener("message",function(event){
     if(!event.data || event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER") return;
 
-    /*
-       Let ONE request pass to the original Story uploader.
-       This fixes Add Story doing nothing while keeping the Reel chooser.
-    */
-    if(storyPassThrough){
-      storyPassThrough=false;
+    if(event.data.__ma7alakOpenStoryNow===true){
       return;
     }
 
