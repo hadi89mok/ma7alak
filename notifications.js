@@ -2401,6 +2401,7 @@ function buildReelNotifications(){
         );
 
       const createdAt =
+        reel.created_at ||
         state.detectedAt[fingerprint] ||
         new Date().toISOString();
 
@@ -2526,6 +2527,99 @@ function markAllCurrentReelsAsSeen(){
 
 
 /* =========================================================
+   FOLLOW-ONLY NOTIFICATIONS
+   ---------------------------------------------------------
+   The bell now shows Story/Reel activity ONLY from shops
+   followed by this visitor.
+
+   Uses the SAME persistent visitor ID as the Follow system:
+   ma7alak_visitor_id
+
+   Security behavior:
+   If the Follow RPC cannot be read, fail CLOSED (show no
+   shop activity) instead of falling back to notifying the
+   visitor about every shop.
+========================================================= */
+
+async function getFollowedShopSlugSet(client){
+
+  try{
+
+    const {
+      data,
+      error
+    } = await client.rpc(
+      "get_visitor_followed_shops",
+      {
+        p_visitor_id:
+          visitorId
+      }
+    );
+
+
+    if(error){
+
+      console.error(
+        "Ma7alak followed shops:",
+        error
+      );
+
+      return new Set();
+
+    }
+
+
+    const rows =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    return new Set(
+      rows
+        .map(
+          function(row){
+
+            if(
+              typeof row ===
+              "string"
+            ){
+              return row.trim();
+            }
+
+            return String(
+              (
+                row &&
+                (
+                  row.shop_slug ||
+                  row.p_shop_slug ||
+                  row.slug
+                )
+              ) ||
+              ""
+            ).trim();
+
+          }
+        )
+        .filter(Boolean)
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Ma7alak followed shops failed:",
+      error
+    );
+
+    return new Set();
+
+  }
+
+}
+
+
+/* =========================================================
    LOAD NOTIFICATIONS
 ========================================================= */
 
@@ -2535,6 +2629,18 @@ async function loadNotifications(){
 
     const client =
       await loadMa7alakSupabase();
+
+
+    /*
+       LIVE FOLLOW FILTER:
+       Re-read the visitor's followed shops on every notification
+       refresh. The existing refresh loop means Follow/Unfollow
+       changes affect the bell without a page refresh.
+    */
+    const followedShopSlugs =
+      await getFollowedShopSlugSet(
+        client
+      );
 
 
     const notificationCutoff =
@@ -2597,7 +2703,21 @@ async function loadNotifications(){
 
 
     const activeStories =
-      stories || [];
+      (stories || []).filter(
+        function(story){
+
+          return !!(
+            story &&
+            story.shop_slug &&
+            followedShopSlugs.has(
+              String(
+                story.shop_slug
+              ).trim()
+            )
+          );
+
+        }
+      );
 
 
     /* -------------------------------------------------------
@@ -2751,15 +2871,32 @@ async function loadNotifications(){
 
     if(!directReelsError){
 
+      const followedDirectReels =
+        (directReels || []).filter(
+          function(row){
+
+            return !!(
+              row &&
+              row.shop_slug &&
+              followedShopSlugs.has(
+                String(
+                  row.shop_slug
+                ).trim()
+              )
+            );
+
+          }
+        );
+
       const directReelIds =
-        (directReels || [])
+        followedDirectReels
           .map(function(row){
             return String(row.reel_id || "").trim();
           })
           .filter(Boolean);
 
       const directReelCatalog =
-        (directReels || [])
+        followedDirectReels
           .map(function(row){
             return {
               id:String(row.reel_id || "").trim(),
@@ -2785,20 +2922,26 @@ async function loadNotifications(){
           directReelIds,
           directReelCatalog
         );
-
-        currentReelsState = {
-          reelIds:directReelIds,
-          reels:directReelCatalog
-        };
-
-        try{
-          localStorage.setItem(
-            MA7ALAK_REELS_LIVE_CACHE_KEY,
-            JSON.stringify(currentReelsState)
-          );
-        }
-        catch(error){}
       }
+
+      /*
+         IMPORTANT:
+         Set the current state even when the visitor follows ZERO
+         shops. This prevents an old/global Reel cache from leaking
+         unrelated shop notifications back into the bell.
+      */
+      currentReelsState = {
+        reelIds:directReelIds,
+        reels:directReelCatalog
+      };
+
+      try{
+        localStorage.setItem(
+          MA7ALAK_REELS_LIVE_CACHE_KEY,
+          JSON.stringify(currentReelsState)
+        );
+      }
+      catch(error){}
 
     }
     else{
@@ -2809,7 +2952,22 @@ async function loadNotifications(){
     }
 
     const reelNotifications =
-      buildReelNotifications();
+      buildReelNotifications()
+        .filter(
+          function(notification){
+
+            return !!(
+              notification &&
+              notification.shop_slug &&
+              followedShopSlugs.has(
+                String(
+                  notification.shop_slug
+                ).trim()
+              )
+            );
+
+          }
+        );
 
 
     /* -------------------------------------------------------
