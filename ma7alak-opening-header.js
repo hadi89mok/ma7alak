@@ -45,6 +45,49 @@
   if (window.__MA7ALAK_OPENING_HEADER_V5__) return;
   window.__MA7ALAK_OPENING_HEADER_V5__ = true;
 
+  const ma7alakOpeningJoinFix = document.createElement("style");
+  ma7alakOpeningJoinFix.id = "ma7alak-opening-join-four-corners-fix";
+  ma7alakOpeningJoinFix.textContent = `
+/* =========================================================
+   V7 FINAL MOBILE JOIN + FOUR-CORNER FIX
+   - Tiny visual gap below the fixed Premium Header.
+   - Same radius on all four Opening Header corners.
+   - Clip image/content inside the rounded hero.
+========================================================= */
+#ma7alak-opening-header-root{
+  margin-top:0!important;
+  padding-top:0!important;
+}
+
+#ma7alak-opening-header-root .ma7alak-ultra-hero{
+  border-radius:22px!important;
+  overflow:hidden!important;
+  clip-path:inset(0 round 22px)!important;
+  -webkit-mask-image:-webkit-radial-gradient(white,black)!important;
+  isolation:isolate!important;
+}
+
+#ma7alak-opening-header-root .ma7alak-ultra-hero::before,
+#ma7alak-opening-header-root .ma7alak-ultra-hero::after{
+  border-radius:inherit!important;
+}
+
+#ma7alak-opening-header-root .ma7alak-ultra-hero img,
+#ma7alak-opening-header-root .ma7alak-ultra-hero video,
+#ma7alak-opening-header-root .ma7alak-ultra-hero picture,
+#ma7alak-opening-header-root .ma7alak-ultra-hero canvas{
+  border-radius:inherit!important;
+}
+
+@media (max-width:900px){
+  #ma7alak-opening-header-root .ma7alak-ultra-hero{
+    border-radius:18px!important;
+    clip-path:inset(0 round 18px)!important;
+  }
+}
+`;
+  document.head.appendChild(ma7alakOpeningJoinFix);
+
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
 
