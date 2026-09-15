@@ -3,9 +3,11 @@
    - Separate owner login from Viewer Account
    - Owner login automatically signs out any Viewer session
    - Exposes owner auth/client for the Owner Messages inbox
+   - Does not run on the private /admin page
 ========================================================= */
 (function(){
 "use strict";
+if((window.location.pathname.replace(/\/+$/,"")||"/")==="/admin")return;
 if(window.__MA7ALAK_OWNER_HEADER_AUTH_V2__)return;
 window.__MA7ALAK_OWNER_HEADER_AUTH_V2__=true;
 const URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
@@ -21,6 +23,6 @@ function syncMenu(){const a=findLoginLink();if(!a)return;const main=a.querySelec
 async function logout(){const x=client();if(x)await x.auth.signOut({scope:"local"});session=null;owner=null;emit();syncMenu();location.reload();}
 function open(){css();close();const d=document.createElement("div");d.id="m7-owner-auth-overlay";d.innerHTML=`<div id="m7-owner-auth-card"><button id="m7oa-close">×</button><h2>Shop Owner Login</h2><p>This login is only for Ma7alak shop owners.</p><input id="m7oa-email" class="m7oa-input" type="email" autocomplete="email" placeholder="Owner email"><input id="m7oa-pass" class="m7oa-input" type="password" autocomplete="current-password" placeholder="Password"><button id="m7oa-login" class="m7oa-btn">Log in</button><div id="m7oa-status"></div></div>`;document.body.appendChild(d);d.onclick=e=>{if(e.target===d)close();};document.getElementById("m7oa-close").onclick=close;document.getElementById("m7oa-login").onclick=async()=>{const st=document.getElementById("m7oa-status"),x=client();if(!x)return;st.textContent="Logging in...";const email=document.getElementById("m7oa-email").value.trim(),password=document.getElementById("m7oa-pass").value;const r=await x.auth.signInWithPassword({email,password});if(r.error){st.textContent=r.error.message;return;}const o=await x.from("shop_owners").select("shop_slug").eq("user_id",r.data.user.id).limit(1).maybeSingle();if(o.error||!o.data?.shop_slug){await x.auth.signOut({scope:"local"});st.textContent="This account is not a shop-owner account.";return;}if(window.Ma7alakAccount?.logout)await window.Ma7alakAccount.logout();owner=o.data;session=r.data.session;emit();st.textContent="Logged in ✓";setTimeout(()=>{close();location.reload();},300);};}
 async function boot(){let tries=0;while(!window.supabase?.createClient&&tries++<100)await new Promise(r=>setTimeout(r,100));await refresh();readyResolve();timer=setInterval(syncMenu,500);setTimeout(()=>{if(timer){clearInterval(timer);timer=null;}},15000);client()?.auth.onAuthStateChange(()=>setTimeout(refresh,0));}
-window.Ma7alakOwnerAuth={open,close,logout,refresh,get client(){return client();},get session(){return session;},get user(){return session?.user||null;},get owner(){return owner;},ready:()=>readyPromise};
+window.Ma7alakOwnerAuth={open,close,logout,refresh,get client(){return client();},get session(){return session;},get user(){return session?.user||null},get owner(){return owner;},ready:()=>readyPromise};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
