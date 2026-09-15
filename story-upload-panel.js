@@ -16,6 +16,7 @@
 
   let activeSlug="";
   let originalSource=null;
+  let storyPassThrough=false;
 
   function injectChooser(){
     if(document.getElementById("ma7alak-owner-add-chooser")) return;
@@ -52,9 +53,25 @@
 
     document.getElementById("ma7alak-owner-add-story").addEventListener("click",function(){
       close();
-      // Re-send the SAME existing Story request. The bypass marker lets the
-      // untouched b212 Story uploader receive it normally.
-      window.postMessage({type:"MA7ALAK_OPEN_STORY_UPLOADER",shopSlug:activeSlug,__ma7alakChooserBypass:true},"*");
+
+      /*
+         ADD STORY FIX:
+         Allow exactly one normal Story uploader request to pass through
+         the chooser's capture listener into the untouched b212 uploader.
+      */
+      storyPassThrough=true;
+
+      window.postMessage(
+        {
+          type:"MA7ALAK_OPEN_STORY_UPLOADER",
+          shopSlug:activeSlug
+        },
+        "*"
+      );
+
+      setTimeout(function(){
+        storyPassThrough=false;
+      },1000);
     });
 
     document.getElementById("ma7alak-owner-add-reel").addEventListener("click",function(){
@@ -79,9 +96,19 @@
   // from opening immediately, so the owner sees the choice first.
   window.addEventListener("message",function(event){
     if(!event.data || event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER") return;
-    if(event.data.__ma7alakChooserBypass) return;
+
+    /*
+       Let ONE request pass to the original Story uploader.
+       This fixes Add Story doing nothing while keeping the Reel chooser.
+    */
+    if(storyPassThrough){
+      storyPassThrough=false;
+      return;
+    }
+
     const slug=String(event.data.shopSlug||"").trim();
     if(!slug) return;
+
     event.stopImmediatePropagation();
     showChooser(slug,event.source);
   },true);
