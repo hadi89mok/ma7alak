@@ -3752,3 +3752,237 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
    9. Existing Reels, Search, Notifications, owner profile and owner-only Story Likes remain intact.
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
 ========================================================= */
+
+
+/* =========================================================
+   MA7ALAK V27 — CINEMATIC BRAND HERO MERGED WITH HEADER
+   EXAMPLE BUILD
+   - NO IMAGE / NO BASE64 / NO EXTERNAL BACKGROUND
+   - Pure CSS Lebanon-night atmosphere
+   - Preserves the complete V26 header above
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.self !== window.top){ return; }
+  if(window.__MA7ALAK_CINEMATIC_BRAND_HERO_V27__){ return; }
+  window.__MA7ALAK_CINEMATIC_BRAND_HERO_V27__ = true;
+
+  function injectCinematicHero(){
+    if(document.getElementById("ma7alak-cinematic-brand-hero")){ return; }
+
+    const header = document.getElementById("ma7alak-social-header");
+    if(!header){
+      setTimeout(injectCinematicHero,120);
+      return;
+    }
+
+    const hero = document.createElement("section");
+    hero.id = "ma7alak-cinematic-brand-hero";
+    hero.setAttribute("aria-label","Ma7alak — كل محل بستاهل ينشاف");
+
+    hero.innerHTML = `
+      <div class="m7cin-sky" aria-hidden="true"></div>
+      <div class="m7cin-stars" aria-hidden="true"></div>
+      <div class="m7cin-glow m7cin-glow-left" aria-hidden="true"></div>
+      <div class="m7cin-glow m7cin-glow-right" aria-hidden="true"></div>
+
+      <div class="m7cin-street" aria-hidden="true">
+        <span class="m7cin-shop s1"><i></i><b></b></span>
+        <span class="m7cin-shop s2"><i></i><b></b></span>
+        <span class="m7cin-shop s3"><i></i><b></b></span>
+        <span class="m7cin-shop s4"><i></i><b></b></span>
+        <span class="m7cin-shop s5"><i></i><b></b></span>
+      </div>
+
+      <div class="m7cin-flag" aria-hidden="true">
+        <span class="m7cin-flag-red top"></span>
+        <span class="m7cin-flag-white"><span class="m7cin-cedar">♠</span></span>
+        <span class="m7cin-flag-red bottom"></span>
+      </div>
+
+      <div class="m7cin-frame" aria-hidden="true"></div>
+      <div class="m7cin-sweep" aria-hidden="true"></div>
+
+      <div class="m7cin-content">
+        <div class="m7cin-brand-mini">
+          <span class="m7cin-brand-line"></span>
+          <span>MA7ALAK</span>
+          <span class="m7cin-brand-line"></span>
+        </div>
+
+        <h1 class="m7cin-main-title" dir="rtl">
+          <span class="m7cin-title-word">كل</span>
+          <span class="m7cin-title-word">محل</span>
+          <span class="m7cin-title-word">بستاهل</span>
+          <span class="m7cin-title-word m7cin-title-gold">ينشاف</span>
+        </h1>
+
+        <div class="m7cin-tagline" aria-label="Local shops, real people, a stronger Lebanon">
+          <span>LOCAL SHOPS</span>
+          <i>•</i>
+          <span>REAL PEOPLE</span>
+          <span class="m7cin-mini-cedar">♠</span>
+          <span>A STRONGER LEBANON</span>
+        </div>
+
+        <div class="m7cin-discovery" dir="rtl">
+          <span class="m7cin-discovery-white">وفّر ع حالك الجولات</span>
+          <span class="m7cin-discovery-separator">—</span>
+          <span class="m7cin-discovery-gold">عنا بتلاقي المحلات</span>
+        </div>
+
+        <p class="m7cin-subtitle" dir="rtl">اكتشف محلات منطقتك بمكان واحد</p>
+
+        <div class="m7cin-actions">
+          <a class="m7cin-btn m7cin-btn-primary" href="https://ma7alak.com/dhyf-mhlk-" aria-label="ضيف محلك">
+            <span class="m7cin-btn-icon m7cin-plus">+</span>
+            <span>ضيف محلك</span>
+          </a>
+          <a class="m7cin-btn m7cin-btn-secondary" href="https://ma7alak.com/shwf-almhlat-" aria-label="شوف المحلّات">
+            <span>شوف المحلّات</span>
+            <span class="m7cin-btn-icon m7cin-eye">◉</span>
+          </a>
+        </div>
+      </div>
+    `;
+
+    header.insertAdjacentElement("afterend",hero);
+
+    const style = document.createElement("style");
+    style.id = "ma7alak-cinematic-brand-hero-style";
+    style.textContent = `
+      #ma7alak-cinematic-brand-hero{
+        --cin-gold:#d9a441;
+        --cin-gold2:#f0c66f;
+        --cin-deep:#08090a;
+        position:relative;
+        isolation:isolate;
+        width:min(1180px,calc(100% - 28px));
+        height:clamp(300px,31vw,390px);
+        margin:14px auto 26px;
+        overflow:hidden;
+        border:1px solid rgba(217,164,65,.28);
+        border-radius:0 0 27px 27px;
+        background:
+          radial-gradient(circle at 15% 62%,rgba(197,102,28,.22),transparent 27%),
+          radial-gradient(circle at 84% 48%,rgba(126,25,20,.20),transparent 30%),
+          linear-gradient(180deg,#111315 0%,#0b0c0e 43%,#060708 100%);
+        box-shadow:0 24px 65px rgba(0,0,0,.35),inset 0 -1px 0 rgba(217,164,65,.13);
+        font-family:Arial,"Noto Sans Arabic",Tahoma,sans-serif;
+      }
+      #ma7alak-cinematic-brand-hero *{box-sizing:border-box}
+
+      .m7cin-sky{
+        position:absolute;inset:0;z-index:-8;
+        background:
+          linear-gradient(115deg,transparent 0 42%,rgba(255,179,72,.035) 48%,transparent 56%),
+          radial-gradient(ellipse at 50% 8%,rgba(217,164,65,.08),transparent 42%);
+      }
+      .m7cin-stars{position:absolute;inset:0;z-index:-7;opacity:.38;background-image:radial-gradient(circle,rgba(255,223,165,.8) 0 1px,transparent 1.3px);background-size:73px 57px;animation:m7cinStars 8s ease-in-out infinite alternate}
+      @keyframes m7cinStars{from{opacity:.20;transform:translateY(0)}to{opacity:.46;transform:translateY(3px)}}
+
+      .m7cin-glow{position:absolute;width:320px;height:320px;border-radius:50%;filter:blur(54px);z-index:-6;opacity:.25;pointer-events:none;animation:m7cinGlow 6s ease-in-out infinite alternate}
+      .m7cin-glow-left{left:-170px;bottom:-160px;background:#d36b21}
+      .m7cin-glow-right{right:-170px;top:-160px;background:#8b251e;animation-delay:-3s}
+      @keyframes m7cinGlow{to{opacity:.42;transform:scale(1.12)}}
+
+      .m7cin-street{position:absolute;left:0;right:0;bottom:0;height:44%;z-index:-4;display:flex;align-items:flex-end;gap:1px;opacity:.88;filter:drop-shadow(0 -8px 22px rgba(0,0,0,.28))}
+      .m7cin-shop{position:relative;display:block;flex:1;height:72%;background:linear-gradient(180deg,#171513,#090a0b);border-top:1px solid rgba(217,164,65,.13)}
+      .m7cin-shop.s1{height:68%}.m7cin-shop.s2{height:91%}.m7cin-shop.s3{height:76%}.m7cin-shop.s4{height:96%}.m7cin-shop.s5{height:70%}
+      .m7cin-shop:before{content:"";position:absolute;left:8%;right:8%;top:17%;height:8px;background:repeating-linear-gradient(90deg,rgba(221,145,49,.62) 0 12px,rgba(82,32,19,.8) 12px 24px);clip-path:polygon(0 0,100% 0,94% 100%,6% 100%)}
+      .m7cin-shop i,.m7cin-shop b{position:absolute;bottom:9%;display:block;border:1px solid rgba(217,164,65,.12);background:linear-gradient(180deg,rgba(233,155,60,.24),rgba(96,45,21,.08));box-shadow:inset 0 0 18px rgba(255,170,66,.06)}
+      .m7cin-shop i{left:15%;width:28%;height:42%}.m7cin-shop b{right:14%;width:31%;height:42%}
+      .m7cin-shop:nth-child(2n) i,.m7cin-shop:nth-child(2n+1) b{animation:m7cinWindow 4s ease-in-out infinite alternate}
+      @keyframes m7cinWindow{to{background:linear-gradient(180deg,rgba(255,184,88,.42),rgba(117,53,20,.10));box-shadow:0 0 18px rgba(255,154,45,.10),inset 0 0 15px rgba(255,197,102,.10)}}
+
+      .m7cin-flag{position:absolute;right:3.2%;top:12%;width:92px;height:62px;z-index:-2;transform:rotate(-3deg) skewY(-2deg);opacity:.72;filter:drop-shadow(0 7px 12px rgba(0,0,0,.35));animation:m7cinFlag 4s ease-in-out infinite alternate;transform-origin:left center}
+      .m7cin-flag span{display:flex;width:100%;height:33.333%;align-items:center;justify-content:center}.m7cin-flag-red{background:rgba(170,31,27,.72)}.m7cin-flag-white{background:rgba(230,225,210,.76)}.m7cin-cedar{font-size:17px;line-height:1;color:#2f6339;transform:scaleX(1.2) rotate(180deg)}
+      @keyframes m7cinFlag{from{transform:rotate(-3deg) skewY(-2deg) scaleX(.98)}to{transform:rotate(-1deg) skewY(2deg) scaleX(1.03)}}
+
+      .m7cin-frame{position:absolute;inset:9px;z-index:5;border:1px solid rgba(217,164,65,.10);border-radius:0 0 20px 20px;pointer-events:none}
+      .m7cin-frame:before,.m7cin-frame:after{content:"";position:absolute;top:-1px;width:19%;height:1px;background:linear-gradient(90deg,transparent,var(--cin-gold2),transparent);animation:m7cinFramePulse 3s ease-in-out infinite alternate}.m7cin-frame:before{left:5%}.m7cin-frame:after{right:5%;animation-delay:-1.5s}
+      @keyframes m7cinFramePulse{from{opacity:.25;transform:scaleX(.75)}to{opacity:.85;transform:scaleX(1.08)}}
+      .m7cin-sweep{position:absolute;inset:-30%;z-index:4;pointer-events:none;background:linear-gradient(110deg,transparent 42%,rgba(255,220,150,.075) 49%,transparent 56%);transform:translateX(-55%);animation:m7cinSweep 8s ease-in-out infinite}
+      @keyframes m7cinSweep{0%,28%{transform:translateX(-55%)}60%,100%{transform:translateX(55%)}}
+
+      .m7cin-content{position:relative;z-index:6;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 160px 30px;text-align:center;background:linear-gradient(90deg,rgba(5,6,7,.48),rgba(5,6,7,.06) 28%,rgba(5,6,7,.05) 70%,rgba(5,6,7,.38))}
+      .m7cin-brand-mini{display:flex;align-items:center;gap:10px;margin-bottom:9px;color:rgba(241,204,137,.75);font-size:9px;font-weight:800;letter-spacing:4.2px}.m7cin-brand-line{width:35px;height:1px;background:linear-gradient(90deg,transparent,var(--cin-gold))}
+      .m7cin-brand-line:last-child{transform:scaleX(-1)}
+
+      .m7cin-main-title{margin:0;color:#f3eee4;font-family:Georgia,"Times New Roman","Noto Naskh Arabic",serif;font-size:clamp(37px,5.2vw,70px);font-weight:500;line-height:1.05;letter-spacing:-1.5px;text-shadow:0 3px 16px rgba(0,0,0,.62),0 0 26px rgba(217,164,65,.06)}
+      .m7cin-title-word{display:inline-block;opacity:0;transform:translateY(15px);animation:m7cinTitleIn .8s cubic-bezier(.2,.8,.2,1) forwards}
+      .m7cin-title-word:nth-child(1){animation-delay:.10s}.m7cin-title-word:nth-child(2){animation-delay:.22s}.m7cin-title-word:nth-child(3){animation-delay:.34s}.m7cin-title-word:nth-child(4){animation-delay:.46s}
+      .m7cin-title-gold{color:#e3b45b;text-shadow:0 0 22px rgba(217,164,65,.18)}
+      @keyframes m7cinTitleIn{to{opacity:1;transform:translateY(0)}}
+
+      .m7cin-tagline{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;color:rgba(255,241,213,.68);font-size:8px;font-weight:700;letter-spacing:3px;white-space:nowrap}.m7cin-tagline i{color:var(--cin-gold);font-style:normal}.m7cin-mini-cedar{color:#d8c59d;font-size:13px;transform:rotate(180deg)}
+
+      .m7cin-discovery{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:20px;font-size:clamp(14px,1.45vw,19px);font-weight:850;line-height:1.2;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+      .m7cin-discovery-white,.m7cin-discovery-gold{display:inline-block;animation:m7cinDiscoveryFloat 3.2s ease-in-out infinite}
+      .m7cin-discovery-white{color:#fff;animation-delay:-.35s}.m7cin-discovery-gold{color:#e1ae50;animation-delay:-1.2s}.m7cin-discovery-separator{color:rgba(217,164,65,.42);animation:m7cinSep 2.1s ease-in-out infinite}
+      @keyframes m7cinDiscoveryFloat{0%,100%{transform:translateY(0);text-shadow:0 2px 10px rgba(0,0,0,.6)}50%{transform:translateY(-2px);text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(217,164,65,.15)}}
+      @keyframes m7cinSep{50%{opacity:.35;transform:scaleX(.72)}}
+      .m7cin-subtitle{margin:5px 0 0;color:rgba(255,255,255,.58);font-size:11px;font-weight:650}
+
+      .m7cin-actions{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:17px}
+      .m7cin-btn{position:relative;overflow:hidden;min-width:138px;height:42px;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none!important;font-size:12px;font-weight:900;transition:transform .18s ease,border-color .18s ease,background .18s ease;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+      .m7cin-btn:after{content:"";position:absolute;top:-50%;bottom:-50%;width:42%;left:-60%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent);animation:m7cinBtnShine 4.4s ease-in-out infinite}.m7cin-btn-secondary:after{animation-delay:-2.2s}
+      @keyframes m7cinBtnShine{0%,52%{left:-60%;opacity:0}65%{opacity:1}82%,100%{left:125%;opacity:0}}
+      .m7cin-btn:hover{transform:translateY(-2px)}.m7cin-btn:active{transform:scale(.97)}
+      .m7cin-btn-primary{color:#15100a;background:linear-gradient(135deg,#edc16d,#c99234);border:1px solid rgba(255,225,167,.55)}
+      .m7cin-btn-secondary{color:#f5e8d1;background:rgba(12,13,14,.68);border:1px solid rgba(217,164,65,.28);backdrop-filter:blur(9px)}
+      .m7cin-btn-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:16px;font-weight:900}
+      .m7cin-plus{animation:m7cinPlus 1.8s ease-in-out infinite}@keyframes m7cinPlus{0%,55%,100%{transform:scale(1) rotate(0)}70%{transform:scale(1.18) rotate(-8deg)}82%{transform:scale(1.03) rotate(4deg)}}
+      .m7cin-eye{border:1.5px solid currentColor;border-radius:50% 10% 50% 10%;font-size:9px;transform:rotate(45deg);animation:m7cinEye 2.2s ease-in-out infinite}.m7cin-eye::first-letter{transform:rotate(-45deg)}
+      @keyframes m7cinEye{0%,25%,100%{scale:1 1}31%{scale:1 .18}37%{scale:1 1}62%{translate:-2px 0}78%{translate:2px 0}}
+
+      @media(max-width:900px){
+        #ma7alak-cinematic-brand-hero{width:calc(100% - 14px);height:285px;margin:8px auto 18px;border-radius:0 0 22px 22px}
+        .m7cin-content{padding:24px 86px 24px}.m7cin-flag{right:2%;width:72px;height:49px;opacity:.52}.m7cin-tagline{font-size:7px;letter-spacing:2.1px;gap:8px}.m7cin-street{height:42%}
+      }
+
+      @media(max-width:600px){
+        #ma7alak-cinematic-brand-hero{height:248px;margin-top:6px;border-radius:0 0 19px 19px}
+        .m7cin-content{padding:20px 12px 18px;justify-content:center;background:linear-gradient(180deg,rgba(5,6,7,.10),rgba(5,6,7,.17) 58%,rgba(5,6,7,.54))}
+        .m7cin-brand-mini{margin-bottom:6px;font-size:7px;letter-spacing:3px;gap:7px}.m7cin-brand-line{width:22px}
+        .m7cin-main-title{font-size:clamp(31px,10.4vw,44px);letter-spacing:-.8px;white-space:nowrap}
+        .m7cin-tagline{margin-top:8px;max-width:100%;gap:5px;font-size:5.8px;letter-spacing:1.25px}.m7cin-mini-cedar{font-size:10px}
+        .m7cin-discovery{margin-top:13px;gap:6px;font-size:12.5px}.m7cin-subtitle{font-size:9.5px;margin-top:4px}
+        .m7cin-actions{margin-top:12px;gap:7px;width:100%;padding:0 6px}.m7cin-btn{flex:1;min-width:0;max-width:165px;height:37px;padding:0 10px;border-radius:12px;font-size:10.5px;gap:6px}.m7cin-btn-icon{width:17px;height:17px;font-size:14px}
+        .m7cin-flag{right:-8px;top:14px;width:57px;height:39px;opacity:.28}.m7cin-street{height:38%;opacity:.66}.m7cin-frame{inset:6px;border-radius:0 0 14px 14px}.m7cin-glow{filter:blur(46px)}
+      }
+
+      @media(max-width:380px){
+        #ma7alak-cinematic-brand-hero{height:238px}.m7cin-main-title{font-size:30px}.m7cin-tagline{font-size:5.2px;letter-spacing:.9px}.m7cin-discovery{font-size:11.5px}.m7cin-btn{font-size:10px}
+      }
+
+      @media(prefers-reduced-motion:reduce){
+        #ma7alak-cinematic-brand-hero *,#ma7alak-cinematic-brand-hero *:before,#ma7alak-cinematic-brand-hero *:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",injectCinematicHero,{once:true});
+  }else{
+    injectCinematicHero();
+  }
+})();
+
+/* =========================================================
+   V27 EXAMPLE NOTES
+   - Complete V26 header is preserved above this block.
+   - New visual hero uses ZERO background images.
+   - Visual atmosphere is made from CSS only: night sky, warm shop
+     windows, Lebanese flag accent, gold frame/light sweep.
+   - Main identity mirrors the supplied reference composition:
+     centered Arabic statement + tiny premium English strapline.
+   - Existing "وفّر ع حالك الجولات / عنا بتلاقي المحلات" copy is
+     merged underneath and animated, instead of being discarded.
+   - Existing functional destination buttons are included inside the
+     hero and remain phone-safe.
+   - Phone layout is intentionally much shorter and uses no horizontal
+     overflow so it sits naturally under the V26 fixed header.
+========================================================= */
