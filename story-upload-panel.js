@@ -173,10 +173,10 @@
       #ma-owner-reels-card *{box-sizing:border-box} .ma-or-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.ma-or-head b{font-size:20px}.ma-or-head span{font-size:26px}.ma-or-sub{opacity:.72;font-size:13px;margin-top:3px}
       .ma-or-quota{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.055);margin-bottom:14px}.ma-or-quota strong{color:#ffc46b}.ma-or-count{font-size:20px;font-weight:900}
       .ma-or-field{display:block;margin:12px 0}.ma-or-field span{display:block;font-size:13px;font-weight:800;margin-bottom:7px}.ma-or-field input{width:100%;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.13);background:#100b08;color:#fff;font-size:16px;outline:none}
-      .ma-or-upload,.ma-or-publish{width:100%;border:0;border-radius:15px;padding:14px;font-size:15px;font-weight:900;cursor:pointer}.ma-or-upload{display:block;text-align:center;background:#3b2518;color:#ffd59a;margin:10px 0}.ma-or-publish{background:linear-gradient(135deg,#ffb347,#d77a20);color:#211007}.ma-or-publish:disabled,.ma-or-upload.is-disabled{opacity:.45;pointer-events:none}
+      .ma-or-upload,.ma-or-publish{width:100%;border:0;border-radius:15px;padding:14px;font-size:15px;font-weight:900;cursor:pointer}.ma-or-upload{display:block;text-align:center;background:#3b2518;color:#ffd59a;margin:10px 0}.ma-or-publish{background:linear-gradient(135deg,#ffb347,#d77a20);color:#211007}.ma-or-publish:disabled,.ma-or-upload:disabled,.ma-or-upload.is-disabled{opacity:.45;pointer-events:none}
       .ma-owner-reel-status{min-height:20px;margin:10px 0;font-size:13px}.ma-owner-reel-status.is-error{color:#ff8c8c}.ma-owner-reel-status.is-success{color:#8ff0a4}
       .ma-or-list{display:grid;gap:10px;margin-top:14px}.ma-or-item{display:grid;grid-template-columns:88px 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:15px;background:rgba(255,255,255,.05)}.ma-or-item video{width:88px;height:120px;object-fit:cover;border-radius:11px;background:#000}.ma-or-meta{min-width:0}.ma-or-meta b{display:block;overflow:hidden;text-overflow:ellipsis}.ma-or-meta small{opacity:.62}.ma-or-delete{border:1px solid rgba(255,100,100,.35);background:rgba(130,20,20,.2);color:#ffb0b0;border-radius:11px;padding:9px;cursor:pointer}
-      #ma-owner-reels-backdrop{position:fixed;z-index:2147483646;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)} .ma-or-close{position:absolute;right:12px;top:10px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:25px;cursor:pointer}
+      #ma-owner-reels-backdrop{position:fixed;z-index:2147483646;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overscroll-behavior:none;touch-action:none} .ma-or-close{position:absolute;right:12px;top:10px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:25px;cursor:pointer}
       @media(max-width:560px){#ma-owner-reels-card{width:calc(100vw - 18px);margin:0;padding:15px;border-radius:18px}.ma-or-item{grid-template-columns:70px 1fr}.ma-or-item video{width:70px;height:98px}.ma-or-delete{grid-column:2;width:100%}}
     `;
     document.head.appendChild(style);
@@ -193,8 +193,8 @@
       <button id="ma-or-close" class="ma-or-close" type="button" aria-label="Close">×</button>
       <div class="ma-or-head"><span>🔥</span><div><b>Homepage Reels</b><div class="ma-or-sub" id="ma-or-shop">Checking owner account…</div></div></div>
       <div class="ma-or-quota"><div><strong>Your Reel quota</strong><div class="ma-or-sub">Active homepage Reels</div></div><div class="ma-or-count" id="ma-or-quota">0 / 0</div></div>
-      <label id="ma-or-upload-label" class="ma-or-upload" for="ma-or-file">📱 Choose Reel from device</label>
-      <input id="ma-or-file" type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" hidden>
+      <button id="ma-or-upload-label" class="ma-or-upload" type="button">📱 Choose Reel from device</button>
+      <input id="ma-or-file" type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
       <label class="ma-or-field"><span>Video URL</span><input id="ma-or-url" type="url" inputmode="url" placeholder="Upload from device or paste a direct MP4 URL"></label>
       <label class="ma-or-field"><span>Caption (optional)</span><input id="ma-or-caption" type="text" maxlength="180" placeholder="Fresh today 🔥"></label>
       <button id="ma-or-publish" class="ma-or-publish" type="button">Publish to Homepage</button>
@@ -215,7 +215,9 @@
     document.getElementById("ma-or-quota").textContent=Number(row.active_reels||0)+" / "+Number(row.reel_limit||0);
     const blocked=Number(row.remaining||0)<=0;
     document.getElementById("ma-or-publish").disabled=blocked;
-    document.getElementById("ma-or-upload-label").classList.toggle("is-disabled",blocked);
+    const uploadButton=document.getElementById("ma-or-upload-label");
+    uploadButton.classList.toggle("is-disabled",blocked);
+    uploadButton.disabled=blocked;
     if(Number(row.reel_limit||0)<=0) status("Homepage Reels are not enabled for your shop yet.");
     else if(blocked) status("You reached your Reel limit. Delete one below to free a slot.");
     else status("");
@@ -301,11 +303,44 @@
     }catch(error){ status(error.message||"Could not delete Reel.","error"); button.disabled=false; }
   }
 
+  let pageScrollY=0;
+  let pageLockState=null;
+
+  function lockPageScroll(){
+    if(pageLockState) return;
+    pageScrollY=window.scrollY || window.pageYOffset || 0;
+    pageLockState={
+      htmlOverflow:document.documentElement.style.overflow,
+      bodyOverflow:document.body.style.overflow,
+      bodyPosition:document.body.style.position,
+      bodyTop:document.body.style.top,
+      bodyWidth:document.body.style.width
+    };
+    document.documentElement.style.overflow="hidden";
+    document.body.style.overflow="hidden";
+    document.body.style.position="fixed";
+    document.body.style.top=(-pageScrollY)+"px";
+    document.body.style.width="100%";
+  }
+
+  function unlockPageScroll(){
+    if(!pageLockState) return;
+    document.documentElement.style.overflow=pageLockState.htmlOverflow;
+    document.body.style.overflow=pageLockState.bodyOverflow;
+    document.body.style.position=pageLockState.bodyPosition;
+    document.body.style.top=pageLockState.bodyTop;
+    document.body.style.width=pageLockState.bodyWidth;
+    const y=pageScrollY;
+    pageLockState=null;
+    window.scrollTo(0,y);
+  }
+
   function closePanel(){
     const card=document.getElementById("ma-owner-reels-card");
     const backdrop=document.getElementById("ma-owner-reels-backdrop");
     if(card) card.hidden=true;
     if(backdrop) backdrop.hidden=true;
+    unlockPageScroll();
   }
 
   async function openPanel(requestedSlug){
@@ -317,6 +352,7 @@
       throw new Error("This owner account is not linked to this shop.");
     }
     await list();
+    lockPageScroll();
     document.getElementById("ma-owner-reels-backdrop").hidden=false;
     document.getElementById("ma-owner-reels-card").hidden=false;
   }
@@ -331,6 +367,11 @@
 
       document.getElementById("ma-or-close").addEventListener("click",closePanel);
       document.getElementById("ma-owner-reels-backdrop").addEventListener("click",closePanel);
+      document.getElementById("ma-or-upload-label").addEventListener("click",function(){
+        if(this.disabled || this.classList.contains("is-disabled")) return;
+        const input=document.getElementById("ma-or-file");
+        if(input) input.click();
+      });
       document.getElementById("ma-or-file").addEventListener("change",async function(){
         const file=this.files&&this.files[0]; if(!file) return;
         try{await upload(file);}catch(error){status(error.message||"Upload failed.","error");this.value="";}
@@ -347,6 +388,7 @@
       window.addEventListener("message",function(event){
         if(!event.data || event.data.type!=="MA7ALAK_OPEN_REEL_UPLOADER") return;
         openPanel(String(event.data.shopSlug||"").trim()).catch(function(error){
+          lockPageScroll();
           document.getElementById("ma-owner-reels-backdrop").hidden=false;
           document.getElementById("ma-owner-reels-card").hidden=false;
           status(error.message||"Could not open Reel uploader.","error");
