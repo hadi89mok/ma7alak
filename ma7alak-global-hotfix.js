@@ -1,87 +1,34 @@
 /* =========================================================
- MA7ALAK GLOBAL HOTFIX V2 — PERFORMANCE SAFE
+ MA7ALAK GLOBAL HOTFIX V3 — PERFORMANCE SAFE + PANEL COORDINATOR
  Replaces old show-shops-stability-fix.js.
- - No document-wide MutationObserver
- - No attribute/class observation loop
- - Directory state restoration runs only on the directory page
- - Story stabilization is event/bounded-refresh driven
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_GLOBAL_HOTFIX_V2__)return;
-window.__MA7ALAK_GLOBAL_HOTFIX_V2__=true;
-
-const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
-const SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+if(window.__MA7ALAK_GLOBAL_HOTFIX_V3__)return;
+window.__MA7ALAK_GLOBAL_HOTFIX_V3__=true;
+const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
 let sb=null;
-function client(){
-  if(sb)return sb;
-  if(window.Ma7alakAccount?.client)return(sb=window.Ma7alakAccount.client);
-  if(window.Ma7alakOwnerAuth?.client)return(sb=window.Ma7alakOwnerAuth.client);
-  if(window.supabase?.createClient)return(sb=window.supabase.createClient(SB_URL,SB_KEY));
-  return null;
-}
-function visitorId(){
-  let id="";try{id=localStorage.getItem("ma7alak_visitor_id")||""}catch(_){}
-  if(!id){id=(window.crypto?.randomUUID?.()||("visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)));try{localStorage.setItem("ma7alak_visitor_id",id)}catch(_){}}
-  return id;
-}
-function css(){
-  if(document.getElementById("m7-global-hotfix-css"))return;
-  const s=document.createElement("style");s.id="m7-global-hotfix-css";s.textContent=`
-  #ma7alak-following-list .ma7alak-following-item{position:relative!important;padding-right:86px!important}
-  #ma7alak-following-list .ma7alak-following-remove,#ma7alak-following-list [data-action="unfollow"]{position:absolute!important;right:10px!important;top:50%!important;transform:translateY(-50%)!important;min-width:68px!important;border:1px solid #ffffff1a!important;border-radius:999px!important;background:#ffffff0b!important;color:#ddd!important;font-size:10px!important;font-weight:800!important;padding:7px 9px!important}
-  body.ma7alak-header-page.ma7alak-shops-body{padding-top:var(--m7-header-h,76px)!important}
-  #ma7alak-shops-page{padding-top:8px!important;margin-top:0!important}
-  @media(max-width:700px){#ma7alak-shops-page{padding-top:4px!important}}
-  .ma7alak-shop-image-ring.m7-story-stable.ma7alak-has-story{visibility:visible!important;opacity:1!important}`;
-  document.head.appendChild(s);
-}
-
+function client(){if(sb)return sb;if(window.Ma7alakAccount?.client)return(sb=window.Ma7alakAccount.client);if(window.Ma7alakOwnerAuth?.client)return(sb=window.Ma7alakOwnerAuth.client);if(window.supabase?.createClient)return(sb=window.supabase.createClient(SB_URL,SB_KEY));return null}
+function visitorId(){let id="";try{id=localStorage.getItem("ma7alak_visitor_id")||""}catch(_){}if(!id){id=(window.crypto?.randomUUID?.()||("visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)));try{localStorage.setItem("ma7alak_visitor_id",id)}catch(_){}}return id}
+function css(){if(document.getElementById("m7-global-hotfix-css"))return;const s=document.createElement("style");s.id="m7-global-hotfix-css";s.textContent=`
+#ma7alak-following-list .ma7alak-following-row{position:relative!important;padding-right:98px!important}
+#ma7alak-following-list .m7-following-unfollow{position:absolute!important;right:10px!important;top:50%!important;transform:translateY(-50%)!important;min-width:76px!important;border:1px solid #ffffff1a!important;border-radius:999px!important;background:#ffffff0b!important;color:#ddd!important;font-size:10px!important;font-weight:800!important;padding:8px 10px!important;z-index:4!important;cursor:pointer!important}
+#ma7alak-following-list .m7-following-unfollow:disabled{opacity:.55!important}
+body.ma7alak-header-page.ma7alak-shops-body{padding-top:var(--m7-header-h,76px)!important}
+#ma7alak-shops-page{padding-top:8px!important;margin-top:0!important}
+@media(max-width:700px){#ma7alak-shops-page{padding-top:4px!important}#ma7alak-following-list .ma7alak-following-row{padding-right:92px!important}}
+.ma7alak-shop-image-ring.m7-story-stable.ma7alak-has-story{visibility:visible!important;opacity:1!important}`;document.head.appendChild(s)}
 const directoryPage=(location.pathname.replace(/\/+$/,"")||"/").toLowerCase()==="/shwf-almhlat-";
 let shopState={area:"",category:"",openCategory:false},storyCache=new Map(),lockUntil=0,restoreQueued=false;
-function captureShopState(e){
-  if(!directoryPage)return;
-  const a=e.target.closest?.(".ma7alak-area-button"),c=e.target.closest?.(".ma7alak-category-button");
-  if(a){shopState.area=(a.dataset.area||a.textContent||"").trim();shopState.openCategory=true;lockUntil=Date.now()+2500;queueRestore()}
-  if(c){shopState.category=(c.dataset.category||c.textContent||"").trim();shopState.openCategory=true;lockUntil=Date.now()+2500;queueRestore()}
-}
-function restoreShopState(){
-  restoreQueued=false;if(!directoryPage||Date.now()>lockUntil)return;
-  const sec=document.querySelector(".ma7alak-category-section");if(shopState.openCategory&&sec&&!sec.classList.contains("visible"))sec.classList.add("visible");
-  if(shopState.area)document.querySelectorAll(".ma7alak-area-button").forEach(b=>{if((b.dataset.area||b.textContent||"").trim()===shopState.area&&!b.classList.contains("active"))b.classList.add("active")});
-  if(shopState.category)document.querySelectorAll(".ma7alak-category-button").forEach(b=>{if((b.dataset.category||b.textContent||"").trim()===shopState.category&&!b.classList.contains("active"))b.classList.add("active")});
-}
+function captureShopState(e){if(!directoryPage)return;const a=e.target.closest?.(".ma7alak-area-button"),c=e.target.closest?.(".ma7alak-category-button");if(a){shopState.area=(a.dataset.area||a.textContent||"").trim();shopState.openCategory=true;lockUntil=Date.now()+2500;queueRestore()}if(c){shopState.category=(c.dataset.category||c.textContent||"").trim();shopState.openCategory=true;lockUntil=Date.now()+2500;queueRestore()}}
+function restoreShopState(){restoreQueued=false;if(!directoryPage||Date.now()>lockUntil)return;const sec=document.querySelector(".ma7alak-category-section");if(shopState.openCategory&&sec&&!sec.classList.contains("visible"))sec.classList.add("visible");if(shopState.area)document.querySelectorAll(".ma7alak-area-button").forEach(b=>{if((b.dataset.area||b.textContent||"").trim()===shopState.area&&!b.classList.contains("active"))b.classList.add("active")});if(shopState.category)document.querySelectorAll(".ma7alak-category-button").forEach(b=>{if((b.dataset.category||b.textContent||"").trim()===shopState.category&&!b.classList.contains("active"))b.classList.add("active")})}
 function queueRestore(){if(restoreQueued)return;restoreQueued=true;requestAnimationFrame(restoreShopState)}
-function stabilizeStories(){
-  if(!directoryPage)return;
-  document.querySelectorAll(".ma7alak-shop-image-ring").forEach(r=>{
-    const card=r.closest("[data-shop-slug],.ma7alak-shop-card"),slug=card?.dataset?.shopSlug||card?.querySelector?.("[data-shop-slug]")?.dataset?.shopSlug||"";
-    if(!slug)return;
-    if(r.classList.contains("ma7alak-has-story"))storyCache.set(slug,Date.now()+5000);
-    if((storyCache.get(slug)||0)>Date.now()){
-      if(!r.classList.contains("ma7alak-has-story"))r.classList.add("ma7alak-has-story");
-      if(!r.classList.contains("m7-story-stable"))r.classList.add("m7-story-stable");
-    }
-  });
-}
-async function unfollowFromFollowing(e){
-  const btn=e.target.closest?.("#ma7alak-following-list .ma7alak-following-remove,#ma7alak-following-list [data-action='unfollow']");if(!btn)return;
-  const row=btn.closest("[data-shop-slug],.ma7alak-following-item"),slug=String(row?.dataset?.shopSlug||btn.dataset.shopSlug||"");if(!slug)return;
-  e.preventDefault();e.stopPropagation();const c=client();if(!c)return;btn.disabled=true;
-  const r=await c.from("shop_follows").delete().eq("visitor_id",visitorId()).eq("shop_slug",slug);btn.disabled=false;
-  if(r.error){console.warn(r.error);return}row?.remove();dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));
-}
+function stabilizeStories(){if(!directoryPage)return;document.querySelectorAll(".ma7alak-shop-image-ring").forEach(r=>{const card=r.closest("[data-shop-slug],.ma7alak-shop-card"),slug=card?.dataset?.shopSlug||card?.querySelector?.("[data-shop-slug]")?.dataset?.shopSlug||"";if(!slug)return;if(r.classList.contains("ma7alak-has-story"))storyCache.set(slug,Date.now()+5000);if((storyCache.get(slug)||0)>Date.now()){if(!r.classList.contains("ma7alak-has-story"))r.classList.add("ma7alak-has-story");if(!r.classList.contains("m7-story-stable"))r.classList.add("m7-story-stable")}})}
+function decorateFollowing(){document.querySelectorAll("#ma7alak-following-list .ma7alak-following-row").forEach(row=>{if(row.querySelector(".m7-following-unfollow"))return;let slug="";try{const u=new URL(row.getAttribute("href")||"",location.origin);slug=decodeURIComponent(u.pathname.replace(/^\/+|\/+$/g,""))}catch(_){}if(!slug)return;row.dataset.shopSlug=slug;const b=document.createElement("button");b.type="button";b.className="m7-following-unfollow";b.dataset.shopSlug=slug;b.textContent="Unfollow";b.setAttribute("aria-label","Unfollow this shop");row.appendChild(b)})}
+async function unfollowFromFollowing(e){const btn=e.target.closest?.("#ma7alak-following-list .m7-following-unfollow");if(!btn)return;e.preventDefault();e.stopPropagation();const slug=String(btn.dataset.shopSlug||"").trim(),row=btn.closest(".ma7alak-following-row");if(!slug)return;const c=client();if(!c)return;btn.disabled=true;let r=await c.rpc("unfollow_shop",{p_shop_slug:slug,p_visitor_id:visitorId()});if(r.error){btn.disabled=false;console.warn("MA7ALAK unfollow:",r.error);return}row?.remove();window.postMessage({type:"MA7ALAK_FOLLOW_CHANGED",shopSlug:slug,following:false},"*");dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));setTimeout(decorateFollowing,50)}
+function closePanelsExcept(kind){if(kind!=="following"){const o=document.getElementById("ma7alak-following-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")}if(kind!=="notifications"){const p=document.getElementById("ma7alak-notification-panel");p?.classList.remove("open")}if(kind!=="heart"){const p=document.getElementById("m7-owner-social-panel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")}if(kind!=="chat"){try{window.Ma7alakChat?.close?.()}catch(_){}}}
+function panelCoordinator(e){const t=e.target;if(t.closest?.("#ma7alak-header-following")){closePanelsExcept("following");setTimeout(decorateFollowing,20);setTimeout(decorateFollowing,250);return}if(t.closest?.("#ma7alak-notification-bell")){closePanelsExcept("notifications");return}if(t.closest?.("#ma7alak-story-likes-button")){closePanelsExcept("heart");return}if(t.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages],#ma7alak-header-messages,#ma7alak-messages-button")){closePanelsExcept("chat");return}}
 function bindMessageShortcuts(){document.addEventListener("click",e=>{const el=e.target.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages]");if(!el)return;e.preventDefault();if(el.hasAttribute("data-ma7alak-open-owner-messages"))dispatchEvent(new Event("ma7alak:open-owner-messages"));else dispatchEvent(new Event("ma7alak:open-messages"))},true)}
-function boot(){
-  css();document.addEventListener("pointerup",captureShopState,true);document.addEventListener("click",unfollowFromFollowing,true);bindMessageShortcuts();
-  if(directoryPage){
-    scrollTo(0,0);requestAnimationFrame(()=>scrollTo(0,0));
-    stabilizeStories();
-    [250,700,1500,3000].forEach(ms=>setTimeout(()=>{queueRestore();stabilizeStories()},ms));
-    addEventListener("ma7alak:story-uploaded",()=>setTimeout(stabilizeStories,100));
-    addEventListener("ma7alak:follow-change",()=>setTimeout(stabilizeStories,100));
-  }
-}
+function boot(){css();document.addEventListener("pointerup",captureShopState,true);document.addEventListener("click",unfollowFromFollowing,true);document.addEventListener("click",panelCoordinator,true);document.addEventListener("input",e=>{if(e.target?.id==="ma7alak-following-search")setTimeout(decorateFollowing,0)},true);bindMessageShortcuts();if(directoryPage){scrollTo(0,0);requestAnimationFrame(()=>scrollTo(0,0));stabilizeStories();[250,700,1500,3000].forEach(ms=>setTimeout(()=>{queueRestore();stabilizeStories()},ms));addEventListener("ma7alak:story-uploaded",()=>setTimeout(stabilizeStories,100));addEventListener("ma7alak:follow-change",()=>setTimeout(stabilizeStories,100))}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
