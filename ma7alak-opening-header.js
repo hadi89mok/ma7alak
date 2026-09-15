@@ -55,7 +55,7 @@
    - Clip image/content inside the rounded hero.
 ========================================================= */
 #ma7alak-opening-header-root{
-  margin-top:0!important;
+  margin-top:7px!important;
   padding-top:0!important;
 }
 
