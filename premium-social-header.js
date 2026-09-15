@@ -1424,7 +1424,9 @@ body.ma7alak-header-page.ma7alak-premium-homepage{
    - Gap keeps the same brown/copper theme.
 ========================================================= */
 body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
-  height:calc(var(--m7-header-h) + 7px)!important;
+  /* Keep the existing 7px visual separation, but carry the same
+     copper/brown backdrop underneath it and the opener's 7px offset. */
+  height:calc(var(--m7-header-h) + 14px)!important;
 }
 
 `;
