@@ -1,6 +1,6 @@
 /* =========================================================
    MA7ALAK OPENING HEADER — GITHUB / CUSTOM CODE VERSION
-   V4 — LOCKED UNDER PREMIUM HEADER + TRANSPARENT PAGE BACKGROUND
+   V5 — VISUAL TOP PLACEMENT UNDER FIXED PREMIUM HEADER + TRANSPARENT BACKGROUND
 
    POSITION options:
    "under-premium"   -> directly under Premium Panel
@@ -14,8 +14,8 @@
   "use strict";
 
   if (window.self !== window.top) return;
-  if (window.__MA7ALAK_OPENING_HEADER_V4__) return;
-  window.__MA7ALAK_OPENING_HEADER_V4__ = true;
+  if (window.__MA7ALAK_OPENING_HEADER_V5__) return;
+  window.__MA7ALAK_OPENING_HEADER_V5__ = true;
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
@@ -41,36 +41,36 @@
   }
 
   function placeRoot(root) {
-    const premium = findPremiumPanel();
+    /*
+       FIX:
+       #ma7alak-social-header is position:fixed and is appended near the
+       end of BODY. Inserting the hero after that DOM node sends it to
+       the bottom of the website.
 
-    /* PRIMARY RULE: this opening hero belongs directly under the Premium Header. */
-    if (premium) {
-      premium.insertAdjacentElement("afterend", root);
-      return true;
+       The Premium Header code already adds top padding to BODY.
+       Therefore the correct visual location is the FIRST real item in
+       the normal page flow. This puts the hero directly beneath the
+       fixed Premium Header on screen.
+    */
+    if (!document.body) return false;
+
+    const firstRealPageNode = Array.from(document.body.children).find(function(el){
+      return (
+        el !== root &&
+        el.id !== "ma7alak-social-header" &&
+        el.id !== "ma7alak-header-theme-backdrop" &&
+        el.tagName !== "SCRIPT" &&
+        el.tagName !== "STYLE"
+      );
+    });
+
+    if (firstRealPageNode) {
+      document.body.insertBefore(root, firstRealPageNode);
+    } else {
+      document.body.prepend(root);
     }
 
-    if (POSITION === "before-stats") {
-      const stats = findStats();
-      if (stats) {
-        stats.insertAdjacentElement("beforebegin", root);
-        return true;
-      }
-    }
-
-    if (POSITION === "before-happening") {
-      const happening = findHappening();
-      if (happening) {
-        happening.insertAdjacentElement("beforebegin", root);
-        return true;
-      }
-    }
-
-    if (POSITION === "top-page") {
-      document.body.insertAdjacentElement("afterbegin", root);
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   function syncWidth() {
