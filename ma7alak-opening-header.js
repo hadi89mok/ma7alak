@@ -14,6 +14,34 @@
   "use strict";
 
   if (window.self !== window.top) return;
+
+  /* =========================================================
+     HOMEPAGE ONLY
+     Allowed:
+       https://ma7alak.com/
+       https://www.ma7alak.com/
+     Blocked:
+       /admin
+       /doze-3ale
+       /masaya-cafe
+       /shwf-almhlat-
+       /dhyf-mhlk-
+       and every other page/path.
+  ========================================================= */
+  const MA7ALAK_HOME_HOST = (window.location.hostname || "")
+    .toLowerCase()
+    .replace(/^www\./, "");
+
+  const MA7ALAK_HOME_PATH =
+    (window.location.pathname || "/").replace(/\/+$/, "") || "/";
+
+  if (
+    MA7ALAK_HOME_HOST !== "ma7alak.com" ||
+    MA7ALAK_HOME_PATH !== "/"
+  ) {
+    return;
+  }
+
   if (window.__MA7ALAK_OPENING_HEADER_V5__) return;
   window.__MA7ALAK_OPENING_HEADER_V5__ = true;
 
