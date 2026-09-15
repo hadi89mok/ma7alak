@@ -3753,236 +3753,81 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
 ========================================================= */
 
-
 /* =========================================================
-   MA7ALAK V27 — CINEMATIC BRAND HERO MERGED WITH HEADER
-   EXAMPLE BUILD
-   - NO IMAGE / NO BASE64 / NO EXTERNAL BACKGROUND
-   - Pure CSS Lebanon-night atmosphere
-   - Preserves the complete V26 header above
+   MA7ALAK V28 — TRANSPARENT BRAND STRIP
+   - Directly under the existing premium icon panel
+   - NO hero background / NO image / NO enclosing card
+   - Page's own background remains fully visible
+   - Mobile-first responsive layout
 ========================================================= */
 (function(){
   "use strict";
-
   if(window.self !== window.top){ return; }
-  if(window.__MA7ALAK_CINEMATIC_BRAND_HERO_V27__){ return; }
-  window.__MA7ALAK_CINEMATIC_BRAND_HERO_V27__ = true;
+  if(window.__MA7ALAK_TRANSPARENT_BRAND_V28__){ return; }
+  window.__MA7ALAK_TRANSPARENT_BRAND_V28__ = true;
 
-  function injectCinematicHero(){
-    if(document.getElementById("ma7alak-cinematic-brand-hero")){ return; }
+  function mount(){
+    if(document.getElementById("ma7alak-transparent-brand")){ return; }
+    const header=document.getElementById("ma7alak-social-header");
+    if(!header){ setTimeout(mount,120); return; }
 
-    const header = document.getElementById("ma7alak-social-header");
-    if(!header){
-      setTimeout(injectCinematicHero,120);
-      return;
-    }
-
-    const hero = document.createElement("section");
-    hero.id = "ma7alak-cinematic-brand-hero";
-    hero.setAttribute("aria-label","Ma7alak — كل محل بستاهل ينشاف");
-
-    hero.innerHTML = `
-      <div class="m7cin-sky" aria-hidden="true"></div>
-      <div class="m7cin-stars" aria-hidden="true"></div>
-      <div class="m7cin-glow m7cin-glow-left" aria-hidden="true"></div>
-      <div class="m7cin-glow m7cin-glow-right" aria-hidden="true"></div>
-
-      <div class="m7cin-street" aria-hidden="true">
-        <span class="m7cin-shop s1"><i></i><b></b></span>
-        <span class="m7cin-shop s2"><i></i><b></b></span>
-        <span class="m7cin-shop s3"><i></i><b></b></span>
-        <span class="m7cin-shop s4"><i></i><b></b></span>
-        <span class="m7cin-shop s5"><i></i><b></b></span>
-      </div>
-
-      <div class="m7cin-flag" aria-hidden="true">
-        <span class="m7cin-flag-red top"></span>
-        <span class="m7cin-flag-white"><span class="m7cin-cedar">♠</span></span>
-        <span class="m7cin-flag-red bottom"></span>
-      </div>
-
-      <div class="m7cin-frame" aria-hidden="true"></div>
-      <div class="m7cin-sweep" aria-hidden="true"></div>
-
-      <div class="m7cin-content">
-        <div class="m7cin-brand-mini">
-          <span class="m7cin-brand-line"></span>
-          <span>MA7ALAK</span>
-          <span class="m7cin-brand-line"></span>
+    const brand=document.createElement("section");
+    brand.id="ma7alak-transparent-brand";
+    brand.setAttribute("aria-label","Ma7alak — كل محل بستاهل ينشاف");
+    brand.innerHTML=`
+      <div class="m7tb-inner">
+        <div class="m7tb-mini"><i></i><span>MA7ALAK</span><i></i></div>
+        <h1 class="m7tb-title" dir="rtl"><span>كل محل بستاهل</span> <b>ينشاف</b></h1>
+        <div class="m7tb-english"><span>LOCAL SHOPS</span><em>•</em><span>REAL PEOPLE</span><strong class="m7tb-cedar">♠</strong><span>A STRONGER LEBANON</span></div>
+        <div class="m7tb-discovery" dir="rtl"><span>وفّر ع حالك الجولات</span><i>—</i><b>عنا بتلاقي المحلات</b></div>
+        <p class="m7tb-sub" dir="rtl">اكتشف محلات منطقتك بمكان واحد</p>
+        <div class="m7tb-actions">
+          <a class="m7tb-btn m7tb-primary" href="https://ma7alak.com/dhyf-mhlk-" aria-label="ضيف محلك"><span class="m7tb-plus">+</span><span>ضيف محلك</span></a>
+          <a class="m7tb-btn m7tb-secondary" href="https://ma7alak.com/shwf-almhlat-" aria-label="شوف المحلّات"><span>شوف المحلّات</span><span class="m7tb-eye">◉</span></a>
         </div>
+      </div>`;
+    header.insertAdjacentElement("afterend",brand);
 
-        <h1 class="m7cin-main-title" dir="rtl">
-          <span class="m7cin-title-word">كل</span>
-          <span class="m7cin-title-word">محل</span>
-          <span class="m7cin-title-word">بستاهل</span>
-          <span class="m7cin-title-word m7cin-title-gold">ينشاف</span>
-        </h1>
-
-        <div class="m7cin-tagline" aria-label="Local shops, real people, a stronger Lebanon">
-          <span>LOCAL SHOPS</span>
-          <i>•</i>
-          <span>REAL PEOPLE</span>
-          <span class="m7cin-mini-cedar">♠</span>
-          <span>A STRONGER LEBANON</span>
-        </div>
-
-        <div class="m7cin-discovery" dir="rtl">
-          <span class="m7cin-discovery-white">وفّر ع حالك الجولات</span>
-          <span class="m7cin-discovery-separator">—</span>
-          <span class="m7cin-discovery-gold">عنا بتلاقي المحلات</span>
-        </div>
-
-        <p class="m7cin-subtitle" dir="rtl">اكتشف محلات منطقتك بمكان واحد</p>
-
-        <div class="m7cin-actions">
-          <a class="m7cin-btn m7cin-btn-primary" href="https://ma7alak.com/dhyf-mhlk-" aria-label="ضيف محلك">
-            <span class="m7cin-btn-icon m7cin-plus">+</span>
-            <span>ضيف محلك</span>
-          </a>
-          <a class="m7cin-btn m7cin-btn-secondary" href="https://ma7alak.com/shwf-almhlat-" aria-label="شوف المحلّات">
-            <span>شوف المحلّات</span>
-            <span class="m7cin-btn-icon m7cin-eye">◉</span>
-          </a>
-        </div>
-      </div>
+    const st=document.createElement("style");
+    st.id="ma7alak-transparent-brand-style";
+    st.textContent=`
+      #ma7alak-transparent-brand{position:relative;z-index:10;width:100%;margin:0!important;padding:5px 12px 16px!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible;font-family:Arial,"Noto Sans Arabic",Tahoma,sans-serif}
+      #ma7alak-transparent-brand *{box-sizing:border-box}
+      .m7tb-inner{width:min(1040px,100%);margin:0 auto;text-align:center;background:transparent!important;border:0!important;box-shadow:none!important;padding:3px 12px 0}
+      .m7tb-mini{display:flex;align-items:center;justify-content:center;gap:9px;color:rgba(235,190,105,.72);font-size:8px;font-weight:900;letter-spacing:4px;margin:0 0 3px}
+      .m7tb-mini i{display:block;width:34px;height:1px;background:linear-gradient(90deg,transparent,#d9a441)}.m7tb-mini i:last-child{transform:scaleX(-1)}
+      .m7tb-title{margin:0;color:#f2eadc;font-family:Georgia,"Times New Roman","Noto Naskh Arabic",serif;font-size:clamp(34px,5.2vw,62px);font-weight:500;line-height:1.08;text-shadow:0 3px 12px rgba(0,0,0,.55),0 0 18px rgba(217,164,65,.08)}
+      .m7tb-title span,.m7tb-title b{display:inline-block;animation:m7tbTitle 3.8s ease-in-out infinite}.m7tb-title b{color:#e3b45b;font-weight:500;animation-delay:-1.2s;text-shadow:0 0 18px rgba(217,164,65,.22)}
+      @keyframes m7tbTitle{0%,100%{transform:translateY(0);filter:brightness(1)}50%{transform:translateY(-2px);filter:brightness(1.12)}}
+      .m7tb-english{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:7px;color:rgba(255,245,226,.70);font-size:8px;font-weight:800;letter-spacing:3px;text-shadow:0 2px 8px rgba(0,0,0,.65)}
+      .m7tb-english em{color:#d9a441;font-style:normal}.m7tb-cedar{display:inline-flex;color:#d9a441;font-size:16px;line-height:1;transform:rotate(180deg);filter:drop-shadow(0 0 7px rgba(217,164,65,.25))}
+      .m7tb-discovery{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px;color:#f1eadf;font-size:clamp(15px,2vw,21px);font-weight:850;text-shadow:0 2px 10px rgba(0,0,0,.62)}
+      .m7tb-discovery b{color:#e3b45b}.m7tb-discovery i{color:rgba(217,164,65,.52);font-style:normal}.m7tb-discovery span,.m7tb-discovery b{animation:m7tbDiscovery 4s ease-in-out infinite}.m7tb-discovery b{animation-delay:-2s}
+      @keyframes m7tbDiscovery{0%,100%{opacity:.88;transform:translateY(0)}50%{opacity:1;transform:translateY(-1px);text-shadow:0 0 15px rgba(217,164,65,.25)}}
+      .m7tb-sub{margin:4px 0 0;color:rgba(255,255,255,.55);font-size:11px;font-weight:650;text-shadow:0 2px 8px rgba(0,0,0,.65)}
+      .m7tb-actions{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:11px}
+      .m7tb-btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:155px;height:43px;padding:0 19px;border-radius:999px;text-decoration:none!important;color:#fff!important;font-size:14px;font-weight:900;border:1px solid rgba(217,164,65,.42);background:rgba(10,10,11,.38);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-shadow:0 5px 18px rgba(0,0,0,.18),inset 0 0 0 1px rgba(255,255,255,.025);transition:transform .18s ease,border-color .18s ease}
+      .m7tb-primary{background:linear-gradient(135deg,rgba(217,164,65,.88),rgba(143,89,20,.80));color:#0a0907!important;border-color:rgba(245,200,112,.75)}
+      .m7tb-btn:before{content:"";position:absolute;inset:-2px;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,235,184,.34) 48%,transparent 65%);transform:translateX(-120%);animation:m7tbShine 4.2s ease-in-out infinite}.m7tb-secondary:before{animation-delay:-2.1s}
+      @keyframes m7tbShine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+      .m7tb-btn:hover{transform:translateY(-2px);border-color:rgba(240,198,111,.72)}.m7tb-btn:active{transform:scale(.97)}
+      .m7tb-plus{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;font-size:20px;line-height:1;animation:m7tbPlus 1.8s ease-in-out infinite}@keyframes m7tbPlus{0%,100%{transform:scale(1) rotate(0)}40%{transform:scale(1.16) rotate(-8deg)}60%{transform:scale(1.08) rotate(5deg)}}
+      .m7tb-eye{display:inline-block;font-size:22px;line-height:1;animation:m7tbEye 2.2s ease-in-out infinite}@keyframes m7tbEye{0%,100%{transform:translateX(0) scaleY(1)}25%{transform:translateX(-2px) scaleY(1)}38%{transform:translateX(0) scaleY(.25)}52%{transform:translateX(2px) scaleY(1)}}
+      @media(max-width:900px){#ma7alak-transparent-brand{padding:3px 8px 13px!important}.m7tb-inner{padding:0 7px}.m7tb-title{font-size:clamp(31px,8.5vw,47px)}.m7tb-english{font-size:7px;letter-spacing:2px;gap:7px}.m7tb-discovery{font-size:16px}.m7tb-actions{margin-top:9px}.m7tb-btn{height:41px;min-width:145px;padding:0 16px;font-size:13px}}
+      @media(max-width:560px){#ma7alak-transparent-brand{padding-top:1px!important;padding-bottom:11px!important}.m7tb-inner{padding:0 3px}.m7tb-mini{font-size:6.5px;letter-spacing:3px;margin-bottom:1px}.m7tb-mini i{width:25px}.m7tb-title{font-size:clamp(29px,9.5vw,41px);line-height:1.02}.m7tb-english{margin-top:6px;gap:5px;font-size:5.8px;letter-spacing:1.55px;white-space:nowrap;flex-wrap:nowrap}.m7tb-cedar{font-size:13px}.m7tb-discovery{margin-top:6px;gap:5px;font-size:14px;line-height:1.25}.m7tb-sub{font-size:9px;margin-top:3px}.m7tb-actions{gap:7px;margin-top:8px}.m7tb-btn{flex:1;min-width:0;max-width:190px;height:39px;padding:0 10px;font-size:12px;gap:7px}.m7tb-plus{width:20px;height:20px;font-size:18px}.m7tb-eye{font-size:19px}}
+      @media(max-width:380px){#ma7alak-transparent-brand{padding-left:5px!important;padding-right:5px!important}.m7tb-title{font-size:28px}.m7tb-english{font-size:5.1px;letter-spacing:1.15px;gap:4px}.m7tb-discovery{font-size:12.5px}.m7tb-sub{font-size:8.5px}.m7tb-btn{height:37px;font-size:11px;padding:0 8px}}
+      @media(prefers-reduced-motion:reduce){.m7tb-title span,.m7tb-title b,.m7tb-discovery span,.m7tb-discovery b,.m7tb-btn:before,.m7tb-plus,.m7tb-eye{animation:none!important}}
     `;
-
-    header.insertAdjacentElement("afterend",hero);
-
-    const style = document.createElement("style");
-    style.id = "ma7alak-cinematic-brand-hero-style";
-    style.textContent = `
-      #ma7alak-cinematic-brand-hero{
-        --cin-gold:#d9a441;
-        --cin-gold2:#f0c66f;
-        --cin-deep:#08090a;
-        position:relative;
-        isolation:isolate;
-        width:min(1180px,calc(100% - 28px));
-        height:clamp(300px,31vw,390px);
-        margin:14px auto 26px;
-        overflow:hidden;
-        border:1px solid rgba(217,164,65,.28);
-        border-radius:0 0 27px 27px;
-        background:
-          radial-gradient(circle at 15% 62%,rgba(197,102,28,.22),transparent 27%),
-          radial-gradient(circle at 84% 48%,rgba(126,25,20,.20),transparent 30%),
-          linear-gradient(180deg,#111315 0%,#0b0c0e 43%,#060708 100%);
-        box-shadow:0 24px 65px rgba(0,0,0,.35),inset 0 -1px 0 rgba(217,164,65,.13);
-        font-family:Arial,"Noto Sans Arabic",Tahoma,sans-serif;
-      }
-      #ma7alak-cinematic-brand-hero *{box-sizing:border-box}
-
-      .m7cin-sky{
-        position:absolute;inset:0;z-index:-8;
-        background:
-          linear-gradient(115deg,transparent 0 42%,rgba(255,179,72,.035) 48%,transparent 56%),
-          radial-gradient(ellipse at 50% 8%,rgba(217,164,65,.08),transparent 42%);
-      }
-      .m7cin-stars{position:absolute;inset:0;z-index:-7;opacity:.38;background-image:radial-gradient(circle,rgba(255,223,165,.8) 0 1px,transparent 1.3px);background-size:73px 57px;animation:m7cinStars 8s ease-in-out infinite alternate}
-      @keyframes m7cinStars{from{opacity:.20;transform:translateY(0)}to{opacity:.46;transform:translateY(3px)}}
-
-      .m7cin-glow{position:absolute;width:320px;height:320px;border-radius:50%;filter:blur(54px);z-index:-6;opacity:.25;pointer-events:none;animation:m7cinGlow 6s ease-in-out infinite alternate}
-      .m7cin-glow-left{left:-170px;bottom:-160px;background:#d36b21}
-      .m7cin-glow-right{right:-170px;top:-160px;background:#8b251e;animation-delay:-3s}
-      @keyframes m7cinGlow{to{opacity:.42;transform:scale(1.12)}}
-
-      .m7cin-street{position:absolute;left:0;right:0;bottom:0;height:44%;z-index:-4;display:flex;align-items:flex-end;gap:1px;opacity:.88;filter:drop-shadow(0 -8px 22px rgba(0,0,0,.28))}
-      .m7cin-shop{position:relative;display:block;flex:1;height:72%;background:linear-gradient(180deg,#171513,#090a0b);border-top:1px solid rgba(217,164,65,.13)}
-      .m7cin-shop.s1{height:68%}.m7cin-shop.s2{height:91%}.m7cin-shop.s3{height:76%}.m7cin-shop.s4{height:96%}.m7cin-shop.s5{height:70%}
-      .m7cin-shop:before{content:"";position:absolute;left:8%;right:8%;top:17%;height:8px;background:repeating-linear-gradient(90deg,rgba(221,145,49,.62) 0 12px,rgba(82,32,19,.8) 12px 24px);clip-path:polygon(0 0,100% 0,94% 100%,6% 100%)}
-      .m7cin-shop i,.m7cin-shop b{position:absolute;bottom:9%;display:block;border:1px solid rgba(217,164,65,.12);background:linear-gradient(180deg,rgba(233,155,60,.24),rgba(96,45,21,.08));box-shadow:inset 0 0 18px rgba(255,170,66,.06)}
-      .m7cin-shop i{left:15%;width:28%;height:42%}.m7cin-shop b{right:14%;width:31%;height:42%}
-      .m7cin-shop:nth-child(2n) i,.m7cin-shop:nth-child(2n+1) b{animation:m7cinWindow 4s ease-in-out infinite alternate}
-      @keyframes m7cinWindow{to{background:linear-gradient(180deg,rgba(255,184,88,.42),rgba(117,53,20,.10));box-shadow:0 0 18px rgba(255,154,45,.10),inset 0 0 15px rgba(255,197,102,.10)}}
-
-      .m7cin-flag{position:absolute;right:3.2%;top:12%;width:92px;height:62px;z-index:-2;transform:rotate(-3deg) skewY(-2deg);opacity:.72;filter:drop-shadow(0 7px 12px rgba(0,0,0,.35));animation:m7cinFlag 4s ease-in-out infinite alternate;transform-origin:left center}
-      .m7cin-flag span{display:flex;width:100%;height:33.333%;align-items:center;justify-content:center}.m7cin-flag-red{background:rgba(170,31,27,.72)}.m7cin-flag-white{background:rgba(230,225,210,.76)}.m7cin-cedar{font-size:17px;line-height:1;color:#2f6339;transform:scaleX(1.2) rotate(180deg)}
-      @keyframes m7cinFlag{from{transform:rotate(-3deg) skewY(-2deg) scaleX(.98)}to{transform:rotate(-1deg) skewY(2deg) scaleX(1.03)}}
-
-      .m7cin-frame{position:absolute;inset:9px;z-index:5;border:1px solid rgba(217,164,65,.10);border-radius:0 0 20px 20px;pointer-events:none}
-      .m7cin-frame:before,.m7cin-frame:after{content:"";position:absolute;top:-1px;width:19%;height:1px;background:linear-gradient(90deg,transparent,var(--cin-gold2),transparent);animation:m7cinFramePulse 3s ease-in-out infinite alternate}.m7cin-frame:before{left:5%}.m7cin-frame:after{right:5%;animation-delay:-1.5s}
-      @keyframes m7cinFramePulse{from{opacity:.25;transform:scaleX(.75)}to{opacity:.85;transform:scaleX(1.08)}}
-      .m7cin-sweep{position:absolute;inset:-30%;z-index:4;pointer-events:none;background:linear-gradient(110deg,transparent 42%,rgba(255,220,150,.075) 49%,transparent 56%);transform:translateX(-55%);animation:m7cinSweep 8s ease-in-out infinite}
-      @keyframes m7cinSweep{0%,28%{transform:translateX(-55%)}60%,100%{transform:translateX(55%)}}
-
-      .m7cin-content{position:relative;z-index:6;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 160px 30px;text-align:center;background:linear-gradient(90deg,rgba(5,6,7,.48),rgba(5,6,7,.06) 28%,rgba(5,6,7,.05) 70%,rgba(5,6,7,.38))}
-      .m7cin-brand-mini{display:flex;align-items:center;gap:10px;margin-bottom:9px;color:rgba(241,204,137,.75);font-size:9px;font-weight:800;letter-spacing:4.2px}.m7cin-brand-line{width:35px;height:1px;background:linear-gradient(90deg,transparent,var(--cin-gold))}
-      .m7cin-brand-line:last-child{transform:scaleX(-1)}
-
-      .m7cin-main-title{margin:0;color:#f3eee4;font-family:Georgia,"Times New Roman","Noto Naskh Arabic",serif;font-size:clamp(37px,5.2vw,70px);font-weight:500;line-height:1.05;letter-spacing:-1.5px;text-shadow:0 3px 16px rgba(0,0,0,.62),0 0 26px rgba(217,164,65,.06)}
-      .m7cin-title-word{display:inline-block;opacity:0;transform:translateY(15px);animation:m7cinTitleIn .8s cubic-bezier(.2,.8,.2,1) forwards}
-      .m7cin-title-word:nth-child(1){animation-delay:.10s}.m7cin-title-word:nth-child(2){animation-delay:.22s}.m7cin-title-word:nth-child(3){animation-delay:.34s}.m7cin-title-word:nth-child(4){animation-delay:.46s}
-      .m7cin-title-gold{color:#e3b45b;text-shadow:0 0 22px rgba(217,164,65,.18)}
-      @keyframes m7cinTitleIn{to{opacity:1;transform:translateY(0)}}
-
-      .m7cin-tagline{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;color:rgba(255,241,213,.68);font-size:8px;font-weight:700;letter-spacing:3px;white-space:nowrap}.m7cin-tagline i{color:var(--cin-gold);font-style:normal}.m7cin-mini-cedar{color:#d8c59d;font-size:13px;transform:rotate(180deg)}
-
-      .m7cin-discovery{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:20px;font-size:clamp(14px,1.45vw,19px);font-weight:850;line-height:1.2;text-shadow:0 2px 10px rgba(0,0,0,.6)}
-      .m7cin-discovery-white,.m7cin-discovery-gold{display:inline-block;animation:m7cinDiscoveryFloat 3.2s ease-in-out infinite}
-      .m7cin-discovery-white{color:#fff;animation-delay:-.35s}.m7cin-discovery-gold{color:#e1ae50;animation-delay:-1.2s}.m7cin-discovery-separator{color:rgba(217,164,65,.42);animation:m7cinSep 2.1s ease-in-out infinite}
-      @keyframes m7cinDiscoveryFloat{0%,100%{transform:translateY(0);text-shadow:0 2px 10px rgba(0,0,0,.6)}50%{transform:translateY(-2px);text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(217,164,65,.15)}}
-      @keyframes m7cinSep{50%{opacity:.35;transform:scaleX(.72)}}
-      .m7cin-subtitle{margin:5px 0 0;color:rgba(255,255,255,.58);font-size:11px;font-weight:650}
-
-      .m7cin-actions{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:17px}
-      .m7cin-btn{position:relative;overflow:hidden;min-width:138px;height:42px;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none!important;font-size:12px;font-weight:900;transition:transform .18s ease,border-color .18s ease,background .18s ease;box-shadow:0 8px 22px rgba(0,0,0,.25)}
-      .m7cin-btn:after{content:"";position:absolute;top:-50%;bottom:-50%;width:42%;left:-60%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent);animation:m7cinBtnShine 4.4s ease-in-out infinite}.m7cin-btn-secondary:after{animation-delay:-2.2s}
-      @keyframes m7cinBtnShine{0%,52%{left:-60%;opacity:0}65%{opacity:1}82%,100%{left:125%;opacity:0}}
-      .m7cin-btn:hover{transform:translateY(-2px)}.m7cin-btn:active{transform:scale(.97)}
-      .m7cin-btn-primary{color:#15100a;background:linear-gradient(135deg,#edc16d,#c99234);border:1px solid rgba(255,225,167,.55)}
-      .m7cin-btn-secondary{color:#f5e8d1;background:rgba(12,13,14,.68);border:1px solid rgba(217,164,65,.28);backdrop-filter:blur(9px)}
-      .m7cin-btn-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:16px;font-weight:900}
-      .m7cin-plus{animation:m7cinPlus 1.8s ease-in-out infinite}@keyframes m7cinPlus{0%,55%,100%{transform:scale(1) rotate(0)}70%{transform:scale(1.18) rotate(-8deg)}82%{transform:scale(1.03) rotate(4deg)}}
-      .m7cin-eye{border:1.5px solid currentColor;border-radius:50% 10% 50% 10%;font-size:9px;transform:rotate(45deg);animation:m7cinEye 2.2s ease-in-out infinite}.m7cin-eye::first-letter{transform:rotate(-45deg)}
-      @keyframes m7cinEye{0%,25%,100%{scale:1 1}31%{scale:1 .18}37%{scale:1 1}62%{translate:-2px 0}78%{translate:2px 0}}
-
-      @media(max-width:900px){
-        #ma7alak-cinematic-brand-hero{width:calc(100% - 14px);height:285px;margin:8px auto 18px;border-radius:0 0 22px 22px}
-        .m7cin-content{padding:24px 86px 24px}.m7cin-flag{right:2%;width:72px;height:49px;opacity:.52}.m7cin-tagline{font-size:7px;letter-spacing:2.1px;gap:8px}.m7cin-street{height:42%}
-      }
-
-      @media(max-width:600px){
-        #ma7alak-cinematic-brand-hero{height:248px;margin-top:6px;border-radius:0 0 19px 19px}
-        .m7cin-content{padding:20px 12px 18px;justify-content:center;background:linear-gradient(180deg,rgba(5,6,7,.10),rgba(5,6,7,.17) 58%,rgba(5,6,7,.54))}
-        .m7cin-brand-mini{margin-bottom:6px;font-size:7px;letter-spacing:3px;gap:7px}.m7cin-brand-line{width:22px}
-        .m7cin-main-title{font-size:clamp(31px,10.4vw,44px);letter-spacing:-.8px;white-space:nowrap}
-        .m7cin-tagline{margin-top:8px;max-width:100%;gap:5px;font-size:5.8px;letter-spacing:1.25px}.m7cin-mini-cedar{font-size:10px}
-        .m7cin-discovery{margin-top:13px;gap:6px;font-size:12.5px}.m7cin-subtitle{font-size:9.5px;margin-top:4px}
-        .m7cin-actions{margin-top:12px;gap:7px;width:100%;padding:0 6px}.m7cin-btn{flex:1;min-width:0;max-width:165px;height:37px;padding:0 10px;border-radius:12px;font-size:10.5px;gap:6px}.m7cin-btn-icon{width:17px;height:17px;font-size:14px}
-        .m7cin-flag{right:-8px;top:14px;width:57px;height:39px;opacity:.28}.m7cin-street{height:38%;opacity:.66}.m7cin-frame{inset:6px;border-radius:0 0 14px 14px}.m7cin-glow{filter:blur(46px)}
-      }
-
-      @media(max-width:380px){
-        #ma7alak-cinematic-brand-hero{height:238px}.m7cin-main-title{font-size:30px}.m7cin-tagline{font-size:5.2px;letter-spacing:.9px}.m7cin-discovery{font-size:11.5px}.m7cin-btn{font-size:10px}
-      }
-
-      @media(prefers-reduced-motion:reduce){
-        #ma7alak-cinematic-brand-hero *,#ma7alak-cinematic-brand-hero *:before,#ma7alak-cinematic-brand-hero *:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
-      }
-    `;
-    document.head.appendChild(style);
+    document.head.appendChild(st);
   }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded",injectCinematicHero,{once:true});
-  }else{
-    injectCinematicHero();
-  }
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",mount,{once:true});}else{mount();}
 })();
 
 /* =========================================================
-   V27 EXAMPLE NOTES
-   - Complete V26 header is preserved above this block.
-   - New visual hero uses ZERO background images.
-   - Visual atmosphere is made from CSS only: night sky, warm shop
-     windows, Lebanese flag accent, gold frame/light sweep.
-   - Main identity mirrors the supplied reference composition:
-     centered Arabic statement + tiny premium English strapline.
-   - Existing "وفّر ع حالك الجولات / عنا بتلاقي المحلات" copy is
-     merged underneath and animated, instead of being discarded.
-   - Existing functional destination buttons are included inside the
-     hero and remain phone-safe.
-   - Phone layout is intentionally much shorter and uses no horizontal
-     overflow so it sits naturally under the V26 fixed header.
+   V28 RESULT
+   - Existing premium icon panel remains the functional header.
+   - Branding sits immediately below it.
+   - Entire branding area is transparent so the Hostinger/page background shows through.
+   - No cinematic sky, street, flag, image, gradient card or hero background.
+   - Existing Following / live Story rings / Reels / Notifications / owner-only Story Likes / Search / Login remain untouched.
 ========================================================= */
