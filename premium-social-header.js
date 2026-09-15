@@ -160,7 +160,7 @@ body.ma7alak-header-page{
   left:0;
   right:0;
   width:100%;
-  height:calc(var(--m7-header-h) + 58px);
+  height:calc(var(--m7-header-h) + 7px);
   overflow:hidden;
   pointer-events:none;
   z-index:2147482500;
@@ -1414,6 +1414,17 @@ body.ma7alak-header-page.ma7alak-premium-homepage{
   body.ma7alak-header-page.ma7alak-premium-homepage{
     padding-top:calc(var(--m7-header-h) + 7px)!important;
   }
+}
+
+
+/* =========================================================
+   FINAL HOMEPAGE BACKDROP BOUNDARY FIX
+   - Social Header brown backdrop ends at the tiny 7px gap.
+   - It no longer extends behind Opening Header top corners.
+   - Gap keeps the same brown/copper theme.
+========================================================= */
+body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
+  height:calc(var(--m7-header-h) + 7px)!important;
 }
 
 `;
