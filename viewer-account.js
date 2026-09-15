@@ -1,5 +1,5 @@
 /* =========================================================
-   MA7ALAK VIEWER ACCOUNT V2 — ISOLATED VIEWER AUTH
+   MA7ALAK VIEWER ACCOUNT V3 — ISOLATED VIEWER AUTH + OWNER BLOCK
    - Separate browser auth storage from existing shop-owner login
    - Email signup/login + Google
    - Device profile-photo picker + Supabase Storage upload
@@ -9,8 +9,8 @@
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_VIEWER_ACCOUNT_V2__) return;
-window.__MA7ALAK_VIEWER_ACCOUNT_V2__ = true;
+if(window.__MA7ALAK_VIEWER_ACCOUNT_V3__) return;
+window.__MA7ALAK_VIEWER_ACCOUNT_V3__ = true;
 
 const URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
 const KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
@@ -29,8 +29,25 @@ function loadSupabase(){
 }
 function esc(v){return String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function emit(){window.dispatchEvent(new CustomEvent("ma7alak:account-change",{detail:{session,user:session?.user||null,profile}}));}
+async function isShopOwnerUser(userId){
+  if(!userId||!client)return false;
+  try{
+    const r=await client.from("shop_owners").select("shop_slug").eq("user_id",userId).limit(1).maybeSingle();
+    return !!(!r.error&&r.data&&r.data.shop_slug);
+  }catch(_){ return false; }
+}
+async function rejectOwnerSession(){
+  if(!session?.user)return false;
+  if(await isShopOwnerUser(session.user.id)){
+    await client.auth.signOut({scope:"local"});
+    session=null;profile=null;emit();
+    return true;
+  }
+  return false;
+}
 async function loadProfile(){
   if(!session?.user){profile=null;emit();return null;}
+  if(await rejectOwnerSession())return null;
   const r=await client.from("viewer_profiles").select("*").eq("user_id",session.user.id).maybeSingle();
   if(r.error) console.warn("Ma7alak viewer profile:",r.error);
   profile=r.data||null;emit();return profile;
@@ -115,21 +132,53 @@ function open(){
   document.getElementById("m7a-avatar-change").onclick=()=>picker.click();
   picker.onchange=()=>uploadAvatar(picker.files?.[0]);
   document.getElementById("m7a-save").onclick=async()=>{
+   const displayName=document.getElementById("m7a-name").value.trim();
+   if(!displayName){status("Display name is required.");return;}
    status("Saving...");
+   try{
    const r=await client.rpc("ma7alak_update_my_profile",{
-     p_display_name:document.getElementById("m7a-name").value,
+     p_display_name:displayName,
      p_username:document.getElementById("m7a-user").value||null,
      p_avatar_url:profile?.avatar_url||null,
      p_bio:document.getElementById("m7a-bio").value||null
    });
    if(r.error){status(r.error.message);return;}
    await loadProfile();status("Saved ✓");
+   }catch(e){status(e?.message||"Could not save profile.");}
   };
   document.getElementById("m7a-logout").onclick=async()=>{await client.auth.signOut();close();};
  }else{
   const creds=()=>({email:document.getElementById("m7a-email").value.trim(),password:document.getElementById("m7a-pass").value});
-  document.getElementById("m7a-login").onclick=async()=>{status("Logging in...");const r=await client.auth.signInWithPassword(creds());status(r.error?r.error.message:"Logged in ✓");if(!r.error)close();};
-  document.getElementById("m7a-signup").onclick=async()=>{status("Creating account...");const r=await client.auth.signUp(creds());status(r.error?r.error.message:"Account created. Check your email if confirmation is enabled.");};
+  document.getElementById("m7a-login").onclick=async()=>{
+    status("Logging in...");
+    const r=await client.auth.signInWithPassword(creds());
+    if(r.error){status(r.error.message);return;}
+    session=r.data?.session||null;
+    if(session?.user && await isShopOwnerUser(session.user.id)){
+      await client.auth.signOut({scope:"local"});session=null;profile=null;emit();
+      status("This email belongs to a shop-owner account. Use Shop Owner Login instead.");
+      return;
+    }
+    await loadProfile();status("Logged in ✓");setTimeout(close,350);
+  };
+  document.getElementById("m7a-signup").onclick=async()=>{
+    status("Creating account...");
+    const c=creds();
+    if(!c.email||!c.password){status("Enter email and password.");return;}
+    const r=await client.auth.signUp(c);
+    if(r.error){status(r.error.message);return;}
+    if(r.data?.user && await isShopOwnerUser(r.data.user.id)){
+      await client.auth.signOut({scope:"local"});session=null;profile=null;emit();
+      status("This email already belongs to a shop-owner account. Use another email for a viewer account.");
+      return;
+    }
+    if(r.data?.session){
+      session=r.data.session;await loadProfile();
+      status("Account created ✓");setTimeout(()=>open(),400);
+    }else{
+      status("Account created. Email confirmation is required by Supabase.");
+    }
+  };
   document.getElementById("m7a-google").onclick=async()=>{
     const r=await client.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
     if(r.error)status(r.error.message);
