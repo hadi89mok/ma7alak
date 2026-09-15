@@ -1,6 +1,6 @@
 /* =========================================================
    MA7ALAK OPENING HEADER — GITHUB / CUSTOM CODE VERSION
-   V3 — FREE PLACEMENT + PREMIUM PANEL WIDTH SYNC
+   V4 — LOCKED UNDER PREMIUM HEADER + TRANSPARENT PAGE BACKGROUND
 
    POSITION options:
    "under-premium"   -> directly under Premium Panel
@@ -14,8 +14,8 @@
   "use strict";
 
   if (window.self !== window.top) return;
-  if (window.__MA7ALAK_OPENING_HEADER_V3__) return;
-  window.__MA7ALAK_OPENING_HEADER_V3__ = true;
+  if (window.__MA7ALAK_OPENING_HEADER_V4__) return;
+  window.__MA7ALAK_OPENING_HEADER_V4__ = true;
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
@@ -43,7 +43,8 @@
   function placeRoot(root) {
     const premium = findPremiumPanel();
 
-    if (POSITION === "under-premium" && premium) {
+    /* PRIMARY RULE: this opening hero belongs directly under the Premium Header. */
+    if (premium) {
       premium.insertAdjacentElement("afterend", root);
       return true;
     }
@@ -103,10 +104,30 @@
         boxSizing: "border-box",
         marginLeft: "auto",
         marginRight: "auto",
+        marginTop: "0",
+        marginBottom: "0",
         padding: "0",
         position: "relative",
-        zIndex: "2"
+        zIndex: "2",
+        background: "transparent",
+        backgroundColor: "transparent"
       });
+
+      /* This component must never create a white Hostinger-style box. */
+      const transparentFix = document.createElement("style");
+      transparentFix.textContent = `
+        #${ROOT_ID},
+        #${ROOT_ID} > *,
+        #${ROOT_ID} .ma7alak-ultra-hero {
+          background-color: transparent !important;
+        }
+        #${ROOT_ID} {
+          padding: 0 !important;
+          border: 0 !important;
+          box-shadow: none !important;
+        }
+      `;
+      document.head.appendChild(transparentFix);
     }
 
     if (!placeRoot(root)) return;
