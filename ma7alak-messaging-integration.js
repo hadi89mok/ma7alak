@@ -1,197 +1,24 @@
 /* =========================================================
-   MA7ALAK MESSAGING INTEGRATION V2 — FREEZE FIX
-   Safe add-on: DOES NOT modify Premium Header / Follow / Owner login.
-
-   Requires, in this order:
-   1) viewer-account.js V2+
-   2) ma7alak-chat.js
-   3) this file
-
-   Adds:
-   - Viewer Account/Profile button to Premium Header
-   - Messages icon only after viewer has at least one conversation
-   - Live unread badge
-   - Message button beside Follow on real shop pages
+   MA7ALAK MESSAGING INTEGRATION V3
+   - Viewer Profile + Viewer Messages in Premium Header
+   - Owner gets separate Shop Messages icon + live unread badge
+   - Does NOT inject shop-page Message button: the Hostinger Follow
+     embed now owns that button and exact SHOP_SLUG.
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_MESSAGING_INTEGRATION_V2__) return;
-window.__MA7ALAK_MESSAGING_INTEGRATION_V2__=true;
-
-const RESERVED=new Set(["","admin","dhyf-mhlk-","shwf-almhlat-","login"]);
-let realtime=null, refreshTimer=null, mountTimer=null, refreshBusy=false;
-
-function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
-function slug(){
- const explicit=document.documentElement.getAttribute("data-ma7alak-shop-slug")||(document.body&&document.body.getAttribute("data-ma7alak-shop-slug"));
- if(explicit)return String(explicit).trim();
- let p=String(location.pathname||"").replace(/^\/+|\/+$/g,"");
- if(!p||p.includes("/"))return "";
- try{p=decodeURIComponent(p)}catch(_){}
- return RESERVED.has(p.toLowerCase())?"":p;
-}
-function readyAccount(){
- return new Promise(resolve=>{
-   let n=0;
-   (function wait(){
-     if(window.Ma7alakAccount){Promise.resolve(window.Ma7alakAccount.ready?.()).finally(()=>resolve(true));return;}
-     if(++n>120){resolve(false);return;} setTimeout(wait,100);
-   })();
- });
-}
-function readyChat(){
- return new Promise(resolve=>{
-   let n=0;(function wait(){if(window.Ma7alakChat){resolve(true);return;}if(++n>120){resolve(false);return;}setTimeout(wait,100);})();
- });
-}
-function style(){
- if(document.getElementById("m7-msg-int-css"))return;
- const s=document.createElement("style");s.id="m7-msg-int-css";s.textContent=`
-#m7-viewer-account-btn,#m7-header-messages{position:relative}
-#m7-viewer-account-btn .m7-viewer-avatar{width:25px;height:25px;border-radius:50%;object-fit:cover;border:1px solid rgba(239,198,110,.65);display:block}
-#m7-msg-badge{position:absolute;top:1px;right:5px;min-width:17px;height:17px;padding:0 4px;display:none;align-items:center;justify-content:center;border:2px solid #0b0c0d;border-radius:999px;background:#e08b22;color:#fff;font:900 9px/1 Arial;z-index:8;pointer-events:none}
-#m7-msg-badge.visible{display:flex}
-#m7-header-messages.m7-hidden{display:none!important}
-#m7-shop-message-btn{min-width:126px;height:43px;flex:0 0 auto;border:1px solid rgba(217,164,65,.46);border-radius:14px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:rgba(255,255,255,.055);color:#f4c96f;font:900 14px/1 Arial;transition:transform .16s ease,background .18s ease,border-color .18s ease}
-#m7-shop-message-btn:hover{background:rgba(217,164,65,.10);border-color:rgba(217,164,65,.65)}
-#m7-shop-message-btn:active{transform:scale(.96)}
-#m7-shop-message-btn svg{width:18px;height:18px;display:block}
-#ma7alak-shop-follow-root .ma7alak-follow-card{flex-wrap:nowrap}
-#ma7alak-shop-follow-root .m7-follow-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-@media(max-width:600px){
- #m7-shop-message-btn{min-width:45px;width:45px;height:41px;padding:0;border-radius:13px}
- #m7-shop-message-btn .m7-msg-text{display:none}
- #ma7alak-shop-follow-root .ma7alak-follow-btn{min-width:104px!important}
- #ma7alak-shop-follow-root .m7-follow-actions{gap:6px}
-}
-@media(max-width:480px){
- #m7-viewer-account-btn,#m7-header-messages{min-width:35px!important;width:35px!important}
-}
-`;document.head.appendChild(s);
-}
+if(window.__MA7ALAK_MESSAGING_INTEGRATION_V3__)return;window.__MA7ALAK_MESSAGING_INTEGRATION_V3__=true;
+let viewerRealtime=null,ownerRealtime=null,timer=null,busy=false;
+const esc=s=>String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const personSVG=`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.4-4 2.9-6.2 7-6.2s6.6 2.2 7 6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 const msgSVG=`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.2 5.2h13.6c1.2 0 2.2 1 2.2 2.2v8.1c0 1.2-1 2.2-2.2 2.2H11l-4.8 3v-3H5.2c-1.2 0-2.2-1-2.2-2.2V7.4c0-1.2 1-2.2 2.2-2.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
-
-function header(){
- const nav=document.querySelector("#ma7alak-social-header .ma7alak-header-nav");
- if(!nav)return;
- if(!document.getElementById("m7-viewer-account-btn")){
-   const b=document.createElement("button");
-   b.id="m7-viewer-account-btn";b.className="ma7alak-header-nav-item";b.type="button";b.setAttribute("aria-label","My Account");
-   b.innerHTML=`<span class="ma7alak-header-nav-icon">${personSVG}</span><span class="ma7alak-header-nav-label">Profile</span>`;
-   const following=document.getElementById("ma7alak-header-following");
-   nav.insertBefore(b,following||nav.firstChild);
-   b.onclick=e=>{e.preventDefault();e.stopPropagation();window.Ma7alakAccount?.open();};
- }
- if(!document.getElementById("m7-header-messages")){
-   const b=document.createElement("button");
-   b.id="m7-header-messages";b.className="ma7alak-header-nav-item m7-hidden";b.type="button";b.setAttribute("aria-label","Messages");
-   b.innerHTML=`<span class="ma7alak-header-nav-icon">${msgSVG}</span><span id="m7-msg-badge">0</span><span class="ma7alak-header-nav-label">Messages</span>`;
-   const following=document.getElementById("ma7alak-header-following");
-   nav.insertBefore(b,following||null);
-   b.onclick=e=>{e.preventDefault();e.stopPropagation();window.Ma7alakChat?.openInbox();};
- }
- renderViewer();
-}
-function renderViewer(){
- const b=document.getElementById("m7-viewer-account-btn"); if(!b||!window.Ma7alakAccount)return;
- const p=window.Ma7alakAccount.profile,u=window.Ma7alakAccount.user;
- const icon=b.querySelector(".ma7alak-header-nav-icon");
- if(icon){
-   const wanted=(u&&p?.avatar_url)?String(p.avatar_url):"";
-   const current=icon.getAttribute("data-m7-avatar")||"";
-   if(current!==wanted){
-     icon.setAttribute("data-m7-avatar",wanted);
-     icon.innerHTML=wanted?`<img class="m7-viewer-avatar" src="${esc(wanted)}" alt="">`:personSVG;
-   }
- }
- const wantedLabel=u?"My Ma7alak Profile":"Log in / Create account";
- if(b.getAttribute("aria-label")!==wantedLabel)b.setAttribute("aria-label",wantedLabel);
-}
-function shopButton(){
- const s=slug();if(!s)return;
- const root=document.getElementById("ma7alak-shop-follow-root");
- const follow=root?.querySelector(".ma7alak-follow-btn");
- const card=root?.querySelector(".ma7alak-follow-card");
- if(!root||!follow||!card||document.getElementById("m7-shop-message-btn"))return;
- let actions=card.querySelector(".m7-follow-actions");
- if(!actions){
-   actions=document.createElement("div");actions.className="m7-follow-actions";
-   follow.parentNode.insertBefore(actions,follow);
-   actions.appendChild(follow);
- }
- const b=document.createElement("button");b.id="m7-shop-message-btn";b.type="button";b.setAttribute("aria-label","Message this shop");
- b.innerHTML=`${msgSVG}<span class="m7-msg-text">Message</span>`;
- actions.appendChild(b);
- b.onclick=async e=>{
-   e.preventDefault();e.stopPropagation();
-   if(!window.Ma7alakAccount?.user){window.Ma7alakAccount?.open();return;}
-   if(!window.Ma7alakChat){return;}
-   window.Ma7alakChat.openShop(s);
- };
-}
-async function conversationStats(){
- const btn=document.getElementById("m7-header-messages"),badge=document.getElementById("m7-msg-badge");
- if(!btn||!badge||!window.Ma7alakAccount)return;
- const user=window.Ma7alakAccount.user, c=window.Ma7alakAccount.client;
- if(!user||!c){btn.classList.add("m7-hidden");badge.classList.remove("visible");badge.textContent="0";return;}
- if(refreshBusy)return;refreshBusy=true;
- try{
-   const cr=await c.from("ma7alak_conversations").select("id,viewer_id,viewer_last_read_at,owner_last_read_at,created_at");
-   if(cr.error)throw cr.error;
-   const conv=cr.data||[];
-   if(!conv.length){btn.classList.add("m7-hidden");badge.classList.remove("visible");badge.textContent="0";return;}
-   btn.classList.remove("m7-hidden");
-   const ids=conv.map(x=>x.id);
-   const mr=await c.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids).order("created_at",{ascending:false});
-   if(mr.error)throw mr.error;
-   let unread=0;
-   const map=new Map(conv.map(x=>[x.id,x]));
-   for(const m of (mr.data||[])){
-     const x=map.get(m.conversation_id);if(!x)continue;
-     const viewerSide=x.viewer_id===user.id;
-     const readAt=viewerSide?x.viewer_last_read_at:x.owner_last_read_at;
-     const incoming=viewerSide?m.sender_id!==user.id:m.sender_id!==user.id;
-     if(incoming && (!readAt || new Date(m.created_at)>new Date(readAt))) unread++;
-   }
-   badge.textContent=unread>99?"99+":String(unread);
-   badge.classList.toggle("visible",unread>0);
- }catch(err){console.warn("[Ma7alak Messaging Integration]",err);}
- finally{refreshBusy=false;}
-}
-function subscribe(){
- const c=window.Ma7alakAccount?.client,u=window.Ma7alakAccount?.user;
- if(realtime&&c){try{c.removeChannel(realtime)}catch(_){} realtime=null;}
- if(!c||!u)return;
- try{
-   realtime=c.channel("m7-msg-header-"+Math.random().toString(36).slice(2))
-     .on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_conversations"},()=>setTimeout(conversationStats,30))
-     .on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages"},()=>setTimeout(conversationStats,30))
-     .subscribe();
- }catch(_){}
-}
-async function refreshAll(){
- header();shopButton();renderViewer();await conversationStats();
-}
-async function boot(){
- style();
- await readyAccount(); await readyChat();
- refreshAll();subscribe();
- window.addEventListener("ma7alak:account-change",()=>{setTimeout(()=>{refreshAll();subscribe();},30)});
- window.addEventListener("focus",conversationStats);
- document.addEventListener("visibilitychange",()=>{if(!document.hidden)conversationStats();});
- /* PERFORMANCE FIX:
-    Do NOT observe the entire Hostinger DOM. The old MutationObserver could
-    react to our own DOM writes and create a mutation loop that froze pages.
-    Mount-check briefly at low frequency, then stop.
- */
- let mountChecks=0;
- mountTimer=setInterval(()=>{
-   header();
-   shopButton();
-   if(++mountChecks>=20){clearInterval(mountTimer);mountTimer=null;}
- },500);
- refreshTimer=setInterval(conversationStats,5000);
-}
+function style(){if(document.getElementById("m7-msg-int-css"))return;const s=document.createElement("style");s.id="m7-msg-int-css";s.textContent=`#m7-viewer-account-btn,#m7-header-messages,#m7-owner-messages{position:relative}#m7-viewer-account-btn .m7-viewer-avatar{width:25px;height:25px;border-radius:50%;object-fit:cover;border:1px solid rgba(239,198,110,.65);display:block}.m7-msg-badge{position:absolute;top:1px;right:5px;min-width:17px;height:17px;padding:0 4px;display:none;align-items:center;justify-content:center;border:2px solid #0b0c0d;border-radius:999px;background:#e08b22;color:#fff;font:900 9px/1 Arial;z-index:8;pointer-events:none}.m7-msg-badge.visible{display:flex}.m7-hidden{display:none!important}@media(max-width:480px){#m7-viewer-account-btn,#m7-header-messages,#m7-owner-messages{min-width:35px!important;width:35px!important}}`;document.head.appendChild(s);}
+async function ready(){for(let i=0;i<120&&(!window.Ma7alakAccount||!window.Ma7alakChat);i++)await new Promise(r=>setTimeout(r,100));try{await window.Ma7alakAccount?.ready?.();}catch(_){}for(let i=0;i<120&&!window.Ma7alakOwnerAuth;i++)await new Promise(r=>setTimeout(r,100));try{await window.Ma7alakOwnerAuth?.ready?.();}catch(_){} }
+function header(){const nav=document.querySelector("#ma7alak-social-header .ma7alak-header-nav");if(!nav)return;let p=document.getElementById("m7-viewer-account-btn");if(!p){p=document.createElement("button");p.id="m7-viewer-account-btn";p.className="ma7alak-header-nav-item";p.type="button";p.innerHTML=`<span class="ma7alak-header-nav-icon">${personSVG}</span><span class="ma7alak-header-nav-label">Profile</span>`;const f=document.getElementById("ma7alak-header-following");nav.insertBefore(p,f||nav.firstChild);p.onclick=e=>{e.preventDefault();e.stopPropagation();window.Ma7alakAccount?.open();};}let v=document.getElementById("m7-header-messages");if(!v){v=document.createElement("button");v.id="m7-header-messages";v.className="ma7alak-header-nav-item m7-hidden";v.type="button";v.innerHTML=`<span class="ma7alak-header-nav-icon">${msgSVG}</span><span id="m7-viewer-msg-badge" class="m7-msg-badge">0</span><span class="ma7alak-header-nav-label">Messages</span>`;const f=document.getElementById("ma7alak-header-following");nav.insertBefore(v,f||null);v.onclick=e=>{e.preventDefault();e.stopPropagation();window.Ma7alakChat?.openViewerInbox();};}let o=document.getElementById("m7-owner-messages");if(!o){o=document.createElement("button");o.id="m7-owner-messages";o.className="ma7alak-header-nav-item m7-hidden";o.type="button";o.innerHTML=`<span class="ma7alak-header-nav-icon">${msgSVG}</span><span id="m7-owner-msg-badge" class="m7-msg-badge">0</span><span class="ma7alak-header-nav-label">Shop Messages</span>`;const f=document.getElementById("ma7alak-header-following");nav.insertBefore(o,f||null);o.onclick=e=>{e.preventDefault();e.stopPropagation();window.Ma7alakChat?.openOwnerInbox();};}renderIdentity();}
+function renderIdentity(){const owner=!!window.Ma7alakOwnerAuth?.owner,p=document.getElementById("m7-viewer-account-btn"),v=document.getElementById("m7-header-messages"),o=document.getElementById("m7-owner-messages");if(p)p.classList.toggle("m7-hidden",owner);if(o)o.classList.toggle("m7-hidden",!owner);if(v&&owner)v.classList.add("m7-hidden");if(p&&!owner&&window.Ma7alakAccount){const pr=window.Ma7alakAccount.profile,u=window.Ma7alakAccount.user,icon=p.querySelector(".ma7alak-header-nav-icon"),wanted=(u&&pr?.avatar_url)?String(pr.avatar_url):"";if(icon)icon.innerHTML=wanted?`<img class="m7-viewer-avatar" src="${esc(wanted)}" alt="">`:personSVG;p.setAttribute("aria-label",u?"My Ma7alak Profile":"Log in / Create account");}}
+async function unreadFor(c,u,ownerSide){if(!c||!u)return 0;let q=c.from("ma7alak_conversations").select("id,viewer_id,viewer_last_read_at,owner_last_read_at");if(ownerSide){const slug=window.Ma7alakOwnerAuth?.owner?.shop_slug;if(!slug)return 0;q=q.eq("shop_slug",slug);}const cr=await q;if(cr.error)return 0;const conv=cr.data||[];if(!conv.length)return 0;const ids=conv.map(x=>x.id),mr=await c.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids).order("created_at",{ascending:false});if(mr.error)return 0;let n=0,map=new Map(conv.map(x=>[x.id,x]));for(const m of mr.data||[]){const x=map.get(m.conversation_id);if(!x)continue;const readAt=ownerSide?x.owner_last_read_at:x.viewer_last_read_at;if(m.sender_id!==u.id&&(!readAt||new Date(m.created_at)>new Date(readAt)))n++;}return n;}
+async function stats(){if(busy)return;busy=true;try{header();const owner=!!window.Ma7alakOwnerAuth?.owner;const vb=document.getElementById("m7-viewer-msg-badge"),vbtn=document.getElementById("m7-header-messages"),ob=document.getElementById("m7-owner-msg-badge"),obtn=document.getElementById("m7-owner-messages");if(owner){const c=window.Ma7alakOwnerAuth.client,u=window.Ma7alakOwnerAuth.user,n=await unreadFor(c,u,true);if(ob){ob.textContent=n>99?"99+":String(n);ob.classList.toggle("visible",n>0);}if(obtn)obtn.classList.remove("m7-hidden");if(vbtn)vbtn.classList.add("m7-hidden");}else{const c=window.Ma7alakAccount?.client,u=window.Ma7alakAccount?.user;if(!u){if(vbtn)vbtn.classList.add("m7-hidden");if(vb)vb.classList.remove("visible");}else{const n=await unreadFor(c,u,false);const cr=await c.from("ma7alak_conversations").select("id",{count:"exact",head:true});if(vbtn)vbtn.classList.toggle("m7-hidden",!!cr.error||!cr.count);if(vb){vb.textContent=n>99?"99+":String(n);vb.classList.toggle("visible",n>0);}}if(obtn)obtn.classList.add("m7-hidden");}}finally{busy=false;}}
+function subscribe(){if(viewerRealtime&&window.Ma7alakAccount?.client)try{window.Ma7alakAccount.client.removeChannel(viewerRealtime);}catch(_){}if(ownerRealtime&&window.Ma7alakOwnerAuth?.client)try{window.Ma7alakOwnerAuth.client.removeChannel(ownerRealtime);}catch(_){}viewerRealtime=ownerRealtime=null;if(window.Ma7alakOwnerAuth?.owner){const c=window.Ma7alakOwnerAuth.client;ownerRealtime=c.channel("m7-owner-msg-"+Math.random().toString(36).slice(2)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_conversations"},stats).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages"},stats).subscribe();}else if(window.Ma7alakAccount?.user){const c=window.Ma7alakAccount.client;viewerRealtime=c.channel("m7-viewer-msg-"+Math.random().toString(36).slice(2)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_conversations"},stats).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages"},stats).subscribe();}}
+async function boot(){style();await ready();header();await stats();subscribe();window.addEventListener("ma7alak:account-change",()=>setTimeout(()=>{renderIdentity();stats();subscribe();},50));window.addEventListener("ma7alak:owner-auth-change",()=>setTimeout(()=>{renderIdentity();stats();subscribe();},50));window.addEventListener("ma7alak:messages-read",stats);let checks=0;const mount=setInterval(()=>{header();if(++checks>=30)clearInterval(mount);},500);timer=setInterval(stats,5000);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
