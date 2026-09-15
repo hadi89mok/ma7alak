@@ -1,5 +1,5 @@
 /* =========================================================
-   MA7ALAK MESSAGING INTEGRATION V1
+   MA7ALAK MESSAGING INTEGRATION V2 — FREEZE FIX
    Safe add-on: DOES NOT modify Premium Header / Follow / Owner login.
 
    Requires, in this order:
@@ -15,11 +15,11 @@
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_MESSAGING_INTEGRATION_V1__) return;
-window.__MA7ALAK_MESSAGING_INTEGRATION_V1__=true;
+if(window.__MA7ALAK_MESSAGING_INTEGRATION_V2__) return;
+window.__MA7ALAK_MESSAGING_INTEGRATION_V2__=true;
 
 const RESERVED=new Set(["","admin","dhyf-mhlk-","shwf-almhlat-","login"]);
-let realtime=null, refreshTimer=null, observer=null, refreshBusy=false;
+let realtime=null, refreshTimer=null, mountTimer=null, refreshBusy=false;
 
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function slug(){
@@ -98,10 +98,15 @@ function renderViewer(){
  const p=window.Ma7alakAccount.profile,u=window.Ma7alakAccount.user;
  const icon=b.querySelector(".ma7alak-header-nav-icon");
  if(icon){
-   if(u&&p?.avatar_url) icon.innerHTML=`<img class="m7-viewer-avatar" src="${esc(p.avatar_url)}" alt="">`;
-   else icon.innerHTML=personSVG;
+   const wanted=(u&&p?.avatar_url)?String(p.avatar_url):"";
+   const current=icon.getAttribute("data-m7-avatar")||"";
+   if(current!==wanted){
+     icon.setAttribute("data-m7-avatar",wanted);
+     icon.innerHTML=wanted?`<img class="m7-viewer-avatar" src="${esc(wanted)}" alt="">`:personSVG;
+   }
  }
- b.setAttribute("aria-label",u?"My Ma7alak Profile":"Log in / Create account");
+ const wantedLabel=u?"My Ma7alak Profile":"Log in / Create account";
+ if(b.getAttribute("aria-label")!==wantedLabel)b.setAttribute("aria-label",wantedLabel);
 }
 function shopButton(){
  const s=slug();if(!s)return;
@@ -175,9 +180,18 @@ async function boot(){
  window.addEventListener("ma7alak:account-change",()=>{setTimeout(()=>{refreshAll();subscribe();},30)});
  window.addEventListener("focus",conversationStats);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden)conversationStats();});
- observer=new MutationObserver(()=>{header();shopButton();});
- observer.observe(document.documentElement,{childList:true,subtree:true});
- refreshTimer=setInterval(conversationStats,4000);
+ /* PERFORMANCE FIX:
+    Do NOT observe the entire Hostinger DOM. The old MutationObserver could
+    react to our own DOM writes and create a mutation loop that froze pages.
+    Mount-check briefly at low frequency, then stop.
+ */
+ let mountChecks=0;
+ mountTimer=setInterval(()=>{
+   header();
+   shopButton();
+   if(++mountChecks>=20){clearInterval(mountTimer);mountTimer=null;}
+ },500);
+ refreshTimer=setInterval(conversationStats,5000);
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
