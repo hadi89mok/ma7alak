@@ -1,4 +1,99 @@
 /* =========================================================
+   MA7ALAK — OWNER + MENU (STORY OR HOMEPAGE REEL)
+   Companion for story-upload-panel.js baseline:
+   b2126297f74e3d3a1b35224e5cc59b4e71d55a88
+
+   IMPORTANT:
+   - Does NOT replace or rewrite the working Story uploader.
+   - Intercepts the existing owner + request.
+   - Story continues into the existing b212 Story uploader.
+   - Reel opens the Owner Homepage Reel uploader below.
+   ========================================================= */
+(function(){
+  "use strict";
+  if(window.__MA7ALAK_OWNER_ADD_CHOOSER__) return;
+  window.__MA7ALAK_OWNER_ADD_CHOOSER__=true;
+
+  let activeSlug="";
+  let originalSource=null;
+
+  function injectChooser(){
+    if(document.getElementById("ma7alak-owner-add-chooser")) return;
+    const style=document.createElement("style");
+    style.textContent=`
+      #ma7alak-owner-add-chooser{position:fixed!important;inset:0!important;z-index:2147483646!important;display:none!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:rgba(3,4,5,.90)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;font-family:Arial,"Segoe UI",sans-serif!important}
+      #ma7alak-owner-add-chooser.active{display:flex!important}
+      #ma7alak-owner-add-panel{position:relative!important;width:min(430px,100%)!important;padding:27px 18px 19px!important;box-sizing:border-box!important;border:1px solid rgba(217,164,65,.28)!important;border-radius:26px!important;background:linear-gradient(180deg,#191613,#0d0d0e)!important;box-shadow:0 28px 90px rgba(0,0,0,.7)!important;color:#fff!important;text-align:center!important}
+      #ma7alak-owner-add-close{position:absolute!important;right:12px!important;top:11px!important;width:37px!important;height:37px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:50%!important;background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:24px!important;line-height:32px!important;padding:0!important}
+      .ma7alak-owner-add-title{font-size:22px!important;font-weight:900!important;margin:3px 38px 4px!important}.ma7alak-owner-add-sub{font-size:12px!important;color:rgba(255,255,255,.5)!important;margin:0 0 18px!important}
+      .ma7alak-owner-add-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important}
+      .ma7alak-owner-add-choice{min-height:137px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:20px!important;background:rgba(255,255,255,.045)!important;color:#fff!important;padding:17px 10px!important;font:inherit!important;font-weight:900!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}
+      .ma7alak-owner-add-choice:active{transform:scale(.97)!important}.ma7alak-owner-add-icon{display:block!important;font-size:32px!important;margin-bottom:9px!important}.ma7alak-owner-add-choice small{display:block!important;margin-top:7px!important;color:rgba(255,255,255,.45)!important;font-size:10px!important;font-weight:600!important;line-height:1.4!important}
+      @media(max-width:380px){.ma7alak-owner-add-grid{grid-template-columns:1fr!important}.ma7alak-owner-add-choice{min-height:105px!important}}
+    `;
+    document.head.appendChild(style);
+
+    const overlay=document.createElement("div");
+    overlay.id="ma7alak-owner-add-chooser";
+    overlay.innerHTML=`<div id="ma7alak-owner-add-panel">
+      <button id="ma7alak-owner-add-close" type="button" aria-label="Close">×</button>
+      <div class="ma7alak-owner-add-title">شو بدك تضيف؟</div>
+      <div class="ma7alak-owner-add-sub">اختار Story أو Homepage Reel</div>
+      <div class="ma7alak-owner-add-grid">
+        <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">📸</span>Add Story<small>بتختفي تلقائياً بعد 24 ساعة</small></button>
+        <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">🔥</span>Add Homepage Reel<small>بتظهر بقسم Reels على الصفحة الرئيسية</small></button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+
+    const close=()=>overlay.classList.remove("active");
+    document.getElementById("ma7alak-owner-add-close").addEventListener("click",close);
+    overlay.addEventListener("click",e=>{if(e.target===overlay) close();});
+
+    document.getElementById("ma7alak-owner-add-story").addEventListener("click",function(){
+      close();
+      // Re-send the SAME existing Story request. The bypass marker lets the
+      // untouched b212 Story uploader receive it normally.
+      window.postMessage({type:"MA7ALAK_OPEN_STORY_UPLOADER",shopSlug:activeSlug,__ma7alakChooserBypass:true},"*");
+    });
+
+    document.getElementById("ma7alak-owner-add-reel").addEventListener("click",function(){
+      close();
+      if(window.Ma7alakOwnerReels && typeof window.Ma7alakOwnerReels.open==="function"){
+        window.Ma7alakOwnerReels.open(activeSlug).catch(function(error){console.error("MA7ALAK Reel uploader:",error);});
+      }else{
+        window.postMessage({type:"MA7ALAK_OPEN_REEL_UPLOADER",shopSlug:activeSlug},"*");
+      }
+    });
+  }
+
+  function showChooser(slug,source){
+    activeSlug=String(slug||"").trim();
+    originalSource=source||null;
+    if(!activeSlug) return;
+    injectChooser();
+    document.getElementById("ma7alak-owner-add-chooser").classList.add("active");
+  }
+
+  // Capture phase is intentional: it prevents the original b212 uploader
+  // from opening immediately, so the owner sees the choice first.
+  window.addEventListener("message",function(event){
+    if(!event.data || event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER") return;
+    if(event.data.__ma7alakChooserBypass) return;
+    const slug=String(event.data.shopSlug||"").trim();
+    if(!slug) return;
+    event.stopImmediatePropagation();
+    showChooser(slug,event.source);
+  },true);
+
+  document.addEventListener("keydown",function(event){
+    if(event.key!=="Escape") return;
+    const el=document.getElementById("ma7alak-owner-add-chooser");
+    if(el) el.classList.remove("active");
+  });
+})();
+
+/* =========================================================
    MA7ALAK — OWNER HOMEPAGE REEL UPLOADER
    Separate from Stories. Does NOT modify the Story uploader.
 
@@ -74,21 +169,28 @@
   function inject(){
     const style=document.createElement("style");
     style.textContent=`
-      #ma-owner-reels-card{max-width:760px;margin:18px auto;padding:18px;border:1px solid rgba(255,183,77,.24);border-radius:22px;background:linear-gradient(145deg,#1a110d,#28170f);color:#fff;font-family:Arial,sans-serif;box-shadow:0 18px 45px rgba(0,0,0,.25)}
+      #ma-owner-reels-card{position:fixed;z-index:2147483647;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,calc(100vw - 24px));max-height:92vh;overflow:auto;margin:0;padding:18px;border:1px solid rgba(255,183,77,.24);border-radius:22px;background:linear-gradient(145deg,#1a110d,#28170f);color:#fff;font-family:Arial,sans-serif;box-shadow:0 18px 45px rgba(0,0,0,.25)}
       #ma-owner-reels-card *{box-sizing:border-box} .ma-or-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.ma-or-head b{font-size:20px}.ma-or-head span{font-size:26px}.ma-or-sub{opacity:.72;font-size:13px;margin-top:3px}
       .ma-or-quota{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.055);margin-bottom:14px}.ma-or-quota strong{color:#ffc46b}.ma-or-count{font-size:20px;font-weight:900}
       .ma-or-field{display:block;margin:12px 0}.ma-or-field span{display:block;font-size:13px;font-weight:800;margin-bottom:7px}.ma-or-field input{width:100%;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.13);background:#100b08;color:#fff;font-size:16px;outline:none}
       .ma-or-upload,.ma-or-publish{width:100%;border:0;border-radius:15px;padding:14px;font-size:15px;font-weight:900;cursor:pointer}.ma-or-upload{display:block;text-align:center;background:#3b2518;color:#ffd59a;margin:10px 0}.ma-or-publish{background:linear-gradient(135deg,#ffb347,#d77a20);color:#211007}.ma-or-publish:disabled,.ma-or-upload.is-disabled{opacity:.45;pointer-events:none}
       .ma-owner-reel-status{min-height:20px;margin:10px 0;font-size:13px}.ma-owner-reel-status.is-error{color:#ff8c8c}.ma-owner-reel-status.is-success{color:#8ff0a4}
       .ma-or-list{display:grid;gap:10px;margin-top:14px}.ma-or-item{display:grid;grid-template-columns:88px 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:15px;background:rgba(255,255,255,.05)}.ma-or-item video{width:88px;height:120px;object-fit:cover;border-radius:11px;background:#000}.ma-or-meta{min-width:0}.ma-or-meta b{display:block;overflow:hidden;text-overflow:ellipsis}.ma-or-meta small{opacity:.62}.ma-or-delete{border:1px solid rgba(255,100,100,.35);background:rgba(130,20,20,.2);color:#ffb0b0;border-radius:11px;padding:9px;cursor:pointer}
-      @media(max-width:560px){#ma-owner-reels-card{margin:12px 0;padding:15px;border-radius:18px}.ma-or-item{grid-template-columns:70px 1fr}.ma-or-item video{width:70px;height:98px}.ma-or-delete{grid-column:2;width:100%}}
+      #ma-owner-reels-backdrop{position:fixed;z-index:2147483646;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)} .ma-or-close{position:absolute;right:12px;top:10px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:25px;cursor:pointer}
+      @media(max-width:560px){#ma-owner-reels-card{width:calc(100vw - 18px);margin:0;padding:15px;border-radius:18px}.ma-or-item{grid-template-columns:70px 1fr}.ma-or-item video{width:70px;height:98px}.ma-or-delete{grid-column:2;width:100%}}
     `;
     document.head.appendChild(style);
+
+    const backdrop=document.createElement("div");
+    backdrop.id="ma-owner-reels-backdrop";
+    backdrop.hidden=true;
+    document.body.appendChild(backdrop);
 
     const card=document.createElement("section");
     card.id="ma-owner-reels-card";
     card.hidden=true;
     card.innerHTML=`
+      <button id="ma-or-close" class="ma-or-close" type="button" aria-label="Close">×</button>
       <div class="ma-or-head"><span>🔥</span><div><b>Homepage Reels</b><div class="ma-or-sub" id="ma-or-shop">Checking owner account…</div></div></div>
       <div class="ma-or-quota"><div><strong>Your Reel quota</strong><div class="ma-or-sub">Active homepage Reels</div></div><div class="ma-or-count" id="ma-or-quota">0 / 0</div></div>
       <label id="ma-or-upload-label" class="ma-or-upload" for="ma-or-file">📱 Choose Reel from device</label>
@@ -199,16 +301,36 @@
     }catch(error){ status(error.message||"Could not delete Reel.","error"); button.disabled=false; }
   }
 
+  function closePanel(){
+    const card=document.getElementById("ma-owner-reels-card");
+    const backdrop=document.getElementById("ma-owner-reels-backdrop");
+    if(card) card.hidden=true;
+    if(backdrop) backdrop.hidden=true;
+  }
+
+  async function openPanel(requestedSlug){
+    if(!client) throw new Error("Reel uploader is still loading. Try again.");
+    const {data:{user}}=await client.auth.getUser();
+    if(!user) throw new Error("You must be signed in.");
+    await quota();
+    if(requestedSlug && ownerInfo && String(ownerInfo.shop_slug)!==String(requestedSlug)){
+      throw new Error("This owner account is not linked to this shop.");
+    }
+    await list();
+    document.getElementById("ma-owner-reels-backdrop").hidden=false;
+    document.getElementById("ma-owner-reels-card").hidden=false;
+  }
+
   async function start(){
     inject();
     try{
       await ensureSupabase();
       client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
       const {data:{user}}=await client.auth.getUser();
-      if(!user) return;
-      document.getElementById("ma-owner-reels-card").hidden=false;
-      await quota(); await list();
+      if(user){ await quota(); await list(); }
 
+      document.getElementById("ma-or-close").addEventListener("click",closePanel);
+      document.getElementById("ma-owner-reels-backdrop").addEventListener("click",closePanel);
       document.getElementById("ma-or-file").addEventListener("change",async function(){
         const file=this.files&&this.files[0]; if(!file) return;
         try{await upload(file);}catch(error){status(error.message||"Upload failed.","error");this.value="";}
@@ -220,9 +342,18 @@
         const btn=e.target.closest(".ma-or-delete"); if(!btn) return;
         const row=btn.closest("[data-id]"); if(row) removeReel(row.dataset.id,btn);
       });
+
+      window.Ma7alakOwnerReels={open:openPanel,close:closePanel};
+      window.addEventListener("message",function(event){
+        if(!event.data || event.data.type!=="MA7ALAK_OPEN_REEL_UPLOADER") return;
+        openPanel(String(event.data.shopSlug||"").trim()).catch(function(error){
+          document.getElementById("ma-owner-reels-backdrop").hidden=false;
+          document.getElementById("ma-owner-reels-card").hidden=false;
+          status(error.message||"Could not open Reel uploader.","error");
+        });
+      });
     }catch(error){
-      const card=document.getElementById("ma-owner-reels-card"); if(card) card.hidden=false;
-      status(error.message||"Could not load owner Reels.","error");
+      console.error("MA7ALAK owner Reel uploader:",error);
     }
   }
 
