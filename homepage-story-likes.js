@@ -359,21 +359,18 @@
 
       /*
          NEW LIKE
-         Heart becomes fully red and pulses.
+         Keep the heart visually NORMAL.
+         Only the notification number badge shows new likes.
       */
 
       #ma7alak-story-likes-button.has-new{
 
-        color:#ff2d55;
+        color:#fff;
 
         border-color:
-          rgba(255,45,85,.70);
+          rgba(217,164,65,.28);
 
-        animation:
-          ma7alakLikePulse
-          1.35s
-          ease-in-out
-          infinite;
+        animation:none;
 
       }
 
@@ -381,10 +378,11 @@
       #ma7alak-story-likes-button.has-new
       #ma7alak-story-likes-icon{
 
-        fill:#ff2d55;
+        fill:none;
 
-        transform:
-          scale(1.05);
+        color:#fff;
+
+        transform:none;
 
       }
 
@@ -1413,6 +1411,26 @@
     }
 
 
+    /*
+       LOGIN/REFRESH SAFETY:
+       Always reset the heart itself to its normal outline state.
+       The badge below remains the only new-like visual indicator.
+    */
+    const heartIcon =
+      document.getElementById(
+        "ma7alak-story-likes-icon"
+      );
+
+    button.style.color = "#fff";
+    button.style.animation = "none";
+
+    if(heartIcon){
+      heartIcon.style.fill = "none";
+      heartIcon.style.color = "#fff";
+      heartIcon.style.transform = "none";
+    }
+
+
     const unseenCount =
       ma7alakLikeNotifications.filter(
         function(item){
@@ -2117,4 +2135,3 @@
 
 
 })();
-
