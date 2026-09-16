@@ -1233,15 +1233,15 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
   /* Shop/owner circle stays clearly smaller than the left Ma7alak circle. */
   #ma7alak-header-owner.visible{
-    width:47px!important;
-    flex-basis:47px!important;
-    margin-right:11px!important;
+    width:51px!important;
+    flex-basis:51px!important;
+    margin-right:13px!important;
   }
 
   #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:44px!important;
-    height:44px!important;
-    flex:0 0 44px!important;
+    width:48px!important;
+    height:48px!important;
+    flex:0 0 48px!important;
   }
 }
 
@@ -1258,15 +1258,15 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   }
 
   #ma7alak-header-owner.visible{
-    width:45px!important;
-    flex-basis:45px!important;
-    margin-right:9px!important;
+    width:48px!important;
+    flex-basis:48px!important;
+    margin-right:10px!important;
   }
 
   #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:42px!important;
-    height:42px!important;
-    flex:0 0 42px!important;
+    width:45px!important;
+    height:45px!important;
+    flex:0 0 45px!important;
   }
 }
 
@@ -1370,12 +1370,12 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 }
 @media(max-width:480px){
   /* Five personal/action icons fit without removing Reels, Search, Bell or owner Likes. */
-  .ma7alak-header-brand{min-width:82px!important;width:82px!important;padding-right:2px!important;}
-  .ma7alak-header-logo{height:51px!important;max-width:80px!important;}
+  .ma7alak-header-brand{min-width:76px!important;width:76px!important;padding-right:2px!important;}
+  .ma7alak-header-logo{height:46px!important;max-width:74px!important;}
   .ma7alak-header-nav-item,#ma7alak-header-following,#ma7alak-header-likes-slot,#ma7alak-header-notification-slot{min-width:35px!important;width:35px!important;}
   #ma7alak-social-header #ma7alak-story-likes-button,#ma7alak-social-header #ma7alak-notification-bell{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;}
-  #ma7alak-header-owner.visible{width:39px!important;flex-basis:39px!important;margin-right:5px!important;}
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{width:36px!important;height:36px!important;flex:0 0 36px!important;}
+  #ma7alak-header-owner.visible{width:43px!important;flex-basis:43px!important;margin-right:5px!important;}
+  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{width:40px!important;height:40px!important;flex:0 0 40px!important;}
   #ma7alak-header-menu-button{width:38px;height:38px;flex-basis:38px;}
   .ma7alak-following-head{padding:16px 15px 13px}.ma7alak-following-title{font-size:19px}.ma7alak-following-row{min-height:68px;padding:8px}.ma7alak-following-avatar-ring{width:50px;height:50px;flex-basis:50px}
 }
