@@ -828,7 +828,42 @@
   }
 
 
-  function ma7alakRenderDynamicCategories(area){
+  async function ma7alakRenderDynamicCategories(area){
+
+    /*
+     * FINAL CATEGORY SOURCE:
+     * Read active categories directly when the visitor opens an Area.
+     * The live page proved this exact Supabase query returns the category
+     * rows even when the cached/private category map is empty.
+     */
+    try{
+      const liveClient = await ma7alakLoadSupabase();
+      if(liveClient && typeof liveClient.from === "function"){
+        const { data:liveRows, error:liveError } = await liveClient
+          .from("shop_categories")
+          .select("category_key,category_name,icon,is_active,sort_order")
+          .eq("is_active", true)
+          .order("sort_order", { ascending:true });
+
+        if(!liveError && Array.isArray(liveRows)){
+          ma7alakLiveCategoryIcons = new Map();
+          ma7alakLiveCategoryNames = new Map();
+
+          liveRows.forEach(function(row){
+            const key = String(row && row.category_key || "").trim();
+            if(!key) return;
+            const name = String(row.category_name || key).trim();
+            const icon = String(row.icon || "🏪").trim() || "🏪";
+            ma7alakLiveCategoryIcons.set(key,icon);
+            ma7alakLiveCategoryIcons.set(key.toLocaleLowerCase(),icon);
+            ma7alakLiveCategoryNames.set(key,name);
+            ma7alakLiveCategoryNames.set(key.toLocaleLowerCase(),name);
+          });
+        }
+      }
+    }catch(liveCategoryError){
+      console.error("Ma7alak Shops: direct category load failed.", liveCategoryError);
+    }
 
     const categoryMap =
       new Map();
@@ -924,7 +959,7 @@
 
     areaGrid.addEventListener(
       "click",
-      function(event){
+      async function(event){
 
         const button =
           event.target.closest(
@@ -978,7 +1013,7 @@
          * loaded active shop_profiles rows.
          */
         try{
-          ma7alakRenderDynamicCategories(selectedArea);
+          await ma7alakRenderDynamicCategories(selectedArea);
         }catch(categoryRenderError){
           console.error("Ma7alak Shops: category render failed.", categoryRenderError);
           categoryGrid.innerHTML = "";
@@ -1716,7 +1751,7 @@
         selectedArea = oldArea;
         const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
         if(btn) btn.classList.add("active");
-        ma7alakRenderDynamicCategories(oldArea);
+        await ma7alakRenderDynamicCategories(oldArea);
 
         if(oldCategory && Array.from(page.querySelectorAll(".ma7alak-category-button")).some(b=>b.dataset.category===oldCategory)){
           selectedCategory = oldCategory;
