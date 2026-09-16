@@ -3282,6 +3282,75 @@ function requestCurrentReelsState(){
 }
 
 /* =========================================================
+   NOTIFICATION CONTENT DEEP LINKS
+========================================================= */
+
+function buildNotificationUrl(path,params){
+  const url=new URL(path||"/",window.location.origin);
+  Object.keys(params||{}).forEach(function(key){
+    const value=String(params[key]||"").trim();
+    if(value)url.searchParams.set(key,value);
+  });
+  return url.href;
+}
+
+function navigateFromNotification(url){
+  if(typeof window.ma7alakFreshNavigate==="function"){
+    window.ma7alakFreshNavigate(url);
+  }
+  else{
+    window.location.assign(url);
+  }
+}
+
+function ensureExactReelOpened(reelId){
+  const targetId=getReelFingerprintId(reelId);
+  if(!targetId)return;
+  setTimeout(function(){
+    const viewer=document.getElementById("ma7alakGlobalReelViewer");
+    if(viewer&&viewer.classList.contains("open"))return;
+    navigateFromNotification(buildNotificationUrl("/",{reel:targetId}));
+  },500);
+}
+
+function openStoryDeepLinkOnShopPage(){
+  let params;
+  try{params=new URLSearchParams(window.location.search)}catch(error){return}
+  const storyId=String(params.get("story")||"").trim();
+  if(!storyId)return;
+
+  let attempts=0;
+  const tryOpen=function(){
+    attempts+=1;
+    const selectors="#ma7alak-story-button,.ma7alak-story-button,#ma7alak-story-active-ring,#ma7alak-story-new-ring";
+    let button=document.querySelector(selectors);
+
+    if(!button){
+      document.querySelectorAll("iframe").forEach(function(frame){
+        if(button)return;
+        try{button=frame.contentDocument&&frame.contentDocument.querySelector(selectors)}catch(error){}
+      });
+    }
+
+    if(button){
+      try{button.click();return}catch(error){}
+    }
+
+    if(attempts<24)setTimeout(tryOpen,250);
+  };
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",function(){setTimeout(tryOpen,100)},{once:true});
+  }
+  else{
+    setTimeout(tryOpen,100);
+  }
+}
+
+openStoryDeepLinkOnShopPage();
+
+
+/* =========================================================
    RENDER
 ========================================================= */
 
@@ -3603,6 +3672,12 @@ function renderNotifications(){
                   notificationId
                 );
 
+              if(contentOpened){
+                ensureExactReelOpened(
+                  notificationId
+                );
+              }
+
 
               /*
                  If the exact Reel viewer is unavailable on this page,
@@ -3696,11 +3771,15 @@ function renderNotifications(){
               shopSlug
             ){
 
-              window.location.href =
-                "/" +
-                encodeURIComponent(
-                  shopSlug
-                );
+              navigateFromNotification(
+                buildNotificationUrl(
+                  "/" + encodeURIComponent(shopSlug),
+                  {
+                    story:notificationId,
+                    shop:shopSlug
+                  }
+                )
+              );
 
             }
 
