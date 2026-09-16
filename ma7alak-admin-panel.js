@@ -4500,12 +4500,12 @@ function inject(){
     .m7la-toggle{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:15px!important;padding:14px!important;border:1px solid #ffffff13!important;border-radius:16px!important;background:#ffffff08!important}.m7la-toggle strong,.m7la-toggle small{display:block!important}.m7la-toggle small{color:#ffffff83!important;margin-top:4px!important;font-size:11px!important}.m7la-toggle input{width:24px!important;height:24px!important;accent-color:#dda348!important}
     .m7la-field{display:block!important;margin-top:14px!important}.m7la-field span{display:block!important;margin-bottom:7px!important;font-size:12px!important;font-weight:900!important}.m7la-field input{width:100%!important;box-sizing:border-box!important;padding:13px!important;border:1px solid #ffffff1a!important;border-radius:13px!important;background:#090807!important;color:#fff!important;font-size:16px!important}
     #m7-live-admin-save{width:100%!important;margin-top:16px!important;padding:14px!important;border:0!important;border-radius:14px!important;background:linear-gradient(135deg,#f0ba64,#c47b28)!important;color:#1a1008!important;font-weight:950!important;font-size:15px!important}
-    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-warning{margin-top:15px!important;padding:12px!important;border:1px solid #c6534b55!important;border-radius:13px!important;background:#321817!important;color:#ffbbb5!important;font-size:11px!important;line-height:1.5!important}
+    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-posts{display:grid!important;gap:9px!important;margin-top:17px!important}.m7la-posts-title{font-size:13px!important;font-weight:950!important;color:#efb967!important}.m7la-post{display:grid!important;grid-template-columns:1fr auto!important;gap:10px!important;align-items:center!important;padding:11px!important;border:1px solid #ffffff13!important;border-radius:14px!important;background:#ffffff07!important}.m7la-post strong,.m7la-post small{display:block!important}.m7la-post strong{overflow-wrap:anywhere!important}.m7la-post small{margin-top:4px!important;color:#ffffff78!important;font-size:10px!important}.m7la-delete{border:1px solid #ff777755!important;border-radius:10px!important;padding:9px 10px!important;background:#6d2020!important;color:#fff!important;font-weight:900!important}.m7la-empty{padding:16px!important;border:1px dashed #ffffff1c!important;border-radius:13px!important;text-align:center!important;color:#ffffff76!important;font-size:11px!important}
   `;
   document.head.appendChild(style);
   const overlay=document.createElement("div");
   overlay.id="m7-live-admin-overlay";
-  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers</strong><small>Turn owner access on or off for this shop.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><button id="m7-live-admin-save" type="button">Save Live & Offers Access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-warning">Offer deletion is not enabled yet because the database currently has no admin delete RPC or admin DELETE policy for Live/Offers. No SQL was changed.</div></section>`;
+  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers</strong><small>Turn owner access on or off for this shop.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><button id="m7-live-admin-save" type="button">Save Live & Offers Access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-posts"><div class="m7la-posts-title">Shop Live / Offers</div><div id="m7-live-admin-posts"><div class="m7la-empty">Loading offers…</div></div></div></section>`;
   document.body.appendChild(overlay);
   const close=()=>overlay.classList.remove("active");
   document.getElementById("m7-live-admin-close").onclick=close;
@@ -4539,6 +4539,48 @@ async function open(slug,name){
   document.getElementById("m7-live-admin-limit").disabled=false;
   document.getElementById("m7-live-admin-save").disabled=false;
   status(row?.enabled?"Access is currently ON.":"Access is currently OFF.",false);
+  await loadPosts();
+}
+
+function postState(row){
+  if(row.status!=="active")return String(row.status||"ended");
+  return new Date(row.ends_at)>new Date()?"active":"expired";
+}
+
+async function loadPosts(){
+  const box=document.getElementById("m7-live-admin-posts");
+  if(!box||!activeShop)return;
+  box.innerHTML='<div class="m7la-empty">Loading offers…</div>';
+  const result=await sb.rpc("ma7alak_admin_list_live_posts",{p_shop_slug:activeShop.slug});
+  if(result.error){box.innerHTML='<div class="m7la-empty">'+esc(result.error.message||"Could not load offers.")+'</div>';return}
+  const rows=Array.isArray(result.data)?result.data:[];
+  if(!rows.length){box.innerHTML='<div class="m7la-empty">This shop has no Live / Offers.</div>';return}
+  box.innerHTML=rows.map(row=>`<article class="m7la-post" data-live-id="${esc(row.id)}"><div><strong>${esc(row.title||"Live / Offer")}</strong><small>${esc(row.post_type||"live")} · ${esc(postState(row))} · ${esc(row.created_at?new Date(row.created_at).toLocaleString():"")}</small></div><button class="m7la-delete" type="button" data-delete-live="${esc(row.id)}">Delete</button></article>`).join("");
+  box.querySelectorAll("[data-delete-live]").forEach(button=>button.onclick=()=>deletePost(button.dataset.deleteLive,button));
+}
+
+function storagePath(url){
+  const marker="/storage/v1/object/public/live-offers/";
+  const value=String(url||"");
+  const index=value.indexOf(marker);
+  if(index<0)return"";
+  try{return decodeURIComponent(value.slice(index+marker.length).split("?")[0])}catch(_){return""}
+}
+
+async function deletePost(id,button){
+  if(!window.confirm("Permanently delete this Live / Offer?"))return;
+  button.disabled=true;
+  status("Deleting offer…",false);
+  const result=await sb.rpc("ma7alak_admin_delete_live_post",{p_post_id:Number(id)});
+  if(result.error){button.disabled=false;status(result.error.message||"Could not delete offer.",true);return}
+  const row=Array.isArray(result.data)?result.data[0]:result.data;
+  const path=storagePath(row?.media_url);
+  if(path){
+    const cleanup=await sb.storage.from("live-offers").remove([path]);
+    if(cleanup.error)console.warn("Live/Offer media cleanup:",cleanup.error);
+  }
+  status("Live / Offer deleted.",false);
+  await loadPosts();
 }
 
 async function save(){
