@@ -1,34 +1,40 @@
 /* =========================================================
- MA7ALAK VIEWER ACCOUNT V9 — ONE ACCOUNT SYSTEM
+ MA7ALAK VIEWER ACCOUNT V9.1 — ONE ACCOUNT SYSTEM
  - One Google/Ma7alak account for viewers and shop owners
  - Personal viewer profile remains preserved underneath ownership
- - V9: enforce one normal-user identity circle in the header
- - V9: move mobile Ma7alak logo left with a safe edge gap
+ - Safe signed-in-only Logout item in header menu
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_VIEWER_ACCOUNT_V9__)return;window.__MA7ALAK_VIEWER_ACCOUNT_V9__=true;
+if(window.__MA7ALAK_VIEWER_ACCOUNT_V91__)return;window.__MA7ALAK_VIEWER_ACCOUNT_V91__=true;
 const URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",STORAGE_KEY="ma7alak-viewer-auth-v1",BUCKET="viewer-avatars";let client=null,session=null,profile=null,initPromise=null,ownerState=false;
 const esc=v=>String(v||"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[m]));
 function loadSB(){if(window.supabase?.createClient)return Promise.resolve();return new Promise((a,b)=>{let s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=a;s.onerror=b;document.head.appendChild(s)})}
 function emit(){dispatchEvent(new CustomEvent("ma7alak:account-change",{detail:{session,user:session?.user||null,profile}}))}
 async function loadProfile(){if(!session?.user){profile=null;emit();syncHeaderFix();return}let r=await client.from("viewer_profiles").select("*").eq("user_id",session.user.id).maybeSingle();profile=r.data||null;if(profile?.account_status==="banned"){alert("This Ma7alak account is banned."+(profile.banned_reason?"\nReason: "+profile.banned_reason:""));await logout();return}if(profile?.account_status==="deleted"){alert("This Ma7alak account has been disabled.");await logout();return}emit();syncHeaderFix()}
-function css(){if(document.getElementById("m7a-v9-css"))return;let s=document.createElement("style");s.id="m7a-v9-css";s.textContent=`#m7-account-overlay{position:fixed;inset:0;background:#000c;z-index:2147483600;display:grid;place-items:center;padding:18px;font-family:Arial}#m7-account-card{width:min(430px,100%);max-height:92vh;overflow:auto;background:linear-gradient(160deg,#21150f,#0f0d0c);border:1px solid #d99a4566;border-radius:24px;padding:22px;color:#fff;box-shadow:0 24px 70px #000a}#m7-account-card h2{margin:0;color:#f4b85d}.m7a-close{float:right;border:0;background:none;color:#fff;font-size:25px}.m7a-row{display:grid;gap:10px;margin-top:15px}.m7a-btn{border:0;border-radius:14px;padding:13px;font-weight:900;cursor:pointer;background:#d99a45}.m7a-btn.google{background:#fff;color:#171717}.m7a-btn.dark{background:#2d2723;color:#fff}.m7a-input{width:100%;box-sizing:border-box;background:#15110f;color:#fff;border:1px solid #4a382c;border-radius:13px;padding:12px}#m7a-avatar{width:104px;height:104px;border-radius:50%;overflow:hidden;border:2px solid #d99a45;margin:15px auto;display:grid;place-items:center;background:#1b1613;cursor:pointer}#m7a-avatar img{width:100%;height:100%;object-fit:cover}#m7a-status{font-size:12px;color:#f4b85d;margin-top:10px}.m7a-coming{margin-top:18px;padding:14px;border:1px solid #d99a4538;border-radius:15px;background:#ffffff08;text-align:center}.m7a-coming strong{display:block;color:#f4b85d;font-size:12px;letter-spacing:.4px}.m7a-coming span{display:block;margin-top:5px;color:#ffffff8f;font-size:10px;line-height:1.4}`;document.head.appendChild(s)}
+function css(){if(document.getElementById("m7a-v91-css"))return;let s=document.createElement("style");s.id="m7a-v91-css";s.textContent=`#m7-account-overlay{position:fixed;inset:0;background:#000c;z-index:2147483600;display:grid;place-items:center;padding:18px;font-family:Arial}#m7-account-card{width:min(430px,100%);max-height:92vh;overflow:auto;background:linear-gradient(160deg,#21150f,#0f0d0c);border:1px solid #d99a4566;border-radius:24px;padding:22px;color:#fff;box-shadow:0 24px 70px #000a}#m7-account-card h2{margin:0;color:#f4b85d}.m7a-close{float:right;border:0;background:none;color:#fff;font-size:25px}.m7a-row{display:grid;gap:10px;margin-top:15px}.m7a-btn{border:0;border-radius:14px;padding:13px;font-weight:900;cursor:pointer;background:#d99a45}.m7a-btn.google{background:#fff;color:#171717}.m7a-btn.dark{background:#2d2723;color:#fff}.m7a-input{width:100%;box-sizing:border-box;background:#15110f;color:#fff;border:1px solid #4a382c;border-radius:13px;padding:12px}#m7a-avatar{width:104px;height:104px;border-radius:50%;overflow:hidden;border:2px solid #d99a45;margin:15px auto;display:grid;place-items:center;background:#1b1613;cursor:pointer}#m7a-avatar img{width:100%;height:100%;object-fit:cover}#m7a-status{font-size:12px;color:#f4b85d;margin-top:10px}.m7a-coming{margin-top:18px;padding:14px;border:1px solid #d99a4538;border-radius:15px;background:#ffffff08;text-align:center}.m7a-coming strong{display:block;color:#f4b85d;font-size:12px;letter-spacing:.4px}.m7a-coming span{display:block;margin-top:5px;color:#ffffff8f;font-size:10px;line-height:1.4}#m7a-header-logout{color:#ffaaa3!important;cursor:pointer!important}`;document.head.appendChild(s)}
+function ensureMenuLogout(){
+  const panel=document.getElementById("ma7alak-header-menu-panel");
+  let item=document.getElementById("m7a-header-logout");
+  if(!session?.user){item?.remove();return}
+  if(!panel||item)return;
+  item=document.createElement("a");
+  item.id="m7a-header-logout";
+  item.href="#";
+  item.className="ma7alak-header-menu-link";
+  item.innerHTML='<span class="ma7alak-header-menu-main">Log out</span><span class="ma7alak-header-menu-sub">Sign out of Ma7alak</span>';
+  item.addEventListener("click",async e=>{e.preventDefault();e.stopPropagation();await logout()});
+  panel.appendChild(item);
+}
 function syncHeaderFix(){
   const likes=document.getElementById("ma7alak-header-likes-slot");
-  if(likes){
-    if(session?.user&&!ownerState)likes.style.setProperty("display","none","important");
-    else likes.style.removeProperty("display");
-  }
+  if(likes){if(session?.user&&!ownerState)likes.style.setProperty("display","none","important");else likes.style.removeProperty("display")}
   const brand=document.querySelector("#ma7alak-social-header .ma7alak-header-brand");
-  if(brand&&window.matchMedia("(max-width:900px)").matches){
-    brand.style.setProperty("margin-left","-10px","important");
-    brand.style.setProperty("padding-left","4px","important");
-  }
+  if(brand&&window.matchMedia("(max-width:900px)").matches){brand.style.setProperty("margin-left","-10px","important");brand.style.setProperty("padding-left","4px","important")}
+  ensureMenuLogout();
 }
 function startHeaderFixWatcher(){
-  syncHeaderFix();
-  let queued=false;
+  syncHeaderFix();let queued=false;
   const mo=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;syncHeaderFix()})});
   mo.observe(document.documentElement,{childList:true,subtree:true});
   addEventListener("resize",syncHeaderFix,{passive:true});
