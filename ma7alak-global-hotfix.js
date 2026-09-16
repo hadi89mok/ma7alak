@@ -1,5 +1,5 @@
 /* =========================================================
- MA7ALAK GLOBAL HOTFIX V6 — MOBILE PERFORMANCE SAFE
+ MA7ALAK GLOBAL HOTFIX V6.1 — MOBILE PERFORMANCE SAFE
  - replaces old show-shops-stability-fix.js
  - mobile Following Unfollow actions fixed
  - Unfollow never opens the shop page
@@ -7,12 +7,13 @@
  - one overlay/panel at a time, including viewer account
  - directory forced to top content position
  - no document-wide MutationObserver
+ - reuses the shared Ma7alak Supabase client
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_GLOBAL_HOTFIX_V6__)return;window.__MA7ALAK_GLOBAL_HOTFIX_V6__=true;
-const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";let sb=null,followingObserver=null;
-function client(){if(window.Ma7alakAccount?.user&&window.Ma7alakAccount?.client)return window.Ma7alakAccount.client;if(sb)return sb;if(window.Ma7alakOwnerAuth?.client)return(sb=window.Ma7alakOwnerAuth.client);if(window.supabase?.createClient)return(sb=window.supabase.createClient(SB_URL,SB_KEY));return null}
+if(window.__MA7ALAK_GLOBAL_HOTFIX_V61__)return;window.__MA7ALAK_GLOBAL_HOTFIX_V61__=true;
+let followingObserver=null;
+function client(){return window.Ma7alakSupabase?.client||window.Ma7alakAccount?.client||window.Ma7alakOwnerAuth?.client||null}
 function visitorId(){let id="";try{id=localStorage.getItem("ma7alak_visitor_id")||""}catch(_){}if(!id){id=(window.crypto?.randomUUID?.()||("visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)));try{localStorage.setItem("ma7alak_visitor_id",id)}catch(_){}}return id}
 function isPhone(){return window.matchMedia&&window.matchMedia("(max-width: 700px)").matches}
 function isShopPage(){const p=(location.pathname.replace(/\/+$/,"")||"/").toLowerCase();return p!=="/"&&p!=="/shwf-almhlat-"&&p!=="/dhyf-mhlk-"&&p!=="/admin"}
@@ -27,7 +28,7 @@ function decorateFollowing(){document.querySelectorAll("#ma7alak-following-list 
 function watchFollowingList(){const list=document.getElementById("ma7alak-following-list");if(!list)return;if(followingObserver?.__target===list){decorateFollowing();return}try{followingObserver?.disconnect()}catch(_){}followingObserver=new MutationObserver(()=>requestAnimationFrame(decorateFollowing));followingObserver.__target=list;followingObserver.observe(list,{childList:true});decorateFollowing()}
 function unfollowButtonFromEvent(e){return e.target?.closest?.("#ma7alak-following-list .m7-following-unfollow")||null}
 function stopUnfollowEvent(e){const btn=unfollowButtonFromEvent(e);if(!btn)return null;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();return btn}
-async function performUnfollow(btn){if(!btn||btn.dataset.m7Busy==="1")return;const slug=String(btn.dataset.shopSlug||"").trim(),row=btn.closest(".ma7alak-following-row");if(!slug)return;let c=client();try{if(window.Ma7alakAccount?.ready)await window.Ma7alakAccount.ready();if(window.Ma7alakAccount?.user&&window.Ma7alakAccount?.client)c=window.Ma7alakAccount.client}catch(_){}if(!c)return;btn.dataset.m7Busy="1";btn.disabled=true;const r=await c.rpc("unfollow_shop",{p_shop_slug:slug,p_visitor_id:visitorId()});if(r.error){btn.dataset.m7Busy="0";btn.disabled=false;console.warn("MA7ALAK unfollow:",r.error);return}row?.remove();window.postMessage({type:"MA7ALAK_FOLLOW_CHANGED",shopSlug:slug,following:false},"*");dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));dispatchEvent(new CustomEvent("ma7alak:follow-changed",{detail:{shopSlug:slug,following:false}}))}
+async function performUnfollow(btn){if(!btn||btn.dataset.m7Busy==="1")return;const slug=String(btn.dataset.shopSlug||"").trim(),row=btn.closest(".ma7alak-following-row");if(!slug)return;let c=client();try{if(window.Ma7alakSupabase?.ready)await window.Ma7alakSupabase.ready();else if(window.Ma7alakAccount?.ready)await window.Ma7alakAccount.ready();c=client()}catch(_){}if(!c)return;btn.dataset.m7Busy="1";btn.disabled=true;const r=await c.rpc("unfollow_shop",{p_shop_slug:slug,p_visitor_id:visitorId()});if(r.error){btn.dataset.m7Busy="0";btn.disabled=false;console.warn("MA7ALAK unfollow:",r.error);return}row?.remove();window.postMessage({type:"MA7ALAK_FOLLOW_CHANGED",shopSlug:slug,following:false},"*");dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));dispatchEvent(new CustomEvent("ma7alak:follow-changed",{detail:{shopSlug:slug,following:false}}))}
 function onUnfollowPointerDown(e){stopUnfollowEvent(e)}
 function onUnfollowTouchEnd(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
 function onUnfollowClick(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
