@@ -1486,7 +1486,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   <a class="ma7alak-header-brand" href="https://ma7alak.com/" aria-label="Ma7alak Home">
     <img
       class="ma7alak-header-logo"
-      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/020e2776-1fe4-4b32-9ac0-8e1358911397-removebg-preview.png?auto=format,compress&w=264&fit=max"
+      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/3d5e9803-9a46-49c5-bf62-c7bbf7b5bc84.png"
       alt="Ma7alak"
       width="264"
       height="88"
