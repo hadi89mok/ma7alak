@@ -2088,6 +2088,22 @@
 
       }
 
+      /*
+         Older shop embeds (including Zee) send the direct-Story
+         flag from inside their iframe. Those clicks should now be
+         handled by the Story/Reel chooser below. Only an explicit
+         Add Story choice posted by this top-level page opens the
+         Story uploader immediately.
+      */
+      if(
+        event.source &&
+        event.source !== window
+      ){
+
+        return;
+
+      }
+
 
       const shopSlug =
         String(
@@ -2254,7 +2270,13 @@
   window.addEventListener("message",function(event){
     if(!event.data || event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER") return;
 
-    if(event.data.__ma7alakOpenStoryNow===true){
+    if(
+      event.data.__ma7alakOpenStoryNow===true &&
+      (
+        !event.source ||
+        event.source===window
+      )
+    ){
       return;
     }
 
