@@ -828,13 +828,30 @@
   }
 
 
+  function ma7alakNormalizeCategory(value){
+    return String(value || "").trim().toLocaleLowerCase();
+  }
+
+  function ma7alakCategoryMatches(shopCategory, selectedKey){
+    const shopValue = ma7alakNormalizeCategory(shopCategory);
+    const selectedValue = ma7alakNormalizeCategory(selectedKey);
+    if(!shopValue || !selectedValue) return false;
+    if(shopValue === selectedValue) return true;
+
+    const officialName = ma7alakNormalizeCategory(
+      ma7alakLiveCategoryNames.get(selectedKey) ||
+      ma7alakLiveCategoryNames.get(selectedValue) ||
+      ""
+    );
+
+    return Boolean(officialName && shopValue === officialName);
+  }
+
   async function ma7alakRenderDynamicCategories(area){
 
     /*
-     * FINAL CATEGORY SOURCE:
-     * Read active categories directly when the visitor opens an Area.
-     * The live page proved this exact Supabase query returns the category
-     * rows even when the cached/private category map is empty.
+     * Load category metadata from Admin/Supabase, but ONLY render categories
+     * that are actually assigned to at least one active shop in this Area.
      */
     try{
       const liveClient = await ma7alakLoadSupabase();
@@ -862,89 +879,63 @@
         }
       }
     }catch(liveCategoryError){
-      console.error("Ma7alak Shops: direct category load failed.", liveCategoryError);
+      console.error("Ma7alak Shops: direct category metadata load failed.", liveCategoryError);
     }
 
-    const categoryMap =
-      new Map();
+    const categoryMap = new Map();
+    const areaValue = String(area || "").trim().toLocaleLowerCase();
 
-    /*
-       IMPORTANT: Directory categories come from shop_categories,
-       NOT only from categories currently assigned to shop_profiles.
-       This keeps every active category visible after any Area is selected.
-    */
-    ma7alakLiveCategoryNames.forEach(function(name,key){
-      const cleanKey = String(key || "").trim();
-      const cleanName = String(name || cleanKey).trim();
+    shops.forEach(function(shop){
+      if(!shop) return;
+      if(String(ma7alakShopRegion(shop) || "").trim().toLocaleLowerCase() !== areaValue) return;
 
-      if(!cleanKey){
-        return;
-      }
+      const rawCategory = String(shop.category || "").trim();
+      if(!rawCategory) return;
 
-      /* The map stores both exact + lowercase aliases. Keep one button. */
-      const canonicalKey = Array.from(ma7alakLiveCategoryNames.keys()).find(function(candidate){
-        return String(candidate).trim().toLocaleLowerCase() === cleanKey.toLocaleLowerCase() &&
-               String(candidate).trim() !== String(candidate).trim().toLocaleLowerCase();
-      }) || cleanKey;
+      const normalizedRaw = ma7alakNormalizeCategory(rawCategory);
+      let key = rawCategory;
+      let name = String(shop.categoryName || rawCategory).trim();
 
-      if(!Array.from(categoryMap.keys()).some(function(existing){
-        return String(existing).toLocaleLowerCase() === String(canonicalKey).toLocaleLowerCase();
-      })){
-        categoryMap.set(canonicalKey, cleanName);
+      /* Resolve Admin category key/name even if an older shop row stored the label. */
+      ma7alakLiveCategoryNames.forEach(function(liveName, liveKey){
+        if(ma7alakNormalizeCategory(liveKey) === normalizedRaw ||
+           ma7alakNormalizeCategory(liveName) === normalizedRaw){
+          key = String(liveKey || rawCategory).trim();
+          name = String(liveName || shop.categoryName || rawCategory).trim();
+        }
+      });
+
+      const duplicate = Array.from(categoryMap.keys()).some(function(existing){
+        return ma7alakNormalizeCategory(existing) === ma7alakNormalizeCategory(key);
+      });
+
+      if(!duplicate){
+        categoryMap.set(key,name);
       }
     });
 
-    /*
-       Safe fallback: if shop_categories cannot be read for any reason,
-       still build categories from live shop rows instead of showing nothing.
-    */
-    if(categoryMap.size === 0){
-      shops.forEach(function(shop){
-        const key = String(shop.category || "").trim();
-        if(!key){
-          return;
-        }
+    const categories = Array.from(categoryMap.entries()).sort(function(a,b){
+      return a[1].localeCompare(b[1],undefined,{sensitivity:"base"});
+    });
 
-        const name = String(
-          ma7alakLiveCategoryNames.get(key) ||
-          ma7alakLiveCategoryNames.get(key.toLocaleLowerCase()) ||
-          shop.categoryName ||
-          key
-        ).trim();
+    categoryGrid.innerHTML = categories.map(function(entry){
+      const key = entry[0];
+      const name = entry[1];
+      return `
+        <button
+          class="ma7alak-category-button"
+          data-category="${ma7alakEscapeHtml(key)}"
+          type="button"
+        >
+          <span class="ma7alak-category-icon">
+            ${ma7alakCategoryIcon(key,name)}
+          </span>
+          ${ma7alakEscapeHtml(name)}
+        </button>
+      `;
+    }).join("");
 
-        if(!categoryMap.has(key)){
-          categoryMap.set(key,name);
-        }
-      });
-    }
-
-    const categories =
-      Array.from(categoryMap.entries())
-        .sort((a,b) =>
-          a[1].localeCompare(b[1],undefined,{sensitivity:"base"})
-        );
-
-    categoryGrid.innerHTML =
-      categories
-        .map(([key,name]) => `
-          <button
-            class="ma7alak-category-button"
-            data-category="${ma7alakEscapeHtml(key)}"
-            type="button"
-          >
-            <span class="ma7alak-category-icon">
-              ${ma7alakCategoryIcon(key,name)}
-            </span>
-            ${ma7alakEscapeHtml(name)}
-          </button>
-        `)
-        .join("");
-
-    categoryButtons =
-      page.querySelectorAll(
-        ".ma7alak-category-button"
-      );
-
+    categoryButtons = page.querySelectorAll(".ma7alak-category-button");
   }
 
 
@@ -1309,8 +1300,9 @@
           }
 
           return (
-            ma7alakShopRegion(shop) === selectedArea &&
-            shop.category === selectedCategory
+            String(ma7alakShopRegion(shop) || "").trim().toLocaleLowerCase() ===
+              String(selectedArea || "").trim().toLocaleLowerCase() &&
+            ma7alakCategoryMatches(shop.category, selectedCategory)
           );
 
         }
