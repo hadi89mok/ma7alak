@@ -918,51 +918,49 @@
           return;
         }
 
-        selectedArea =
-          button.dataset.area;
+        const clickedArea = button.dataset.area;
+        const sameArea = selectedArea === clickedArea;
 
-        selectedCategory =
-          null;
-
-        areaButtons =
-          page.querySelectorAll(
-            ".ma7alak-area-button"
-          );
-
-        areaButtons.forEach(
-          item => {
-            item.classList.remove(
-              "active"
-            );
-          }
+        areaButtons = page.querySelectorAll(
+          ".ma7alak-area-button"
         );
 
-        button.classList.add(
-          "active"
-        );
+        areaButtons.forEach(function(item){
+          item.classList.remove("active");
+        });
 
-        ma7alakRenderDynamicCategories(
-          selectedArea
-        );
+        selectedCategory = null;
+        searchInput.value = "";
+        searchTerm = "";
+        results.classList.remove("visible");
+        shopGrid.innerHTML = "";
+        empty.style.display = "none";
+        changeArea.classList.remove("visible");
 
-        categorySection.classList.add(
-          "visible"
-        );
-
-        /* Close the Area panel after an Area is chosen. */
-        if(areaFilterBlock){
-          areaFilterBlock.style.display = "none";
+        /* Tapping the selected Area again closes its Category panel. */
+        if(sameArea){
+          selectedArea = null;
+          categorySection.classList.remove("visible");
+          categoryGrid.innerHTML = "";
+          button.blur();
+          return;
         }
 
-        results.classList.remove(
-          "visible"
+        selectedArea = clickedArea;
+        button.classList.add("active");
+
+        ma7alakRenderDynamicCategories(selectedArea);
+
+        /* A newly opened Area must never inherit an old Category selection. */
+        categoryButtons = page.querySelectorAll(
+          ".ma7alak-category-button"
         );
+        categoryButtons.forEach(function(item){
+          item.classList.remove("active");
+        });
 
-        searchInput.value =
-          "";
-
-        searchTerm =
-          "";
+        categorySection.classList.add("visible");
+        button.blur();
 
       }
     );
@@ -986,32 +984,33 @@
           return;
         }
 
-        selectedCategory =
-          button.dataset.category;
+        const clickedCategory = button.dataset.category;
+        const sameCategory = selectedCategory === clickedCategory;
 
-        categoryButtons =
-          page.querySelectorAll(
-            ".ma7alak-category-button"
-          );
-
-        categoryButtons.forEach(
-          item => {
-            item.classList.remove(
-              "active"
-            );
-          }
+        categoryButtons = page.querySelectorAll(
+          ".ma7alak-category-button"
         );
 
-        button.classList.add(
-          "active"
-        );
+        categoryButtons.forEach(function(item){
+          item.classList.remove("active");
+        });
 
+        /* Tapping the selected Category again deselects it and closes results. */
+        if(sameCategory){
+          selectedCategory = null;
+          results.classList.remove("visible");
+          shopGrid.innerHTML = "";
+          empty.style.display = "none";
+          changeArea.classList.remove("visible");
+          button.blur();
+          return;
+        }
+
+        selectedCategory = clickedCategory;
+        button.classList.add("active");
         renderResults();
-
-        /* Close the Category panel after a Category is chosen. */
-        categorySection.classList.remove(
-          "visible"
-        );
+        categorySection.classList.add("visible");
+        button.blur();
 
       }
     );
@@ -1120,7 +1119,15 @@
           }
         );
 
-
+        /* Return the visitor to the Area selector after leaving results. */
+        if(areaFilterBlock){
+          requestAnimationFrame(function(){
+            areaFilterBlock.scrollIntoView({
+              behavior:"smooth",
+              block:"start"
+            });
+          });
+        }
 
 
       }
@@ -1624,13 +1631,13 @@
           selectedCategory = oldCategory;
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
-          if(areaFilterBlock) areaFilterBlock.style.display = "none";
-          categorySection.classList.remove("visible");
+          if(areaFilterBlock) areaFilterBlock.style.display = "block";
+          categorySection.classList.add("visible");
           renderResults();
           ma7alakRefreshStoryRings();
         }else{
           selectedCategory = null;
-          if(areaFilterBlock) areaFilterBlock.style.display = "none";
+          if(areaFilterBlock) areaFilterBlock.style.display = "block";
           categorySection.classList.add("visible");
           results.classList.remove("visible");
         }
