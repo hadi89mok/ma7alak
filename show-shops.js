@@ -1694,13 +1694,13 @@
 
       ma7alakRenderDynamicAreas();
 
-      if(oldArea && shops.some(s => ma7alakShopRegion(s) === oldArea)){
+      if(oldArea && Array.from(page.querySelectorAll(".ma7alak-area-button")).some(b => b.dataset.area === oldArea)){
         selectedArea = oldArea;
         const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
         if(btn) btn.classList.add("active");
         ma7alakRenderDynamicCategories(oldArea);
 
-        if(oldCategory && shops.some(s=>ma7alakShopRegion(s)===oldArea && s.category===oldCategory)){
+        if(oldCategory && Array.from(page.querySelectorAll(".ma7alak-category-button")).some(b=>b.dataset.category===oldCategory)){
           selectedCategory = oldCategory;
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
