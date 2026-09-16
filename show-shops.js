@@ -1732,7 +1732,7 @@
 
     }
 
-    ma7alakActiveStoryShops =
+    const nextActiveStoryShops =
       new Set(
         (result.data || [])
           .filter(
@@ -1752,21 +1752,39 @@
           .filter(Boolean)
       );
 
+    /*
+     * IMPORTANT: reconcile the old/new Story state instead of
+     * removing the class from every ring and adding it again.
+     * The old behaviour restarted the new-Story CSS animation on
+     * every 2-second fallback poll, causing the ring to flash/off/on.
+     */
+    ma7alakActiveStoryShops.forEach(
+      function(slug){
+        if(!nextActiveStoryShops.has(slug)){
+          ma7alakSetStoryRing(slug, false);
+        }
+      }
+    );
+
+    nextActiveStoryShops.forEach(
+      function(slug){
+        if(!ma7alakActiveStoryShops.has(slug)){
+          ma7alakSetStoryRing(slug, true);
+        }
+      }
+    );
+
+    ma7alakActiveStoryShops =
+      nextActiveStoryShops;
+
     ma7alakStoryLoaded =
       true;
 
-    page
-      .querySelectorAll(
-        ".ma7alak-shop-image-ring.ma7alak-has-story"
-      )
-      .forEach(
-        function(ring){
-          ring.classList.remove(
-            "ma7alak-has-story"
-          );
-        }
-      );
-
+    /*
+     * Cards can be rebuilt by filters/live directory updates.
+     * Re-apply active state to newly-created rings only; classList
+     * toggle(true) leaves existing animated rings untouched.
+     */
     ma7alakRefreshStoryRings();
 
   }
