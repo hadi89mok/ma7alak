@@ -1374,8 +1374,8 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   .ma7alak-header-logo{height:51px!important;max-width:80px!important;}
   .ma7alak-header-nav-item,#ma7alak-header-following,#ma7alak-header-likes-slot,#ma7alak-header-notification-slot{min-width:35px!important;width:35px!important;}
   #ma7alak-social-header #ma7alak-story-likes-button,#ma7alak-social-header #ma7alak-notification-bell{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;}
-  #ma7alak-header-owner.visible{width:43px!important;flex-basis:43px!important;margin-right:5px!important;}
-  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{width:40px!important;height:40px!important;flex:0 0 40px!important;}
+  #ma7alak-header-owner.visible{width:39px!important;flex-basis:39px!important;margin-right:5px!important;}
+  #ma7alak-header-owner .ma7alak-owner-avatar-wrap{width:36px!important;height:36px!important;flex:0 0 36px!important;}
   #ma7alak-header-menu-button{width:38px;height:38px;flex-basis:38px;}
   .ma7alak-following-head{padding:16px 15px 13px}.ma7alak-following-title{font-size:19px}.ma7alak-following-row{min-height:68px;padding:8px}.ma7alak-following-avatar-ring{width:50px;height:50px;flex-basis:50px}
 }
