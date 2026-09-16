@@ -1456,19 +1456,38 @@
 
   function ma7alakGetSupabaseClient(){
 
+    /*
+     * IMPORTANT: use the same authenticated/shared Supabase client already
+     * used by the rest of Ma7alak. Creating a private client here can leave
+     * Directory metadata on a different auth/bootstrap state: the page can
+     * load Areas from shop_profiles while shop_categories stays empty.
+     */
+    const sharedCandidates = [
+      window.Ma7alakAccount && window.Ma7alakAccount.client,
+      window.Ma7alakSupabaseBootstrap && window.Ma7alakSupabaseBootstrap.client,
+      window.Ma7alakSupabase && window.Ma7alakSupabase.client,
+      window.__MA7ALAK_SHARED_SUPABASE__,
+      window.Ma7alakOwnerAuth && window.Ma7alakOwnerAuth.client
+    ];
+
+    for(const candidate of sharedCandidates){
+      if(candidate && typeof candidate.from === "function"){
+        ma7alakSupabaseClient = candidate;
+        return ma7alakSupabaseClient;
+      }
+    }
+
     if(
-      ma7alakSupabaseClient
+      ma7alakSupabaseClient &&
+      typeof ma7alakSupabaseClient.from === "function"
     ){
-
       return ma7alakSupabaseClient;
-
     }
 
     if(
       window.supabase &&
       typeof window.supabase.createClient === "function"
     ){
-
       ma7alakSupabaseClient =
         window.supabase.createClient(
           MA7ALAK_SUPABASE_URL,
@@ -1476,7 +1495,6 @@
         );
 
       return ma7alakSupabaseClient;
-
     }
 
     return null;
