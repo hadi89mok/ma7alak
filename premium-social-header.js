@@ -300,6 +300,101 @@
     (document.head||document.documentElement).appendChild(style);
   }
 
+
+  /* =========================================================
+     AUTH VISIBILITY GATE
+     ---------------------------------------------------------
+     Private/account controls stay hidden until Supabase confirms
+     a signed-in user. Logged-out visitors only keep public header
+     controls such as Reels, Search and Menu.
+  ========================================================= */
+  function installAuthVisibilityGate(){
+    if(document.getElementById("ma7alak-header-auth-visibility-gate")) return;
+
+    const style=document.createElement("style");
+    style.id="ma7alak-header-auth-visibility-gate";
+    style.textContent=`
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header #ma7alak-header-likes-slot,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header #ma7alak-header-following,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header #ma7alak-header-notification-slot,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header #ma7alak-header-owner,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header [data-ma7alak-private="1"],
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header .ma7alak-header-chat,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header #ma7alak-header-chat,
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header [href*="/chat"],
+      html:not(.ma7alak-header-authenticated) #ma7alak-social-header [href*="/messages"]{
+        display:none!important;
+      }
+    `;
+    (document.head||document.documentElement).appendChild(style);
+
+    function setAuthState(user){
+      document.documentElement.classList.toggle(
+        "ma7alak-header-authenticated",
+        !!(user && user.id)
+      );
+      document.documentElement.classList.toggle(
+        "ma7alak-header-logged-out",
+        !(user && user.id)
+      );
+    }
+
+    // Safe default: logged out until a real session is confirmed.
+    setAuthState(null);
+
+    let attempts=0;
+    const timer=setInterval(async function(){
+      attempts++;
+
+      try{
+        const candidates=[
+          window.ma7alakSupabase,
+          window.ma7alakSupabaseClient,
+          window.supabaseClient,
+          window.sb
+        ].filter(Boolean);
+
+        // Some Ma7alak files expose the actual client through window.supabase.
+        if(window.supabase && window.supabase.auth &&
+           typeof window.supabase.auth.getSession==="function"){
+          candidates.unshift(window.supabase);
+        }
+
+        const client=candidates.find(function(c){
+          return c && c.auth && typeof c.auth.getSession==="function";
+        });
+
+        if(client){
+          clearInterval(timer);
+
+          const result=await client.auth.getSession();
+          const session=result && result.data ? result.data.session : null;
+          setAuthState(session ? session.user : null);
+
+          if(typeof client.auth.onAuthStateChange==="function"){
+            client.auth.onAuthStateChange(function(_event,sessionNow){
+              setAuthState(sessionNow ? sessionNow.user : null);
+            });
+          }
+          return;
+        }
+
+        // The legacy header may load Supabase after this wrapper.
+        if(attempts>=80){
+          clearInterval(timer);
+          setAuthState(null);
+        }
+      }catch(_err){
+        if(attempts>=80){
+          clearInterval(timer);
+          setAuthState(null);
+        }
+      }
+    },250);
+  }
+
+  installAuthVisibilityGate();
+
   function loadExactHeader(){
     const existing=document.querySelector(
       'script[data-ma7alak-exact-premium-407="1"]'
@@ -330,6 +425,32 @@
 
     (document.head||document.documentElement).appendChild(script);
   }
+
+
+  function installHeaderDedupe(){
+    function clean(){
+      [
+        "ma7alak-social-header",
+        "ma7alak-header-theme-backdrop",
+        "ma7alak-header-likes-slot",
+        "ma7alak-header-notification-slot",
+        "ma7alak-header-following",
+        "ma7alak-header-owner",
+        "ma7alak-header-menu-button"
+      ].forEach(function(id){
+        const nodes=document.querySelectorAll("#"+id);
+        for(let i=1;i<nodes.length;i++){
+          nodes[i].remove();
+        }
+      });
+    }
+
+    clean();
+    const observer=new MutationObserver(clean);
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
+  installHeaderDedupe();
 
   loadExactHeader();
 })();
