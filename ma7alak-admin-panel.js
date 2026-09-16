@@ -4471,3 +4471,114 @@ async function touch(){try{let a=window.Ma7alakAccount;if(!a?.user||!a?.client)r
 async function start(){for(let i=0;i<120&&!window.Ma7alakAccount;i++)await new Promise(r=>setTimeout(r,100));await window.Ma7alakAccount?.ready?.();await touch();clearInterval(timer);timer=setInterval(touch,4000);addEventListener("ma7alak:account-change",touch)}
 start().catch(()=>{});
 })();
+
+/* =========================================================
+   MA7ALAK ADMIN — LIVE & OFFERS ACCESS
+   Adds per-shop On/Off and active-slot limits inside Manage Shops.
+   Uses the existing admin-only Supabase entitlement RPCs.
+========================================================= */
+(function(){
+"use strict";
+if(window.__M7_ADMIN_LIVE_OFFERS__)return;
+window.__M7_ADMIN_LIVE_OFFERS__=true;
+if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin")return;
+
+let sb=null,activeShop=null;
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function inject(){
+  if(document.getElementById("m7-live-admin-css"))return;
+  const style=document.createElement("style");
+  style.id="m7-live-admin-css";
+  style.textContent=`
+    .ma-shop-action.live-offers{background:linear-gradient(135deg,#f0b34f,#b66b20)!important;color:#1a1008!important}
+    #m7-live-admin-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none!important;align-items:center!important;justify-content:center!important;padding:14px!important;background:rgba(4,4,4,.9)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font-family:Arial,"Segoe UI",sans-serif!important;color:#fff!important}
+    #m7-live-admin-overlay.active{display:flex!important}
+    #m7-live-admin-panel{position:relative!important;width:min(470px,100%)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;box-sizing:border-box!important;padding:22px!important;border:1px solid rgba(231,164,67,.42)!important;border-radius:24px!important;background:linear-gradient(160deg,#21150e,#0f0e0d)!important;box-shadow:0 30px 90px #000!important}
+    #m7-live-admin-close{position:absolute!important;right:12px!important;top:11px!important;width:38px!important;height:38px!important;border:1px solid #ffffff18!important;border-radius:50%!important;background:#ffffff0d!important;color:#fff!important;font-size:24px!important}
+    .m7la-title{margin:2px 45px 4px 0!important;font-size:23px!important;font-weight:950!important}.m7la-shop{color:#eeb767!important;font-size:12px!important;margin-bottom:18px!important;overflow-wrap:anywhere!important}
+    .m7la-toggle{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:15px!important;padding:14px!important;border:1px solid #ffffff13!important;border-radius:16px!important;background:#ffffff08!important}.m7la-toggle strong,.m7la-toggle small{display:block!important}.m7la-toggle small{color:#ffffff83!important;margin-top:4px!important;font-size:11px!important}.m7la-toggle input{width:24px!important;height:24px!important;accent-color:#dda348!important}
+    .m7la-field{display:block!important;margin-top:14px!important}.m7la-field span{display:block!important;margin-bottom:7px!important;font-size:12px!important;font-weight:900!important}.m7la-field input{width:100%!important;box-sizing:border-box!important;padding:13px!important;border:1px solid #ffffff1a!important;border-radius:13px!important;background:#090807!important;color:#fff!important;font-size:16px!important}
+    #m7-live-admin-save{width:100%!important;margin-top:16px!important;padding:14px!important;border:0!important;border-radius:14px!important;background:linear-gradient(135deg,#f0ba64,#c47b28)!important;color:#1a1008!important;font-weight:950!important;font-size:15px!important}
+    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-warning{margin-top:15px!important;padding:12px!important;border:1px solid #c6534b55!important;border-radius:13px!important;background:#321817!important;color:#ffbbb5!important;font-size:11px!important;line-height:1.5!important}
+  `;
+  document.head.appendChild(style);
+  const overlay=document.createElement("div");
+  overlay.id="m7-live-admin-overlay";
+  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers</strong><small>Turn owner access on or off for this shop.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><button id="m7-live-admin-save" type="button">Save Live & Offers Access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-warning">Offer deletion is not enabled yet because the database currently has no admin delete RPC or admin DELETE policy for Live/Offers. No SQL was changed.</div></section>`;
+  document.body.appendChild(overlay);
+  const close=()=>overlay.classList.remove("active");
+  document.getElementById("m7-live-admin-close").onclick=close;
+  overlay.onclick=e=>{if(e.target===overlay)close()};
+  document.getElementById("m7-live-admin-save").onclick=save;
+}
+
+function status(message,error){
+  const el=document.getElementById("m7-live-admin-status");
+  if(!el)return;
+  el.textContent=message||"";
+  el.style.color=error?"#ff9189":"#8ee6a5";
+}
+
+async function open(slug,name){
+  inject();
+  activeShop={slug:String(slug||"").trim(),name:String(name||slug||"Shop")};
+  if(!activeShop.slug)return;
+  document.getElementById("m7-live-admin-shop").textContent=activeShop.name+"  /"+activeShop.slug;
+  document.getElementById("m7-live-admin-enabled").disabled=true;
+  document.getElementById("m7-live-admin-limit").disabled=true;
+  document.getElementById("m7-live-admin-save").disabled=true;
+  status("Loading access…",false);
+  document.getElementById("m7-live-admin-overlay").classList.add("active");
+  const result=await sb.rpc("ma7alak_admin_get_live_entitlement",{p_shop_slug:activeShop.slug});
+  if(result.error){status(result.error.message||"Could not load Live & Offers access.",true);return}
+  const row=Array.isArray(result.data)?result.data[0]:result.data;
+  document.getElementById("m7-live-admin-enabled").checked=!!row?.enabled;
+  document.getElementById("m7-live-admin-limit").value=Number(row?.active_limit??0);
+  document.getElementById("m7-live-admin-enabled").disabled=false;
+  document.getElementById("m7-live-admin-limit").disabled=false;
+  document.getElementById("m7-live-admin-save").disabled=false;
+  status(row?.enabled?"Access is currently ON.":"Access is currently OFF.",false);
+}
+
+async function save(){
+  if(!activeShop||!sb)return;
+  const button=document.getElementById("m7-live-admin-save");
+  const enabled=document.getElementById("m7-live-admin-enabled").checked;
+  const limit=Number(document.getElementById("m7-live-admin-limit").value);
+  if(!Number.isInteger(limit)||limit<0||limit>100){status("Offer limit must be a whole number from 0 to 100.",true);return}
+  button.disabled=true;
+  status("Saving…",false);
+  const result=await sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled});
+  button.disabled=false;
+  if(result.error){status(result.error.message||"Could not save Live & Offers access.",true);return}
+  status((enabled?"Access ON":"Access OFF")+" · "+limit+" active offer slot"+(limit===1?"":"s")+" saved.",false);
+}
+
+function decorate(){
+  document.querySelectorAll("#ma-admin-shop-list .ma-admin-shop-item").forEach(card=>{
+    const actions=card.querySelector(".ma-admin-shop-actions");
+    if(!actions||actions.querySelector('[data-m7-live-offers]'))return;
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="ma-shop-action live-offers";
+    button.dataset.m7LiveOffers="1";
+    button.textContent="⚡ Live / Offers";
+    button.onclick=e=>{e.preventDefault();e.stopPropagation();const name=card.querySelector(".ma-admin-shop-name")?.textContent?.trim()||card.dataset.slug;open(card.dataset.slug,name).catch(err=>status(err?.message||"Could not open Live & Offers access.",true))};
+    const danger=actions.querySelector(".danger");
+    actions.insertBefore(button,danger||null);
+  });
+}
+
+async function ready(){
+  for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));
+  sb=window.Ma7alakAdminClient;
+  if(!sb)return console.error("MA7ALAK Live/Offers admin: shared admin client unavailable");
+  inject();
+  const observer=new MutationObserver(decorate);
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  decorate();
+  window.addEventListener("ma7alak:admin-ready",decorate);
+}
+ready().catch(console.error);
+})();
