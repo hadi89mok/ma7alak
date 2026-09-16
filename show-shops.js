@@ -834,45 +834,60 @@
       new Map();
 
     /*
-       Categories are GLOBAL Directory choices.
-       Selecting an Area must not hide categories just because that Area
-       does not currently have a shop in every category. The selected Area
-       is applied only when results are rendered.
+       IMPORTANT: Directory categories come from shop_categories,
+       NOT only from categories currently assigned to shop_profiles.
+       This keeps every active category visible after any Area is selected.
     */
-    shops.forEach(
-      shop => {
+    ma7alakLiveCategoryNames.forEach(function(name,key){
+      const cleanKey = String(key || "").trim();
+      const cleanName = String(name || cleanKey).trim();
 
-        const key =
-          String(shop.category || "").trim();
+      if(!cleanKey){
+        return;
+      }
 
+      /* The map stores both exact + lowercase aliases. Keep one button. */
+      const canonicalKey = Array.from(ma7alakLiveCategoryNames.keys()).find(function(candidate){
+        return String(candidate).trim().toLocaleLowerCase() === cleanKey.toLocaleLowerCase() &&
+               String(candidate).trim() !== String(candidate).trim().toLocaleLowerCase();
+      }) || cleanKey;
+
+      if(!Array.from(categoryMap.keys()).some(function(existing){
+        return String(existing).toLocaleLowerCase() === String(canonicalKey).toLocaleLowerCase();
+      })){
+        categoryMap.set(canonicalKey, cleanName);
+      }
+    });
+
+    /*
+       Safe fallback: if shop_categories cannot be read for any reason,
+       still build categories from live shop rows instead of showing nothing.
+    */
+    if(categoryMap.size === 0){
+      shops.forEach(function(shop){
+        const key = String(shop.category || "").trim();
         if(!key){
           return;
         }
 
-        const name =
-          String(
-            ma7alakLiveCategoryNames.get(key) ||
-            ma7alakLiveCategoryNames.get(key.toLocaleLowerCase()) ||
-            key
-          ).trim();
+        const name = String(
+          ma7alakLiveCategoryNames.get(key) ||
+          ma7alakLiveCategoryNames.get(key.toLocaleLowerCase()) ||
+          shop.categoryName ||
+          key
+        ).trim();
 
         if(!categoryMap.has(key)){
-          categoryMap.set(
-            key,
-            name
-          );
+          categoryMap.set(key,name);
         }
-
-      }
-    );
+      });
+    }
 
     const categories =
-      Array.from(
-        categoryMap.entries()
-      )
-      .sort((a,b) =>
-        a[1].localeCompare(b[1],undefined,{sensitivity:"base"})
-      );
+      Array.from(categoryMap.entries())
+        .sort((a,b) =>
+          a[1].localeCompare(b[1],undefined,{sensitivity:"base"})
+        );
 
     categoryGrid.innerHTML =
       categories
