@@ -1022,14 +1022,14 @@
         <div
           id="ma7alak-page-story-title"
         >
-          إضافة ستوري
+          Add Story
         </div>
 
 
         <div
           id="ma7alak-page-story-subtitle"
         >
-          شارك آخر شي جديد من محلك
+          Share what’s new from your shop
         </div>
 
 
@@ -1057,7 +1057,7 @@
             <span
               class="ma7alak-page-story-option-title"
             >
-              صورة
+              Image
             </span>
 
           </button>
@@ -1078,7 +1078,7 @@
             <span
               class="ma7alak-page-story-option-title"
             >
-              فيديو
+              Video
             </span>
 
           </button>
@@ -1121,7 +1121,7 @@
         <div
           id="ma7alak-page-story-note"
         >
-          الستوري بتختفي تلقائياً بعد 24 ساعة
+          Stories disappear automatically after 24 hours
         </div>
 
       </div>
@@ -1387,7 +1387,7 @@
       if(!session){
 
         alert(
-          "لازم تكون مسجّل الدخول."
+          "You need to be signed in."
         );
 
         return;
@@ -1425,7 +1425,7 @@
       ){
 
         alert(
-          "ما عندك صلاحية لهذا المحل."
+          "You don’t have permission for this shop."
         );
 
         return;
@@ -1476,7 +1476,7 @@
       );
 
       alert(
-        "صار خطأ. جرّب مرة ثانية."
+        "Something went wrong. Please try again."
       );
 
     }
@@ -1585,7 +1585,7 @@
     ){
 
       alert(
-        "حجم الملف كبير. الحد الأقصى 50MB."
+        "File is too large. Maximum size is 50 MB."
       );
 
       return;
@@ -1629,7 +1629,7 @@
 
 
       showStatus(
-        "جاري رفع الستوري..."
+        "Uploading Story…"
       );
 
 
@@ -1901,7 +1901,7 @@
 
 
       showStatus(
-        "✓ تم نشر الستوري!"
+        "✓ Story published!"
       );
 
 
@@ -2005,7 +2005,7 @@
       ){
 
         showStatus(
-          "لازم تكون مسجّل الدخول."
+          "You need to be signed in."
         );
 
       }
@@ -2017,7 +2017,7 @@
       ){
 
         showStatus(
-          "ما عندك صلاحية لهذا المحل."
+          "You don’t have permission for this shop."
         );
 
       }
@@ -2025,7 +2025,7 @@
       else{
 
         showStatus(
-          "صار خطأ أثناء الرفع. جرّب مرة ثانية."
+          "Upload failed. Please try again."
         );
 
       }
@@ -2222,11 +2222,11 @@
     overlay.id="ma7alak-owner-add-chooser";
     overlay.innerHTML=`<div id="ma7alak-owner-add-panel">
       <button id="ma7alak-owner-add-close" type="button" aria-label="Close">×</button>
-      <div class="ma7alak-owner-add-title">شو بدك تضيف؟</div>
-      <div class="ma7alak-owner-add-sub">اختار Story أو Homepage Reel</div>
+      <div class="ma7alak-owner-add-title">What would you like to add?</div>
+      <div class="ma7alak-owner-add-sub">Choose Story or Homepage Reel</div>
       <div class="ma7alak-owner-add-grid">
-        <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">📸</span>Add Story<small>بتختفي تلقائياً بعد 24 ساعة</small></button>
-        <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">🔥</span>Add Homepage Reel<small>بتظهر بقسم Reels على الصفحة الرئيسية</small></button>
+        <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">📸</span>Add Story<small>Disappears automatically after 24 hours</small></button>
+        <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">🔥</span>Add Homepage Reel<small>Appears in Reels on the homepage</small></button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
