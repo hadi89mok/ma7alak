@@ -833,12 +833,14 @@
     const categoryMap =
       new Map();
 
+    /*
+       Categories are GLOBAL Directory choices.
+       Selecting an Area must not hide categories just because that Area
+       does not currently have a shop in every category. The selected Area
+       is applied only when results are rendered.
+    */
     shops.forEach(
       shop => {
-
-        if(ma7alakShopRegion(shop) !== area){
-          return;
-        }
 
         const key =
           String(shop.category || "").trim();
@@ -3139,7 +3141,7 @@
    - Removed hardcoded Area buttons from the page markup.
    - Removed hardcoded Category buttons from the page markup.
    - Area buttons now build automatically from active shop_profiles rows.
-   - Category buttons now build automatically from categories used by shops inside the selected Area.
+   - Category buttons now stay available across Areas instead of disappearing based on the selected Area.
    - category_name controls the visible category label; category remains the filter key.
    - Added automatic category icons with a safe shop fallback icon for new categories.
    - If a new active shop uses a new Area, that Area appears automatically after refresh.
