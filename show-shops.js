@@ -1579,13 +1579,48 @@
   let ma7alakDirectoryRealtimeChannel = null;
   let ma7alakDirectoryRefreshTimer = null;
 
+  function ma7alakDirectoryDataSignature(){
+    return JSON.stringify(
+      shops.map(function(shop){
+        return [
+          shop.id,
+          shop.name,
+          shop.arabic,
+          shop.city,
+          shop.area,
+          shop.category,
+          shop.categoryName,
+          shop.location,
+          shop.image,
+          shop.url,
+          shop.verified,
+          shop.featured,
+          shop.redFeatured
+        ];
+      })
+    ) + "|" + JSON.stringify(Array.from(ma7alakLiveCategoryNames.entries()))
+      + "|" + JSON.stringify(Array.from(ma7alakLiveCityNames.entries()));
+  }
+
   async function ma7alakRefreshDirectoryLive(){
     clearTimeout(ma7alakDirectoryRefreshTimer);
     ma7alakDirectoryRefreshTimer = setTimeout(async function(){
       const oldArea = selectedArea;
       const oldCategory = selectedCategory;
+      const beforeSignature = ma7alakDirectoryDataSignature();
       const ok = await ma7alakLoadShopProfiles();
       if(!ok) return;
+
+      /*
+       * Do not rebuild Area/Category buttons and shop cards when the
+       * fallback poll returns exactly the same directory data. Rebuilding
+       * every 1.5 seconds was resetting selected categories and replacing
+       * Story-ring DOM nodes, which made the Doze 3ale ring flicker.
+       */
+      if(beforeSignature === ma7alakDirectoryDataSignature()){
+        return;
+      }
+
       ma7alakRenderDynamicAreas();
 
       if(oldArea && shops.some(s => ma7alakShopRegion(s) === oldArea)){
@@ -1600,6 +1635,7 @@
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
           renderResults();
+          ma7alakRefreshStoryRings();
         }else{
           selectedCategory = null;
           results.classList.remove("visible");
@@ -1752,12 +1788,6 @@
           .filter(Boolean)
       );
 
-    /*
-     * IMPORTANT: reconcile the old/new Story state instead of
-     * removing the class from every ring and adding it again.
-     * The old behaviour restarted the new-Story CSS animation on
-     * every 2-second fallback poll, causing the ring to flash/off/on.
-     */
     ma7alakActiveStoryShops.forEach(
       function(slug){
         if(!nextActiveStoryShops.has(slug)){
@@ -1780,11 +1810,6 @@
     ma7alakStoryLoaded =
       true;
 
-    /*
-     * Cards can be rebuilt by filters/live directory updates.
-     * Re-apply active state to newly-created rings only; classList
-     * toggle(true) leaves existing animated rings untouched.
-     */
     ma7alakRefreshStoryRings();
 
   }
