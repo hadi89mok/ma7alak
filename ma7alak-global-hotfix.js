@@ -1,17 +1,17 @@
 /* =========================================================
- MA7ALAK GLOBAL HOTFIX V6.1 — MOBILE PERFORMANCE SAFE
+ MA7ALAK GLOBAL HOTFIX V6.2 — MOBILE PERFORMANCE SAFE
  - replaces old show-shops-stability-fix.js
  - mobile Following Unfollow actions fixed
  - Unfollow never opens the shop page
  - shop-page header gap/backdrop is black on phone browsers
  - one overlay/panel at a time, including viewer account
- - directory forced to top content position
+ - directory kept at top content position WITHOUT changing visitor scroll
  - no document-wide MutationObserver
  - reuses the shared Ma7alak Supabase client
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_GLOBAL_HOTFIX_V61__)return;window.__MA7ALAK_GLOBAL_HOTFIX_V61__=true;
+if(window.__MA7ALAK_GLOBAL_HOTFIX_V62__)return;window.__MA7ALAK_GLOBAL_HOTFIX_V62__=true;
 let followingObserver=null;
 function client(){return window.Ma7alakSupabase?.client||window.Ma7alakAccount?.client||window.Ma7alakOwnerAuth?.client||null}
 function visitorId(){let id="";try{id=localStorage.getItem("ma7alak_visitor_id")||""}catch(_){}if(!id){id=(window.crypto?.randomUUID?.()||("visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)));try{localStorage.setItem("ma7alak_visitor_id",id)}catch(_){}}return id}
@@ -34,7 +34,7 @@ function onUnfollowTouchEnd(e){const btn=stopUnfollowEvent(e);if(btn)performUnfo
 function onUnfollowClick(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
 function closePanelsExcept(kind){if(kind!=="following"){const o=document.getElementById("ma7alak-following-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")}if(kind!=="notifications")document.getElementById("ma7alak-notification-panel")?.classList.remove("open");if(kind!=="heart"){const p=document.getElementById("m7-owner-social-panel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")}if(kind!=="chat"){try{window.Ma7alakChat?.close?.()}catch(_){}}if(kind!=="account")document.getElementById("m7-account-overlay")?.remove()}
 function panelCoordinator(e){const t=e.target;if(t.closest?.("#ma7alak-header-following")){closePanelsExcept("following");setTimeout(watchFollowingList,20);setTimeout(watchFollowingList,250);return}if(t.closest?.("#ma7alak-notification-bell")){closePanelsExcept("notifications");return}if(t.closest?.("#ma7alak-story-likes-button")){closePanelsExcept("heart");return}if(t.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages],#ma7alak-header-messages,#ma7alak-messages-button")){closePanelsExcept("chat");return}if(t.closest?.("#ma7alak-header-login,#ma7alak-header-account,[data-ma7alak-account],.ma7alak-account-button"))closePanelsExcept("account")}
-function placeDirectoryAtTop(){if(!directoryPage)return;const p=document.getElementById("ma7alak-shops-page");if(!p)return;const premium=document.getElementById("ma7alak-premium-social-header")||document.querySelector(".ma7alak-premium-social-header");if(premium&&premium.parentNode===document.body){if(premium.nextElementSibling!==p)premium.insertAdjacentElement("afterend",p)}else if(document.body.firstElementChild!==p)document.body.insertBefore(p,document.body.firstChild);window.scrollTo(0,0)}
+function placeDirectoryAtTop(){if(!directoryPage)return;const p=document.getElementById("ma7alak-shops-page");if(!p)return;const premium=document.getElementById("ma7alak-premium-social-header")||document.querySelector(".ma7alak-premium-social-header");if(premium&&premium.parentNode===document.body){if(premium.nextElementSibling!==p)premium.insertAdjacentElement("afterend",p)}else if(document.body.firstElementChild!==p)document.body.insertBefore(p,document.body.firstChild)}
 function bindMessageShortcuts(){document.addEventListener("click",e=>{const el=e.target.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages]");if(!el)return;e.preventDefault();if(el.hasAttribute("data-ma7alak-open-owner-messages"))dispatchEvent(new Event("ma7alak:open-owner-messages"));else dispatchEvent(new Event("ma7alak:open-messages"))},true)}
 function boot(){css();markMobileShopPage();document.addEventListener("pointerup",captureShopState,true);document.addEventListener("pointerdown",onUnfollowPointerDown,true);document.addEventListener("touchend",onUnfollowTouchEnd,{capture:true,passive:false});document.addEventListener("click",onUnfollowClick,true);document.addEventListener("click",panelCoordinator,true);window.addEventListener("ma7alak:panel-open",e=>closePanelsExcept(e.detail?.panel||""));document.addEventListener("input",e=>{if(e.target?.id==="ma7alak-following-search")setTimeout(watchFollowingList,0)},true);bindMessageShortcuts();if(directoryPage){[0,80,250,700,1500,3000].forEach(ms=>setTimeout(()=>{placeDirectoryAtTop();queueRestore();stabilizeStories()},ms));addEventListener("ma7alak:story-uploaded",()=>setTimeout(stabilizeStories,100));addEventListener("ma7alak:follow-change",()=>setTimeout(stabilizeStories,100))}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
