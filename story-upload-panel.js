@@ -1806,8 +1806,7 @@
             file,
             {
 
-              cacheControl:
-                "3600",
+              cacheControl:"86400",
 
               upsert:
                 false,
@@ -2461,7 +2460,7 @@
     if(pendingPath) await cleanup(pendingPath);
     const path="reels/"+ownerInfo.shop_slug+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,9)+"-"+cleanName(file.name)+"."+ext;
     status("Uploading Reel…");
-    const {error}=await client.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
+    const {error}=await client.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:"86400",upsert:false,contentType:file.type||undefined});
     if(error) throw error;
     const {data}=client.storage.from(STORAGE_BUCKET).getPublicUrl(path);
     if(!data || !data.publicUrl){ await cleanup(path); throw new Error("Could not create Reel URL."); }
