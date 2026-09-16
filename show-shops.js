@@ -971,7 +971,58 @@
         selectedArea = clickedArea;
         button.classList.add("active");
 
-        ma7alakRenderDynamicCategories(selectedArea);
+        /*
+         * Render categories for the selected Area. If anything in the live
+         * category metadata path fails on a browser, never leave the visitor
+         * with an empty Category section: rebuild directly from the already
+         * loaded active shop_profiles rows.
+         */
+        try{
+          ma7alakRenderDynamicCategories(selectedArea);
+        }catch(categoryRenderError){
+          console.error("Ma7alak Shops: category render failed.", categoryRenderError);
+          categoryGrid.innerHTML = "";
+        }
+
+        if(!categoryGrid.children.length){
+          const emergencyCategories = new Map();
+
+          shops.forEach(function(shop){
+            const key = String(shop && shop.category || "").trim();
+            if(!key) return;
+
+            const name = String(
+              (shop && shop.categoryName) ||
+              key
+            ).trim();
+
+            if(!Array.from(emergencyCategories.keys()).some(function(existing){
+              return String(existing).toLocaleLowerCase() === key.toLocaleLowerCase();
+            })){
+              emergencyCategories.set(key,name);
+            }
+          });
+
+          categoryGrid.innerHTML = Array.from(emergencyCategories.entries())
+            .sort(function(a,b){
+              return a[1].localeCompare(b[1],undefined,{sensitivity:"base"});
+            })
+            .map(function(entry){
+              const key = entry[0];
+              const name = entry[1];
+              return `
+                <button
+                  class="ma7alak-category-button"
+                  data-category="${ma7alakEscapeHtml(key)}"
+                  type="button"
+                >
+                  <span class="ma7alak-category-icon">🏪</span>
+                  ${ma7alakEscapeHtml(name)}
+                </button>
+              `;
+            })
+            .join("");
+        }
 
         /* A newly opened Area must never inherit an old Category selection. */
         categoryButtons = page.querySelectorAll(
