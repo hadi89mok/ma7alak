@@ -919,7 +919,12 @@
         }
 
         const clickedArea = button.dataset.area;
-        const sameArea = selectedArea === clickedArea;
+        /* Only treat it as a toggle-close when this Area is already OPEN.
+           selectedArea can remain set while the Category panel is hidden,
+           so comparing selectedArea alone could swallow the next tap. */
+        const sameArea =
+          selectedArea === clickedArea &&
+          categorySection.classList.contains("visible");
 
         areaButtons = page.querySelectorAll(
           ".ma7alak-area-button"
