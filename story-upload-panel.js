@@ -197,7 +197,7 @@
       const uniqueId=crypto.randomUUID?crypto.randomUUID():(Date.now()+"_"+Math.random().toString(36).slice(2));
       const storagePath=activeShopSlug+"/"+uniqueId+"."+extension;
       if(bar) bar.style.width="25%";
-      const uploadResult=await client.storage.from("shop-stories").upload(storagePath,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+      const uploadResult=await client.storage.from("shop-stories").upload(storagePath,file,{cacheControl:"86400",upsert:false,contentType:file.type});
       if(uploadResult.error) throw uploadResult.error;
       if(bar) bar.style.width="70%";
       const expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
