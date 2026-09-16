@@ -1233,15 +1233,15 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
   /* Shop/owner circle stays clearly smaller than the left Ma7alak circle. */
   #ma7alak-header-owner.visible{
-    width:51px!important;
-    flex-basis:51px!important;
-    margin-right:13px!important;
+    width:47px!important;
+    flex-basis:47px!important;
+    margin-right:11px!important;
   }
 
   #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:48px!important;
-    height:48px!important;
-    flex:0 0 48px!important;
+    width:44px!important;
+    height:44px!important;
+    flex:0 0 44px!important;
   }
 }
 
@@ -1258,15 +1258,15 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   }
 
   #ma7alak-header-owner.visible{
-    width:48px!important;
-    flex-basis:48px!important;
-    margin-right:10px!important;
+    width:45px!important;
+    flex-basis:45px!important;
+    margin-right:9px!important;
   }
 
   #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
-    width:45px!important;
-    height:45px!important;
-    flex:0 0 45px!important;
+    width:42px!important;
+    height:42px!important;
+    flex:0 0 42px!important;
   }
 }
 
