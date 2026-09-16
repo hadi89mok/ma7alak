@@ -577,6 +577,8 @@
 
   let areaGrid;
 
+  let areaFilterBlock;
+
   let categoryGrid;
 
   let categorySection;
@@ -610,6 +612,9 @@
       page.querySelector(
         "#ma7alak-area-grid"
       );
+
+    areaFilterBlock =
+      areaGrid ? areaGrid.closest(".ma7alak-filter-block") : null;
 
 
     categoryGrid =
@@ -944,6 +949,11 @@
           "visible"
         );
 
+        /* Close the Area panel after an Area is chosen. */
+        if(areaFilterBlock){
+          areaFilterBlock.style.display = "none";
+        }
+
         results.classList.remove(
           "visible"
         );
@@ -953,16 +963,6 @@
 
         searchTerm =
           "";
-
-        setTimeout(
-          function(){
-            categorySection.scrollIntoView({
-              behavior:"smooth",
-              block:"center"
-            });
-          },
-          80
-        );
 
       }
     );
@@ -1008,14 +1008,9 @@
 
         renderResults();
 
-        setTimeout(
-          function(){
-            results.scrollIntoView({
-              behavior:"smooth",
-              block:"start"
-            });
-          },
-          100
+        /* Close the Category panel after a Category is chosen. */
+        categorySection.classList.remove(
+          "visible"
         );
 
       }
@@ -1089,6 +1084,10 @@
           "visible"
         );
 
+        if(areaFilterBlock){
+          areaFilterBlock.style.display = "block";
+        }
+
 
         categoryGrid.innerHTML =
           "";
@@ -1122,15 +1121,7 @@
         );
 
 
-        page.querySelector(
-          ".ma7alak-area-grid"
-        ).scrollIntoView({
 
-          behavior:"smooth",
-
-          block:"center"
-
-        });
 
       }
     );
@@ -1628,21 +1619,25 @@
         const btn = Array.from(page.querySelectorAll(".ma7alak-area-button")).find(b=>b.dataset.area===oldArea);
         if(btn) btn.classList.add("active");
         ma7alakRenderDynamicCategories(oldArea);
-        categorySection.classList.add("visible");
 
         if(oldCategory && shops.some(s=>ma7alakShopRegion(s)===oldArea && s.category===oldCategory)){
           selectedCategory = oldCategory;
           const cbtn = Array.from(page.querySelectorAll(".ma7alak-category-button")).find(b=>b.dataset.category===oldCategory);
           if(cbtn) cbtn.classList.add("active");
+          if(areaFilterBlock) areaFilterBlock.style.display = "none";
+          categorySection.classList.remove("visible");
           renderResults();
           ma7alakRefreshStoryRings();
         }else{
           selectedCategory = null;
+          if(areaFilterBlock) areaFilterBlock.style.display = "none";
+          categorySection.classList.add("visible");
           results.classList.remove("visible");
         }
       }else{
         selectedArea = null;
         selectedCategory = null;
+        if(areaFilterBlock) areaFilterBlock.style.display = "block";
         categorySection.classList.remove("visible");
         results.classList.remove("visible");
       }
@@ -2654,8 +2649,14 @@
       }
 
       event.preventDefault();
+      event.stopPropagation();
       event.stopImmediatePropagation();
 
+      /*
+       * Do not let the shop anchor navigate when a live Story exists.
+       * The image link has no inline navigation handler anymore, so mobile
+       * ghost/touch clicks cannot open the Story and then jump to the shop.
+       */
       ma7alakOpenShopStories(shop);
 
     },
@@ -2889,10 +2890,6 @@
       <a
         class="ma7alak-shop-image-link"
         href="${shop.url}"
-        onclick="
-          window.top.location.href='${shop.url}';
-          return false;
-        "
       >
 
         <div
