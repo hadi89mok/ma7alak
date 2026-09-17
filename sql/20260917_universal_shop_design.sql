@@ -4,7 +4,7 @@
 create table if not exists public.shop_page_design (
   shop_slug text primary key references public.shop_profiles(shop_slug) on update cascade on delete cascade,
   plan text not null default 'basic' check (plan in ('basic','premium','vip_custom')),
-  template_key text not null default 'zee-premium-v1',
+  template_key text not null default 'zee-premium-v2',
   published boolean not null default true,
   config jsonb not null default '{}'::jsonb,
   updated_by uuid references auth.users(id) on delete set null,
@@ -30,8 +30,10 @@ create policy "Site admins can update shop designs" on public.shop_page_design f
 drop policy if exists "Site admins can delete shop designs" on public.shop_page_design;
 create policy "Site admins can delete shop designs" on public.shop_page_design for delete to authenticated using ((select public.is_site_admin()));
 
-grant select on public.shop_page_design to anon, authenticated;
-grant insert, update, delete on public.shop_page_design to authenticated;
+revoke all privileges on table public.shop_page_design from anon;
+grant select on table public.shop_page_design to anon;
+revoke truncate, references, trigger on table public.shop_page_design from authenticated;
+grant select, insert, update, delete on table public.shop_page_design to authenticated;
 
 create index if not exists shop_page_design_published_idx on public.shop_page_design (published, shop_slug);
 
