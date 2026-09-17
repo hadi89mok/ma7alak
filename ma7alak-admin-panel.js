@@ -2237,7 +2237,6 @@
       badges += '<span class="ma-admin-shop-badge ' + (shop.verified ? 'verified' : 'incomplete') + '">' + (shop.verified ? '✓ Verified' : 'Not verified') + '</span>';
       if(hasStory) badges += '<span class="ma-admin-shop-badge live">● LIVE</span>';
       if(featureActive) badges += '<span class="ma-admin-shop-badge featured">Featured' + (featureDays ? ' · ' + featureDays + 'd' : '') + '</span>';
-      if(shop.featured_red) badges += '<span class="ma-admin-shop-badge red">Red Featured</span>';
       if(directoryBadge) badges += '<span class="ma-admin-shop-badge new">' + escapeHtml(directoryBadge) + '</span>';
 
       const completenessNote = completeness.ready
@@ -4564,7 +4563,7 @@ function installPanelToggles(){
     $("m7-shop-control")?.append(toolbar);toolbar.onclick=e=>{const b=e.target.closest("[data-panels]");if(!b)return;dash.querySelectorAll(":scope > [data-m7-all-panel]").forEach((p,i)=>{const t=p.querySelector(":scope > .ma-admin-section-head .m7-panel-toggle, :scope > .ma-v2-head .m7-panel-toggle, :scope > .m7-panel-title-row .m7-panel-toggle");if(t)setCollapsed(p,t,b.dataset.panels==="hide",panelKey(p,i))})};
   }
 }
-function removeLegacyOwner(){$("ma-admin-owner-card")?.remove();$("ma-admin-post-add-owner")?.remove()}
+function removeLegacyOwner(){$("ma-admin-owner-card")?.remove();$("ma-admin-post-add-owner")?.remove();["ma-shop-red","ma-edit-red"].forEach(id=>{const row=$(id)?.closest(".ma-toggle-row");if(row)row.hidden=true})}
 async function ready(){
   for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;
   installCss();mountFeature();removeLegacyOwner();installPanelToggles();
