@@ -3307,35 +3307,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       null
     );
 
-    /*
-      Because THIS function runs directly from the real header click,
-      native fullscreen has valid user activation and can work normally.
-      The overlay already fills the viewport, so failure is harmless.
-    */
-    const viewer =
-      document.getElementById(
-        "ma7alakGlobalReelViewer"
-      );
-
-    if(viewer){
-      try{
-        if(viewer.requestFullscreen){
-          const req =
-            viewer.requestFullscreen();
-
-          if(
-            req &&
-            typeof req.catch === "function"
-          ){
-            req.catch(function(){});
-          }
-        }
-        else if(viewer.webkitRequestFullscreen){
-          viewer.webkitRequestFullscreen();
-        }
-      }
-      catch(error){}
-    }
+    /* The fixed viewer already fills the viewport. Avoid native fullscreen so
+       mobile browsers do not display their intrusive exit instructions. */
 
     loadGlobalFavoriteIds();
   }
@@ -3764,3 +3737,4 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    9. Existing Reels, Search, Notifications, owner profile and owner-only Story Likes remain intact.
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
 ========================================================= */
+
