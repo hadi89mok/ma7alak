@@ -3327,8 +3327,10 @@
     const page=document.getElementById("ma7alak-shops-page");
     const host=document.getElementById("ma7alak-discovery-cards");
     const preview=document.getElementById("ma7alak-discovery-preview");
+    const results=document.getElementById("ma7alak-results");
     const data=Array.isArray(window.__MA7ALAK_SHOPS__)?window.__MA7ALAK_SHOPS__:[];
     if(!page||!host||!preview||!data.length)return;
+    preview.style.display=results&&results.classList.contains("visible")?"none":"block";
     const rows=data.slice().sort((a,b)=>Number(b.featured)-Number(a.featured)).slice(0,8);
     host.innerHTML=rows.map(function(shop){
       const cover=shop.cover||shop.image||"";
