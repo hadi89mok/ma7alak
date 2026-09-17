@@ -11,7 +11,7 @@ Keep the existing admin panel script exactly as it is.
 
 Add this once AFTER ma7alak-admin-panel.js:
 
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@8370cef0830cf6d1cab46b2486605ef594daec0e/ma7alak-admin-design.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@bca37515a4a638a9fc4d47c729bc6075cf4ab91b/ma7alak-admin-design.js"></script>
 
 This creates the approved Live Page Editor / Design Studio. It loads only after
 admin authentication and saves by immutable shop_slug.
@@ -23,12 +23,12 @@ Create or duplicate one hidden Hostinger shop template page. Add this one
 Custom Embed:
 
 <div id="ma7alak-universal-shop-page" data-shop-slug="your-shop-slug"></div>
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@0271b060e923a75170c7bb2d9d34f2da192467e7/ma7alak-shop-page.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@5371b889c08d1b7cf9c3524db23d9da08ef357fd/ma7alak-shop-page.js"></script>
 
 For Zee use:
 
 <div id="ma7alak-universal-shop-page" data-shop-slug="zee-tattoos-and-piercing"></div>
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@0271b060e923a75170c7bb2d9d34f2da192467e7/ma7alak-shop-page.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@5371b889c08d1b7cf9c3524db23d9da08ef357fd/ma7alak-shop-page.js"></script>
 
 Every future shop uses the same script. Change only data-shop-slug.
 
