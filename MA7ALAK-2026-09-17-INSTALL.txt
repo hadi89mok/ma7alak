@@ -1,0 +1,63 @@
+MA7ALAK — 17 SEPTEMBER 2026 UPDATE
+
+IMPORTANT
+Use each script only once on its page. Replace older versions of the same
+script; do not keep both the old and new script tags.
+
+
+1) SHOW SHOPS PAGE (/shwf-almhlat-)
+
+Replace the old show-shops.js script with:
+
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/show-shops.js"></script>
+
+
+2) ADMIN PAGE (/admin)
+
+Replace the old admin script with:
+
+<script charset="utf-8" src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-admin-panel.js"></script>
+
+
+3) PREMIUM HEADER / REEL VIEWER
+
+Replace the old premium-social-header.js script with:
+
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/premium-social-header.js"></script>
+
+
+4) GLOBAL HOTFIX
+
+Replace the old ma7alak-global-hotfix.js script with:
+
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-global-hotfix.js"></script>
+
+
+5) HOMEPAGE FEATURED / NEW SHOPS
+
+Delete the full old static Featured Shops embed and put this in its place:
+
+<div id="ma7alak-home-shop-spotlight"></div>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-home-shop-spotlight.js"></script>
+
+This section reads Featured and NEW shops live from the admin-managed shop
+profiles. Its optional label, description, accent color, and button text are
+inside Add Shop / Edit Shop under the new “Homepage spotlight” panel.
+
+
+6) ENGLISH ADD-YOUR-SHOP PROMO
+
+Delete the full old Arabic promo embed and put this in its place:
+
+<div id="ma7alak-add-shop-promo"></div>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-add-shop-promo.js"></script>
+
+Its button opens:
+https://ma7alak.com/shufma7lit
+
+
+DATABASE
+
+The owner self-follow and self-story-like prevention is already installed in
+Supabase. No SQL needs to be run manually.
+
