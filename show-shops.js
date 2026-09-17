@@ -137,7 +137,7 @@
 
       <div class="ma7alak-hero-icon ma7alak-hero-eye" aria-hidden="true">
         <img
-          src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/020e2776-1fe4-4b32-9ac0-8e1358911397-removebg-preview.png"
+          src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/3d5e9803-9a46-49c5-bf62-c7bbf7b5bc84.png"
           alt=""
           draggable="false"
         >
@@ -159,7 +159,6 @@
       </p>
 
     </section>
-
 
     <!-- =====================================================
          SEARCH
@@ -221,6 +220,17 @@
         class="ma7alak-category-grid"
       ></div>
 
+    </section>
+
+    <section id="ma7alak-discovery-preview" class="ma7alak-discovery-preview" aria-label="Popular shops">
+      <div class="ma7alak-discovery-heading">
+        <div>
+          <div class="ma7alak-discovery-kicker">DISCOVER LOCAL</div>
+          <h2>Popular near you</h2>
+        </div>
+        <span>Swipe to explore</span>
+      </div>
+      <div id="ma7alak-discovery-cards" class="ma7alak-discovery-cards"></div>
     </section>
 
 
@@ -1555,7 +1565,7 @@
       await client
         .from("shop_profiles")
         .select(
-          "shop_slug,shop_name,arabic_name,profile_image_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active"
+          "shop_slug,shop_name,arabic_name,profile_image_url,main_image_url,intro_poster_url,shop_url,city,area,category,category_name,location,verified,featured,featured_red,is_active"
         )
         .eq("is_active", true)
         .order("shop_name", { ascending:true });
@@ -1592,6 +1602,7 @@
               categoryName:String(row.category_name || "").trim(),
               location:String(row.location || "").trim(),
               image:String(row.profile_image_url || "").trim(),
+              cover:String(row.main_image_url || row.intro_poster_url || row.profile_image_url || "").trim(),
               url:String(
                 row.shop_url ||
                 ("https://ma7alak.com/" + encodeURIComponent(slug))
@@ -1603,6 +1614,8 @@
 
           }
         );
+
+    window.__MA7ALAK_SHOPS__ = shops.slice();
 
     return true;
   }
@@ -1625,6 +1638,7 @@
           shop.categoryName,
           shop.location,
           shop.image,
+          shop.cover,
           shop.url,
           shop.verified,
           shop.featured,
@@ -3258,3 +3272,73 @@
    - Card content uses flex layout so View Profile aligns evenly.
    - Directory filtering/data logic was NOT rewritten.
 ========================================================= */
+
+/* =========================================================
+   MA7ALAK 2026 DIRECTORY DISCOVERY LAYER
+   Keeps the existing filters/story system, while giving the
+   first screen a compact, swipeable discovery experience.
+========================================================= */
+(function(){
+  "use strict";
+
+  const style=document.createElement("style");
+  style.id="ma7alak-directory-discovery-style";
+  style.textContent=`
+    #ma7alak-shops-page{max-width:980px;padding:18px 14px 54px;background:radial-gradient(circle at 50% 0%,rgba(211,139,43,.12),transparent 38%),#080706}
+    #ma7alak-shops-page .ma7alak-top-brand{display:none}
+    #ma7alak-shops-page .ma7alak-hero{margin:12px auto 17px;padding:22px 14px 18px;border:1px solid rgba(245,184,63,.28);border-radius:28px;background:linear-gradient(145deg,rgba(48,35,24,.82),rgba(13,11,9,.9));box-shadow:0 20px 60px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.08)}
+    #ma7alak-shops-page .ma7alak-hero-icon.ma7alak-hero-eye{width:96px;height:70px;margin-bottom:7px}
+    #ma7alak-shops-page .ma7alak-hero-eye img{width:92px;height:66px}
+    #ma7alak-shops-page .ma7alak-hero h1{font-size:clamp(38px,7vw,62px);letter-spacing:0}
+    #ma7alak-shops-page .ma7alak-hero p{max-width:520px;margin-top:8px;font-size:13px;color:rgba(255,255,255,.64)}
+    #ma7alak-shops-page .ma7alak-search-wrapper{max-width:100%;margin:0 auto 15px}
+    #ma7alak-shops-page .ma7alak-search{height:56px;border-radius:19px;background:rgba(20,16,13,.86);border-color:rgba(255,255,255,.2);box-shadow:0 12px 34px rgba(0,0,0,.28)}
+    #ma7alak-shops-page .ma7alak-filter-block{margin:0 0 12px;padding:13px 13px 11px;border:1px solid rgba(255,255,255,.12);border-radius:21px;background:rgba(25,20,16,.72)}
+    #ma7alak-shops-page .ma7alak-filter-label{margin-bottom:8px;color:#d9b77e;font-size:10px;letter-spacing:1.6px;text-transform:uppercase}
+    #ma7alak-shops-page .ma7alak-area-grid,#ma7alak-shops-page .ma7alak-category-grid{display:flex;gap:8px;overflow-x:auto;padding:1px 1px 3px;scrollbar-width:none}
+    #ma7alak-shops-page .ma7alak-area-grid::-webkit-scrollbar,#ma7alak-shops-page .ma7alak-category-grid::-webkit-scrollbar{display:none}
+    #ma7alak-shops-page .ma7alak-area-button,#ma7alak-shops-page .ma7alak-category-button{flex:0 0 auto;min-height:40px;padding:0 14px;border-radius:999px;font-size:11px;white-space:nowrap}
+    #ma7alak-shops-page .ma7alak-category-section{padding:12px 13px 11px;border:1px solid rgba(255,255,255,.12);border-radius:21px;background:rgba(25,20,16,.72)}
+    #ma7alak-shops-page .ma7alak-category-button{min-height:44px}
+    .ma7alak-discovery-preview{margin:17px 0 0;padding:16px 0 3px}
+    .ma7alak-discovery-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 2px 10px}
+    .ma7alak-discovery-kicker{color:#d3a45d;font-size:9px;font-weight:900;letter-spacing:2px}
+    .ma7alak-discovery-heading h2{margin:3px 0 0;color:#fff;font:700 26px/1.05 Georgia,serif}
+    .ma7alak-discovery-heading>span{color:rgba(255,255,255,.42);font-size:10px}
+    .ma7alak-discovery-cards{display:flex;gap:12px;overflow-x:auto;padding:3px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}
+    .ma7alak-discovery-cards::-webkit-scrollbar{display:none}
+    .ma7alak-discovery-card{position:relative;flex:0 0 min(78vw,285px);height:190px;overflow:hidden;scroll-snap-align:start;border:1px solid rgba(245,184,63,.24);border-radius:22px;background:#15110e;box-shadow:0 15px 38px rgba(0,0,0,.3);cursor:pointer}
+    .ma7alak-discovery-card>img.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72;filter:saturate(.86)}
+    .ma7alak-discovery-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02) 20%,rgba(0,0,0,.88) 100%)}
+    .ma7alak-discovery-card-copy{position:absolute;z-index:2;left:14px;right:14px;bottom:13px;display:flex;align-items:center;gap:9px}
+    .ma7alak-discovery-card-copy img.logo{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;border:2px solid #f5d48a;background:#17120e}
+    .ma7alak-discovery-card-text{min-width:0}
+    .ma7alak-discovery-card-text strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:15px}
+    .ma7alak-discovery-card-text span{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.66);font-size:10px}
+    .ma7alak-discovery-badge{position:absolute;z-index:3;top:11px;left:11px;padding:5px 8px;border-radius:999px;background:rgba(0,0,0,.62);color:#f5d48a;font-size:9px;font-weight:900;letter-spacing:.5px}
+    .ma7alak-discovery-preview:has(+ .ma7alak-results.visible){display:none}
+    #ma7alak-shops-page .ma7alak-business-cta{margin-top:28px;padding:20px 16px;border-radius:23px}
+    @media(max-width:700px){#ma7alak-shops-page{padding:12px 10px 45px}.ma7alak-discovery-heading h2{font-size:23px}.ma7alak-discovery-card{flex-basis:78vw;height:185px}#ma7alak-shops-page .ma7alak-hero{padding-top:18px}}
+  `;
+  (document.head||document.documentElement).appendChild(style);
+
+  function esc(v){return String(v==null?"":v).replace(/[&<>\"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c]})}
+  function render(){
+    const page=document.getElementById("ma7alak-shops-page");
+    const host=document.getElementById("ma7alak-discovery-cards");
+    const preview=document.getElementById("ma7alak-discovery-preview");
+    const data=Array.isArray(window.__MA7ALAK_SHOPS__)?window.__MA7ALAK_SHOPS__:[];
+    if(!page||!host||!preview||!data.length)return;
+    const rows=data.slice().sort((a,b)=>Number(b.featured)-Number(a.featured)).slice(0,8);
+    host.innerHTML=rows.map(function(shop){
+      const cover=shop.cover||shop.image||"";
+      const logo=shop.image||cover;
+      const label=shop.featured?"★ FEATURED":(window.ma7alakActiveStoryShops&&window.ma7alakActiveStoryShops.has(shop.id)?"● STORY":"DISCOVER");
+      const meta=[shop.categoryName||shop.category,shop.location||shop.area||shop.city].filter(Boolean).join(" · ");
+      return `<article class="ma7alak-discovery-card" data-url="${esc(shop.url)}"><span class="ma7alak-discovery-badge">${label}</span><img class="cover" src="${esc(cover)}" alt="" loading="lazy"><div class="ma7alak-discovery-card-copy"><img class="logo" src="${esc(logo)}" alt="${esc(shop.name)}" loading="lazy"><div class="ma7alak-discovery-card-text"><strong>${esc(shop.name)}</strong><span>${esc(meta||"Local business")} · View shop →</span></div></div></article>`;
+    }).join("");
+    host.querySelectorAll(".ma7alak-discovery-card").forEach(function(card){card.addEventListener("click",function(){const url=card.dataset.url;if(url)window.top.location.href=url})});
+  }
+  const timer=setInterval(render,400);
+  setTimeout(function(){clearInterval(timer);render()},8000);
+})();
