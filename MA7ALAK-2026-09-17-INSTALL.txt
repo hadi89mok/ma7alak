@@ -1,82 +1,64 @@
-MA7ALAK — 17 SEPTEMBER 2026 UPDATE
+MA7ALAK — EXACT SHOP DESIGN STUDIO INSTALL
 
 IMPORTANT
-Use each script only once on its page. Replace older versions of the same
-script; do not keep both the old and new script tags.
+Use every script only once. Do not delete or replace the existing working
+Story, Reels, chat, owner-auth, gallery, statistics, or admin panel scripts.
 
 
-1) SHOW SHOPS PAGE (/shwf-almhlat-)
+1) ADMIN PAGE (/admin)
 
-Replace the old show-shops.js script with:
+Keep the existing admin panel script exactly as it is.
 
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/show-shops.js"></script>
+Add this once AFTER ma7alak-admin-panel.js:
 
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@8370cef0830cf6d1cab46b2486605ef594daec0e/ma7alak-admin-design.js"></script>
 
-2) ADMIN PAGE (/admin)
-
-Keep the existing admin panel script:
-
-<script charset="utf-8" src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-admin-panel.js"></script>
-
-Add this once after it:
-
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-admin-design.js"></script>
-
-This adds the live Design tab/module after admin authentication. It is additive
-and does not replace the existing Story, Reels, chat, gallery, or shop editor.
+This creates the approved Live Page Editor / Design Studio. It loads only after
+admin authentication and saves by immutable shop_slug.
 
 
-3) UNIVERSAL SHOP PAGE (new opt-in template)
+2) UNIVERSAL SHOP TEMPLATE
 
-On a duplicated hidden shop template page, add this single embed:
+Create or duplicate one hidden Hostinger shop template page. Add this one
+Custom Embed:
 
 <div id="ma7alak-universal-shop-page" data-shop-slug="your-shop-slug"></div>
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-shop-page.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@0271b060e923a75170c7bb2d9d34f2da192467e7/ma7alak-shop-page.js"></script>
 
-Duplicate that Hostinger page for each shop and change only data-shop-slug.
-Do not add this embed to existing live shops until the new template is tested.
+For Zee use:
 
+<div id="ma7alak-universal-shop-page" data-shop-slug="zee-tattoos-and-piercing"></div>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@0271b060e923a75170c7bb2d9d34f2da192467e7/ma7alak-shop-page.js"></script>
 
-4) PREMIUM HEADER / REEL VIEWER
-
-Replace the old premium-social-header.js script with:
-
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/premium-social-header.js"></script>
+Every future shop uses the same script. Change only data-shop-slug.
 
 
-5) GLOBAL HOTFIX
+3) REQUIRED EXISTING GLOBAL SCRIPTS
 
-Replace the old ma7alak-global-hotfix.js script with:
+Keep the current working global scripts for:
+- Supabase bootstrap and account identity
+- Owner authentication
+- Story uploader
+- Reels uploader
+- Messaging/chat integration
+- Universal live presence and statistics
+- Premium header
 
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-global-hotfix.js"></script>
-
-
-6) HOMEPAGE FEATURED / NEW SHOPS
-
-Delete the full old static Featured Shops embed and put this in its place:
-
-<div id="ma7alak-home-shop-spotlight"></div>
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-home-shop-spotlight.js"></script>
-
-This section reads Featured and NEW shops live from the admin-managed shop
-profiles. Its optional label, description, accent color, and button text are
-inside Add Shop / Edit Shop under the new “Homepage spotlight” panel.
+The new renderer connects to those working APIs; it does not replace them.
 
 
-7) ENGLISH ADD-YOUR-SHOP PROMO
+4) SAVE BEHAVIOR
 
-Delete the full old Arabic promo embed and put this in its place:
+Save & Publish updates:
+- shop_profiles for text, identity, hours, location and social details
+- shop_page_design for plan, template, colors, background, typography,
+  cards, hero, buttons, animations and section visibility
 
-<div id="ma7alak-add-shop-promo"></div>
-<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-add-shop-promo.js"></script>
-
-Its button opens:
-https://ma7alak.com/shufma7lit
+Anonymous visitors have read-only access to published designs.
+Only authenticated site admins can insert, update or delete design settings.
 
 
 DATABASE
 
-The owner self-follow and self-story-like prevention is already installed in
-Supabase. The new shop_page_design table is installed and protected by RLS.
-It stores one published configuration per immutable shop_slug.
-
+shop_page_design is already installed in Supabase with RLS and hardened grants.
+Do not run SQL manually.
