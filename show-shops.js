@@ -14,6 +14,131 @@
   }
 })();
 
+/* =========================================================
+   MA7ALAK DIRECTORY V2 — CONCEPT-ACCURATE MOBILE UI
+   This final visual layer replaces the legacy directory look.
+========================================================= */
+(function(){
+  "use strict";
+
+  if((window.location.pathname||"").replace(/\/+$/,"").toLowerCase()!=="/shwf-almhlat-") return;
+
+  const style=document.createElement("style");
+  style.id="ma7alak-directory-v2-style";
+  style.textContent=`
+    html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body,body.ma7alak-shops-body{background:#090807!important}
+    #ma7alak-shops-page{--v2gold:#efb650;--v2line:rgba(239,182,80,.24);width:100%!important;max-width:1040px!important;margin:0 auto!important;padding:14px 0 50px!important;overflow:hidden!important;background:radial-gradient(circle at 10% 12%,rgba(176,73,42,.15),transparent 28%),radial-gradient(circle at 90% 48%,rgba(53,99,151,.13),transparent 30%),#090807!important}
+    #ma7alak-shops-page .ma7alak-top-brand{display:none!important}
+
+    #ma7alak-shops-page .ma7alak-hero{position:relative!important;isolation:isolate!important;width:calc(100% - 24px)!important;min-height:292px!important;margin:0 12px 18px!important;padding:30px 22px 25px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;overflow:hidden!important;border:1px solid rgba(239,182,80,.38)!important;border-radius:31px!important;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(7,6,5,.28) 38%,rgba(7,6,5,.94) 100%),url("https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_po0pljpo0pljpo0p.jfif") center 42%/cover no-repeat!important;box-shadow:0 26px 70px rgba(0,0,0,.44),inset 0 0 65px rgba(0,0,0,.2)!important;text-align:center!important;box-sizing:border-box!important}
+    #ma7alak-shops-page .ma7alak-hero:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 50% 12%,rgba(239,182,80,.12),transparent 32%);pointer-events:none}
+    #ma7alak-shops-page .ma7alak-hero-icon.ma7alak-hero-eye{width:88px!important;height:64px!important;margin:0 auto 8px!important;filter:drop-shadow(0 8px 20px rgba(0,0,0,.8))!important}
+    #ma7alak-shops-page .ma7alak-hero-eye img{width:86px!important;height:62px!important;object-fit:contain!important;animation:ma7alakV2Eye 5s ease-in-out infinite!important}
+    @keyframes ma7alakV2Eye{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.025)}}
+    #ma7alak-shops-page .ma7alak-hero h1{margin:0!important;font:900 clamp(39px,8vw,63px)/1 Tahoma,Arial,sans-serif!important;letter-spacing:0!important}
+    #ma7alak-shops-page .ma7alak-hero h1 .ma7alak-arabic-hero-title{animation:ma7alakHeroColorFlow 5s linear infinite!important;filter:drop-shadow(0 5px 18px rgba(0,0,0,.82))!important}
+    #ma7alak-shops-page .ma7alak-hero p{max-width:520px!important;margin:11px auto 0!important;padding:0!important;color:rgba(255,255,255,.78)!important;font-size:13px!important;line-height:1.5!important;text-shadow:0 2px 10px #000!important}
+
+    #ma7alak-shops-page .ma7alak-search-wrapper{z-index:5!important;width:calc(100% - 28px)!important;max-width:none!important;margin:-5px 14px 17px!important}
+    #ma7alak-shops-page .ma7alak-search{height:58px!important;padding:0 58px 0 19px!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(29,25,22,.96),rgba(13,12,11,.97))!important;color:#fff!important;font-size:13px!important;box-shadow:0 16px 42px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.07)!important}
+    #ma7alak-shops-page .ma7alak-search:focus{border-color:rgba(239,182,80,.72)!important;box-shadow:0 0 0 4px rgba(239,182,80,.08),0 18px 45px rgba(0,0,0,.4)!important}
+    #ma7alak-shops-page .ma7alak-search-icon{right:18px!important;color:#f4d59d!important;font-size:27px!important}
+
+    #ma7alak-shops-page .ma7alak-filter-block,#ma7alak-shops-page .ma7alak-category-section{margin:0!important;padding:0 14px 15px!important;border:0!important;border-radius:0!important;background:transparent!important}
+    #ma7alak-shops-page .ma7alak-filter-label{margin:0 0 9px 2px!important;color:#e2b45f!important;font-size:10px!important;font-weight:900!important;letter-spacing:2.1px!important;text-transform:uppercase!important}
+    #ma7alak-shops-page .ma7alak-area-grid,#ma7alak-shops-page .ma7alak-category-grid{display:flex!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 7px!important;scroll-snap-type:x proximity!important;scrollbar-width:none!important}
+    #ma7alak-shops-page .ma7alak-area-button,#ma7alak-shops-page .ma7alak-category-button{flex:0 0 auto!important;min-height:45px!important;padding:0 16px!important;scroll-snap-align:start!important;border:1px solid rgba(255,255,255,.17)!important;border-radius:999px!important;background:linear-gradient(145deg,rgba(36,30,26,.9),rgba(18,16,14,.94))!important;color:rgba(255,255,255,.8)!important;font-size:11px!important;font-weight:800!important;box-shadow:inset 0 1px rgba(255,255,255,.05)!important}
+    #ma7alak-shops-page .ma7alak-area-button.active,#ma7alak-shops-page .ma7alak-category-button.active{border-color:#efb650!important;background:linear-gradient(135deg,#efb650,#bd772c)!important;color:#17100a!important;box-shadow:0 7px 22px rgba(217,142,49,.22)!important}
+    #ma7alak-shops-page .ma7alak-category-button{min-height:56px!important;border-radius:18px!important;flex-direction:column!important;gap:3px!important;min-width:82px!important;padding:7px 13px!important}
+    #ma7alak-shops-page .ma7alak-category-icon{font-size:20px!important}
+
+    #ma7alak-shops-page .ma7alak-discovery-preview{margin:3px 0 0!important;padding:14px 0 5px!important;border-top:1px solid rgba(255,255,255,.08)!important}
+    #ma7alak-shops-page .ma7alak-discovery-heading{margin:0 16px 12px!important;align-items:flex-end!important}
+    #ma7alak-shops-page .ma7alak-discovery-kicker{color:#dca858!important;font-size:9px!important;letter-spacing:2.4px!important}
+    #ma7alak-shops-page .ma7alak-discovery-heading h2{margin:4px 0 0!important;color:#fff!important;font:800 27px/1.05 Georgia,serif!important}
+    #ma7alak-shops-page .ma7alak-discovery-heading>span{color:rgba(255,255,255,.43)!important;font-size:10px!important}
+    #ma7alak-shops-page .ma7alak-discovery-cards{gap:12px!important;padding:2px 16px 16px!important;scroll-padding-inline:16px!important}
+    #ma7alak-shops-page .ma7alak-discovery-card{flex:0 0 min(76vw,305px)!important;height:232px!important;border-radius:25px!important;border:1px solid rgba(239,182,80,.3)!important;background:#15110e!important;box-shadow:0 18px 45px rgba(0,0,0,.38)!important}
+    #ma7alak-shops-page .ma7alak-discovery-card>img.cover{opacity:.92!important;filter:saturate(.94) contrast(1.03)!important}
+    #ma7alak-shops-page .ma7alak-discovery-card::after{background:linear-gradient(180deg,rgba(0,0,0,.03) 25%,rgba(0,0,0,.22) 52%,rgba(0,0,0,.96) 100%)!important}
+    #ma7alak-shops-page .ma7alak-discovery-card-copy{left:15px!important;right:15px!important;bottom:15px!important}
+    #ma7alak-shops-page .ma7alak-discovery-card-copy img.logo{width:48px!important;height:48px!important;flex-basis:48px!important;border:2px solid #efbd69!important;box-shadow:0 0 0 3px rgba(239,182,80,.12),0 8px 18px rgba(0,0,0,.5)!important}
+    #ma7alak-shops-page .ma7alak-discovery-card-text strong{font-size:17px!important}
+    #ma7alak-shops-page .ma7alak-discovery-card-text span{font-size:10px!important;color:rgba(255,255,255,.72)!important}
+    #ma7alak-shops-page .ma7alak-discovery-badge{top:13px!important;left:13px!important;padding:6px 9px!important;border:1px solid rgba(255,255,255,.12)!important;background:rgba(4,4,4,.72)!important;backdrop-filter:blur(9px)!important}
+
+    #ma7alak-shops-page .ma7alak-results{margin:7px 0 0!important;padding:18px 0 4px!important;border-top:1px solid rgba(255,255,255,.08)!important}
+    #ma7alak-shops-page .ma7alak-results-top{margin:0 15px!important;padding:0 0 12px!important;align-items:flex-end!important;border-bottom:0!important}
+    #ma7alak-shops-page .ma7alak-results-kicker{font-size:9px!important;color:#dca858!important}
+    #ma7alak-shops-page .ma7alak-results-title{font-size:27px!important}
+    #ma7alak-shops-page .ma7alak-results-subtitle{font-size:10px!important}
+    #ma7alak-shops-page .ma7alak-shop-grid{display:flex!important;grid-template-columns:none!important;gap:12px!important;overflow-x:auto!important;padding:3px 15px 18px!important;scroll-snap-type:x mandatory!important;scroll-padding-inline:15px!important;scrollbar-width:none!important}
+    #ma7alak-shops-page .ma7alak-shop-grid::-webkit-scrollbar{display:none!important}
+    #ma7alak-shops-page .ma7alak-shop-card{position:relative!important;flex:0 0 min(76vw,305px)!important;min-height:370px!important;padding:0 0 14px!important;overflow:hidden!important;scroll-snap-align:start!important;border:1px solid rgba(239,182,80,.26)!important;border-radius:25px!important;background:linear-gradient(155deg,#201a16,#0d0c0b 62%)!important;text-align:left!important;box-shadow:0 18px 48px rgba(0,0,0,.38)!important}
+    #ma7alak-shops-page .ma7alak-shop-card:before,#ma7alak-shops-page .ma7alak-shop-card:after{display:none!important}
+    #ma7alak-shops-page .ma7alak-shop-cover-link{position:relative!important;display:block!important;width:100%!important;height:178px!important;overflow:hidden!important;text-decoration:none!important}
+    #ma7alak-shops-page .ma7alak-shop-cover-image{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;background:#171411!important}
+    #ma7alak-shops-page .ma7alak-shop-cover-shade{position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.4))!important}
+    #ma7alak-shops-page .ma7alak-shop-cover-badge{position:absolute!important;top:12px!important;left:12px!important;padding:6px 9px!important;border:1px solid rgba(239,182,80,.5)!important;border-radius:999px!important;background:rgba(0,0,0,.68)!important;color:#f4c873!important;font-size:9px!important;font-weight:900!important;letter-spacing:.6px!important;backdrop-filter:blur(8px)!important}
+    #ma7alak-shops-page .ma7alak-shop-cover-badge.red{border-color:rgba(255,92,92,.5)!important;color:#ff8b8b!important}
+    #ma7alak-shops-page .ma7alak-shop-image-link{position:relative!important;z-index:4!important;width:62px!important;height:62px!important;margin:-31px 0 0 15px!important;justify-content:flex-start!important}
+    #ma7alak-shops-page .ma7alak-shop-image-ring{width:62px!important;height:62px!important;padding:3px!important;box-shadow:0 8px 22px rgba(0,0,0,.58),0 0 0 3px #111!important}
+    #ma7alak-shops-page .ma7alak-verified-badge{right:-3px!important;bottom:-1px!important;width:20px!important;height:20px!important;font-size:10px!important}
+    #ma7alak-shops-page .ma7alak-shop-content{margin:8px 15px 0!important;display:block!important;text-align:left!important}
+    #ma7alak-shops-page .ma7alak-shop-title-row{justify-content:flex-start!important}
+    #ma7alak-shops-page .ma7alak-shop-name{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-size:19px!important;line-height:1.15!important}
+    #ma7alak-shops-page .ma7alak-shop-arabic{min-height:0!important;margin-top:3px!important;text-align:left!important;direction:rtl!important;color:rgba(255,255,255,.67)!important;font-size:11px!important}
+    #ma7alak-shops-page .ma7alak-shop-category-pill{width:auto!important;margin-top:9px!important;padding:5px 9px!important;justify-content:flex-start!important;font-size:8px!important}
+    #ma7alak-shops-page .ma7alak-shop-location{justify-content:flex-start!important;margin-top:8px!important;font-size:10px!important}
+    #ma7alak-shops-page .ma7alak-featured{display:none!important}
+    #ma7alak-shops-page .ma7alak-profile-button{min-height:43px!important;margin:13px 0 0!important;transform:none!important;border-radius:14px!important;background:linear-gradient(135deg,#efbd69,#c88431)!important;border:0!important;color:#181008!important;font-size:11px!important;font-weight:900!important}
+    #ma7alak-shops-page .ma7alak-empty{margin:3px 15px!important}
+    #ma7alak-shops-page .ma7alak-change-area{margin-top:4px!important}
+
+    #ma7alak-shops-page .ma7alak-business-cta{width:calc(100% - 28px)!important;margin:24px 14px 0!important;padding:20px!important;border:1px solid rgba(239,182,80,.28)!important;border-radius:24px!important;background:radial-gradient(circle at 85% 15%,rgba(239,182,80,.18),transparent 35%),linear-gradient(145deg,#211a15,#0e0d0c)!important;box-shadow:0 18px 45px rgba(0,0,0,.34)!important;box-sizing:border-box!important}
+    #ma7alak-shops-page .ma7alak-business-cta h2{font-size:24px!important}
+    #ma7alak-shops-page .ma7alak-add-button{min-width:155px!important;height:48px!important;border-radius:15px!important}
+    #ma7alak-shops-page .ma7alak-footer{margin:24px 14px 0!important;padding-top:18px!important}
+    #ma7alak-shops-page .ma7alak-footer-features{display:none!important}
+    #ma7alak-shops-page .ma7alak-footer-logo{margin-top:0!important;font-size:20px!important}
+
+    @media(max-width:700px){
+      #ma7alak-shops-page .ma7alak-hero{min-height:278px!important}
+      #ma7alak-shops-page .ma7alak-business-cta{align-items:flex-start!important;text-align:left!important;gap:15px!important}
+      #ma7alak-shops-page .ma7alak-add-button{width:100%!important}
+      #ma7alak-shops-page .ma7alak-results-top{flex-direction:row!important;gap:8px!important}
+      #ma7alak-shops-page .ma7alak-results-count{font-size:8px!important}
+    }
+    @media(max-width:390px){
+      #ma7alak-shops-page .ma7alak-hero{min-height:255px!important;padding-left:16px!important;padding-right:16px!important}
+      #ma7alak-shops-page .ma7alak-discovery-card,#ma7alak-shops-page .ma7alak-shop-card{flex-basis:82vw!important}
+    }
+  `;
+  (document.head||document.documentElement).appendChild(style);
+  setTimeout(function(){
+    if(style.parentNode){
+      style.parentNode.appendChild(style);
+    }
+  },80);
+
+  function upgradeLabels(){
+    const page=document.getElementById("ma7alak-shops-page");
+    if(!page) return false;
+    page.classList.add("ma7alak-directory-v2");
+    const labels=page.querySelectorAll(".ma7alak-filter-label");
+    if(labels[0]) labels[0].textContent="Explore Areas";
+    if(labels[1]) labels[1].textContent="Browse Categories";
+    const search=page.querySelector("#ma7alak-shop-search");
+    if(search) search.placeholder="Search shops, places or categories...";
+    return true;
+  }
+
+  if(!upgradeLabels()){
+    const timer=setInterval(function(){if(upgradeLabels()) clearInterval(timer)},200);
+    setTimeout(function(){clearInterval(timer)},7000);
+  }
+})();
+
 (function(){
 
   "use strict";
@@ -2933,6 +3058,21 @@
 
 
     card.innerHTML = `
+
+      <a
+        class="ma7alak-shop-cover-link"
+        href="${shop.url}"
+        onclick="window.top.location.href='${shop.url}'; return false;"
+      >
+        <img
+          class="ma7alak-shop-cover-image"
+          src="${escapeHTML(shop.cover || shop.image)}"
+          alt=""
+          loading="lazy"
+        >
+        <span class="ma7alak-shop-cover-shade"></span>
+        ${shop.featured ? `<span class="ma7alak-shop-cover-badge ${shop.redFeatured ? "red" : ""}">★ FEATURED</span>` : ""}
+      </a>
 
 
       <!-- SHOP IMAGE -->
