@@ -69,3 +69,13 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+
+/* Re-evaluate timed Featured badges even when no database row changes. */
+(function(){
+  if(location.pathname.replace(/\/+$/,'').toLowerCase()!=='/shwf-almhlat-')return;
+  setInterval(()=>{
+    if(document.hidden)return;
+    const search=document.querySelector('#ma7alak-shops-page input[type="search"]');
+    if(search)search.dispatchEvent(new Event('input',{bubbles:true}));
+  },30000);
+})();
