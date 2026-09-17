@@ -419,6 +419,7 @@
   let pendingReelPublicUrl = "";
 
   let managedShops = [];
+  let activeStoryShopSlugs = new Set();
   let lastAddedShopSlug = "";
 
 
@@ -781,11 +782,18 @@
 
     setStatus(manageStatus, "Loading shops…");
 
-    const { data, error } =
-      await supabaseClient
+    const nowIso = new Date().toISOString();
+    const [shopResult, storyResult] = await Promise.all([
+      supabaseClient
         .from("shop_profiles")
         .select("*")
-        .order("shop_name", { ascending:true });
+        .order("shop_name", { ascending:true }),
+      supabaseClient
+        .from("shop_stories")
+        .select("shop_slug,expires_at")
+    ]);
+
+    const { data, error } = shopResult;
 
     if(error){
       setStatus(manageStatus, error.message || "Could not load shops.", "error");
@@ -793,6 +801,11 @@
     }
 
     managedShops = data || [];
+    activeStoryShopSlugs = new Set(
+      storyResult.error
+        ? []
+        : (storyResult.data || []).filter(row => !row.expires_at || row.expires_at > nowIso).map(row => String(row.shop_slug || "")).filter(Boolean)
+    );
     setStatus(manageStatus, "");
     renderManagedShops();
     loadVisibleOwnerBadges();
@@ -2202,6 +2215,12 @@
       const directoryOptions = shop.directory_options && typeof shop.directory_options === "object" ? shop.directory_options : {};
       const cover = escapeHtml(directoryOptions.cover || shop.main_image_url || shop.intro_poster_url || "");
       const directoryBadge = normalizedText(directoryOptions.badge);
+      const featuredUntil = directoryOptions.featured_until ? new Date(directoryOptions.featured_until) : null;
+      const featureActive = shop.featured === true && (!featuredUntil || featuredUntil > new Date());
+      const featureDays = featuredUntil && featuredUntil > new Date()
+        ? Math.max(1, Math.ceil((featuredUntil.getTime() - Date.now()) / 86400000))
+        : null;
+      const hasStory = activeStoryShopSlugs.has(String(shop.shop_slug || ""));
       const meta = [shop.city, shop.area, shop.category_name || shop.category, shop.location].filter(Boolean).map(escapeHtml).join(" • ");
 
       const imageHtml = image
@@ -2215,9 +2234,9 @@
 
       let badges = '';
       badges += '<span class="ma-admin-shop-badge ' + (shop.is_active ? 'active' : '') + '">' + (shop.is_active ? 'Active' : 'Hidden') + '</span>';
-      badges += '<span class="ma-admin-shop-badge ' + (completeness.ready ? 'ready' : 'incomplete') + '">' + (completeness.ready ? '✓ Ready' : '⚠ Incomplete') + '</span>';
-      if(shop.verified) badges += '<span class="ma-admin-shop-badge">Verified</span>';
-      if(shop.featured) badges += '<span class="ma-admin-shop-badge featured">Featured</span>';
+      badges += '<span class="ma-admin-shop-badge ' + (shop.verified ? 'verified' : 'incomplete') + '">' + (shop.verified ? '✓ Verified' : 'Not verified') + '</span>';
+      if(hasStory) badges += '<span class="ma-admin-shop-badge live">● LIVE</span>';
+      if(featureActive) badges += '<span class="ma-admin-shop-badge featured">Featured' + (featureDays ? ' · ' + featureDays + 'd' : '') + '</span>';
       if(shop.featured_red) badges += '<span class="ma-admin-shop-badge red">Red Featured</span>';
       if(directoryBadge) badges += '<span class="ma-admin-shop-badge new">' + escapeHtml(directoryBadge) + '</span>';
 
@@ -2228,7 +2247,7 @@
       return '' +
         '<article class="ma-admin-shop-item ' + (shop.is_active ? '' : 'is-inactive') + '" data-slug="' + slug + '">' +
           (cover ? '<img class="ma-admin-shop-cover" src="' + cover + '" alt="" loading="lazy">' : '') +
-          '<div class="ma-admin-shop-thumb">' + imageHtml + '</div>' +
+          '<div class="ma-admin-shop-thumb ' + (hasStory ? 'has-story' : '') + '">' + imageHtml + '</div>' +
           '<div class="ma-admin-shop-info">' +
             '<div class="ma-admin-shop-name-row"><div class="ma-admin-shop-name">' + name + '</div><span class="ma-admin-owner-state" data-owner-badge="' + slug + '">Checking owner…</span></div>' +
             '<div class="ma-admin-shop-slug">/' + slug + '</div>' +
@@ -2238,8 +2257,9 @@
           '</div>' +
           '<div class="ma-admin-shop-actions">' +
             '<button class="ma-shop-action primary" type="button" data-action="edit">✏️ Edit all</button>' +
-            '<button class="ma-shop-action" type="button" data-action="active">' + (shop.is_active ? '🙈 Hide' : '👁 Activate') + '</button>' +
-            '<button class="ma-shop-action feature" type="button" data-action="featured">' + (shop.featured ? '★ Unfeature' : '☆ Feature') + '</button>' +
+            '<button class="ma-shop-action" type="button" data-action="active">' + (shop.is_active ? '🙈 Hide shop' : '👁 Show shop') + '</button>' +
+            '<button class="ma-shop-action verify" type="button" data-action="verified">' + (shop.verified ? '✓ Unverify' : '✓ Verify') + '</button>' +
+            '<button class="ma-shop-action feature" type="button" data-action="featured">' + (featureActive ? '★ Unfeature' : '☆ Feature days') + '</button>' +
             '<button class="ma-shop-action new" type="button" data-action="new">' + (/^new$/i.test(directoryBadge) ? 'Remove NEW' : '＋ NEW badge') + '</button>' +
             '<button class="ma-shop-action owner" type="button" data-action="owner">👤 Assign owner</button>' +
             '<button class="ma-shop-action gallery" type="button" data-action="gallery">🖼 Gallery</button>' +
@@ -3161,7 +3181,12 @@
       }
 
       if(action === "featured"){
-        await updateShopFlag(slug, "featured", !shop.featured);
+        window.dispatchEvent(new CustomEvent("ma7alak:feature-shop", { detail:{ slug:slug } }));
+        return;
+      }
+
+      if(action === "verified"){
+        await updateShopFlag(slug, "verified", !shop.verified);
         return;
       }
 
@@ -4248,18 +4273,21 @@
       if(!citySel||!areaSel) return;
       const rows=v2Areas.filter(a=>a.city_key===citySel.value && a.is_active!==false);
       areaSel.innerHTML='<option value="">Choose area…</option>'+rows.map(a=>`<option value="${esc(a.area_name)}">${esc(a.area_name)}</option>`).join("");
+      areaSel.required = rows.length > 0;
       if(currentArea) areaSel.value=currentArea;
     }
 
     function refreshSmartFields(){
       ["ma-shop-city-v2","ma-edit-city-v2"].forEach(id=>{
         const sel=byId(id); if(!sel)return;
+        sel.required=true;
         const old=sel.value;
         sel.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
         if(old) sel.value=old;
       });
       ["ma-shop-v2-category-smart","ma-edit-v2-category-smart"].forEach(id=>{
         const sel=byId(id); if(!sel)return;
+        sel.required=true;
         const old=sel.value;
         sel.innerHTML='<option value="">Choose category…</option>'+v2Categories.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.category_key)}">${esc(c.icon)} ${esc(c.category_name)}</option>`).join("");
         if(old) sel.value=old;
@@ -4389,15 +4417,14 @@
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},()=>loadV2Taxonomy().catch(console.warn))
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},()=>loadV2Taxonomy().catch(console.warn))
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},async()=>{await loadManagedShops();})
+        .on("postgres_changes",{event:"*",schema:"public",table:"shop_stories"},async()=>{await loadManagedShops();})
         .subscribe();
     }
 
 
     const AREA_MODE_KEY = "ma7alak_admin_areas_enabled_v2";
 
-    function areasEnabled(){
-      return localStorage.getItem(AREA_MODE_KEY) === "1";
-    }
+    function areasEnabled(){ return true; }
 
     function applyAreaMode(){
       const enabled = areasEnabled();
@@ -4405,12 +4432,12 @@
       const toggle = byId("ma-v2-toggle-areas");
       const state = byId("ma-v2-area-state");
 
-      if(controls) controls.hidden = !enabled;
-      if(toggle) toggle.textContent = enabled ? "Stop Areas" : "Start Areas";
-      if(state) state.textContent = enabled ? "ON" : "OFF";
+      if(controls) controls.hidden = false;
+      if(toggle) toggle.hidden = true;
+      if(state) state.textContent = "LIVE DIRECTORY";
 
       document.querySelectorAll(".ma-v2-area-shop-field").forEach(el=>{
-        el.hidden = !enabled;
+        el.hidden = false;
       });
 
       /*
@@ -4422,11 +4449,6 @@
     function bindAreaMode(){
       const toggle = byId("ma-v2-toggle-areas");
       if(!toggle) return;
-      toggle.addEventListener("click", function(){
-        const next = !areasEnabled();
-        localStorage.setItem(AREA_MODE_KEY, next ? "1" : "0");
-        applyAreaMode();
-      });
       applyAreaMode();
     }
 
@@ -4454,6 +4476,103 @@
     bootV2();
   })();
 
+})();
+
+/* =========================================================
+   MA7ALAK ADMIN — STORY STATUS, TIMED FEATURES & PANEL CONTROL
+========================================================= */
+(function(){
+"use strict";
+if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin"||window.__M7_ADMIN_DIRECTORY_FINISH__)return;
+window.__M7_ADMIN_DIRECTORY_FINISH__=true;
+let client=null,featureSlug="",panelObserver=null,expiryTimer=null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function installCss(){
+  if($("m7-admin-directory-finish-css"))return;
+  const style=document.createElement("style");
+  style.id="m7-admin-directory-finish-css";
+  style.textContent=`
+.ma-admin-shop-thumb.has-story{border-color:#39e784!important;outline:2px solid #39e784;outline-offset:3px;box-shadow:0 0 0 0 #39e78488,0 0 18px #39e78488!important;animation:m7AdminStoryRing 1.55s ease-in-out infinite!important}
+.ma-admin-shop-badge.verified{color:#a4f5bd!important;border-color:#42d97866!important;background:#173720!important}.ma-admin-shop-badge.live{color:#8dffb0!important;border-color:#39e78488!important;background:#12371f!important;animation:m7AdminLive 1.45s ease-in-out infinite!important}.ma-admin-shop-badge.featured{color:#fff!important;border-color:#ff5d6eaa!important;background:linear-gradient(120deg,#a50f25,#e12f43)!important;box-shadow:0 0 14px #ff2f4c66!important;animation:m7AdminFeatured 1.65s ease-in-out infinite!important}
+.ma-shop-action.verify{color:#9df0b7!important;border-color:#3bd87955!important;background:#142d1d!important}.ma-shop-action.feature{color:#ff9aa5!important;border-color:#ef405455!important;background:#35141a!important}
+@keyframes m7AdminStoryRing{50%{outline-color:#a6ffc2;box-shadow:0 0 0 7px #39e78400,0 0 25px #39e784cc!important;transform:scale(1.025)}}@keyframes m7AdminLive{50%{box-shadow:0 0 14px #39e78499}}@keyframes m7AdminFeatured{50%{box-shadow:0 0 24px #ff2f4cbb!important;filter:brightness(1.12)}}
+.m7-feature-overlay{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;padding:18px;background:#000c;backdrop-filter:blur(8px)}.m7-feature-overlay.open{display:flex}.m7-feature-box{width:min(430px,100%);padding:22px;border:1px solid #ef546c77;border-radius:22px;background:linear-gradient(145deg,#211214,#0e0c0c);color:#fff;box-shadow:0 24px 90px #000}.m7-feature-box h2{margin:0 0 7px}.m7-feature-box p{color:#ffffff99;font-size:13px}.m7-feature-box input{width:100%;min-height:50px;padding:10px 13px;border:1px solid #ef546c66;border-radius:12px;background:#100c0d;color:#fff;font-size:17px}.m7-feature-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.m7-feature-actions button{min-height:45px;border:0;border-radius:12px;font-weight:900}.m7-feature-save{background:linear-gradient(120deg,#f36b77,#bc172f);color:#fff}.m7-feature-remove{background:#33151a;color:#ff9aa5}.m7-feature-close{background:#24201f;color:#fff}.m7-feature-status{min-height:20px;color:#ff9aa5!important}
+.m7-panel-toggle{margin-left:auto;min-width:70px;border:1px solid #d99a4555!important;background:#211812!important;color:#f4b85d!important;border-radius:9px!important;padding:7px 10px!important;font-weight:900!important;cursor:pointer}.m7-admin-collapsed>:not(.ma-admin-section-head):not(.ma-v2-head):not(.m7-panel-toggle):not(h2){display:none!important}.m7-admin-collapsed{padding-bottom:12px!important}.m7-panel-title-row{display:flex;align-items:center;gap:10px}.m7-panel-title-row>h2{flex:1}.m7-admin-panel-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.m7-admin-panel-toolbar button{border:1px solid #d99a4555;border-radius:10px;background:#211812;color:#f4b85d;padding:9px 12px;font-weight:900}
+@media(max-width:600px){.ma-admin-shop-thumb.has-story{animation-duration:1.35s!important}.m7-feature-box{padding:18px}.m7-panel-toggle{min-width:62px;padding:7px 8px!important}}
+@media(prefers-reduced-motion:reduce){.ma-admin-shop-thumb.has-story,.ma-admin-shop-badge.live,.ma-admin-shop-badge.featured{animation:none!important}}
+`;
+  document.head.appendChild(style);
+}
+
+function mountFeature(){
+  if($("m7-feature-overlay"))return;
+  const overlay=document.createElement("div");
+  overlay.id="m7-feature-overlay";
+  overlay.className="m7-feature-overlay";
+  overlay.innerHTML=`<section class="m7-feature-box" role="dialog" aria-modal="true" aria-labelledby="m7-feature-title"><h2 id="m7-feature-title">Timed Featured shop</h2><p id="m7-feature-shop"></p><label>How many days?<input id="m7-feature-days" type="number" min="1" max="365" step="1" value="7" inputmode="numeric"></label><p class="m7-feature-status" id="m7-feature-status" role="status"></p><div class="m7-feature-actions"><button class="m7-feature-save" id="m7-feature-save" type="button">Activate feature</button><button class="m7-feature-remove" id="m7-feature-remove" type="button">Remove feature</button><button class="m7-feature-close" id="m7-feature-close" type="button">Cancel</button></div></section>`;
+  document.body.appendChild(overlay);
+  $("m7-feature-close").onclick=closeFeature;
+  overlay.onclick=e=>{if(e.target===overlay)closeFeature()};
+  $("m7-feature-save").onclick=saveFeature;
+  $("m7-feature-remove").onclick=()=>removeFeature(featureSlug);
+}
+function closeFeature(){featureSlug="";$("m7-feature-overlay")?.classList.remove("open")}
+async function openFeature(slug){
+  mountFeature();featureSlug=String(slug||"");
+  const card=document.querySelector(`.ma-admin-shop-item[data-slug="${CSS.escape(featureSlug)}"]`);
+  $("m7-feature-shop").textContent=(card?.querySelector(".ma-admin-shop-name")?.textContent||featureSlug)+" · Choose exactly how long the red Featured badge stays active.";
+  $("m7-feature-status").textContent="";
+  $("m7-feature-overlay").classList.add("open");
+  setTimeout(()=>$("m7-feature-days")?.focus(),40);
+}
+async function profile(slug){const r=await client.from("shop_profiles").select("shop_slug,shop_name,featured,directory_options").eq("shop_slug",slug).single();if(r.error)throw r.error;return r.data}
+async function saveFeature(){
+  const days=Number($("m7-feature-days").value),status=$("m7-feature-status"),button=$("m7-feature-save");
+  if(!Number.isInteger(days)||days<1||days>365){status.textContent="Enter a whole number from 1 to 365.";return}
+  button.disabled=true;status.textContent="Saving…";
+  try{const row=await profile(featureSlug),options={...(row.directory_options||{}),featured_until:new Date(Date.now()+days*86400000).toISOString()};const r=await client.from("shop_profiles").update({featured:true,directory_options:options}).eq("shop_slug",featureSlug);if(r.error)throw r.error;status.textContent=`Featured for ${days} day${days===1?"":"s"}.`;setTimeout(closeFeature,500)}catch(e){status.textContent=e.message||"Could not save Featured days."}finally{button.disabled=false}
+}
+async function removeFeature(slug){
+  if(!slug)return;const status=$("m7-feature-status"),button=$("m7-feature-remove");button.disabled=true;status.textContent="Removing…";
+  try{const row=await profile(slug),options={...(row.directory_options||{})};delete options.featured_until;const r=await client.from("shop_profiles").update({featured:false,directory_options:options}).eq("shop_slug",slug);if(r.error)throw r.error;status.textContent="Featured removed.";setTimeout(closeFeature,450)}catch(e){status.textContent=e.message||"Could not remove Featured."}finally{button.disabled=false}
+}
+async function clearExpiredFeatures(){
+  if(!client)return;const r=await client.from("shop_profiles").select("shop_slug,directory_options").eq("featured",true);if(r.error)return;
+  const expired=(r.data||[]).filter(x=>x.directory_options?.featured_until&&new Date(x.directory_options.featured_until)<=new Date());
+  await Promise.all(expired.map(row=>{const options={...(row.directory_options||{})};delete options.featured_until;return client.from("shop_profiles").update({featured:false,directory_options:options}).eq("shop_slug",row.shop_slug)}));
+}
+
+function panelKey(panel,index){return "m7_admin_panel_"+(panel.id||panel.querySelector("h2")?.textContent||index).trim().toLowerCase().replace(/[^a-z0-9]+/g,"_")}
+function setCollapsed(panel,button,collapsed,key){panel.classList.toggle("m7-admin-collapsed",collapsed);button.textContent=collapsed?"Unhide":"Hide";button.setAttribute("aria-expanded",String(!collapsed));try{localStorage.setItem(key,collapsed?"1":"0")}catch(_){}}
+function installPanelToggles(){
+  const dash=$("ma-admin-dashboard");if(!dash)return;
+  dash.querySelectorAll(".m7-collapse-btn").forEach(x=>x.remove());
+  [...dash.children].forEach((panel,index)=>{
+    if(panel.id==="m7-shop-control"||panel.classList.contains("ma-admin-welcome")||panel.dataset.m7AllPanel)return;
+    const head=panel.querySelector(":scope > .ma-admin-section-head, :scope > .ma-v2-head");
+    const h2=panel.querySelector(":scope > h2");
+    if(!head&&!h2)return;
+    panel.dataset.m7AllPanel="1";const key=panelKey(panel,index);const button=document.createElement("button");button.type="button";button.className="m7-panel-toggle";
+    if(head)head.appendChild(button);else{let row=document.createElement("div");row.className="m7-panel-title-row";h2.before(row);row.append(h2,button)}
+    let collapsed=false;try{collapsed=localStorage.getItem(key)==="1"}catch(_){}
+    button.onclick=e=>{e.preventDefault();e.stopPropagation();setCollapsed(panel,button,!panel.classList.contains("m7-admin-collapsed"),key)};setCollapsed(panel,button,collapsed,key);
+  });
+  if(!$("m7-admin-panel-toolbar")){
+    const toolbar=document.createElement("div");toolbar.id="m7-admin-panel-toolbar";toolbar.className="m7-admin-panel-toolbar";toolbar.innerHTML='<button type="button" data-panels="show">Unhide all panels</button><button type="button" data-panels="hide">Hide all panels</button>';
+    $("m7-shop-control")?.append(toolbar);toolbar.onclick=e=>{const b=e.target.closest("[data-panels]");if(!b)return;dash.querySelectorAll(":scope > [data-m7-all-panel]").forEach((p,i)=>{const t=p.querySelector(":scope > .ma-admin-section-head .m7-panel-toggle, :scope > .ma-v2-head .m7-panel-toggle, :scope > .m7-panel-title-row .m7-panel-toggle");if(t)setCollapsed(p,t,b.dataset.panels==="hide",panelKey(p,i))})};
+  }
+}
+function removeLegacyOwner(){$("ma-admin-owner-card")?.remove();$("ma-admin-post-add-owner")?.remove()}
+async function ready(){
+  for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;
+  installCss();mountFeature();removeLegacyOwner();installPanelToggles();
+  window.addEventListener("ma7alak:feature-shop",e=>openFeature(e.detail?.slug));
+  panelObserver=new MutationObserver(()=>{removeLegacyOwner();installPanelToggles()});panelObserver.observe($("ma-admin-dashboard")||document.body,{childList:true,subtree:false});
+  await clearExpiredFeatures();clearInterval(expiryTimer);expiryTimer=setInterval(clearExpiredFeatures,60000);
+}
+ready().catch(console.error);
 })();
 
   }
@@ -4492,7 +4611,7 @@ function mount(){css();document.getElementById("m7adm-mod")?.remove();if(documen
 <div class="m7adm-panel"><button class="m7adm-head" data-target="m7adm-analytics"><span>📊 Analytics</span><span>Hide / Unhide</span></button><div id="m7adm-analytics" class="m7adm-body"><div class="m7adm-analytics"><div id="m7adm-online-total" class="m7adm-big">0</div><div class="m7adm-sub">visitors browsing Ma7alak right now</div></div></div></div>
 <div class="m7adm-panel"><button class="m7adm-head" data-target="m7adm-users"><span>👥 Viewer Users</span><span>Hide / Unhide</span></button><div id="m7adm-users" class="m7adm-body"><div class="m7adm-tools"><input id="m7adm-user-search" class="m7adm-search" type="search" placeholder="Search name, full email or status…" autocomplete="off"></div><div id="m7adm-user-list"><div class="m7adm-empty">Loading users...</div></div></div></div>
 <div class="m7adm-panel"><button class="m7adm-head" data-target="m7adm-owner"><span>👤 Owner Management</span><span>Hide / Unhide</span></button><div id="m7adm-owner" class="m7adm-body"><div class="m7adm-ownerbox"><select id="m7adm-owner-shop" class="m7adm-select"><option value="">Select shop…</option></select><input id="m7adm-owner-email" class="m7adm-input" type="email" placeholder="Google account email"><button id="m7adm-owner-assign" class="m7adm-btn view" type="button">Assign Owner</button><div id="m7adm-owner-state" class="m7adm-ownerstate bad">❌ Select a shop to check its owner.</div><div class="m7adm-danger"><strong>Owner access</strong><div style="color:#bbb;font-size:12px;margin-bottom:10px">Removing owner access keeps the normal Google viewer account and the shop itself.</div><button id="m7adm-owner-delete" class="m7adm-btn del" type="button">Delete Owner Account</button></div></div></div></div>
-<div class="m7adm-panel"><button class="m7adm-head" data-target="m7adm-reports"><span>🚩 Chat Reports</span><span>Hide / Unhide</span></button><div id="m7adm-reports" class="m7adm-body"><div class="m7adm-empty">Loading reports...</div></div></div>`;host.appendChild(x);x.querySelectorAll(".m7adm-head").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.target)?.classList.toggle("hidden"));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.hidden=true;return true}
+<div class="m7adm-panel"><button class="m7adm-head" data-target="m7adm-reports"><span>🚩 Chat Reports</span><span>Hide / Unhide</span></button><div id="m7adm-reports" class="m7adm-body"><div class="m7adm-empty">Loading reports...</div></div></div>`;host.appendChild(x);x.querySelectorAll(".m7adm-head").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.target)?.classList.toggle("hidden"));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.remove();let post=document.getElementById("ma-admin-post-add-owner");if(post)post.remove();return true}
 async function loadPresence(){let r=await sb.rpc("ma7alak_admin_user_presence");presenceMap.clear();if(!r.error)(r.data||[]).forEach(p=>presenceMap.set(String(p.user_id),p));}
 function renderUsers(){let box=document.getElementById("m7adm-user-list");if(!box)return;let q=(document.getElementById("m7adm-user-search")?.value||"").trim().toLowerCase();let rows=userRows.filter(u=>!q||[u.display_name,u.username,u.email,u.account_status].some(v=>String(v||"").toLowerCase().includes(q)));box.innerHTML=rows.length?rows.map(u=>{let p=presenceMap.get(String(u.user_id)),on=!!p?.is_online;return `<div class="m7adm-user ${u.account_status!=="active"?"m7adm-banned":""}">${u.avatar_url?`<img class="m7adm-avatar" src="${esc(u.avatar_url)}">`:'<div class="m7adm-avatar"></div>'}<div class="m7adm-copy"><strong>${esc(u.display_name||u.username||"Google User")}</strong><small class="m7adm-email">${esc(u.email||"Email unavailable")}</small><small><span class="m7adm-presence"><i class="m7adm-dot ${on?"on":"off"}"></i>${on?"Browsing now":"Offline"}</span> · Account: ${esc(u.account_status||"active")}</small><small>Created: ${esc(u.created_at?new Date(u.created_at).toLocaleString():"")}</small>${u.banned_reason?`<small>Reason: ${esc(u.banned_reason)}</small>`:""}</div><div class="m7adm-actions">${u.account_status==="banned"?`<button class="m7adm-btn ok" data-act="active" data-id="${esc(u.user_id)}">Unban</button>`:`<button class="m7adm-btn ban" data-act="banned" data-id="${esc(u.user_id)}">Ban</button>`}<button class="m7adm-btn del" data-act="deleted" data-id="${esc(u.user_id)}">Delete from site</button></div></div>`}).join(""):'<div class="m7adm-empty">No matching viewer users.</div>';box.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{let reason=b.dataset.act==="banned"?prompt("Ban reason:","Chat abuse"):null;if(b.dataset.act==="deleted"&&!confirm("Disable/delete this viewer from Ma7alak?"))return;let r=await sb.rpc("ma7alak_admin_set_user_status",{p_user_id:b.dataset.id,p_status:b.dataset.act,p_reason:reason});if(r.error)alert(r.error.message);else loadUsers()})}
 async function loadUsers(){try{let [u]=await Promise.all([sb.rpc("ma7alak_admin_list_users"),loadPresence()]);if(u.error)throw u.error;userRows=u.data||[];renderUsers()}catch(e){let b=document.getElementById("m7adm-user-list");if(b)b.innerHTML=`<div class="m7adm-empty">${esc(e.message||"Could not load users.")}</div>`}}
@@ -4715,7 +4834,7 @@ function css(){if($('m7-shop-control-css'))return;const style=document.createEle
 @media(max-width:720px){#m7-shop-control{padding:15px;border-radius:20px}.m7sc-title-row h2{font-size:23px}.m7sc-stats{grid-template-columns:repeat(2,1fr)}#ma-admin-shop-list{grid-template-columns:1fr!important}.ma-admin-shop-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.ma-admin-shop-item{grid-template-columns:68px minmax(0,1fr)!important}.ma-admin-shop-thumb{width:68px!important;height:68px!important}.m7da-grid,.m7da-cat{grid-template-columns:1fr!important}}
 `;document.head.append(style)}
 function target(id){if(id==='m7-admin-add-shop'){const section=$('ma-admin-shop-form')?.closest('section');if(section&&!section.id)section.id=id;return section}return $(id)}
-function openSection(id){const section=target(id);if(!section)return;section.hidden=false;section.querySelectorAll('.m7-collapsed-body,.hidden').forEach(el=>{if(el.classList.contains('m7adm-body')||el.classList.contains('m7-collapsed-body'))el.classList.remove('hidden','m7-collapsed-body')});section.querySelectorAll('.m7-collapse-btn').forEach(b=>b.textContent='Hide');section.classList.remove('m7sc-flash');void section.offsetWidth;section.classList.add('m7sc-flash');section.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>section.classList.remove('m7sc-flash'),1000)}
+function openSection(id){const section=target(id);if(!section)return;section.hidden=false;section.classList.remove('m7-admin-collapsed');section.querySelectorAll('.m7-collapsed-body,.hidden').forEach(el=>{if(el.classList.contains('m7adm-body')||el.classList.contains('m7-collapsed-body'))el.classList.remove('hidden','m7-collapsed-body')});section.querySelectorAll('.m7-collapse-btn,.m7-panel-toggle').forEach(b=>b.textContent='Hide');section.classList.remove('m7sc-flash');void section.offsetWidth;section.classList.add('m7sc-flash');section.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>section.classList.remove('m7sc-flash'),1000)}
 async function loadStats(){if(!client)return;const queries=[client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}),client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}).eq('is_active',true),client.from('shop_categories').select('category_key',{count:'exact',head:true}).eq('is_active',true),client.from('shop_areas').select('area_key',{count:'exact',head:true}).eq('is_active',true)];const rows=await Promise.all(queries);['all','active','categories','areas'].forEach((key,i)=>{const el=$('m7sc-'+key);if(el)el.textContent=rows[i].error?'—':String(rows[i].count||0)})}
 function mount(){const dash=$('ma-admin-dashboard');if(!dash||$('m7-shop-control'))return false;css();target('m7-admin-add-shop');const center=document.createElement('section');center.id='m7-shop-control';center.innerHTML=`<div class="m7sc-eyebrow">MA7ALAK DIRECTORY CONTROL</div><div class="m7sc-title-row"><div><h2>Shop Control Center</h2><p>Every shop, owner, badge, category, area and media tool in one flow.</p></div><span class="m7sc-live"><i></i> LIVE SYNC</span></div><div class="m7sc-stats"><div class="m7sc-stat"><b id="m7sc-all">—</b><span>ALL SHOPS</span></div><div class="m7sc-stat"><b id="m7sc-active">—</b><span>VISIBLE</span></div><div class="m7sc-stat"><b id="m7sc-categories">—</b><span>CATEGORIES</span></div><div class="m7sc-stat"><b id="m7sc-areas">—</b><span>AREAS</span></div></div><nav class="m7sc-nav" aria-label="Shop administration"><button data-target="ma-manage-shops-card">🏪 Manage shops</button><button data-target="m7-admin-add-shop">＋ Add shop</button><button data-target="ma-admin-v2-hub">🗂 Categories & areas</button><button data-target="m7da-settings">🎨 Directory design</button><button data-target="m7adm-v3">👥 Accounts & reports</button></nav>`;dash.prepend(center);center.onclick=e=>{const b=e.target.closest('[data-target]');if(b)openSection(b.dataset.target)};return true}
 async function ready(){for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;for(let i=0;i<180&&!mount();i++)await new Promise(r=>setTimeout(r,100));await loadStats();statsChannel=client.channel('ma7alak-admin-control-center').on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_categories'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_areas'},loadStats).subscribe();window.addEventListener('ma7alak:admin-ready',loadStats)}
