@@ -14,26 +14,44 @@ Replace the old show-shops.js script with:
 
 2) ADMIN PAGE (/admin)
 
-Replace the old admin script with:
+Keep the existing admin panel script:
 
 <script charset="utf-8" src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-admin-panel.js"></script>
 
+Add this once after it:
 
-3) PREMIUM HEADER / REEL VIEWER
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-admin-design.js"></script>
+
+This adds the live Design tab/module after admin authentication. It is additive
+and does not replace the existing Story, Reels, chat, gallery, or shop editor.
+
+
+3) UNIVERSAL SHOP PAGE (new opt-in template)
+
+On a duplicated hidden shop template page, add this single embed:
+
+<div id="ma7alak-universal-shop-page" data-shop-slug="your-shop-slug"></div>
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-shop-page.js"></script>
+
+Duplicate that Hostinger page for each shop and change only data-shop-slug.
+Do not add this embed to existing live shops until the new template is tested.
+
+
+4) PREMIUM HEADER / REEL VIEWER
 
 Replace the old premium-social-header.js script with:
 
 <script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/premium-social-header.js"></script>
 
 
-4) GLOBAL HOTFIX
+5) GLOBAL HOTFIX
 
 Replace the old ma7alak-global-hotfix.js script with:
 
 <script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/ma7alak-global-hotfix.js"></script>
 
 
-5) HOMEPAGE FEATURED / NEW SHOPS
+6) HOMEPAGE FEATURED / NEW SHOPS
 
 Delete the full old static Featured Shops embed and put this in its place:
 
@@ -45,7 +63,7 @@ profiles. Its optional label, description, accent color, and button text are
 inside Add Shop / Edit Shop under the new “Homepage spotlight” panel.
 
 
-6) ENGLISH ADD-YOUR-SHOP PROMO
+7) ENGLISH ADD-YOUR-SHOP PROMO
 
 Delete the full old Arabic promo embed and put this in its place:
 
@@ -59,5 +77,6 @@ https://ma7alak.com/shufma7lit
 DATABASE
 
 The owner self-follow and self-story-like prevention is already installed in
-Supabase. No SQL needs to be run manually.
+Supabase. The new shop_page_design table is installed and protected by RLS.
+It stores one published configuration per immutable shop_slug.
 
