@@ -367,6 +367,76 @@ mount.innerHTML = MARKUP;
 
 })();
 
+
+/* =========================================================
+   LIVE ADMIN REFRESH BUS
+   ---------------------------------------------------------
+   Each proven module registers its own loader here.
+   A shop_profiles Realtime UPDATE then refreshes the open
+   website immediately without rebuilding the whole embed.
+========================================================= */
+
+const MA7ALAK_HUB_REFRESHERS = [];
+
+window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ =
+  function(callback){
+
+    if(
+      typeof callback !== "function" ||
+      MA7ALAK_HUB_REFRESHERS.includes(callback)
+    ){
+      return;
+    }
+
+    MA7ALAK_HUB_REFRESHERS.push(
+      callback
+    );
+  };
+
+
+window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
+  function(reason){
+
+    MA7ALAK_HUB_REFRESHERS
+      .slice()
+      .forEach(
+        function(callback){
+
+          try{
+
+            const result =
+              callback(
+                reason || "manual"
+              );
+
+            if(
+              result &&
+              typeof result.catch === "function"
+            ){
+              result.catch(
+                function(error){
+                  console.warn(
+                    "[Ma7alak Hub] live refresh:",
+                    error
+                  );
+                }
+              );
+            }
+
+          }
+          catch(error){
+
+            console.warn(
+              "[Ma7alak Hub] live refresh:",
+              error
+            );
+
+          }
+
+        }
+      );
+  };
+
 /* ===== EXACT OLD ABOUT ENGINE ===== */
 (function(){
   "use strict";
@@ -1011,6 +1081,15 @@ mount.innerHTML = MARKUP;
 
   loadAbout();
 
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+      loadAbout
+    );
+  }
+
 })();
 
 /* ===== EXACT OLD SOCIAL ENGINE ===== */
@@ -1398,6 +1477,15 @@ mount.innerHTML = MARKUP;
 
   loadSocialPanel();
 
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+      loadSocialPanel
+    );
+  }
+
 })();
 
 /* ===== EXACT OLD LOCATION ENGINE ===== */
@@ -1625,6 +1713,15 @@ mount.innerHTML = MARKUP;
 
 
   loadLocationPanel();
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+      loadLocationPanel
+    );
+  }
 
 })();
 
@@ -2561,6 +2658,309 @@ mount.innerHTML = MARKUP;
 
   loadExtraProfile();
 
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+      loadExtraProfile
+    );
+  }
+
 })();
+
+
+/* =========================================================
+   SUPABASE REALTIME — ADMIN SAVE -> LIVE WEBSITE UPDATE
+   ---------------------------------------------------------
+   Initial page content still uses the private REST bridge.
+   Realtime is loaded AFTER render, so it cannot cause the old
+   Hostinger "Loading…" race.
+========================================================= */
+
+(function installMa7alakHubAdminLiveSync(){
+
+  const SHOP_SLUG =
+    window.__MA7ALAK_EXACT_HUB_SLUG__;
+
+  const SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
+  let realtimeChannel = null;
+  let realtimeClient = null;
+  let libraryPromise = null;
+
+
+  function refreshNow(reason){
+
+    if(
+      typeof window.__MA7ALAK_PROFILE_HUB_REFRESH__ ===
+        "function"
+    ){
+      window.__MA7ALAK_PROFILE_HUB_REFRESH__(
+        reason || "admin-live"
+      );
+    }
+
+  }
+
+
+  function loadSupabaseLibrary(){
+
+    if(
+      window.supabase &&
+      typeof window.supabase.createClient ===
+        "function"
+    ){
+      return Promise.resolve(
+        window.supabase
+      );
+    }
+
+    if(libraryPromise){
+      return libraryPromise;
+    }
+
+    libraryPromise =
+      new Promise(
+        function(resolve,reject){
+
+          const existing =
+            document.querySelector(
+              'script[data-ma7alak-hub-realtime-lib="1"],script[src*="@supabase/supabase-js@2"]'
+            );
+
+          function finish(){
+
+            if(
+              window.supabase &&
+              typeof window.supabase.createClient ===
+                "function"
+            ){
+              resolve(
+                window.supabase
+              );
+              return;
+            }
+
+            reject(
+              new Error(
+                "SUPABASE_REALTIME_LIBRARY_NOT_READY"
+              )
+            );
+          }
+
+          if(existing){
+
+            if(
+              window.supabase &&
+              typeof window.supabase.createClient ===
+                "function"
+            ){
+              finish();
+              return;
+            }
+
+            existing.addEventListener(
+              "load",
+              finish,
+              {once:true}
+            );
+
+            existing.addEventListener(
+              "error",
+              reject,
+              {once:true}
+            );
+
+            return;
+          }
+
+          const script =
+            document.createElement(
+              "script"
+            );
+
+          script.src =
+            "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+          script.async =
+            true;
+
+          script.dataset.ma7alakHubRealtimeLib =
+            "1";
+
+          script.onload =
+            finish;
+
+          script.onerror =
+            function(){
+              reject(
+                new Error(
+                  "SUPABASE_REALTIME_LIBRARY_LOAD_FAILED"
+                )
+              );
+            };
+
+          document.head.appendChild(
+            script
+          );
+        }
+      );
+
+    return libraryPromise;
+  }
+
+
+  async function getRealtimeClient(){
+
+    if(
+      window.Ma7alakAccount &&
+      typeof window.Ma7alakAccount.ready ===
+        "function"
+    ){
+      try{
+        await window.Ma7alakAccount.ready();
+      }
+      catch(_){}
+    }
+
+    if(
+      window.Ma7alakAccount &&
+      window.Ma7alakAccount.client &&
+      typeof window.Ma7alakAccount.client.channel ===
+        "function"
+    ){
+      return window.Ma7alakAccount.client;
+    }
+
+    if(
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ &&
+      typeof window.__MA7ALAK_SHARED_SUPABASE_CLIENT__.channel ===
+        "function"
+    ){
+      return window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
+    }
+
+    const library =
+      await loadSupabaseLibrary();
+
+    if(!realtimeClient){
+
+      realtimeClient =
+        library.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY,
+          {
+            auth:{
+              persistSession:false,
+              autoRefreshToken:false,
+              detectSessionInUrl:false
+            }
+          }
+        );
+    }
+
+    return realtimeClient;
+  }
+
+
+  async function startRealtime(){
+
+    if(realtimeChannel){
+      return;
+    }
+
+    try{
+
+      const client =
+        await getRealtimeClient();
+
+      if(
+        !client ||
+        typeof client.channel !==
+          "function"
+      ){
+        return;
+      }
+
+      realtimeChannel =
+        client
+          .channel(
+            "ma7alak-profile-hub-" +
+            SHOP_SLUG +
+            "-" +
+            Math.random()
+              .toString(36)
+              .slice(2)
+          )
+          .on(
+            "postgres_changes",
+            {
+              event:"UPDATE",
+              schema:"public",
+              table:"shop_profiles",
+              filter:
+                "shop_slug=eq." +
+                SHOP_SLUG
+            },
+            function(){
+
+              refreshNow(
+                "supabase-realtime"
+              );
+
+            }
+          )
+          .subscribe();
+
+    }
+    catch(error){
+
+      console.warn(
+        "[Ma7alak Hub] Realtime unavailable:",
+        error
+      );
+
+    }
+  }
+
+
+  document.addEventListener(
+    "visibilitychange",
+    function(){
+
+      if(
+        document.visibilityState ===
+          "visible"
+      ){
+
+        refreshNow(
+          "visibility"
+        );
+
+        startRealtime();
+      }
+    }
+  );
+
+
+  window.addEventListener(
+    "focus",
+    function(){
+      refreshNow(
+        "focus"
+      );
+    }
+  );
+
+
+  startRealtime();
+
+})();
+
 
 })();
