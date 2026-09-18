@@ -40,10 +40,23 @@ function candidates(){
  return all.filter(x=>x.id!=="m7-global-home-feed"&&!x.closest("#m7-global-home-feed")&&x.offsetHeight>24&&!/header|footer/i.test(x.tagName));
 }
 function place(){
- let r=root();if(!cfg?.enabled){r.style.display="none";return}r.style.display="";
- r.style.maxWidth=(cfg.max_width_px||900)+"px";r.style.marginTop=(28+(cfg.offset_px||0))+"px";
+ let r=root();if(!cfg?.enabled){r.style.display="none";return}r.style.display="block";
+ r.style.setProperty("position","relative","important");
+ r.style.setProperty("z-index","50","important");
+ r.style.setProperty("visibility","visible","important");
+ r.style.setProperty("opacity","1","important");
+ r.style.setProperty("isolation","isolate","important");
+ r.style.maxWidth=(cfg.max_width_px||900)+"px";
+ r.style.marginTop=(28+(cfg.offset_px||0))+"px";
  let a=candidates(),i=Math.max(0,Math.min(Number(cfg.position_index??3),a.length));
- if(a[i])a[i].before(r);else{let main=document.querySelector("main");(main||document.body).appendChild(r)}
+ if(a[i]&&a[i].parentNode){
+   a[i].parentNode.insertBefore(r,a[i]);
+ }else{
+   let main=document.querySelector("main");
+   (main||document.body).appendChild(r);
+ }
+ r.style.setProperty("height","auto","important");
+ r.style.setProperty("overflow","visible","important");
 }
 function friendly(v){let d=new Date(v);return new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Beirut",weekday:"short",hour:"numeric",minute:"2-digit",hour12:true}).format(d)}
 function remain(v){let s=Math.max(0,Math.floor((new Date(v)-Date.now())/1000)),h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),q=s%60;return[h,m,q].map(x=>String(x).padStart(2,"0")).join(":")}
