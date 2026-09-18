@@ -84,7 +84,7 @@ style.textContent=`
 html.m7-reel-open #ma7alak-live-stats,
 body.m7-reel-open #ma7alak-live-stats{display:none!important}
 @media(max-width:500px){
-  #ma7alak-live-stats{max-width:100%;width:calc(100% - 12px)!important;padding:0 6px!important}
+  #ma7alak-live-stats{max-width:410px;width:calc(100% - 32px)!important;padding:0 4px!important}
   #ma7alak-live-stats .ma7alak-live-panel{padding:8px 7px;border-radius:12px;backdrop-filter:none;-webkit-backdrop-filter:none}
   #ma7alak-live-stats .ma7alak-live-item{gap:5px;padding:2px 4px}
   #ma7alak-live-stats .ma7alak-live-icon{font-size:16px}
