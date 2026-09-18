@@ -2664,9 +2664,9 @@
   );
 
 
-  loginForm.addEventListener(
-    "submit",
-    async function(event){
+  async function ma7alakAdminGoogleLogin(event){
+      if(event){ event.preventDefault(); event.stopPropagation(); }
+
 
       event.preventDefault();
 
@@ -2725,7 +2725,14 @@
           "Continue with Google";
       }
     }
-  );
+
+  if(loginForm){
+    loginForm.addEventListener("submit", ma7alakAdminGoogleLogin);
+  }
+  if(loginButton){
+    loginButton.type = "button";
+    loginButton.addEventListener("click", ma7alakAdminGoogleLogin);
+  }
 
 
   logoutButton.addEventListener(
