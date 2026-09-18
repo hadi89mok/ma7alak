@@ -32,7 +32,7 @@
   };
   let db=null,settings=structuredClone(defaults),channel=null;
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const safeUrl=v=>{try{const u=new URL(String(v||""),location.origin);return ["http:","https:","mailto:","tel:"].includes(u.protocol)||String(v||"").startsWith("#")?u.href:""}catch{return String(v||"").startsWith("#")?String(v):""}};
+  const safeUrl=v=>{const raw=String(v||"").trim();if(raw.startsWith("#"))return raw;try{const u=new URL(raw,location.origin);return ["http:","https:","mailto:","tel:"].includes(u.protocol)?u.href:""}catch{return""}};
   const merge=(base,next)=>{const out={...base,...(next||{})};out.plans=Array.isArray(next?.plans)?next.plans:base.plans;return out};
   function icon(value){const v=String(value||"").trim();if(!v)return"";return /^https?:\/\//i.test(v)?`<img src="${esc(v)}" alt="" style="width:16px;height:16px;object-fit:contain">`:`<span>${esc(v)}</span>`}
   async function getClient(){
@@ -54,6 +54,12 @@ html,body{background:#070706!important}body.m7-subscription-page{margin:0;color:
   }
   function mount(){
     css();document.body.classList.add("m7-subscription-page");
+    /* Hostinger still renders its empty page canvas on a blank page. Remove only
+       that large anonymous direct child so this becomes a true full-width page. */
+    const canvas=[...document.body.children]
+      .filter(el=>el.tagName==="DIV"&&!el.id&&!String(el.className||"").trim()&&getComputedStyle(el).position==="static")
+      .sort((a,b)=>b.getBoundingClientRect().height-a.getBoundingClientRect().height)[0];
+    if(canvas&&canvas.getBoundingClientRect().height>200){canvas.dataset.m7SubscriptionCanvas="hidden";canvas.style.setProperty("display","none","important")}
     let root=document.getElementById("ma7alak-subscription-page");if(!root){root=document.createElement("main");root.id="ma7alak-subscription-page";document.body.appendChild(root)}root.className="m7sp";
     const active=(settings.plans||[]).filter(p=>p&&p.active!==false);
     root.innerHTML=`<div class="m7sp-shell"><header class="m7sp-hero">${settings.show_logo!==false&&settings.logo_url?`<img class="m7sp-eye" src="${esc(settings.logo_url)}" alt="Ma7alak">`:""}<div class="m7sp-eyebrow">${esc(settings.eyebrow)}</div><h1>${esc(settings.title)}</h1><p>${esc(settings.subtitle)}</p></header><section aria-labelledby="m7sp-plans-title"><div class="m7sp-heading"><h2 id="m7sp-plans-title">${esc(settings.plans_title)}</h2><p>${esc(settings.plans_subtitle)}</p></div><div class="m7sp-plans">${active.map(planHtml).join("")}</div><div class="m7sp-note">${esc(settings.note)}</div></section><section class="m7sp-request" id="ma7alak-shop-request"><h2>${esc(settings.form_title)}</h2><p>${esc(settings.form_subtitle)}</p><form class="m7sp-form"><label class="m7sp-field">Shop name<input name="shop_name" required maxlength="120" autocomplete="organization"></label><label class="m7sp-field">Your name<input name="owner_name" required maxlength="120" autocomplete="name"></label><label class="m7sp-field">Phone / WhatsApp<input name="contact" required maxlength="100" inputmode="tel" autocomplete="tel"></label><label class="m7sp-field">Area<input name="area" required maxlength="120" autocomplete="address-level2"></label><label class="m7sp-field full">Plan<select name="plan">${active.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} — ${esc(p.currency||"")}${esc(p.price)} / ${esc(p.period||"month")}</option>`).join("")}</select></label><label class="m7sp-field full">Tell us about your shop<textarea name="details" maxlength="1500" placeholder="What do you sell or offer?"></textarea></label><button class="m7sp-submit" type="submit">${esc(settings.form_button)}</button><div class="m7sp-status" role="status" aria-live="polite"></div></form></section><footer class="m7sp-signature"><span>${esc(settings.signature)}</span>${settings.show_logo!==false&&settings.logo_url?`<img src="${esc(settings.logo_url)}" alt="">`:""}</footer></div>`;
