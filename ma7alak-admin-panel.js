@@ -5335,3 +5335,232 @@ document.addEventListener("click",async function(event){
 },true);
 
 })();
+
+
+
+/* =========================================================
+   MA7ALAK ADMIN CONTROL DECK V2
+   Safe UX layer. Existing Admin IDs, handlers, forms and logic stay intact.
+========================================================= */
+(function(){
+"use strict";
+if(location.pathname.replace(/\/+$/,"")!=="/admin"||window.__M7_ADMIN_DECK_V2__)return;
+window.__M7_ADMIN_DECK_V2__=true;
+
+const PREF="m7_admin_deck_v2";
+const ICONS=[
+["shop","Shop"],["fashion","Clothing / Fashion"],["hijab","Hijab"],["tattoo","Tattoo"],
+["piercing","Piercing"],["cafe","Coffee / Café"],["food","Food"],["beauty","Beauty"],
+["perfume","Perfume"],["phone","Phone / Electronics"],["barber","Barber"],["gym","Gym / Fitness"],
+["kiosk","Kiosk / Market"],["star","Star"],["heart","Heart"],["sparkle","Sparkle"],["none","No icon"]
+];
+const PANELS=[
+["manage","Manage Shops","🏪","#ma-manage-shops-card"],
+["edit","Edit Shop","✏️","#ma-admin-edit-card"],
+["owner","Owner Management","👤","#ma-admin-owner-card"],
+["gallery","Gallery Manager","🖼","#ma-admin-gallery-card"],
+["video","Video Manager","🎥","#ma-admin-video-card"],
+["reels","Live Reels","🔥","#ma-admin-reels-card"],
+["directory","Show Shops Design","🧭","#m7da-settings"],
+["control","Shop Control Center","⚙️","#m7-shop-control"],
+["subs","Subscriptions","💳","#m7-sub-admin"],
+["analytics","Analytics","📊","#m7adm-analytics"],
+["users","Users","👥","#m7adm-users"],
+["owner-tools","Owner Tools","🔐","#m7adm-owner"],
+["reports","Reports","🚩","#m7adm-reports"],
+["activity","Admin Activity","🧾","#ma-admin-activity-card"]
+];
+
+let pref={hidden:{},collapsed:{directory:true,control:true,subs:true,analytics:true,users:true,"owner-tools":true,reports:true,activity:true}};
+try{
+  const saved=JSON.parse(localStorage.getItem(PREF)||"{}");
+  pref.hidden=Object.assign({},pref.hidden,saved.hidden||{});
+  pref.collapsed=Object.assign({},pref.collapsed,saved.collapsed||{});
+}catch(_){}
+const savePref=()=>{try{localStorage.setItem(PREF,JSON.stringify(pref))}catch(_){}};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const panel=k=>{
+  if(k==="add")return document.getElementById("ma-admin-shop-form")?.closest(".ma-admin-card")||null;
+  const row=PANELS.find(x=>x[0]===k);
+  return row?document.querySelector(row[3]):null;
+};
+
+function css(){
+  if(document.getElementById("m7deck-css"))return;
+  const s=document.createElement("style");s.id="m7deck-css";
+  s.textContent=[
+  ":root{--m7g:#d9aa58;--m7g2:#f0cc82;--m7b:rgba(217,170,88,.21);--m7bg:#0a0807}",
+  "body{background:radial-gradient(circle at 8% 0%,rgba(217,170,88,.07),transparent 24%),linear-gradient(180deg,#0c0907,#070605)!important}",
+  "#ma7alak-admin-app{max-width:1380px!important;margin:auto!important}#ma-admin-dashboard{padding-bottom:100px!important}",
+  "#m7deck{position:sticky;top:7px;z-index:9995;margin:8px 0 16px;padding:9px;border:1px solid rgba(217,170,88,.38);border-radius:17px;background:rgba(15,11,8,.95);box-shadow:0 14px 34px rgba(0,0,0,.4);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}",
+  ".m7dt{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.m7brand{margin-right:auto}.m7brand b{display:block;color:#fff;font-size:12px}.m7brand small{color:#8f826f;font-size:8px}",
+  ".m7db,.m7chip,.m7pbtn{border:1px solid var(--m7b);background:rgba(255,255,255,.025);color:#ead7b5;border-radius:9px;cursor:pointer;font-size:9px;font-weight:850;min-height:32px;padding:0 10px}.m7db:hover,.m7chip:hover,.m7pbtn:hover{background:rgba(217,170,88,.08);border-color:rgba(217,170,88,.42)}",
+  ".m7db.main{color:#1c1308;background:linear-gradient(135deg,#f1ce82,#d3a149);border:0}.m7db.danger{color:#ffbcbc;border-color:rgba(255,90,90,.24)}",
+  ".m7quick{display:flex;gap:5px;overflow-x:auto;margin-top:7px;scrollbar-width:none}.m7quick::-webkit-scrollbar{display:none}.m7chip{flex:0 0 auto;border-radius:999px;min-height:28px}",
+  ".m7panel{position:relative!important;border-color:rgba(217,170,88,.17)!important;border-radius:18px!important;background:radial-gradient(circle at 10% 0%,rgba(217,170,88,.045),transparent 30%),rgba(18,14,11,.95)!important;box-shadow:0 13px 30px rgba(0,0,0,.27)!important;scroll-margin-top:105px}",
+  ".m7panel.m7hidden{display:none!important}.m7panel.m7collapsed>:not(.m7ph){display:none!important}.m7panel.m7collapsed{padding-bottom:4px!important}",
+  ".m7ph{display:flex;align-items:center;gap:8px;min-height:43px;margin:-1px -1px 10px;padding:6px 7px 6px 9px;border-bottom:1px solid rgba(217,170,88,.1)}.m7pi{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(217,170,88,.15);border-radius:9px;background:rgba(217,170,88,.06)}.m7pt{margin-right:auto}.m7pt b{display:block;color:#f2e2c5;font-size:10px}.m7pt small{color:#7f7362;font-size:8px}.m7pa{display:flex;gap:4px}.m7pbtn{min-height:28px;padding:0 7px}",
+  ".m7fieldset{position:relative}.m7fieldset.m7fc>:not(legend):not(.m7ft){display:none!important}.m7ft{float:right;border:1px solid var(--m7b);background:rgba(255,255,255,.02);color:#d8c5a5;border-radius:8px;min-height:25px;padding:0 8px;font-size:8px;font-weight:800;cursor:pointer}",
+  ".m7labelbox{border-color:rgba(242,202,237,.22)!important;background:radial-gradient(circle at 8% 0%,rgba(242,202,237,.06),transparent 32%),rgba(19,14,12,.9)!important}.m7labelpreview{margin-top:9px;min-height:36px;border:1px solid rgba(217,170,88,.23);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:7px;color:#efd49b;font-size:10px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase}",
+  "#m7drawerbg{position:fixed;inset:0;z-index:10040;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.18s}#m7drawer{position:fixed;z-index:10050;top:0;right:0;bottom:0;width:min(360px,92vw);padding:15px;overflow:auto;background:#0f0c09;border-left:1px solid rgba(217,170,88,.25);box-shadow:-20px 0 50px rgba(0,0,0,.5);transform:translateX(105%);transition:.2s}body.m7draweropen #m7drawer{transform:none}body.m7draweropen #m7drawerbg{opacity:1;pointer-events:auto}",
+  ".m7drhead{display:flex;align-items:center;gap:8px}.m7drhead h3{margin:0 auto 0 0;color:#f1dfbd}.m7drtools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.m7drrow{display:flex;align-items:center;gap:8px;padding:9px 5px;border-bottom:1px solid rgba(217,170,88,.08)}.m7drrow label{flex:1;color:#dfcfb2;font-size:10px}.m7drrow input{accent-color:#d9aa58}",
+  "#m7savebar{position:fixed;z-index:10020;left:50%;bottom:12px;transform:translateX(-50%) translateY(120px);width:min(620px,calc(100vw - 22px));min-height:56px;padding:8px 9px 8px 12px;border:1px solid rgba(217,170,88,.34);border-radius:16px;background:rgba(13,10,8,.96);box-shadow:0 18px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transition:.2s;backdrop-filter:blur(15px)}#m7savebar.on{transform:translateX(-50%)}.m7savecopy{flex:1;min-width:0}.m7savecopy b{display:block;color:#fff;font-size:10px}.m7savecopy small{color:#877a68;font-size:8px}.m7savemain{min-height:39px;min-width:120px;border:0;border-radius:10px;background:linear-gradient(135deg,#f2d18a,#d3a049);color:#1c1308;font-size:10px;font-weight:950;cursor:pointer}.m7savecancel{min-height:39px;border:1px solid var(--m7b);border-radius:10px;background:transparent;color:#d7c5a6;cursor:pointer}",
+  ".ma-admin-form input,.ma-admin-form textarea,.ma-admin-form select,.m7da-field input,.m7da-field textarea,.m7da-field select{border-radius:10px!important}#ma-admin-shop-list .ma-admin-shop-item{border-radius:15px!important;border-color:rgba(217,170,88,.14)!important}",
+  "@media(max-width:700px){#m7deck{top:4px;border-radius:14px}.m7brand{min-width:145px}#m7savebar{bottom:7px}.m7savemain{min-width:100px}}"
+  ].join("");
+  document.head.appendChild(s);
+}
+
+let drawer=null,list=null,savebar=null,patched=false,addDirty=false;
+function savePrefs(){try{localStorage.setItem(PREF,JSON.stringify(pref))}catch(_){}}
+function setVis(k,v,persist=true){const el=panel(k);if(!el)return;el.classList.toggle("m7hidden",!v);if(persist){pref.hidden[k]=!v;savePrefs()}draw();saveState()}
+function setFold(k,v,persist=true){const el=panel(k);if(!el)return;el.classList.toggle("m7collapsed",!!v);const b=el.querySelector(".m7ph [data-fold]");if(b)b.textContent=v?"Open":"Fold";if(persist){pref.collapsed[k]=!!v;savePrefs()}}
+function focus(k){const el=panel(k);if(!el){openDrawer();return}setVis(k,true);setFold(k,false);if(!el.hidden)setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),25)}
+
+function toolbar(){
+  if(document.getElementById("m7deck"))return;
+  const d=document.getElementById("ma-admin-dashboard");if(!d)return;
+  const x=document.createElement("div");x.id="m7deck";
+  x.innerHTML='<div class="m7dt"><div class="m7brand"><b>Ma7alak Control Deck</b><small>Open only what you need</small></div><button class="m7db main" data-panels>Panels</button><button class="m7db" data-manage>Manage Shops</button><button class="m7db danger" data-hideall>Hide all</button></div><div class="m7quick"></div>';
+  d.insertBefore(x,d.firstChild);
+  x.querySelector("[data-panels]").onclick=openDrawer;
+  x.querySelector("[data-manage]").onclick=()=>focus("manage");
+  x.querySelector("[data-hideall]").onclick=()=>{allVisible(false);openDrawer()};
+  const q=x.querySelector(".m7quick");
+  [["manage","🏪 Shops"],["add","＋ Add"],["directory","🧭 Directory"],["gallery","🖼 Gallery"],["video","🎥 Videos"],["owner","👤 Owners"],["activity","🧾 Activity"]].forEach(a=>{
+    const b=document.createElement("button");b.className="m7chip";b.type="button";b.textContent=a[1];b.onclick=()=>focus(a[0]);q.appendChild(b);
+  });
+}
+
+function ensureDrawer(){
+  if(drawer)return;
+  const bg=document.createElement("div");bg.id="m7drawerbg";bg.onclick=closeDrawer;
+  drawer=document.createElement("aside");drawer.id="m7drawer";
+  drawer.innerHTML='<div class="m7drhead"><h3>Admin Panels</h3><button class="m7db" data-close>Close</button></div><div class="m7drtools"><button class="m7db" data-show>Show all</button><button class="m7db danger" data-hide>Hide all</button><button class="m7db" data-open>Expand all</button><button class="m7db" data-fold>Collapse all</button></div><div id="m7drlist"></div>';
+  list=drawer.querySelector("#m7drlist");
+  drawer.querySelector("[data-close]").onclick=closeDrawer;
+  drawer.querySelector("[data-show]").onclick=()=>allVisible(true);
+  drawer.querySelector("[data-hide]").onclick=()=>allVisible(false);
+  drawer.querySelector("[data-open]").onclick=()=>allFold(false);
+  drawer.querySelector("[data-fold]").onclick=()=>allFold(true);
+  document.body.append(bg,drawer);
+}
+function openDrawer(){ensureDrawer();draw();document.body.classList.add("m7draweropen")}
+function closeDrawer(){document.body.classList.remove("m7draweropen")}
+function draw(){
+  if(!list)return;list.innerHTML="";
+  [["add","Add New Shop","＋",null],...PANELS].forEach(r=>{
+    const el=panel(r[0]);if(!el)return;
+    const row=document.createElement("div");row.className="m7drrow";
+    const c=document.createElement("input");c.type="checkbox";c.checked=!el.classList.contains("m7hidden");c.onchange=()=>setVis(r[0],c.checked);
+    const l=document.createElement("label");l.textContent=r[2]+" "+r[1];
+    const g=document.createElement("button");g.className="m7pbtn";g.type="button";g.textContent="Go";g.onclick=()=>{setVis(r[0],true);setFold(r[0],false);closeDrawer();focus(r[0])};
+    row.append(c,l,g);list.appendChild(row);
+  });
+}
+function allVisible(v){[["add"],...PANELS].forEach(r=>{if(panel(r[0])){panel(r[0]).classList.toggle("m7hidden",!v);pref.hidden[r[0]]=!v}});savePrefs();draw();saveState()}
+function allFold(v){[["add"],...PANELS].forEach(r=>{if(panel(r[0])){setFold(r[0],v,false);pref.collapsed[r[0]]=v}});savePrefs()}
+
+function decorate(k,label,icon){
+  const el=panel(k);if(!el||el.dataset.m7deck)return;
+  el.dataset.m7deck="1";el.classList.add("m7panel");
+  if(pref.hidden[k])el.classList.add("m7hidden");
+  if(pref.collapsed[k])el.classList.add("m7collapsed");
+  const h=document.createElement("div");h.className="m7ph";
+  h.innerHTML='<div class="m7pi">'+esc(icon)+'</div><div class="m7pt"><b>'+esc(label)+'</b><small>Admin panel</small></div><div class="m7pa"><button class="m7pbtn" data-fold>'+(pref.collapsed[k]?"Open":"Fold")+'</button><button class="m7pbtn" data-hide>Hide</button></div>';
+  h.querySelector("[data-fold]").onclick=()=>setFold(k,!el.classList.contains("m7collapsed"));
+  h.querySelector("[data-hide]").onclick=()=>{setVis(k,false);openDrawer()};
+  el.insertBefore(h,el.firstChild);
+}
+
+function foldsets(){
+  document.querySelectorAll("#ma-admin-shop-form fieldset,#ma-admin-edit-form fieldset").forEach(f=>{
+    if(f.dataset.m7fold)return;f.dataset.m7fold="1";f.classList.add("m7fieldset");
+    const b=document.createElement("button");b.type="button";b.className="m7ft";b.textContent="Fold";b.onclick=()=>{const z=f.classList.toggle("m7fc");b.textContent=z?"Open":"Fold"};
+    const legend=f.querySelector(":scope > legend");legend?legend.after(b):f.insertBefore(b,f.firstChild);
+    if(/homepage|advanced/i.test(legend?.textContent||"")){f.classList.add("m7fc");b.textContent="Open"}
+  });
+}
+
+function iconOptions(){
+  return ICONS.map(x=>'<option value="'+esc(x[0])+'">'+esc(x[1])+'</option>').join("");
+}
+function labelControls(form,prefix){
+  if(!form||form.querySelector(".m7labelbox"))return;
+  const f=document.createElement("fieldset");f.className="m7da-fields m7labelbox m7fieldset";
+  f.innerHTML='<legend>Shop Label — independent from Category</legend><p>Category stays only for Show Shops filtering. This label is what visitors see above the shop name.</p><div class="m7da-grid"><label class="m7da-field">Shop Label text<input id="'+prefix+'shop_label" maxlength="32" placeholder="e.g. HIJABS, TATTOO STUDIO"></label><label class="m7da-field">Shop Label icon<select id="'+prefix+'shop_label_icon">'+iconOptions()+'</select></label><label class="m7da-field">Custom icon / emoji (optional)<input id="'+prefix+'shop_label_icon_text" maxlength="4" placeholder="e.g. ✦ or 🧕"></label></div><div class="m7labelpreview"><span data-li>⌂</span><span data-lt>SHOP</span></div>';
+  const base=form.querySelector(".m7da-fields:not(.m7da-home-fields)");base?form.insertBefore(f,base):form.appendChild(f);
+  const a=f.querySelector("#"+prefix+"shop_label"),i=f.querySelector("#"+prefix+"shop_label_icon"),t=f.querySelector("#"+prefix+"shop_label_icon_text");
+  const sym={shop:"⌂",fashion:"♙",hijab:"◒",tattoo:"✒",piercing:"◈",cafe:"☕",food:"◉",beauty:"✦",perfume:"♢",phone:"▯",barber:"✂",gym:"↔",kiosk:"▣",star:"★",heart:"♥",sparkle:"✦",none:""};
+  const preview=()=>{f.querySelector("[data-lt]").textContent=a.value.trim()||"SHOP";f.querySelector("[data-li]").textContent=t.value.trim()||sym[i.value]||"⌂"};
+  [a,i,t].forEach(x=>{x.addEventListener("input",preview);x.addEventListener("change",preview)});f._preview=preview;preview();
+}
+function mountLabels(){labelControls(document.getElementById("ma-admin-shop-form"),"m7da-");labelControls(document.getElementById("ma-admin-edit-form"),"m7de-")}
+
+function patchDirectory(){
+  if(patched)return;
+  const api=window.Ma7alakDirectoryAdmin;if(!api||typeof api.fill!=="function"||typeof api.collect!=="function")return;
+  patched=true;
+  const fill=api.fill.bind(api),collect=api.collect.bind(api);
+  api.fill=function(shop){
+    fill(shop);mountLabels();
+    const o=shop?.directory_options&&typeof shop.directory_options==="object"?shop.directory_options:{};
+    [["shop_label",o.shop_label||""],["shop_label_icon",o.shop_label_icon||"shop"],["shop_label_icon_text",o.shop_label_icon_text||""]].forEach(x=>{const el=document.getElementById("m7de-"+x[0]);if(el)el.value=x[1]});
+    document.getElementById("m7de-shop_label")?.closest(".m7labelbox")?._preview?.();
+  };
+  api.collect=function(edit){
+    const r=collect(edit),p=edit?"m7de-":"m7da-";r.directory_options=r.directory_options&&typeof r.directory_options==="object"?r.directory_options:{};
+    r.directory_options.shop_label=document.getElementById(p+"shop_label")?.value?.trim()||null;
+    r.directory_options.shop_label_icon=document.getElementById(p+"shop_label_icon")?.value?.trim()||"shop";
+    r.directory_options.shop_label_icon_text=document.getElementById(p+"shop_label_icon_text")?.value?.trim()||null;
+    return r;
+  };
+}
+
+function ensureSave(){
+  if(savebar)return;
+  savebar=document.createElement("div");savebar.id="m7savebar";
+  savebar.innerHTML='<div class="m7savecopy"><b id="m7st">Save changes</b><small>Save from anywhere — no scrolling back.</small></div><button class="m7savecancel" id="m7sc">Cancel</button><button class="m7savemain" id="m7sm">Save Changes</button>';
+  savebar.querySelector("#m7sm").onclick=()=>{savebar.dataset.mode==="edit"?document.getElementById("ma-admin-save-edit")?.click():document.getElementById("ma-admin-add-shop-btn")?.click()};
+  savebar.querySelector("#m7sc").onclick=()=>{if(savebar.dataset.mode==="edit")document.getElementById("ma-admin-cancel-edit")?.click();else{addDirty=false;saveState()}};
+  document.body.appendChild(savebar);
+}
+function saveState(){
+  ensureSave();
+  const e=document.getElementById("ma-admin-edit-card");
+  if(e&&!e.hidden&&!e.classList.contains("m7hidden")){
+    savebar.dataset.mode="edit";savebar.querySelector("#m7st").textContent="Editing "+(document.getElementById("ma-edit-name")?.value?.trim()||"shop");savebar.classList.add("on");return;
+  }
+  if(addDirty){savebar.dataset.mode="add";savebar.querySelector("#m7st").textContent="New shop has unsaved changes";savebar.classList.add("on");return}
+  savebar.classList.remove("on");
+}
+
+function reveal(action){
+  const m={edit:"edit",owner:"owner",gallery:"gallery",video:"video",reels:"reels"},k=m[action];if(!k)return;
+  pref.hidden[k]=false;pref.collapsed[k]=false;savePrefs();
+  setTimeout(()=>{setVis(k,true,false);setFold(k,false,false);saveState()},40);
+}
+function bind(){
+  document.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(b)reveal(b.dataset.action);if(e.target.closest("#ma-admin-post-add-owner-btn"))reveal("owner")},true);
+  document.addEventListener("input",e=>{if(e.target.closest("#ma-admin-shop-form")){addDirty=true;saveState()}else if(e.target.closest("#ma-admin-edit-form"))saveState()});
+  document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==="s"&&savebar?.classList.contains("on")){e.preventDefault();savebar.querySelector("#m7sm")?.click()}if(e.key==="Escape")closeDrawer()});
+}
+
+function decorateAll(){
+  toolbar();ensureDrawer();ensureSave();mountLabels();patchDirectory();
+  decorate("add","Add New Shop","＋");
+  PANELS.forEach(r=>decorate(r[0],r[1],r[2]));
+  foldsets();draw();saveState();
+}
+function observe(){
+  const d=document.getElementById("ma-admin-dashboard");if(!d)return;
+  let q=false;new MutationObserver(()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;decorateAll()})}).observe(d,{childList:true,subtree:true,attributes:true,attributeFilter:["hidden"]});
+}
+(async function(){
+  css();bind();
+  for(let i=0;i<200&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,50));
+  decorateAll();observe();window.addEventListener("ma7alak:admin-ready",decorateAll);
+  setInterval(()=>{patchDirectory();saveState()},800);
+})().catch(e=>console.error("MA7ALAK Admin Control Deck:",e));
+})();
+
