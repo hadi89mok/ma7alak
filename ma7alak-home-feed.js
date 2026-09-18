@@ -1,6 +1,7 @@
 (function(){
 "use strict";
-if(window.self!==window.top)return;\nif(window.__MA7ALAK_HOME_FEED_GLOBAL__)return;
+if(window.self!==window.top)return;
+if(window.__MA7ALAK_HOME_FEED_GLOBAL__)return;
 if(location.pathname.replace(/\/+$/,"")!=="")return;
 window.__MA7ALAK_HOME_FEED_GLOBAL__=1;
 const KEY="live_offers_reels",SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
