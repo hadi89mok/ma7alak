@@ -4890,3 +4890,145 @@ function mount(){const dash=$('ma-admin-dashboard');if(!dash||$('m7-shop-control
 async function ready(){for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;for(let i=0;i<180&&!mount();i++)await new Promise(r=>setTimeout(r,100));await loadStats();statsChannel=client.channel('ma7alak-admin-control-center').on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_categories'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_areas'},loadStats).subscribe();window.addEventListener('ma7alak:admin-ready',loadStats)}
 ready().catch(console.error);
 })();
+
+
+/* MA7ALAK ABOUT SERVICES ADMIN — SLUG DRIVEN */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin") return;
+if(window.__MA7ALAK_ABOUT_SERVICES_ADMIN__) return;
+window.__MA7ALAK_ABOUT_SERVICES_ADMIN__=true;
+
+const ICONS=[
+  ["hijab","🧕 Hijab"],
+  ["clothing","👗 Clothing / Fashion"],
+  ["dress","👗 Dress"],
+  ["bag","👜 Bag"],
+  ["beauty","✨ Beauty"],
+  ["perfume","🌸 Perfume / Scent"],
+  ["tattoo","✒️ Tattoo"],
+  ["piercing","💎 Piercing"],
+  ["coffee","☕ Coffee"],
+  ["food","🍴 Food"],
+  ["delivery","🚚 Delivery"],
+  ["location","📍 Location"],
+  ["phone","📱 Phone / Mobile"],
+  ["heart","♡ Heart"],
+  ["star","☆ Star"],
+  ["sparkle","✦ Sparkle"],
+  ["shop","🏪 Shop"]
+];
+
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+function optionsHtml(selected){
+  return ICONS.map(([value,label])=>
+    '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
+  ).join("");
+}
+
+function ensureStyles(){
+  if(document.getElementById("m7-about-services-admin-css")) return;
+  const st=document.createElement("style");
+  st.id="m7-about-services-admin-css";
+  st.textContent=\`
+    .m7-about-services-fields{margin:16px 0!important;padding:16px!important;border:1px solid #d6ac6244!important;border-radius:16px!important;background:#17130f!important;color:#e9d6b3!important}
+    .m7-about-services-fields legend{padding:0 9px;color:#f2c574;font-weight:900}
+    .m7-about-services-fields>p{margin:5px 0 14px;color:#b9ab97;font-size:12px;line-height:1.45}
+    .m7-about-service-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px;margin:10px 0}
+    .m7-about-service-row label{display:flex;flex-direction:column;gap:6px;font-size:12px}
+    .m7-about-service-row input,.m7-about-service-row select{width:100%;min-height:46px;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #d6ac6244;background:#0e0c0a;color:#fff;font:inherit}
+    @media(max-width:620px){.m7-about-service-row{grid-template-columns:1fr}}
+  \`;
+  document.head.appendChild(st);
+}
+
+function ensureForm(form,prefix){
+  if(!form || form.querySelector(".m7-about-services-fields")) return;
+  ensureStyles();
+
+  const fs=document.createElement("fieldset");
+  fs.className="m7-about-services-fields";
+  fs.innerHTML=
+    '<legend>About Me — bottom icons</legend>'+
+    '<p>The About text is the existing <b>About the shop</b> field above. Here you choose the labels + icons shown at the bottom of the About panel. Leave a label empty to hide that item.</p>'+
+    [1,2,3,4].map(i=>
+      '<div class="m7-about-service-row">'+
+        '<label><span>Item '+i+' name</span><input id="'+prefix+'about-service-'+i+'-label" type="text" placeholder="e.g. Hijabs"></label>'+
+        '<label><span>Item '+i+' icon</span><select id="'+prefix+'about-service-'+i+'-icon">'+optionsHtml(i===1?"sparkle":"shop")+'</select></label>'+
+      '</div>'
+    ).join("");
+
+  const home=form.querySelector(".m7da-home-fields");
+  if(home) form.insertBefore(fs,home);
+  else form.appendChild(fs);
+}
+
+function fillServices(prefix,services){
+  const rows=Array.isArray(services)?services:[];
+  [1,2,3,4].forEach((i,index)=>{
+    const row=rows[index]||{};
+    const label=document.getElementById(prefix+"about-service-"+i+"-label");
+    const icon=document.getElementById(prefix+"about-service-"+i+"-icon");
+    if(label) label.value=String(row.label||"");
+    if(icon){
+      const value=String(row.icon||"sparkle");
+      icon.value=ICONS.some(x=>x[0]===value)?value:"sparkle";
+    }
+  });
+}
+
+function collectServices(prefix){
+  return [1,2,3,4].map(i=>{
+    const label=String(document.getElementById(prefix+"about-service-"+i+"-label")?.value||"").trim();
+    const icon=String(document.getElementById(prefix+"about-service-"+i+"-icon")?.value||"sparkle").trim();
+    return label?{label,icon}:null;
+  }).filter(Boolean);
+}
+
+async function install(){
+  for(let i=0;i<200&&!window.Ma7alakDirectoryAdmin;i++){
+    await new Promise(r=>setTimeout(r,80));
+  }
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api || api.__aboutServicesWrapped) return;
+
+  const oldFill=api.fill.bind(api);
+  const oldCollect=api.collect.bind(api);
+
+  api.fill=function(shop){
+    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+    oldFill(shop);
+    fillServices("m7de-",shop?.directory_options?.about_services);
+  };
+
+  api.collect=function(edit){
+    const prefix=edit?"m7de-":"m7da-";
+    ensureForm(
+      document.getElementById(edit?"ma-admin-edit-form":"ma-admin-shop-form"),
+      prefix
+    );
+    const result=oldCollect(edit);
+    result.directory_options=result.directory_options||{};
+    result.directory_options.about_services=collectServices(prefix);
+    return result;
+  };
+
+  api.__aboutServicesWrapped=true;
+
+  ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+  ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+  const observer=new MutationObserver(()=>{
+    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+  });
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+
+install().catch(console.error);
+})();
