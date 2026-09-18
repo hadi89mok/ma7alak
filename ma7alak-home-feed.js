@@ -1,9 +1,10 @@
 (function(){
 "use strict";
-if(window.self!==window.top)return;
+/* top-level guard intentionally removed: Hostinger may execute Custom Code in a managed frame */
 if(window.__MA7ALAK_HOME_FEED_ORIGINAL_GLOBAL__)return;
 const __m7Path=(location.pathname||"/").replace(/\/+$/,"")||"/";
-if(__m7Path!=="/")return;
+const __m7IsHome=(__m7Path==="/"||__m7Path==="/home");
+if(!__m7IsHome)return;
 window.__MA7ALAK_HOME_FEED_ORIGINAL_GLOBAL__=1;
 
 function m7Mount(){
@@ -24,8 +25,9 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
  let cfg={enabled:true,position_index:3,offset_px:0,max_width_px:900};
  function place(){
    shell.style.display=cfg.enabled===false?"none":"block";
-   shell.style.maxWidth=(Number(cfg.max_width_px)||900)+"px";
-   shell.style.marginTop=(28+(Number(cfg.offset_px)||0))+"px";
+   shell.style.setProperty("max-width","none","important");
+   shell.style.setProperty("width","100%","important");
+   shell.style.marginTop=(Number(cfg.offset_px)||0)+"px";
    const a=[...document.querySelectorAll("main > section, main > div, body > section")].filter(x=>x!==shell&&!x.closest("#m7-global-home-feed-shell")&&x.offsetHeight>24&&!/header|footer/i.test(x.tagName));
    const i=Math.max(0,Math.min(Number(cfg.position_index??3),a.length));
    if(a[i]&&a[i].parentNode)a[i].parentNode.insertBefore(shell,a[i]); else (document.querySelector("main")||document.body).appendChild(shell);
