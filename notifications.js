@@ -224,7 +224,7 @@ let notificationBadgeCount = 0;
    ---------------------------------------------------------
    - Opening the bell clears the RED NUMBER immediately.
    - Rows stay highlighted until THAT row is clicked.
-   - A newer Story/Reel creates a new signature, so the badge
+   - A newer Story/Reel/Live update creates a new signature, so the badge
      comes back for the new activity.
 ========================================================= */
 
@@ -2527,6 +2527,83 @@ function markAllCurrentReelsAsSeen(){
 
 
 /* =========================================================
+   LIVE NOTIFICATIONS — ONE ROW PER SHOP
+   ---------------------------------------------------------
+   - One Live notification row per followed shop.
+   - Multiple active Live cards NEVER create notification spam.
+   - If the row was already read and the shop publishes a NEW
+     Live card, the same row becomes unread again.
+   - Existing Live cards are seeded as the first-run baseline.
+========================================================= */
+
+const MA7ALAK_LIVE_NOTIFICATION_STATE_KEY =
+  "ma7alak_live_notification_state_v1";
+
+function getLiveNotificationState(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(MA7ALAK_LIVE_NOTIFICATION_STATE_KEY)||"null");
+    if(!parsed||typeof parsed!=="object")throw new Error("EMPTY_LIVE_STATE");
+    return {
+      initialized:Boolean(parsed.initialized),
+      seenByShop:parsed.seenByShop&&typeof parsed.seenByShop==="object" ? parsed.seenByShop : {}
+    };
+  }catch(error){
+    return {initialized:false,seenByShop:{}};
+  }
+}
+
+function saveLiveNotificationState(state){
+  try{
+    localStorage.setItem(
+      MA7ALAK_LIVE_NOTIFICATION_STATE_KEY,
+      JSON.stringify({
+        initialized:Boolean(state&&state.initialized),
+        seenByShop:state&&state.seenByShop&&typeof state.seenByShop==="object" ? state.seenByShop : {}
+      })
+    );
+  }catch(error){}
+}
+
+function markLiveNotificationAsSeen(shopSlug,postId){
+  const slug=String(shopSlug||"").trim();
+  const id=String(postId||"").trim();
+  if(!slug||!id)return;
+  const state=getLiveNotificationState();
+  state.initialized=true;
+  state.seenByShop[slug]=id;
+  saveLiveNotificationState(state);
+}
+
+function markAllCurrentLivesAsSeen(){
+  const liveRows=notifications.filter(function(notification){return notification&&notification.type==="live";});
+  if(!liveRows.length)return;
+  const state=getLiveNotificationState();
+  state.initialized=true;
+  liveRows.forEach(function(notification){
+    const slug=String(notification.shop_slug||"").trim();
+    const id=String(notification.id||"").trim();
+    if(slug&&id)state.seenByShop[slug]=id;
+  });
+  saveLiveNotificationState(state);
+}
+
+async function openExactLiveFromNotification(postId){
+  const id=String(postId||"").trim();
+  if(!id)return false;
+  try{
+    const api=window.Ma7alakLiveOffers;
+    if(api){
+      if(typeof api.refresh==="function")await api.refresh();
+      if(typeof api.open==="function"){api.open(id);return true;}
+    }
+  }catch(error){}
+  try{
+    window.postMessage({type:"MA7ALAK_LIVE_OFFERS_VIEW",id:id},"*");
+    return true;
+  }catch(error){return false;}
+}
+
+/* =========================================================
    FOLLOW-ONLY NOTIFICATIONS
    ---------------------------------------------------------
    The bell now shows Story/Reel activity ONLY from shops
@@ -2971,6 +3048,50 @@ async function loadNotifications(){
 
 
     /* -------------------------------------------------------
+       LIVE NOTIFICATIONS — LATEST ACTIVE CARD PER SHOP
+    ------------------------------------------------------- */
+
+    const liveNow = new Date().toISOString();
+    const {data:directLivePosts,error:directLivePostsError} = await client
+      .from("shop_live_posts")
+      .select("id,shop_slug,shop_name,post_type,title,starts_at,ends_at,status,created_at")
+      .eq("status","active")
+      .lte("starts_at",liveNow)
+      .gt("ends_at",liveNow)
+      .order("created_at",{ascending:false});
+
+    let liveNotifications = [];
+    if(!directLivePostsError){
+      const latestLiveByShop=new Map();
+      (directLivePosts||[]).forEach(function(row){
+        const slug=String(row&&row.shop_slug?row.shop_slug:"").trim();
+        if(!slug||!followedShopSlugs.has(slug)||latestLiveByShop.has(slug))return;
+        latestLiveByShop.set(slug,row);
+      });
+      const liveState=getLiveNotificationState();
+      if(!liveState.initialized){
+        liveState.initialized=true;
+        latestLiveByShop.forEach(function(row,slug){liveState.seenByShop[slug]=String(row.id||"");});
+        saveLiveNotificationState(liveState);
+      }
+      liveNotifications=Array.from(latestLiveByShop.entries()).map(function(entry){
+        const slug=entry[0],row=entry[1],id=String(row.id||"");
+        return {
+          ...row,
+          key:"live:"+slug,
+          type:"live",
+          id:id,
+          shop_slug:slug,
+          shop_name:String(row.shop_name||getShopName(slug)||slug).trim(),
+          created_at:row.created_at||row.starts_at||liveNow,
+          seen:String(liveState.seenByShop[slug]||"")===id
+        };
+      });
+    }else{
+      console.error("Ma7alak notifications live:",directLivePostsError);
+    }
+
+    /* -------------------------------------------------------
        COMBINE + SORT
     ------------------------------------------------------- */
 
@@ -2978,6 +3099,9 @@ async function loadNotifications(){
       storyNotifications
         .concat(
           reelNotifications
+        )
+        .concat(
+          liveNotifications
         )
         .sort(
           function(a,b){
@@ -3435,9 +3559,12 @@ function renderNotifications(){
           const isReel =
             notification.type === "reel";
 
+          const isLive =
+            notification.type === "live";
+
 
           const shopName =
-            isReel && notification.shop_name
+            (isReel || isLive) && notification.shop_name
               ? notification.shop_name
               : getShopName(
                   notification.shop_slug
@@ -3483,7 +3610,7 @@ function renderNotifications(){
                   if(!this.parentElement.querySelector('.fallback-emoji')){
                     this.parentElement.insertAdjacentHTML(
                       'beforeend',
-                      '<span class=&quot;fallback-emoji&quot;>${isReel ? "▶️" : "🔥"}</span>'
+                      '<span class=&quot;fallback-emoji&quot;>${isLive ? "🟢" : (isReel ? "▶️" : "🔥")}</span>'
                     );
                   }
                 "
@@ -3499,7 +3626,7 @@ function renderNotifications(){
               <span
                 class="fallback-emoji"
               >
-                ${isReel ? "▶️" : "🔥"}
+                ${isLive ? "🟢" : (isReel ? "▶️" : "🔥")}
               </span>
 
             `;
@@ -3543,7 +3670,7 @@ function renderNotifications(){
                     ${escapeHtml(shopName)}
                   </strong>
 
-                  ${isReel ? "added a new Reel" : "added a new story"}
+                  ${isLive ? "is now live!" : (isReel ? "added a new Reel" : "added a new story")}
 
                 </p>
 
@@ -3697,6 +3824,16 @@ function renderNotifications(){
               }
 
             }
+            else if(
+              notificationType === "live"
+            ){
+
+              contentOpened =
+                await openExactLiveFromNotification(
+                  notificationId
+                );
+
+            }
             else{
 
               /*
@@ -3724,6 +3861,16 @@ function renderNotifications(){
             ){
 
               markReelFingerprintAsSeen(
+                notificationId
+              );
+
+            }
+            else if(
+              notificationType === "live"
+            ){
+
+              markLiveNotificationAsSeen(
+                shopSlug,
                 notificationId
               );
 
@@ -3948,6 +4095,8 @@ async function markAllCurrentNotificationsAsSeen(){
 
 
     markAllCurrentReelsAsSeen();
+
+    markAllCurrentLivesAsSeen();
 
 
     notifications =
@@ -4257,6 +4406,26 @@ async function setupRealtime(){
           }
         )
 
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"shop_live_posts"
+          },
+          async function(){
+
+            await loadNotifications();
+
+            notificationBadgeCount =
+              calculateBadgeCount();
+
+            updateNotificationBadge();
+            renderNotifications();
+
+          }
+        )
+
         .subscribe(
           function(status){
 
@@ -4484,10 +4653,10 @@ else{
    1. Bell panel opens immediately; no Supabase wait.
    2. Opening bell clears only the red number badge.
    3. Notification row highlight remains until that row is clicked.
-   4. New Story/Reel gets a new signature and brings the badge back.
+   4. New Story/Reel/Live update gets a new signature and brings the badge back.
    5. Story realtime INSERT updates immediately.
    6. Reel state messages update immediately.
-   7. 1.5s backup refresh requests Story + Reel state if an event is missed.
+   7. 1.5s backup refresh requests Story + Reel + Live state if an event is missed.
    8. Reel notification opens the exact Reel ID in the existing header viewer.
 ========================================================= */
 
@@ -4495,7 +4664,7 @@ else{
 
 
 /* =========================================================
-   WHAT CHANGED — STORY + REEL SMART NOTIFICATIONS
+   WHAT CHANGED — STORY + REEL + LIVE SMART NOTIFICATIONS
    =========================================================
    1. Stories now use ONE notification row per shop.
    2. If the same shop posts again, its row updates to the newest Story.
