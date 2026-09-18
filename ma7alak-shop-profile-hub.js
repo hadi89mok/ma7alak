@@ -3121,40 +3121,40 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
     let modeCss = "";
 
     if(mode === "shimmer"){
-      modeCss = \`
+      modeCss = `
         animation:m7AdminAboutTitleShimmer 3.4s ease-in-out infinite!important;
         -webkit-animation:m7AdminAboutTitleShimmer 3.4s ease-in-out infinite!important;
-      \`;
+      `;
     }
     else if(mode === "glow"){
-      modeCss = \`
+      modeCss = `
         background:none!important;
-        color:\${color}!important;
-        -webkit-text-fill-color:\${color}!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
         animation:m7AdminAboutTitleGlow 2.1s ease-in-out infinite!important;
         -webkit-animation:m7AdminAboutTitleGlow 2.1s ease-in-out infinite!important;
-      \`;
+      `;
     }
     else if(mode === "breathe"){
-      modeCss = \`
+      modeCss = `
         background:none!important;
-        color:\${color}!important;
-        -webkit-text-fill-color:\${color}!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
         animation:m7AdminAboutTitleBreathe 2.6s ease-in-out infinite!important;
         -webkit-animation:m7AdminAboutTitleBreathe 2.6s ease-in-out infinite!important;
-      \`;
+      `;
     }
     else if(mode === "none"){
-      modeCss = \`
+      modeCss = `
         background:none!important;
-        color:\${color}!important;
-        -webkit-text-fill-color:\${color}!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
         animation:none!important;
         -webkit-animation:none!important;
-      \`;
+      `;
     }
 
-    style.textContent = \`
+    style.textContent = `
       @keyframes m7AdminAboutTitleShimmer{
         from{background-position:120% 50%}
         to{background-position:-120% 50%}
@@ -3168,13 +3168,13 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
       @keyframes m7AdminAboutTitleGlow{
         0%,100%{
           text-shadow:
-            0 0 5px \${rgba(rgb,.24)},
+            0 0 5px ${rgba(rgb,.24)},
             0 2px 10px rgba(0,0,0,.45);
         }
         50%{
           text-shadow:
-            0 0 13px \${rgba(rgb,.80)},
-            0 0 22px \${rgba(rgb,.34)},
+            0 0 13px ${rgba(rgb,.80)},
+            0 0 22px ${rgba(rgb,.34)},
             0 2px 10px rgba(0,0,0,.45);
         }
       }
@@ -3182,13 +3182,13 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
       @-webkit-keyframes m7AdminAboutTitleGlow{
         0%,100%{
           text-shadow:
-            0 0 5px \${rgba(rgb,.24)},
+            0 0 5px ${rgba(rgb,.24)},
             0 2px 10px rgba(0,0,0,.45);
         }
         50%{
           text-shadow:
-            0 0 13px \${rgba(rgb,.80)},
-            0 0 22px \${rgba(rgb,.34)},
+            0 0 13px ${rgba(rgb,.80)},
+            0 0 22px ${rgba(rgb,.34)},
             0 2px 10px rgba(0,0,0,.45);
         }
       }
@@ -3207,11 +3207,11 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
         background:
           linear-gradient(
             105deg,
-            \${light} 0%,
-            \${soft} 24%,
+            ${light} 0%,
+            ${soft} 24%,
             #ffffff 39%,
-            \${color} 52%,
-            \${light} 72%,
+            ${color} 52%,
+            ${light} 72%,
             #ffffff 100%
           )!important;
 
@@ -3229,9 +3229,9 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
             rgba(0,0,0,.30)
           )!important;
 
-        \${modeCss}
+        ${modeCss}
       }
-    \`;
+    `;
   }
 
   async function load(){
