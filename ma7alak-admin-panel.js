@@ -5625,7 +5625,7 @@ function observe(){
     box.className =
       "m7da-fields m7-title-style-box m7fieldset";
 
-    box.innerHTML = \`
+    box.innerHTML = `
       <legend>Title Styling</legend>
 
       <p>
@@ -5636,25 +5636,25 @@ function observe(){
       <div class="m7da-grid">
         <label class="m7da-field">
           Shop name text color
-          <input id="\${prefix}shop_name_color" type="color" value="#f2caed">
+          <input id="${prefix}shop_name_color" type="color" value="#f2caed">
         </label>
 
         <label class="m7da-field">
           Shop name animation
-          <select id="\${prefix}shop_name_animation">
-            \${animOptions()}
+          <select id="${prefix}shop_name_animation">
+            ${animOptions()}
           </select>
         </label>
 
         <label class="m7da-field">
           About title text color
-          <input id="\${prefix}about_title_color" type="color" value="#f2caed">
+          <input id="${prefix}about_title_color" type="color" value="#f2caed">
         </label>
 
         <label class="m7da-field">
           About title animation
-          <select id="\${prefix}about_title_animation">
-            \${animOptions()}
+          <select id="${prefix}about_title_animation">
+            ${animOptions()}
           </select>
         </label>
       </div>
@@ -5663,7 +5663,7 @@ function observe(){
         <span data-shop-preview>Shop Name</span>
         <span data-about-preview>About Shop Name</span>
       </div>
-    \`;
+    `;
 
     const labelBox =
       form.querySelector(".m7labelbox");
@@ -5906,7 +5906,7 @@ function observe(){
     style.id =
       "m7-title-style-admin-css";
 
-    style.textContent = \`
+    style.textContent = `
       .m7-title-style-box{
         border-color:rgba(242,202,237,.28)!important;
         background:
@@ -5940,7 +5940,7 @@ function observe(){
           grid-template-columns:1fr;
         }
       }
-    \`;
+    `;
 
     document.head.appendChild(style);
   }
