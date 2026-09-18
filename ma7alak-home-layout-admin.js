@@ -6,8 +6,14 @@ window.__M7_HOME_LAYOUT_ADMIN__=1;
 const KEY="live_offers_reels";let db=null,row=null;
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 async function ready(){
- for(let i=0;i<160;i++){db=window.Ma7alakAccount?.client||window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||null;if(db)break;await sleep(250)}
- if(!db&&window.Ma7alakSupabase?.ready){try{db=await window.Ma7alakSupabase.ready()}catch(_){}}
+ for(let i=0;i<160;i++){db=window.Ma7alakAdminClient||null;if(db)break;await sleep(250)}
+ if(!db)return null;
+ try{
+   const s=await db.auth.getSession();
+   if(!s?.data?.session)return null;
+   const a=await db.rpc("is_site_admin");
+   if(a.error||a.data!==true)return null;
+ }catch(_){return null}
  return db;
 }
 function mount(){
