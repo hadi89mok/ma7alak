@@ -34,10 +34,7 @@ async function save(){
  row.offset_px=Math.max(-100,Math.min(300,Number(document.getElementById("m7hla-offset").value||0)));
  row.max_width_px=Math.max(320,Math.min(1400,Number(document.getElementById("m7hla-width").value||900)));
  row.enabled=document.getElementById("m7hla-enabled").checked;row.updated_at=new Date().toISOString();
- let r=await db.rpc("ma7alak_admin_update_homepage_layout",{p_key:KEY,p_enabled:row.enabled,p_position_index:row.position_index,p_offset_px:row.offset_px,p_max_width_px:row.max_width_px});
- if(r.error && /permission denied for table homepage_layout_settings/i.test(r.error.message||"")){
-   r=await db.from("homepage_layout_settings").update({enabled:row.enabled,position_index:row.position_index,offset_px:row.offset_px,max_width_px:row.max_width_px,updated_at:row.updated_at}).eq("key",KEY);
- }
+ let r=await db.rpc("ma7alak_admin_update_homepage_layout_v2",{p_key:KEY,p_enabled:row.enabled,p_position_index:row.position_index,p_offset_px:row.offset_px,p_max_width_px:row.max_width_px});
  st.textContent=r.error?("Could not save: "+r.error.message):"✓ Published to the live homepage";if(!r.error)setTimeout(()=>st.textContent="",2600)
 }
 async function boot(){
