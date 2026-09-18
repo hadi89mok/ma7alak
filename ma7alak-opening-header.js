@@ -287,3 +287,10 @@
   }, 100);
 
 })();
+
+/* Route every opening-header “Add your shop” action to the new plan page. */
+(function(){
+  function sync(){document.querySelectorAll('#ma7alak-opening-header-root a[href*="dhyf-mhlk-"]').forEach(function(link){link.href="https://ma7alak.com/add-shop-";link.onclick=function(e){e.preventDefault();window.top.location.href="https://ma7alak.com/add-shop-"}})}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sync,{once:true});else sync();
+  const observer=new MutationObserver(sync);observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){observer.disconnect()},15000);
+})();

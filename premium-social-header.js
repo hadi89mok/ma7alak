@@ -1591,7 +1591,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       <a
         class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/dhyf-mhlk-"
+        href="https://ma7alak.com/add-shop-"
       >
         <span class="ma7alak-header-menu-icon">＋</span>
         <span class="ma7alak-header-menu-text">
@@ -3738,3 +3738,20 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
 ========================================================= */
 
+/* V27: fit only the far-left Ma7alak eye inside the phone header.
+   The right profile-circle is intentionally not selected here. */
+(function(){
+  if(document.getElementById("ma7alak-left-eye-fit-v27"))return;
+  const style=document.createElement("style");
+  style.id="ma7alak-left-eye-fit-v27";
+  style.textContent=`
+@media(max-width:900px){
+  #ma7alak-social-header .ma7alak-header-brand{width:76px!important;min-width:76px!important;height:54px!important;margin-left:0!important;padding:5px 5px 5px 8px!important;overflow:hidden!important;box-sizing:border-box!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:63px!important;max-width:63px!important;height:44px!important;object-fit:contain!important;object-position:center!important;transform:none!important}
+}
+@media(max-width:390px){
+  #ma7alak-social-header .ma7alak-header-brand{width:70px!important;min-width:70px!important;padding-left:7px!important;padding-right:4px!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:58px!important;max-width:58px!important;height:41px!important}
+}`;
+  (document.head||document.documentElement).appendChild(style);
+})();
