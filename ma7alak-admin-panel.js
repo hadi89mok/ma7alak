@@ -4901,23 +4901,33 @@ if(window.__MA7ALAK_ABOUT_SERVICES_ADMIN__) return;
 window.__MA7ALAK_ABOUT_SERVICES_ADMIN__=true;
 
 const ICONS=[
-  ["hijab","🧕 Hijab"],
-  ["clothing","👗 Clothing / Fashion"],
-  ["dress","👗 Dress"],
+  ["hijab","🥕 hijab"],
+  ["clothing","👔 Clothing / Fashion"],
+  ["dress","👔 Dress"],
   ["bag","👜 Bag"],
   ["beauty","✨ Beauty"],
   ["perfume","🌸 Perfume / Scent"],
   ["tattoo","✒️ Tattoo"],
-  ["piercing","💎 Piercing"],
+  ["piercing","💍 Piercing"],
   ["coffee","☕ Coffee"],
   ["food","🍴 Food"],
-  ["delivery","🚚 Delivery"],
+  ["delivery","🚛 Delivery"],
   ["location","📍 Location"],
   ["phone","📱 Phone / Mobile"],
   ["heart","♡ Heart"],
   ["star","☆ Star"],
   ["sparkle","✦ Sparkle"],
-  ["shop","🏪 Shop"]
+  ["shop","🊩 Shop"]
+];
+
+const EFFECTS=[
+  ["about_fx_title_sparkles","Animated title sparkles","Small sparkles around the About title",true],
+  ["about_fx_floating_sparkles","Floating sparkles","Soft sparkles drifting inside the About panel",false],
+  ["about_fx_title_shimmer","Title shimmer","Moving shine across the About title",true],
+  ["about_fx_panel_glow","Breathing panel glow","Soft animated glow around the About card",false],
+  ["about_fx_icon_pulse","Icon pulse","Bottom service icons gently pulse",false],
+  ["about_fx_signature_shimmer","Signature shimmer","Animated shine on the bottom signature",false],
+  ["about_fx_ornament_shine","Top ornament animation","Animate the top lines and center diamond",true]
 ];
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
@@ -4925,23 +4935,41 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
 }[c]));
 
 function optionsHtml(selected){
-  return ICONS.map(([value,label])=>
+  return ICONS.map(([value,label])>>
     '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
   ).join("");
 }
 
+function boolValue(value,fallback){
+  if(value===undefined || value===null) return fallback;
+  return value===true || String(value).toLowerCase()==="true";
+}
+
 function ensureStyles(){
   if(document.getElementById("m7-about-services-admin-css")) return;
+
   const st=document.createElement("style");
   st.id="m7-about-services-admin-css";
   st.textContent=`
     .m7-about-services-fields{margin:16px 0!important;padding:16px!important;border:1px solid #d6ac6244!important;border-radius:16px!important;background:#17130f!important;color:#e9d6b3!important}
-    .m7-about-services-fields legend{padding:0 9px;color:#f2c574;font-weight:900}
+    .m7-about-services-fields{legend{padding:0 9px;color:#f2c574;font-weight:900}
     .m7-about-services-fields>p{margin:5px 0 14px;color:#b9ab97;font-size:12px;line-height:1.45}
+    .m7-about-description-slot{margin:8px 0 16px}
+    .m7-about-description-slot label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:800}
+    .m7-about-description-slot textarea{width:100%xaimportant;min-height:150px!important;resize:vertical!important;box-sizing:border-box!important;padding:12px!important;border-radius:12px!important;border:1px solid #d6ac6244!important;background:#0e0c0a!important;color:#fff!important;font:inherit!important;line-height:1.6!important}
+    .m7-about-signature{display:flex;flex-direction:column;gap:6px;margin:16px 0;font-size:12px;font-weight:800}
+    .m7-about-signature input{width:100%;min-height:46px;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #d6ac6244;background:#0e0c0a;color:#fff;font:inherit}
+    .m7-about-service-title,.m7-about-effects-title{margin:16px 0 8px;color:#f2c574;font-size:12px;font-weight:950;letter-spacing:.7px;text-transform:uppercase}
     .m7-about-service-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px;margin:10px 0}
     .m7-about-service-row label{display:flex;flex-direction:column;gap:6px;font-size:12px}
     .m7-about-service-row input,.m7-about-service-row select{width:100%;min-height:46px;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #d6ac6244;background:#0e0c0a;color:#fff;font:inherit}
-    @media(max-width:620px){.m7-about-service-row{grid-template-columns:1fr}}
+    .m7-about-effects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .m7-about-fx-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:58px;padding:10px 12px;border:1px solid #d6ac6244;border-radius:12px;background:#0e0c0a}
+    .m7-about-fx-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .m7-about-fx-copy b{font-size:12px;color:#fff}
+    .m7-about-fx-copy small{font-size:10px;color:#b9ab97;line-height:1.35}
+    .m7-about-fx-row input{width:20px!important;height:20px!important;min-height:20px!important;flex:0 0 20px;accent-color:#e4b660}
+    @media(max-width:620px){.h7-about-service-row,.m7-about-effects{grid-template-columns:1fr}}
   `;
   document.head.appendChild(st);
 }
@@ -4957,24 +4985,31 @@ function ensureForm(form,prefix){
     fs.className="m7-about-services-fields";
     fs.innerHTML=
       '<legend>About Me</legend>'+
-      '<p>Add the actual shop description here, then choose the optional labels + icons shown at the bottom of the About panel. Leave an item name empty to hide it.</p>'+
+      '<p>Write the shop description, choose the bottom labels/icons, edit the signature, and switch visual effects on or off for this shop.</p>'+
       '<div class="m7-about-description-slot"></div>'+
+      '<div class="m7-about-service-title">Bottom items</div>'+
       [1,2,3,4].map(i=>
         '<div class="m7-about-service-row">'+
           '<label><span>Item '+i+' name</span><input id="'+prefix+'about-service-'+i+'-label" type="text" placeholder="e.g. Hijabs"></label>'+
           '<label><span>Item '+i+' icon</span><select id="'+prefix+'about-service-'+i+'-icon">'+optionsHtml(i===1?"sparkle":"shop")+'</select></label>'+
         '</div>'
-      ).join("");
+      ).join("")+
+      '<label class="m7-about-signature"><span>Bottom signature</span><input id="'+prefix+'about-signature" type="text" placeholder="e.g. Your style. Your story."></label>'+
+      '<div class="m7-about-effects-title">Animations & effects</div>'+
+      '<div class="m7-about-effects">'+
+        EFFECTS.map(([key,label,help])=>
+          '<label class="m7-about-fx-row">'+
+            '<span class="m7-about-fx-copy"><b>'+esc(label)+'</b><small>'+esc(help)+'</small></span>'+
+            '<input id="'+prefix+key+'" type="checkbox">'+
+          '</label>'
+        ).join("")+
+      '</div>';
 
     const home=form.querySelector(".m7da-home-fields");
     if(home) form.insertBefore(fs,home);
     else form.appendChild(fs);
   }
 
-  /*
-     Move the EXISTING about_text field into this About Me box.
-     This keeps the same database field and save logic — no duplicate data.
-  */
   const aboutInput=document.getElementById(prefix+"about_text");
   const slot=fs.querySelector(".m7-about-description-slot");
 
@@ -4994,34 +5029,80 @@ function ensureForm(form,prefix){
   }
 }
 
-function fillServices(prefix,services){
-  const rows=Array.isArray(services)?services:[];
+function fillControls(prefix,options){
+  const o=options && typeof options==="object" ? options : {};
+  const services=Array.isArray(o.about_services) ? o.about_services : [];
+
+  const signature=document.getElementById(prefix+"about-signature");
+  if(signature){
+    signature.value=String(
+      o.about_signature ?? "Your style. Your story."
+    );
+  }
+
   [1,2,3,4].forEach((i,index)=>{
-    const row=rows[index]||{};
+    const row=services[index]||{};
     const label=document.getElementById(prefix+"about-service-"+i+"-label");
     const icon=document.getElementById(prefix+"about-service-"+i+"-icon");
+
     if(label) label.value=String(row.label||"");
+
     if(icon){
       const value=String(row.icon||"sparkle");
-      icon.value=ICONS.some(x=>x[0]===value)?value:"sparkle";
+      icon.value=ICONS.some(x=>x[0]===value) ? value : "sparkle";
+    }
+  });
+
+  EFFECTS.forEach(([key,,,,fallback])=>{
+    const input=document.getElementById(prefix+key);
+    if(input){
+      input.checked=boolValue(o[key],fallback);
     }
   });
 }
 
 function collectServices(prefix){
   return [1,2,3,4].map(i=>{
-    const label=String(document.getElementById(prefix+"about-service-"+i+"-label")?.value||"").trim();
-    const icon=String(document.getElementById(prefix+"about-service-"+i+"-icon")?.value||"sparkle").trim();
-    return label?{label,icon}:null;
+    const label=String(
+      document.getElementById(prefix+"about-service-"+i+"-label")?.value||""
+    ).trim();
+
+    const icon=String(
+      document.getElementById(prefix+"about-service-"+i+"-icon")?.value||"sparkle"
+    ).trim();
+
+    return label ? {label,icon} : null;
   }).filter(Boolean);
+}
+
+function collectControls(prefix,result){
+  result.directory_options=result.directory_options||{};
+
+  result.directory_options.about_services=
+    collectServices(prefix);
+
+  result.directory_options.about_signature=
+    String(
+      document.getElementById(prefix+"about-signature")?.value ||
+      ""
+    ).trim() || "Your style. Your story.";
+
+  EFFECTS.forEach(([key])=>{
+    result.directory_options[key]=
+      !!document.getElementById(prefix+key)?.checked;
+  });
+
+  return result;
 }
 
 async function install(){
   for(let i=0;i<200&&!window.Ma7alakDirectoryAdmin;i++){
     await new Promise(r=>setTimeout(r,80));
   }
+
   const api=window.Ma7alakDirectoryAdmin;
-  if(!api || api.__aboutServicesWrapped) return;
+
+  if(!api || api.__aboutServicesWrappedV2) return;
 
   const oldFill=api.fill.bind(api);
   const oldCollect=api.collect.bind(api);
@@ -5029,32 +5110,54 @@ async function install(){
   api.fill=function(shop){
     ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
     ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+
     oldFill(shop);
-    fillServices("m7de-",shop?.directory_options?.about_services);
+
+    fillControls(
+      "m7de-",
+      shop?.directory_options
+    );
   };
 
   api.collect=function(edit){
     const prefix=edit?"m7de-":"m7da-";
+
     ensureForm(
-      document.getElementById(edit?"ma-admin-edit-form":"ma-admin-shop-form"),
+      document.getElementById(
+        edit
+          ? "ma-admin-edit-form"
+          : "ma-admin-shop-form"
+      ),
       prefix
     );
+
     const result=oldCollect(edit);
-    result.directory_options=result.directory_options||{};
-    result.directory_options.about_services=collectServices(prefix);
-    return result;
+
+    return collectControls(
+      prefix,
+      result
+    );
   };
 
-  api.__aboutServicesWrapped=true;
+  api.__aboutServicesWrappedV2=true;
 
   ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
   ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+  fillControls("m7da-",{});
 
   const observer=new MutationObserver(()=>{
     ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
     ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
   });
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
 }
 
 install().catch(console.error);
