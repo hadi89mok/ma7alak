@@ -4934,7 +4934,7 @@ function ensureStyles(){
   if(document.getElementById("m7-about-services-admin-css")) return;
   const st=document.createElement("style");
   st.id="m7-about-services-admin-css";
-  st.textContent=\`
+  st.textContent=`
     .m7-about-services-fields{margin:16px 0!important;padding:16px!important;border:1px solid #d6ac6244!important;border-radius:16px!important;background:#17130f!important;color:#e9d6b3!important}
     .m7-about-services-fields legend{padding:0 9px;color:#f2c574;font-weight:900}
     .m7-about-services-fields>p{margin:5px 0 14px;color:#b9ab97;font-size:12px;line-height:1.45}
@@ -4942,7 +4942,7 @@ function ensureStyles(){
     .m7-about-service-row label{display:flex;flex-direction:column;gap:6px;font-size:12px}
     .m7-about-service-row input,.m7-about-service-row select{width:100%;min-height:46px;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #d6ac6244;background:#0e0c0a;color:#fff;font:inherit}
     @media(max-width:620px){.m7-about-service-row{grid-template-columns:1fr}}
-  \`;
+  `;
   document.head.appendChild(st);
 }
 
