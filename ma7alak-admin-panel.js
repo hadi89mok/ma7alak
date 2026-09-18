@@ -4947,24 +4947,51 @@ function ensureStyles(){
 }
 
 function ensureForm(form,prefix){
-  if(!form || form.querySelector(".m7-about-services-fields")) return;
+  if(!form) return;
   ensureStyles();
 
-  const fs=document.createElement("fieldset");
-  fs.className="m7-about-services-fields";
-  fs.innerHTML=
-    '<legend>About Me — bottom icons</legend>'+
-    '<p>The About text is the existing <b>About the shop</b> field above. Here you choose the labels + icons shown at the bottom of the About panel. Leave a label empty to hide that item.</p>'+
-    [1,2,3,4].map(i=>
-      '<div class="m7-about-service-row">'+
-        '<label><span>Item '+i+' name</span><input id="'+prefix+'about-service-'+i+'-label" type="text" placeholder="e.g. Hijabs"></label>'+
-        '<label><span>Item '+i+' icon</span><select id="'+prefix+'about-service-'+i+'-icon">'+optionsHtml(i===1?"sparkle":"shop")+'</select></label>'+
-      '</div>'
-    ).join("");
+  let fs=form.querySelector(".m7-about-services-fields");
 
-  const home=form.querySelector(".m7da-home-fields");
-  if(home) form.insertBefore(fs,home);
-  else form.appendChild(fs);
+  if(!fs){
+    fs=document.createElement("fieldset");
+    fs.className="m7-about-services-fields";
+    fs.innerHTML=
+      '<legend>About Me</legend>'+
+      '<p>Add the actual shop description here, then choose the optional labels + icons shown at the bottom of the About panel. Leave an item name empty to hide it.</p>'+
+      '<div class="m7-about-description-slot"></div>'+
+      [1,2,3,4].map(i=>
+        '<div class="m7-about-service-row">'+
+          '<label><span>Item '+i+' name</span><input id="'+prefix+'about-service-'+i+'-label" type="text" placeholder="e.g. Hijabs"></label>'+
+          '<label><span>Item '+i+' icon</span><select id="'+prefix+'about-service-'+i+'-icon">'+optionsHtml(i===1?"sparkle":"shop")+'</select></label>'+
+        '</div>'
+      ).join("");
+
+    const home=form.querySelector(".m7da-home-fields");
+    if(home) form.insertBefore(fs,home);
+    else form.appendChild(fs);
+  }
+
+  /*
+     Move the EXISTING about_text field into this About Me box.
+     This keeps the same database field and save logic — no duplicate data.
+  */
+  const aboutInput=document.getElementById(prefix+"about_text");
+  const slot=fs.querySelector(".m7-about-description-slot");
+
+  if(aboutInput && slot){
+    const aboutLabel=aboutInput.closest("label");
+
+    if(aboutLabel && aboutLabel.parentNode!==slot){
+      const title=aboutLabel.querySelector("span");
+      if(title) title.textContent="About description";
+      slot.appendChild(aboutLabel);
+    }
+
+    aboutInput.setAttribute(
+      "placeholder",
+      "Write the shop's About Me description here…"
+    );
+  }
 }
 
 function fillServices(prefix,services){
