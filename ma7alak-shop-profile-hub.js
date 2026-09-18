@@ -2964,3 +2964,355 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
 
 
 })();
+
+/* =========================================================
+   MA7ALAK PROFILE HUB — LIVE ABOUT TITLE STYLE
+   directory_options:
+     about_title_color
+     about_title_animation
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__MA7ALAK_ABOUT_TITLE_STYLE_LIVE__){
+    return;
+  }
+
+  window.__MA7ALAK_ABOUT_TITLE_STYLE_LIVE__ = true;
+
+  function safeHex(value,fallback){
+    const raw = String(value || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)
+      ? raw
+      : fallback;
+  }
+
+  function hexToRgb(hex){
+    const clean =
+      String(hex || "")
+        .replace("#","")
+        .trim();
+
+    if(!/^[0-9a-f]{6}$/i.test(clean)){
+      return null;
+    }
+
+    return {
+      r:parseInt(clean.slice(0,2),16),
+      g:parseInt(clean.slice(2,4),16),
+      b:parseInt(clean.slice(4,6),16)
+    };
+  }
+
+  function mix(rgb,target,amount){
+    const clamp = n =>
+      Math.max(
+        0,
+        Math.min(
+          255,
+          Math.round(n)
+        )
+      );
+
+    return (
+      "#" +
+      [
+        clamp(rgb.r+(target.r-rgb.r)*amount),
+        clamp(rgb.g+(target.g-rgb.g)*amount),
+        clamp(rgb.b+(target.b-rgb.b)*amount)
+      ]
+        .map(v=>
+          v.toString(16).padStart(2,"0")
+        )
+        .join("")
+    );
+  }
+
+  function rgba(rgb,a){
+    return (
+      "rgba(" +
+      rgb.r + "," +
+      rgb.g + "," +
+      rgb.b + "," +
+      a +
+      ")"
+    );
+  }
+
+  function apply(profile){
+    const title =
+      document.getElementById(
+        "ma7alak-about-title"
+      );
+
+    if(!title){
+      return;
+    }
+
+    const options =
+      profile &&
+      profile.directory_options &&
+      typeof profile.directory_options === "object"
+        ? profile.directory_options
+        : {};
+
+    const fallback =
+      safeHex(
+        options.story_color ||
+        options.card_color,
+        "#f2caed"
+      );
+
+    const color =
+      safeHex(
+        options.about_title_color,
+        fallback
+      );
+
+    const mode =
+      String(
+        options.about_title_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+    const rgb =
+      hexToRgb(color) ||
+      {
+        r:242,
+        g:202,
+        b:237
+      };
+
+    const light =
+      mix(
+        rgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+    const soft =
+      mix(
+        rgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+    let style =
+      document.getElementById(
+        "m7-about-title-live-style"
+      );
+
+    if(!style){
+      style =
+        document.createElement(
+          "style"
+        );
+
+      style.id =
+        "m7-about-title-live-style";
+
+      document.head.appendChild(
+        style
+      );
+    }
+
+    let modeCss = "";
+
+    if(mode === "shimmer"){
+      modeCss = \`
+        animation:m7AdminAboutTitleShimmer 3.4s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitleShimmer 3.4s ease-in-out infinite!important;
+      \`;
+    }
+    else if(mode === "glow"){
+      modeCss = \`
+        background:none!important;
+        color:\${color}!important;
+        -webkit-text-fill-color:\${color}!important;
+        animation:m7AdminAboutTitleGlow 2.1s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitleGlow 2.1s ease-in-out infinite!important;
+      \`;
+    }
+    else if(mode === "breathe"){
+      modeCss = \`
+        background:none!important;
+        color:\${color}!important;
+        -webkit-text-fill-color:\${color}!important;
+        animation:m7AdminAboutTitleBreathe 2.6s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitleBreathe 2.6s ease-in-out infinite!important;
+      \`;
+    }
+    else if(mode === "none"){
+      modeCss = \`
+        background:none!important;
+        color:\${color}!important;
+        -webkit-text-fill-color:\${color}!important;
+        animation:none!important;
+        -webkit-animation:none!important;
+      \`;
+    }
+
+    style.textContent = \`
+      @keyframes m7AdminAboutTitleShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @-webkit-keyframes m7AdminAboutTitleShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @keyframes m7AdminAboutTitleGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px \${rgba(rgb,.24)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+        50%{
+          text-shadow:
+            0 0 13px \${rgba(rgb,.80)},
+            0 0 22px \${rgba(rgb,.34)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+      }
+
+      @-webkit-keyframes m7AdminAboutTitleGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px \${rgba(rgb,.24)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+        50%{
+          text-shadow:
+            0 0 13px \${rgba(rgb,.80)},
+            0 0 22px \${rgba(rgb,.34)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+      }
+
+      @keyframes m7AdminAboutTitleBreathe{
+        0%,100%{transform:scale(1);opacity:.94}
+        50%{transform:scale(1.035);opacity:1}
+      }
+
+      @-webkit-keyframes m7AdminAboutTitleBreathe{
+        0%,100%{-webkit-transform:scale(1);opacity:.94}
+        50%{-webkit-transform:scale(1.035);opacity:1}
+      }
+
+      html body .zee-about-card #ma7alak-about-title{
+        background:
+          linear-gradient(
+            105deg,
+            \${light} 0%,
+            \${soft} 24%,
+            #ffffff 39%,
+            \${color} 52%,
+            \${light} 72%,
+            #ffffff 100%
+          )!important;
+
+        background-size:280% 100%!important;
+
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+
+        color:transparent!important;
+        -webkit-text-fill-color:transparent!important;
+
+        filter:
+          drop-shadow(
+            0 3px 10px
+            rgba(0,0,0,.30)
+          )!important;
+
+        \${modeCss}
+      }
+    \`;
+  }
+
+  async function load(){
+    const slug =
+      String(
+        window.__MA7ALAK_EXACT_HUB_SLUG__ ||
+        document
+          .getElementById(
+            "ma7alak-shop-profile-hub-mount"
+          )
+          ?.getAttribute(
+            "data-shop-slug"
+          ) ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const client =
+      window.__MA7ALAK_EXACT_HUB_REST_CLIENT__;
+
+    if(
+      !slug ||
+      !client
+    ){
+      return;
+    }
+
+    const result =
+      await client
+        .from("shop_profiles")
+        .select(
+          "shop_slug,directory_options"
+        )
+        .eq(
+          "shop_slug",
+          slug
+        )
+        .maybeSingle();
+
+    if(
+      !result.error &&
+      result.data
+    ){
+      apply(result.data);
+    }
+  }
+
+  async function start(){
+    for(let i=0;i<120;i++){
+      if(
+        document.getElementById(
+          "ma7alak-about-title"
+        ) &&
+        window.__MA7ALAK_EXACT_HUB_REST_CLIENT__
+      ){
+        break;
+      }
+
+      await new Promise(resolve=>
+        setTimeout(resolve,50)
+      );
+    }
+
+    await load();
+
+    if(
+      typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+        "function"
+    ){
+      window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+        load
+      );
+    }
+  }
+
+  start().catch(error=>
+    console.warn(
+      "[Ma7alak Hub] About title style:",
+      error
+    )
+  );
+
+})();
