@@ -9,7 +9,13 @@ window.__MA7ALAK_HOME_FEED_ORIGINAL_GLOBAL__=1;
 
 function m7Mount(){
  if(document.getElementById("m7-global-home-feed-shell"))return;
- const style=document.createElement("style"); style.id="m7-global-home-feed-original-css"; style.textContent=`\n#m7-global-home-feed-shell,#m7-global-home-feed-shell *{box-sizing:border-box}#m7-home-feed{width:100%;font-family:Arial,"Segoe UI",sans-serif;color:#fff}
+ /* Paint the actual Hostinger page canvas behind/between homepage sections.
+    This targets the white page gaps, NOT the feed cards themselves. */
+ document.documentElement.classList.add("m7-homepage-canvas");
+ document.body.classList.add("m7-homepage-canvas");
+ const style=document.createElement("style"); style.id="m7-global-home-feed-original-css"; style.textContent=`\nhtml.m7-homepage-canvas,body.m7-homepage-canvas{background:#090706!important;background-image:radial-gradient(ellipse at 50% 8%,rgba(217,164,65,.16),transparent 34%),radial-gradient(ellipse at 12% 52%,rgba(121,55,22,.20),transparent 38%),radial-gradient(ellipse at 88% 78%,rgba(163,82,28,.16),transparent 38%),linear-gradient(180deg,#1b100a 0%,#0c0907 42%,#070606 100%)!important;background-attachment:fixed!important}
+body.m7-homepage-canvas main,body.m7-homepage-canvas main>section,body.m7-homepage-canvas main>div{background-color:transparent!important}
+#m7-global-home-feed-shell,#m7-global-home-feed-shell *{box-sizing:border-box}#m7-home-feed{width:100%;font-family:Arial,"Segoe UI",sans-serif;color:#fff}
 /* FULL HOMEPAGE FEED BACKDROP — covers Hostinger's white section around this component */
 #m7-global-home-feed-shell{position:relative!important;isolation:isolate!important;width:100%!important;max-width:none!important;margin:0!important;padding:28px max(10px,calc((100% - 900px)/2)) 34px!important;background:radial-gradient(circle at 50% 0%,rgba(217,164,65,.22),transparent 34%),linear-gradient(180deg,#241409 0%,#100b08 32%,#080706 100%)!important;overflow:hidden!important}
 #m7-global-home-feed-shell:before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 8% 20%,rgba(255,143,32,.18),transparent 34%),radial-gradient(ellipse at 88% 45%,rgba(197,114,28,.15),transparent 36%),linear-gradient(115deg,transparent 0 18%,rgba(217,164,65,.055) 19%,transparent 20% 55%,rgba(217,164,65,.04) 56%,transparent 57%);pointer-events:none}
