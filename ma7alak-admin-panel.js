@@ -4955,7 +4955,7 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
 }[c]));
 
 function optionsHtml(selected){
-  return ICONS.map(([value,label])>>
+  return ICONS.map(([value,label])=>
     '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
   ).join("");
 }
@@ -5073,7 +5073,7 @@ function fillControls(prefix,options){
     }
   });
 
-  EFFECTS.forEach(([key,,,,fallback])=>{
+  EFFECTS.forEach(([key,,,fallback])=>{
     const input=document.getElementById(prefix+key);
     if(input){
       input.checked=boolValue(o[key],fallback);
