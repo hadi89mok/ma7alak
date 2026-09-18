@@ -191,7 +191,8 @@
           storageKey: "ma7alak-admin-auth-v1",
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: false
+          detectSessionInUrl: true,
+          flowType: "pkce"
         }
       }
     );
