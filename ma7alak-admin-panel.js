@@ -2687,17 +2687,25 @@
           await supabaseClient.auth.signOut({ scope:"local" });
         }
 
-        const { error } = await supabaseClient.auth.signInWithOAuth({
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider:"google",
           options:{
             redirectTo: location.origin + "/admin",
-            queryParams:{ prompt:"select_account" }
+            queryParams:{ prompt:"select_account" },
+            skipBrowserRedirect:true
           }
         });
 
         if(error){
           throw error;
         }
+
+        if(!data || !data.url){
+          throw new Error("Google sign-in URL was not returned.");
+        }
+
+        /* Hostinger/Brave-safe explicit navigation. */
+        window.location.assign(data.url);
 
       }catch(error){
 
