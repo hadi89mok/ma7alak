@@ -4127,18 +4127,42 @@ function safeHex(value,fallback){
   return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
 }
 
-function percent(value){
+function percent(value,min,max,fallback){
   const n=Number(value);
-  return Number.isFinite(n)?Math.max(60,Math.min(200,n)):100;
+  return Number.isFinite(n)
+    ? Math.max(min,Math.min(max,n))
+    : fallback;
 }
 
 function fontFamily(value){
-  const mode=String(value||"inherit").trim().toLowerCase();
+  const mode=String(value||"current").trim().toLowerCase();
   return FONT_STACKS[mode]||"";
 }
 
-function baseSize(el){
+function resolvedFamily(options,key){
+  let mode=String(options["about_"+key+"_font_style"]||"inherit").trim().toLowerCase();
+
+  if(mode==="inherit"){
+    mode=String(options.about_font_style||"inherit").trim().toLowerCase();
+  }
+
+  if(mode==="inherit"){
+    mode=String(options.global_font_style||"current").trim().toLowerCase();
+  }
+
+  return {
+    mode,
+    family:fontFamily(mode)
+  };
+}
+
+function rawBaseSize(el){
   if(!el)return 0;
+
+  const genericBase=Number(el.dataset.m7BaseFontSize);
+  if(Number.isFinite(genericBase)&&genericBase>0){
+    return genericBase;
+  }
 
   let base=Number(el.dataset.m7IndividualAboutBaseSize);
 
@@ -4155,18 +4179,31 @@ function baseSize(el){
 function styleText(el,options,key,colorKey,fallbackColor){
   if(!el)return;
 
-  const family=fontFamily(options["about_"+key+"_font_style"]);
-  const scale=percent(options["about_"+key+"_font_size"])/100;
-  const base=baseSize(el);
+  const resolved=resolvedFamily(options,key);
 
-  if(family){
-    el.style.setProperty("font-family",family,"important");
-  }else{
+  if(resolved.family){
+    el.style.setProperty("font-family",resolved.family,"important");
+  }else if(resolved.mode==="current"){
     el.style.removeProperty("font-family");
   }
 
+  const base=rawBaseSize(el);
+
+  const globalScale=
+    percent(options.global_font_size,70,150,100)/100;
+
+  const aboutScale=
+    percent(options.about_font_size,70,150,100)/100;
+
+  const individualScale=
+    percent(options["about_"+key+"_font_size"],60,200,100)/100;
+
   if(base>0){
-    el.style.setProperty("font-size",(base*scale).toFixed(2)+"px","important");
+    el.style.setProperty(
+      "font-size",
+      (base*globalScale*aboutScale*individualScale).toFixed(2)+"px",
+      "important"
+    );
   }
 
   if(colorKey){
