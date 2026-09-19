@@ -5823,6 +5823,19 @@ function decorateAll(){
   const COLORS = [
     ["profile_ring_color","Story / profile ring"],
     ["profile_banner_color","Profile banner"],
+    ["profile_shell_bg_color","Profile shell background"],
+    ["profile_shell_border_color","Profile shell border"],
+    ["profile_banner_border_color","Profile banner frame"],
+    ["profile_stats_bg_color","Profile stats background"],
+    ["profile_stats_border_color","Profile stats border"],
+    ["profile_stats_number_color","Profile stats numbers"],
+    ["profile_stats_label_color","Profile stats labels"],
+    ["profile_follow_btn_bg_color","Profile Follow button background"],
+    ["profile_follow_btn_border_color","Profile Follow button border"],
+    ["profile_follow_btn_text_color","Profile Follow button text"],
+    ["profile_message_btn_bg_color","Profile Message button background"],
+    ["profile_message_btn_border_color","Profile Message button border"],
+    ["profile_message_btn_text_color","Profile Message button text"],
     ["shop_label_text_color","Shop Label text"],
     ["shop_label_border_color","Shop Label border"],
     ["shop_label_bg_color","Shop Label background"],
@@ -5880,6 +5893,82 @@ function decorateAll(){
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
     profile_banner_style:"rounded-fade",
+
+    profile_shell_enabled:true,
+    profile_shell_layout:"luxury",
+    profile_shell_bg_color:"#100d0b",
+    profile_shell_opacity:"92",
+    profile_shell_border_color:"$ACCENT",
+    profile_shell_border_width:"1",
+    profile_shell_radius:"30",
+    profile_shell_shadow:"42",
+    profile_shell_glow:"18",
+    profile_shell_blur:"10",
+    profile_shell_inner_highlight:true,
+    profile_shell_padding:"14",
+    profile_shell_top_gap:"8",
+    profile_shell_bottom_gap:"18",
+
+    profile_banner_height:"150",
+    profile_banner_overlay:"30",
+    profile_banner_position_y:"50",
+    profile_banner_border_color:"$ACCENT",
+    profile_banner_border_width:"1",
+
+    profile_logo_size:"210",
+    profile_logo_overlap:"62",
+
+    profile_stats_bg_color:"#0d0b0a",
+    profile_stats_border_color:"#5d472f",
+    profile_stats_radius:"18",
+    profile_stats_number_color:"#ffffff",
+    profile_stats_label_color:"#bcb5ae",
+
+    profile_action_style:"premium",
+    profile_follow_btn_bg_color:"#5a351a",
+    profile_follow_btn_border_color:"$ACCENT",
+    profile_follow_btn_text_color:"#ffffff",
+    profile_message_btn_bg_color:"#0d0d0e",
+    profile_message_btn_border_color:"#65543e",
+    profile_message_btn_text_color:"#ffffff",
+
+    profile_shell_enabled:true,
+    profile_shell_layout:"luxury",
+    profile_shell_bg_color:"#100d0b",
+    profile_shell_opacity:"92",
+    profile_shell_border_color:"#d9a441",
+    profile_shell_border_width:"1",
+    profile_shell_radius:"30",
+    profile_shell_shadow:"42",
+    profile_shell_glow:"18",
+    profile_shell_blur:"10",
+    profile_shell_inner_highlight:true,
+    profile_shell_padding:"14",
+    profile_shell_top_gap:"8",
+    profile_shell_bottom_gap:"18",
+
+    profile_banner_height:"150",
+    profile_banner_overlay:"30",
+    profile_banner_position_y:"50",
+    profile_banner_border_color:"#d9a441",
+    profile_banner_border_width:"1",
+
+    profile_logo_size:"210",
+    profile_logo_overlap:"62",
+
+    profile_stats_bg_color:"#0d0b0a",
+    profile_stats_border_color:"#5d472f",
+    profile_stats_radius:"18",
+    profile_stats_number_color:"#ffffff",
+    profile_stats_label_color:"#bcb5ae",
+
+    profile_action_style:"premium",
+    profile_follow_btn_bg_color:"#5a351a",
+    profile_follow_btn_border_color:"#d9a441",
+    profile_follow_btn_text_color:"#ffffff",
+    profile_message_btn_bg_color:"#0d0d0e",
+    profile_message_btn_border_color:"#65543e",
+    profile_message_btn_text_color:"#ffffff",
 
     global_font_style:"current",
     global_font_size:"100",
@@ -6506,6 +6595,117 @@ function decorateAll(){
           ${colorField(prefix,"follow_accent_color","Follow / Message accent")}
         </div>
 
+        <div class="m7ds-section-title">Profile Container / Shell</div>
+
+        <label class="m7ds-check">
+          <input id="${prefix}profile_shell_enabled" type="checkbox" checked>
+          <span>
+            <b>Use unified profile shell</b>
+            <small>
+              Wrap banner, story/profile logo, identity, stats, Follow and Message inside one profile card.
+            </small>
+          </span>
+        </label>
+
+        <div class="m7ds-grid">
+          <label class="m7ds-field">
+            <span>Shell layout</span>
+            <select id="${prefix}profile_shell_layout">
+              <option value="luxury">Luxury — spacious</option>
+              <option value="balanced">Balanced</option>
+              <option value="compact">Compact</option>
+            </select>
+          </label>
+
+          ${colorField(prefix,"profile_shell_bg_color","Shell background")}
+          ${effectNumberField(prefix,"profile_shell_opacity","Shell opacity",0,100,1,"%")}
+          ${colorField(prefix,"profile_shell_border_color","Shell border")}
+          ${effectNumberField(prefix,"profile_shell_border_width","Border thickness",0,4,0.5,"px")}
+          ${effectNumberField(prefix,"profile_shell_radius","Corner radius",0,48,1,"px")}
+          ${effectNumberField(prefix,"profile_shell_shadow","Shadow strength",0,100,5,"%")}
+          ${effectNumberField(prefix,"profile_shell_glow","Glow strength",0,100,5,"%")}
+          ${effectNumberField(prefix,"profile_shell_blur","Glass blur",0,30,1,"px")}
+          ${effectNumberField(prefix,"profile_shell_padding","Inner padding",0,28,1,"px")}
+          ${effectNumberField(prefix,"profile_shell_top_gap","Top spacing",0,40,1,"px")}
+          ${effectNumberField(prefix,"profile_shell_bottom_gap","Bottom spacing",0,50,1,"px")}
+        </div>
+
+        <label class="m7ds-check">
+          <input id="${prefix}profile_shell_inner_highlight" type="checkbox" checked>
+          <span>
+            <b>Inner highlight</b>
+            <small>Subtle inner edge that makes the shell feel more dimensional.</small>
+          </span>
+        </label>
+
+        <div class="m7ds-section-title">Banner Placement</div>
+        <div class="m7ds-grid">
+          ${effectNumberField(prefix,"profile_banner_height","Banner height",80,260,5,"px")}
+          ${effectNumberField(prefix,"profile_banner_overlay","Banner dark overlay",0,85,5,"%")}
+          ${effectNumberField(prefix,"profile_banner_position_y","Banner crop position",0,100,5,"%")}
+          ${colorField(prefix,"profile_banner_border_color","Banner frame")}
+          ${effectNumberField(prefix,"profile_banner_border_width","Banner frame thickness",0,4,0.5,"px")}
+        </div>
+
+        <div class="m7ds-section-title">Profile Logo Placement</div>
+        <div class="m7ds-grid">
+          ${effectNumberField(prefix,"profile_logo_size","Logo / story circle size",120,270,5,"px")}
+          ${effectNumberField(prefix,"profile_logo_overlap","Logo overlap into banner",0,130,2,"px")}
+        </div>
+
+        <div class="m7ds-section-title">Social Stats</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"profile_stats_bg_color","Stats background")}
+          ${colorField(prefix,"profile_stats_border_color","Stats border")}
+          ${effectNumberField(prefix,"profile_stats_radius","Stats corner radius",0,32,1,"px")}
+          ${colorField(prefix,"profile_stats_number_color","Stats numbers")}
+          ${colorField(prefix,"profile_stats_label_color","Stats labels")}
+        </div>
+
+        <div class="m7ds-section-title">Follow / Message Buttons</div>
+        <div class="m7ds-grid">
+          <label class="m7ds-field">
+            <span>Button style</span>
+            <select id="${prefix}profile_action_style">
+              <option value="premium">Premium</option>
+              <option value="glass">Glass</option>
+              <option value="solid">Solid</option>
+              <option value="outline">Outline</option>
+            </select>
+          </label>
+
+          ${colorField(prefix,"profile_follow_btn_bg_color","Follow button inside")}
+          ${colorField(prefix,"profile_follow_btn_border_color","Follow button frame")}
+          ${colorField(prefix,"profile_follow_btn_text_color","Follow button text")}
+          ${colorField(prefix,"profile_message_btn_bg_color","Message button inside")}
+          ${colorField(prefix,"profile_message_btn_border_color","Message button frame")}
+          ${colorField(prefix,"profile_message_btn_text_color","Message button text")}
+        </div>
+
+        <div class="m7ds-profile-shell-demo" data-m7-profile-shell-preview>
+          <div class="m7ds-profile-shell-banner">
+            <span>BANNER</span>
+          </div>
+          <div class="m7ds-profile-shell-logo">LOGO</div>
+          <div class="m7ds-profile-shell-pill">SHOP LABEL</div>
+          <strong class="m7ds-profile-shell-name">Shop Name</strong>
+          <small class="m7ds-profile-shell-arabic">اسم المحل</small>
+          <div class="m7ds-profile-shell-stats">
+            <span><b>4</b><small>Followers</small></span>
+            <span><b>0</b><small>Following</small></span>
+            <span><b>0</b><small>Likes</small></span>
+          </div>
+          <div class="m7ds-profile-shell-actions">
+            <span class="follow">Following</span>
+            <span class="message">Message</span>
+          </div>
+        </div>
+
+        <p class="m7ds-help">
+          The shell sits on top of the real Hostinger page background. It never adds a fake page background.
+          Each shop keeps its own saved shell theme.
+        </p>
+
         <div class="m7ds-section-title">Top Profile Banner</div>
 
         <label class="m7ds-check">
@@ -6886,6 +7086,257 @@ function decorateAll(){
 
     box.__m7BannerRefresh =
       refreshBannerPreview;
+
+    function refreshProfileShellPreview(){
+      const preview=
+        box.querySelector(
+          "[data-m7-profile-shell-preview]"
+        );
+
+      if(!preview){
+        return;
+      }
+
+      const get=key=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+key)
+        );
+
+      const number=(key,min,max,fallback)=>{
+        const raw=Number(get(key)?.value);
+        return Number.isFinite(raw)
+          ? Math.max(min,Math.min(max,raw))
+          : fallback;
+      };
+
+      const hexToRgba=(hex,alpha)=>{
+        const safe=safeHex(hex,"#100d0b");
+        const raw=safe.slice(1);
+        const r=parseInt(raw.slice(0,2),16);
+        const g=parseInt(raw.slice(2,4),16);
+        const b=parseInt(raw.slice(4,6),16);
+        return "rgba("+r+","+g+","+b+","+alpha+")";
+      };
+
+      const enabled=
+        !!get("profile_shell_enabled")?.checked;
+
+      const layout=
+        String(
+          get("profile_shell_layout")?.value ||
+          DEFAULTS.profile_shell_layout
+        );
+
+      const bg=
+        safeHex(
+          get("profile_shell_bg_color")?.value,
+          DEFAULTS.profile_shell_bg_color
+        );
+
+      const opacity=
+        number("profile_shell_opacity",0,100,92)/100;
+
+      const border=
+        safeHex(
+          get("profile_shell_border_color")?.value,
+          DEFAULTS.profile_shell_border_color
+        );
+
+      const borderWidth=
+        number("profile_shell_border_width",0,4,1);
+
+      const radius=
+        number("profile_shell_radius",0,48,30);
+
+      const shadow=
+        number("profile_shell_shadow",0,100,42);
+
+      const glow=
+        number("profile_shell_glow",0,100,18);
+
+      const blur=
+        number("profile_shell_blur",0,30,10);
+
+      const padding=
+        number("profile_shell_padding",0,28,14);
+
+      const bannerHeight=
+        number("profile_banner_height",80,260,150);
+
+      const bannerOverlay=
+        number("profile_banner_overlay",0,85,30)/100;
+
+      const bannerColor=
+        safeHex(
+          get("profile_banner_color")?.value,
+          DEFAULTS.profile_banner_color
+        );
+
+      const bannerFrame=
+        safeHex(
+          get("profile_banner_border_color")?.value,
+          DEFAULTS.profile_banner_border_color
+        );
+
+      const bannerFrameWidth=
+        number("profile_banner_border_width",0,4,1);
+
+      const logoSize=
+        number("profile_logo_size",120,270,210);
+
+      const overlap=
+        number("profile_logo_overlap",0,130,62);
+
+      const statsBg=
+        safeHex(
+          get("profile_stats_bg_color")?.value,
+          DEFAULTS.profile_stats_bg_color
+        );
+
+      const statsBorder=
+        safeHex(
+          get("profile_stats_border_color")?.value,
+          DEFAULTS.profile_stats_border_color
+        );
+
+      const statsRadius=
+        number("profile_stats_radius",0,32,18);
+
+      const statsNumber=
+        safeHex(
+          get("profile_stats_number_color")?.value,
+          DEFAULTS.profile_stats_number_color
+        );
+
+      const statsLabel=
+        safeHex(
+          get("profile_stats_label_color")?.value,
+          DEFAULTS.profile_stats_label_color
+        );
+
+      const followBg=
+        safeHex(
+          get("profile_follow_btn_bg_color")?.value,
+          DEFAULTS.profile_follow_btn_bg_color
+        );
+
+      const followBorder=
+        safeHex(
+          get("profile_follow_btn_border_color")?.value,
+          DEFAULTS.profile_follow_btn_border_color
+        );
+
+      const followText=
+        safeHex(
+          get("profile_follow_btn_text_color")?.value,
+          DEFAULTS.profile_follow_btn_text_color
+        );
+
+      const messageBg=
+        safeHex(
+          get("profile_message_btn_bg_color")?.value,
+          DEFAULTS.profile_message_btn_bg_color
+        );
+
+      const messageBorder=
+        safeHex(
+          get("profile_message_btn_border_color")?.value,
+          DEFAULTS.profile_message_btn_border_color
+        );
+
+      const messageText=
+        safeHex(
+          get("profile_message_btn_text_color")?.value,
+          DEFAULTS.profile_message_btn_text_color
+        );
+
+      preview.dataset.layout=layout;
+      preview.classList.toggle("off",!enabled);
+      preview.style.background=hexToRgba(bg,opacity);
+      preview.style.border=borderWidth+"px solid "+border;
+      preview.style.borderRadius=radius+"px";
+      preview.style.padding=padding+"px";
+      preview.style.backdropFilter="blur("+blur+"px)";
+      preview.style.webkitBackdropFilter="blur("+blur+"px)";
+
+      const shadowAlpha=Math.min(.72,shadow/100*.58);
+      const glowAlpha=Math.min(.60,glow/100*.48);
+      preview.style.boxShadow=
+        "0 18px 38px rgba(0,0,0,"+shadowAlpha.toFixed(3)+"),"+
+        "0 0 "+(4+glow*.22).toFixed(1)+"px "+hexToRgba(border,glowAlpha);
+
+      const banner=
+        preview.querySelector(
+          ".m7ds-profile-shell-banner"
+        );
+
+      if(banner){
+        banner.style.height=
+          Math.max(62,bannerHeight*.55)+"px";
+        banner.style.border=
+          bannerFrameWidth+"px solid "+bannerFrame;
+        banner.style.background=
+          "linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+")),"+
+          bannerColor;
+      }
+
+      const logo=
+        preview.querySelector(
+          ".m7ds-profile-shell-logo"
+        );
+
+      if(logo){
+        const scaled=
+          Math.max(74,Math.min(118,logoSize*.48));
+        logo.style.width=scaled+"px";
+        logo.style.height=scaled+"px";
+        logo.style.marginTop=
+          (-Math.min(72,overlap*.56))+"px";
+        logo.style.borderColor=border;
+      }
+
+      const stats=
+        preview.querySelector(
+          ".m7ds-profile-shell-stats"
+        );
+
+      if(stats){
+        stats.style.background=statsBg;
+        stats.style.borderColor=statsBorder;
+        stats.style.borderRadius=statsRadius+"px";
+        stats.querySelectorAll("b").forEach(
+          el=>el.style.color=statsNumber
+        );
+        stats.querySelectorAll("small").forEach(
+          el=>el.style.color=statsLabel
+        );
+      }
+
+      const follow=
+        preview.querySelector(
+          ".m7ds-profile-shell-actions .follow"
+        );
+
+      if(follow){
+        follow.style.background=followBg;
+        follow.style.borderColor=followBorder;
+        follow.style.color=followText;
+      }
+
+      const message=
+        preview.querySelector(
+          ".m7ds-profile-shell-actions .message"
+        );
+
+      if(message){
+        message.style.background=messageBg;
+        message.style.borderColor=messageBorder;
+        message.style.color=messageText;
+      }
+    }
+
+    box.__m7ProfileShellRefresh =
+      refreshProfileShellPreview;
 
     function refreshGalleryFramePreview(){
       const preview=
@@ -7372,6 +7823,60 @@ function decorateAll(){
     );
 
     [
+      "profile_shell_enabled",
+      "profile_shell_layout",
+      "profile_shell_bg_color",
+      "profile_shell_opacity",
+      "profile_shell_border_color",
+      "profile_shell_border_width",
+      "profile_shell_radius",
+      "profile_shell_shadow",
+      "profile_shell_glow",
+      "profile_shell_blur",
+      "profile_shell_inner_highlight",
+      "profile_shell_padding",
+      "profile_shell_top_gap",
+      "profile_shell_bottom_gap",
+      "profile_banner_color",
+      "profile_banner_height",
+      "profile_banner_overlay",
+      "profile_banner_position_y",
+      "profile_banner_border_color",
+      "profile_banner_border_width",
+      "profile_logo_size",
+      "profile_logo_overlap",
+      "profile_stats_bg_color",
+      "profile_stats_border_color",
+      "profile_stats_radius",
+      "profile_stats_number_color",
+      "profile_stats_label_color",
+      "profile_action_style",
+      "profile_follow_btn_bg_color",
+      "profile_follow_btn_border_color",
+      "profile_follow_btn_text_color",
+      "profile_message_btn_bg_color",
+      "profile_message_btn_border_color",
+      "profile_message_btn_text_color"
+    ]
+      .map(key=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+key)
+        )
+      )
+      .filter(Boolean)
+      .forEach(el=>{
+        el.addEventListener(
+          "input",
+          refreshProfileShellPreview
+        );
+
+        el.addEventListener(
+          "change",
+          refreshProfileShellPreview
+        );
+      });
+
+    [
       "gallery_frame_style",
       "gallery_frame_color_1",
       "gallery_frame_color_2",
@@ -7461,6 +7966,7 @@ function decorateAll(){
     motion.addEventListener("change",updatePresetHint);
     updatePresetHint();
     refreshBannerPreview();
+    refreshProfileShellPreview();
     refreshGalleryFramePreview();
 
     box.__m7dsRefresh = function(){
@@ -7470,6 +7976,7 @@ function decorateAll(){
       });
       updatePresetHint();
       refreshBannerPreview();
+      refreshProfileShellPreview();
       refreshGalleryFramePreview();
     };
   }
@@ -7716,6 +8223,35 @@ function decorateAll(){
       .m7ds-banner-actions{display:flex;align-items:center;gap:8px;min-height:30px;margin-top:7px}
       .m7ds-banner-clear{min-height:29px;padding:0 9px;border:1px solid rgba(216,170,88,.18);border-radius:8px;background:rgba(255,255,255,.02);color:#d7c4a5;font-size:8px;font-weight:850;cursor:pointer}
       .m7ds-banner-status{flex:1;min-width:0;color:#8fd7aa;font-size:8px;line-height:1.35}
+
+      .m7ds-profile-shell-demo{
+        position:relative;
+        isolation:isolate;
+        width:min(280px,82vw);
+        margin:14px auto 4px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        overflow:hidden;
+        color:#fff;
+        transition:background .18s ease,border-color .18s ease,border-radius .18s ease,box-shadow .18s ease,padding .18s ease;
+      }
+      .m7ds-profile-shell-demo.off{opacity:.38;filter:grayscale(.45)}
+      .m7ds-profile-shell-banner{width:100%;min-height:62px;display:grid;place-items:center;border-radius:14px;color:rgba(255,255,255,.62);font-size:7px;font-weight:950;letter-spacing:1.2px}
+      .m7ds-profile-shell-logo{width:98px;height:98px;margin-top:-42px;display:grid;place-items:center;border:3px solid #d9a441;border-radius:50%;background:radial-gradient(circle at 32% 28%,#332116,#0a0807 70%);color:#e6bf72;font-size:9px;font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,.32)}
+      .m7ds-profile-shell-pill{margin-top:8px;padding:5px 10px;border:1px solid rgba(216,170,88,.35);border-radius:999px;background:rgba(0,0,0,.28);color:#d9b56d;font-size:6.5px;font-weight:900;letter-spacing:1px}
+      .m7ds-profile-shell-name{margin-top:7px;font-family:Georgia,"Times New Roman",serif;font-size:17px}
+      .m7ds-profile-shell-arabic{margin-top:3px;color:#d9b056;font-size:9px}
+      .m7ds-profile-shell-stats{width:100%;min-height:54px;margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #5d472f;overflow:hidden}
+      .m7ds-profile-shell-stats>span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+      .m7ds-profile-shell-stats>span+span{border-left:1px solid rgba(255,255,255,.08)}
+      .m7ds-profile-shell-stats b{font-size:12px}
+      .m7ds-profile-shell-stats small{font-size:6px}
+      .m7ds-profile-shell-actions{width:100%;margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+      .m7ds-profile-shell-actions span{min-height:32px;display:grid;place-items:center;border:1px solid;border-radius:10px;font-size:7px;font-weight:900}
+      .m7ds-profile-shell-demo[data-layout="compact"]{width:min(250px,78vw)}
+      .m7ds-profile-shell-demo[data-layout="compact"] .m7ds-profile-shell-name{font-size:15px}
+      .m7ds-profile-shell-demo[data-layout="luxury"] .m7ds-profile-shell-banner{border-radius:16px}
 
       .m7ds-gallery-frame-demo{
         margin-top:12px;
@@ -15076,6 +15612,43 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
   const STORAGE_PREFIX="ma7alak_design_live_v1:";
   const DESIGN_KEYS=[
     "page_use_universal_accent",
+    "profile_shell_enabled",
+    "profile_shell_layout",
+    "profile_shell_bg_color",
+    "profile_shell_opacity",
+    "profile_shell_border_color",
+    "profile_shell_border_width",
+    "profile_shell_radius",
+    "profile_shell_shadow",
+    "profile_shell_glow",
+    "profile_shell_blur",
+    "profile_shell_inner_highlight",
+    "profile_shell_padding",
+    "profile_shell_top_gap",
+    "profile_shell_bottom_gap",
+    "profile_banner_enabled",
+    "profile_banner_color",
+    "profile_banner_image_url",
+    "profile_banner_style",
+    "profile_banner_height",
+    "profile_banner_overlay",
+    "profile_banner_position_y",
+    "profile_banner_border_color",
+    "profile_banner_border_width",
+    "profile_logo_size",
+    "profile_logo_overlap",
+    "profile_stats_bg_color",
+    "profile_stats_border_color",
+    "profile_stats_radius",
+    "profile_stats_number_color",
+    "profile_stats_label_color",
+    "profile_action_style",
+    "profile_follow_btn_bg_color",
+    "profile_follow_btn_border_color",
+    "profile_follow_btn_text_color",
+    "profile_message_btn_bg_color",
+    "profile_message_btn_border_color",
+    "profile_message_btn_text_color",
     "gallery_accent_color",
     "media_title_color",
     "media_count_color",
