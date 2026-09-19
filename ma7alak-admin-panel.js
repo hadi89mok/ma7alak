@@ -4556,8 +4556,7 @@
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_categories"},()=>loadV2Taxonomy().catch(console.warn))
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_cities"},()=>loadV2Taxonomy().catch(console.warn))
         .on("postgres_changes",{event:"*",schema:"public",table:"shop_areas"},()=>loadV2Taxonomy().catch(console.warn))
-        .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},async()=>{await loadManagedShops();})
-        .on("postgres_changes",{event:"*",schema:"public",table:"shop_stories"},async()=>{await loadManagedShops();})
+        
         .subscribe();
     }
 
@@ -4774,13 +4773,16 @@ window.addEventListener("ma7alak:admin-ready",()=>boot().catch(console.error),{o
 if(window.__M7_ADMIN_MOD_V3__)return;window.__M7_ADMIN_MOD_V3__=true;
 if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin")return;
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-let sb=null,userRows=[],presenceMap=new Map(),analyticsTimer=null,currentOwnerUserId=null,adminRealtime=null;
+let sb=null,userRows=[],presenceMap=new Map(),analyticsTimer=null,currentOwnerUserId=null,adminRealtime=null,activeAdminTool="",adminToolRefreshBusy=false;
 function css(){if(document.getElementById("m7adm-v3-css"))return;let s=document.createElement("style");s.id="m7adm-v3-css";s.textContent=`
 #m7adm-v3{margin:12px 0 18px;font-family:Arial;color:#fff;background:#12100f;border:1px solid #d99a4544;border-radius:20px;padding:10px;overflow:hidden}.m7adm-hub-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 3px 9px}.m7adm-hub-title{min-width:0}.m7adm-hub-title b{display:block;color:#f4b85d;font-size:13px;font-weight:950}.m7adm-hub-title small{display:block;margin-top:2px;color:#88796a;font-size:9px}.m7adm-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.m7adm-tab{min-height:40px;border:1px solid #d99a4538;border-radius:11px;background:#1b1511;color:#cdb48e;font-size:10px;font-weight:900;cursor:pointer}.m7adm-tab:hover,.m7adm-tab.active{border-color:#d99a4575;background:#2a1d13;color:#f4b85d}.m7adm-tab.active{box-shadow:inset 0 0 0 1px #d99a4528}.m7adm-hub-content{margin-top:8px}.m7adm-body{padding:12px;border:1px solid #ffffff0d;border-radius:14px;background:#0f0d0c}.m7adm-body.hidden,.m7adm-body[hidden]{display:none!important}.m7adm-tools{display:flex;gap:8px;margin-bottom:10px}.m7adm-search,.m7adm-select,.m7adm-input{width:100%;box-sizing:border-box;background:#0e0c0b;color:#fff;border:1px solid #d99a4544;border-radius:12px;padding:11px 12px;outline:none}.m7adm-user,.m7adm-report{display:flex;gap:11px;align-items:center;background:#1a1613;border:1px solid #ffffff12;border-radius:15px;padding:11px;margin:8px 0}.m7adm-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#30251f;flex:0 0 auto}.m7adm-copy{min-width:0;flex:1}.m7adm-copy strong,.m7adm-copy small{display:block}.m7adm-copy small{color:#aaa;margin-top:3px}.m7adm-email{overflow-wrap:anywhere;word-break:break-word;color:#f0d5ad!important}.m7adm-actions{display:flex;gap:6px;flex-wrap:wrap}.m7adm-btn{border:0;border-radius:9px;padding:8px 9px;font-weight:800;cursor:pointer}.ban{background:#b64635;color:#fff}.ok{background:#39734c;color:#fff}.del{background:#6d3030;color:#fff}.view{background:#d99a45;color:#16100c}.m7adm-banned{opacity:.68;border-color:#b64635}.m7adm-chat{max-height:360px;overflow:auto;background:#0c0b0a;padding:10px;border-radius:12px;margin-top:8px}.m7adm-msg{padding:8px;background:#211b17;border-radius:10px;margin:5px 0}.m7adm-empty{padding:20px;text-align:center;color:#999}.m7adm-presence{display:inline-flex;align-items:center;gap:6px;font-weight:800}.m7adm-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.m7adm-dot.on{background:#31d56b;box-shadow:0 0 9px #31d56b88}.m7adm-dot.off{background:#e04d43}.m7adm-analytics{text-align:center;padding:20px}.m7adm-big{font-size:46px;font-weight:950;color:#f4b85d;line-height:1}.m7adm-sub{color:#aaa;margin-top:8px}.m7adm-ownerbox{display:grid;gap:10px}.m7adm-ownerstate{padding:13px;border-radius:13px;border:1px solid #ffffff16;background:#171310}.m7adm-ownerstate.good{border-color:#36c66c66;background:#14301d}.m7adm-ownerstate.bad{border-color:#d85b5266;background:#321817}.m7adm-danger{margin-top:16px;padding:14px;border:1px solid #c44a4266;border-radius:14px;background:#2a1212}.m7adm-danger strong{color:#ff8c84;display:block;margin-bottom:6px}.m7-collapse-btn{margin-left:auto;border:1px solid #d99a4555;background:#211812;color:#f4b85d;border-radius:9px;padding:7px 10px;font-weight:900;cursor:pointer}.m7-collapsed-body{display:none!important}@media(max-width:620px){#m7adm-v3{padding:8px}.m7adm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.m7adm-tab{min-height:38px}.m7adm-user,.m7adm-report{align-items:flex-start;flex-wrap:wrap}.m7adm-actions{width:100%}}
 `;document.head.appendChild(s)}
 function addCollapse(section,label){if(!section||section.dataset.m7collapse)return;section.dataset.m7collapse="1";let head=section.querySelector(":scope > .ma-admin-section-head, :scope > .ma-v2-head");if(!head)return;let b=document.createElement("button");b.type="button";b.className="m7-collapse-btn";b.textContent="Hide";b.onclick=e=>{e.stopPropagation();let kids=[...section.children].filter(x=>x!==head);let hide=b.textContent==="Hide";kids.forEach(x=>x.classList.toggle("m7-collapsed-body",hide));b.textContent=hide?"Unhide":"Hide"};head.appendChild(b)}
 function installCollapsers(){let dash=document.getElementById("ma-admin-dashboard");if(!dash)return;[...dash.querySelectorAll("section.ma-admin-card")].forEach(sec=>{let h=(sec.querySelector("h2")?.textContent||"").trim();if(["Add New Shop","Manage Shops"].includes(h))addCollapse(sec,h)});let dir=document.getElementById("ma-v2-hub")||[...document.querySelectorAll("section,div")].find(x=>x.querySelector?.("h2")?.textContent?.trim()==="Directory Control");if(dir)addCollapse(dir,"Directory Control")}
-function selectAdminTool(target){let root=document.getElementById("m7adm-v3");if(!root)return;let bodies=[...root.querySelectorAll(".m7adm-body")],tabs=[...root.querySelectorAll(".m7adm-tab")],body=document.getElementById(target),tab=root.querySelector('.m7adm-tab[data-target="'+target+'"]'),wasOpen=!!body&&!body.hidden&&!body.classList.contains("hidden");bodies.forEach(x=>{x.hidden=true;x.classList.add("hidden")});tabs.forEach(x=>{x.classList.remove("active");x.setAttribute("aria-selected","false")});if(body&&!wasOpen){body.hidden=false;body.classList.remove("hidden");if(tab){tab.classList.add("active");tab.setAttribute("aria-selected","true")}}}
+function stopAdminToolPolling(){if(analyticsTimer){clearInterval(analyticsTimer);analyticsTimer=null}}
+async function refreshActiveAdminTool(){if(adminToolRefreshBusy)return;adminToolRefreshBusy=true;try{if(activeAdminTool==="m7adm-analytics")await loadAnalytics();else if(activeAdminTool==="m7adm-users"){await loadPresence();renderUsers()}}finally{adminToolRefreshBusy=false}}
+function setActiveAdminTool(target,open){stopAdminToolPolling();activeAdminTool=open?String(target||""):"";if(activeAdminTool==="m7adm-analytics"||activeAdminTool==="m7adm-users"){refreshActiveAdminTool().catch(()=>{});analyticsTimer=setInterval(()=>refreshActiveAdminTool().catch(()=>{}),2000)}}
+function selectAdminTool(target){let root=document.getElementById("m7adm-v3");if(!root)return;let bodies=[...root.querySelectorAll(".m7adm-body")],tabs=[...root.querySelectorAll(".m7adm-tab")],body=document.getElementById(target),tab=root.querySelector('.m7adm-tab[data-target="'+target+'"]'),wasOpen=!!body&&!body.hidden&&!body.classList.contains("hidden");bodies.forEach(x=>{x.hidden=true;x.classList.add("hidden")});tabs.forEach(x=>{x.classList.remove("active");x.setAttribute("aria-selected","false")});if(body&&!wasOpen){body.hidden=false;body.classList.remove("hidden");if(tab){tab.classList.add("active");tab.setAttribute("aria-selected","true")}window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:target,open:true}}))}else{window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:target,open:false}}))}}
 function mount(){css();document.getElementById("m7adm-mod")?.remove();if(document.getElementById("m7adm-v3"))return true;let host=document.getElementById("ma-admin-dashboard");if(!host)return false;let x=document.createElement("section");x.id="m7adm-v3";x.innerHTML=`
 <div class="m7adm-hub-top"><div class="m7adm-hub-title"><b>🛠 Admin Tools</b><small>Open one tool at a time — tap again to close.</small></div></div>
 <div class="m7adm-tabs" role="tablist">
@@ -4804,8 +4806,8 @@ async function loadOwnerShops(){let sel=document.getElementById("m7adm-owner-sho
 async function loadOwnerState(){let slug=document.getElementById("m7adm-owner-shop")?.value,state=document.getElementById("m7adm-owner-state"),email=document.getElementById("m7adm-owner-email");currentOwnerUserId=null;if(!slug){state.className="m7adm-ownerstate bad";state.textContent="❌ Select a shop to check its owner.";email.value="";return}state.className="m7adm-ownerstate";state.textContent="Checking account…";let r=await sb.rpc("ma7alak_admin_owner_for_shop",{p_shop_slug:slug});if(r.error){state.className="m7adm-ownerstate bad";state.textContent="❌ "+r.error.message;return}let d=Array.isArray(r.data)?r.data[0]:r.data;if(d&&(d.email||d.user_email||d.user_id)){currentOwnerUserId=d.user_id||null;let e=d.email||d.user_email||"Assigned Google account";email.value=e.includes("@")?e:"";state.className="m7adm-ownerstate good";state.textContent="✅ Account found and assigned: "+e}else{email.value="";state.className="m7adm-ownerstate bad";state.textContent="❌ No email assigned to this shop yet."}}
 async function assignOwner(){let slug=document.getElementById("m7adm-owner-shop")?.value,email=document.getElementById("m7adm-owner-email")?.value.trim(),state=document.getElementById("m7adm-owner-state");if(!slug||!email){state.className="m7adm-ownerstate bad";state.textContent="❌ Select a shop and enter the existing Google account email.";return}state.className="m7adm-ownerstate";state.textContent="Finding existing account…";if(!userRows.length)await loadUsers();let user=userRows.find(row=>String(row.email||"").trim().toLowerCase()===email.toLowerCase());if(!user?.user_id){state.className="m7adm-ownerstate bad";state.textContent="❌ No existing Ma7alak account uses that exact email. Ask the owner to sign in once first.";return}state.textContent="Assigning…";let r=await sb.rpc("ma7alak_admin_assign_shop_owner",{p_shop_slug:slug,p_user_id:user.user_id});if(r.error){state.className="m7adm-ownerstate bad";state.textContent="❌ "+r.error.message;return}await loadOwnerState()}
 async function removeOwner(){let slug=document.getElementById("m7adm-owner-shop")?.value;if(!slug)return alert("Select a shop first.");if(!currentOwnerUserId){await loadOwnerState();if(!currentOwnerUserId)return alert("This shop has no assigned owner account.")}if(!confirm("Remove this owner's access from the selected shop? The normal Google account and shop will remain."))return;let r=await sb.rpc("ma7alak_admin_remove_shop_owner",{p_user_id:currentOwnerUserId});if(r.error)alert(r.error.message);else loadOwnerState()}
-async function loadAll(){sb=window.Ma7alakAdminClient;if(!sb||!mount())return;await Promise.all([loadUsers(),loadReports(),loadAnalytics(),loadOwnerShops()]);clearInterval(analyticsTimer);analyticsTimer=setInterval(()=>{loadAnalytics();loadPresence().then(renderUsers).catch(()=>{})},2000);if(adminRealtime)try{await sb.removeChannel(adminRealtime)}catch(_){}adminRealtime=sb.channel("ma7alak-admin-users-owners-live").on("postgres_changes",{event:"*",schema:"public",table:"viewer_profiles"},()=>loadUsers()).on("postgres_changes",{event:"*",schema:"public",table:"shop_owners"},()=>{loadOwnerState();loadOwnerShops();window.dispatchEvent(new CustomEvent("ma7alak:owner-assignment-changed"))}).subscribe()}
-async function ready(){for(let i=0;i<150&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));sb=window.Ma7alakAdminClient;if(!sb)return console.error("MA7ALAK ADMIN V3: shared admin client unavailable");for(let i=0;i<150&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,100));window.addEventListener("ma7alak:admin-ready",()=>loadAll().catch(console.error));let d=document.getElementById("ma-admin-dashboard");if(d&&!d.hidden)await loadAll()}
+async function loadAll(){sb=window.Ma7alakAdminClient;if(!sb||!mount())return;await Promise.all([loadUsers(),loadReports(),loadAnalytics(),loadOwnerShops()]);stopAdminToolPolling();if(adminRealtime)try{await sb.removeChannel(adminRealtime)}catch(_){}adminRealtime=sb.channel("ma7alak-admin-users-owners-live").on("postgres_changes",{event:"*",schema:"public",table:"viewer_profiles"},()=>loadUsers()).on("postgres_changes",{event:"*",schema:"public",table:"shop_owners"},()=>{loadOwnerState();loadOwnerShops();window.dispatchEvent(new CustomEvent("ma7alak:owner-assignment-changed"))}).subscribe()}
+async function ready(){for(let i=0;i<150&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));sb=window.Ma7alakAdminClient;if(!sb)return console.error("MA7ALAK ADMIN V3: shared admin client unavailable");for(let i=0;i<150&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,100));window.addEventListener("ma7alak:admin-tool-visibility",e=>{const target=String(e.detail?.target||""),open=e.detail?.open===true;setActiveAdminTool(target,open);if(!open)return;if(target==="m7adm-users")loadUsers().catch(()=>{});else if(target==="m7adm-reports")loadReports().catch(()=>{});else if(target==="m7adm-owner")Promise.all([loadUsers(),loadOwnerShops(),loadOwnerState()]).catch(()=>{});else if(target==="m7adm-analytics")loadAnalytics().catch(()=>{})});window.addEventListener("ma7alak:admin-ready",()=>loadAll().catch(console.error));let d=document.getElementById("ma-admin-dashboard");if(d&&!d.hidden)await loadAll()}
 ready().catch(console.error);
 })();
 
@@ -10046,6 +10048,7 @@ function markLegacyPanels(){
 }
 
 function clearLegacy(){
+  window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:"",open:false}}));
   document.querySelectorAll(".m7v4-legacy-panel").forEach(el=>{
     el.classList.remove(
       "m7v4-show",
@@ -10164,6 +10167,8 @@ async function openAdminHub(target,shopSlug){
       }
     }
   }
+
+  window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:target,open:true}}));
 
   setTimeout(()=>{
     root.scrollIntoView({
@@ -12059,6 +12064,14 @@ function mount(){
   return true;
 }
 
+function scheduleShopRefresh(delay){
+  window.clearTimeout(window.__m7v4RefreshTimer);
+  window.__m7v4RefreshTimer=window.setTimeout(
+    ()=>loadShops().catch(console.error),
+    Number.isFinite(Number(delay))?Number(delay):90
+  );
+}
+
 async function ready(){
   for(let i=0;i<240&&!window.Ma7alakAdminClient;i++){
     await new Promise(resolve=>setTimeout(resolve,80));
@@ -12080,14 +12093,13 @@ async function ready(){
   channel=client
     .channel("ma7alak-admin-workspace-v4")
     .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},()=>{
-      window.clearTimeout(window.__m7v4RefreshTimer);
-      window.__m7v4RefreshTimer=window.setTimeout(()=>loadShops().catch(console.error),90);
+      scheduleShopRefresh(90);
     })
     .subscribe();
 
-  window.addEventListener("focus",()=>loadShops().catch(()=>{}));
+  window.addEventListener("focus",()=>scheduleShopRefresh(60));
   document.addEventListener("visibilitychange",()=>{
-    if(document.visibilityState==="visible")loadShops().catch(()=>{});
+    if(document.visibilityState==="visible")scheduleShopRefresh(60);
   });
 
   const observer=new MutationObserver(()=>{
