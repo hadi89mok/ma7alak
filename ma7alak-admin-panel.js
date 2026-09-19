@@ -4679,7 +4679,7 @@
 "use strict";
 if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin"||window.__M7_ADMIN_DIRECTORY_FINISH__)return;
 window.__M7_ADMIN_DIRECTORY_FINISH__=true;
-let client=null,featureSlug="",panelObserver=null,expiryTimer=null;
+let client=null,featureSlug="",expiryTimer=null;
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -4787,7 +4787,6 @@ async function ready(){
   for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;
   installCss();mountFeature();removeLegacyOwner();installPanelToggles();
   window.addEventListener("ma7alak:feature-shop",e=>openFeature(e.detail?.slug));
-  panelObserver=new MutationObserver(()=>{removeLegacyOwner();installPanelToggles()});panelObserver.observe($("ma-admin-dashboard")||document.body,{childList:true,subtree:false});
   await clearExpiredFeatures();clearInterval(expiryTimer);expiryTimer=setInterval(clearExpiredFeatures,60000);
 }
 ready().catch(console.error);
@@ -5103,21 +5102,7 @@ async function ready(){
   sb=window.Ma7alakAdminClient;
   if(!sb)return console.error("MA7ALAK Live/Offers admin: shared admin client unavailable");
   inject();
-
-  window.setTimeout(()=>{
-    if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__){
-      window.Ma7alakDisableLegacyLiveDecorator?.();
-      return;
-    }
-
-    legacyDecoratorObserver=new MutationObserver(decorate);
-    legacyDecoratorObserver.observe(
-      document.documentElement,
-      {childList:true,subtree:true}
-    );
-    decorate();
-    window.addEventListener("ma7alak:admin-ready",decorate);
-  },0);
+  window.Ma7alakDisableLegacyLiveDecorator?.();
 }
 ready().catch(console.error);
 })();
@@ -5427,18 +5412,10 @@ async function install(){
 
   fillControls("m7da-",{});
 
-  const observer=new MutationObserver(()=>{
-    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
-    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
-  });
-
-  observer.observe(
-    document.documentElement,
-    {
-      childList:true,
-      subtree:true
-    }
-  );
+  /*
+     V4 keeps both forms mounted. fill()/collect() ensure About Services on
+     demand, so no document-wide observer is required.
+  */
 }
 
 install().catch(console.error);
@@ -5764,14 +5741,11 @@ function decorateAll(){
   foldsets();
   draw();saveState();
 }
-function observe(){
-  const d=document.getElementById("ma-admin-dashboard");if(!d)return;
-  let q=false;new MutationObserver(()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;decorateAll();pinAdminToolsBottom()})}).observe(d,{childList:true,subtree:true,attributes:true,attributeFilter:["hidden"]});
-}
 (async function(){
   css();bind();
   for(let i=0;i<200&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,50));
-  decorateAll();observe();window.addEventListener("ma7alak:admin-ready",decorateAll);
+  decorateAll();
+  window.addEventListener("ma7alak:admin-ready",decorateAll);
 })().catch(e=>console.error("MA7ALAK Admin Control Deck:",e));
 })();
 
@@ -7061,31 +7035,11 @@ function observe(){
       refresh
     );
 
-    let queued = false;
-
-    const root =
-      document.getElementById("ma-admin-dashboard") ||
-      document.documentElement;
-
-    new MutationObserver(function(){
-      if(queued){
-        return;
-      }
-
-      queued = true;
-
-      requestAnimationFrame(function(){
-        queued = false;
-        refresh();
-      });
-    })
-      .observe(
-        root,
-        {
-          childList:true,
-          subtree:true
-        }
-      );
+    /*
+       V4 keeps the forms and Design Studio mounted.
+       refresh() already ran through startup and admin-ready, so no
+       continuous subtree observer is required.
+    */
   })();
 
 })();
@@ -7615,18 +7569,10 @@ async function install(){
 
   fillSchedule("m7da-",{});
 
-  const observer=new MutationObserver(()=>{
-    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
-    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
-  });
-
-  observer.observe(
-    document.documentElement,
-    {
-      childList:true,
-      subtree:true
-    }
-  );
+  /*
+     V4 keeps both forms mounted. fill()/collect() ensure Hours controls on
+     demand, so no document-wide observer is required.
+  */
 }
 
 install().catch(console.error);
@@ -8017,18 +7963,10 @@ async function install(){
 
   fill("m7da-",{});
 
-  const observer=new MutationObserver(()=>{
-    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
-    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
-  });
-
-  observer.observe(
-    document.documentElement,
-    {
-      childList:true,
-      subtree:true
-    }
-  );
+  /*
+     V4 keeps both forms mounted. fill()/collect() ensure Availability rows
+     on demand, so no document-wide observer is required.
+  */
 }
 
 install().catch(console.error);
@@ -8557,12 +8495,10 @@ async function install(){
   ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
   fillBox(addBox,{});
 
-  const observer=new MutationObserver(()=>{
-    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
-    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
-  });
-
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  /*
+     V4 keeps both forms mounted. fill()/collect() ensure the Card Designer
+     on demand, so no document-wide observer is required.
+  */
 }
 
 install().catch(error=>console.error("MA7ALAK Card Designer:",error));
@@ -8827,12 +8763,10 @@ async function install(){
   ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
   fillBox(addBox,{},"m7da-");
 
-  const observer=new MutationObserver(()=>{
-    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
-    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
-  });
-
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  /*
+     V4 keeps both forms mounted. fill()/collect() ensure About text styling
+     on demand, so no document-wide observer is required.
+  */
 }
 
 install().catch(error=>console.error("MA7ALAK About individual text:",error));
@@ -12122,13 +12056,23 @@ async function ready(){
     if(document.visibilityState==="visible")scheduleShopRefresh(60);
   });
 
-  const observer=new MutationObserver(()=>{
-    markLegacyPanels();
-    window.Ma7alakRemoveLegacyPanelToggleUi?.();
-    window.Ma7alakRemoveLegacyDeckUi?.();
-  });
+  const dashboard=document.getElementById("ma-admin-dashboard");
 
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  if(dashboard){
+    const observer=new MutationObserver(()=>{
+      markLegacyPanels();
+      window.Ma7alakRemoveLegacyPanelToggleUi?.();
+      window.Ma7alakRemoveLegacyDeckUi?.();
+    });
+
+    observer.observe(
+      dashboard,
+      {
+        childList:true,
+        subtree:true
+      }
+    );
+  }
 }
 
 ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
