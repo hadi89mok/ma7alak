@@ -63,7 +63,7 @@ var galleryAccent=useUniversal
   ? universalAccent
   : safeHex(o.gallery_accent_color,universalAccent);
 var galleryFrameStyle=String(o.gallery_frame_style||"current").trim().toLowerCase();
-if(!["current","dual","quad","blend","none"].includes(galleryFrameStyle))galleryFrameStyle="current";
+if(!["current","dual","triple","quad","blend","none"].includes(galleryFrameStyle))galleryFrameStyle="current";
 var galleryFrameC1=safeHex(o.gallery_frame_color_1,"#e2a6b8");
 var galleryFrameC2=safeHex(o.gallery_frame_color_2,"#f2d18d");
 var galleryFrameC3=safeHex(o.gallery_frame_color_3,"#c88f45");
@@ -75,6 +75,8 @@ var galleryFrameAngle=clamp(o.gallery_frame_angle,0,360,315);
 var galleryFrameBg=galleryAccent;
 if(galleryFrameStyle==="dual"){
   galleryFrameBg="conic-gradient(from "+galleryFrameAngle+"deg,"+galleryFrameC1+" 0 50%,"+galleryFrameC3+" 50% 100%)";
+}else if(galleryFrameStyle==="triple"){
+  galleryFrameBg="conic-gradient(from "+galleryFrameAngle+"deg,"+galleryFrameC1+" 0 33.333%,"+galleryFrameC2+" 33.333% 66.666%,"+galleryFrameC3+" 66.666% 100%)";
 }else if(galleryFrameStyle==="quad"){
   galleryFrameBg="conic-gradient(from "+galleryFrameAngle+"deg,"+galleryFrameC1+" 0 25%,"+galleryFrameC2+" 25% 50%,"+galleryFrameC3+" 50% 75%,"+galleryFrameC4+" 75% 100%)";
 }else if(galleryFrameStyle==="blend"){
