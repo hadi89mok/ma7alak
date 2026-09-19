@@ -6280,7 +6280,7 @@ function decorateAll(){
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
         <button type="button" data-m7ds-tab="follow">Follow / Banner</button>
-        <button type="button" data-m7ds-tab="typography">Typography</button>
+        <button type="button" data-m7ds-tab="typography">Aa Typography</button>
         <button type="button" data-m7ds-tab="modules">Gallery / Video / Hub</button>
       </div>
 
@@ -8638,6 +8638,18 @@ function ensureCss(){
       gap:7px;
     }
 
+    .m7ats-columns{
+      display:grid;
+      grid-template-columns:minmax(120px,1.2fr) 74px minmax(125px,1fr) 85px;
+      gap:7px;
+      padding:0 8px 2px;
+      color:#8f7f89;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.45px;
+      text-transform:uppercase;
+    }
+
     .m7ats-row{
       display:grid;
       grid-template-columns:minmax(120px,1.2fr) 74px minmax(125px,1fr) 85px;
@@ -8674,6 +8686,10 @@ function ensureCss(){
     }
 
     @media(max-width:660px){
+      .m7ats-columns{
+        display:none;
+      }
+
       .m7ats-row{
         grid-template-columns:1fr 72px;
       }
@@ -8693,7 +8709,33 @@ function ensureBox(form,prefix){
   if(!form)return null;
 
   let box=form.querySelector(".m7-about-text-style-box");
-  if(box)return box;
+
+  const placeBox=()=>{
+    if(!box)return;
+
+    const about=
+      form.querySelector(".m7-about-services-fields");
+
+    const slot=
+      about?.querySelector(".m7-about-description-slot");
+
+    if(slot){
+      slot.after(box);
+      return;
+    }
+
+    const design=
+      form.querySelector(".m7-design-studio");
+
+    if(about)about.prepend(box);
+    else if(design)design.before(box);
+    else form.appendChild(box);
+  };
+
+  if(box){
+    placeBox();
+    return box;
+  }
 
   ensureCss();
 
@@ -8701,8 +8743,9 @@ function ensureBox(form,prefix){
   box.className="m7-about-text-style-box";
 
   box.innerHTML=
-    '<legend>Aa About — individual text styling</legend>'+
-    '<p class="m7ats-head">Each text below is independent. Change its color, font and size without changing the whole About panel.</p>'+
+    '<legend>Aa Text Styling — Font / Size / Color</legend>'+
+    '<p class="m7ats-head">Change each About text independently. These controls update the live preview before you save.</p>'+
+    '<div class="m7ats-columns"><span>Text</span><span>Color</span><span>Font type</span><span>Size</span></div>'+
     '<div class="m7ats-list">'+
       ROWS.map(([key,label,colorKey,fallback])=>
         '<div class="m7ats-row" data-m7ats-row="'+esc(key)+'">'+
@@ -8714,12 +8757,7 @@ function ensureBox(form,prefix){
       ).join("")+
     '</div>';
 
-  const about= form.querySelector(".m7-about-services-fields");
-  const design=form.querySelector(".m7-design-studio");
-
-  if(about)about.after(box);
-  else if(design)design.before(box);
-  else form.appendChild(box);
+  placeBox();
 
   return box;
 }
@@ -11063,6 +11101,68 @@ function previewAnimClass(value){
     : "";
 }
 
+function previewFontFamily(value){
+  const families={
+    system:'Arial,"Segoe UI",sans-serif',
+    modern:'Inter,Arial,"Segoe UI",sans-serif',
+    elegant:'Georgia,"Times New Roman",serif',
+    classic:'"Times New Roman",Georgia,serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,monospace'
+  };
+
+  return families[String(value||"").trim().toLowerCase()]||"inherit";
+}
+
+function previewModuleTypography(key){
+  const globalFont=
+    previewVal(
+      "m7de-global_font_style",
+      "current"
+    );
+
+  const globalSize=
+    Math.max(
+      70,
+      Math.min(
+        150,
+        Number(
+          previewVal(
+            "m7de-global_font_size",
+            "100"
+          )
+        )||100
+      )
+    );
+
+  const moduleFont=
+    previewVal(
+      "m7de-"+key+"_font_style",
+      "inherit"
+    );
+
+  const moduleSize=
+    Math.max(
+      70,
+      Math.min(
+        150,
+        Number(
+          previewVal(
+            "m7de-"+key+"_font_size",
+            String(globalSize)
+          )
+        )||globalSize
+      )
+    );
+
+  return {
+    family:
+      String(moduleFont).toLowerCase()==="inherit"
+        ? previewFontFamily(globalFont)
+        : previewFontFamily(moduleFont),
+    size:moduleSize
+  };
+}
+
 function previewAboutStyle(key,fallbackColor){
   const row=
     document.querySelector(
@@ -11091,18 +11191,10 @@ function previewAboutStyle(key,fallbackColor){
       )
     );
 
-  const families={
-    system:'Arial,"Segoe UI",sans-serif',
-    modern:'Inter,Arial,"Segoe UI",sans-serif',
-    elegant:'Georgia,"Times New Roman",serif',
-    classic:'"Times New Roman",Georgia,serif',
-    mono:'ui-monospace,SFMono-Regular,Menlo,monospace'
-  };
-
   return {
     color:color,
     size:size,
-    family:families[font]||"inherit"
+    family:previewFontFamily(font)
   };
 }
 
@@ -11334,8 +11426,14 @@ function previewIdentityHtml(shop,mode){
           "sparkle"
         );
 
+      const serviceStyle=
+        previewAboutStyle(
+          "service_"+i,
+          serviceText
+        );
+
       services.push(
-        '<span>'+
+        '<span style="color:'+esc(serviceStyle.color)+';font-family:'+esc(serviceStyle.family==='inherit'?aboutTypography.family:serviceStyle.family)+';font-size:calc(7px * '+(aboutTypography.size/100)+' * '+(serviceStyle.size/100)+');">'+
           esc(previewServiceIcon(icon))+
           ' '+
           esc(label)+
@@ -11350,6 +11448,21 @@ function previewIdentityHtml(shop,mode){
       ""
     );
 
+  const profileTypography=
+    previewModuleTypography(
+      "profile"
+    );
+
+  const aboutTypography=
+    previewModuleTypography(
+      "about"
+    );
+
+  const followTypography=
+    previewModuleTypography(
+      "follow"
+    );
+
   const titleStyle=
     previewAboutStyle(
       "title",
@@ -11360,6 +11473,18 @@ function previewIdentityHtml(shop,mode){
     previewAboutStyle(
       "body",
       textColor
+    );
+
+  const arabicStyle=
+    previewAboutStyle(
+      "arabic",
+      arabicColor
+    );
+
+  const kickerStyle=
+    previewAboutStyle(
+      "kicker",
+      titleColor
     );
 
   const signatureStyle=
@@ -11390,16 +11515,17 @@ function previewIdentityHtml(shop,mode){
             : '🏪'
         )+
       '</div>'+
-      '<span class="m7pv-kicker">'+(shopLabelIcon?esc(shopLabelIcon)+' ':'')+esc(shopLabel)+'</span>'+
-      '<div class="m7pv-name'+previewAnimClass(shopNameAnimation)+'">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
-      (arabic?'<div class="m7pv-arabic'+previewAnimClass(arabicAnimation)+'">'+esc(arabic)+'</div>':'')+
-      '<div class="m7pv-meta">📍 '+esc(location)+'</div>'+
+      '<span class="m7pv-kicker" style="font-family:'+esc(profileTypography.family)+';font-size:'+profileTypography.size+'%;">'+(shopLabelIcon?esc(shopLabelIcon)+' ':'')+esc(shopLabel)+'</span>'+
+      '<div class="m7pv-name'+previewAnimClass(shopNameAnimation)+'" style="font-family:'+esc(profileTypography.family)+';font-size:calc(20px * '+(profileTypography.size/100)+');">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
+      (arabic?'<div class="m7pv-arabic'+previewAnimClass(arabicAnimation)+'" style="color:'+esc(arabicStyle.color)+';font-family:'+esc(arabicStyle.family==='inherit'?profileTypography.family:arabicStyle.family)+';font-size:calc(11px * '+(profileTypography.size/100)+' * '+(arabicStyle.size/100)+');">'+esc(arabic)+'</div>':'')+
+      '<div class="m7pv-meta" style="font-family:'+esc(profileTypography.family)+';font-size:calc(8px * '+(profileTypography.size/100)+');">📍 '+esc(location)+'</div>'+
       '<div class="m7pv-divider">◆</div>'+
     '</div>'+
-    '<div class="m7pv-actions" style="--pv-accent:'+esc(previewColor("m7de-follow_accent_color",accent))+'"><span>＋ Follow</span><span>✉ Message</span></div>'+
+    '<div class="m7pv-actions" style="--pv-accent:'+esc(previewColor("m7de-follow_accent_color",accent))+';font-family:'+esc(followTypography.family)+';font-size:'+followTypography.size+'%;"><span>＋ Follow</span><span>✉ Message</span></div>'+
     '<div class="m7pv-block" style="--pv-title:'+esc(titleColor)+';--pv-text:'+esc(textColor)+';--pv-panel-bg:'+esc(panelBg)+';--pv-panel-border:'+esc(panelBorder)+';--pv-service-text:'+esc(serviceText)+';--pv-service-border:'+esc(serviceBorder)+';--pv-service-bg:'+esc(serviceBg)+';--pv-signature:'+esc(signatureColor)+';">'+
-      '<h4 style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family)+';font-size:'+titleStyle.size+'%;">About Me</h4>'+
-      '<p style="color:'+esc(bodyStyle.color)+';font-family:'+esc(bodyStyle.family)+';font-size:'+bodyStyle.size+'%;">'+esc(about)+'</p>'+
+      '<div style="margin-bottom:3px;color:'+esc(kickerStyle.color)+';font-family:'+esc(kickerStyle.family==='inherit'?aboutTypography.family:kickerStyle.family)+';font-size:calc(7px * '+(aboutTypography.size/100)+' * '+(kickerStyle.size/100)+');font-weight:900;text-transform:uppercase;letter-spacing:.6px;">About</div>'+
+      '<h4 style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family==='inherit'?aboutTypography.family:titleStyle.family)+';font-size:calc(11px * '+(aboutTypography.size/100)+' * '+(titleStyle.size/100)+');">About Me</h4>'+
+      '<p style="color:'+esc(bodyStyle.color)+';font-family:'+esc(bodyStyle.family==='inherit'?aboutTypography.family:bodyStyle.family)+';font-size:calc(8px * '+(aboutTypography.size/100)+' * '+(bodyStyle.size/100)+');">'+esc(about)+'</p>'+
       (
         services.length
           ? '<div class="m7pv-services">'+services.join("")+'</div>'
@@ -11407,7 +11533,7 @@ function previewIdentityHtml(shop,mode){
       )+
       (
         signature
-          ? '<div class="m7pv-signature" style="color:'+esc(signatureStyle.color)+';font-family:'+esc(signatureStyle.family)+';font-size:'+signatureStyle.size+'%;">'+esc(signature)+'</div>'
+          ? '<div class="m7pv-signature" style="color:'+esc(signatureStyle.color)+';font-family:'+esc(signatureStyle.family==='inherit'?aboutTypography.family:signatureStyle.family)+';font-size:calc(8px * '+(aboutTypography.size/100)+' * '+(signatureStyle.size/100)+');">'+esc(signature)+'</div>'
           : ''
       )+
     '</div>'+
@@ -11645,11 +11771,16 @@ function previewHoursHtml(shop){
       accent
     );
 
-  return '<div class="m7pv-identity" style="padding-top:18px;--pv-accent:'+esc(accent)+'">'+
+  const hoursTypography=
+    previewModuleTypography(
+      "hours"
+    );
+
+  return '<div class="m7pv-identity" style="padding-top:18px;--pv-accent:'+esc(accent)+';font-family:'+esc(hoursTypography.family)+';font-size:'+hoursTypography.size+'%;">'+
       '<span class="m7pv-kicker" style="color:'+esc(mainColor)+';border-color:'+esc(accent)+'"><i style="display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:'+esc(dotColor)+'"></i>◷ '+esc(status)+'</span>'+
       '<div class="m7pv-meta" style="color:'+esc(subColor)+'">'+esc(sub)+'</div>'+
     '</div>'+
-    '<div class="m7pv-block" style="--pv-panel-border:'+esc(accent)+'"><h4 style="color:'+esc(accent)+'">Weekly schedule</h4><div class="m7pv-hours">'+rows+'</div></div>';
+    '<div class="m7pv-block" style="--pv-panel-border:'+esc(accent)+';font-family:'+esc(hoursTypography.family)+';font-size:'+hoursTypography.size+'%;"><h4 style="color:'+esc(accent)+'">Weekly schedule</h4><div class="m7pv-hours">'+rows+'</div></div>';
 }
 
 function refreshEditPreview(panel){
