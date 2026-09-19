@@ -97,7 +97,32 @@ async function addMedia(x,files){let st=$("#m7lo-manager-status");try{let existi
 async function setCover(x,m){let st=$("#m7lo-manager-status");try{st.textContent="Updating cover…";let a=await c.from("shop_live_post_media").update({is_cover:false}).eq("post_id",Number(x.id));if(a.error)throw a.error;let b=await c.from("shop_live_post_media").update({is_cover:true}).eq("id",Number(m.id)).eq("post_id",Number(x.id));if(b.error)throw b.error;let r=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:m.media_url,media_type:m.media_type}});if(r.error)throw r.error;await refreshManager(x.id,"Cover updated.")}catch(err){st.textContent=err.message||String(err)}}
 async function deleteMedia(x,m){if(!confirm("Delete this photo / video?"))return;let st=$("#m7lo-manager-status");try{let r=await c.from("shop_live_post_media").delete().eq("id",Number(m.id)).eq("post_id",Number(x.id));if(r.error)throw r.error;if(m.storage_path){let s=await c.storage.from(BUCKET).remove([m.storage_path]);if(s.error)console.warn("Media file cleanup:",s.error)}let remaining=(x.media||[]).filter(q=>String(q.id)!==String(m.id));if(m.is_cover){let next=remaining[0]||null;if(next){await c.from("shop_live_post_media").update({is_cover:true}).eq("id",Number(next.id));let u=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:next.media_url,media_type:next.media_type}});if(u.error)throw u.error}else{let u=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:null,media_type:null}});if(u.error)throw u.error}}await refreshManager(x.id,"Media deleted.")}catch(err){st.textContent=err.message||String(err)}}
 async function moveMedia(x,m,dir){let a=(x.media||[]).slice().sort((p,q)=>p.sort_order-q.sort_order),i=a.findIndex(q=>String(q.id)===String(m.id)),j=dir==="up"?i-1:i+1;if(i<0||j<0||j>=a.length)return;let first=a[i],second=a[j],r1=await c.from("shop_live_post_media").update({sort_order:second.sort_order}).eq("id",Number(first.id)),r2=await c.from("shop_live_post_media").update({sort_order:first.sort_order}).eq("id",Number(second.id));if(r1.error||r2.error)return alert((r1.error||r2.error).message);await refreshManager(x.id,"Order updated.")}
-async function endPost(id){if(!confirm("End this Live / Offer now?"))return;let r=await c.rpc("ma7alak_end_live_post",{p_post_id:Number(id)});if(r.error)return alert(r.error.message);await load()}
+function liveStoragePath(url){
+  const marker="/storage/v1/object/public/"+BUCKET+"/";
+  const value=String(url||"");
+  const index=value.indexOf(marker);
+  if(index<0)return"";
+  try{return decodeURIComponent(value.slice(index+marker.length).split("?")[0])}catch(_){return""}
+}
+async function endPost(id){
+  if(!confirm("End and permanently delete this Live / Offer now?"))return;
+
+  const post=ownerItems.find(x=>String(x.id)===String(id));
+  const paths=[...new Set([
+    ...((post?.media||[]).map(m=>String(m.storage_path||liveStoragePath(m.media_url)||"").trim())),
+    liveStoragePath(post?.media_url)
+  ].filter(Boolean))];
+
+  if(paths.length){
+    const cleanup=await c.storage.from(BUCKET).remove(paths);
+    if(cleanup.error)return alert(cleanup.error.message||"Could not permanently remove Live / Offer media.");
+  }
+
+  const r=await c.rpc("ma7alak_end_live_post",{p_post_id:Number(id)});
+  if(r.error)return alert(r.error.message);
+
+  await load();
+}
 function formHtml(x){let edit=!!x,[ic]=meta(x?.post_type||"offer");return`<div id="m7lo-panel"><button class="m7lo-close">×</button><div class="m7lo-panel-title">${edit?"Edit Live / Offer":"Add Live / Offer"}</div><div class="m7lo-types">${[["offer","🏷️ OFFER"],["happening","🟢 HAPPENING NOW"],["arrival","✨ NEW ARRIVAL"],["event","📅 EVENT"]].map(a=>`<button class="m7lo-type ${a[0]===(x?.post_type||"offer")?"on":""}" data-m7-type="${a[0]}" type="button">${a[1]}</button>`).join("")}</div><form id="m7lo-form" class="m7lo-form"><input id="m7lo-type" type="hidden" value="${esc(x?.post_type||"offer")}"><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="Title" value="${esc(x?.title||"")}"><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" placeholder="Description">${esc(x?.description||"")}</textarea><input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}"><div id="m7lo-prices" class="m7lo-two" style="display:${(x?.post_type||"offer")==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div><div class="m7lo-two"><div><div class="m7lo-label">STARTS</div><input id="m7lo-start" class="m7lo-in" type="datetime-local"></div><div><div class="m7lo-label">ENDS *</div><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></div></div>${edit?"":`<label class="m7lo-file">📷 Add up to 8 photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div>`}<button class="m7lo-btn" type="submit">${edit?"Save Changes":"⚡ Publish"}</button><div id="m7lo-status" class="m7lo-status"></div></form></div>`}
 function localValue(v){let d=new Date(v);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
 function wireForm(d,x){$(".m7lo-close",d).onclick=close;$$('[data-m7-type]',d).forEach(b=>b.onclick=()=>{$$('[data-m7-type]',d).forEach(q=>q.classList.remove("on"));b.classList.add("on");$("#m7lo-type").value=b.dataset.m7Type;$("#m7lo-prices").style.display=b.dataset.m7Type==="offer"?"grid":"none"});if(x){$("#m7lo-start").value=localValue(x.starts_at);$("#m7lo-finish").value=localValue(x.ends_at);$("#m7lo-form").onsubmit=e=>saveEdit(e,x.id)}else{let h=Math.min(6,Math.max(1,Number(ent?.max_duration_hours||48))),f=new Date(Date.now()+h*3600000);$("#m7lo-finish").value=localValue(f);$("#m7lo-file").onchange=e=>{let n=e.target.files?.length||0;$("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first file becomes the cover`:""};$("#m7lo-form").onsubmit=publish}}
