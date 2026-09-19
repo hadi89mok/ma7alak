@@ -4225,13 +4225,35 @@ function styleText(el,options,key,colorKey,fallbackColor){
     const color=safeHex(options[colorKey],fallbackColor||"#ffffff");
 
     /*
-      About title color is already rendered by the title animation engine.
-      Do not kill its shimmer/gradient. Every other element can take the
-      color directly.
+      Animated text fill is owned by the Design Studio V2 runtime.
+      A solid inline -webkit-text-fill-color would kill Shimmer on mobile.
     */
-    if(key!=="title"){
+    const arabicMode=
+      String(options.arabic_name_animation||"none")
+        .trim()
+        .toLowerCase();
+
+    const signatureShimmer=
+      options.about_fx_signature_shimmer===true ||
+      String(options.about_fx_signature_shimmer).toLowerCase()==="true";
+
+    const animatedFill=
+      key==="title" ||
+      (
+        key==="arabic" &&
+        arabicMode!=="none"
+      ) ||
+      (
+        key==="signature" &&
+        signatureShimmer
+      );
+
+    if(!animatedFill){
       el.style.setProperty("color",color,"important");
       el.style.setProperty("-webkit-text-fill-color",color,"important");
+    }else{
+      el.style.removeProperty("color");
+      el.style.removeProperty("-webkit-text-fill-color");
     }
   }
 }
