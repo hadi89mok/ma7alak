@@ -5,8 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.20.3";
-  const ICON_BASE="https://ma7alak-pwa.hadizeboss89.workers.dev";
+  const VERSION="2026.09.20.4";
   const DISMISS_KEY="ma7alak_pwa_install_dismissed_until";
   const THREE_DAYS=3*24*60*60*1000;
   let deferredPrompt=null;
@@ -49,7 +48,7 @@
       icon.rel="apple-touch-icon";
       document.head.appendChild(icon);
     }
-    icon.href=ICON_BASE+"/pwa-icon-192.png?v="+encodeURIComponent(VERSION);
+    icon.href="/manifest.webmanifest?icon=192&v="+encodeURIComponent(VERSION);
   }
 
   async function registerServiceWorker(){
@@ -128,7 +127,7 @@
       card.setAttribute("role","dialog");
       card.setAttribute("aria-label","Install Ma7alak");
       card.innerHTML=`
-        <span class="m7p-icon" aria-hidden="true"><img src="${ICON_BASE}/pwa-icon-192.png?v=${VERSION}" alt=""></span>
+        <span class="m7p-icon" aria-hidden="true"><img src="/manifest.webmanifest?icon=192&v=${VERSION}" alt=""></span>
         <span class="m7p-copy"><b>Install Ma7alak</b><span>Faster access · opens like an app</span></span>
         <span class="m7p-actions">
           <button class="m7p-install" type="button">Install</button>
