@@ -7895,3 +7895,1692 @@ async function install(){
 install().catch(console.error);
 })();
 
+
+/* =========================================================
+   MA7ALAK ADMIN — DIRECTORY CARD DESIGNER V1
+   ---------------------------------------------------------
+   Per-shop card shape / edge / color / shadow / motion.
+   Stored in shop_profiles.directory_options.
+========================================================= */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin")return;
+if(window.__MA7ALAK_CARD_DESIGNER_V1__)return;
+window.__MA7ALAK_CARD_DESIGNER_V1__=true;
+
+const EDGES=[
+  ["rounded","Full rounded border"],
+  ["corners","Corner lines — reference look"],
+  ["double","Double border"],
+  ["soft","Soft glass edge"],
+  ["none","No border"]
+];
+
+const ANIMS=[
+  ["auto","Auto / current behavior"],
+  ["none","No animation"],
+  ["glow","Glow pulse"],
+  ["breathe","Gentle breathe"],
+  ["edge","Edge pulse"],
+  ["shimmer","Light shimmer"]
+];
+
+const DEFAULTS={
+  card_color:"#dabb7a",
+  card_edge_style:"rounded",
+  card_radius:"16",
+  card_border_width:"1",
+  card_surface_color:"#171611",
+  card_shadow_strength:"48",
+  card_glow_strength:"28",
+  card_animation:"auto",
+  card_animation_speed:"2.4",
+  card_cover_height:"126",
+  card_name_color:"#ffffff",
+  card_meta_color:"#c8c0b2",
+  card_button_color:"#ead49e",
+  card_button_bg_color:"#0b0b08"
+};
+
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function opts(rows,selected){
+  return rows.map(([value,label])=>
+    '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
+  ).join("");
+}
+
+function safeHex(value,fallback){
+  const raw=String(value||"").trim();
+  return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+}
+
+function number(value,min,max,fallback){
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+}
+
+function ensureCss(){
+  if(document.getElementById("m7-card-designer-admin-css"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-card-designer-admin-css";
+  style.textContent=`
+    .m7-card-designer-box{
+      margin:18px 0!important;
+      padding:17px!important;
+      border:1px solid rgba(217,170,88,.28)!important;
+      border-radius:18px!important;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(217,170,88,.08),transparent 32%),
+        rgba(15,12,9,.96)!important;
+      color:#ead9ba!important;
+    }
+
+    .m7-card-designer-box legend{
+      padding:0 8px!important;
+      color:#f2cf89!important;
+      font-weight:950!important;
+    }
+
+    .m7cd-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .m7cd-head b{
+      display:block;
+      color:#fff3da;
+      font-size:13px;
+    }
+
+    .m7cd-head small{
+      display:block;
+      margin-top:4px;
+      color:#8f816c;
+      font-size:9px;
+      line-height:1.45;
+    }
+
+    .m7cd-badge{
+      flex:0 0 auto;
+      padding:6px 9px;
+      border:1px solid rgba(217,170,88,.24);
+      border-radius:999px;
+      color:#edc878;
+      background:rgba(217,170,88,.06);
+      font-size:8px;
+      font-weight:950;
+      letter-spacing:.6px;
+    }
+
+    .m7cd-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:9px;
+    }
+
+    .m7cd-field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+      color:#aa9b84;
+      font-size:9px;
+      font-weight:850;
+    }
+
+    .m7cd-field input,
+    .m7cd-field select{
+      width:100%!important;
+      min-height:40px!important;
+      box-sizing:border-box!important;
+      padding:0 10px!important;
+      border:1px solid rgba(217,170,88,.16)!important;
+      border-radius:10px!important;
+      background:#090807!important;
+      color:#fff!important;
+      font:inherit!important;
+    }
+
+    .m7cd-field input[type="color"]{
+      padding:4px!important;
+      cursor:pointer;
+    }
+
+    .m7cd-section{
+      margin:16px 0 8px;
+      color:#d9b96f;
+      font-size:9px;
+      font-weight:950;
+      letter-spacing:.85px;
+      text-transform:uppercase;
+    }
+
+    .m7cd-preview-wrap{
+      margin-top:15px;
+      padding:14px;
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:15px;
+      background:#080706;
+    }
+
+    .m7cd-preview-title{
+      margin-bottom:9px;
+      color:#8f816c;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+
+    .m7cd-preview{
+      --p-accent:#dabb7a;
+      --p-rgb:218,187,122;
+      --p-radius:16px;
+      --p-border:1px;
+      --p-shadow:.48;
+      --p-glow:.28;
+      --p-speed:2.4s;
+      --p-surface:#171611;
+      width:min(260px,100%);
+      min-height:185px;
+      margin:0 auto;
+      position:relative;
+      overflow:hidden;
+      border:var(--p-border) solid color-mix(in srgb,var(--p-accent) 55%,transparent);
+      border-radius:var(--p-radius);
+      background:linear-gradient(145deg,color-mix(in srgb,var(--p-surface) 86%,white 14%),var(--p-surface));
+      box-shadow:
+        0 11px 28px rgba(0,0,0,var(--p-shadow)),
+        0 0 19px rgba(var(--p-rgb),var(--p-glow));
+      isolation:isolate;
+    }
+
+    .m7cd-preview-cover{
+      height:96px;
+      background:
+        linear-gradient(135deg,rgba(var(--p-rgb),.17),transparent 40%),
+        linear-gradient(160deg,#29251d,#0c0b09);
+    }
+
+    .m7cd-preview-body{
+      padding:13px;
+    }
+
+    .m7cd-preview-body b{
+      display:block;
+      color:var(--p-name,#fff);
+      font-size:14px;
+    }
+
+    .m7cd-preview-body small{
+      display:block;
+      margin-top:5px;
+      color:var(--p-meta,#c8c0b2);
+      font-size:9px;
+    }
+
+    .m7cd-preview-button{
+      margin-top:12px;
+      padding:8px;
+      border:1px solid var(--p-accent);
+      border-radius:9px;
+      background:var(--p-button-bg,#0b0b08);
+      color:var(--p-button,#ead49e);
+      font-size:9px;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .m7cd-preview.edge-none{
+      border:0;
+    }
+
+    .m7cd-preview.edge-soft{
+      border-color:color-mix(in srgb,var(--p-accent) 28%,transparent);
+      box-shadow:
+        0 11px 28px rgba(0,0,0,var(--p-shadow)),
+        inset 0 0 0 1px rgba(255,255,255,.04),
+        0 0 25px rgba(var(--p-rgb),var(--p-glow));
+    }
+
+    .m7cd-preview.edge-double{
+      box-shadow:
+        0 11px 28px rgba(0,0,0,var(--p-shadow)),
+        inset 0 0 0 max(1px,var(--p-border)) color-mix(in srgb,var(--p-accent) 30%,transparent),
+        0 0 19px rgba(var(--p-rgb),var(--p-glow));
+    }
+
+    .m7cd-preview.edge-corners{
+      border-color:transparent;
+    }
+
+    .m7cd-preview.edge-corners::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:6;
+      pointer-events:none;
+      border-radius:inherit;
+      background:
+        linear-gradient(90deg,var(--p-accent),var(--p-accent)) left top/34% var(--p-border) no-repeat,
+        linear-gradient(180deg,var(--p-accent),var(--p-accent)) left top/var(--p-border) 28px no-repeat,
+        linear-gradient(270deg,var(--p-accent),var(--p-accent)) right top/34% var(--p-border) no-repeat,
+        linear-gradient(180deg,var(--p-accent),var(--p-accent)) right top/var(--p-border) 28px no-repeat,
+        linear-gradient(90deg,var(--p-accent),var(--p-accent)) left bottom/34% var(--p-border) no-repeat,
+        linear-gradient(0deg,var(--p-accent),var(--p-accent)) left bottom/var(--p-border) 28px no-repeat,
+        linear-gradient(270deg,var(--p-accent),var(--p-accent)) right bottom/34% var(--p-border) no-repeat,
+        linear-gradient(0deg,var(--p-accent),var(--p-accent)) right bottom/var(--p-border) 28px no-repeat;
+      filter:drop-shadow(0 0 5px rgba(var(--p-rgb),var(--p-glow)));
+    }
+
+    @keyframes m7cdGlow{
+      0%,100%{box-shadow:0 11px 28px rgba(0,0,0,var(--p-shadow)),0 0 10px rgba(var(--p-rgb),calc(var(--p-glow)*.45))}
+      50%{box-shadow:0 11px 28px rgba(0,0,0,var(--p-shadow)),0 0 28px rgba(var(--p-rgb),var(--p-glow))}
+    }
+
+    @keyframes m7cdBreathe{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.018)}
+    }
+
+    @keyframes m7cdEdge{
+      0%,100%{opacity:.52}
+      50%{opacity:1}
+    }
+
+    @keyframes m7cdShimmer{
+      0%,25%{background-position:140% 0;opacity:0}
+      45%{opacity:1}
+      78%,100%{background-position:-140% 0;opacity:0}
+    }
+
+    .m7cd-preview.anim-glow{animation:m7cdGlow var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-breathe{animation:m7cdBreathe var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-edge::before{animation:m7cdEdge var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-shimmer::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:5;
+      pointer-events:none;
+      background:linear-gradient(112deg,transparent 0 38%,rgba(255,255,255,.10) 48%,rgba(var(--p-rgb),.22) 52%,transparent 62% 100%);
+      background-size:260% 100%;
+      animation:m7cdShimmer var(--p-speed) ease-in-out infinite;
+    }
+
+    @media(max-width:760px){
+      .m7cd-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media(max-width:470px){
+      .m7cd-grid{grid-template-columns:1fr}
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function field(prefix,key,label,type,extra){
+  const value=DEFAULTS[key]??"";
+  if(type==="select"){
+    return '<label class="m7cd-field"><span>'+esc(label)+'</span><select data-m7cd-key="'+esc(key)+'" data-m7cd-prefix="'+esc(prefix)+'">'+extra+'</select></label>';
+  }
+  return '<label class="m7cd-field"><span>'+esc(label)+'</span><input data-m7cd-key="'+esc(key)+'" data-m7cd-prefix="'+esc(prefix)+'" type="'+esc(type||"text")+'" value="'+esc(value)+'" '+(extra||"")+'></label>';
+}
+
+function ensureBox(form,prefix){
+  if(!form)return null;
+  let box=form.querySelector(".m7-card-designer-box");
+  if(box)return box;
+
+  ensureCss();
+
+  box=document.createElement("fieldset");
+  box.className="m7-card-designer-box";
+  box.innerHTML=`
+    <legend>▰ Directory Card Designer</legend>
+
+    <div class="m7cd-head">
+      <div>
+        <b>Full control of this shop's directory card</b>
+        <small>Edges, radius, shadow, glow, colors and motion are saved per shop.</small>
+      </div>
+      <span class="m7cd-badge">PER SHOP</span>
+    </div>
+
+    <div class="m7cd-section">Edge & shape</div>
+    <div class="m7cd-grid">
+      ${field(prefix,"card_color","Edge / accent color","color")}
+      ${field(prefix,"card_edge_style","Edge style","select",opts(EDGES,DEFAULTS.card_edge_style))}
+      ${field(prefix,"card_radius","Corner radius","number",'min="0" max="34" step="1"')}
+      ${field(prefix,"card_border_width","Edge thickness","number",'min="0" max="4" step=".5"')}
+      ${field(prefix,"card_cover_height","Cover height","number",'min="90" max="220" step="2"')}
+      ${field(prefix,"card_surface_color","Card surface","color")}
+    </div>
+
+    <div class="m7cd-section">Depth & animation</div>
+    <div class="m7cd-grid">
+      ${field(prefix,"card_shadow_strength","Shadow strength %","number",'min="0" max="100" step="5"')}
+      ${field(prefix,"card_glow_strength","Accent glow %","number",'min="0" max="100" step="5"')}
+      ${field(prefix,"card_animation","Animation","select",opts(ANIMS,DEFAULTS.card_animation))}
+      ${field(prefix,"card_animation_speed","Animation speed (seconds)","number",'min=".8" max="8" step=".1"')}
+    </div>
+
+    <div class="m7cd-section">Text & button</div>
+    <div class="m7cd-grid">
+      ${field(prefix,"card_name_color","Shop name","color")}
+      ${field(prefix,"card_meta_color","Category / location","color")}
+      ${field(prefix,"card_button_color","View button text","color")}
+      ${field(prefix,"card_button_bg_color","View button background","color")}
+    </div>
+
+    <div class="m7cd-preview-wrap">
+      <div class="m7cd-preview-title">Live style preview</div>
+      <div class="m7cd-preview">
+        <div class="m7cd-preview-cover"></div>
+        <div class="m7cd-preview-body">
+          <b>SHOP NAME</b>
+          <small>Category · Location</small>
+          <div class="m7cd-preview-button">View shop →</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const design=form.querySelector(".m7-design-studio");
+  if(design)design.before(box);
+  else form.appendChild(box);
+
+  box.addEventListener("input",()=>refreshPreview(box));
+  box.addEventListener("change",()=>refreshPreview(box));
+
+  return box;
+}
+
+function input(box,key){
+  return box?.querySelector('[data-m7cd-key="'+key+'"]')||null;
+}
+
+function fillBox(box,options){
+  if(!box)return;
+  const o=options&&typeof options==="object"?options:{};
+
+  Object.keys(DEFAULTS).forEach(key=>{
+    const el=input(box,key);
+    if(!el)return;
+
+    let value=o[key];
+    if(value===undefined||value===null||value==="")value=DEFAULTS[key];
+
+    if(el.type==="color"){
+      value=safeHex(value,DEFAULTS[key]);
+    }
+
+    el.value=String(value);
+  });
+
+  refreshPreview(box);
+}
+
+function collectBox(box,result){
+  if(!box)return result;
+  result.directory_options=result.directory_options&&typeof result.directory_options==="object"
+    ? result.directory_options
+    : {};
+
+  Object.keys(DEFAULTS).forEach(key=>{
+    const el=input(box,key);
+    if(!el)return;
+
+    if(["card_radius","card_border_width","card_cover_height","card_shadow_strength","card_glow_strength","card_animation_speed"].includes(key)){
+      result.directory_options[key]=Number(el.value);
+    }else{
+      result.directory_options[key]=String(el.value||"").trim();
+    }
+  });
+
+  return result;
+}
+
+function refreshPreview(box){
+  const preview=box?.querySelector(".m7cd-preview");
+  if(!preview)return;
+
+  const accent=safeHex(input(box,"card_color")?.value,DEFAULTS.card_color);
+  const clean=accent.replace("#","");
+  const r=parseInt(clean.slice(0,2),16)||218;
+  const g=parseInt(clean.slice(2,4),16)||187;
+  const b=parseInt(clean.slice(4,6),16)||122;
+
+  preview.style.setProperty("--p-accent",accent);
+  preview.style.setProperty("--p-rgb",r+","+g+","+b);
+  preview.style.setProperty("--p-radius",number(input(box,"card_radius")?.value,0,34,16)+"px");
+  preview.style.setProperty("--p-border",number(input(box,"card_border_width")?.value,.5,4,1)+"px");
+  preview.style.setProperty("--p-shadow",(number(input(box,"card_shadow_strength")?.value,0,100,48)/100).toFixed(2));
+  preview.style.setProperty("--p-glow",(number(input(box,"card_glow_strength")?.value,0,100,28)/100).toFixed(2));
+  preview.style.setProperty("--p-speed",number(input(box,"card_animation_speed")?.value,.8,8,2.4)+"s");
+  preview.style.setProperty("--p-surface",safeHex(input(box,"card_surface_color")?.value,DEFAULTS.card_surface_color));
+  preview.style.setProperty("--p-name",safeHex(input(box,"card_name_color")?.value,DEFAULTS.card_name_color));
+  preview.style.setProperty("--p-meta",safeHex(input(box,"card_meta_color")?.value,DEFAULTS.card_meta_color));
+  preview.style.setProperty("--p-button",safeHex(input(box,"card_button_color")?.value,DEFAULTS.card_button_color));
+  preview.style.setProperty("--p-button-bg",safeHex(input(box,"card_button_bg_color")?.value,DEFAULTS.card_button_bg_color));
+
+  [...preview.classList].forEach(cls=>{
+    if(cls.startsWith("edge-")||cls.startsWith("anim-"))preview.classList.remove(cls);
+  });
+
+  preview.classList.add("edge-"+String(input(box,"card_edge_style")?.value||"rounded"));
+  const animation=String(input(box,"card_animation")?.value||"auto");
+  if(animation!=="auto")preview.classList.add("anim-"+animation);
+}
+
+async function install(){
+  for(let i=0;i<240&&!window.Ma7alakDirectoryAdmin;i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api||api.__cardDesignerWrappedV1)return;
+
+  const oldFill=api.fill.bind(api);
+  const oldCollect=api.collect.bind(api);
+
+  api.fill=function(shop){
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    const editBox=ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+    oldFill(shop);
+    fillBox(editBox,shop?.directory_options||{});
+  };
+
+  api.collect=function(edit){
+    const prefix=edit?"m7de-":"m7da-";
+    const form=document.getElementById(edit?"ma-admin-edit-form":"ma-admin-shop-form");
+    const box=ensureBox(form,prefix);
+    const result=oldCollect(edit);
+    return collectBox(box,result);
+  };
+
+  api.__cardDesignerWrappedV1=true;
+
+  const addBox=ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+  ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+  fillBox(addBox,{});
+
+  const observer=new MutationObserver(()=>{
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+  });
+
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+
+install().catch(error=>console.error("MA7ALAK Card Designer:",error));
+})();
+
+
+/* =========================================================
+   MA7ALAK ADMIN — ABOUT INDIVIDUAL TEXT STYLES V1
+   ---------------------------------------------------------
+   Each About text can have its own color, font and size.
+========================================================= */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin")return;
+if(window.__MA7ALAK_ABOUT_INDIVIDUAL_TEXT_V1__)return;
+window.__MA7ALAK_ABOUT_INDIVIDUAL_TEXT_V1__=true;
+
+const FONTS=[
+  ["inherit","Use About / global font"],
+  ["current","Current design font"],
+  ["system","Clean system"],
+  ["modern","Modern sans"],
+  ["elegant","Elegant serif"],
+  ["classic","Classic serif"],
+  ["mono","Monospace"]
+];
+
+const ROWS=[
+  ["kicker","Kicker / category","about_kicker_color","#f2caed"],
+  ["title","About title","about_title_color","#f2caed"],
+  ["arabic","Arabic name","about_arabic_color","#ffffff"],
+  ["body","About description","about_text_color","#ffffff"],
+  ["signature","Bottom signature","about_signature_color","#f2caed"],
+  ["service_1","Service text 1","about_service_1_color","#ffffff"],
+  ["service_2","Service text 2","about_service_2_color","#ffffff"],
+  ["service_3","Service text 3","about_service_3_color","#ffffff"],
+  ["service_4","Service text 4","about_service_4_color","#ffffff"]
+];
+
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function opts(selected){
+  return FONTS.map(([value,label])=>
+    '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
+  ).join("");
+}
+
+function safeHex(value,fallback){
+  const raw=String(value||"").trim();
+  return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+}
+
+function ensureCss(){
+  if(document.getElementById("m7-about-individual-admin-css"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-about-individual-admin-css";
+  style.textContent=`
+    .m7-about-text-style-box{
+      margin:16px 0!important;
+      padding:16px!important;
+      border:1px solid rgba(240,143,182,.22)!important;
+      border-radius:17px!important;
+      background:rgba(17,13,16,.96)!important;
+      color:#f0dae5!important;
+    }
+
+    .m7-about-text-style-box legend{
+      padding:0 8px!important;
+      color:#f2b6d4!important;
+      font-weight:950!important;
+    }
+
+    .m7ats-head{
+      margin:0 0 12px;
+      color:#9d8491;
+      font-size:9px;
+      line-height:1.5;
+    }
+
+    .m7ats-list{
+      display:grid;
+      gap:7px;
+    }
+
+    .m7ats-row{
+      display:grid;
+      grid-template-columns:minmax(120px,1.2fr) 74px minmax(125px,1fr) 85px;
+      gap:7px;
+      align-items:center;
+      padding:8px;
+      border:1px solid rgba(255,255,255,.055);
+      border-radius:11px;
+      background:rgba(255,255,255,.018);
+    }
+
+    .m7ats-name{
+      color:#f1e3ea;
+      font-size:9px;
+      font-weight:900;
+    }
+
+    .m7ats-row input,
+    .m7ats-row select{
+      width:100%!important;
+      min-width:0!important;
+      min-height:35px!important;
+      box-sizing:border-box!important;
+      padding:0 8px!important;
+      border:1px solid rgba(240,143,182,.13)!important;
+      border-radius:9px!important;
+      background:#090709!important;
+      color:#fff!important;
+      font-size:9px!important;
+    }
+
+    .m7ats-row input[type="color"]{
+      padding:4px!important;
+    }
+
+    @media(max-width:660px){
+      .m7ats-row{
+        grid-template-columns:1fr 72px;
+      }
+      .m7ats-row .m7ats-font{
+        grid-column:1;
+      }
+      .m7ats-row .m7ats-size{
+        grid-column:2;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function ensureBox(form,prefix){
+  if(!form)return null;
+
+  let box=form.querySelector(".m7-about-text-style-box");
+  if(box)return box;
+
+  ensureCss();
+
+  box=document.createElement("fieldset");
+  box.className="m7-about-text-style-box";
+
+  box.innerHTML=
+    '<legend>Aa About — individual text styling</legend>'+
+    '<p class="m7ats-head">Each text below is independent. Change its color, font and size without changing the whole About panel.</p>'+
+    '<div class="m7ats-list">'+
+      ROWS.map(([key,label,colorKey,fallback])=>
+        '<div class="m7ats-row" data-m7ats-row="'+esc(key)+'">'+
+          '<div class="m7ats-name">'+esc(label)+'</div>'+
+          '<input type="color" data-m7ats-color data-color-key="'+esc(colorKey)+'" value="'+esc(fallback)+'" aria-label="'+esc(label)+' color">'+
+          '<select class="m7ats-font" data-m7ats-font>'+opts("inherit")+'</select>'+
+          '<input class="m7ats-size" type="number" min="60" max="200" step="5" value="100" data-m7ats-size aria-label="'+esc(label)+' size percentage">'+
+        '</div>'
+      ).join("")+
+    '</div>';
+
+  const about= form.querySelector(".m7-about-services-fields");
+  const design=form.querySelector(".m7-design-studio");
+
+  if(about)about.after(box);
+  else if(design)design.before(box);
+  else form.appendChild(box);
+
+  return box;
+}
+
+function fillBox(box,options,prefix){
+  if(!box)return;
+  const o=options&&typeof options==="object"?options:{};
+
+  ROWS.forEach(([key,,colorKey,fallback])=>{
+    const row=box.querySelector('[data-m7ats-row="'+key+'"]');
+    if(!row)return;
+
+    let color=o[colorKey];
+
+    if(!color){
+      if(key.startsWith("service_"))color=o.about_service_text_color;
+      if(key==="arabic")color=o.arabic_name_color;
+    }
+
+    row.querySelector("[data-m7ats-color]").value=safeHex(color,fallback);
+    row.querySelector("[data-m7ats-font]").value=String(o["about_"+key+"_font_style"]||"inherit");
+    row.querySelector("[data-m7ats-size]").value=String(o["about_"+key+"_font_size"]||"100");
+
+    const legacy=document.getElementById(prefix+colorKey);
+    if(legacy&&legacy.type==="color"){
+      legacy.value=safeHex(color,fallback);
+      legacy.dispatchEvent(new Event("input",{bubbles:true}));
+    }
+  });
+}
+
+function collectBox(box,result,prefix){
+  if(!box)return result;
+
+  result.directory_options=result.directory_options&&typeof result.directory_options==="object"
+    ? result.directory_options
+    : {};
+
+  ROWS.forEach(([key,,colorKey,fallback])=>{
+    const row=box.querySelector('[data-m7ats-row="'+key+'"]');
+    if(!row)return;
+
+    const color=safeHex(row.querySelector("[data-m7ats-color]")?.value,fallback);
+    const font=String(row.querySelector("[data-m7ats-font]")?.value||"inherit");
+    const size=Math.max(60,Math.min(200,Number(row.querySelector("[data-m7ats-size]")?.value)||100));
+
+    result.directory_options[colorKey]=color;
+    result.directory_options["about_"+key+"_font_style"]=font;
+    result.directory_options["about_"+key+"_font_size"]=size;
+
+    const legacy=document.getElementById(prefix+colorKey);
+    if(legacy&&legacy.type==="color")legacy.value=color;
+  });
+
+  return result;
+}
+
+async function install(){
+  for(let i=0;i<240&&!window.Ma7alakDirectoryAdmin;i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api||api.__aboutIndividualTextWrappedV1)return;
+
+  const oldFill=api.fill.bind(api);
+  const oldCollect=api.collect.bind(api);
+
+  api.fill=function(shop){
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    const editBox=ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+    oldFill(shop);
+    fillBox(editBox,shop?.directory_options||{},"m7de-");
+  };
+
+  api.collect=function(edit){
+    const prefix=edit?"m7de-":"m7da-";
+    const form=document.getElementById(edit?"ma-admin-edit-form":"ma-admin-shop-form");
+    const box=ensureBox(form,prefix);
+    const result=oldCollect(edit);
+    return collectBox(box,result,prefix);
+  };
+
+  api.__aboutIndividualTextWrappedV1=true;
+
+  const addBox=ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+  ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+  fillBox(addBox,{},"m7da-");
+
+  const observer=new MutationObserver(()=>{
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+  });
+
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+
+install().catch(error=>console.error("MA7ALAK About individual text:",error));
+})();
+
+
+/* =========================================================
+   MA7ALAK ADMIN WORKSPACE V4
+   ---------------------------------------------------------
+   Shop-first admin UX.
+   The old functional forms/managers remain underneath and are reused.
+   Old duplicate decks/tabs are hidden from the normal workflow.
+========================================================= */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin")return;
+if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;
+window.__MA7ALAK_ADMIN_WORKSPACE_V4__=true;
+
+let client=null;
+let shops=[];
+let selectedSlug="";
+let channel=null;
+
+const PANEL_IDS=[
+  "ma-admin-edit-card",
+  "ma-admin-owner-card",
+  "ma-admin-gallery-card",
+  "ma-admin-video-card",
+  "ma-admin-reels-card",
+  "m7da-settings",
+  "ma-admin-v2-hub",
+  "m7-sub-admin",
+  "m7adm-analytics",
+  "m7adm-users",
+  "m7adm-owner",
+  "m7adm-reports",
+  "ma-admin-activity-card"
+];
+
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function norm(value){
+  return String(value||"").trim().toLowerCase();
+}
+
+function ensureCss(){
+  if(document.getElementById("m7-admin-v4-css"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-admin-v4-css";
+  style.textContent=`
+    body.m7-admin-v4{
+      --v4-gold:#d9aa58;
+      --v4-gold2:#f0cf87;
+      --v4-line:rgba(217,170,88,.18);
+      --v4-bg:#090706;
+      --v4-panel:#12100d;
+    }
+
+    body.m7-admin-v4 #m7deck,
+    body.m7-admin-v4 #m7drawer,
+    body.m7-admin-v4 #m7drawerbg,
+    body.m7-admin-v4 #m7-shop-control{
+      display:none!important;
+    }
+
+    body.m7-admin-v4 #ma-manage-shops-card{
+      display:none!important;
+    }
+
+    body.m7-admin-v4 .m7v4-legacy-panel{
+      display:none!important;
+    }
+
+    body.m7-admin-v4 .m7v4-legacy-panel.m7v4-show{
+      display:block!important;
+      margin:15px 0!important;
+      scroll-margin-top:18px;
+    }
+
+    #m7-admin-workspace-v4{
+      width:100%;
+      margin:0 0 20px;
+      padding:0;
+      color:#f7efe1;
+      font-family:Arial,"Segoe UI",sans-serif;
+    }
+
+    .m7v4-shell{
+      border:1px solid rgba(217,170,88,.24);
+      border-radius:22px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 6% 0%,rgba(217,170,88,.08),transparent 30%),
+        linear-gradient(180deg,#12100d,#090807);
+      box-shadow:0 18px 48px rgba(0,0,0,.34);
+    }
+
+    .m7v4-top{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:17px;
+      border-bottom:1px solid rgba(217,170,88,.12);
+    }
+
+    .m7v4-logo{
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(217,170,88,.25);
+      border-radius:13px;
+      background:rgba(217,170,88,.07);
+      color:#f1cc7b;
+      font-size:18px;
+    }
+
+    .m7v4-top-copy{
+      min-width:0;
+      margin-right:auto;
+    }
+
+    .m7v4-top-copy b{
+      display:block;
+      color:#fff;
+      font-size:16px;
+    }
+
+    .m7v4-top-copy small{
+      display:block;
+      margin-top:3px;
+      color:#887d6c;
+      font-size:9px;
+    }
+
+    .m7v4-live{
+      padding:6px 9px;
+      border:1px solid rgba(73,218,130,.18);
+      border-radius:999px;
+      background:rgba(73,218,130,.055);
+      color:#78e5a7;
+      font-size:8px;
+      font-weight:950;
+    }
+
+    .m7v4-home,
+    .m7v4-shop-workspace{
+      padding:16px;
+    }
+
+    .m7v4-search-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .m7v4-search{
+      min-height:44px!important;
+      width:100%!important;
+      box-sizing:border-box!important;
+      padding:0 13px!important;
+      border:1px solid rgba(217,170,88,.16)!important;
+      border-radius:12px!important;
+      background:#080706!important;
+      color:#fff!important;
+      font-size:12px!important;
+    }
+
+    .m7v4-add{
+      min-height:44px;
+      padding:0 14px;
+      border:0;
+      border-radius:12px;
+      background:linear-gradient(135deg,#f0cf86,#cb9541);
+      color:#211508;
+      font-size:9px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .m7v4-count{
+      margin:0 0 10px;
+      color:#8f826d;
+      font-size:9px;
+      font-weight:850;
+    }
+
+    .m7v4-shop-list{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .m7v4-shop{
+      display:grid;
+      grid-template-columns:62px minmax(0,1fr) auto;
+      gap:11px;
+      align-items:center;
+      padding:11px;
+      border:1px solid rgba(217,170,88,.12);
+      border-radius:16px;
+      background:rgba(255,255,255,.018);
+    }
+
+    .m7v4-shop img,
+    .m7v4-shop-fallback{
+      width:62px;
+      height:62px;
+      display:grid;
+      place-items:center;
+      border-radius:15px;
+      object-fit:cover;
+      background:#211b13;
+      color:#d9b669;
+      font-size:20px;
+    }
+
+    .m7v4-shop-info{
+      min-width:0;
+    }
+
+    .m7v4-shop-info b{
+      display:block;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#fff;
+      font-size:12px;
+    }
+
+    .m7v4-shop-info small{
+      display:block;
+      margin-top:4px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#8f8372;
+      font-size:8px;
+    }
+
+    .m7v4-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      margin-top:6px;
+    }
+
+    .m7v4-tag{
+      padding:3px 6px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      color:#a99d8a;
+      font-size:7px;
+      font-weight:900;
+    }
+
+    .m7v4-tag.on{color:#74dda2;border-color:rgba(75,214,132,.17)}
+    .m7v4-tag.verified{color:#79bcff;border-color:rgba(80,160,255,.18)}
+
+    .m7v4-manage{
+      min-height:38px;
+      padding:0 11px;
+      border:1px solid rgba(217,170,88,.22);
+      border-radius:11px;
+      background:rgba(217,170,88,.065);
+      color:#efcf90;
+      font-size:8px;
+      font-weight:950;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .m7v4-empty{
+      grid-column:1/-1;
+      padding:28px 14px;
+      border:1px dashed rgba(217,170,88,.18);
+      border-radius:15px;
+      color:#8a7f6d;
+      text-align:center;
+      font-size:10px;
+    }
+
+    .m7v4-shop-workspace[hidden],
+    .m7v4-home[hidden]{
+      display:none!important;
+    }
+
+    .m7v4-shop-head{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      margin-bottom:15px;
+      padding-bottom:14px;
+      border-bottom:1px solid rgba(217,170,88,.10);
+    }
+
+    .m7v4-back{
+      width:38px;
+      height:38px;
+      flex:0 0 38px;
+      border:1px solid rgba(217,170,88,.18);
+      border-radius:11px;
+      background:rgba(255,255,255,.025);
+      color:#e6ca91;
+      cursor:pointer;
+      font-size:17px;
+    }
+
+    .m7v4-shop-head img,
+    .m7v4-shop-head .m7v4-head-fallback{
+      width:48px;
+      height:48px;
+      display:grid;
+      place-items:center;
+      border-radius:13px;
+      object-fit:cover;
+      background:#211b13;
+      color:#d9b669;
+    }
+
+    .m7v4-shop-head-copy{
+      min-width:0;
+      margin-right:auto;
+    }
+
+    .m7v4-shop-head-copy b{
+      display:block;
+      color:#fff;
+      font-size:15px;
+    }
+
+    .m7v4-shop-head-copy small{
+      display:block;
+      margin-top:3px;
+      color:#877b69;
+      font-size:8px;
+    }
+
+    .m7v4-view{
+      min-height:36px;
+      padding:0 11px;
+      border:1px solid rgba(217,170,88,.18);
+      border-radius:10px;
+      background:rgba(217,170,88,.05);
+      color:#e9c983;
+      font-size:8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .m7v4-group-title{
+      margin:16px 0 8px;
+      color:#9f8e72;
+      font-size:8px;
+      font-weight:950;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+
+    .m7v4-actions{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .m7v4-action{
+      min-height:84px;
+      padding:12px;
+      border:1px solid rgba(217,170,88,.12);
+      border-radius:14px;
+      background:
+        radial-gradient(circle at 15% 0%,rgba(217,170,88,.055),transparent 42%),
+        rgba(255,255,255,.016);
+      color:#e9dcc5;
+      text-align:left;
+      cursor:pointer;
+    }
+
+    .m7v4-action:hover{
+      border-color:rgba(217,170,88,.30);
+      background:rgba(217,170,88,.05);
+    }
+
+    .m7v4-action i{
+      display:block;
+      margin-bottom:8px;
+      color:#e0b964;
+      font-style:normal;
+      font-size:17px;
+    }
+
+    .m7v4-action b{
+      display:block;
+      color:#f4e8d3;
+      font-size:10px;
+    }
+
+    .m7v4-action small{
+      display:block;
+      margin-top:4px;
+      color:#766d5e;
+      font-size:8px;
+      line-height:1.35;
+    }
+
+    .m7v4-system{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+    }
+
+    .m7v4-system button{
+      min-height:38px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:10px;
+      background:rgba(255,255,255,.018);
+      color:#a99c87;
+      font-size:8px;
+      font-weight:850;
+      cursor:pointer;
+    }
+
+    /* Edit Shop focus modes. */
+    #ma-admin-edit-card.m7v4-show .m7ds-tabs{
+      display:none!important;
+    }
+
+    #ma-admin-edit-card.m7v4-mode-about .m7ds-pane{
+      display:none!important;
+    }
+
+    #ma-admin-edit-card.m7v4-mode-about .m7ds-pane[data-m7ds-pane="about"]{
+      display:block!important;
+    }
+
+    #ma-admin-edit-card.m7v4-mode-about .m7-about-services-fields,
+    #ma-admin-edit-card.m7v4-mode-about .m7-about-text-style-box{
+      display:block!important;
+    }
+
+    #ma-admin-edit-card.m7v4-mode-card .m7-card-designer-box{
+      outline:1px solid rgba(217,170,88,.16);
+    }
+
+    #ma-admin-edit-card.m7v4-mode-hours .m7-hours-schedule-box,
+    #ma-admin-edit-card.m7v4-mode-hours .m7-availability-extra-box{
+      outline:1px solid rgba(217,170,88,.12);
+    }
+
+    @media(max-width:850px){
+      .m7v4-shop-list{grid-template-columns:1fr}
+      .m7v4-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .m7v4-system{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media(max-width:470px){
+      .m7v4-top{padding:13px}
+      .m7v4-home,.m7v4-shop-workspace{padding:11px}
+      .m7v4-shop{grid-template-columns:52px minmax(0,1fr)}
+      .m7v4-shop img,.m7v4-shop-fallback{width:52px;height:52px}
+      .m7v4-manage{grid-column:1/-1;width:100%}
+      .m7v4-actions{grid-template-columns:1fr 1fr}
+      .m7v4-shop-head{align-items:flex-start;flex-wrap:wrap}
+      .m7v4-view{margin-left:auto}
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function markLegacyPanels(){
+  PANEL_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.add("m7v4-legacy-panel");
+  });
+}
+
+function clearLegacy(){
+  document.querySelectorAll(".m7v4-legacy-panel").forEach(el=>{
+    el.classList.remove("m7v4-show","m7v4-mode-details","m7v4-mode-about","m7v4-mode-hours","m7v4-mode-card");
+  });
+}
+
+function showLegacy(id){
+  markLegacyPanels();
+  clearLegacy();
+  const el=document.getElementById(id);
+  if(!el)return null;
+  el.hidden=false;
+  el.removeAttribute("hidden");
+  el.classList.add("m7v4-show");
+  setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),60);
+  return el;
+}
+
+function legacyCard(slug){
+  return document.querySelector('#ma-admin-shop-list .ma-admin-shop-item[data-slug="'+CSS.escape(slug)+'"]');
+}
+
+function legacyAction(slug,action){
+  const card=legacyCard(slug);
+  if(!card)return false;
+  const button=card.querySelector('button[data-action="'+action+'"]');
+  if(!button)return false;
+  button.click();
+  return true;
+}
+
+async function waitForEdit(slug){
+  for(let i=0;i<80;i++){
+    const original=document.getElementById("ma-edit-original-slug");
+    const card=document.getElementById("ma-admin-edit-card");
+    if(original&&norm(original.value)===norm(slug)&&card&&!card.hidden)return card;
+    await new Promise(resolve=>setTimeout(resolve,60));
+  }
+  return document.getElementById("ma-admin-edit-card");
+}
+
+async function openEditMode(slug,mode){
+  if(!legacyAction(slug,"edit")){
+    throw new Error("Edit Shop action is not ready yet.");
+  }
+
+  const panel=await waitForEdit(slug);
+  if(!panel)throw new Error("Edit Shop panel did not open.");
+
+  showLegacy("ma-admin-edit-card");
+  panel.classList.add("m7v4-mode-"+mode);
+
+  const targets={
+    card:".m7-card-designer-box",
+    about:".m7-about-services-fields",
+    hours:".m7-hours-schedule-box",
+    details:"#ma-edit-name"
+  };
+
+  const target=panel.querySelector(targets[mode]||"#ma-edit-name");
+  if(target){
+    setTimeout(()=>target.scrollIntoView({behavior:"smooth",block:"center"}),120);
+  }
+}
+
+function selectedShop(){
+  return shops.find(shop=>norm(shop.shop_slug)===norm(selectedSlug))||null;
+}
+
+function shopImage(shop,sizeClass){
+  const url=String(shop?.profile_image_url||"").trim();
+  return url
+    ? '<img class="'+(sizeClass||"")+'" src="'+esc(url)+'" alt="" loading="lazy">'
+    : '<div class="'+(sizeClass||"")+' m7v4-shop-fallback">🏪</div>';
+}
+
+function renderList(){
+  const root=document.getElementById("m7-admin-workspace-v4");
+  if(!root)return;
+
+  const term=norm(root.querySelector("[data-m7v4-search]")?.value);
+  const list=root.querySelector("[data-m7v4-shop-list]");
+  const count=root.querySelector("[data-m7v4-count]");
+
+  const rows=shops.filter(shop=>{
+    if(!term)return true;
+    return [
+      shop.shop_name,
+      shop.arabic_name,
+      shop.shop_slug,
+      shop.area,
+      shop.location,
+      shop.category_name,
+      shop.category
+    ].some(value=>norm(value).includes(term));
+  });
+
+  if(count)count.textContent=rows.length+" shop"+(rows.length===1?"":"s");
+
+  if(!list)return;
+
+  if(!rows.length){
+    list.innerHTML='<div class="m7v4-empty">No shops match this search.</div>';
+    return;
+  }
+
+  list.innerHTML=rows.map(shop=>{
+    const meta=[shop.category_name||shop.category,shop.location||shop.area].filter(Boolean).map(esc).join(" · ");
+    return '<article class="m7v4-shop" data-m7v4-slug="'+esc(shop.shop_slug)+'">'+
+      shopImage(shop,"")+
+      '<div class="m7v4-shop-info">'+
+        '<b>'+esc(shop.shop_name||shop.shop_slug)+'</b>'+
+        '<small>/'+esc(shop.shop_slug)+(meta?" · "+meta:"")+'</small>'+
+        '<div class="m7v4-badges">'+
+          '<span class="m7v4-tag '+(shop.is_active?"on":"")+'">'+(shop.is_active?"VISIBLE":"HIDDEN")+'</span>'+
+          (shop.verified?'<span class="m7v4-tag verified">VERIFIED</span>':"")+
+        '</div>'+
+      '</div>'+
+      '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Manage →</button>'+
+    '</article>';
+  }).join("");
+}
+
+function renderWorkspace(){
+  const root=document.getElementById("m7-admin-workspace-v4");
+  const shop=selectedShop();
+  if(!root||!shop)return;
+
+  const home=root.querySelector("[data-m7v4-home]");
+  const workspace=root.querySelector("[data-m7v4-shop-workspace]");
+  home.hidden=true;
+  workspace.hidden=false;
+
+  workspace.innerHTML=
+    '<div class="m7v4-shop-head">'+
+      '<button class="m7v4-back" type="button" data-m7v4-back aria-label="Back">‹</button>'+
+      shopImage(shop,"m7v4-head-fallback")+
+      '<div class="m7v4-shop-head-copy"><b>'+esc(shop.shop_name||shop.shop_slug)+'</b><small>/'+esc(shop.shop_slug)+'</small></div>'+
+      '<button class="m7v4-view" type="button" data-m7v4-action="view">View shop ↗</button>'+
+    '</div>'+
+
+    '<div class="m7v4-group-title">Shop profile & design</div>'+
+    '<div class="m7v4-actions">'+
+      action("details","✏️","Shop details","Name, slug, location, category, profile details")+
+      action("card","▰","Directory card","Edges, corners, colors, shadow and animation")+
+      action("about","Aa","About Me","Content, services and each text style")+
+      action("hours","◷","Hours & availability","Weekly opening schedule and extra availability rows")+
+    '</div>'+
+
+    '<div class="m7v4-group-title">Media & live content</div>'+
+    '<div class="m7v4-actions">'+
+      action("gallery","▧","Photos","Gallery images and featured photo")+
+      action("video","▶","Videos","Shop video gallery")+
+      action("reels","◉","Reels","Homepage owner reels and limits")+
+      action("live","⚡","Live / Offers","Access, active offers and limits")+
+    '</div>'+
+
+    '<div class="m7v4-group-title">Account & publishing</div>'+
+    '<div class="m7v4-actions">'+
+      action("owner","♙","Owner access","Assign or manage this shop owner")+
+      action("visibility","◐","Visibility","Show or hide this shop")+
+      action("verify","✓","Verification","Verify or unverify this shop")+
+      action("feature","★","Featured","Feature this shop for a period")+
+    '</div>'+
+
+    '<div class="m7v4-group-title">System tools</div>'+
+    '<div class="m7v4-system">'+
+      '<button type="button" data-m7v4-system="ma-admin-v2-hub">Categories & areas</button>'+
+      '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
+      '<button type="button" data-m7v4-system="m7adm-analytics">Analytics</button>'+
+      '<button type="button" data-m7v4-system="m7adm-users">Users</button>'+
+      '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
+      '<button type="button" data-m7v4-system="m7adm-reports">Reports</button>'+
+      '<button type="button" data-m7v4-system="ma-admin-activity-card">Activity</button>'+
+    '</div>';
+}
+
+function action(key,icon,title,copy){
+  return '<button type="button" class="m7v4-action" data-m7v4-action="'+esc(key)+'"><i>'+icon+'</i><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></button>';
+}
+
+async function loadShops(){
+  if(!client)return;
+
+  const result=await client
+    .from("shop_profiles")
+    .select("shop_slug,shop_name,arabic_name,profile_image_url,location,area,category,category_name,is_active,verified,featured,directory_options")
+    .order("shop_name",{ascending:true});
+
+  if(result.error)throw result.error;
+
+  shops=result.data||[];
+  renderList();
+
+  if(selectedSlug&&selectedShop()){
+    renderWorkspace();
+  }
+}
+
+async function handleAction(key){
+  const shop=selectedShop();
+  if(!shop)return;
+
+  if(key==="view"){
+    const target=String(shop.shop_url||"").trim()||("https://ma7alak.com/"+encodeURIComponent(shop.shop_slug));
+    window.open(target,"_blank","noopener");
+    return;
+  }
+
+  if(["details","card","about","hours"].includes(key)){
+    await openEditMode(shop.shop_slug,key);
+    return;
+  }
+
+  const map={
+    gallery:["gallery","ma-admin-gallery-card"],
+    video:["video","ma-admin-video-card"],
+    reels:["reels","ma-admin-reels-card"],
+    owner:["owner","ma-admin-owner-card"]
+  };
+
+  if(map[key]){
+    const [legacy,panelId]=map[key];
+    if(!legacyAction(shop.shop_slug,legacy))throw new Error(legacy+" action is not ready yet.");
+    setTimeout(()=>showLegacy(panelId),100);
+    return;
+  }
+
+  if(key==="live"){
+    const card=legacyCard(shop.shop_slug);
+    const button=card?.querySelector("[data-m7-live-offers]");
+    if(!button)throw new Error("Live / Offers controls are still loading.");
+    button.click();
+    return;
+  }
+
+  if(key==="visibility"){
+    if(!legacyAction(shop.shop_slug,"active"))throw new Error("Visibility action is not ready.");
+    setTimeout(loadShops,250);
+    return;
+  }
+
+  if(key==="verify"){
+    if(!legacyAction(shop.shop_slug,"verified"))throw new Error("Verification action is not ready.");
+    setTimeout(loadShops,250);
+    return;
+  }
+
+  if(key==="feature"){
+    if(!legacyAction(shop.shop_slug,"featured"))throw new Error("Featured action is not ready.");
+    setTimeout(loadShops,250);
+  }
+}
+
+function showHome(){
+  selectedSlug="";
+  clearLegacy();
+  const root=document.getElementById("m7-admin-workspace-v4");
+  if(!root)return;
+  root.querySelector("[data-m7v4-home]").hidden=false;
+  root.querySelector("[data-m7v4-shop-workspace]").hidden=true;
+  root.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function mount(){
+  const dash=document.getElementById("ma-admin-dashboard");
+  if(!dash||document.getElementById("m7-admin-workspace-v4"))return false;
+
+  ensureCss();
+  document.body.classList.add("m7-admin-v4");
+  markLegacyPanels();
+
+  const root=document.createElement("section");
+  root.id="m7-admin-workspace-v4";
+  root.innerHTML=`
+    <div class="m7v4-shell">
+      <header class="m7v4-top">
+        <div class="m7v4-logo">M7</div>
+        <div class="m7v4-top-copy">
+          <b>Ma7alak Admin</b>
+          <small>Choose a shop first. Every function for that shop is inside one workspace.</small>
+        </div>
+        <span class="m7v4-live">LIVE SYNC</span>
+      </header>
+
+      <div class="m7v4-home" data-m7v4-home>
+        <div class="m7v4-search-row">
+          <input class="m7v4-search" type="search" placeholder="Search shop, slug, area, category…" data-m7v4-search>
+          <button class="m7v4-add" type="button" data-m7v4-add>＋ Add shop</button>
+        </div>
+        <div class="m7v4-count" data-m7v4-count>Loading shops…</div>
+        <div class="m7v4-shop-list" data-m7v4-shop-list>
+          <div class="m7v4-empty">Loading shops…</div>
+        </div>
+      </div>
+
+      <div class="m7v4-shop-workspace" data-m7v4-shop-workspace hidden></div>
+    </div>
+  `;
+
+  dash.prepend(root);
+
+  root.addEventListener("input",event=>{
+    if(event.target.matches("[data-m7v4-search]"))renderList();
+  });
+
+  root.addEventListener("click",async event=>{
+    const manage=event.target.closest("[data-m7v4-manage]");
+    if(manage){
+      selectedSlug=manage.dataset.m7v4Manage||"";
+      clearLegacy();
+      renderWorkspace();
+      root.scrollIntoView({behavior:"smooth",block:"start"});
+      return;
+    }
+
+    if(event.target.closest("[data-m7v4-back]")){
+      showHome();
+      return;
+    }
+
+    if(event.target.closest("[data-m7v4-add]")){
+      const form=document.getElementById("ma-admin-shop-form");
+      const section=form?.closest(".ma-admin-card,section,fieldset");
+      if(section){
+        section.classList.add("m7v4-legacy-panel","m7v4-show");
+        section.hidden=false;
+        section.scrollIntoView({behavior:"smooth",block:"start"});
+      }
+      return;
+    }
+
+    const actionButton=event.target.closest("[data-m7v4-action]");
+    if(actionButton){
+      try{
+        await handleAction(actionButton.dataset.m7v4Action);
+      }catch(error){
+        console.error("MA7ALAK Admin V4 action:",error);
+        window.alert(error?.message||"This admin tool could not open.");
+      }
+      return;
+    }
+
+    const system=event.target.closest("[data-m7v4-system]");
+    if(system){
+      showLegacy(system.dataset.m7v4System);
+    }
+  });
+
+  return true;
+}
+
+async function ready(){
+  for(let i=0;i<240&&!window.Ma7alakAdminClient;i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  client=window.Ma7alakAdminClient;
+  if(!client)return;
+
+  for(let i=0;i<240&&!mount();i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  await loadShops();
+
+  if(channel){
+    try{await client.removeChannel(channel)}catch(_){}
+  }
+
+  channel=client
+    .channel("ma7alak-admin-workspace-v4")
+    .on("postgres_changes",{event:"*",schema:"public",table:"shop_profiles"},()=>{
+      window.clearTimeout(window.__m7v4RefreshTimer);
+      window.__m7v4RefreshTimer=window.setTimeout(()=>loadShops().catch(console.error),90);
+    })
+    .subscribe();
+
+  window.addEventListener("focus",()=>loadShops().catch(()=>{}));
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible")loadShops().catch(()=>{});
+  });
+
+  const observer=new MutationObserver(()=>{
+    markLegacyPanels();
+    if(selectedSlug&&!legacyCard(selectedSlug)){
+      const search=document.getElementById("ma-admin-shop-search");
+      if(search&&search.value){
+        search.value="";
+        search.dispatchEvent(new Event("input",{bubbles:true}));
+      }
+    }
+  });
+
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+
+ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
+})();
+
+
