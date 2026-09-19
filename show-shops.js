@@ -89,7 +89,7 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
 
     const animation=allowed(
       o.card_animation,
-      ["auto","none","glow","breathe","edge","shimmer"],
+      ["auto","none","glow","breathe","edge","shimmer","float","pulse","sway","bounce"],
       "auto"
     );
 
@@ -99,6 +99,11 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     const shadow=num(o.card_shadow_strength,0,100,48)/100;
     const glowStrength=num(o.card_glow_strength,0,100,28)/100;
     const speed=num(o.card_animation_speed,0.8,8,2.4);
+    const intensity=num(o.card_animation_intensity,0,100,55);
+    const shimmerStrength=num(o.card_shimmer_strength,0,100,70)/100;
+    const move=2+intensity*.10;
+    const scale=1+intensity*.0005;
+    const rotate=.3+intensity*.025;
 
     const surface=hex(o.card_surface_color,"#171611");
     const nameColor=hex(o.card_name_color,"#ffffff");
@@ -120,6 +125,11 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
       "--m7-card-shadow-alpha:"+shadow.toFixed(2),
       "--m7-card-glow-alpha:"+glowStrength.toFixed(2),
       "--m7-card-speed:"+speed+"s",
+      "--m7-card-intensity:"+(intensity/100).toFixed(2),
+      "--m7-card-shimmer:"+shimmerStrength.toFixed(2),
+      "--m7-card-move:"+move.toFixed(1)+"px",
+      "--m7-card-scale:"+scale.toFixed(4),
+      "--m7-card-rotate:"+rotate.toFixed(2)+"deg",
       "--m7-card-surface:"+surface,
       "--m7-card-name:"+nameColor,
       "--m7-card-meta:"+metaColor,
@@ -321,30 +331,93 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
         linear-gradient(
           112deg,
           transparent 0 38%,
-          rgba(255,255,255,.10) 48%,
-          rgba(var(--m7-card-accent-rgb,193,166,106),.22) 52%,
-          transparent 62% 100%
+          rgba(255,255,255,calc(.08 + var(--m7-card-shimmer,.70) * .42)) 47%,
+          rgba(var(--m7-card-accent-rgb,193,166,106),calc(.12 + var(--m7-card-shimmer,.70) * .48)) 52%,
+          rgba(255,255,255,calc(.06 + var(--m7-card-shimmer,.70) * .30)) 57%,
+          transparent 68% 100%
         );
-      background-size:260% 100%;
-      animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) ease-in-out infinite;
-      -webkit-animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) ease-in-out infinite;
+      background-size:300% 100%;
+      animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) linear infinite;
+      -webkit-animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) linear infinite;
     }
 
     @keyframes m7CardAdminShimmer{
-      0%,25%{background-position:140% 0;opacity:0}
-      45%{opacity:1}
-      78%,100%{background-position:-140% 0;opacity:0}
+      from{background-position:150% 0;opacity:.15}
+      45%,55%{opacity:1}
+      to{background-position:-150% 0;opacity:.15}
     }
 
     @-webkit-keyframes m7CardAdminShimmer{
-      0%,25%{background-position:140% 0;opacity:0}
-      45%{opacity:1}
-      78%,100%{background-position:-140% 0;opacity:0}
+      from{background-position:150% 0;opacity:.15}
+      45%,55%{opacity:1}
+      to{background-position:-150% 0;opacity:.15}
+    }
+
+    @keyframes m7CardAdminFloat{
+      50%{transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+    }
+
+    @-webkit-keyframes m7CardAdminFloat{
+      50%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+    }
+
+    @keyframes m7CardAdminPulse{
+      50%{transform:scale(var(--m7-card-scale,1.018));opacity:.78}
+    }
+
+    @-webkit-keyframes m7CardAdminPulse{
+      50%{-webkit-transform:scale(var(--m7-card-scale,1.018));opacity:.78}
+    }
+
+    @keyframes m7CardAdminSway{
+      25%{transform:rotate(calc(var(--m7-card-rotate,1.4deg) * -1))}
+      75%{transform:rotate(var(--m7-card-rotate,1.4deg))}
+    }
+
+    @-webkit-keyframes m7CardAdminSway{
+      25%{-webkit-transform:rotate(calc(var(--m7-card-rotate,1.4deg) * -1))}
+      75%{-webkit-transform:rotate(var(--m7-card-rotate,1.4deg))}
+    }
+
+    @keyframes m7CardAdminBounce{
+      0%,100%{transform:translateY(0)}
+      45%{transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+      62%{transform:translateY(calc(var(--m7-card-move,6px) * .25))}
+    }
+
+    @-webkit-keyframes m7CardAdminBounce{
+      0%,100%{-webkit-transform:translateY(0)}
+      45%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+      62%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * .25))}
+    }
+
+    .m7d-card.m7d-anim-float{
+      animation:m7CardAdminFloat var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminFloat var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    .m7d-card.m7d-anim-pulse{
+      animation:m7CardAdminPulse var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminPulse var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    .m7d-card.m7d-anim-sway{
+      animation:m7CardAdminSway var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminSway var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    .m7d-card.m7d-anim-bounce{
+      animation:m7CardAdminBounce var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminBounce var(--m7-card-speed,2.4s) ease-in-out infinite!important;
     }
 
     @media(prefers-reduced-motion:reduce){
       .m7d-card.m7d-anim-glow,
       .m7d-card.m7d-anim-breathe,
+      .m7d-card.m7d-anim-float,
+      .m7d-card.m7d-anim-pulse,
+      .m7d-card.m7d-anim-sway,
+      .m7d-card.m7d-anim-bounce,
       .m7d-card.m7d-anim-edge::before,
       .m7d-card.m7d-anim-shimmer::after{
         animation:none!important;
