@@ -8869,10 +8869,7 @@ const PANEL_IDS=[
   "m7da-settings",
   "ma-admin-v2-hub",
   "m7-sub-admin",
-  "m7adm-analytics",
-  "m7adm-users",
-  "m7adm-owner",
-  "m7adm-reports",
+  "m7adm-v3",
   "ma-admin-activity-card"
 ];
 
@@ -9383,6 +9380,108 @@ function showLegacy(id){
   return el;
 }
 
+async function openAdminHub(target,shopSlug){
+  let root=null;
+
+  for(let i=0;i<60;i++){
+    root=document.getElementById("m7adm-v3");
+    if(root)break;
+    await new Promise(resolve=>setTimeout(resolve,50));
+  }
+
+  if(!root){
+    throw new Error("Admin Tools are still loading.");
+  }
+
+  markLegacyPanels();
+  clearLegacy();
+
+  root.hidden=false;
+  root.removeAttribute("hidden");
+  root.classList.remove(
+    "m7hidden",
+    "m7collapsed",
+    "m7-admin-collapsed"
+  );
+  root.classList.add("m7v4-show");
+
+  const bodies=[
+    ...root.querySelectorAll(".m7adm-body")
+  ];
+
+  const tabs=[
+    ...root.querySelectorAll(".m7adm-tab")
+  ];
+
+  bodies.forEach(body=>{
+    body.hidden=true;
+    body.classList.add("hidden");
+  });
+
+  tabs.forEach(tab=>{
+    tab.classList.remove("active");
+    tab.setAttribute("aria-selected","false");
+  });
+
+  const body=document.getElementById(target);
+  const tab=root.querySelector(
+    '.m7adm-tab[data-target="'+CSS.escape(target)+'"]'
+  );
+
+  if(!body){
+    throw new Error("This Admin Tool is not available.");
+  }
+
+  body.hidden=false;
+  body.classList.remove("hidden");
+
+  if(tab){
+    tab.classList.add("active");
+    tab.setAttribute("aria-selected","true");
+  }
+
+  if(
+    target==="m7adm-owner" &&
+    shopSlug
+  ){
+    const select=
+      document.getElementById(
+        "m7adm-owner-shop"
+      );
+
+    if(select){
+      const wanted=
+        String(shopSlug).trim();
+
+      const hasOption=[
+        ...select.options
+      ].some(option=>
+        String(option.value).trim()===
+        wanted
+      );
+
+      if(hasOption){
+        select.value=wanted;
+        select.dispatchEvent(
+          new Event(
+            "change",
+            {bubbles:true}
+          )
+        );
+      }
+    }
+  }
+
+  setTimeout(()=>{
+    root.scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  },60);
+
+  return root;
+}
+
 function legacyCard(slug){
   return document.querySelector('#ma-admin-shop-list .ma-admin-shop-item[data-slug="'+CSS.escape(slug)+'"]');
 }
@@ -9581,11 +9680,18 @@ async function handleAction(key){
     return;
   }
 
+  if(key==="owner"){
+    await openAdminHub(
+      "m7adm-owner",
+      shop.shop_slug
+    );
+    return;
+  }
+
   const map={
     gallery:["gallery","ma-admin-gallery-card"],
     video:["video","ma-admin-video-card"],
-    reels:["reels","ma-admin-reels-card"],
-    owner:["owner","ma-admin-owner-card"]
+    reels:["reels","ma-admin-reels-card"]
   };
 
   if(map[key]){
@@ -9727,7 +9833,35 @@ function mount(){
 
     const system=event.target.closest("[data-m7v4-system]");
     if(system){
-      showLegacy(system.dataset.m7v4System);
+      const id=
+        system.dataset.m7v4System;
+
+      if(
+        id==="m7adm-analytics" ||
+        id==="m7adm-users" ||
+        id==="m7adm-owner" ||
+        id==="m7adm-reports"
+      ){
+        try{
+          await openAdminHub(
+            id,
+            id==="m7adm-owner"
+              ? selectedSlug
+              : ""
+          );
+        }catch(error){
+          console.error(
+            "MA7ALAK Admin Tools:",
+            error
+          );
+          window.alert(
+            error?.message ||
+            "This Admin Tool could not open."
+          );
+        }
+      }else{
+        showLegacy(id);
+      }
     }
   });
 
