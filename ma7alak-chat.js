@@ -37,12 +37,217 @@ async function deleteMessage(id,c){if(!id||!c)return;if(!confirm("Delete this me
 async function deleteConversation(c,back){if(!c?.id)return;if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;let r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});if(r.error){alert(r.error.message);return false}dispatchEvent(new Event("ma7alak:messages-read"));if(typeof back==="function")await back();else close();return true}
 async function messages(c){let b=document.getElementById("m7-chat-body");if(!b)return false;if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}try{let r=await Promise.race([client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))]);if(!b.isConnected)return false;if(r.error)throw r.error;b.innerHTML=(r.data||[]).map(m=>{let mine=sameId(m.sender_id,user?.id);return `<div class="m7-msg ${mine?"mine":""}">${esc(m.body)}${mine?`<button class="m7-msg-delete" type="button" data-delete-message="${esc(m.id)}" title="Delete message">×</button>`:""}<div class="m7-msg-time">${tm(m.created_at)}</div></div>`}).join("")||'<div class="m7-empty">No messages yet.</div>';b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});b.scrollTop=b.scrollHeight;client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));return true}catch(e){loadError(b,e);return false}}
 async function convo(c,title,avatar,back){shell(title,avatar,!!back);if(!c||c.id==null){loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));return}if(back)document.getElementById("m7-back").onclick=back;let del=document.getElementById("m7-delete-convo");del.style.display="block";del.onclick=()=>deleteConversation(c,back);document.getElementById("m7-report").onclick=async()=>{let reason=prompt("Why are you reporting this conversation?","Abusive messages");if(!reason)return;let r=await client.rpc("ma7alak_report_conversation",{p_conversation_id:c.id,p_reason:reason,p_details:"Reported from Ma7alak chat"});alert(r.error?r.error.message:"Report sent to Ma7alak Admin ✓")};document.getElementById("m7-chat").insertAdjacentHTML("beforeend",`<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`);await messages(c);let form=document.getElementById("m7-chat-send");if(form)form.onsubmit=async e=>{e.preventDefault();let i=document.getElementById("m7-chat-input"),t=i?.value.trim();if(!t)return;i.value="";try{let r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){alert(r.error.message);i.value=t}}catch(err){alert(err?.message||"Could not send message");i.value=t}};channel=client.channel("m7c-"+c.id+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages",filter:"conversation_id=eq."+c.id},()=>messages(c)).on("postgres_changes",{event:"DELETE",schema:"public",table:"ma7alak_conversations",filter:"id=eq."+c.id},()=>{if(typeof back==="function")back();else close()}).subscribe()}
-async function unreadMap(rows){let out=new Set;if(!rows.length)return out;try{let ids=rows.map(x=>x.id),r=await client.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids);if(r.error)return out;for(let m of r.data||[]){let c=rows.find(x=>sameId(x.id,m.conversation_id));if(!c)continue;let rd=mode==="owner"?c.owner_last_read_at:c.viewer_last_read_at;if(!sameId(m.sender_id,user?.id)&&(!rd||new Date(m.created_at)>new Date(rd)))out.add(String(m.conversation_id))}}catch(e){console.warn("Unread map failed:",e)}return out}
+async function unreadMap(rows,sideFor){let out=new Set;if(!rows.length)return out;try{let ids=rows.map(x=>x.id),r=await client.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids);if(r.error)return out;for(let m of r.data||[]){let c=rows.find(x=>sameId(x.id,m.conversation_id));if(!c)continue;let side=typeof sideFor==="function"?sideFor(c):mode,rd=side==="owner"?c.owner_last_read_at:c.viewer_last_read_at;if(!sameId(m.sender_id,user?.id)&&(!rd||new Date(m.created_at)>new Date(rd)))out.add(String(m.conversation_id))}}catch(e){console.warn("Unread map failed:",e)}return out}
 async function accepts(slug){let r=await client.rpc("ma7alak_shop_accepts_messages",{p_shop_slug:String(slug||"").trim()});if(r.error){console.warn("Message setting:",r.error);return true}return r.data!==false}
-async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url").eq("shop_slug",c.shop_slug).maybeSingle();convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null)}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}
+async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim();if(ownSlug&&ownSlug.toLowerCase()===slug.toLowerCase()){alert("You cannot message your own shop");return}if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url").eq("shop_slug",c.shop_slug).maybeSingle();mode="viewer";convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null)}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}
 function wireInboxDeletes(b,rows,reopen){b.querySelectorAll("[data-delete-convo]").forEach(btn=>btn.onclick=async e=>{e.preventDefault();e.stopPropagation();let c=rows.find(x=>sameId(x.id,btn.dataset.deleteConvo));if(c)await deleteConversation(c,reopen)})}
 async function viewerInbox(){try{await vr();if(!user){window.Ma7alakAccount?.open();return}shell("Messages","",false);document.getElementById("m7-report").style.display="none";let b=document.getElementById("m7-chat-body"),r=await client.from("ma7alak_conversations").select("*").order("updated_at",{ascending:false});if(r.error){b.textContent=r.error.message;return}let rows=r.data||[],slugs=[...new Set(rows.map(x=>x.shop_slug))];let [un,p]=await Promise.all([unreadMap(rows),slugs.length?client.from("shop_profiles").select("shop_slug,shop_name,profile_image_url").in("shop_slug",slugs):Promise.resolve({data:[]})]);let map={};for(let x of p.data||[])map[x.shop_slug]=x;b.innerHTML=rows.length?rows.map(c=>{let p=map[c.shop_slug]||{},n=p.shop_name||c.shop_slug,id=String(c.id);return `<div class="m7-convo ${un.has(id)?"unread":""}" data-id="${esc(id)}">${av(p.profile_image_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>Shop conversation</small></div>${un.has(id)?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`}).join(""):'<div class="m7-empty">No conversations yet.</div>';wireInboxDeletes(b,rows,viewerInbox);b.querySelectorAll(".m7-convo").forEach(el=>el.onclick=()=>{let c=rows.find(x=>sameId(x.id,el.dataset.id));if(!c){loadError(b,new Error("Conversation not found."));return}let p=map[c.shop_slug]||{};convo(c,p.shop_name||c.shop_slug,p.profile_image_url||"",viewerInbox)})}catch(e){loadError(document.getElementById("m7-chat-body"),e)}}
-async function ownerInbox(){try{if(!await or()){window.Ma7alakOwnerAuth?.open();return}let shop=window.Ma7alakOwnerAuth.owner.shop_slug;shell("Shop Messages",window.Ma7alakOwnerAuth.owner.profile_image_url||"",false);document.getElementById("m7-report").style.display="none";let head=document.getElementById("m7-chat-head"),toggle=document.createElement("button");toggle.id="m7-owner-accept";head.insertBefore(toggle,document.getElementById("m7-close"));async function sync(){let on=await accepts(shop);toggle.className=on?"on":"off";toggle.textContent=on?"Messages ON":"Messages OFF";toggle.dataset.on=on?"1":"0"}toggle.onclick=async()=>{toggle.disabled=true;let next=toggle.dataset.on!=="1",r=await client.rpc("ma7alak_set_my_shop_accepting_messages",{p_shop_slug:shop,p_accepting:next});toggle.disabled=false;if(r.error){alert(r.error.message);return}sync()};await sync();settingsChannel=client.channel("m7-msg-setting-"+shop+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_shop_message_settings",filter:"shop_slug=eq."+shop},sync).subscribe();let b=document.getElementById("m7-chat-body"),r=await client.from("ma7alak_conversations").select("*").eq("shop_slug",shop).order("updated_at",{ascending:false});if(r.error){b.textContent=r.error.message;return}let rows=r.data||[],ids=[...new Set(rows.map(x=>x.viewer_id))];let [un,p]=await Promise.all([unreadMap(rows),ids.length?client.from("viewer_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids):Promise.resolve({data:[]})]);let map={};for(let x of p.data||[])map[x.user_id]=x;b.innerHTML=rows.length?rows.map(c=>{let p=map[c.viewer_id]||{},n=p.display_name||p.username||"Customer",id=String(c.id);return `<div class="m7-convo ${un.has(id)?"unread":""}" data-id="${esc(id)}">${av(p.avatar_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>${esc(p.username?"@"+p.username:"Customer")}</small></div>${un.has(id)?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`}).join(""):'<div class="m7-empty">No customer messages yet.</div>';wireInboxDeletes(b,rows,ownerInbox);b.querySelectorAll(".m7-convo").forEach(el=>el.onclick=()=>{let c=rows.find(x=>sameId(x.id,el.dataset.id));if(!c){loadError(b,new Error("Conversation not found."));return}let p=map[c.viewer_id]||{},n=p.display_name||p.username||"Customer";convo(c,n,p.avatar_url||"",ownerInbox)})}catch(e){loadError(document.getElementById("m7-chat-body"),e)}}
+async function ownerInbox(){
+  try{
+    if(!await or()){
+      window.Ma7alakOwnerAuth?.open();
+      return;
+    }
+
+    const shop=String(window.Ma7alakOwnerAuth.owner.shop_slug||"").trim();
+
+    shell(
+      "Shop Messages",
+      window.Ma7alakOwnerAuth.owner.profile_image_url||"",
+      false
+    );
+
+    document.getElementById("m7-report").style.display="none";
+
+    const head=document.getElementById("m7-chat-head");
+    const toggle=document.createElement("button");
+    toggle.id="m7-owner-accept";
+    head.insertBefore(toggle,document.getElementById("m7-close"));
+
+    async function sync(){
+      const on=await accepts(shop);
+      toggle.className=on?"on":"off";
+      toggle.textContent=on?"Messages ON":"Messages OFF";
+      toggle.dataset.on=on?"1":"0";
+    }
+
+    toggle.onclick=async()=>{
+      toggle.disabled=true;
+      const next=toggle.dataset.on!=="1";
+      const r=await client.rpc(
+        "ma7alak_set_my_shop_accepting_messages",
+        {
+          p_shop_slug:shop,
+          p_accepting:next
+        }
+      );
+      toggle.disabled=false;
+
+      if(r.error){
+        alert(r.error.message);
+        return;
+      }
+
+      sync();
+    };
+
+    await sync();
+
+    settingsChannel=
+      client
+        .channel("m7-msg-setting-"+shop+Math.random())
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"ma7alak_shop_message_settings",
+            filter:"shop_slug=eq."+shop
+          },
+          sync
+        )
+        .subscribe();
+
+    const b=document.getElementById("m7-chat-body");
+
+    /*
+      RLS returns both:
+      - conversations sent TO this owner's shop
+      - conversations this same owner started with another shop
+    */
+    const r=
+      await client
+        .from("ma7alak_conversations")
+        .select("*")
+        .order("updated_at",{ascending:false});
+
+    if(r.error){
+      b.textContent=r.error.message;
+      return;
+    }
+
+    const rows=(r.data||[]).filter(c=>{
+      const incoming=
+        String(c.shop_slug||"").toLowerCase()===
+        shop.toLowerCase();
+
+      const outgoing=
+        sameId(c.viewer_id,user?.id);
+
+      return incoming||outgoing;
+    });
+
+    const ids=rows.map(x=>x.id);
+
+    const [un,partnersResult]=await Promise.all([
+      unreadMap(
+        rows,
+        c=>sameId(c.viewer_id,user?.id)
+          ? "viewer"
+          : "owner"
+      ),
+      ids.length
+        ? client.rpc(
+            "ma7alak_get_conversation_partners",
+            {p_conversation_ids:ids}
+          )
+        : Promise.resolve({data:[]})
+    ]);
+
+    if(partnersResult.error){
+      console.warn(
+        "Conversation partner identities:",
+        partnersResult.error
+      );
+    }
+
+    const partnerMap=new Map(
+      (partnersResult.data||[]).map(
+        p=>[String(p.conversation_id),p]
+      )
+    );
+
+    b.innerHTML=
+      rows.length
+        ? rows.map(c=>{
+            const id=String(c.id);
+            const outgoing=sameId(c.viewer_id,user?.id);
+            const p=partnerMap.get(id)||{};
+            const n=
+              p.display_name||
+              (outgoing?c.shop_slug:"Customer");
+
+            const shopActor=
+              p.counterpart_type==="shop";
+
+            const subtitle=
+              shopActor
+                ? (
+                    outgoing
+                      ? "Shop · You messaged this shop"
+                      : "Shop · Messaged your shop"
+                  )
+                : (
+                    p.username
+                      ? "@"+p.username
+                      : "Customer"
+                  );
+
+            return `<div class="m7-convo ${un.has(id)?"unread":""}" data-id="${esc(id)}" data-side="${outgoing?"viewer":"owner"}">${av(p.avatar_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>${esc(subtitle)}</small></div>${un.has(id)?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`;
+          }).join("")
+        : '<div class="m7-empty">No shop messages yet.</div>';
+
+    wireInboxDeletes(
+      b,
+      rows,
+      ownerInbox
+    );
+
+    b.querySelectorAll(".m7-convo").forEach(el=>{
+      el.onclick=()=>{
+        const c=rows.find(
+          x=>sameId(x.id,el.dataset.id)
+        );
+
+        if(!c){
+          loadError(
+            b,
+            new Error("Conversation not found.")
+          );
+          return;
+        }
+
+        const p=
+          partnerMap.get(String(c.id))||
+          {};
+
+        const outgoing=
+          sameId(c.viewer_id,user?.id);
+
+        mode=outgoing
+          ? "viewer"
+          : "owner";
+
+        const n=
+          p.display_name||
+          (outgoing?c.shop_slug:"Customer");
+
+        convo(
+          c,
+          n,
+          p.avatar_url||"",
+          ownerInbox
+        );
+      };
+    });
+  }
+  catch(e){
+    loadError(
+      document.getElementById("m7-chat-body"),
+      e
+    );
+  }
+}
 window.Ma7alakChat={openShop,openInbox:viewerInbox,openViewerInbox:viewerInbox,openOwnerInbox:ownerInbox,close};
 addEventListener("ma7alak:open-chat",e=>openShop(e.detail?.shop_slug));addEventListener("ma7alak:open-messages",viewerInbox);addEventListener("ma7alak:open-owner-messages",ownerInbox);
 })();
