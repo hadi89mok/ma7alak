@@ -4,7 +4,7 @@
 if(window.self!==window.top)return;
 if(window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__)return;window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__=true;
 const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",HEARTBEAT_MS=2000,STATS_REFRESH_MS=2000;
-let client=null,detectedShopSlug="",stopped=false,heartbeatTimer=null,statsTimer=null,domObserver=null,paintQueued=false;
+let client=null,detectedShopSlug="",stopped=false,heartbeatTimer=null,statsTimer=null,domObserver=null,paintQueued=false,presenceRefreshInFlight=false,statsRefreshInFlight=false;
 let latestWebsiteStats={online:0,total:0,shopsOnline:0},latestShopStats={online:0,week:0,today:0,total:0};
 const text=v=>String(v==null?"":v).trim(),numberValue=v=>{const n=Number(v||0);return Number.isFinite(n)?n:0};
 function createId(){try{if(window.crypto?.randomUUID)return window.crypto.randomUUID()}catch(_){}return"visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)}
@@ -24,8 +24,8 @@ function getStatsMessage(){return{type:"MA7ALAK_LIVE_STATS",website:{online:late
 function broadcastStatsToEmbeds(){const m=getStatsMessage();document.querySelectorAll("iframe").forEach(f=>{try{f.contentWindow?.postMessage(m,"*")}catch(_){}})}
 function setNumber(id,v){const e=document.getElementById(id),n=numberValue(v);if(e&&e.textContent!==String(n))e.textContent=String(n)}
 function paintStats(){setNumber("ma7alak-web-online",latestWebsiteStats.online);setNumber("ma7alak-shop-online",latestWebsiteStats.shopsOnline);setNumber("ma7alak-web-total",latestWebsiteStats.total);if(detectedShopSlug){setNumber("ma7alak-online",latestShopStats.online);setNumber("ma7alak-week",latestShopStats.week);setNumber("ma7alak-today",latestShopStats.today);setNumber("ma7alak-total",latestShopStats.total)}broadcastStatsToEmbeds()}
-async function refreshPresence(){if(stopped)return;const t=[updateWebsitePresence()];if(detectedShopSlug)t.push(updateShopPresence());await Promise.all(t)}
-async function refreshStats(){if(stopped)return;const t=[loadWebsiteStats(),loadAllShopsOnline()];if(detectedShopSlug)t.push(loadCurrentShopStats());await Promise.all(t);paintStats()}
+async function refreshPresence(){if(stopped||presenceRefreshInFlight)return;presenceRefreshInFlight=true;try{const t=[updateWebsitePresence()];if(detectedShopSlug)t.push(updateShopPresence());await Promise.all(t)}finally{presenceRefreshInFlight=false}}
+async function refreshStats(){if(stopped||statsRefreshInFlight)return;statsRefreshInFlight=true;try{const t=[loadWebsiteStats(),loadAllShopsOnline()];if(detectedShopSlug)t.push(loadCurrentShopStats());await Promise.all(t);paintStats()}finally{statsRefreshInFlight=false}}
 function callLeaveRpc(fn,body){try{fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json",apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY},body:JSON.stringify(body)}).catch(()=>{})}catch(_){}}
 function leaveNow(){if(stopped)return;stopped=true;clearInterval(heartbeatTimer);clearInterval(statsTimer);heartbeatTimer=statsTimer=null;callLeaveRpc("leave_website_presence",{p_visitor_id:websiteVisitorId});if(detectedShopSlug)callLeaveRpc("leave_shop_presence",{p_shop_id:detectedShopSlug,p_visitor_id:shopVisitorId})}
 async function resume(){if(!stopped)return;stopped=false;await refreshPresence();await refreshStats();startTimers()}
