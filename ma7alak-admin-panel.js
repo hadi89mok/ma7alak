@@ -1056,6 +1056,8 @@
     }, 30);
   }
 
+  window.Ma7alakAdminOpenGalleryManager = openGalleryManager;
+
 
   function closeGalleryManager(){
     galleryCard.hidden = true;
@@ -1458,6 +1460,8 @@
       videoCard.scrollIntoView({ behavior:"smooth", block:"start" });
     }, 30);
   }
+
+  window.Ma7alakAdminOpenVideoManager = openVideoManager;
 
   function closeVideoManager(){
     videoCard.hidden = true;
@@ -2077,6 +2081,8 @@
       30
     );
   }
+
+  window.Ma7alakAdminOpenReelsManager = openReelsManager;
 
 
   function closeReelsManager(){
@@ -4855,7 +4861,7 @@ if(window.__M7_ADMIN_LIVE_OFFERS__)return;
 window.__M7_ADMIN_LIVE_OFFERS__=true;
 if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin")return;
 
-let sb=null,activeShop=null;
+let sb=null,activeShop=null,legacyDecoratorObserver=null;
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 
 function inject(){
@@ -4913,6 +4919,21 @@ async function open(slug,name){
   status(row?.enabled?"Access is currently ON.":"Access is currently OFF.",false);
   await loadPosts();
 }
+
+window.Ma7alakAdminOpenLiveOffers = async function(slug,name){
+  if(!sb){
+    throw new Error("Live / Offers admin is still loading.");
+  }
+  return open(slug,name);
+};
+
+window.Ma7alakDisableLegacyLiveDecorator = function(){
+  if(legacyDecoratorObserver){
+    legacyDecoratorObserver.disconnect();
+    legacyDecoratorObserver=null;
+  }
+  document.querySelectorAll("[data-m7-live-offers]").forEach(button=>button.remove());
+};
 
 function postState(row){
   if(row.status!=="active")return String(row.status||"ended");
@@ -5028,10 +5049,21 @@ async function ready(){
   sb=window.Ma7alakAdminClient;
   if(!sb)return console.error("MA7ALAK Live/Offers admin: shared admin client unavailable");
   inject();
-  const observer=new MutationObserver(decorate);
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  decorate();
-  window.addEventListener("ma7alak:admin-ready",decorate);
+
+  window.setTimeout(()=>{
+    if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__){
+      window.Ma7alakDisableLegacyLiveDecorator?.();
+      return;
+    }
+
+    legacyDecoratorObserver=new MutationObserver(decorate);
+    legacyDecoratorObserver.observe(
+      document.documentElement,
+      {childList:true,subtree:true}
+    );
+    decorate();
+    window.addEventListener("ma7alak:admin-ready",decorate);
+  },0);
 }
 ready().catch(console.error);
 })();
@@ -10083,15 +10115,6 @@ function legacyCard(slug){
   return document.querySelector('#ma-admin-shop-list .ma-admin-shop-item[data-slug="'+CSS.escape(slug)+'"]');
 }
 
-function legacyAction(slug,action){
-  const card=legacyCard(slug);
-  if(!card)return false;
-  const button=card.querySelector('button[data-action="'+action+'"]');
-  if(!button)return false;
-  button.click();
-  return true;
-}
-
 async function waitForEdit(slug){
   for(let i=0;i<80;i++){
     const original=document.getElementById("ma-edit-original-slug");
@@ -11625,24 +11648,50 @@ async function handleAction(key){
     return;
   }
 
-  const map={
-    gallery:["gallery","ma-admin-gallery-card"],
-    video:["video","ma-admin-video-card"],
-    reels:["reels","ma-admin-reels-card"]
+  const mediaManagers={
+    gallery:[
+      window.Ma7alakAdminOpenGalleryManager,
+      "ma-admin-gallery-card",
+      "Gallery"
+    ],
+    video:[
+      window.Ma7alakAdminOpenVideoManager,
+      "ma-admin-video-card",
+      "Videos"
+    ],
+    reels:[
+      window.Ma7alakAdminOpenReelsManager,
+      "ma-admin-reels-card",
+      "Reels"
+    ]
   };
 
-  if(map[key]){
-    const [legacy,panelId]=map[key];
-    if(!legacyAction(shop.shop_slug,legacy))throw new Error(legacy+" action is not ready yet.");
-    setTimeout(()=>showLegacy(panelId),100);
+  if(mediaManagers[key]){
+    const [openManager,panelId,label]=
+      mediaManagers[key];
+
+    if(typeof openManager!=="function"){
+      throw new Error(label+" manager is still loading.");
+    }
+
+    await openManager(shop);
+    showLegacy(panelId);
     return;
   }
 
   if(key==="live"){
-    const card=legacyCard(shop.shop_slug);
-    const button=card?.querySelector("[data-m7-live-offers]");
-    if(!button)throw new Error("Live / Offers controls are still loading.");
-    button.click();
+    if(
+      typeof window.Ma7alakAdminOpenLiveOffers!=="function"
+    ){
+      throw new Error("Live / Offers controls are still loading.");
+    }
+
+    await window.Ma7alakAdminOpenLiveOffers(
+      shop.shop_slug,
+      shop.shop_name||
+      shop.shop_slug||
+      "Shop"
+    );
     return;
   }
 
@@ -11847,6 +11896,7 @@ function mount(){
 
   window.Ma7alakRemoveLegacyPanelToggleUi?.();
   window.Ma7alakRemoveLegacyDeckUi?.();
+  window.Ma7alakDisableLegacyLiveDecorator?.();
 
   const root=document.createElement("section");
   root.id="m7-admin-workspace-v4";
