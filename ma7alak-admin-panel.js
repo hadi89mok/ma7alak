@@ -5874,6 +5874,22 @@ function decorateAll(){
     ["video_accent_color","Video accent"],
     ["follow_accent_color","Follow / Message accent"],
     ["live_accent_color","Live / Offers accent"],
+    ["live_panel_bg_color","Live Offers panel background"],
+    ["live_panel_border_color","Live Offers panel frame"],
+    ["live_title_color","Live Offers title"],
+    ["live_subtitle_color","Live Offers subtitle"],
+    ["live_icon_color","Live Offers icon"],
+    ["live_status_color","LIVE status"],
+    ["live_empty_bg_color","Live Offers empty card"],
+    ["live_empty_text_color","Live Offers empty text"],
+    ["live_card_bg_color","Live Offer card background"],
+    ["live_card_border_color","Live Offer card frame"],
+    ["live_card_title_color","Live Offer title"],
+    ["live_card_text_color","Live Offer description"],
+    ["live_price_color","Live Offer price"],
+    ["live_countdown_color","Live Offer countdown"],
+    ["live_button_bg_color","Live Offer button"],
+    ["live_button_text_color","Live Offer button text"],
     ["hub_accent_color","Profile hub accent"]
   ];
 
@@ -6052,6 +6068,29 @@ function decorateAll(){
     video_accent_color:"#f2caed",
     follow_accent_color:"#f2caed",
     live_accent_color:"#f2caed",
+
+    live_panel_bg_color:"#0d0b09",
+    live_panel_border_color:"#d9a441",
+    live_title_color:"#ffffff",
+    live_subtitle_color:"#c7beb4",
+    live_icon_color:"#f4bd4b",
+    live_status_color:"#ff3f35",
+    live_empty_bg_color:"#120f0c",
+    live_empty_text_color:"#e6c98c",
+    live_card_bg_color:"#100d0a",
+    live_card_border_color:"#d9a441",
+    live_card_title_color:"#ffffff",
+    live_card_text_color:"#c9c0b7",
+    live_price_color:"#f4bd4b",
+    live_countdown_color:"#ff4b43",
+    live_button_bg_color:"#f4bd4b",
+    live_button_text_color:"#160f08",
+    live_panel_radius:"26",
+    live_card_radius:"18",
+    live_panel_shadow:"42",
+    live_panel_glow:"18",
+    live_live_pulse:true,
+
     hub_accent_color:"#f2caed"
   };
 
@@ -6847,6 +6886,60 @@ function decorateAll(){
           ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
         </div>
 
+        <div class="m7ds-section-title">Live Offers Section Design</div>
+
+        <p class="m7ds-help">
+          Controls the real <b>Live Offers</b> section on each manual shop page.
+          The Hostinger page background remains visible around the section.
+        </p>
+
+        <div class="m7ds-grid">
+          ${colorField(prefix,"live_panel_bg_color","Section background")}
+          ${colorField(prefix,"live_panel_border_color","Section frame")}
+          ${colorField(prefix,"live_title_color","Section title")}
+          ${colorField(prefix,"live_subtitle_color","Subtitle")}
+          ${colorField(prefix,"live_icon_color","Section icon")}
+          ${colorField(prefix,"live_status_color","LIVE badge / dot")}
+          ${colorField(prefix,"live_empty_bg_color","Empty-state card")}
+          ${colorField(prefix,"live_empty_text_color","Empty-state text")}
+          ${colorField(prefix,"live_card_bg_color","Offer card background")}
+          ${colorField(prefix,"live_card_border_color","Offer card frame")}
+          ${colorField(prefix,"live_card_title_color","Offer title")}
+          ${colorField(prefix,"live_card_text_color","Offer description")}
+          ${colorField(prefix,"live_price_color","Offer price")}
+          ${colorField(prefix,"live_countdown_color","Countdown")}
+          ${colorField(prefix,"live_button_bg_color","View Offer button")}
+          ${colorField(prefix,"live_button_text_color","View Offer text")}
+          ${effectNumberField(prefix,"live_panel_radius","Section corner radius",0,42,1,"px")}
+          ${effectNumberField(prefix,"live_card_radius","Offer card radius",0,32,1,"px")}
+          ${effectNumberField(prefix,"live_panel_shadow","Section shadow",0,100,5,"%")}
+          ${effectNumberField(prefix,"live_panel_glow","Section glow",0,100,5,"%")}
+        </div>
+
+        <label class="m7ds-check">
+          <input id="${prefix}live_live_pulse" type="checkbox" checked>
+          <span>
+            <b>Animate LIVE indicator</b>
+            <small>Mobile-safe pulse on the LIVE icon and badge only.</small>
+          </span>
+        </label>
+
+        <div class="m7ds-live-offers-demo" data-m7-live-offers-preview>
+          <div class="m7ds-live-offers-head">
+            <span class="m7ds-live-offers-icon">🔥</span>
+            <span>
+              <b>Live Offers</b>
+              <small>What's happening now</small>
+            </span>
+            <i>1 LIVE</i>
+          </div>
+          <div class="m7ds-live-offer-demo-card">
+            <strong>2 Croissants + Coffee</strong>
+            <small>Special deal happening now</small>
+            <div><b>$8</b><em>Ends in 02:14:36</em><button type="button">View Offer</button></div>
+          </div>
+        </div>
+
         <div class="m7ds-section-title">Shop Media Header & Filter Buttons</div>
 
         <p class="m7ds-help">
@@ -7378,6 +7471,73 @@ function decorateAll(){
 
     box.__m7ProfileShellRefresh =
       refreshProfileShellPreview;
+
+    function refreshLiveOffersPreview(){
+      const preview=box.querySelector("[data-m7-live-offers-preview]");
+      if(!preview)return;
+
+      const get=key=>box.querySelector("#"+CSS.escape(prefix+key));
+      const val=(key,fallback)=>String(get(key)?.value||fallback);
+      const num=(key,min,max,fallback)=>{
+        const n=Number(get(key)?.value);
+        return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+      };
+      const rgba=(hex,a)=>{
+        const raw=safeHex(hex,"#000000").slice(1);
+        return "rgba("+parseInt(raw.slice(0,2),16)+","+parseInt(raw.slice(2,4),16)+","+parseInt(raw.slice(4,6),16)+","+a+")";
+      };
+
+      const panelBg=safeHex(val("live_panel_bg_color",DEFAULTS.live_panel_bg_color),DEFAULTS.live_panel_bg_color);
+      const panelBorder=safeHex(val("live_panel_border_color",DEFAULTS.live_panel_border_color),DEFAULTS.live_panel_border_color);
+      const title=safeHex(val("live_title_color",DEFAULTS.live_title_color),DEFAULTS.live_title_color);
+      const subtitle=safeHex(val("live_subtitle_color",DEFAULTS.live_subtitle_color),DEFAULTS.live_subtitle_color);
+      const icon=safeHex(val("live_icon_color",DEFAULTS.live_icon_color),DEFAULTS.live_icon_color);
+      const status=safeHex(val("live_status_color",DEFAULTS.live_status_color),DEFAULTS.live_status_color);
+      const cardBg=safeHex(val("live_card_bg_color",DEFAULTS.live_card_bg_color),DEFAULTS.live_card_bg_color);
+      const cardBorder=safeHex(val("live_card_border_color",DEFAULTS.live_card_border_color),DEFAULTS.live_card_border_color);
+      const cardTitle=safeHex(val("live_card_title_color",DEFAULTS.live_card_title_color),DEFAULTS.live_card_title_color);
+      const cardText=safeHex(val("live_card_text_color",DEFAULTS.live_card_text_color),DEFAULTS.live_card_text_color);
+      const price=safeHex(val("live_price_color",DEFAULTS.live_price_color),DEFAULTS.live_price_color);
+      const countdown=safeHex(val("live_countdown_color",DEFAULTS.live_countdown_color),DEFAULTS.live_countdown_color);
+      const buttonBg=safeHex(val("live_button_bg_color",DEFAULTS.live_button_bg_color),DEFAULTS.live_button_bg_color);
+      const buttonText=safeHex(val("live_button_text_color",DEFAULTS.live_button_text_color),DEFAULTS.live_button_text_color);
+      const radius=num("live_panel_radius",0,42,26);
+      const cardRadius=num("live_card_radius",0,32,18);
+      const shadow=num("live_panel_shadow",0,100,42);
+      const glow=num("live_panel_glow",0,100,18);
+
+      preview.style.background=panelBg;
+      preview.style.borderColor=panelBorder;
+      preview.style.borderRadius=radius+"px";
+      preview.style.boxShadow=
+        "0 16px 34px rgba(0,0,0,"+(shadow/100*.55).toFixed(3)+"),"+
+        "0 0 "+(4+glow*.18).toFixed(1)+"px "+rgba(panelBorder,Math.min(.5,glow/100*.42));
+
+      const head=preview.querySelector(".m7ds-live-offers-head");
+      if(head){
+        head.querySelector("b").style.color=title;
+        head.querySelector("small").style.color=subtitle;
+        head.querySelector(".m7ds-live-offers-icon").style.color=icon;
+        head.querySelector("i").style.color=status;
+        head.querySelector("i").style.borderColor=status;
+      }
+
+      const card=preview.querySelector(".m7ds-live-offer-demo-card");
+      if(card){
+        card.style.background=cardBg;
+        card.style.borderColor=cardBorder;
+        card.style.borderRadius=cardRadius+"px";
+        card.querySelector("strong").style.color=cardTitle;
+        card.querySelector("small").style.color=cardText;
+        card.querySelector("div>b").style.color=price;
+        card.querySelector("em").style.color=countdown;
+        const btn=card.querySelector("button");
+        btn.style.background=buttonBg;
+        btn.style.color=buttonText;
+      }
+    }
+
+    box.__m7LiveOffersRefresh=refreshLiveOffersPreview;
 
     function refreshGalleryFramePreview(){
       const preview=
@@ -7924,6 +8084,33 @@ function decorateAll(){
       });
 
     [
+      "live_panel_bg_color",
+      "live_panel_border_color",
+      "live_title_color",
+      "live_subtitle_color",
+      "live_icon_color",
+      "live_status_color",
+      "live_empty_bg_color",
+      "live_empty_text_color",
+      "live_card_bg_color",
+      "live_card_border_color",
+      "live_card_title_color",
+      "live_card_text_color",
+      "live_price_color",
+      "live_countdown_color",
+      "live_button_bg_color",
+      "live_button_text_color",
+      "live_panel_radius",
+      "live_card_radius",
+      "live_panel_shadow",
+      "live_panel_glow",
+      "live_live_pulse"
+    ].map(key=>box.querySelector("#"+CSS.escape(prefix+key))).filter(Boolean).forEach(el=>{
+      el.addEventListener("input",refreshLiveOffersPreview);
+      el.addEventListener("change",refreshLiveOffersPreview);
+    });
+
+    [
       "gallery_frame_style",
       "gallery_frame_color_1",
       "gallery_frame_color_2",
@@ -8014,6 +8201,7 @@ function decorateAll(){
     updatePresetHint();
     refreshBannerPreview();
     refreshProfileShellPreview();
+    refreshLiveOffersPreview();
     refreshGalleryFramePreview();
 
     box.__m7dsRefresh = function(){
@@ -8024,6 +8212,7 @@ function decorateAll(){
       updatePresetHint();
       refreshBannerPreview();
       refreshProfileShellPreview();
+      refreshLiveOffersPreview();
       refreshGalleryFramePreview();
     };
   }
@@ -8315,6 +8504,21 @@ function decorateAll(){
       .m7ds-profile-shell-demo[data-layout="compact"]{width:min(250px,78vw)}
       .m7ds-profile-shell-demo[data-layout="compact"] .m7ds-profile-shell-name{font-size:15px}
       .m7ds-profile-shell-demo[data-layout="luxury"] .m7ds-profile-shell-banner{border-radius:16px}
+
+      .m7ds-live-offers-demo{width:min(330px,88vw);margin:14px auto 4px;padding:12px;border:1px solid #d9a441;background:#0d0b09;color:#fff;overflow:hidden}
+      .m7ds-live-offers-head{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center}
+      .m7ds-live-offers-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:16px}
+      .m7ds-live-offers-head>span:nth-child(2){display:flex;flex-direction:column;gap:2px}
+      .m7ds-live-offers-head b{font-family:Georgia,"Times New Roman",serif;font-size:15px}
+      .m7ds-live-offers-head small{font-size:7px}
+      .m7ds-live-offers-head i{padding:5px 8px;border:1px solid;border-radius:999px;font-size:7px;font-style:normal;font-weight:900}
+      .m7ds-live-offer-demo-card{margin-top:10px;padding:10px;border:1px solid;display:flex;flex-direction:column;gap:4px}
+      .m7ds-live-offer-demo-card>strong{font-family:Georgia,"Times New Roman",serif;font-size:12px}
+      .m7ds-live-offer-demo-card>small{font-size:7px}
+      .m7ds-live-offer-demo-card>div{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:4px}
+      .m7ds-live-offer-demo-card>div>b{font-size:14px}
+      .m7ds-live-offer-demo-card em{font-size:7px;font-style:normal}
+      .m7ds-live-offer-demo-card button{border:0;border-radius:8px;padding:7px 9px;font-size:7px;font-weight:900}
 
       .m7ds-gallery-frame-demo{
         margin-top:12px;
@@ -14818,6 +15022,29 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
     video_accent_color:"$ACCENT",
     follow_accent_color:"$ACCENT",
     live_accent_color:"$ACCENT",
+
+    live_panel_bg_color:"#0d0b09",
+    live_panel_border_color:"$ACCENT",
+    live_title_color:"#ffffff",
+    live_subtitle_color:"#c7beb4",
+    live_icon_color:"$ACCENT",
+    live_status_color:"#ff3f35",
+    live_empty_bg_color:"#120f0c",
+    live_empty_text_color:"#e6c98c",
+    live_card_bg_color:"#100d0a",
+    live_card_border_color:"$ACCENT",
+    live_card_title_color:"#ffffff",
+    live_card_text_color:"#c9c0b7",
+    live_price_color:"$ACCENT",
+    live_countdown_color:"#ff4b43",
+    live_button_bg_color:"$ACCENT",
+    live_button_text_color:"#160f08",
+    live_panel_radius:"26",
+    live_card_radius:"18",
+    live_panel_shadow:"42",
+    live_panel_glow:"18",
+    live_live_pulse:true,
+
     hours_accent_color:"$ACCENT",
     hub_accent_color:"$ACCENT"
   };
@@ -15725,6 +15952,27 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
     "profile_message_btn_bg_color",
     "profile_message_btn_border_color",
     "profile_message_btn_text_color",
+    "live_panel_bg_color",
+    "live_panel_border_color",
+    "live_title_color",
+    "live_subtitle_color",
+    "live_icon_color",
+    "live_status_color",
+    "live_empty_bg_color",
+    "live_empty_text_color",
+    "live_card_bg_color",
+    "live_card_border_color",
+    "live_card_title_color",
+    "live_card_text_color",
+    "live_price_color",
+    "live_countdown_color",
+    "live_button_bg_color",
+    "live_button_text_color",
+    "live_panel_radius",
+    "live_card_radius",
+    "live_panel_shadow",
+    "live_panel_glow",
+    "live_live_pulse",
     "gallery_accent_color",
     "media_title_color",
     "media_count_color",
