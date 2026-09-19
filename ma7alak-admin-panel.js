@@ -15123,6 +15123,10 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
 
   let timer=0;
   let bc=null;
+  let realtimePreviewChannel=null;
+  let realtimePreviewSlug="";
+  let realtimePreviewReady=false;
+  let pendingRealtimeMessage=null;
 
   try{
     if("BroadcastChannel" in window){
@@ -15173,6 +15177,101 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
     return options;
   }
 
+  function ensureRealtimePreview(slug){
+    const client=window.Ma7alakAdminClient;
+
+    if(
+      !client ||
+      typeof client.channel!=="function" ||
+      !slug
+    ){
+      return null;
+    }
+
+    if(
+      realtimePreviewChannel &&
+      realtimePreviewSlug===slug
+    ){
+      return realtimePreviewChannel;
+    }
+
+    if(realtimePreviewChannel){
+      try{
+        client.removeChannel(
+          realtimePreviewChannel
+        );
+      }catch(_){}
+    }
+
+    realtimePreviewSlug=slug;
+    realtimePreviewReady=false;
+
+    realtimePreviewChannel=
+      client.channel(
+        "ma7alak-design-preview-"+slug,
+        {
+          config:{
+            broadcast:{
+              self:false
+            }
+          }
+        }
+      );
+
+    realtimePreviewChannel.subscribe(
+      status=>{
+        realtimePreviewReady=
+          status==="SUBSCRIBED";
+
+        if(
+          realtimePreviewReady &&
+          pendingRealtimeMessage
+        ){
+          const message=
+            pendingRealtimeMessage;
+
+          pendingRealtimeMessage=null;
+
+          Promise.resolve(
+            realtimePreviewChannel.send({
+              type:"broadcast",
+              event:"design-preview",
+              payload:message
+            })
+          ).catch(()=>{});
+        }
+      }
+    );
+
+    return realtimePreviewChannel;
+  }
+
+  function sendRealtimePreview(message){
+    pendingRealtimeMessage=message;
+
+    const channel=
+      ensureRealtimePreview(
+        message.shop_slug
+      );
+
+    if(
+      !channel ||
+      !realtimePreviewReady
+    ){
+      return;
+    }
+
+    pendingRealtimeMessage=null;
+
+    Promise.resolve(
+      channel.send({
+        type:"broadcast",
+        event:"design-preview",
+        payload:message
+      })
+    ).catch(()=>{});
+  }
+
   function publish(){
     timer=0;
 
@@ -15200,6 +15299,10 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
         window.top.postMessage(message,"*");
       }
     }catch(_){}
+
+    sendRealtimePreview(
+      message
+    );
   }
 
   function schedule(){
@@ -15224,6 +15327,25 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
   },true);
 
   window.addEventListener("ma7alak:design-preview-request",schedule);
+
+  window.addEventListener(
+    "beforeunload",
+    ()=>{
+      const client=
+        window.Ma7alakAdminClient;
+
+      if(
+        client &&
+        realtimePreviewChannel
+      ){
+        try{
+          client.removeChannel(
+            realtimePreviewChannel
+          );
+        }catch(_){}
+      }
+    }
+  );
 
   window.Ma7alakDesignLiveBridge={
     publish,
