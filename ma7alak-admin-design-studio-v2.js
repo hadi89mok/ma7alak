@@ -41,6 +41,34 @@
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
+    profile_banner_style:"rounded-fade",
+
+    global_font_style:"current",
+    global_font_size:"100",
+
+    profile_font_style:"inherit",
+    profile_font_size:"100",
+
+    about_font_style:"inherit",
+    about_font_size:"100",
+
+    hours_font_style:"inherit",
+    hours_font_size:"100",
+
+    gallery_font_style:"inherit",
+    gallery_font_size:"100",
+
+    video_font_style:"inherit",
+    video_font_size:"100",
+
+    follow_font_style:"inherit",
+    follow_font_size:"100",
+
+    live_font_style:"inherit",
+    live_font_size:"100",
+
+    hub_font_style:"inherit",
+    hub_font_size:"100",
 
     shop_label_text_color:"$ACCENT",
     shop_label_border_color:"$ACCENT",
