@@ -9141,6 +9141,38 @@ function ensureCss(){
       display:block!important;
     }
 
+    /* Design mode removes the old tabs and lays the sections out vertically. */
+    #ma-admin-edit-card.m7v4-mode-design .m7ds-pane{
+      display:block!important;
+      margin:11px 0!important;
+      padding:12px!important;
+      border:1px solid rgba(217,170,88,.10)!important;
+      border-radius:13px!important;
+      background:rgba(255,255,255,.012)!important;
+    }
+
+    /* Details mode is intentionally clean: no design/media add-ons. */
+    #ma-admin-edit-card.m7v4-mode-details .m7-design-studio,
+    #ma-admin-edit-card.m7v4-mode-details .m7-about-services-fields,
+    #ma-admin-edit-card.m7v4-mode-details .m7-about-text-style-box,
+    #ma-admin-edit-card.m7v4-mode-details .m7-hours-schedule-box,
+    #ma-admin-edit-card.m7v4-mode-details .m7-availability-extra-box,
+    #ma-admin-edit-card.m7v4-mode-details .m7-card-designer-box{
+      display:none!important;
+    }
+
+    body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add{
+      display:block!important;
+      margin:15px 0!important;
+    }
+
+    body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add #ma-admin-shop-list,
+    body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add #ma-admin-shop-search,
+    body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add #ma-admin-shop-count,
+    body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add #ma-admin-refresh-shops{
+      display:none!important;
+    }
+
     #ma-admin-edit-card.m7v4-mode-about .m7-about-services-fields,
     #ma-admin-edit-card.m7v4-mode-about .m7-about-text-style-box{
       display:block!important;
@@ -9185,8 +9217,17 @@ function markLegacyPanels(){
 
 function clearLegacy(){
   document.querySelectorAll(".m7v4-legacy-panel").forEach(el=>{
-    el.classList.remove("m7v4-show","m7v4-mode-details","m7v4-mode-about","m7v4-mode-hours","m7v4-mode-card");
+    el.classList.remove(
+      "m7v4-show",
+      "m7v4-mode-details",
+      "m7v4-mode-about",
+      "m7v4-mode-hours",
+      "m7v4-mode-card",
+      "m7v4-mode-design"
+    );
   });
+
+  document.getElementById("ma-manage-shops-card")?.classList.remove("m7v4-show-add");
 }
 
 function showLegacy(id){
@@ -9239,6 +9280,7 @@ async function openEditMode(slug,mode){
     card:".m7-card-designer-box",
     about:".m7-about-services-fields",
     hours:".m7-hours-schedule-box",
+    design:".m7-design-studio",
     details:"#ma-edit-name"
   };
 
@@ -9328,6 +9370,7 @@ function renderWorkspace(){
     '<div class="m7v4-actions">'+
       action("details","✏️","Shop details","Name, slug, location, category, profile details")+
       action("card","▰","Directory card","Edges, corners, colors, shadow and animation")+
+      action("design","✦","Profile design","All page design controls in one vertical view — no tabs")+
       action("about","Aa","About Me","Content, services and each text style")+
       action("hours","◷","Hours & availability","Weekly opening schedule and extra availability rows")+
     '</div>'+
@@ -9392,7 +9435,7 @@ async function handleAction(key){
     return;
   }
 
-  if(["details","card","about","hours"].includes(key)){
+  if(["details","card","about","hours","design"].includes(key)){
     await openEditMode(shop.shop_slug,key);
     return;
   }
@@ -9506,11 +9549,26 @@ function mount(){
 
     if(event.target.closest("[data-m7v4-add]")){
       const form=document.getElementById("ma-admin-shop-form");
+      const manage=document.getElementById("ma-manage-shops-card");
+      const drawer=form?.closest(".m7sc-add-drawer");
       const section=form?.closest(".ma-admin-card,section,fieldset");
+
+      clearLegacy();
+
+      if(manage){
+        manage.classList.add("m7v4-show-add");
+        manage.hidden=false;
+      }
+
+      if(drawer){
+        drawer.open=true;
+        drawer.style.display="block";
+      }
+
       if(section){
-        section.classList.add("m7v4-legacy-panel","m7v4-show");
         section.hidden=false;
-        section.scrollIntoView({behavior:"smooth",block:"start"});
+        section.style.removeProperty("display");
+        setTimeout(()=>section.scrollIntoView({behavior:"smooth",block:"start"}),60);
       }
       return;
     }
