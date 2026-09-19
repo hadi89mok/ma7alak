@@ -3649,6 +3649,7 @@ function renderNotifications(){
               data-notification-key="${escapeAttribute(notificationKey)}"
               data-notification-type="${escapeAttribute(notification.type || "story")}"
               data-notification-id="${escapeAttribute(String(notification.id || ""))}"
+              data-notification-created-at="${escapeAttribute(notification.created_at || "")}"
               data-shop-slug="${escapeAttribute(notification.shop_slug || "")}"
               data-shop-url="${escapeAttribute(notification.shop_url || "")}"
             >
