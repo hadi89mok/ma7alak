@@ -373,13 +373,30 @@
         accent
       );
 
-    const titleMode =
+    const rawTitleMode =
       String(
         options.about_title_animation ||
         "current"
       )
         .trim()
         .toLowerCase();
+
+    const legacyTitleShimmerEnabled =
+      options.about_fx_title_shimmer === undefined
+        ? true
+        : (
+            options.about_fx_title_shimmer === true ||
+            String(options.about_fx_title_shimmer).toLowerCase() === "true"
+          );
+
+    const titleMode =
+      rawTitleMode === "current"
+        ? (
+            legacyTitleShimmerEnabled
+              ? "shimmer"
+              : "none"
+          )
+        : rawTitleMode;
 
     const titleRgb =
       hexToRgb(titleColor) ||
@@ -399,133 +416,195 @@
         .20
       );
 
-    let titleVisualCss = "";
+    function buildTextAnimationCss(
+      mode,
+      color,
+      colorRgb,
+      lightColor,
+      softColor
+    ){
+      const normalized =
+        String(mode || "none")
+          .trim()
+          .toLowerCase();
 
-    if(titleMode === "glow"){
-      titleVisualCss = `
+      const base = `
         display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
+        transform-origin:center!important;
+        animation-play-state:running!important;
+        -webkit-animation-play-state:running!important;
+        will-change:transform,filter,background-position,opacity!important;
+        -webkit-backface-visibility:hidden!important;
+        backface-visibility:hidden!important;
       `;
-    }
-    else if(titleMode === "breathe"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
-      `;
-    }
-    else if(titleMode === "float"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
-      `;
-    }
-    else if(titleMode === "pulse"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
-      `;
-    }
-    else if(titleMode === "sway"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
-      `;
-    }
-    else if(titleMode === "bounce"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
-      `;
-    }
-    else if(titleMode === "flicker"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        text-shadow:
-          0 0 ${glowNear}px ${rgba(titleRgb,.72)},
-          0 0 ${glowFar}px ${rgba(titleRgb,.34)}!important;
-        animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
-        -webkit-animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
-      `;
-    }
-    else if(titleMode === "none"){
-      titleVisualCss = `
-        display:inline-block!important;
-        background:none!important;
-        color:${titleColor}!important;
-        -webkit-text-fill-color:${titleColor}!important;
-        animation:none!important;
-        -webkit-animation:none!important;
-      `;
-    }
-    else{
-      titleVisualCss = `
-        display:inline-block!important;
-        background:
-          linear-gradient(
-            110deg,
-            ${titleColor} 0%,
-            ${titleSoft} 30%,
-            rgba(255,255,255,${shimmerAlpha}) 46%,
-            #ffffff 51%,
-            rgba(255,255,255,${shimmerAlpha}) 56%,
-            ${titleLight} 70%,
-            ${titleColor} 100%
-          )!important;
-        background-size:320% 100%!important;
-        background-position:145% 50%!important;
-        -webkit-background-clip:text!important;
-        background-clip:text!important;
-        color:transparent!important;
-        -webkit-text-fill-color:transparent!important;
-        animation:m7HubTitleShimmer ${titleMode === "shimmer" ? tunedSpeed : tunedSpeed*1.12}s linear infinite!important;
-        -webkit-animation:m7HubTitleShimmer ${titleMode === "shimmer" ? tunedSpeed : tunedSpeed*1.12}s linear infinite!important;
-        filter:
-          drop-shadow(
-            0 0 ${Math.max(1,glowNear*.35)}px
-            ${rgba(titleRgb,.34)}
-          )!important;
-      `;
+
+      let css = "";
+
+      if(normalized === "glow"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "breathe"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "float"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "pulse"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "sway"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "bounce"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
+          -webkit-animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
+        `;
+      }
+      else if(normalized === "flicker"){
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          text-shadow:
+            0 0 ${glowNear}px ${rgba(colorRgb,.72)},
+            0 0 ${glowFar}px ${rgba(colorRgb,.34)}!important;
+          animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
+          -webkit-animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
+        `;
+      }
+      else if(normalized === "shimmer"){
+        css = `
+          background:
+            linear-gradient(
+              110deg,
+              ${color} 0%,
+              ${softColor} 30%,
+              rgba(255,255,255,${shimmerAlpha}) 46%,
+              #ffffff 51%,
+              rgba(255,255,255,${shimmerAlpha}) 56%,
+              ${lightColor} 70%,
+              ${color} 100%
+            )!important;
+          background-size:320% 100%!important;
+          background-position:145% 50%!important;
+          background-repeat:no-repeat!important;
+          -webkit-background-clip:text!important;
+          background-clip:text!important;
+          color:transparent!important;
+          -webkit-text-fill-color:transparent!important;
+          animation:m7HubTitleShimmer ${tunedSpeed}s linear infinite!important;
+          -webkit-animation:m7HubTitleShimmer ${tunedSpeed}s linear infinite!important;
+          filter:
+            drop-shadow(
+              0 0 ${Math.max(1,glowNear*.35)}px
+              ${rgba(colorRgb,.34)}
+            )!important;
+        `;
+      }
+      else{
+        css = `
+          background:none!important;
+          color:${color}!important;
+          -webkit-text-fill-color:${color}!important;
+          animation:none!important;
+          -webkit-animation:none!important;
+        `;
+      }
+
+      if(motionOff){
+        css += `
+          animation:none!important;
+          -webkit-animation:none!important;
+        `;
+      }
+
+      return base + css;
     }
 
-    if(motionOff){
-      titleVisualCss += `
-        animation:none!important;
-        -webkit-animation:none!important;
-      `;
-    }
-    else if(motionSubtle && titleMode !== "none"){
-      titleVisualCss += `
-        animation-duration:${tunedSpeed}s!important;
-        -webkit-animation-duration:${tunedSpeed}s!important;
-      `;
-    }
+    const titleVisualCss =
+      buildTextAnimationCss(
+        titleMode,
+        titleColor,
+        titleRgb,
+        titleLight,
+        titleSoft
+      );
+
+    const arabicColor =
+      safeHex(
+        options.about_arabic_color ||
+        options.arabic_name_color,
+        accent
+      );
+
+    const arabicRgb =
+      hexToRgb(arabicColor) ||
+      rgb;
+
+    const arabicLight =
+      mix(
+        arabicRgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+    const arabicSoft =
+      mix(
+        arabicRgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+    const arabicMode =
+      String(
+        options.arabic_name_animation ||
+        "none"
+      )
+        .trim()
+        .toLowerCase();
+
+    const arabicVisualCss =
+      buildTextAnimationCss(
+        arabicMode,
+        arabicColor,
+        arabicRgb,
+        arabicLight,
+        arabicSoft
+      );
 
     const kickerColor =
       picked(
@@ -708,6 +787,31 @@
       tunedFloat + "px"
     );
 
+    root.style.setProperty(
+      "--m7-page-float-distance-negative",
+      (-tunedFloat) + "px"
+    );
+
+    root.style.setProperty(
+      "--m7-page-scale-max",
+      String(tunedScale)
+    );
+
+    root.style.setProperty(
+      "--m7-page-glow-near",
+      glowNear + "px"
+    );
+
+    root.style.setProperty(
+      "--m7-page-glow-far",
+      glowFar + "px"
+    );
+
+    root.style.setProperty(
+      "--m7-page-shimmer-alpha",
+      String(shimmerAlpha)
+    );
+
     let style =
       document.getElementById(
         "m7-hub-page-design-studio"
@@ -763,8 +867,8 @@
             html body #ma7alak-exact-merged-hub .zee-title-word,
             html body #ma7alak-exact-merged-hub .zee-center-symbol,
             html body #ma7alak-exact-merged-hub .zee-service-icon{
-              animation-duration:5s!important;
-              -webkit-animation-duration:5s!important;
+              animation-duration:${tunedSpeed}s!important;
+              -webkit-animation-duration:${tunedSpeed}s!important;
             }
           `
         : "";
@@ -911,15 +1015,36 @@
       }
 
       html body #ma7alak-exact-merged-hub #ma7alak-about-title{
-        transform-origin:center!important;
-        will-change:transform,filter,background-position,opacity!important;
+        transform:translateZ(0);
+        -webkit-transform:translateZ(0);
         ${titleVisualCss}
+      }
+
+      html body #ma7alak-exact-merged-hub #ma7alak-about-arabic-name{
+        transform:translateZ(0);
+        -webkit-transform:translateZ(0);
+        ${arabicVisualCss}
+      }
+
+      html body #ma7alak-exact-merged-hub .zee-line,
+      html body #ma7alak-exact-merged-hub .zee-line::after,
+      html body #ma7alak-exact-merged-hub .zee-center-symbol,
+      html body #ma7alak-exact-merged-hub .zee-title-sparkle,
+      html body #ma7alak-exact-merged-hub .ma7alak-about-floating-sparkles span,
+      html body #ma7alak-exact-merged-hub .zee-service-icon,
+      html body #ma7alak-exact-merged-hub .zee-signature-text{
+        animation-play-state:running;
+        -webkit-animation-play-state:running;
+        -webkit-backface-visibility:hidden;
+        backface-visibility:hidden;
       }
 
       html body #ma7alak-exact-merged-hub .zee-line{
         ${ornamentStyle === "none" ? "display:none!important;" : ""}
         height:${ornamentStyle === "double" ? "4px" : ornamentStyle === "beam" ? "3px" : "2px"}!important;
         background:${ornamentBg}!important;
+        animation-duration:${tunedSpeed}s!important;
+        -webkit-animation-duration:${tunedSpeed}s!important;
         box-shadow:
           ${ornamentStyle === "neon"
             ? "0 0 "+glowNear+"px "+rgba(ornamentRgb,.86)+",0 0 "+glowFar+"px "+rgba(ornamentRgb,.44)
@@ -967,6 +1092,8 @@
 
       html body #ma7alak-exact-merged-hub .zee-signature-text{
         color:${signatureColor}!important;
+        animation-duration:${tunedSpeed}s!important;
+        -webkit-animation-duration:${tunedSpeed}s!important;
       }
 
       html body #ma7alak-exact-merged-hub .zee-signature-line{
@@ -981,6 +1108,18 @@
 
       html body #ma7alak-exact-merged-hub::before{
         border-color:${rgba(rgb,.26)}!important;
+      }
+
+      @media(max-width:600px){
+        html body #ma7alak-exact-merged-hub #ma7alak-about-title,
+        html body #ma7alak-exact-merged-hub #ma7alak-about-arabic-name,
+        html body #ma7alak-exact-merged-hub .zee-center-symbol,
+        html body #ma7alak-exact-merged-hub .zee-service-icon,
+        html body #ma7alak-exact-merged-hub .zee-title-sparkle{
+          -webkit-font-smoothing:antialiased;
+          transform-style:preserve-3d;
+          -webkit-transform-style:preserve-3d;
+        }
       }
 
       ${staticCss}
