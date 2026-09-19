@@ -829,7 +829,6 @@
     );
     setStatus(manageStatus, "");
     renderManagedShops();
-    loadVisibleOwnerBadges();
   }
 
 
@@ -2357,7 +2356,7 @@
           (cover ? '<img class="ma-admin-shop-cover" src="' + cover + '" alt="" loading="lazy">' : '') +
           '<div class="ma-admin-shop-thumb ' + (hasStory ? 'has-story' : '') + '" style="--shop-story-color:' + (/^#[0-9a-f]{6}$/i.test(String(directoryOptions.story_color || '')) ? escapeHtml(directoryOptions.story_color) : '#e3b85f') + '">' + imageHtml + '</div>' +
           '<div class="ma-admin-shop-info">' +
-            '<div class="ma-admin-shop-name-row"><div class="ma-admin-shop-name">' + name + '</div><span class="ma-admin-owner-state" data-owner-badge="' + slug + '">Checking owner…</span></div>' +
+            '<div class="ma-admin-shop-name-row"><div class="ma-admin-shop-name">' + name + '</div></div>' +
             '<div class="ma-admin-shop-slug">/' + slug + '</div>' +
             '<div class="ma-admin-shop-meta">' + meta + '</div>' +
             '<div class="ma-admin-shop-badges">' + badges + '</div>' +
@@ -2369,7 +2368,6 @@
             '<button class="ma-shop-action verify" type="button" data-action="verified">' + (shop.verified ? '✓ Unverify' : '✓ Verify') + '</button>' +
             '<button class="ma-shop-action feature" type="button" data-action="featured">' + (featureActive ? '★ Unfeature' : '☆ Feature days') + '</button>' +
             '<button class="ma-shop-action new" type="button" data-action="new">' + (/^new$/i.test(directoryBadge) ? 'Remove NEW' : '＋ NEW badge') + '</button>' +
-            '<button class="ma-shop-action owner" type="button" data-action="owner">👤 Assign owner</button>' +
             '<button class="ma-shop-action gallery" type="button" data-action="gallery">🖼 Gallery</button>' +
             '<button class="ma-shop-action video" type="button" data-action="video">🎥 Videos</button>' +
             '<button class="ma-shop-action feature" type="button" data-action="reels">🔥 Reels</button>' +
@@ -3183,7 +3181,6 @@
 
   manageShopSearch.addEventListener("input", function(){
     renderManagedShops();
-    loadVisibleOwnerBadges();
   });
 
 
@@ -3242,11 +3239,6 @@
 
     if(action === "edit"){
       openEditShop(shop);
-      return;
-    }
-
-    if(action === "owner"){
-      openUnifiedOwnerAccess(shop);
       return;
     }
 
@@ -4810,7 +4802,7 @@ function mount(){css();document.getElementById("m7adm-mod")?.remove();if(documen
   <div id="m7adm-users" class="m7adm-body hidden" hidden><div class="m7adm-tools"><input id="m7adm-user-search" class="m7adm-search" type="search" placeholder="Search name, full email or status…" autocomplete="off"></div><div id="m7adm-user-list"><div class="m7adm-empty">Loading users...</div></div></div>
   <div id="m7adm-owner" class="m7adm-body hidden" hidden><div class="m7adm-ownerbox"><select id="m7adm-owner-shop" class="m7adm-select"><option value="">Select shop…</option></select><input id="m7adm-owner-email" class="m7adm-input" type="email" placeholder="Google account email"><button id="m7adm-owner-assign" class="m7adm-btn view" type="button">Assign Owner</button><div id="m7adm-owner-state" class="m7adm-ownerstate bad">❌ Select a shop to check its owner.</div><div class="m7adm-danger"><strong>Owner access</strong><div style="color:#bbb;font-size:12px;margin-bottom:10px">Removing owner access keeps the normal Google viewer account and the shop itself.</div><button id="m7adm-owner-delete" class="m7adm-btn del" type="button">Remove Owner Access</button></div></div></div>
   <div id="m7adm-reports" class="m7adm-body hidden" hidden><div class="m7adm-empty">Loading reports...</div></div>
-</div>`;host.appendChild(x);x.querySelectorAll(".m7adm-tab").forEach(b=>b.onclick=()=>selectAdminTool(b.dataset.target));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.remove();let post=document.getElementById("ma-admin-post-add-owner");if(post)post.remove();return true}
+</div>`;host.appendChild(x);x.dataset.m7GlobalFooter="1";x.querySelectorAll(".m7adm-tab").forEach(b=>b.onclick=()=>selectAdminTool(b.dataset.target));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.remove();let post=document.getElementById("ma-admin-post-add-owner");if(post)post.remove();return true}
 async function loadPresence(){let r=await sb.rpc("ma7alak_admin_user_presence");presenceMap.clear();if(!r.error)(r.data||[]).forEach(p=>presenceMap.set(String(p.user_id),p));}
 function renderUsers(){let box=document.getElementById("m7adm-user-list");if(!box)return;let q=(document.getElementById("m7adm-user-search")?.value||"").trim().toLowerCase();let rows=userRows.filter(u=>!q||[u.display_name,u.username,u.email,u.account_status].some(v=>String(v||"").toLowerCase().includes(q)));box.innerHTML=rows.length?rows.map(u=>{let p=presenceMap.get(String(u.user_id)),on=!!p?.is_online;return `<div class="m7adm-user ${u.account_status!=="active"?"m7adm-banned":""}" data-user-row="${esc(u.user_id)}">${u.avatar_url?`<img class="m7adm-avatar" src="${esc(u.avatar_url)}">`:'<div class="m7adm-avatar"></div>'}<div class="m7adm-copy"><strong>${esc(u.display_name||u.username||"Google User")}</strong><small class="m7adm-email">${esc(u.email||"Email unavailable")}</small><small><span class="m7adm-presence"><i class="m7adm-dot ${on?"on":"off"}"></i>${on?"Browsing now":"Offline"}</span> · Account: ${esc(u.account_status||"active")}</small><small>Created: ${esc(u.created_at?new Date(u.created_at).toLocaleString():"")}</small>${u.banned_reason?`<small>Reason: ${esc(u.banned_reason)}</small>`:""}</div><div class="m7adm-actions">${u.account_status==="banned"?`<button class="m7adm-btn ok" data-act="active" data-id="${esc(u.user_id)}">Unban</button>`:`<button class="m7adm-btn ban" data-act="banned" data-id="${esc(u.user_id)}">Ban</button>`}<button class="m7adm-btn del" data-act="deleted" data-id="${esc(u.user_id)}">Delete permanently</button></div></div>`}).join(""):'<div class="m7adm-empty">No matching viewer users.</div>';box.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const action=b.dataset.act,id=b.dataset.id;if(action==="deleted"){if(!confirm("Permanently delete this Google user and all linked Ma7alak account data? This cannot be undone."))return;b.disabled=true;b.textContent="Deleting…";const r=await sb.functions.invoke("delete-ma7alak-user",{body:{user_id:id}});if(r.error||r.data?.success===false){b.disabled=false;b.textContent="Delete permanently";alert(r.data?.error||r.error?.message||"Could not delete user.");return}userRows=userRows.filter(u=>String(u.user_id)!==String(id));document.querySelector(`[data-user-row="${CSS.escape(id)}"]`)?.remove();await Promise.all([loadUsers(),loadOwnerState()]);return}let reason=action==="banned"?prompt("Ban reason:","Chat abuse"):null;let r=await sb.rpc("ma7alak_admin_set_user_status",{p_user_id:id,p_status:action,p_reason:reason});if(r.error)alert(r.error.message);else loadUsers()})}
 async function loadUsers(){try{let [u]=await Promise.all([sb.rpc("ma7alak_admin_list_users"),loadPresence()]);if(u.error)throw u.error;userRows=u.data||[];renderUsers()}catch(e){let b=document.getElementById("m7adm-user-list");if(b)b.innerHTML=`<div class="m7adm-empty">${esc(e.message||"Could not load users.")}</div>`}}
@@ -5538,11 +5530,23 @@ const PANELS=[
 ["activity","Admin Activity","🧾","#ma-admin-activity-card"]
 ];
 
-let pref={hidden:{},collapsed:{directory:true,control:true,subs:true,tools:false,activity:true}};
+let pref={hidden:{},collapsed:{directory:true,control:true,subs:true,tools:true,activity:true}};
 try{
   const saved=JSON.parse(localStorage.getItem(PREF)||"{}");
   pref.hidden=Object.assign({},pref.hidden,saved.hidden||{});
   pref.collapsed=Object.assign({},pref.collapsed,saved.collapsed||{});
+
+  /*
+     Admin Tools is now a permanent global footer panel.
+     Collapse it once after this layout migration so older saved UI state
+     cannot leave the footer expanded on every Admin load.
+  */
+  const layoutVersion=String(saved.layout_version||"");
+  if(layoutVersion!=="admin-tools-footer-v1"){
+    pref.hidden.tools=false;
+    pref.collapsed.tools=true;
+    pref.layout_version="admin-tools-footer-v1";
+  }
 }catch(_){}
 const savePref=()=>{try{localStorage.setItem(PREF,JSON.stringify(pref))}catch(_){}};
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -5640,7 +5644,7 @@ function toolbar(){
   x.querySelector("[data-manage]").onclick=()=>focus("manage");
   x.querySelector("[data-hideall]").onclick=()=>{allVisible(false);openDrawer()};
   const q=x.querySelector(".m7quick");
-  [["manage","🏪 Shops"],["add","＋ Add"],["gallery","🖼 Gallery"],["video","🎥 Videos"],["directory","🧭 Design"],["tools","🛠 Admin Tools"]].forEach(a=>{
+  [["manage","🏪 Shops"],["add","＋ Add"],["gallery","🖼 Gallery"],["video","🎥 Videos"],["directory","🧭 Design"]].forEach(a=>{
     const b=document.createElement("button");b.className="m7chip";b.type="button";b.textContent=a[1];b.onclick=()=>focus(a[0]);q.appendChild(b);
   });
 }
@@ -5749,7 +5753,7 @@ function saveState(){
 }
 
 function reveal(action){
-  const m={edit:"edit",owner:"owner",gallery:"gallery",video:"video",reels:"reels"},k=m[action];if(!k)return;
+  const m={edit:"edit",gallery:"gallery",video:"video",reels:"reels"},k=m[action];if(!k)return;
   pref.hidden[k]=false;pref.collapsed[k]=false;savePrefs();
   setTimeout(()=>{setVis(k,true,false);setFold(k,false,false);saveState()},40);
 }
@@ -5759,15 +5763,31 @@ function bind(){
   document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==="s"&&savebar?.classList.contains("on")){e.preventDefault();savebar.querySelector("#m7sm")?.click()}if(e.key==="Escape")closeDrawer()});
 }
 
+function pinAdminToolsBottom(){
+  const dashboard=document.getElementById("ma-admin-dashboard");
+  const tools=document.getElementById("m7adm-v3");
+
+  if(!dashboard||!tools)return;
+
+  /* Keep the global Admin Tools card as the final dashboard section. */
+  if(tools.parentElement!==dashboard){
+    dashboard.appendChild(tools);
+  }else if(dashboard.lastElementChild!==tools){
+    dashboard.appendChild(tools);
+  }
+}
+
 function decorateAll(){
   toolbar();ensureDrawer();ensureSave();mountLabels();patchDirectory();
   decorate("add","Add New Shop","＋");
   PANELS.forEach(r=>decorate(r[0],r[1],r[2]));
-  foldsets();draw();saveState();
+  foldsets();
+  pinAdminToolsBottom();
+  draw();saveState();
 }
 function observe(){
   const d=document.getElementById("ma-admin-dashboard");if(!d)return;
-  let q=false;new MutationObserver(()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;decorateAll()})}).observe(d,{childList:true,subtree:true,attributes:true,attributeFilter:["hidden"]});
+  let q=false;new MutationObserver(()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;decorateAll();pinAdminToolsBottom()})}).observe(d,{childList:true,subtree:true,attributes:true,attributeFilter:["hidden"]});
 }
 (async function(){
   css();bind();
@@ -11460,7 +11480,6 @@ function renderWorkspace(){
 
     '<div class="m7v4-group-title">Account & publishing</div>'+
     '<div class="m7v4-actions">'+
-      action("owner","♙","Owner access","Assign or manage this shop owner")+
       stateAction("visibility","◐","Shop visibility",shop.is_active===true,shop.is_active===true?"Visible to visitors":"Hidden from visitors","visibility")+
       stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
       stateAction("new","NEW","NEW badge",newBadgeOn(shop),newBadgeOn(shop)?"NEW badge is showing":"NEW badge is hidden","new")+
@@ -11471,10 +11490,7 @@ function renderWorkspace(){
     '<div class="m7v4-system">'+
       '<button type="button" data-m7v4-system="ma-admin-v2-hub">Categories & areas</button>'+
       '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
-      '<button type="button" data-m7v4-system="m7adm-analytics">Analytics</button>'+
-      '<button type="button" data-m7v4-system="m7adm-users">Users</button>'+
       '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
-      '<button type="button" data-m7v4-system="m7adm-reports">Reports</button>'+
       '<button type="button" data-m7v4-system="ma-admin-activity-card">Activity</button>'+
     '</div>';
 }
@@ -11513,14 +11529,6 @@ async function handleAction(key){
 
   if(["details","label","card","about","hours","design"].includes(key)){
     await openEditMode(shop.shop_slug,key);
-    return;
-  }
-
-  if(key==="owner"){
-    await openAdminHub(
-      "m7adm-owner",
-      shop.shop_slug
-    );
     return;
   }
 
