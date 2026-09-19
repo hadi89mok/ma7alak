@@ -5998,6 +5998,7 @@ function decorateAll(){
   const GALLERY_FRAME_STYLES = [
     ["current","Current premium frame"],
     ["dual","2-color split"],
+    ["triple","3-color split"],
     ["quad","4-color split"],
     ["blend","4-color soft blend"],
     ["none","No frame"]
@@ -6610,7 +6611,8 @@ function decorateAll(){
         <p class="m7ds-help">
           For a frame like the pink / gold reference, choose <b>2-color split</b>,
           set Color 1 to pink and Color 3 to gold, then adjust rotation and glow.
-          Use 4-color split or soft blend for a richer layered frame.
+          Choose <b>3-color split</b> for pink → champagne → gold, or use 4-color
+          split / soft blend for a richer multi-color frame.
         </p>
 
         <p class="m7ds-help">
@@ -6866,6 +6868,18 @@ function decorateAll(){
           " 0 50%,"+
           c3+
           " 50% 100%)";
+      }
+      else if(style==="triple"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 33.333%,"+
+          c2+
+          " 33.333% 66.666%,"+
+          c3+
+          " 66.666% 100%)";
       }
       else if(style==="quad"){
         background=
