@@ -1702,6 +1702,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let ownerShop=null;
   let searchTimer=null;
   let followedShopSlugs=[];
+  let followedShopTimes=new Map();
   let followingPanelOpen=false;
   let followingRefreshTimer=null;
   let followingRealtimeChannel=null;
@@ -1865,6 +1866,36 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }).filter(Boolean)));
   }
 
+  function normalizeFollowedTimes(data){
+    const rows=Array.isArray(data)?data:[];
+    const next=new Map();
+    rows.forEach(function(row){
+      if(!row||typeof row==="string"){return;}
+      const slug=String(row.shop_slug||row.p_shop_slug||row.slug||"").trim();
+      if(!slug){return;}
+      const value=new Date(row.followed_at||row.created_at||0).getTime();
+      if(Number.isFinite(value)&&value>0){next.set(slug,value);}
+    });
+    return next;
+  }
+
+  function publishFollowingState(){
+    const followedAt={};
+    followedShopTimes.forEach(function(value,slug){
+      followedAt[slug]=value;
+    });
+    const detail={
+      visitorId:getFollowVisitorId(),
+      slugs:followedShopSlugs.slice(),
+      followedAt:followedAt,
+      updatedAt:Date.now()
+    };
+    window.Ma7alakFollowingState=detail;
+    try{
+      window.dispatchEvent(new CustomEvent("ma7alak:following-state",{detail:detail}));
+    }catch(error){}
+  }
+
   function updateFollowingBadge(){
     /* Following is a library/count relationship, not an unread notification.
        Keep the header icon clean: no persistent number badge. */
@@ -1978,7 +2009,9 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       const next=normalizeFollowedSlugs(result.data);
       const changed=JSON.stringify(next.slice().sort())!==JSON.stringify(followedShopSlugs.slice().sort());
       followedShopSlugs=next;
+      followedShopTimes=normalizeFollowedTimes(result.data);
       updateFollowingBadge();
+      publishFollowingState();
       if(changed||followingPanelOpen){renderFollowingPanel();}
       await refreshFollowingStoryState();
     }catch(error){
