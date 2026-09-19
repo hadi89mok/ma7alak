@@ -100,6 +100,10 @@
   }
 
   function getPrefix(box){
+    if(!box){
+      return "";
+    }
+
     const preset =
       box.querySelector(
         '[id$="page_design_preset"]'
