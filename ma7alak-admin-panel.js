@@ -1016,6 +1016,7 @@
         .from("shop_gallery")
         .select("id,shop_slug,image_url,storage_path,sort_order,is_featured,created_at")
         .eq("shop_slug", slug)
+        .eq("active", true)
         .order("sort_order", { ascending:true })
         .order("created_at", { ascending:true });
 
@@ -2174,15 +2175,6 @@
 
     if(loadError) throw loadError;
 
-    const { error } =
-      await supabaseClient
-        .from("shop_reels")
-        .delete()
-        .eq("reel_id", reelId)
-        .eq("shop_slug", slug);
-
-    if(error) throw error;
-
     const storagePath =
       reelRow
         ? getReelStoragePathFromUrl(reelRow.video_url)
@@ -2195,17 +2187,18 @@
         .remove([storagePath]);
 
       if(storageError){
-        console.warn("Reel storage delete warning:", storageError);
+        throw storageError;
       }
     }
 
-    await logAdminActivity(
-      "reel_deleted",
-      slug,
-      {
-        reel_id:String(reelId)
-      }
-    );
+    const { error } =
+      await supabaseClient
+        .from("shop_reels")
+        .delete()
+        .eq("reel_id", reelId)
+        .eq("shop_slug", slug);
+
+    if(error) throw error;
   }
 
 
@@ -4789,7 +4782,8 @@ async function loadPosts(){
   box.innerHTML='<div class="m7la-empty">Loading offers…</div>';
   const result=await sb.rpc("ma7alak_admin_list_live_posts",{p_shop_slug:activeShop.slug});
   if(result.error){box.innerHTML='<div class="m7la-empty">'+esc(result.error.message||"Could not load offers.")+'</div>';return}
-  const rows=Array.isArray(result.data)?result.data:[];
+  const rows=(Array.isArray(result.data)?result.data:[])
+    .filter(row=>row&&row.status==="active"&&new Date(row.ends_at)>new Date());
   if(!rows.length){box.innerHTML='<div class="m7la-empty">This shop has no Live / Offers.</div>';return}
   box.innerHTML=rows.map(row=>`<article class="m7la-post" data-live-id="${esc(row.id)}"><div><strong>${esc(row.title||"Live / Offer")}</strong><small>${esc(row.post_type||"live")} · ${esc(postState(row))} · ${esc(row.created_at?new Date(row.created_at).toLocaleString():"")}</small></div><button class="m7la-delete" type="button" data-delete-live="${esc(row.id)}">Delete</button></article>`).join("");
   box.querySelectorAll("[data-delete-live]").forEach(button=>button.onclick=()=>deletePost(button.dataset.deleteLive,button));
@@ -4804,18 +4798,56 @@ function storagePath(url){
 }
 
 async function deletePost(id,button){
-  if(!window.confirm("Permanently delete this Live / Offer?"))return;
+  if(!window.confirm("Permanently delete this Live / Offer? This cannot be restored."))return;
   button.disabled=true;
   status("Deleting offer…",false);
-  const result=await sb.rpc("ma7alak_admin_delete_live_post",{p_post_id:Number(id)});
-  if(result.error){button.disabled=false;status(result.error.message||"Could not delete offer.",true);return}
-  const row=Array.isArray(result.data)?result.data[0]:result.data;
-  const path=storagePath(row?.media_url);
-  if(path){
-    const cleanup=await sb.storage.from("live-offers").remove([path]);
-    if(cleanup.error)console.warn("Live/Offer media cleanup:",cleanup.error);
+
+  const mediaResult=await sb
+    .from("shop_live_post_media")
+    .select("storage_path,media_url")
+    .eq("post_id",Number(id));
+
+  if(mediaResult.error){
+    button.disabled=false;
+    status(mediaResult.error.message||"Could not read Live / Offer media.",true);
+    return;
   }
-  status("Live / Offer deleted.",false);
+
+  const paths=[...new Set(
+    (mediaResult.data||[])
+      .map(row=>String(row.storage_path||storagePath(row.media_url)||"").trim())
+      .filter(Boolean)
+  )];
+
+  if(paths.length){
+    const cleanup=await sb.storage.from("live-offers").remove(paths);
+    if(cleanup.error){
+      button.disabled=false;
+      status(cleanup.error.message||"Could not permanently remove Live / Offer media.",true);
+      return;
+    }
+  }
+
+  const result=await sb.rpc(
+    "ma7alak_admin_delete_live_post",
+    {p_post_id:Number(id)}
+  );
+
+  if(result.error){
+    button.disabled=false;
+    status(result.error.message||"Could not delete offer.",true);
+    return;
+  }
+
+  const row=Array.isArray(result.data)?result.data[0]:result.data;
+  const fallbackPath=storagePath(row?.media_url);
+
+  if(fallbackPath&&!paths.includes(fallbackPath)){
+    const cleanup=await sb.storage.from("live-offers").remove([fallbackPath]);
+    if(cleanup.error)console.warn("Live/Offer legacy media cleanup:",cleanup.error);
+  }
+
+  status("Live / Offer permanently deleted.",false);
   await loadPosts();
 }
 
