@@ -1016,7 +1016,6 @@
         .from("shop_gallery")
         .select("id,shop_slug,image_url,storage_path,sort_order,is_featured,created_at")
         .eq("shop_slug", slug)
-        .eq("active", true)
         .order("sort_order", { ascending:true })
         .order("created_at", { ascending:true });
 
