@@ -5415,7 +5415,47 @@ let drawer=null,list=null,savebar=null,patched=false,addDirty=false;
 function savePrefs(){try{localStorage.setItem(PREF,JSON.stringify(pref))}catch(_){}}
 function setVis(k,v,persist=true){const el=panel(k);if(!el)return;el.classList.toggle("m7hidden",!v);if(persist){pref.hidden[k]=!v;savePrefs()}draw();saveState()}
 function setFold(k,v,persist=true){const el=panel(k);if(!el)return;el.classList.toggle("m7collapsed",!!v);const b=el.querySelector(".m7ph [data-fold]");if(b)b.textContent=v?"Open":"Fold";if(persist){pref.collapsed[k]=!!v;savePrefs()}}
-function focus(k){const el=panel(k);if(!el){openDrawer();return}setVis(k,true);setFold(k,false);if(!el.hidden)setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),25)}
+function focus(k){
+  const el=panel(k);
+  if(!el){openDrawer();return}
+
+  setVis(k,true);
+  setFold(k,false);
+
+  if(k==="add"){
+    const details=el.closest("details");
+    if(details)details.open=true;
+
+    el.hidden=false;
+    el.classList.remove(
+      "m7hidden",
+      "m7collapsed",
+      "m7-admin-collapsed"
+    );
+
+    /*
+      The older Admin collapser uses m7-collapsed-body on the
+      Add Shop form children. Clear it too so the Control Deck
+      Add button can never scroll to an apparently empty panel.
+    */
+    el.querySelectorAll(".m7-collapsed-body").forEach(node=>{
+      node.classList.remove("m7-collapsed-body");
+    });
+
+    el.querySelectorAll(".m7-collapse-btn,.m7-panel-toggle").forEach(button=>{
+      button.textContent="Hide";
+    });
+  }
+
+  if(!el.hidden){
+    setTimeout(()=>{
+      el.scrollIntoView({behavior:"smooth",block:"start"});
+      if(k==="add"){
+        document.getElementById("ma-shop-name")?.focus();
+      }
+    },25);
+  }
+}
 
 function toolbar(){
   if(document.getElementById("m7deck"))return;
@@ -6025,6 +6065,7 @@ function observe(){
 
   const COLORS = [
     ["profile_ring_color","Story / profile ring"],
+    ["profile_banner_color","Profile banner"],
     ["shop_label_text_color","Shop Label text"],
     ["shop_label_border_color","Shop Label border"],
     ["shop_label_bg_color","Shop Label background"],
@@ -6057,6 +6098,10 @@ function observe(){
     page_use_universal_accent:true,
 
     profile_ring_color:"#f2caed",
+
+    profile_banner_enabled:false,
+    profile_banner_color:"#171217",
+    profile_banner_image_url:"",
 
     shop_label_text_color:"#f2caed",
     shop_label_border_color:"#f2caed",
@@ -6200,6 +6245,139 @@ function observe(){
     `;
   }
 
+  function bannerShopSlug(prefix){
+    const raw =
+      prefix === "m7de-"
+        ? document.getElementById("ma-edit-original-slug")?.value
+        : document.getElementById("ma-shop-slug")?.value;
+
+    return String(raw || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g,"-")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"");
+  }
+
+  async function uploadProfileBanner(prefix,file,box){
+    if(!file){
+      return "";
+    }
+
+    const slug =
+      bannerShopSlug(prefix);
+
+    if(!slug){
+      throw new Error(
+        prefix === "m7de-"
+          ? "No shop selected."
+          : "Enter the Shop Slug first, then choose the banner image."
+      );
+    }
+
+    if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type || "")){
+      throw new Error(
+        "Banner image must be JPG, PNG, WEBP or GIF."
+      );
+    }
+
+    if(file.size > 12 * 1024 * 1024){
+      throw new Error(
+        "Banner image must be smaller than 12 MB."
+      );
+    }
+
+    const client =
+      window.Ma7alakAdminClient;
+
+    if(
+      !client ||
+      !client.storage
+    ){
+      throw new Error(
+        "Admin storage is still loading. Try again."
+      );
+    }
+
+    const adminCheck =
+      await client.rpc(
+        "is_site_admin"
+      );
+
+    if(
+      adminCheck.error ||
+      adminCheck.data !== true
+    ){
+      throw new Error(
+        "Admin session is no longer valid. Login again."
+      );
+    }
+
+    const ext =
+      (
+        String(file.name || "")
+          .split(".")
+          .pop() ||
+        "jpg"
+      )
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g,"") ||
+      "jpg";
+
+    const storagePath =
+      "profile-banners/" +
+      slug +
+      "/" +
+      Date.now() +
+      "-" +
+      Math.random()
+        .toString(36)
+        .slice(2,8) +
+      "." +
+      ext;
+
+    const upload =
+      await client
+        .storage
+        .from("shop-gallery")
+        .upload(
+          storagePath,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type || undefined
+          }
+        );
+
+    if(upload.error){
+      throw upload.error;
+    }
+
+    const publicData =
+      client
+        .storage
+        .from("shop-gallery")
+        .getPublicUrl(
+          storagePath
+        );
+
+    const publicUrl =
+      publicData &&
+      publicData.data &&
+      publicData.data.publicUrl
+        ? publicData.data.publicUrl
+        : "";
+
+    if(!publicUrl){
+      throw new Error(
+        "Could not create the public banner URL."
+      );
+    }
+
+    return publicUrl;
+  }
+
   function mount(form,prefix){
     if(
       !form ||
@@ -6260,6 +6438,7 @@ function observe(){
         <button type="button" class="active" data-m7ds-tab="identity">Identity</button>
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
+        <button type="button" data-m7ds-tab="follow">Follow / Banner</button>
         <button type="button" data-m7ds-tab="modules">Gallery / Video / Hub</button>
       </div>
 
@@ -6336,12 +6515,74 @@ function observe(){
         </div>
       </div>
 
+      <div class="m7ds-pane" data-m7ds-pane="follow">
+        <div class="m7ds-section-title">Follow / Message</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"follow_accent_color","Follow / Message accent")}
+        </div>
+
+        <div class="m7ds-section-title">Top Profile Banner</div>
+
+        <label class="m7ds-check">
+          <input id="${prefix}profile_banner_enabled" type="checkbox">
+          <span>
+            <b>Show profile banner</b>
+            <small>
+              Only the short strip above the profile circle. It never replaces the Hostinger page background.
+            </small>
+          </span>
+        </label>
+
+        <div class="m7ds-grid m7ds-banner-grid">
+          ${colorField(prefix,"profile_banner_color","Banner color")}
+
+          <label class="m7ds-banner-upload">
+            <span>
+              <b>▧ Upload banner image</b>
+              <small>JPG, PNG, WEBP or GIF · max 12 MB</small>
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              data-m7-banner-upload
+            >
+          </label>
+        </div>
+
+        <input
+          id="${prefix}profile_banner_image_url"
+          type="hidden"
+        >
+
+        <div class="m7ds-banner-preview" data-m7-banner-preview>
+          <span>Banner preview</span>
+        </div>
+
+        <div class="m7ds-banner-actions">
+          <button
+            type="button"
+            class="m7ds-banner-clear"
+            data-m7-banner-clear
+          >Remove banner image</button>
+
+          <span
+            class="m7ds-banner-status"
+            data-m7-banner-status
+            aria-live="polite"
+          ></span>
+        </div>
+
+        <p class="m7ds-help">
+          The profile circle overlaps only the bottom edge of this banner by about 20%.
+          There is no page-wide background or banner animation.
+        </p>
+      </div>
+
       <div class="m7ds-pane" data-m7ds-pane="modules">
         <div class="m7ds-section-title">Module Accent Overrides</div>
         <div class="m7ds-grid">
           ${colorField(prefix,"gallery_accent_color","Gallery")}
           ${colorField(prefix,"video_accent_color","Videos")}
-          ${colorField(prefix,"follow_accent_color","Follow / Message")}
           ${colorField(prefix,"live_accent_color","Live / Offers")}
           ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
         </div>
@@ -6394,6 +6635,212 @@ function observe(){
       sync();
     });
 
+    const bannerEnabled =
+      box.querySelector(
+        "#"+prefix+"profile_banner_enabled"
+      );
+
+    const bannerColor =
+      box.querySelector(
+        "#"+prefix+"profile_banner_color"
+      );
+
+    const bannerUrl =
+      box.querySelector(
+        "#"+prefix+"profile_banner_image_url"
+      );
+
+    const bannerFile =
+      box.querySelector(
+        "[data-m7-banner-upload]"
+      );
+
+    const bannerPreview =
+      box.querySelector(
+        "[data-m7-banner-preview]"
+      );
+
+    const bannerClear =
+      box.querySelector(
+        "[data-m7-banner-clear]"
+      );
+
+    const bannerStatus =
+      box.querySelector(
+        "[data-m7-banner-status]"
+      );
+
+    function refreshBannerPreview(){
+      if(!bannerPreview){
+        return;
+      }
+
+      const url =
+        String(
+          bannerUrl?.value ||
+          ""
+        ).trim();
+
+      const color =
+        safeHex(
+          bannerColor?.value,
+          DEFAULTS.profile_banner_color
+        );
+
+      const enabled =
+        !!bannerEnabled?.checked;
+
+      bannerPreview.style.backgroundColor =
+        color;
+
+      bannerPreview.style.backgroundImage =
+        /^https?:\/\//i.test(url)
+          ? 'url("' +
+            url
+              .replace(/\\/g,"%5C")
+              .replace(/"/g,"%22")
+              .replace(/[\r\n]/g,"") +
+            '")'
+          : "none";
+
+      bannerPreview.classList.toggle(
+        "off",
+        !enabled
+      );
+
+      const label =
+        bannerPreview.querySelector("span");
+
+      if(label){
+        label.textContent =
+          enabled
+            ? (
+                url
+                  ? "Banner image selected"
+                  : "Banner color only"
+              )
+            : "Banner disabled";
+      }
+    }
+
+    box.__m7BannerRefresh =
+      refreshBannerPreview;
+
+    [
+      bannerEnabled,
+      bannerColor
+    ]
+      .filter(Boolean)
+      .forEach(el=>{
+        el.addEventListener(
+          "input",
+          refreshBannerPreview
+        );
+
+        el.addEventListener(
+          "change",
+          refreshBannerPreview
+        );
+      });
+
+    bannerFile?.addEventListener(
+      "change",
+      async function(){
+
+        const file =
+          bannerFile.files &&
+          bannerFile.files[0];
+
+        if(!file){
+          return;
+        }
+
+        bannerFile.disabled = true;
+
+        if(bannerStatus){
+          bannerStatus.textContent =
+            "Uploading banner…";
+        }
+
+        try{
+          const url =
+            await uploadProfileBanner(
+              prefix,
+              file,
+              box
+            );
+
+          if(bannerUrl){
+            bannerUrl.value =
+              url;
+
+            bannerUrl.dispatchEvent(
+              new Event(
+                "input",
+                {bubbles:true}
+              )
+            );
+          }
+
+          if(bannerEnabled){
+            bannerEnabled.checked =
+              true;
+
+            bannerEnabled.dispatchEvent(
+              new Event(
+                "change",
+                {bubbles:true}
+              )
+            );
+          }
+
+          if(bannerStatus){
+            bannerStatus.textContent =
+              "Uploaded — press Save Changes to apply.";
+          }
+
+          refreshBannerPreview();
+        }
+        catch(error){
+          if(bannerStatus){
+            bannerStatus.textContent =
+              error &&
+              error.message
+                ? error.message
+                : "Banner upload failed.";
+          }
+        }
+        finally{
+          bannerFile.disabled = false;
+          bannerFile.value = "";
+        }
+      }
+    );
+
+    bannerClear?.addEventListener(
+      "click",
+      function(){
+
+        if(bannerUrl){
+          bannerUrl.value = "";
+
+          bannerUrl.dispatchEvent(
+            new Event(
+              "input",
+              {bubbles:true}
+            )
+          );
+        }
+
+        if(bannerStatus){
+          bannerStatus.textContent =
+            "Banner image removed locally — press Save Changes.";
+        }
+
+        refreshBannerPreview();
+      }
+    );
+
     const preset =
       box.querySelector("#"+prefix+"page_design_preset");
 
@@ -6413,6 +6860,7 @@ function observe(){
     preset.addEventListener("change",updatePresetHint);
     motion.addEventListener("change",updatePresetHint);
     updatePresetHint();
+    refreshBannerPreview();
 
     box.__m7dsRefresh = function(){
       box.querySelectorAll('input[type="color"]').forEach(input=>{
@@ -6420,6 +6868,7 @@ function observe(){
         if(code) code.textContent = input.value.toUpperCase();
       });
       updatePresetHint();
+      refreshBannerPreview();
     };
   }
 
@@ -6449,7 +6898,9 @@ function observe(){
       values[key] =
         safeHex(
           options[key],
-          key.includes("_bg_") || key.endsWith("_bg_color")
+          key.includes("_bg_") ||
+          key.endsWith("_bg_color") ||
+          key === "profile_banner_color"
             ? DEFAULTS[key]
             : accent
         );
@@ -6624,6 +7075,16 @@ function observe(){
       .m7ds-pane{display:none}.m7ds-pane.active{display:block}
       .m7ds-section-title{margin:11px 0 7px;padding-bottom:6px;border-bottom:1px solid rgba(216,170,88,.10);color:#e9d4ad;font-size:9px;font-weight:950;letter-spacing:.5px;text-transform:uppercase}
       .m7ds-help{margin:10px 0 0;color:#837765;font-size:8px;line-height:1.5}
+      .m7ds-banner-grid{align-items:stretch}
+      .m7ds-banner-upload{position:relative;min-height:64px;padding:9px 11px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed rgba(216,170,88,.26);border-radius:11px;background:rgba(255,255,255,.018);color:#d7c4a5;cursor:pointer;overflow:hidden}
+      .m7ds-banner-upload b{display:block;font-size:9px}
+      .m7ds-banner-upload small{display:block;margin-top:4px;color:#807462;font-size:7.5px;line-height:1.4}
+      .m7ds-banner-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+      .m7ds-banner-preview{position:relative;width:100%;height:92px;margin-top:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(216,170,88,.16);border-radius:12px;background-size:cover;background-position:center;background-repeat:no-repeat;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.75);font-size:8px;font-weight:900;letter-spacing:.5px}
+      .m7ds-banner-preview.off{opacity:.42}
+      .m7ds-banner-actions{display:flex;align-items:center;gap:8px;min-height:30px;margin-top:7px}
+      .m7ds-banner-clear{min-height:29px;padding:0 9px;border:1px solid rgba(216,170,88,.18);border-radius:8px;background:rgba(255,255,255,.02);color:#d7c4a5;font-size:8px;font-weight:850;cursor:pointer}
+      .m7ds-banner-status{flex:1;min-width:0;color:#8fd7aa;font-size:8px;line-height:1.35}
       .m7ds-preview-card{margin-top:12px;padding:14px 12px;border-radius:14px;border:1px solid rgba(216,170,88,.16);background:#0c0a08;text-align:center}
       .m7ds-preview-label{display:flex;align-items:center;justify-content:center;gap:8px;color:#e6c36f;font-size:8px;letter-spacing:1.5px}
       .m7ds-preview-label .m7ds-line{width:52px;height:1px;background:linear-gradient(90deg,transparent,#d9a84e)}
