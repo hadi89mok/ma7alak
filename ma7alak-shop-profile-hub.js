@@ -437,6 +437,257 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
       );
   };
 
+
+/* =========================================================
+   PAGE DESIGN STUDIO — HUB TYPOGRAPHY
+   About keeps its own typography control.
+   Social / Location / Stats / Map use the Hub typography control.
+========================================================= */
+(function(){
+  "use strict";
+
+  const SHOP_SLUG =
+    window.__MA7ALAK_EXACT_HUB_SLUG__;
+
+  function fontStack(mode){
+    return({
+      system:'"Segoe UI",Arial,Helvetica,sans-serif',
+      modern:'"Trebuchet MS","Segoe UI",Arial,sans-serif',
+      elegant:'Georgia,"Times New Roman",serif',
+      classic:'"Times New Roman",Georgia,serif',
+      mono:'"Courier New",Courier,monospace'
+    }[String(mode||"").trim().toLowerCase()]||"");
+  }
+
+  function percent(value){
+    const n=Number(value);
+    return Number.isFinite(n)
+      ? Math.max(70,Math.min(150,n))
+      : 100;
+  }
+
+  function apply(root,options,moduleKey){
+    if(!root)return;
+
+    const globalStyle =
+      String(
+        options.global_font_style ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+    const localStyle =
+      String(
+        options[moduleKey+"_font_style"] ||
+        "inherit"
+      )
+        .trim()
+        .toLowerCase();
+
+    const family =
+      fontStack(
+        localStyle === "inherit"
+          ? globalStyle
+          : localStyle
+      );
+
+    const scale =
+      (
+        percent(options.global_font_size) *
+        percent(options[moduleKey+"_font_size"])
+      ) / 10000;
+
+    [root,...root.querySelectorAll("*")]
+      .forEach(el=>{
+        if(!el||!el.tagName)return;
+
+        const tag =
+          el.tagName.toUpperCase();
+
+        if(
+          [
+            "STYLE","SCRIPT","SVG","PATH",
+            "IMG","VIDEO","IFRAME"
+          ].includes(tag)
+        ){
+          return;
+        }
+
+        const direct =
+          [...(el.childNodes||[])]
+            .some(
+              n=>
+                n.nodeType===3 &&
+                String(n.textContent||"").trim()
+            );
+
+        const form =
+          [
+            "BUTTON","INPUT","TEXTAREA",
+            "SELECT","OPTION","A"
+          ].includes(tag);
+
+        if(!direct&&!form)return;
+
+        if(family){
+          el.style.setProperty(
+            "font-family",
+            family,
+            "important"
+          );
+        }
+        else{
+          el.style.removeProperty(
+            "font-family"
+          );
+        }
+
+        let base =
+          Number(
+            el.dataset.m7BaseFontSize
+          );
+
+        if(
+          !Number.isFinite(base) ||
+          base<=0
+        ){
+          base =
+            parseFloat(
+              getComputedStyle(el)
+                .fontSize
+            );
+
+          if(
+            !Number.isFinite(base) ||
+            base<=0
+          ){
+            return;
+          }
+
+          el.dataset.m7BaseFontSize =
+            String(base);
+        }
+
+        el.style.setProperty(
+          "font-size",
+          (base*scale).toFixed(2)+"px",
+          "important"
+        );
+      });
+  }
+
+  function applyAll(options){
+    apply(
+      document.querySelector(
+        "#ma7alak-exact-merged-hub > .zee-about-card"
+      ),
+      options,
+      "about"
+    );
+
+    [
+      document.querySelector(
+        "#ma7alak-exact-merged-hub > .ma7alak-social-section"
+      ),
+      document.querySelector(
+        "#ma7alak-exact-merged-hub > .ma7alak-location-section"
+      ),
+      document.querySelector(
+        "#ma7alak-exact-merged-hub > .ma7alak-realtime-stats"
+      ),
+      document.getElementById(
+        "ma7alak-exact-map-section"
+      )
+    ]
+      .filter(Boolean)
+      .forEach(
+        root=>
+          apply(
+            root,
+            options,
+            "hub"
+          )
+      );
+  }
+
+  async function loadTypography(){
+    const client =
+      (
+        window.Ma7alakAccount &&
+        window.Ma7alakAccount.client
+      ) ||
+      window.__MA7ALAK_EXACT_HUB_REST_CLIENT__ ||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+      null;
+
+    if(
+      !client ||
+      !SHOP_SLUG
+    ){
+      return;
+    }
+
+    try{
+      const result =
+        await client
+          .from("shop_profiles")
+          .select(
+            "shop_slug,directory_options"
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
+          .maybeSingle();
+
+      if(
+        result.error ||
+        !result.data
+      ){
+        return;
+      }
+
+      const options =
+        result.data.directory_options &&
+        typeof result.data.directory_options ===
+          "object"
+          ? result.data.directory_options
+          : {};
+
+      applyAll(options);
+
+      /*
+        Some proven hub modules rebuild their inner text after
+        the profile request completes. Reapply once after those
+        renderers finish, without a permanent polling loop.
+      */
+      setTimeout(
+        ()=>applyAll(options),
+        250
+      );
+    }
+    catch(error){
+      console.warn(
+        "[Ma7alak Hub] typography:",
+        error
+      );
+    }
+  }
+
+  loadTypography();
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
+      loadTypography
+    );
+  }
+})();
+
+
 /* ===== EXACT OLD ABOUT ENGINE ===== */
 (function(){
   "use strict";
