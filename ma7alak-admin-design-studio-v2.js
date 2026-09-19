@@ -26,6 +26,7 @@
     "video_accent_color",
     "follow_accent_color",
     "live_accent_color",
+    "hours_accent_color",
     "hub_accent_color"
   ]);
 
@@ -78,6 +79,7 @@
     video_accent_color:"$ACCENT",
     follow_accent_color:"$ACCENT",
     live_accent_color:"$ACCENT",
+    hours_accent_color:"$ACCENT",
     hub_accent_color:"$ACCENT"
   };
 
@@ -513,7 +515,92 @@
       .forEach(decorate);
   }
 
+  let globalModuleListenerBound = false;
+
+  function bindGlobalModuleOverrideListener(){
+    if(globalModuleListenerBound){
+      return;
+    }
+
+    globalModuleListenerBound = true;
+
+    document.addEventListener(
+      "input",
+      function(event){
+        const input = event.target;
+
+        if(
+          !input ||
+          input.type !== "color" ||
+          !input.id
+        ){
+          return;
+        }
+
+        const prefix =
+          input.id.startsWith("m7de-")
+            ? "m7de-"
+            : (
+                input.id.startsWith("m7da-")
+                  ? "m7da-"
+                  : ""
+              );
+
+        if(!prefix){
+          return;
+        }
+
+        const key =
+          input.id.slice(
+            prefix.length
+          );
+
+        if(!MODULE_KEYS.has(key)){
+          return;
+        }
+
+        const studio =
+          document
+            .getElementById(
+              prefix +
+              "page_design_preset"
+            )
+            ?.closest(
+              ".m7-design-studio"
+            );
+
+        const toggle =
+          document.getElementById(
+            prefix +
+            "page_use_universal_accent"
+          );
+
+        if(
+          !studio ||
+          !toggle ||
+          !toggle.checked ||
+          studio.dataset.m7dsResetting === "1"
+        ){
+          return;
+        }
+
+        toggle.checked = false;
+
+        toggle.dispatchEvent(
+          new Event(
+            "change",
+            {bubbles:true}
+          )
+        );
+      },
+      true
+    );
+  }
+
+
   async function start(){
+    bindGlobalModuleOverrideListener();
+
     for(let i=0;i<200;i++){
       scan();
 
