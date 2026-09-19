@@ -104,6 +104,9 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     const move=2+intensity*.10;
     const scale=1+intensity*.0005;
     const rotate=.3+intensity*.025;
+    const shimmerWhite=.08+shimmerStrength*.42;
+    const shimmerAccent=.12+shimmerStrength*.48;
+    const shimmerSoft=.06+shimmerStrength*.30;
 
     const surface=hex(o.card_surface_color,"#171611");
     const nameColor=hex(o.card_name_color,"#ffffff");
@@ -127,9 +130,15 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
       "--m7-card-speed:"+speed+"s",
       "--m7-card-intensity:"+(intensity/100).toFixed(2),
       "--m7-card-shimmer:"+shimmerStrength.toFixed(2),
+      "--m7-card-shimmer-white:"+shimmerWhite.toFixed(3),
+      "--m7-card-shimmer-accent:"+shimmerAccent.toFixed(3),
+      "--m7-card-shimmer-soft:"+shimmerSoft.toFixed(3),
       "--m7-card-move:"+move.toFixed(1)+"px",
+      "--m7-card-move-neg:"+(-move).toFixed(1)+"px",
+      "--m7-card-move-quarter:"+(move*.25).toFixed(1)+"px",
       "--m7-card-scale:"+scale.toFixed(4),
       "--m7-card-rotate:"+rotate.toFixed(2)+"deg",
+      "--m7-card-rotate-neg:"+(-rotate).toFixed(2)+"deg",
       "--m7-card-surface:"+surface,
       "--m7-card-name:"+nameColor,
       "--m7-card-meta:"+metaColor,
@@ -331,14 +340,20 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
         linear-gradient(
           112deg,
           transparent 0 38%,
-          rgba(255,255,255,calc(.08 + var(--m7-card-shimmer,.70) * .42)) 47%,
-          rgba(var(--m7-card-accent-rgb,193,166,106),calc(.12 + var(--m7-card-shimmer,.70) * .48)) 52%,
-          rgba(255,255,255,calc(.06 + var(--m7-card-shimmer,.70) * .30)) 57%,
+          rgba(255,255,255,var(--m7-card-shimmer-white,.37)) 47%,
+          rgba(var(--m7-card-accent-rgb,193,166,106),var(--m7-card-shimmer-accent,.46)) 52%,
+          rgba(255,255,255,var(--m7-card-shimmer-soft,.27)) 57%,
           transparent 68% 100%
         );
       background-size:300% 100%;
+      background-position:150% 0;
       animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) linear infinite;
       -webkit-animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) linear infinite;
+      animation-play-state:running;
+      -webkit-animation-play-state:running;
+      will-change:background-position,opacity;
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
     }
 
     @keyframes m7CardAdminShimmer{
@@ -354,11 +369,11 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     }
 
     @keyframes m7CardAdminFloat{
-      50%{transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+      50%{transform:translateY(var(--m7-card-move-neg,-6px))}
     }
 
     @-webkit-keyframes m7CardAdminFloat{
-      50%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * -1))}
+      50%{-webkit-transform:translateY(var(--m7-card-move-neg,-6px))}
     }
 
     @keyframes m7CardAdminPulse{
@@ -370,25 +385,38 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     }
 
     @keyframes m7CardAdminSway{
-      25%{transform:rotate(calc(var(--m7-card-rotate,1.4deg) * -1))}
+      25%{transform:rotate(var(--m7-card-rotate-neg,-1.4deg))}
       75%{transform:rotate(var(--m7-card-rotate,1.4deg))}
     }
 
     @-webkit-keyframes m7CardAdminSway{
-      25%{-webkit-transform:rotate(calc(var(--m7-card-rotate,1.4deg) * -1))}
+      25%{-webkit-transform:rotate(var(--m7-card-rotate-neg,-1.4deg))}
       75%{-webkit-transform:rotate(var(--m7-card-rotate,1.4deg))}
     }
 
     @keyframes m7CardAdminBounce{
       0%,100%{transform:translateY(0)}
-      45%{transform:translateY(calc(var(--m7-card-move,6px) * -1))}
-      62%{transform:translateY(calc(var(--m7-card-move,6px) * .25))}
+      45%{transform:translateY(var(--m7-card-move-neg,-6px))}
+      62%{transform:translateY(var(--m7-card-move-quarter,1.5px))}
     }
 
     @-webkit-keyframes m7CardAdminBounce{
       0%,100%{-webkit-transform:translateY(0)}
-      45%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * -1))}
-      62%{-webkit-transform:translateY(calc(var(--m7-card-move,6px) * .25))}
+      45%{-webkit-transform:translateY(var(--m7-card-move-neg,-6px))}
+      62%{-webkit-transform:translateY(var(--m7-card-move-quarter,1.5px))}
+    }
+
+    .m7d-card.m7d-anim-glow,
+    .m7d-card.m7d-anim-breathe,
+    .m7d-card.m7d-anim-float,
+    .m7d-card.m7d-anim-pulse,
+    .m7d-card.m7d-anim-sway,
+    .m7d-card.m7d-anim-bounce{
+      animation-play-state:running!important;
+      -webkit-animation-play-state:running!important;
+      will-change:transform,box-shadow,opacity;
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
     }
 
     .m7d-card.m7d-anim-float{
