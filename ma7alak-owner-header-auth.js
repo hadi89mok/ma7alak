@@ -8,6 +8,7 @@
 ========================================================= */
 (function(){
 "use strict";
+if(window.self!==window.top)return;
 if(window.__MA7ALAK_UNIFIED_OWNER_V6__)return;window.__MA7ALAK_UNIFIED_OWNER_V6__=true;
 let session=null,owner=null,shop=null,readyResolve,ownerChannel=null,shopChannel=null,pollTimer=null,lastOwnerKey="";
 const readyPromise=new Promise(r=>readyResolve=r),path=()=>((location.pathname||"/").replace(/\/+$/,"")||"/"),esc=v=>String(v||"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[m])),sleep=ms=>new Promise(r=>setTimeout(r,ms));
