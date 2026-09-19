@@ -4372,12 +4372,6 @@ async function setupRealtime(){
 
             await loadNotifications();
 
-            notificationBadgeCount =
-              calculateBadgeCount();
-
-            updateNotificationBadge();
-            renderNotifications();
-
           }
         )
 
@@ -4398,12 +4392,6 @@ async function setupRealtime(){
 
             await loadNotifications();
 
-            notificationBadgeCount =
-              calculateBadgeCount();
-
-            updateNotificationBadge();
-            renderNotifications();
-
             /* Also ask the live Reel block to send its refreshed catalog. */
             requestCurrentReelsState();
 
@@ -4420,12 +4408,6 @@ async function setupRealtime(){
           async function(){
 
             await loadNotifications();
-
-            notificationBadgeCount =
-              calculateBadgeCount();
-
-            updateNotificationBadge();
-            renderNotifications();
 
           }
         )
@@ -4527,18 +4509,6 @@ function setupReelNotificationBridge(){
 
 
       loadNotifications()
-        .then(
-          function(){
-
-            notificationBadgeCount =
-              calculateBadgeCount();
-
-            updateNotificationBadge();
-
-            renderNotifications();
-
-          }
-        )
         .catch(function(){});
 
     }
@@ -4574,12 +4544,16 @@ function startNotificationRefresh(){
 
   /*
      REALTIME is the primary path.
-     This 1.5 second refresh is only a safety net in case Hostinger
-     or the browser misses a realtime/message event.
+     This 30 second refresh is only a recovery safety net in case Hostinger
+     or the browser misses a realtime/message event. Hidden tabs do no work.
   */
   refreshTimer =
     setInterval(
       function(){
+
+        if(document.visibilityState !== "visible"){
+          return;
+        }
 
         requestCurrentReelsState();
 
@@ -4587,7 +4561,7 @@ function startNotificationRefresh(){
           .catch(function(){});
 
       },
-      1500
+      30000
     );
 
 }
@@ -4628,6 +4602,52 @@ async function startMa7alakNotifications(){
 }
 
 
+let lastNotificationResumeRefreshAt = 0;
+
+function refreshNotificationsAfterResume(){
+
+  if(document.visibilityState !== "visible"){
+    return;
+  }
+
+  const now = Date.now();
+
+  if(
+    now - lastNotificationResumeRefreshAt <
+    1000
+  ){
+    return;
+  }
+
+  lastNotificationResumeRefreshAt = now;
+
+  requestCurrentReelsState();
+
+  loadNotifications()
+    .catch(function(){});
+
+}
+
+document.addEventListener(
+  "visibilitychange",
+  function(){
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+      refreshNotificationsAfterResume();
+    }
+
+  }
+);
+
+window.addEventListener(
+  "focus",
+  refreshNotificationsAfterResume
+);
+
+
 /* =========================================================
    START AFTER PAGE LOAD
 ========================================================= */
@@ -4660,7 +4680,7 @@ else{
    4. New Story/Reel/Live update gets a new signature and brings the badge back.
    5. Story realtime INSERT updates immediately.
    6. Reel state messages update immediately.
-   7. 1.5s backup refresh requests Story + Reel + Live state if an event is missed.
+   7. 30s recovery refresh requests Story + Reel + Live state if an event is missed.
    8. Reel notification opens the exact Reel ID in the existing header viewer.
 ========================================================= */
 
