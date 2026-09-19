@@ -4685,8 +4685,21 @@ async function clearExpiredFeatures(){
 
 function panelKey(panel,index){return "m7_admin_panel_"+(panel.id||panel.querySelector("h2")?.textContent||index).trim().toLowerCase().replace(/[^a-z0-9]+/g,"_")}
 function setCollapsed(panel,button,collapsed,key){panel.classList.toggle("m7-admin-collapsed",collapsed);button.textContent=collapsed?"Unhide":"Hide";button.setAttribute("aria-expanded",String(!collapsed));try{localStorage.setItem(key,collapsed?"1":"0")}catch(_){}}
+function removeLegacyPanelToggleUi(){
+  const dash=$("ma-admin-dashboard");if(!dash)return;
+  dash.querySelectorAll(".m7-panel-toggle").forEach(x=>x.remove());
+  $("m7-admin-panel-toolbar")?.remove();
+  dash.querySelectorAll(".m7-admin-collapsed").forEach(panel=>{
+    panel.classList.remove("m7-admin-collapsed");
+  });
+}
+window.Ma7alakRemoveLegacyPanelToggleUi=removeLegacyPanelToggleUi;
 function installPanelToggles(){
   const dash=$("ma-admin-dashboard");if(!dash)return;
+  if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__){
+    removeLegacyPanelToggleUi();
+    return;
+  }
   dash.querySelectorAll(".m7-collapse-btn").forEach(x=>x.remove());
   [...dash.children].forEach((panel,index)=>{
     if(panel.id==="m7-shop-control"||panel.classList.contains("ma-admin-welcome")||panel.dataset.m7AllPanel)return;
@@ -5748,6 +5761,10 @@ function saveState(){
 
 function reveal(action){
   const m={edit:"edit",gallery:"gallery",video:"video",reels:"reels"},k=m[action];if(!k)return;
+  if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__){
+    setTimeout(saveState,40);
+    return;
+  }
   pref.hidden[k]=false;pref.collapsed[k]=false;savePrefs();
   setTimeout(()=>{setVis(k,true,false);setFold(k,false,false);saveState()},40);
 }
@@ -5771,12 +5788,34 @@ function pinAdminToolsBottom(){
   }
 }
 
+function cleanupLegacyDeckUi(){
+  document.getElementById("m7deck")?.remove();
+  document.getElementById("m7drawer")?.remove();
+  document.getElementById("m7drawerbg")?.remove();
+  document.body.classList.remove("m7draweropen");
+
+  document.querySelectorAll(".m7ph").forEach(header=>header.remove());
+
+  document.querySelectorAll(".m7panel").forEach(el=>{
+    el.classList.remove("m7panel","m7hidden","m7collapsed");
+    delete el.dataset.m7deck;
+  });
+}
+window.Ma7alakRemoveLegacyDeckUi=cleanupLegacyDeckUi;
+
 function decorateAll(){
-  toolbar();ensureDrawer();ensureSave();mountLabels();patchDirectory();
+  ensureSave();mountLabels();patchDirectory();pinAdminToolsBottom();
+
+  if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__){
+    cleanupLegacyDeckUi();
+    saveState();
+    return;
+  }
+
+  toolbar();ensureDrawer();
   decorate("add","Add New Shop","＋");
   PANELS.forEach(r=>decorate(r[0],r[1],r[2]));
   foldsets();
-  pinAdminToolsBottom();
   draw();saveState();
 }
 function observe(){
@@ -11934,6 +11973,9 @@ function mount(){
   document.body.classList.add("m7-admin-v4");
   markLegacyPanels();
 
+  window.Ma7alakRemoveLegacyPanelToggleUi?.();
+  window.Ma7alakRemoveLegacyDeckUi?.();
+
   const root=document.createElement("section");
   root.id="m7-admin-workspace-v4";
   root.innerHTML=`
@@ -12104,6 +12146,8 @@ async function ready(){
 
   const observer=new MutationObserver(()=>{
     markLegacyPanels();
+    window.Ma7alakRemoveLegacyPanelToggleUi?.();
+    window.Ma7alakRemoveLegacyDeckUi?.();
     if(selectedSlug&&!legacyCard(selectedSlug)){
       const search=document.getElementById("ma-admin-shop-search");
       if(search&&search.value){
