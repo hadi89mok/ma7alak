@@ -2429,6 +2429,7 @@
     const {data,error}=await client.from("shop_reels")
       .select("reel_id,video_url,caption,active,created_at")
       .eq("shop_slug",ownerInfo.shop_slug)
+      .eq("active",true)
       .order("created_at",{ascending:false});
     if(error) throw error;
     const box=document.getElementById("ma-or-list");
@@ -2491,16 +2492,36 @@
   }
 
   async function removeReel(id,button){
-    if(!window.confirm("Delete this homepage Reel?")) return;
+    if(!window.confirm("Permanently delete this homepage Reel?")) return;
     button.disabled=true;
     try{
-      const {data,error}=await client.rpc("delete_my_reel",{p_reel_id:id});
+      const target=await client
+        .from("shop_reels")
+        .select("reel_id,video_url")
+        .eq("reel_id",id)
+        .eq("shop_slug",ownerInfo.shop_slug)
+        .maybeSingle();
+
+      if(target.error) throw target.error;
+      if(!target.data) throw new Error("Reel not found.");
+
+      const path=storagePathFromUrl(target.data.video_url);
+
+      if(path && path.indexOf("reels/"+ownerInfo.shop_slug+"/")===0){
+        const storageResult=await client.storage.from(STORAGE_BUCKET).remove([path]);
+        if(storageResult.error) throw storageResult.error;
+      }
+
+      const {error}=await client.rpc("delete_my_reel",{p_reel_id:id});
       if(error) throw error;
-      const path=storagePathFromUrl(data);
-      if(path && path.indexOf("reels/"+ownerInfo.shop_slug+"/")===0) await cleanup(path);
-      await quota(); await list();
-      status("Reel deleted. One quota slot is free again.","success");
-    }catch(error){ status(error.message||"Could not delete Reel.","error"); button.disabled=false; }
+
+      await quota();
+      await list();
+      status("Reel permanently deleted. One quota slot is free again.","success");
+    }catch(error){
+      status(error.message||"Could not delete Reel.","error");
+      button.disabled=false;
+    }
   }
 
   let pageScrollY=0;
