@@ -8383,7 +8383,7 @@ function ensureCss(){
     }
 
     @keyframes m7cdGlow{
-      0%,100%{box-shadow:0 11px 28px rgba(0,0,0,var(--p-shadow)),0 0 10px rgba(var(--p-rgb),calc(var(--p-glow)*.45))}
+      0%,100%{box-shadow:0 11px 28px rgba(0,0,0,var(--p-shadow)),0 0 10px rgba(var(--p-rgb),var(--p-glow-soft,.13))}
       50%{box-shadow:0 11px 28px rgba(0,0,0,var(--p-shadow)),0 0 28px rgba(var(--p-rgb),var(--p-glow))}
     }
 
@@ -8404,7 +8404,7 @@ function ensureCss(){
     }
 
     @keyframes m7cdFloat{
-      50%{transform:translateY(calc(var(--p-move) * -1))}
+      50%{transform:translateY(var(--p-move-neg,-6px))}
     }
 
     @keyframes m7cdPulse{
@@ -8412,14 +8412,14 @@ function ensureCss(){
     }
 
     @keyframes m7cdSway{
-      25%{transform:rotate(calc(var(--p-rotate) * -1))}
+      25%{transform:rotate(var(--p-rotate-neg,-1.4deg))}
       75%{transform:rotate(var(--p-rotate))}
     }
 
     @keyframes m7cdBounce{
       0%,100%{transform:translateY(0)}
-      45%{transform:translateY(calc(var(--p-move) * -1))}
-      62%{transform:translateY(calc(var(--p-move) * .25))}
+      45%{transform:translateY(var(--p-move-neg,-6px))}
+      62%{transform:translateY(var(--p-move-quarter,1.5px))}
     }
 
     .m7cd-preview.anim-glow{animation:m7cdGlow var(--p-speed) ease-in-out infinite}
@@ -8435,10 +8435,16 @@ function ensureCss(){
       inset:-15%;
       z-index:5;
       pointer-events:none;
-      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,calc(.08 + var(--p-shimmer) * .42)) 47%,rgba(var(--p-rgb),calc(.12 + var(--p-shimmer) * .48)) 52%,rgba(255,255,255,calc(.06 + var(--p-shimmer) * .30)) 57%,transparent 68% 100%);
+      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,var(--p-shimmer-white,.37)) 47%,rgba(var(--p-rgb),var(--p-shimmer-accent,.46)) 52%,rgba(255,255,255,var(--p-shimmer-soft,.27)) 57%,transparent 68% 100%);
       background-size:300% 100%;
+      background-position:150% 0;
       animation:m7cdShimmer var(--p-speed) linear infinite;
-      mix-blend-mode:screen;
+      -webkit-animation:m7cdShimmer var(--p-speed) linear infinite;
+      animation-play-state:running;
+      -webkit-animation-play-state:running;
+      will-change:background-position,opacity;
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
     }
 
     @media(max-width:760px){
@@ -8595,11 +8601,22 @@ function refreshPreview(box){
   preview.style.setProperty("--p-speed",number(input(box,"card_animation_speed")?.value,.8,8,2.4)+"s");
   const intensity=number(input(box,"card_animation_intensity")?.value,0,100,55);
   const shimmer=number(input(box,"card_shimmer_strength")?.value,0,100,70);
+  const glowValue=number(input(box,"card_glow_strength")?.value,0,100,28)/100;
+  const shimmerValue=shimmer/100;
+  const move=2+intensity*.10;
+  const rotate=.3+intensity*.025;
   preview.style.setProperty("--p-intensity",(intensity/100).toFixed(2));
-  preview.style.setProperty("--p-shimmer",(shimmer/100).toFixed(2));
-  preview.style.setProperty("--p-move",(2+intensity*.10).toFixed(1)+"px");
+  preview.style.setProperty("--p-shimmer",shimmerValue.toFixed(2));
+  preview.style.setProperty("--p-shimmer-white",(.08+shimmerValue*.42).toFixed(3));
+  preview.style.setProperty("--p-shimmer-accent",(.12+shimmerValue*.48).toFixed(3));
+  preview.style.setProperty("--p-shimmer-soft",(.06+shimmerValue*.30).toFixed(3));
+  preview.style.setProperty("--p-glow-soft",(glowValue*.45).toFixed(3));
+  preview.style.setProperty("--p-move",move.toFixed(1)+"px");
+  preview.style.setProperty("--p-move-neg",(-move).toFixed(1)+"px");
+  preview.style.setProperty("--p-move-quarter",(move*.25).toFixed(1)+"px");
   preview.style.setProperty("--p-scale",(1+intensity*.0005).toFixed(4));
-  preview.style.setProperty("--p-rotate",(.3+intensity*.025).toFixed(2)+"deg");
+  preview.style.setProperty("--p-rotate",rotate.toFixed(2)+"deg");
+  preview.style.setProperty("--p-rotate-neg",(-rotate).toFixed(2)+"deg");
   preview.style.setProperty("--p-surface",safeHex(input(box,"card_surface_color")?.value,DEFAULTS.card_surface_color));
   preview.style.setProperty("--p-name",safeHex(input(box,"card_name_color")?.value,DEFAULTS.card_name_color));
   preview.style.setProperty("--p-meta",safeHex(input(box,"card_meta_color")?.value,DEFAULTS.card_meta_color));
@@ -9790,7 +9807,13 @@ function ensureCss(){
     .m7pv-anim{
       display:inline-block;
       transform-origin:center;
+      animation-play-state:running;
+      -webkit-animation-play-state:running;
       will-change:transform,filter,background-position,opacity;
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
+      transform:translateZ(0);
+      -webkit-transform:translateZ(0);
     }
 
     .m7pv-anim-glow{
@@ -9840,35 +9863,63 @@ function ensureCss(){
       color:transparent!important;
       -webkit-text-fill-color:transparent!important;
       animation:m7pvTextShimmer var(--m7-anim-speed,2.4s) linear infinite;
-      filter:drop-shadow(0 0 calc(var(--m7-glow-px,10px) * .35) var(--m7-anim-color,#d9aa58));
+      filter:drop-shadow(0 0 var(--m7-glow-soft-px,4px) var(--m7-anim-color,#d9aa58));
     }
 
     @keyframes m7pvTextGlow{
-      0%,100%{text-shadow:0 0 calc(var(--m7-glow-px,10px) * .25) var(--m7-anim-color,currentColor)}
-      50%{text-shadow:0 0 var(--m7-glow-px,10px) var(--m7-anim-color,currentColor),0 0 calc(var(--m7-glow-px,10px) * 1.7) var(--m7-anim-color,currentColor)}
+      0%,100%{text-shadow:0 0 var(--m7-glow-low-px,3px) var(--m7-anim-color,currentColor)}
+      50%{text-shadow:0 0 var(--m7-glow-px,10px) var(--m7-anim-color,currentColor),0 0 var(--m7-glow-far-px,17px) var(--m7-anim-color,currentColor)}
+    }
+
+    @-webkit-keyframes m7pvTextGlow{
+      0%,100%{text-shadow:0 0 var(--m7-glow-low-px,3px) var(--m7-anim-color,currentColor)}
+      50%{text-shadow:0 0 var(--m7-glow-px,10px) var(--m7-anim-color,currentColor),0 0 var(--m7-glow-far-px,17px) var(--m7-anim-color,currentColor)}
     }
 
     @keyframes m7pvTextBreathe{
       50%{transform:scale(var(--m7-scale-max,1.035))}
     }
 
+    @-webkit-keyframes m7pvTextBreathe{
+      50%{-webkit-transform:scale(var(--m7-scale-max,1.035))}
+    }
+
     @keyframes m7pvTextFloat{
-      50%{transform:translateY(calc(var(--m7-float-px,6px) * -1))}
+      50%{transform:translateY(var(--m7-float-neg-px,-6px))}
+    }
+
+    @-webkit-keyframes m7pvTextFloat{
+      50%{-webkit-transform:translateY(var(--m7-float-neg-px,-6px))}
     }
 
     @keyframes m7pvTextPulse{
       50%{transform:scale(var(--m7-scale-max,1.035));opacity:.72}
     }
 
+    @-webkit-keyframes m7pvTextPulse{
+      50%{-webkit-transform:scale(var(--m7-scale-max,1.035));opacity:.72}
+    }
+
     @keyframes m7pvTextSway{
-      25%{transform:rotate(calc(var(--m7-rotate-deg,1.5deg) * -1))}
+      25%{transform:rotate(var(--m7-rotate-neg-deg,-1.5deg))}
       75%{transform:rotate(var(--m7-rotate-deg,1.5deg))}
+    }
+
+    @-webkit-keyframes m7pvTextSway{
+      25%{-webkit-transform:rotate(var(--m7-rotate-neg-deg,-1.5deg))}
+      75%{-webkit-transform:rotate(var(--m7-rotate-deg,1.5deg))}
     }
 
     @keyframes m7pvTextBounce{
       0%,100%{transform:translateY(0)}
-      45%{transform:translateY(calc(var(--m7-float-px,6px) * -1))}
-      62%{transform:translateY(calc(var(--m7-float-px,6px) * .25))}
+      45%{transform:translateY(var(--m7-float-neg-px,-6px))}
+      62%{transform:translateY(var(--m7-float-quarter-px,1.5px))}
+    }
+
+    @-webkit-keyframes m7pvTextBounce{
+      0%,100%{-webkit-transform:translateY(0)}
+      45%{-webkit-transform:translateY(var(--m7-float-neg-px,-6px))}
+      62%{-webkit-transform:translateY(var(--m7-float-quarter-px,1.5px))}
     }
 
     @keyframes m7pvTextFlicker{
@@ -9876,7 +9927,17 @@ function ensureCss(){
       20%,24%,55%{opacity:.42}
     }
 
+    @-webkit-keyframes m7pvTextFlicker{
+      0%,18%,22%,25%,53%,57%,100%{opacity:1}
+      20%,24%,55%{opacity:.42}
+    }
+
     @keyframes m7pvTextShimmer{
+      from{background-position:130% 50%}
+      to{background-position:-130% 50%}
+    }
+
+    @-webkit-keyframes m7pvTextShimmer{
       from{background-position:130% 50%}
       to{background-position:-130% 50%}
     }
@@ -10056,7 +10117,7 @@ function ensureCss(){
       background:var(--pc-surface,#171611);
       box-shadow:
         0 14px 34px rgba(0,0,0,var(--pc-shadow,.48)),
-        0 0 22px color-mix(in srgb,var(--pc-accent,#dabb7a) calc(var(--pc-glow,.28) * 100%),transparent);
+        0 0 22px rgba(var(--pc-rgb,218,187,122),var(--pc-glow,.28));
     }
 
     .m7pv-card-cover{
@@ -10130,10 +10191,16 @@ function ensureCss(){
       inset:-15%;
       z-index:8;
       pointer-events:none;
-      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,calc(.08 + var(--pc-shimmer,.70) * .42)) 47%,rgba(255,255,255,calc(.10 + var(--pc-shimmer,.70) * .60)) 52%,rgba(255,255,255,calc(.06 + var(--pc-shimmer,.70) * .30)) 57%,transparent 68% 100%);
+      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,var(--pc-shimmer-white,.37)) 47%,rgba(var(--pc-rgb,218,187,122),var(--pc-shimmer-accent,.46)) 52%,rgba(255,255,255,var(--pc-shimmer-soft,.27)) 57%,transparent 68% 100%);
       background-size:300% 100%;
+      background-position:150% 0;
       animation:m7pvCardShimmer var(--pc-speed,2.4s) linear infinite;
-      mix-blend-mode:screen;
+      -webkit-animation:m7pvCardShimmer var(--pc-speed,2.4s) linear infinite;
+      animation-play-state:running;
+      -webkit-animation-play-state:running;
+      will-change:background-position,opacity;
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
     }
 
     @keyframes m7pvCardBreathe{
@@ -10141,7 +10208,7 @@ function ensureCss(){
     }
 
     @keyframes m7pvCardFloat{
-      50%{transform:translateY(calc(var(--pc-move,6px) * -1))}
+      50%{transform:translateY(var(--pc-move-neg,-6px))}
     }
 
     @keyframes m7pvCardPulse{
@@ -10149,17 +10216,23 @@ function ensureCss(){
     }
 
     @keyframes m7pvCardSway{
-      25%{transform:rotate(calc(var(--pc-rotate,1.4deg) * -1))}
+      25%{transform:rotate(var(--pc-rotate-neg,-1.4deg))}
       75%{transform:rotate(var(--pc-rotate,1.4deg))}
     }
 
     @keyframes m7pvCardBounce{
       0%,100%{transform:translateY(0)}
-      45%{transform:translateY(calc(var(--pc-move,6px) * -1))}
-      62%{transform:translateY(calc(var(--pc-move,6px) * .25))}
+      45%{transform:translateY(var(--pc-move-neg,-6px))}
+      62%{transform:translateY(var(--pc-move-quarter,1.5px))}
     }
 
     @keyframes m7pvCardShimmer{
+      from{background-position:150% 0;opacity:.15}
+      45%,55%{opacity:1}
+      to{background-position:-150% 0;opacity:.15}
+    }
+
+    @-webkit-keyframes m7pvCardShimmer{
       from{background-position:150% 0;opacity:.15}
       45%,55%{opacity:1}
       to{background-position:-150% 0;opacity:.15}
@@ -11442,15 +11515,26 @@ function previewAnimStyle(color){
   const scale=(1+fx.intensity*.0007).toFixed(4);
   const rotate=(.35+fx.intensity*.02).toFixed(2);
   const floatPx=(fx.distance*(.35+fx.intensity/100)).toFixed(2);
-  const glowPx=(2+fx.glow*.18).toFixed(2);
+  const glowPx=(2+fx.glow*.18);
+  const glowSoft=Math.max(1,glowPx*.35);
+  const glowLow=Math.max(1,glowPx*.25);
+  const glowFar=Math.max(2,glowPx*1.7);
+  const floatNumber=Number(floatPx);
+  const rotateNumber=Number(rotate);
 
   return [
     "--m7-anim-color:"+color,
     "--m7-anim-speed:"+fx.speed+"s",
-    "--m7-glow-px:"+glowPx+"px",
+    "--m7-glow-px:"+glowPx.toFixed(2)+"px",
+    "--m7-glow-soft-px:"+glowSoft.toFixed(2)+"px",
+    "--m7-glow-low-px:"+glowLow.toFixed(2)+"px",
+    "--m7-glow-far-px:"+glowFar.toFixed(2)+"px",
     "--m7-scale-max:"+scale,
-    "--m7-rotate-deg:"+rotate+"deg",
-    "--m7-float-px:"+floatPx+"px",
+    "--m7-rotate-deg:"+rotateNumber.toFixed(2)+"deg",
+    "--m7-rotate-neg-deg:"+(-rotateNumber).toFixed(2)+"deg",
+    "--m7-float-px:"+floatNumber.toFixed(2)+"px",
+    "--m7-float-neg-px:"+(-floatNumber).toFixed(2)+"px",
+    "--m7-float-quarter-px:"+(floatNumber*.25).toFixed(2)+"px",
     "--m7-shimmer-color:rgba(255,255,255,"+Math.min(1,Number(alpha))+")"
   ].join(";");
 }
@@ -12182,12 +12266,19 @@ function previewCardHtml(shop){
   const cardShimmer=
     Math.max(0,Math.min(100,Number(option("card_shimmer_strength")||70)))/100;
 
-  const cardMove=(2+cardIntensity*.10).toFixed(1);
+  const cardMove=2+cardIntensity*.10;
   const cardScale=(1+cardIntensity*.0005).toFixed(4);
-  const cardRotate=(.3+cardIntensity*.025).toFixed(2);
+  const cardRotate=.3+cardIntensity*.025;
+  const cleanAccent=String(accent).replace("#","");
+  const cardR=parseInt(cleanAccent.slice(0,2),16)||218;
+  const cardG=parseInt(cleanAccent.slice(2,4),16)||187;
+  const cardB=parseInt(cleanAccent.slice(4,6),16)||122;
+  const shimmerWhite=(.08+cardShimmer*.42).toFixed(3);
+  const shimmerAccent=(.12+cardShimmer*.48).toFixed(3);
+  const shimmerSoft=(.06+cardShimmer*.30).toFixed(3);
 
   return '<div class="m7pv-card-wrap">'+
-    '<div class="m7pv-card'+animationClass+'" style="--pc-accent:'+esc(accent)+';--pc-radius:'+radius+'px;--pc-border:'+border+'px;--pc-cover:'+coverHeight+'px;--pc-shadow:'+shadow+';--pc-glow:'+glow+';--pc-speed:'+cardSpeed+'s;--pc-shimmer:'+cardShimmer+';--pc-move:'+cardMove+'px;--pc-scale:'+cardScale+';--pc-rotate:'+cardRotate+'deg;--pc-surface:'+esc(surface)+';--pc-name:'+esc(nameColor)+';--pc-meta:'+esc(metaColor)+';--pc-btn:'+esc(btnColor)+';--pc-btn-bg:'+esc(btnBg)+';--pc-cover-image:'+coverStyle+';">'+
+    '<div class="m7pv-card'+animationClass+'" style="--pc-accent:'+esc(accent)+';--pc-rgb:'+cardR+','+cardG+','+cardB+';--pc-radius:'+radius+'px;--pc-border:'+border+'px;--pc-cover:'+coverHeight+'px;--pc-shadow:'+shadow+';--pc-glow:'+glow+';--pc-speed:'+cardSpeed+'s;--pc-shimmer:'+cardShimmer+';--pc-shimmer-white:'+shimmerWhite+';--pc-shimmer-accent:'+shimmerAccent+';--pc-shimmer-soft:'+shimmerSoft+';--pc-move:'+cardMove.toFixed(1)+'px;--pc-move-neg:'+(-cardMove).toFixed(1)+'px;--pc-move-quarter:'+(cardMove*.25).toFixed(1)+'px;--pc-scale:'+cardScale+';--pc-rotate:'+cardRotate.toFixed(2)+'deg;--pc-rotate-neg:'+(-cardRotate).toFixed(2)+'deg;--pc-surface:'+esc(surface)+';--pc-name:'+esc(nameColor)+';--pc-meta:'+esc(metaColor)+';--pc-btn:'+esc(btnColor)+';--pc-btn-bg:'+esc(btnBg)+';--pc-cover-image:'+coverStyle+';">'+
       '<div class="m7pv-card-cover"></div>'+
       '<div class="m7pv-card-body">'+
         '<b>'+esc(name)+'</b>'+
