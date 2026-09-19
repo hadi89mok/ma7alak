@@ -939,33 +939,12 @@
       );
     }
 
+    /*
+       Admin Workspace V4 keeps the Add/Edit forms mounted permanently.
+       The startup loop above already mounts and patches Design Studio V2,
+       so a whole-document observer is unnecessary.
+    */
     boot();
-
-    let queued = false;
-
-    new MutationObserver(
-      ()=>{
-        if(queued){
-          return;
-        }
-
-        queued = true;
-
-        requestAnimationFrame(
-          ()=>{
-            queued = false;
-            boot();
-          }
-        );
-      }
-    )
-      .observe(
-        document.documentElement,
-        {
-          childList:true,
-          subtree:true
-        }
-      );
   }
 
   start().catch(
