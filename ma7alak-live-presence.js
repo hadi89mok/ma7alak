@@ -1,6 +1,7 @@
 /* MA7ALAK UNIVERSAL LIVE PRESENCE + STATS ENGINE V2 — SHARED SUPABASE */
 (function(){
 "use strict";
+if(window.self!==window.top)return;
 if(window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__)return;window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__=true;
 const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",HEARTBEAT_MS=2000,STATS_REFRESH_MS=2000;
 let client=null,detectedShopSlug="",stopped=false,heartbeatTimer=null,statsTimer=null,domObserver=null,paintQueued=false;
