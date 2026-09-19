@@ -6991,3 +6991,505 @@ function observe(){
   document.head.appendChild(script);
 
 })();
+
+
+/* =========================================================
+   MA7ALAK — SHOP OPENING SCHEDULE ADMIN V1
+   ---------------------------------------------------------
+   Stores per-shop opening hours inside:
+   shop_profiles.directory_options.hours_schedule
+
+   No new SQL table required.
+   The public Hours pill reads the same object and switches
+   OPEN / CLOSED automatically using Asia/Beirut time.
+========================================================= */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin") return;
+if(window.__MA7ALAK_HOURS_SCHEDULE_ADMIN_V1__) return;
+window.__MA7ALAK_HOURS_SCHEDULE_ADMIN_V1__=true;
+
+const DAYS=[
+  ["monday","Monday"],
+  ["tuesday","Tuesday"],
+  ["wednesday","Wednesday"],
+  ["thursday","Thursday"],
+  ["friday","Friday"],
+  ["saturday","Saturday"],
+  ["sunday","Sunday"]
+];
+
+const DEFAULT_DAY={
+  enabled:false,
+  open:"09:00",
+  close:"17:00"
+};
+
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function normalizeTime(value,fallback){
+  const raw=String(value||"").trim();
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(raw)
+    ? raw
+    : fallback;
+}
+
+function normalizeDay(value){
+  const row=value&&typeof value==="object"?value:{};
+  return {
+    enabled:
+      row.enabled===true ||
+      String(row.enabled).toLowerCase()==="true",
+    open:normalizeTime(row.open,DEFAULT_DAY.open),
+    close:normalizeTime(row.close,DEFAULT_DAY.close)
+  };
+}
+
+function currentSchedule(options){
+  const source=
+    options &&
+    options.hours_schedule &&
+    typeof options.hours_schedule==="object"
+      ? options.hours_schedule
+      : {};
+
+  const result={};
+
+  DAYS.forEach(([key])=>{
+    result[key]=normalizeDay(source[key]);
+  });
+
+  return result;
+}
+
+function ensureCss(){
+  if(document.getElementById("m7-hours-schedule-admin-css")) return;
+
+  const style=document.createElement("style");
+  style.id="m7-hours-schedule-admin-css";
+  style.textContent=`
+    .m7-hours-schedule-box{
+      margin:18px 0;
+      padding:16px;
+      border:1px solid rgba(217,164,65,.28);
+      border-radius:16px;
+      background:
+        radial-gradient(circle at 10% 0%,rgba(217,164,65,.08),transparent 32%),
+        rgba(14,11,9,.94);
+      color:#ead9ba;
+    }
+
+    .m7-hours-schedule-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .m7-hours-schedule-head strong{
+      display:block;
+      color:#f1d59a;
+      font-size:13px;
+      font-weight:950;
+    }
+
+    .m7-hours-schedule-head small{
+      display:block;
+      margin-top:4px;
+      color:#9f927d;
+      font-size:9px;
+      line-height:1.45;
+    }
+
+    .m7-hours-schedule-zone{
+      flex:0 0 auto;
+      padding:6px 8px;
+      border:1px solid rgba(65,218,132,.20);
+      border-radius:999px;
+      background:rgba(65,218,132,.06);
+      color:#6ee3a2;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+
+    .m7-hours-schedule-days{
+      display:grid;
+      gap:7px;
+    }
+
+    .m7-hours-day{
+      display:grid;
+      grid-template-columns:minmax(90px,1fr) minmax(95px,125px) minmax(95px,125px);
+      gap:8px;
+      align-items:center;
+      padding:9px;
+      border:1px solid rgba(255,255,255,.055);
+      border-radius:12px;
+      background:rgba(255,255,255,.018);
+    }
+
+    .m7-hours-day-name{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+      color:#eee0c6;
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .m7-hours-day-name input{
+      width:17px!important;
+      height:17px!important;
+      min-height:17px!important;
+      padding:0!important;
+      accent-color:#d9a441;
+      flex:0 0 17px;
+    }
+
+    .m7-hours-time{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      color:#8e816d;
+      font-size:7px;
+      font-weight:850;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+    }
+
+    .m7-hours-time input{
+      width:100%!important;
+      min-height:36px!important;
+      padding:0 8px!important;
+      border:1px solid rgba(217,164,65,.16)!important;
+      border-radius:9px!important;
+      background:#090807!important;
+      color:#fff!important;
+      color-scheme:dark;
+      box-sizing:border-box!important;
+    }
+
+    .m7-hours-day.is-closed .m7-hours-time{
+      opacity:.38;
+    }
+
+    .m7-hours-actions{
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .m7-hours-actions button{
+      min-height:33px;
+      padding:0 10px;
+      border:1px solid rgba(217,164,65,.18);
+      border-radius:10px;
+      background:rgba(217,164,65,.055);
+      color:#d8c39e;
+      font-size:8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .m7-hours-actions button:active{
+      transform:scale(.98);
+    }
+
+    .m7-hours-help{
+      margin:10px 0 0;
+      color:#817562;
+      font-size:8px;
+      line-height:1.5;
+    }
+
+    @media(max-width:620px){
+      .m7-hours-day{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .m7-hours-day-name{
+        grid-column:1/-1;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function dayHtml(prefix,key,label){
+  return `
+    <div class="m7-hours-day is-closed" data-hours-day="${esc(key)}">
+      <label class="m7-hours-day-name">
+        <input
+          id="${esc(prefix+"hours-"+key+"-enabled")}"
+          type="checkbox"
+          data-hours-enabled="${esc(key)}"
+        >
+        <span>${esc(label)}</span>
+      </label>
+
+      <label class="m7-hours-time">
+        Opens
+        <input
+          id="${esc(prefix+"hours-"+key+"-open")}"
+          type="time"
+          value="09:00"
+          step="60"
+        >
+      </label>
+
+      <label class="m7-hours-time">
+        Closes
+        <input
+          id="${esc(prefix+"hours-"+key+"-close")}"
+          type="time"
+          value="17:00"
+          step="60"
+        >
+      </label>
+    </div>
+  `;
+}
+
+function ensureForm(form,prefix){
+  if(!form) return null;
+
+  let box=form.querySelector(".m7-hours-schedule-box");
+
+  if(!box){
+    ensureCss();
+
+    box=document.createElement("fieldset");
+    box.className="m7-hours-schedule-box";
+    box.innerHTML=`
+      <div class="m7-hours-schedule-head">
+        <div>
+          <strong>Opening Schedule — Automatic Open / Closed</strong>
+          <small>
+            Choose which days this shop opens and the opening/closing time.
+            The shop page switches automatically using Lebanon time.
+          </small>
+        </div>
+        <span class="m7-hours-schedule-zone">ASIA / BEIRUT</span>
+      </div>
+
+      <div class="m7-hours-schedule-days">
+        ${DAYS.map(([key,label])=>dayHtml(prefix,key,label)).join("")}
+      </div>
+
+      <div class="m7-hours-actions">
+        <button type="button" data-hours-copy-monday>
+          Copy Monday to all days
+        </button>
+        <button type="button" data-hours-close-all>
+          Mark all days closed
+        </button>
+      </div>
+
+      <p class="m7-hours-help">
+        Overnight hours are supported. Example: 09:00 → 01:00 means the shop
+        stays open past midnight until 1:00 AM the next day.
+      </p>
+    `;
+
+    const home=form.querySelector(".m7da-home-fields");
+    const design=form.querySelector(".m7-design-studio");
+
+    if(design){
+      design.before(box);
+    }else if(home){
+      home.before(box);
+    }else{
+      form.appendChild(box);
+    }
+
+    function syncDay(key){
+      const enabled=document.getElementById(prefix+"hours-"+key+"-enabled");
+      const row=box.querySelector('[data-hours-day="'+key+'"]');
+      if(!enabled||!row)return;
+      row.classList.toggle("is-closed",!enabled.checked);
+      row.querySelectorAll('input[type="time"]').forEach(input=>{
+        input.disabled=!enabled.checked;
+      });
+    }
+
+    DAYS.forEach(([key])=>{
+      const input=document.getElementById(prefix+"hours-"+key+"-enabled");
+      input?.addEventListener("change",()=>syncDay(key));
+      syncDay(key);
+    });
+
+    box.querySelector("[data-hours-copy-monday]")?.addEventListener("click",()=>{
+      const sourceEnabled=!!document.getElementById(prefix+"hours-monday-enabled")?.checked;
+      const sourceOpen=String(document.getElementById(prefix+"hours-monday-open")?.value||"09:00");
+      const sourceClose=String(document.getElementById(prefix+"hours-monday-close")?.value||"17:00");
+
+      DAYS.forEach(([key])=>{
+        const enabled=document.getElementById(prefix+"hours-"+key+"-enabled");
+        const open=document.getElementById(prefix+"hours-"+key+"-open");
+        const close=document.getElementById(prefix+"hours-"+key+"-close");
+        if(enabled)enabled.checked=sourceEnabled;
+        if(open)open.value=sourceOpen;
+        if(close)close.value=sourceClose;
+        syncDay(key);
+      });
+    });
+
+    box.querySelector("[data-hours-close-all]")?.addEventListener("click",()=>{
+      DAYS.forEach(([key])=>{
+        const enabled=document.getElementById(prefix+"hours-"+key+"-enabled");
+        if(enabled)enabled.checked=false;
+        syncDay(key);
+      });
+    });
+
+    box.__m7SyncDay=syncDay;
+  }
+
+  return box;
+}
+
+function fillSchedule(prefix,options){
+  const form=document.getElementById(
+    prefix==="m7de-"
+      ? "ma-admin-edit-form"
+      : "ma-admin-shop-form"
+  );
+
+  const box=ensureForm(form,prefix);
+  if(!box)return;
+
+  const schedule=currentSchedule(options);
+
+  DAYS.forEach(([key])=>{
+    const row=schedule[key];
+    const enabled=document.getElementById(prefix+"hours-"+key+"-enabled");
+    const open=document.getElementById(prefix+"hours-"+key+"-open");
+    const close=document.getElementById(prefix+"hours-"+key+"-close");
+
+    if(enabled)enabled.checked=!!row.enabled;
+    if(open)open.value=row.open;
+    if(close)close.value=row.close;
+
+    box.__m7SyncDay?.(key);
+  });
+}
+
+function collectSchedule(prefix,result){
+  result.directory_options=
+    result.directory_options &&
+    typeof result.directory_options==="object"
+      ? result.directory_options
+      : {};
+
+  const schedule={};
+
+  DAYS.forEach(([key,label])=>{
+    const enabled=!!document.getElementById(prefix+"hours-"+key+"-enabled")?.checked;
+    const open=normalizeTime(
+      document.getElementById(prefix+"hours-"+key+"-open")?.value,
+      DEFAULT_DAY.open
+    );
+    const close=normalizeTime(
+      document.getElementById(prefix+"hours-"+key+"-close")?.value,
+      DEFAULT_DAY.close
+    );
+
+    if(enabled && (!open||!close)){
+      throw new Error(label+" needs both an opening and closing time.");
+    }
+
+    schedule[key]={
+      enabled,
+      open,
+      close
+    };
+  });
+
+  result.directory_options.hours_schedule=schedule;
+  result.directory_options.hours_timezone="Asia/Beirut";
+
+  return result;
+}
+
+async function install(){
+  ensureCss();
+
+  for(let i=0;i<240&&!window.Ma7alakDirectoryAdmin;i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api||api.__hoursScheduleWrappedV1)return;
+
+  const oldFill=api.fill.bind(api);
+  const oldCollect=api.collect.bind(api);
+
+  api.fill=function(shop){
+    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+    oldFill(shop);
+
+    fillSchedule(
+      "m7de-",
+      shop?.directory_options||{}
+    );
+  };
+
+  api.collect=function(edit){
+    const prefix=edit?"m7de-":"m7da-";
+
+    ensureForm(
+      document.getElementById(
+        edit
+          ? "ma-admin-edit-form"
+          : "ma-admin-shop-form"
+      ),
+      prefix
+    );
+
+    const result=oldCollect(edit);
+
+    return collectSchedule(
+      prefix,
+      result
+    );
+  };
+
+  api.__hoursScheduleWrappedV1=true;
+
+  ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+  ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+  fillSchedule("m7da-",{});
+
+  const observer=new MutationObserver(()=>{
+    ensureForm(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureForm(document.getElementById("ma-admin-edit-form"),"m7de-");
+  });
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
+}
+
+install().catch(console.error);
+})();
+
