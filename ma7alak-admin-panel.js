@@ -11410,6 +11410,21 @@ function previewIdentityHtml(shop,mode){
       accent
     );
 
+  const profileTypography=
+    previewModuleTypography(
+      "profile"
+    );
+
+  const aboutTypography=
+    previewModuleTypography(
+      "about"
+    );
+
+  const followTypography=
+    previewModuleTypography(
+      "follow"
+    );
+
   const services=[];
 
   for(let i=1;i<=4;i++){
@@ -11446,21 +11461,6 @@ function previewIdentityHtml(shop,mode){
     previewVal(
       "m7de-about-signature",
       ""
-    );
-
-  const profileTypography=
-    previewModuleTypography(
-      "profile"
-    );
-
-  const aboutTypography=
-    previewModuleTypography(
-      "about"
-    );
-
-  const followTypography=
-    previewModuleTypography(
-      "follow"
     );
 
   const titleStyle=
