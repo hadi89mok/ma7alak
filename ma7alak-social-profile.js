@@ -1303,9 +1303,15 @@
           '<div class="m7sp-live-icon">▧</div>' +
           '<h3>Nothing live right now</h3>' +
           '<p>New posts, offers and updates will appear here when they are available.</p>' +
-          '<button class="m7sp-notify" id="m7sp-notify" type="button">' +
-            (state.followed ? "✓ Notifications on" : "♧ Notify me") +
-          '</button>' +
+          (
+            isOwner()
+              ? '<button class="m7sp-notify" id="m7sp-live-manage" type="button">＋ Add Live / Offer</button>'
+              : (
+                  '<button class="m7sp-notify" id="m7sp-notify" type="button">' +
+                    (state.followed ? "✓ Notifications on" : "♧ Notify me") +
+                  '</button>'
+                )
+          ) +
         '</div>'
       );
     }
@@ -1333,6 +1339,12 @@
             '<small>● LIVE NOW</small>' +
             '<h3>'+esc(live.title || "Happening now")+'</h3>' +
             '<p>'+esc(live.description || "Tap into the latest update from this shop.")+'</p>' +
+            '<button class="m7sp-notify" id="m7sp-live-open" data-live-id="'+esc(live.id || "")+'" type="button">Open Live</button>' +
+            (
+              isOwner()
+                ? '<button class="m7sp-notify" id="m7sp-live-manage" type="button">＋ Add Live / Offer</button>'
+                : ''
+            ) +
           '</div>' +
         '</div>' +
       '</div>'
@@ -2144,6 +2156,49 @@
         ()=>{
           if(!state.followed){
             toggleFollow();
+          }
+        }
+      );
+
+    document
+      .getElementById("m7sp-live-open")
+      ?.addEventListener(
+        "click",
+        event=>{
+          const id =
+            event.currentTarget?.getAttribute(
+              "data-live-id"
+            );
+
+          if(
+            id &&
+            window.Ma7alakLiveOffers &&
+            typeof window.Ma7alakLiveOffers.open === "function"
+          ){
+            window.Ma7alakLiveOffers.open(id);
+          }
+        }
+      );
+
+    document
+      .getElementById("m7sp-live-manage")
+      ?.addEventListener(
+        "click",
+        ()=>{
+          if(
+            window.Ma7alakLiveOffers &&
+            typeof window.Ma7alakLiveOffers.create === "function"
+          ){
+            window.Ma7alakLiveOffers.create();
+          }
+          else{
+            window.postMessage(
+              {
+                type:"MA7ALAK_LIVE_OFFERS_CREATE",
+                shopSlug:slug
+              },
+              "*"
+            );
           }
         }
       );
