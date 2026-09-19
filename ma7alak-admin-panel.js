@@ -9811,22 +9811,21 @@ function ensureCss(){
       }
     }
 
-    /* Edit Shop focus modes. */
+    /* Edit Shop focus modes — one section only. */
+    #ma-admin-edit-card .m7v4-section-off{
+      display:none!important;
+    }
+
     #ma-admin-edit-card.m7v4-show .m7ds-tabs{
       display:none!important;
     }
 
-    #ma-admin-edit-card.m7v4-mode-about .m7ds-pane{
-      display:none!important;
+    #ma-admin-edit-card.m7v4-mode-design .m7ds-tabs{
+      display:flex!important;
     }
 
-    #ma-admin-edit-card.m7v4-mode-about .m7ds-pane[data-m7ds-pane="about"]{
-      display:block!important;
-    }
-
-    /* Design mode removes the old tabs and lays the sections out vertically. */
     #ma-admin-edit-card.m7v4-mode-design .m7ds-pane{
-      display:block!important;
+      display:none!important;
       margin:11px 0!important;
       padding:12px!important;
       border:1px solid rgba(217,170,88,.10)!important;
@@ -9834,14 +9833,75 @@ function ensureCss(){
       background:rgba(255,255,255,.012)!important;
     }
 
-    /* Details mode is intentionally clean: no design/media add-ons. */
-    #ma-admin-edit-card.m7v4-mode-details .m7-design-studio,
-    #ma-admin-edit-card.m7v4-mode-details .m7-about-services-fields,
-    #ma-admin-edit-card.m7v4-mode-details .m7-about-text-style-box,
-    #ma-admin-edit-card.m7v4-mode-details .m7-hours-schedule-box,
-    #ma-admin-edit-card.m7v4-mode-details .m7-availability-extra-box,
-    #ma-admin-edit-card.m7v4-mode-details .m7-card-designer-box{
-      display:none!important;
+    #ma-admin-edit-card.m7v4-mode-design .m7ds-pane.active{
+      display:block!important;
+    }
+
+    .m7v4-edit-context{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 13px;
+      padding:12px 13px;
+      border:1px solid rgba(217,170,88,.24);
+      border-radius:15px;
+      background:
+        radial-gradient(circle at 0 0,rgba(217,170,88,.07),transparent 42%),
+        rgba(255,255,255,.018);
+    }
+
+    .m7v4-edit-context-copy{
+      min-width:0;
+      margin-right:auto;
+    }
+
+    .m7v4-edit-context-copy small{
+      display:block;
+      margin-bottom:3px;
+      color:#7f7464;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+
+    .m7v4-edit-context-copy b{
+      display:block;
+      color:#f3dfba;
+      font-size:15px;
+      line-height:1.15;
+    }
+
+    .m7v4-edit-context-copy span{
+      display:block;
+      margin-top:4px;
+      color:#8f8370;
+      font-size:8px;
+      line-height:1.4;
+    }
+
+    .m7v4-context-save{
+      flex:0 0 auto;
+      min-height:36px;
+      padding:0 12px;
+      border:0;
+      border-radius:10px;
+      background:linear-gradient(135deg,#f0cd80,#d39e43);
+      color:#1d1409;
+      font-size:8px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    @media(max-width:560px){
+      .m7v4-edit-context{
+        align-items:flex-start;
+        flex-wrap:wrap;
+      }
+
+      .m7v4-context-save{
+        width:100%;
+      }
     }
 
     body.m7-admin-v4 #ma-manage-shops-card.m7v4-show-add{
@@ -9913,6 +9973,7 @@ function clearLegacy(){
       "m7v4-mode-details",
       "m7v4-mode-about",
       "m7v4-mode-hours",
+      "m7v4-mode-label",
       "m7v4-mode-card",
       "m7v4-mode-design"
     );
@@ -10058,6 +10119,374 @@ async function waitForEdit(slug){
   return document.getElementById("ma-admin-edit-card");
 }
 
+function directFormChild(form,node){
+  if(!form||!node)return null;
+
+  let current=node;
+
+  while(
+    current &&
+    current.parentElement &&
+    current.parentElement!==form
+  ){
+    current=current.parentElement;
+  }
+
+  return current &&
+    current.parentElement===form
+      ? current
+      : null;
+}
+
+function expandFocusedSection(node){
+  if(!node)return;
+
+  node.classList.remove(
+    "m7fc"
+  );
+
+  const fold=
+    node.querySelector(
+      ":scope > .m7ft"
+    );
+
+  if(fold){
+    fold.textContent="Fold";
+  }
+}
+
+function editorModeMeta(mode,shop){
+  const map={
+    details:[
+      "Shop Details",
+      "Basic identity, location, category and profile information."
+    ],
+    label:[
+      "Shop Label",
+      "Only the label visitors see above the shop name."
+    ],
+    card:[
+      "Directory Card",
+      "Only the card appearance used in Show Shops."
+    ],
+    design:[
+      "Profile Design",
+      "Choose one design tab below. Only that design section is shown."
+    ],
+    about:[
+      "About Me",
+      "Only description, services, signature and About typography."
+    ],
+    hours:[
+      "Hours & Availability",
+      "Only weekly opening hours and availability."
+    ]
+  };
+
+  const row=
+    map[mode]||
+    map.details;
+
+  return {
+    title:row[0],
+    help:row[1],
+    shopName:
+      shop?.shop_name||
+      shop?.shop_slug||
+      "Shop"
+  };
+}
+
+function ensureEditContext(form){
+  let box=
+    form.querySelector(
+      ":scope > .m7v4-edit-context"
+    );
+
+  if(box)return box;
+
+  box=document.createElement("div");
+  box.className="m7v4-edit-context";
+  box.innerHTML=
+    '<div class="m7v4-edit-context-copy">'+
+      '<small>MA7ALAK EDITOR</small>'+
+      '<b data-m7v4-context-title>Editing</b>'+
+      '<span data-m7v4-context-help></span>'+
+    '</div>'+
+    '<button type="button" class="m7v4-context-save">Save Changes</button>';
+
+  form.insertBefore(
+    box,
+    form.firstChild
+  );
+
+  box
+    .querySelector(
+      ".m7v4-context-save"
+    )
+    ?.addEventListener(
+      "click",
+      function(){
+        document
+          .getElementById(
+            "ma-admin-save-edit"
+          )
+          ?.click();
+      }
+    );
+
+  return box;
+}
+
+function updateEditContext(panel,mode,shop){
+  const form=
+    panel?.querySelector(
+      "#ma-admin-edit-form"
+    );
+
+  if(!form)return;
+
+  const box=
+    ensureEditContext(form);
+
+  const meta=
+    editorModeMeta(
+      mode,
+      shop
+    );
+
+  let section="";
+
+  if(mode==="design"){
+    const active=
+      form.querySelector(
+        ".m7-design-studio [data-m7ds-tab].active"
+      );
+
+    if(active){
+      section=
+        " — "+
+        String(
+          active.textContent||
+          ""
+        ).trim();
+    }
+  }
+
+  const title=
+    box.querySelector(
+      "[data-m7v4-context-title]"
+    );
+
+  if(title){
+    title.textContent=
+      "Editing: "+
+      meta.title+
+      section+
+      " — "+
+      meta.shopName;
+  }
+
+  const help=
+    box.querySelector(
+      "[data-m7v4-context-help]"
+    );
+
+  if(help){
+    help.textContent=
+      meta.help;
+  }
+
+  const subtitle=
+    document.getElementById(
+      "ma-admin-edit-subtitle"
+    );
+
+  if(subtitle){
+    subtitle.textContent=
+      "Editing: "+
+      meta.title+
+      " — "+
+      meta.shopName;
+  }
+}
+
+function applyEditSectionVisibility(panel,mode,shop){
+  const form=
+    panel?.querySelector(
+      "#ma-admin-edit-form"
+    );
+
+  if(!form)return;
+
+  const context=
+    ensureEditContext(form);
+
+  const all=[
+    ...form.children
+  ];
+
+  all.forEach(child=>{
+    child.classList.remove(
+      "m7v4-section-off"
+    );
+  });
+
+  const specialSelectors=[
+    ".m7labelbox",
+    ".m7-card-designer-box",
+    ".m7-design-studio",
+    ".m7-about-services-fields",
+    ".m7-about-text-style-box",
+    ".m7-hours-schedule-box",
+    ".m7-availability-extra-box",
+    ".m7da-home-fields",
+    ".m7-title-style-box"
+  ];
+
+  const specialRoots=
+    new Set();
+
+  specialSelectors.forEach(selector=>{
+    form
+      .querySelectorAll(selector)
+      .forEach(node=>{
+        const root=
+          directFormChild(
+            form,
+            node
+          );
+
+        if(root){
+          specialRoots.add(root);
+        }
+      });
+  });
+
+  if(mode==="details"){
+    specialRoots.forEach(root=>{
+      root.classList.add(
+        "m7v4-section-off"
+      );
+    });
+  }
+  else{
+    all.forEach(child=>{
+      if(child!==context){
+        child.classList.add(
+          "m7v4-section-off"
+        );
+      }
+    });
+
+    const selectors={
+      label:[
+        ".m7labelbox"
+      ],
+      card:[
+        ".m7-card-designer-box"
+      ],
+      design:[
+        ".m7-design-studio"
+      ],
+      about:[
+        ".m7-about-services-fields",
+        ".m7-about-text-style-box"
+      ],
+      hours:[
+        ".m7-hours-schedule-box",
+        ".m7-availability-extra-box"
+      ]
+    }[mode]||[];
+
+    selectors.forEach(selector=>{
+      form
+        .querySelectorAll(selector)
+        .forEach(node=>{
+          const root=
+            directFormChild(
+              form,
+              node
+            );
+
+          if(root){
+            root.classList.remove(
+              "m7v4-section-off"
+            );
+
+            expandFocusedSection(root);
+          }
+        });
+    });
+  }
+
+  context.classList.remove(
+    "m7v4-section-off"
+  );
+
+  /*
+    Profile Design already has real tabs.
+    Keep exactly one pane active instead of showing the whole studio.
+  */
+  if(mode==="design"){
+    const design=
+      form.querySelector(
+        ".m7-design-studio"
+      );
+
+    if(design){
+      expandFocusedSection(design);
+
+      const tabs=[
+        ...design.querySelectorAll(
+          "[data-m7ds-tab]"
+        )
+      ];
+
+      const panes=[
+        ...design.querySelectorAll(
+          "[data-m7ds-pane]"
+        )
+      ];
+
+      let active=
+        tabs.find(button=>
+          button.classList.contains(
+            "active"
+          )
+        );
+
+      if(!active){
+        active=tabs[0]||null;
+      }
+
+      const key=
+        active?.dataset.m7dsTab||
+        "identity";
+
+      tabs.forEach(button=>{
+        button.classList.toggle(
+          "active",
+          button.dataset.m7dsTab===key
+        );
+      });
+
+      panes.forEach(pane=>{
+        pane.classList.toggle(
+          "active",
+          pane.dataset.m7dsPane===key
+        );
+      });
+    }
+  }
+
+  updateEditContext(
+    panel,
+    mode,
+    shop
+  );
+}
+
 async function openEditMode(slug,mode){
   if(!legacyAction(slug,"edit")){
     throw new Error("Edit Shop action is not ready yet.");
@@ -10082,15 +10511,49 @@ async function openEditMode(slug,mode){
     shop
   );
 
+  applyEditSectionVisibility(
+    panel,
+    mode,
+    shop
+  );
+
+  const form=
+    panel.querySelector(
+      "#ma-admin-edit-form"
+    );
+
+  if(
+    form &&
+    !form.__m7v4SectionObserver
+  ){
+    form.__m7v4SectionObserver=
+      new MutationObserver(()=>{
+        applyEditSectionVisibility(
+          panel,
+          panel.dataset.m7v4PreviewMode||
+          mode,
+          currentPreviewShop()
+        );
+      });
+
+    form.__m7v4SectionObserver.observe(
+      form,
+      {
+        childList:true
+      }
+    );
+  }
+
   const targets={
+    label:".m7labelbox",
     card:".m7-card-designer-box",
     about:".m7-about-services-fields",
     hours:".m7-hours-schedule-box",
     design:".m7-design-studio",
-    details:"#ma-edit-name"
+    details:".m7v4-edit-context"
   };
 
-  const target=panel.querySelector(targets[mode]||"#ma-edit-name");
+  const target=panel.querySelector(targets[mode]||".m7v4-edit-context");
   if(target){
     setTimeout(()=>target.scrollIntoView({behavior:"smooth",block:"center"}),120);
   }
@@ -10626,6 +11089,7 @@ function refreshEditPreview(panel){
 
   const titleMap={
     details:"Shop details",
+    label:"Shop label",
     card:"Directory card",
     design:"Profile design",
     about:"About Me",
@@ -10638,9 +11102,27 @@ function refreshEditPreview(panel){
     );
 
   if(title){
-    title.textContent=
+    let label=
       titleMap[mode]||
       "Live preview";
+
+    if(mode==="design"){
+      const active=
+        panel.querySelector(
+          ".m7-design-studio [data-m7ds-tab].active"
+        );
+
+      if(active){
+        label+=
+          " · "+
+          String(
+            active.textContent||
+            ""
+          ).trim();
+      }
+    }
+
+    title.textContent=label;
   }
 
   if(mode==="card"){
@@ -10771,6 +11253,35 @@ function mountEditPreview(panel,mode,shop){
     form.addEventListener(
       "change",
       queue
+    );
+
+    form.addEventListener(
+      "click",
+      function(event){
+        const tab=
+          event.target.closest(
+            "[data-m7ds-tab]"
+          );
+
+        if(
+          !tab ||
+          panel.dataset.m7v4PreviewMode!=="design"
+        ){
+          return;
+        }
+
+        setTimeout(()=>{
+          updateEditContext(
+            panel,
+            "design",
+            currentPreviewShop()
+          );
+
+          refreshEditPreview(
+            panel
+          );
+        },0);
+      }
     );
   }
 
@@ -10931,11 +11442,12 @@ function renderWorkspace(){
 
     '<div class="m7v4-group-title">Shop profile & design</div>'+
     '<div class="m7v4-actions">'+
-      action("details","✏️","Shop details","Name, slug, location, category, profile details")+
-      action("card","▰","Directory card","Edges, corners, colors, shadow and animation")+
-      action("design","✦","Profile design","All page design controls in one vertical view — no tabs")+
-      action("about","Aa","About Me","Content, services and each text style")+
-      action("hours","◷","Hours & availability","Weekly opening schedule and extra availability rows")+
+      action("details","✏️","Shop details","Name, slug, location, category and profile details")+
+      action("label","⌂","Shop label","Label text, icon and custom symbol only")+
+      action("card","▰","Directory card","Card edges, colors, depth and animation only")+
+      action("design","✦","Profile design","Edit one profile-design section at a time")+
+      action("about","Aa","About Me","Description, services and About text style only")+
+      action("hours","◷","Hours & availability","Weekly schedule and availability only")+
     '</div>'+
 
     '<div class="m7v4-group-title">Media & live content</div>'+
@@ -10999,7 +11511,7 @@ async function handleAction(key){
     return;
   }
 
-  if(["details","card","about","hours","design"].includes(key)){
+  if(["details","label","card","about","hours","design"].includes(key)){
     await openEditMode(shop.shop_slug,key);
     return;
   }
