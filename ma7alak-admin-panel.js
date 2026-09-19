@@ -4910,7 +4910,7 @@ function mount(){css();document.getElementById("m7adm-mod")?.remove();if(documen
 <div class="m7adm-tabs" role="tablist">
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-analytics">📊 Analytics</button>
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-users">👥 Viewer Users</button>
-  <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-owner">👤 Owner Assignment</button>
+  <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-owner">👤 Owner Management</button>
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-reports">🚩 Chat Reports</button>
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-history">🕘 Activity History</button>
 </div>
@@ -10353,6 +10353,14 @@ async function openAdminHub(target,shopSlug){
   if(tab){
     tab.classList.add("active");
     tab.setAttribute("aria-selected","true");
+  }
+
+  if(target==="m7adm-history"){
+    document.getElementById("ma-admin-activity-card")?.removeAttribute("hidden");
+    setTimeout(
+      ()=>document.getElementById("ma-admin-refresh-activity")?.click(),
+      0
+    );
   }
 
   if(
