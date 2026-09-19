@@ -5622,6 +5622,21 @@ function observe(){
 
   window.__MA7ALAK_ADMIN_TITLE_STYLE_CONTROLS__ = true;
 
+  /*
+     LEGACY TITLE STYLING DISABLED
+
+     Page Design Studio is now the single source of truth for:
+       - shop_name_color
+       - shop_name_animation
+       - about_title_color
+       - about_title_animation
+
+     This old layer used the SAME element IDs and wrapped
+     Ma7alakDirectoryAdmin.collect() again, which could cause the
+     hidden legacy values to overwrite the visible Design Studio values.
+  */
+  return;
+
   const ANIMS = [
     ["current","Current design"],
     ["shimmer","Shimmer"],
