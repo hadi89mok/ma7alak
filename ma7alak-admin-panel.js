@@ -6638,6 +6638,17 @@ function observe(){
     css();
     mountAll();
     patch();
+
+    /*
+      Page Design Studio replaces the older separate Title Styling box.
+      Keep the old data wrapper active, but hide its duplicate UI even
+      if it mounted after the Design Studio.
+    */
+    document
+      .querySelectorAll(".m7-title-style-box")
+      .forEach(function(box){
+        box.style.display = "none";
+      });
   }
 
   (async function(){
