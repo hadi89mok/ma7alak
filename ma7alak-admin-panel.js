@@ -5061,7 +5061,7 @@ function mergeAddIntoManage(){const add=target('m7-admin-add-shop'),manage=$('ma
 function openSection(id){const section=target(id);if(!section)return;const drawer=section.closest('.m7sc-add-drawer');if(drawer)drawer.open=true;const manage=section.closest('#ma-manage-shops-card');if(manage){manage.hidden=false;manage.classList.remove('m7-admin-collapsed')}section.hidden=false;section.classList.remove('m7-admin-collapsed');section.querySelectorAll('.m7-collapsed-body,.hidden').forEach(el=>{if(el.classList.contains('m7adm-body')||el.classList.contains('m7-collapsed-body'))el.classList.remove('hidden','m7-collapsed-body')});section.querySelectorAll('.m7-collapse-btn,.m7-panel-toggle').forEach(b=>b.textContent='Hide');section.classList.remove('m7sc-flash');void section.offsetWidth;section.classList.add('m7sc-flash');section.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>section.classList.remove('m7sc-flash'),1000)}
 async function loadStats(){if(!client)return;const queries=[client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}),client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}).eq('is_active',true),client.from('shop_categories').select('category_key',{count:'exact',head:true}).eq('is_active',true),client.from('shop_areas').select('area_key',{count:'exact',head:true}).eq('is_active',true)];const rows=await Promise.all(queries);['all','active','categories','areas'].forEach((key,i)=>{const el=$('m7sc-'+key);if(el)el.textContent=rows[i].error?'—':String(rows[i].count||0)})}
 function mount(){const dash=$('ma-admin-dashboard');if(!dash||$('m7-shop-control'))return false;css();target('m7-admin-add-shop');mergeAddIntoManage();const center=document.createElement('section');center.id='m7-shop-control';center.innerHTML=`<div class="m7sc-eyebrow">MA7ALAK DIRECTORY CONTROL</div><div class="m7sc-title-row"><div><h2>Shop Control Center</h2><p>Every shop, owner, badge, category, area and media tool in one flow.</p></div><span class="m7sc-live"><i></i> LIVE SYNC</span></div><div class="m7sc-stats"><div class="m7sc-stat"><b id="m7sc-all">—</b><span>ALL SHOPS</span></div><div class="m7sc-stat"><b id="m7sc-active">—</b><span>VISIBLE</span></div><div class="m7sc-stat"><b id="m7sc-categories">—</b><span>CATEGORIES</span></div><div class="m7sc-stat"><b id="m7sc-areas">—</b><span>AREAS</span></div></div><nav class="m7sc-nav" aria-label="Shop administration"><button data-target="ma-manage-shops-card">🏪 Manage shops</button><button data-target="m7-admin-add-shop">＋ Add shop</button><button data-target="ma-admin-v2-hub">🗂 Categories & areas</button><button data-target="m7da-settings">🎨 Directory design</button><button data-target="m7adm-v3">👥 Accounts & reports</button></nav>`;dash.prepend(center);center.onclick=e=>{const b=e.target.closest('[data-target]');if(b)openSection(b.dataset.target)};return true}
-async function ready(){for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;for(let i=0;i<180&&!mount();i++)await new Promise(r=>setTimeout(r,100));await loadStats();statsChannel=client.channel('ma7alak-admin-control-center').on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_categories'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_areas'},loadStats).subscribe();window.addEventListener('ma7alak:admin-ready',loadStats)}
+async function ready(){await Promise.resolve();if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;for(let i=0;i<180&&!mount();i++)await new Promise(r=>setTimeout(r,100));await loadStats();if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;statsChannel=client.channel('ma7alak-admin-control-center').on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_categories'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_areas'},loadStats).subscribe();window.addEventListener('ma7alak:admin-ready',loadStats)}
 ready().catch(console.error);
 })();
 
@@ -5785,7 +5785,6 @@ function observe(){
   css();bind();
   for(let i=0;i<200&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,50));
   decorateAll();observe();window.addEventListener("ma7alak:admin-ready",decorateAll);
-  setInterval(()=>{patchDirectory();saveState()},800);
 })().catch(e=>console.error("MA7ALAK Admin Control Deck:",e));
 })();
 
@@ -9837,7 +9836,8 @@ function ensureCss(){
 
     /* Edit Shop focus modes — one section only. */
     #ma-admin-edit-card .m7v4-section-off,
-    #ma-admin-edit-card .m7v4-publishing-duplicate{
+    #ma-admin-edit-card .m7v4-publishing-duplicate,
+    #ma-admin-edit-card .m7v4-duplicate-control{
       display:none!important;
     }
 
@@ -9888,6 +9888,11 @@ function ensureCss(){
     #ma-admin-edit-card .m7da-sectioned-extras .m7da-sectioned-help{
       color:#7f7464;
       font-size:8px;
+    }
+
+    body.m7-admin-v4 #ma-admin-edit-card #ma-admin-save-edit,
+    body.m7-admin-v4 #ma-admin-edit-card #ma-admin-cancel-edit{
+      display:none!important;
     }
 
     #ma-admin-edit-card.m7v4-show .m7ds-tabs{
@@ -10286,28 +10291,12 @@ function ensureEditContext(form){
       '<small>MA7ALAK EDITOR</small>'+
       '<b data-m7v4-context-title>Editing</b>'+
       '<span data-m7v4-context-help></span>'+
-    '</div>'+
-    '<button type="button" class="m7v4-context-save">Save Changes</button>';
+    '</div>';
 
   form.insertBefore(
     box,
     form.firstChild
   );
-
-  box
-    .querySelector(
-      ".m7v4-context-save"
-    )
-    ?.addEventListener(
-      "click",
-      function(){
-        document
-          .getElementById(
-            "ma-admin-save-edit"
-          )
-          ?.click();
-      }
-    );
 
   return box;
 }
@@ -10413,6 +10402,37 @@ function hideDuplicatePublishingControls(form){
   });
 }
 
+function hideDuplicateDesignControls(form){
+  if(!form)return;
+
+  /*
+     These exact colors already have richer controls in
+     "Aa About — individual text styling".
+     Keep the Page Design inputs alive and synchronized internally,
+     but don't show the same setting twice to the admin.
+  */
+  [
+    "m7de-about_title_color",
+    "m7de-about_kicker_color",
+    "m7de-about_text_color",
+    "m7de-about_signature_color"
+  ].forEach(id=>{
+    const input=
+      document.getElementById(id);
+
+    const wrapper=
+      input?.closest(
+        ".m7ds-field"
+      );
+
+    if(wrapper){
+      wrapper.classList.add(
+        "m7v4-duplicate-control"
+      );
+    }
+  });
+}
+
 function configureLegacyExtras(form,mode){
   if(!form)return;
 
@@ -10462,6 +10482,10 @@ function applyEditSectionVisibility(panel,mode,shop){
     ensureEditContext(form);
 
   hideDuplicatePublishingControls(
+    form
+  );
+
+  hideDuplicateDesignControls(
     form
   );
 
