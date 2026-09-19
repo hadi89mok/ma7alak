@@ -2,6 +2,10 @@
 
 "use strict";
 
+if(window.self!==window.top)return;
+if(window.__MA7ALAK_NOTIFICATIONS_ENGINE__)return;
+window.__MA7ALAK_NOTIFICATIONS_ENGINE__=true;
+
 
 /* =========================================================
    SUPABASE
