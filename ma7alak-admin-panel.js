@@ -6046,6 +6046,8 @@ function observe(){
     ["about_signature_color","Signature"],
     ["gallery_accent_color","Gallery accent"],
     ["video_accent_color","Video accent"],
+    ["follow_accent_color","Follow / Message accent"],
+    ["live_accent_color","Live / Offers accent"],
     ["hub_accent_color","Profile hub accent"]
   ];
 
@@ -6096,6 +6098,8 @@ function observe(){
 
     gallery_accent_color:"#f2caed",
     video_accent_color:"#f2caed",
+    follow_accent_color:"#f2caed",
+    live_accent_color:"#f2caed",
     hub_accent_color:"#f2caed"
   };
 
@@ -6337,6 +6341,8 @@ function observe(){
         <div class="m7ds-grid">
           ${colorField(prefix,"gallery_accent_color","Gallery")}
           ${colorField(prefix,"video_accent_color","Videos")}
+          ${colorField(prefix,"follow_accent_color","Follow / Message")}
+          ${colorField(prefix,"live_accent_color","Live / Offers")}
           ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
         </div>
 
