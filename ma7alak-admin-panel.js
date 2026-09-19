@@ -5996,7 +5996,7 @@ function decorateAll(){
   ];
 
   const GALLERY_FRAME_STYLES = [
-    ["current","Current / single accent"],
+    ["current","Current premium frame"],
     ["dual","2-color split"],
     ["quad","4-color split"],
     ["blend","4-color soft blend"],
