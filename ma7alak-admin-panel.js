@@ -6056,7 +6056,6 @@ function observe(){
     page_motion_mode:"preset",
     page_use_universal_accent:true,
 
-    profile_background_image:"",
     profile_ring_color:"#f2caed",
 
     shop_label_text_color:"#f2caed",
@@ -6266,16 +6265,6 @@ function observe(){
 
       <div class="m7ds-pane active" data-m7ds-pane="identity">
         <div class="m7ds-section-title">Profile & Shop Identity</div>
-
-        <label class="m7ds-field" style="margin-bottom:8px">
-          <span>Profile background image URL</span>
-          <input
-            id="${prefix}profile_background_image"
-            type="url"
-            placeholder="https://... (leave blank for dark background)"
-          >
-        </label>
-
         <div class="m7ds-grid">
           ${colorField(prefix,"profile_ring_color","Story / profile ring color")}
           ${colorField(prefix,"shop_label_text_color","Shop Label text color")}
