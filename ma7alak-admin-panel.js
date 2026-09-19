@@ -5668,6 +5668,34 @@ function observe(){
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
+    profile_banner_style:"rounded-fade",
+
+    global_font_style:"current",
+    global_font_size:"100",
+
+    profile_font_style:"inherit",
+    profile_font_size:"100",
+
+    about_font_style:"inherit",
+    about_font_size:"100",
+
+    hours_font_style:"inherit",
+    hours_font_size:"100",
+
+    gallery_font_style:"inherit",
+    gallery_font_size:"100",
+
+    video_font_style:"inherit",
+    video_font_size:"100",
+
+    follow_font_style:"inherit",
+    follow_font_size:"100",
+
+    live_font_style:"inherit",
+    live_font_size:"100",
+
+    hub_font_style:"inherit",
+    hub_font_size:"100",
 
     shop_label_text_color:"#f2caed",
     shop_label_border_color:"#f2caed",
@@ -5739,6 +5767,24 @@ function observe(){
     ["none","Static / no animation"]
   ];
 
+  const BANNER_STYLES = [
+    ["rounded-fade","Rounded + soft fade"],
+    ["rounded","Rounded edge"],
+    ["wave","Soft wave edge"],
+    ["fade","Fade into page"],
+    ["straight","Straight edge"]
+  ];
+
+  const FONT_STYLES = [
+    ["inherit","Use global typography"],
+    ["current","Current design font"],
+    ["system","Clean system"],
+    ["modern","Modern sans"],
+    ["elegant","Elegant serif"],
+    ["classic","Classic serif"],
+    ["mono","Monospace"]
+  ];
+
   function esc(value){
     return String(value ?? "")
       .replace(/&/g,"&amp;")
@@ -5807,6 +5853,44 @@ function observe(){
         <select id="${prefix}${key}">
           ${opts(ANIMS,DEFAULTS[key])}
         </select>
+      </label>
+    `;
+  }
+
+  function bannerStyleField(prefix){
+    return `
+      <label class="m7ds-field">
+        <span>Banner edge style</span>
+        <select id="${prefix}profile_banner_style">
+          ${opts(BANNER_STYLES,DEFAULTS.profile_banner_style)}
+        </select>
+      </label>
+    `;
+  }
+
+  function fontField(prefix,key,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)} font</span>
+        <select id="${prefix}${key}_font_style">
+          ${opts(FONT_STYLES,DEFAULTS[key+"_font_style"])}
+        </select>
+      </label>
+    `;
+  }
+
+  function fontSizeField(prefix,key,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)} text size (%)</span>
+        <input
+          id="${prefix}${key}_font_size"
+          type="number"
+          min="70"
+          max="150"
+          step="5"
+          value="${esc(DEFAULTS[key+"_font_size"])}"
+        >
       </label>
     `;
   }
@@ -6005,6 +6089,7 @@ function observe(){
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
         <button type="button" data-m7ds-tab="follow">Follow / Banner</button>
+        <button type="button" data-m7ds-tab="typography">Typography</button>
         <button type="button" data-m7ds-tab="modules">Gallery / Video / Hub</button>
       </div>
 
@@ -6101,6 +6186,7 @@ function observe(){
 
         <div class="m7ds-grid m7ds-banner-grid">
           ${colorField(prefix,"profile_banner_color","Banner color")}
+          ${bannerStyleField(prefix)}
 
           <label class="m7ds-banner-upload">
             <span>
@@ -6142,6 +6228,66 @@ function observe(){
           The profile circle overlaps only the bottom edge of this banner by about 20%.
           There is no page-wide background or banner animation.
         </p>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="typography">
+        <div class="m7ds-section-title">Global Typography</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"global","Global")}
+          ${fontSizeField(prefix,"global","Global")}
+        </div>
+
+        <p class="m7ds-help">
+          Global typography is the default. Each module below can inherit it or use its own font and relative text size.
+        </p>
+
+        <div class="m7ds-section-title">Profile / Story / Identity</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"profile","Profile")}
+          ${fontSizeField(prefix,"profile","Profile")}
+        </div>
+
+        <div class="m7ds-section-title">About</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"about","About")}
+          ${fontSizeField(prefix,"about","About")}
+        </div>
+
+        <div class="m7ds-section-title">Opening Hours / Status</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"hours","Hours")}
+          ${fontSizeField(prefix,"hours","Hours")}
+        </div>
+
+        <div class="m7ds-section-title">Gallery</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"gallery","Gallery")}
+          ${fontSizeField(prefix,"gallery","Gallery")}
+        </div>
+
+        <div class="m7ds-section-title">Videos</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"video","Videos")}
+          ${fontSizeField(prefix,"video","Videos")}
+        </div>
+
+        <div class="m7ds-section-title">Follow / Message</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"follow","Follow")}
+          ${fontSizeField(prefix,"follow","Follow")}
+        </div>
+
+        <div class="m7ds-section-title">Live / Offers</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"live","Live")}
+          ${fontSizeField(prefix,"live","Live")}
+        </div>
+
+        <div class="m7ds-section-title">Profile Hub / Location / Stats</div>
+        <div class="m7ds-grid">
+          ${fontField(prefix,"hub","Hub")}
+          ${fontSizeField(prefix,"hub","Hub")}
+        </div>
       </div>
 
       <div class="m7ds-pane" data-m7ds-pane="modules">
@@ -6216,6 +6362,11 @@ function observe(){
         "#"+prefix+"profile_banner_image_url"
       );
 
+    const bannerStyle =
+      box.querySelector(
+        "#"+prefix+"profile_banner_style"
+      );
+
     const bannerFile =
       box.querySelector(
         "[data-m7-banner-upload]"
@@ -6274,6 +6425,12 @@ function observe(){
         !enabled
       );
 
+      bannerPreview.dataset.style =
+        String(
+          bannerStyle?.value ||
+          DEFAULTS.profile_banner_style
+        );
+
       const label =
         bannerPreview.querySelector("span");
 
@@ -6294,7 +6451,8 @@ function observe(){
 
     [
       bannerEnabled,
-      bannerColor
+      bannerColor,
+      bannerStyle
     ]
       .filter(Boolean)
       .forEach(el=>{
@@ -6523,14 +6681,37 @@ function observe(){
         return;
       }
 
-      options[key] =
-        el.type === "checkbox"
-          ? !!el.checked
-          : (
-              el.type === "color"
-                ? safeHex(el.value,DEFAULTS[key])
-                : String(el.value || "").trim()
-            );
+      if(el.type === "checkbox"){
+        options[key] = !!el.checked;
+      }
+      else if(el.type === "color"){
+        options[key] =
+          safeHex(
+            el.value,
+            DEFAULTS[key]
+          );
+      }
+      else if(el.type === "number"){
+        const number =
+          Math.max(
+            Number(el.min || 0),
+            Math.min(
+              Number(el.max || 9999),
+              Number(el.value || DEFAULTS[key])
+            )
+          );
+
+        options[key] =
+          String(
+            Number.isFinite(number)
+              ? number
+              : DEFAULTS[key]
+          );
+      }
+      else{
+        options[key] =
+          String(el.value || "").trim();
+      }
     });
 
     return result;
@@ -6647,6 +6828,10 @@ function observe(){
       .m7ds-banner-upload small{display:block;margin-top:4px;color:#807462;font-size:7.5px;line-height:1.4}
       .m7ds-banner-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
       .m7ds-banner-preview{position:relative;width:100%;height:92px;margin-top:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(216,170,88,.16);border-radius:12px;background-size:cover;background-position:center;background-repeat:no-repeat;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.75);font-size:8px;font-weight:900;letter-spacing:.5px}
+      .m7ds-banner-preview[data-style="rounded"]{border-radius:18px}
+      .m7ds-banner-preview[data-style="wave"]{border-radius:12px 12px 46% 46% / 12px 12px 24% 24%}
+      .m7ds-banner-preview[data-style="fade"]{-webkit-mask-image:linear-gradient(to bottom,#000 0 68%,transparent 100%);mask-image:linear-gradient(to bottom,#000 0 68%,transparent 100%)}
+      .m7ds-banner-preview[data-style="rounded-fade"]{border-radius:18px;-webkit-mask-image:linear-gradient(to bottom,#000 0 72%,transparent 100%);mask-image:linear-gradient(to bottom,#000 0 72%,transparent 100%)}
       .m7ds-banner-preview.off{opacity:.42}
       .m7ds-banner-actions{display:flex;align-items:center;gap:8px;min-height:30px;margin-top:7px}
       .m7ds-banner-clear{min-height:29px;padding:0 9px;border:1px solid rgba(216,170,88,.18);border-radius:8px;background:rgba(255,255,255,.02);color:#d7c4a5;font-size:8px;font-weight:850;cursor:pointer}
