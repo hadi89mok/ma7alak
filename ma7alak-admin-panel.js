@@ -8108,7 +8108,11 @@ const ANIMS=[
   ["glow","Glow pulse"],
   ["breathe","Gentle breathe"],
   ["edge","Edge pulse"],
-  ["shimmer","Light shimmer"]
+  ["shimmer","Shimmer sweep"],
+  ["float","Soft float"],
+  ["pulse","Soft pulse"],
+  ["sway","Gentle sway"],
+  ["bounce","Soft bounce"]
 ];
 
 const DEFAULTS={
@@ -8121,6 +8125,8 @@ const DEFAULTS={
   card_glow_strength:"28",
   card_animation:"auto",
   card_animation_speed:"2.4",
+  card_animation_intensity:"55",
+  card_shimmer_strength:"70",
   card_cover_height:"126",
   card_name_color:"#ffffff",
   card_meta_color:"#c8c0b2",
@@ -8278,6 +8284,11 @@ function ensureCss(){
       --p-shadow:.48;
       --p-glow:.28;
       --p-speed:2.4s;
+      --p-intensity:.55;
+      --p-shimmer:.70;
+      --p-move:6px;
+      --p-scale:1.018;
+      --p-rotate:1.4deg;
       --p-surface:#171611;
       width:min(260px,100%);
       min-height:185px;
@@ -8387,23 +8398,47 @@ function ensureCss(){
     }
 
     @keyframes m7cdShimmer{
-      0%,25%{background-position:140% 0;opacity:0}
-      45%{opacity:1}
-      78%,100%{background-position:-140% 0;opacity:0}
+      from{background-position:150% 0;opacity:.15}
+      45%,55%{opacity:1}
+      to{background-position:-150% 0;opacity:.15}
+    }
+
+    @keyframes m7cdFloat{
+      50%{transform:translateY(calc(var(--p-move) * -1))}
+    }
+
+    @keyframes m7cdPulse{
+      50%{transform:scale(var(--p-scale));opacity:.78}
+    }
+
+    @keyframes m7cdSway{
+      25%{transform:rotate(calc(var(--p-rotate) * -1))}
+      75%{transform:rotate(var(--p-rotate))}
+    }
+
+    @keyframes m7cdBounce{
+      0%,100%{transform:translateY(0)}
+      45%{transform:translateY(calc(var(--p-move) * -1))}
+      62%{transform:translateY(calc(var(--p-move) * .25))}
     }
 
     .m7cd-preview.anim-glow{animation:m7cdGlow var(--p-speed) ease-in-out infinite}
     .m7cd-preview.anim-breathe{animation:m7cdBreathe var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-float{animation:m7cdFloat var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-pulse{animation:m7cdPulse var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-sway{animation:m7cdSway var(--p-speed) ease-in-out infinite}
+    .m7cd-preview.anim-bounce{animation:m7cdBounce var(--p-speed) ease-in-out infinite}
     .m7cd-preview.anim-edge::before{animation:m7cdEdge var(--p-speed) ease-in-out infinite}
     .m7cd-preview.anim-shimmer::after{
       content:"";
       position:absolute;
-      inset:0;
+      inset:-15%;
       z-index:5;
       pointer-events:none;
-      background:linear-gradient(112deg,transparent 0 38%,rgba(255,255,255,.10) 48%,rgba(var(--p-rgb),.22) 52%,transparent 62% 100%);
-      background-size:260% 100%;
-      animation:m7cdShimmer var(--p-speed) ease-in-out infinite;
+      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,calc(.08 + var(--p-shimmer) * .42)) 47%,rgba(var(--p-rgb),calc(.12 + var(--p-shimmer) * .48)) 52%,rgba(255,255,255,calc(.06 + var(--p-shimmer) * .30)) 57%,transparent 68% 100%);
+      background-size:300% 100%;
+      animation:m7cdShimmer var(--p-speed) linear infinite;
+      mix-blend-mode:screen;
     }
 
     @media(max-width:760px){
@@ -8461,6 +8496,8 @@ function ensureBox(form,prefix){
       ${field(prefix,"card_glow_strength","Accent glow %","number",'min="0" max="100" step="5"')}
       ${field(prefix,"card_animation","Animation","select",opts(ANIMS,DEFAULTS.card_animation))}
       ${field(prefix,"card_animation_speed","Animation speed (seconds)","number",'min=".8" max="8" step=".1"')}
+      ${field(prefix,"card_animation_intensity","Movement intensity %","number",'min="0" max="100" step="5"')}
+      ${field(prefix,"card_shimmer_strength","Shimmer brightness %","number",'min="0" max="100" step="5"')}
     </div>
 
     <div class="m7cd-section">Text & button</div>
@@ -8529,7 +8566,7 @@ function collectBox(box,result){
     const el=input(box,key);
     if(!el)return;
 
-    if(["card_radius","card_border_width","card_cover_height","card_shadow_strength","card_glow_strength","card_animation_speed"].includes(key)){
+    if(["card_radius","card_border_width","card_cover_height","card_shadow_strength","card_glow_strength","card_animation_speed","card_animation_intensity","card_shimmer_strength"].includes(key)){
       result.directory_options[key]=Number(el.value);
     }else{
       result.directory_options[key]=String(el.value||"").trim();
@@ -8556,6 +8593,13 @@ function refreshPreview(box){
   preview.style.setProperty("--p-shadow",(number(input(box,"card_shadow_strength")?.value,0,100,48)/100).toFixed(2));
   preview.style.setProperty("--p-glow",(number(input(box,"card_glow_strength")?.value,0,100,28)/100).toFixed(2));
   preview.style.setProperty("--p-speed",number(input(box,"card_animation_speed")?.value,.8,8,2.4)+"s");
+  const intensity=number(input(box,"card_animation_intensity")?.value,0,100,55);
+  const shimmer=number(input(box,"card_shimmer_strength")?.value,0,100,70);
+  preview.style.setProperty("--p-intensity",(intensity/100).toFixed(2));
+  preview.style.setProperty("--p-shimmer",(shimmer/100).toFixed(2));
+  preview.style.setProperty("--p-move",(2+intensity*.10).toFixed(1)+"px");
+  preview.style.setProperty("--p-scale",(1+intensity*.0005).toFixed(4));
+  preview.style.setProperty("--p-rotate",(.3+intensity*.025).toFixed(2)+"deg");
   preview.style.setProperty("--p-surface",safeHex(input(box,"card_surface_color")?.value,DEFAULTS.card_surface_color));
   preview.style.setProperty("--p-name",safeHex(input(box,"card_name_color")?.value,DEFAULTS.card_name_color));
   preview.style.setProperty("--p-meta",safeHex(input(box,"card_meta_color")?.value,DEFAULTS.card_meta_color));
@@ -10056,17 +10100,69 @@ function ensureCss(){
     }
 
     .m7pv-card.anim-breathe{
-      animation:m7pvBreathe 2.4s ease-in-out infinite;
+      animation:m7pvCardBreathe var(--pc-speed,2.4s) ease-in-out infinite;
     }
 
     .m7pv-card.anim-glow,
-    .m7pv-card.anim-edge,
-    .m7pv-card.anim-shimmer{
-      animation:m7pvGlow 2.4s ease-in-out infinite;
+    .m7pv-card.anim-edge{
+      animation:m7pvGlow var(--pc-speed,2.4s) ease-in-out infinite;
     }
 
-    @keyframes m7pvBreathe{
-      50%{transform:scale(1.018)}
+    .m7pv-card.anim-float{
+      animation:m7pvCardFloat var(--pc-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-card.anim-pulse{
+      animation:m7pvCardPulse var(--pc-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-card.anim-sway{
+      animation:m7pvCardSway var(--pc-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-card.anim-bounce{
+      animation:m7pvCardBounce var(--pc-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-card.anim-shimmer::after{
+      content:"";
+      position:absolute;
+      inset:-15%;
+      z-index:8;
+      pointer-events:none;
+      background:linear-gradient(112deg,transparent 0 34%,rgba(255,255,255,calc(.08 + var(--pc-shimmer,.70) * .42)) 47%,rgba(255,255,255,calc(.10 + var(--pc-shimmer,.70) * .60)) 52%,rgba(255,255,255,calc(.06 + var(--pc-shimmer,.70) * .30)) 57%,transparent 68% 100%);
+      background-size:300% 100%;
+      animation:m7pvCardShimmer var(--pc-speed,2.4s) linear infinite;
+      mix-blend-mode:screen;
+    }
+
+    @keyframes m7pvCardBreathe{
+      50%{transform:scale(var(--pc-scale,1.018))}
+    }
+
+    @keyframes m7pvCardFloat{
+      50%{transform:translateY(calc(var(--pc-move,6px) * -1))}
+    }
+
+    @keyframes m7pvCardPulse{
+      50%{transform:scale(var(--pc-scale,1.018));opacity:.78}
+    }
+
+    @keyframes m7pvCardSway{
+      25%{transform:rotate(calc(var(--pc-rotate,1.4deg) * -1))}
+      75%{transform:rotate(var(--pc-rotate,1.4deg))}
+    }
+
+    @keyframes m7pvCardBounce{
+      0%,100%{transform:translateY(0)}
+      45%{transform:translateY(calc(var(--pc-move,6px) * -1))}
+      62%{transform:translateY(calc(var(--pc-move,6px) * .25))}
+    }
+
+    @keyframes m7pvCardShimmer{
+      from{background-position:150% 0;opacity:.15}
+      45%,55%{opacity:1}
+      to{background-position:-150% 0;opacity:.15}
     }
 
     @keyframes m7pvGlow{
@@ -12068,7 +12164,7 @@ function previewCardHtml(shop){
     ).toLowerCase();
 
   const animationClass=
-    ["breathe","glow","edge","shimmer"].includes(animation)
+    ["breathe","glow","edge","shimmer","float","pulse","sway","bounce"].includes(animation)
       ? " anim-"+animation
       : "";
 
@@ -12077,8 +12173,21 @@ function previewCardHtml(shop){
       ? 'url("'+esc(cover)+'")'
       : 'linear-gradient(135deg,#2b2419,#0f0d0a)';
 
+  const cardSpeed=
+    Math.max(.8,Math.min(8,Number(option("card_animation_speed")||2.4)));
+
+  const cardIntensity=
+    Math.max(0,Math.min(100,Number(option("card_animation_intensity")||55)));
+
+  const cardShimmer=
+    Math.max(0,Math.min(100,Number(option("card_shimmer_strength")||70)))/100;
+
+  const cardMove=(2+cardIntensity*.10).toFixed(1);
+  const cardScale=(1+cardIntensity*.0005).toFixed(4);
+  const cardRotate=(.3+cardIntensity*.025).toFixed(2);
+
   return '<div class="m7pv-card-wrap">'+
-    '<div class="m7pv-card'+animationClass+'" style="--pc-accent:'+esc(accent)+';--pc-radius:'+radius+'px;--pc-border:'+border+'px;--pc-cover:'+coverHeight+'px;--pc-shadow:'+shadow+';--pc-glow:'+glow+';--pc-surface:'+esc(surface)+';--pc-name:'+esc(nameColor)+';--pc-meta:'+esc(metaColor)+';--pc-btn:'+esc(btnColor)+';--pc-btn-bg:'+esc(btnBg)+';--pc-cover-image:'+coverStyle+';">'+
+    '<div class="m7pv-card'+animationClass+'" style="--pc-accent:'+esc(accent)+';--pc-radius:'+radius+'px;--pc-border:'+border+'px;--pc-cover:'+coverHeight+'px;--pc-shadow:'+shadow+';--pc-glow:'+glow+';--pc-speed:'+cardSpeed+'s;--pc-shimmer:'+cardShimmer+';--pc-move:'+cardMove+'px;--pc-scale:'+cardScale+';--pc-rotate:'+cardRotate+'deg;--pc-surface:'+esc(surface)+';--pc-name:'+esc(nameColor)+';--pc-meta:'+esc(metaColor)+';--pc-btn:'+esc(btnColor)+';--pc-btn-bg:'+esc(btnBg)+';--pc-cover-image:'+coverStyle+';">'+
       '<div class="m7pv-card-cover"></div>'+
       '<div class="m7pv-card-body">'+
         '<b>'+esc(name)+'</b>'+
