@@ -5932,6 +5932,17 @@ function decorateAll(){
     about_signature_color:"#f2caed",
 
     gallery_accent_color:"#f2caed",
+
+    gallery_frame_style:"current",
+    gallery_frame_color_1:"#e2a6b8",
+    gallery_frame_color_2:"#f2d18d",
+    gallery_frame_color_3:"#c88f45",
+    gallery_frame_color_4:"#e7aa5b",
+    gallery_frame_width:"3",
+    gallery_frame_radius:"18",
+    gallery_frame_glow:"22",
+    gallery_frame_angle:"315",
+
     video_accent_color:"#f2caed",
     follow_accent_color:"#f2caed",
     live_accent_color:"#f2caed",
@@ -5982,6 +5993,14 @@ function decorateAll(){
     ["bounce","Soft bounce"],
     ["flicker","Neon flicker"],
     ["none","Static / no animation"]
+  ];
+
+  const GALLERY_FRAME_STYLES = [
+    ["current","Current / single accent"],
+    ["dual","2-color split"],
+    ["quad","4-color split"],
+    ["blend","4-color soft blend"],
+    ["none","No frame"]
   ];
 
   const BANNER_STYLES = [
@@ -6089,6 +6108,20 @@ function decorateAll(){
           >
           <small>${esc(suffix||"")}</small>
         </div>
+      </label>
+    `;
+  }
+
+  function galleryFrameStyleField(prefix){
+    return `
+      <label class="m7ds-field">
+        <span>Gallery frame design</span>
+        <select id="${prefix}gallery_frame_style">
+          ${opts(
+            GALLERY_FRAME_STYLES,
+            DEFAULTS.gallery_frame_style
+          )}
+        </select>
       </label>
     `;
   }
@@ -6550,9 +6583,39 @@ function decorateAll(){
           ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
         </div>
 
+        <div class="m7ds-section-title">Gallery Multi-Color Frame</div>
+
+        <div class="m7ds-grid">
+          ${galleryFrameStyleField(prefix)}
+          ${effectNumberField(prefix,"gallery_frame_width","Frame thickness",0,10,0.5,"px")}
+
+          ${colorField(prefix,"gallery_frame_color_1","Color 1 — top / left")}
+          ${colorField(prefix,"gallery_frame_color_2","Color 2 — top / right")}
+          ${colorField(prefix,"gallery_frame_color_3","Color 3 — bottom / right")}
+          ${colorField(prefix,"gallery_frame_color_4","Color 4 — bottom / left")}
+
+          ${effectNumberField(prefix,"gallery_frame_radius","Corner radius",0,36,1,"px")}
+          ${effectNumberField(prefix,"gallery_frame_glow","Frame glow",0,100,5,"%")}
+          ${effectNumberField(prefix,"gallery_frame_angle","Color rotation",0,360,5,"°")}
+        </div>
+
+        <div class="m7ds-gallery-frame-demo">
+          <div class="m7ds-gallery-frame-sample" data-m7-gallery-frame-preview>
+            <div class="m7ds-gallery-frame-inner">
+              <span>GALLERY IMAGE</span>
+            </div>
+          </div>
+        </div>
+
         <p class="m7ds-help">
-          If “Use Universal Accent everywhere” is checked, these override colors are ignored.
-          Basic preset also forces static/no-animation styling across supported modules.
+          For a frame like the pink / gold reference, choose <b>2-color split</b>,
+          set Color 1 to pink and Color 3 to gold, then adjust rotation and glow.
+          Use 4-color split or soft blend for a richer layered frame.
+        </p>
+
+        <p class="m7ds-help">
+          If “Use Universal Accent everywhere” is checked, normal module accents follow the universal accent.
+          Gallery frame colors stay independent so multi-color frames keep their custom look.
         </p>
       </div>
     `;
@@ -6700,6 +6763,200 @@ function decorateAll(){
     box.__m7BannerRefresh =
       refreshBannerPreview;
 
+    function refreshGalleryFramePreview(){
+      const preview=
+        box.querySelector(
+          "[data-m7-gallery-frame-preview]"
+        );
+
+      if(!preview){
+        return;
+      }
+
+      const get=id=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+id)
+        );
+
+      const style=
+        String(
+          get("gallery_frame_style")?.value ||
+          DEFAULTS.gallery_frame_style
+        )
+          .trim()
+          .toLowerCase();
+
+      const accent=
+        safeHex(
+          get("gallery_accent_color")?.value,
+          DEFAULTS.gallery_accent_color
+        );
+
+      const c1=
+        safeHex(
+          get("gallery_frame_color_1")?.value,
+          DEFAULTS.gallery_frame_color_1
+        );
+
+      const c2=
+        safeHex(
+          get("gallery_frame_color_2")?.value,
+          DEFAULTS.gallery_frame_color_2
+        );
+
+      const c3=
+        safeHex(
+          get("gallery_frame_color_3")?.value,
+          DEFAULTS.gallery_frame_color_3
+        );
+
+      const c4=
+        safeHex(
+          get("gallery_frame_color_4")?.value,
+          DEFAULTS.gallery_frame_color_4
+        );
+
+      const number=(key,min,max,fallback)=>{
+        const raw=Number(get(key)?.value);
+        return Number.isFinite(raw)
+          ? Math.max(min,Math.min(max,raw))
+          : fallback;
+      };
+
+      const width=
+        number(
+          "gallery_frame_width",
+          0,
+          10,
+          3
+        );
+
+      const radius=
+        number(
+          "gallery_frame_radius",
+          0,
+          36,
+          18
+        );
+
+      const glow=
+        number(
+          "gallery_frame_glow",
+          0,
+          100,
+          22
+        );
+
+      const angle=
+        number(
+          "gallery_frame_angle",
+          0,
+          360,
+          315
+        );
+
+      let background=accent;
+
+      if(style==="dual"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 50%,"+
+          c3+
+          " 50% 100%)";
+      }
+      else if(style==="quad"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 25%,"+
+          c2+
+          " 25% 50%,"+
+          c3+
+          " 50% 75%,"+
+          c4+
+          " 75% 100%)";
+      }
+      else if(style==="blend"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          ","+
+          c2+
+          ","+
+          c3+
+          ","+
+          c4+
+          ","+
+          c1+
+          ")";
+      }
+      else if(style==="none"){
+        background="transparent";
+      }
+
+      const activeWidth=
+        style==="none"
+          ? 0
+          : width;
+
+      preview.style.padding=
+        activeWidth+"px";
+
+      preview.style.borderRadius=
+        radius+"px";
+
+      preview.style.background=
+        background;
+
+      const glowPx=
+        glow<=0
+          ? 0
+          : 4+glow*.20;
+
+      preview.style.boxShadow=
+        glow<=0
+          ? "none"
+          : (
+              "0 0 "+
+              glowPx.toFixed(1)+
+              "px color-mix(in srgb,"+
+              c1+
+              " "+
+              Math.min(82,25+glow*.55).toFixed(0)+
+              "%,transparent),"+
+              "0 0 "+
+              (glowPx*1.45).toFixed(1)+
+              "px color-mix(in srgb,"+
+              c3+
+              " "+
+              Math.min(68,15+glow*.45).toFixed(0)+
+              "%,transparent)"
+            );
+
+      const inner=
+        preview.querySelector(
+          ".m7ds-gallery-frame-inner"
+        );
+
+      if(inner){
+        inner.style.borderRadius=
+          Math.max(
+            0,
+            radius-activeWidth
+          )+"px";
+      }
+    }
+
+    box.__m7GalleryFrameRefresh =
+      refreshGalleryFramePreview;
+
     [
       bannerEnabled,
       bannerColor,
@@ -6792,6 +7049,36 @@ function decorateAll(){
       }
     );
 
+    [
+      "gallery_frame_style",
+      "gallery_frame_color_1",
+      "gallery_frame_color_2",
+      "gallery_frame_color_3",
+      "gallery_frame_color_4",
+      "gallery_frame_width",
+      "gallery_frame_radius",
+      "gallery_frame_glow",
+      "gallery_frame_angle",
+      "gallery_accent_color"
+    ]
+      .map(key=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+key)
+        )
+      )
+      .filter(Boolean)
+      .forEach(el=>{
+        el.addEventListener(
+          "input",
+          refreshGalleryFramePreview
+        );
+
+        el.addEventListener(
+          "change",
+          refreshGalleryFramePreview
+        );
+      });
+
     bannerClear?.addEventListener(
       "click",
       function(){
@@ -6836,6 +7123,7 @@ function decorateAll(){
     motion.addEventListener("change",updatePresetHint);
     updatePresetHint();
     refreshBannerPreview();
+    refreshGalleryFramePreview();
 
     box.__m7dsRefresh = function(){
       box.querySelectorAll('input[type="color"]').forEach(input=>{
@@ -6844,6 +7132,7 @@ function decorateAll(){
       });
       updatePresetHint();
       refreshBannerPreview();
+      refreshGalleryFramePreview();
     };
   }
 
@@ -7089,6 +7378,52 @@ function decorateAll(){
       .m7ds-banner-actions{display:flex;align-items:center;gap:8px;min-height:30px;margin-top:7px}
       .m7ds-banner-clear{min-height:29px;padding:0 9px;border:1px solid rgba(216,170,88,.18);border-radius:8px;background:rgba(255,255,255,.02);color:#d7c4a5;font-size:8px;font-weight:850;cursor:pointer}
       .m7ds-banner-status{flex:1;min-width:0;color:#8fd7aa;font-size:8px;line-height:1.35}
+
+      .m7ds-gallery-frame-demo{
+        margin-top:12px;
+        padding:16px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:1px solid rgba(216,170,88,.14);
+        border-radius:14px;
+        background:#090807;
+      }
+
+      .m7ds-gallery-frame-sample{
+        width:min(170px,70vw);
+        aspect-ratio:1/1;
+        box-sizing:border-box;
+        padding:3px;
+        border-radius:18px;
+        background:#f2caed;
+        box-shadow:none;
+        transition:
+          border-radius .18s ease,
+          box-shadow .18s ease,
+          padding .18s ease;
+      }
+
+      .m7ds-gallery-frame-inner{
+        width:100%;
+        height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        overflow:hidden;
+        box-sizing:border-box;
+        border-radius:15px;
+        background:
+          radial-gradient(circle at 30% 22%,rgba(226,166,184,.20),transparent 28%),
+          radial-gradient(circle at 70% 80%,rgba(200,143,69,.18),transparent 32%),
+          linear-gradient(145deg,#25211f,#0c0b0a);
+        color:#d7c9b7;
+        font-size:8px;
+        font-weight:950;
+        letter-spacing:1.2px;
+        text-shadow:0 2px 8px rgba(0,0,0,.75);
+      }
+
       .m7ds-preview-card{margin-top:12px;padding:14px 12px;border-radius:14px;border:1px solid rgba(216,170,88,.16);background:#0c0a08;text-align:center}
       .m7ds-preview-label{display:flex;align-items:center;justify-content:center;gap:8px;color:#e6c36f;font-size:8px;letter-spacing:1.5px}
       .m7ds-preview-label .m7ds-line{width:52px;height:1px;background:linear-gradient(90deg,transparent,#d9a84e)}
