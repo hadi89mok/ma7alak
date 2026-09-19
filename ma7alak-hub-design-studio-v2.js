@@ -606,6 +606,596 @@
         arabicSoft
       );
 
+    const shopNameColor =
+      safeHex(
+        options.shop_name_color,
+        accent
+      );
+
+    const shopNameRgb =
+      hexToRgb(shopNameColor) ||
+      rgb;
+
+    const shopNameLight =
+      mix(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+    const shopNameSoft =
+      mix(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+    const rawShopNameMode =
+      String(
+        options.shop_name_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+    const shopNameMode =
+      rawShopNameMode === "current"
+        ? (
+            motionOff
+              ? "none"
+              : "shimmer"
+          )
+        : rawShopNameMode;
+
+    const shopNameVisualCss =
+      buildTextAnimationCss(
+        shopNameMode,
+        shopNameColor,
+        shopNameRgb,
+        shopNameLight,
+        shopNameSoft
+      );
+
+    const labelLineColor =
+      safeHex(
+        options.shop_label_line_color,
+        accent
+      );
+
+    const labelLineStyle =
+      String(
+        options.shop_label_line_style ||
+        (
+          preset === "minimal"
+            ? "solid"
+            : "fade"
+        )
+      )
+        .trim()
+        .toLowerCase();
+
+    const labelSymbol =
+      symbol(
+        String(
+          options.shop_label_symbol ||
+          "diamond"
+        )
+          .trim()
+          .toLowerCase(),
+        options.shop_label_symbol_text
+      );
+
+    const dividerColor =
+      safeHex(
+        options.identity_divider_color,
+        accent
+      );
+
+    const dividerStyle =
+      String(
+        options.identity_divider_style ||
+        (
+          preset === "minimal"
+            ? "solid"
+            : "fade"
+        )
+      )
+        .trim()
+        .toLowerCase();
+
+    const dividerSymbol =
+      symbol(
+        String(
+          options.identity_divider_symbol ||
+          "diamond"
+        )
+          .trim()
+          .toLowerCase(),
+        options.identity_divider_symbol_text
+      );
+
+    const labelLineRgb =
+      hexToRgb(labelLineColor) ||
+      rgb;
+
+    const dividerRgb =
+      hexToRgb(dividerColor) ||
+      rgb;
+
+    const labelLineBg =
+      lineBackground(
+        labelLineStyle,
+        labelLineColor,
+        rgba(labelLineRgb,.58)
+      );
+
+    const dividerBg =
+      lineBackground(
+        dividerStyle,
+        dividerColor,
+        rgba(dividerRgb,.58)
+      );
+
+    const profileRingColor =
+      safeHex(
+        options.profile_ring_color,
+        accent
+      );
+
+    const profileRingRgb =
+      hexToRgb(profileRingColor) ||
+      rgb;
+
+    const profileRingLight =
+      mix(
+        profileRingRgb,
+        {r:255,g:255,b:255},
+        .46
+      );
+
+    const profileRingDark =
+      mix(
+        profileRingRgb,
+        {r:0,g:0,b:0},
+        .38
+      );
+
+    const labelTextColor =
+      safeHex(
+        options.shop_label_text_color,
+        accent
+      );
+
+    const labelBorderColor =
+      safeHex(
+        options.shop_label_border_color,
+        accent
+      );
+
+    const labelBgColor =
+      safeHex(
+        options.shop_label_bg_color,
+        "#171217"
+      );
+
+    const labelIconColor =
+      safeHex(
+        options.shop_label_icon_color,
+        accent
+      );
+
+    function applyInlineAnimation(
+      element,
+      css
+    ){
+      if(!element){
+        return;
+      }
+
+      /*
+        The manual Hostinger profile embed has an older inline Design Studio
+        engine. Appending the authoritative V2 declarations here makes the
+        latest Admin setting win without replacing the giant embed.
+      */
+      element.style.cssText +=
+        ";" +
+        String(css || "");
+    }
+
+    applyInlineAnimation(
+      document.getElementById(
+        "ma7alak-shop-name"
+      ),
+      shopNameVisualCss
+    );
+
+    applyInlineAnimation(
+      document.getElementById(
+        "ma7alak-shop-arabic-name"
+      ),
+      arabicVisualCss
+    );
+
+    const identityLines =
+      [
+        ...document.querySelectorAll(
+          "#ma7alak-shop-identity .ma7alak-shop-identity-line"
+        )
+      ];
+
+    identityLines.forEach(
+      (line,index)=>{
+        if(labelLineStyle === "none"){
+          line.style.setProperty(
+            "display",
+            "none",
+            "important"
+          );
+          return;
+        }
+
+        line.style.removeProperty(
+          "display"
+        );
+
+        line.style.setProperty(
+          "background",
+          labelLineBg,
+          "important"
+        );
+
+        line.style.setProperty(
+          "height",
+          labelLineStyle === "double"
+            ? "4px"
+            : (
+                labelLineStyle === "beam"
+                  ? "3px"
+                  : "2px"
+              ),
+          "important"
+        );
+
+        line.style.setProperty(
+          "box-shadow",
+          labelLineStyle === "neon"
+            ? (
+                "0 0 " +
+                glowNear +
+                "px " +
+                rgba(labelLineRgb,.86) +
+                ",0 0 " +
+                glowFar +
+                "px " +
+                rgba(labelLineRgb,.44)
+              )
+            : (
+                "0 0 " +
+                Math.max(
+                  1,
+                  glowNear*.45
+                ) +
+                "px " +
+                rgba(labelLineRgb,.28)
+              ),
+          "important"
+        );
+
+        if(
+          !motionOff &&
+          [
+            "fade",
+            "gradient",
+            "beam"
+          ].includes(labelLineStyle)
+        ){
+          line.style.setProperty(
+            "background-size",
+            "260% 100%",
+            "important"
+          );
+
+          line.style.setProperty(
+            "animation",
+            "m7HubIdentityLineFlow " +
+            tunedSpeed +
+            "s linear infinite",
+            "important"
+          );
+
+          line.style.setProperty(
+            "-webkit-animation",
+            "m7HubIdentityLineFlow " +
+            tunedSpeed +
+            "s linear infinite",
+            "important"
+          );
+        }
+        else if(
+          !motionOff &&
+          labelLineStyle === "neon"
+        ){
+          line.style.setProperty(
+            "animation",
+            "m7HubIdentityLineGlow " +
+            tunedSpeed +
+            "s ease-in-out infinite",
+            "important"
+          );
+
+          line.style.setProperty(
+            "-webkit-animation",
+            "m7HubIdentityLineGlow " +
+            tunedSpeed +
+            "s ease-in-out infinite",
+            "important"
+          );
+        }
+        else{
+          line.style.setProperty(
+            "animation",
+            "none",
+            "important"
+          );
+
+          line.style.setProperty(
+            "-webkit-animation",
+            "none",
+            "important"
+          );
+        }
+
+        line.style.setProperty(
+          "animation-play-state",
+          "running",
+          "important"
+        );
+
+        line.style.setProperty(
+          "-webkit-animation-play-state",
+          "running",
+          "important"
+        );
+
+        line.style.setProperty(
+          "-webkit-backface-visibility",
+          "hidden",
+          "important"
+        );
+
+        line.style.setProperty(
+          "backface-visibility",
+          "hidden",
+          "important"
+        );
+
+        if(index === 1){
+          line.style.setProperty(
+            "transform",
+            "scaleX(-1)",
+            "important"
+          );
+        }
+      }
+    );
+
+    const categoryRow =
+      document.getElementById(
+        "ma7alak-shop-identity-category-row"
+      );
+
+    if(categoryRow){
+      categoryRow
+        .querySelectorAll(
+          ".m7ds-label-symbol"
+        )
+        .forEach(node=>node.remove());
+
+      if(labelSymbol){
+        const left =
+          document.createElement(
+            "span"
+          );
+
+        const right =
+          document.createElement(
+            "span"
+          );
+
+        left.className =
+          "m7ds-label-symbol";
+
+        right.className =
+          "m7ds-label-symbol";
+
+        left.textContent =
+          labelSymbol;
+
+        right.textContent =
+          labelSymbol;
+
+        const pill =
+          document.getElementById(
+            "ma7alak-shop-category-pill"
+          );
+
+        if(pill){
+          categoryRow.insertBefore(
+            left,
+            pill
+          );
+
+          pill.after(
+            right
+          );
+        }
+      }
+    }
+
+    const dividerCenter =
+      document.querySelector(
+        "#ma7alak-shop-identity-divider span"
+      );
+
+    if(dividerCenter){
+      dividerCenter.textContent =
+        dividerSymbol;
+    }
+
+    const categoryPill =
+      document.getElementById(
+        "ma7alak-shop-category-pill"
+      );
+
+    if(categoryPill){
+      categoryPill.style.setProperty(
+        "border-color",
+        labelBorderColor,
+        "important"
+      );
+
+      categoryPill.style.setProperty(
+        "background",
+        "linear-gradient(145deg," +
+        labelBgColor +
+        ",rgba(8,8,10,.98))",
+        "important"
+      );
+    }
+
+    const categoryText =
+      document.getElementById(
+        "ma7alak-shop-category-text"
+      );
+
+    categoryText?.style.setProperty(
+      "color",
+      labelTextColor,
+      "important"
+    );
+
+    const categoryIcon =
+      document.getElementById(
+        "ma7alak-shop-category-icon"
+      );
+
+    if(categoryIcon){
+      categoryIcon.style.setProperty(
+        "color",
+        labelIconColor,
+        "important"
+      );
+
+      categoryIcon.style.setProperty(
+        "border-color",
+        rgba(
+          hexToRgb(labelIconColor) ||
+          rgb,
+          .62
+        ),
+        "important"
+      );
+    }
+
+    const storyButton =
+      document.getElementById(
+        "ma7alak-story-button"
+      );
+
+    storyButton?.style.setProperty(
+      "border-color",
+      profileRingColor,
+      "important"
+    );
+
+    storyButton?.style.setProperty(
+      "box-shadow",
+      "0 0 0 1px " +
+      rgba(profileRingRgb,.14) +
+      ",0 0 " +
+      glowNear +
+      "px " +
+      rgba(profileRingRgb,.34),
+      "important"
+    );
+
+    const storyNewRing =
+      document.getElementById(
+        "ma7alak-story-new-ring"
+      );
+
+    storyNewRing?.style.setProperty(
+      "border-color",
+      rgba(profileRingRgb,.82),
+      "important"
+    );
+
+    const storyActiveRing =
+      document.getElementById(
+        "ma7alak-story-active-ring"
+      );
+
+    if(storyActiveRing){
+      storyActiveRing.style.setProperty(
+        "background",
+        "conic-gradient(" +
+        profileRingColor +
+        "," +
+        profileRingLight +
+        "," +
+        profileRingDark +
+        "," +
+        profileRingColor +
+        ")",
+        "important"
+      );
+
+      storyActiveRing.style.setProperty(
+        "filter",
+        "drop-shadow(0 0 " +
+        Math.max(3,glowNear*.55) +
+        "px " +
+        rgba(profileRingRgb,.62) +
+        ")",
+        "important"
+      );
+
+      if(motionOff){
+        storyActiveRing.style.setProperty(
+          "animation",
+          "none",
+          "important"
+        );
+
+        storyActiveRing.style.setProperty(
+          "-webkit-animation",
+          "none",
+          "important"
+        );
+      }
+      else{
+        storyActiveRing.style.setProperty(
+          "animation-duration",
+          Math.max(
+            2.4,
+            tunedSpeed*2.4
+          ) +
+          "s",
+          "important"
+        );
+
+        storyActiveRing.style.setProperty(
+          "-webkit-animation-duration",
+          Math.max(
+            2.4,
+            tunedSpeed*2.4
+          ) +
+          "s",
+          "important"
+        );
+      }
+    }
+
     const kickerColor =
       picked(
         "about_kicker_color",
@@ -1013,6 +1603,103 @@
         0%,18%,22%,25%,53%,57%,100%{opacity:1}
         20%,24%,55%{opacity:.38}
       }
+      @keyframes m7HubIdentityLineFlow{
+        from{background-position:140% 50%}
+        to{background-position:-140% 50%}
+      }
+
+      @-webkit-keyframes m7HubIdentityLineFlow{
+        from{background-position:140% 50%}
+        to{background-position:-140% 50%}
+      }
+
+      @keyframes m7HubIdentityLineGlow{
+        0%,100%{opacity:.58;filter:brightness(1)}
+        50%{opacity:1;filter:brightness(1.42)}
+      }
+
+      @-webkit-keyframes m7HubIdentityLineGlow{
+        0%,100%{opacity:.58;-webkit-filter:brightness(1)}
+        50%{opacity:1;-webkit-filter:brightness(1.42)}
+      }
+
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line::before,
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line::after{
+        display:none!important;
+        animation:none!important;
+        -webkit-animation:none!important;
+      }
+
+      html body #ma7alak-shop-identity .m7ds-label-symbol{
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        flex:0 0 auto!important;
+        color:${labelLineColor}!important;
+        font-size:10px!important;
+        line-height:1!important;
+        text-shadow:
+          0 0 ${glowNear}px
+          ${rgba(labelLineRgb,.56)}!important;
+        animation-play-state:running!important;
+        -webkit-animation-play-state:running!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider{
+        display:${dividerStyle === "none" ? "none" : "flex"}!important;
+        color:${dividerColor}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::before,
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::after{
+        background:${dividerBg}!important;
+        height:${dividerStyle === "double" ? "4px" : dividerStyle === "beam" ? "3px" : "2px"}!important;
+        box-shadow:
+          ${dividerStyle === "neon"
+            ? "0 0 "+glowNear+"px "+rgba(dividerRgb,.84)+",0 0 "+glowFar+"px "+rgba(dividerRgb,.42)
+            : "0 0 "+Math.max(1,glowNear*.40)+"px "+rgba(dividerRgb,.24)}!important;
+        ${(
+          !motionOff &&
+          ["fade","gradient","beam"].includes(dividerStyle)
+        )
+          ? (
+              "background-size:260% 100%!important;" +
+              "animation:m7HubIdentityLineFlow "+tunedSpeed+"s linear infinite!important;" +
+              "-webkit-animation:m7HubIdentityLineFlow "+tunedSpeed+"s linear infinite!important;"
+            )
+          : (
+              !motionOff &&
+              dividerStyle === "neon"
+                ? (
+                    "animation:m7HubIdentityLineGlow "+tunedSpeed+"s ease-in-out infinite!important;" +
+                    "-webkit-animation:m7HubIdentityLineGlow "+tunedSpeed+"s ease-in-out infinite!important;"
+                  )
+                : "animation:none!important;-webkit-animation:none!important;"
+            )}
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider span{
+        display:${dividerSymbol ? "inline-flex" : "none"}!important;
+        align-items:center!important;
+        justify-content:center!important;
+        width:auto!important;
+        min-width:10px!important;
+        height:auto!important;
+        margin:0 8px!important;
+        border:0!important;
+        border-radius:0!important;
+        background:none!important;
+        color:${dividerColor}!important;
+        transform:none!important;
+        -webkit-transform:none!important;
+        font-size:10px!important;
+        line-height:1!important;
+        text-shadow:
+          0 0 ${glowNear}px
+          ${rgba(dividerRgb,.58)}!important;
+        box-shadow:none!important;
+      }
 
       html body #ma7alak-exact-merged-hub #ma7alak-about-title{
         transform:translateZ(0);
@@ -1176,8 +1863,13 @@
   async function start(){
     for(let i=0;i<120;i++){
       if(
-        document.getElementById(
-          "ma7alak-about-title"
+        (
+          document.getElementById(
+            "ma7alak-about-title"
+          ) ||
+          document.getElementById(
+            "ma7alak-shop-name"
+          )
         ) &&
         window.__MA7ALAK_EXACT_HUB_REST_CLIENT__
       ){
