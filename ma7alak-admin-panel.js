@@ -5943,6 +5943,23 @@ function decorateAll(){
     gallery_frame_glow:"22",
     gallery_frame_angle:"315",
 
+    gallery_frame_layer_1_enabled:true,
+    gallery_frame_layer_1_width:"2",
+    gallery_frame_layer_1_gap:"0",
+    gallery_frame_layer_2_enabled:true,
+    gallery_frame_layer_2_width:"2",
+    gallery_frame_layer_2_gap:"1",
+    gallery_frame_layer_3_enabled:true,
+    gallery_frame_layer_3_width:"2",
+    gallery_frame_layer_3_gap:"1",
+    gallery_frame_layer_4_enabled:false,
+    gallery_frame_layer_4_width:"2",
+    gallery_frame_layer_4_gap:"1",
+    gallery_frame_gradient_layer:"0",
+    gallery_frame_shadow:"38",
+    gallery_frame_animation:"none",
+    gallery_frame_animation_speed:"3.2",
+
     video_accent_color:"#f2caed",
     follow_accent_color:"#f2caed",
     live_accent_color:"#f2caed",
@@ -5997,6 +6014,7 @@ function decorateAll(){
 
   const GALLERY_FRAME_STYLES = [
     ["current","Current premium frame"],
+    ["layers","Stacked color layers"],
     ["dual","2-color split"],
     ["triple","3-color split"],
     ["quad","4-color split"],
@@ -6588,20 +6606,55 @@ function decorateAll(){
 
         <div class="m7ds-grid">
           ${galleryFrameStyleField(prefix)}
-          ${effectNumberField(prefix,"gallery_frame_width","Frame thickness",0,10,0.5,"px")}
-
-          ${colorField(prefix,"gallery_frame_color_1","Color 1 — top / left")}
-          ${colorField(prefix,"gallery_frame_color_2","Color 2 — top / right")}
-          ${colorField(prefix,"gallery_frame_color_3","Color 3 — bottom / right")}
-          ${colorField(prefix,"gallery_frame_color_4","Color 4 — bottom / left")}
-
-          ${effectNumberField(prefix,"gallery_frame_radius","Corner radius",0,36,1,"px")}
+          ${effectNumberField(prefix,"gallery_frame_radius","Corner radius",0,44,1,"px")}
           ${effectNumberField(prefix,"gallery_frame_glow","Frame glow",0,100,5,"%")}
-          ${effectNumberField(prefix,"gallery_frame_angle","Color rotation",0,360,5,"°")}
+          ${effectNumberField(prefix,"gallery_frame_shadow","Shadow strength",0,100,5,"%")}
+          ${effectNumberField(prefix,"gallery_frame_angle","Gradient / color angle",0,360,5,"°")}
+          ${effectNumberField(prefix,"gallery_frame_width","Legacy split-frame thickness",0,10,0.5,"px")}
+
+          <label class="m7ds-field">
+            <span>Gradient layer</span>
+            <select id="${prefix}gallery_frame_gradient_layer">
+              <option value="0">None — solid layers</option>
+              <option value="1">Layer 1</option>
+              <option value="2">Layer 2</option>
+              <option value="3">Layer 3</option>
+              <option value="4">Layer 4</option>
+            </select>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Layered frame animation</span>
+            <select id="${prefix}gallery_frame_animation">
+              <option value="none">Static</option>
+              <option value="pulse">Glow pulse</option>
+              <option value="wave">Layer wave</option>
+            </select>
+          </label>
+
+          ${effectNumberField(prefix,"gallery_frame_animation_speed","Frame animation speed",1.2,8,0.1,"seconds")}
+        </div>
+
+        <div class="m7ds-layer-grid">
+          ${[1,2,3,4].map(layer=>`
+            <div class="m7ds-layer-card">
+              <label class="m7ds-check compact">
+                <input id="${prefix}gallery_frame_layer_${layer}_enabled" type="checkbox" ${DEFAULTS["gallery_frame_layer_"+layer+"_enabled"]?"checked":""}>
+                <span><b>Layer ${layer}</b><small>${layer===1?"Closest to image":"Outer layer"}</small></span>
+              </label>
+              ${colorField(prefix,"gallery_frame_color_"+layer,"Layer "+layer+" color")}
+              ${effectNumberField(prefix,"gallery_frame_layer_"+layer+"_width","Thickness",0,6,0.5,"px")}
+              ${effectNumberField(prefix,"gallery_frame_layer_"+layer+"_gap","Spacing before layer",0,4,0.5,"px")}
+            </div>
+          `).join("")}
         </div>
 
         <div class="m7ds-gallery-frame-demo">
           <div class="m7ds-gallery-frame-sample" data-m7-gallery-frame-preview>
+            <i class="m7ds-gallery-frame-layer" data-m7-gallery-layer="1" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-gallery-layer="2" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-gallery-layer="3" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-gallery-layer="4" aria-hidden="true"></i>
             <div class="m7ds-gallery-frame-inner">
               <span>GALLERY IMAGE</span>
             </div>
@@ -6609,10 +6662,10 @@ function decorateAll(){
         </div>
 
         <p class="m7ds-help">
-          For a frame like the pink / gold reference, choose <b>2-color split</b>,
-          set Color 1 to pink and Color 3 to gold, then adjust rotation and glow.
-          Choose <b>3-color split</b> for pink → champagne → gold, or use 4-color
-          split / soft blend for a richer multi-color frame.
+          Choose <b>Stacked color layers</b> for the screenshot-style frame:
+          each layer can be enabled separately with its own color, thickness and spacing.
+          You can also turn one layer into a gradient, tune glow/shadow, and animate the stack.
+          The older 2/3/4-color split modes remain available and unchanged.
         </p>
 
         <p class="m7ds-help">
@@ -6857,6 +6910,45 @@ function decorateAll(){
           315
         );
 
+      const shadow=
+        number(
+          "gallery_frame_shadow",
+          0,
+          100,
+          38
+        );
+
+      const gradientLayer=
+        String(
+          get("gallery_frame_gradient_layer")?.value ||
+          "0"
+        );
+
+      const frameAnimation=
+        String(
+          get("gallery_frame_animation")?.value ||
+          "none"
+        )
+          .trim()
+          .toLowerCase();
+
+      const frameAnimationSpeed=
+        number(
+          "gallery_frame_animation_speed",
+          1.2,
+          8,
+          3.2
+        );
+
+      const layerColors=[c1,c2,c3,c4];
+      const layerData=[1,2,3,4].map((layer,index)=>({
+        layer,
+        color:layerColors[index],
+        enabled:!!get("gallery_frame_layer_"+layer+"_enabled")?.checked,
+        width:number("gallery_frame_layer_"+layer+"_width",0,6,2),
+        gap:number("gallery_frame_layer_"+layer+"_gap",0,4,layer===1?0:1)
+      }));
+
       let background=accent;
 
       if(style==="dual"){
@@ -6915,8 +7007,11 @@ function decorateAll(){
         background="transparent";
       }
 
+      const layered=
+        style==="layers";
+
       const activeWidth=
-        style==="none"
+        style==="none" || layered
           ? 0
           : width;
 
@@ -6927,32 +7022,172 @@ function decorateAll(){
         radius+"px";
 
       preview.style.background=
-        background;
+        layered
+          ? "transparent"
+          : background;
+
+      let extent=0;
+      let lastEnabledColor=c1;
+
+      preview
+        .querySelectorAll(
+          "[data-m7-gallery-layer]"
+        )
+        .forEach((layerEl,index)=>{
+          const data=layerData[index];
+          const show=layered&&data.enabled&&data.width>0;
+
+          layerEl.style.display=
+            show
+              ? "block"
+              : "none";
+
+          layerEl.classList.remove(
+            "gradient"
+          );
+
+          if(!show){
+            return;
+          }
+
+          extent+=
+            data.gap+
+            data.width;
+
+          const nextColor=
+            layerData[
+              Math.min(
+                layerData.length-1,
+                index+1
+              )
+            ].color;
+
+          layerEl.style.inset=
+            (-extent)+"px";
+
+          layerEl.style.borderRadius=
+            (radius+extent)+"px";
+
+          layerEl.style.borderWidth=
+            data.width+"px";
+
+          layerEl.style.borderStyle=
+            "solid";
+
+          layerEl.style.borderColor=
+            data.color;
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-width",
+            data.width+"px"
+          );
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-color",
+            data.color
+          );
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-gradient",
+            "linear-gradient("+
+              angle+
+              "deg,"+
+              data.color+
+              ","+
+              nextColor+
+            ")"
+          );
+
+          layerEl.style.animationDelay=
+            (index*.16)+"s";
+
+          if(
+            gradientLayer===
+              String(data.layer)
+          ){
+            layerEl.classList.add(
+              "gradient"
+            );
+          }
+
+          lastEnabledColor=
+            data.color;
+        });
+
+      preview.style.margin=
+        layered
+          ? extent+"px"
+          : "0";
+
+      preview.classList.remove(
+        "frame-anim-pulse",
+        "frame-anim-wave"
+      );
+
+      if(
+        layered &&
+        (
+          frameAnimation==="pulse" ||
+          frameAnimation==="wave"
+        )
+      ){
+        preview.classList.add(
+          "frame-anim-"+frameAnimation
+        );
+      }
+
+      preview.style.setProperty(
+        "--m7ds-frame-speed",
+        frameAnimationSpeed+"s"
+      );
 
       const glowPx=
         glow<=0
           ? 0
           : 4+glow*.20;
 
+      const shadowAlpha=
+        Math.min(
+          .72,
+          shadow/100*.62
+        );
+
+      const shadows=[];
+
+      if(shadow>0){
+        shadows.push(
+          "0 12px 28px rgba(0,0,0,"+
+          shadowAlpha.toFixed(3)+
+          ")"
+        );
+      }
+
+      if(glow>0){
+        shadows.push(
+          "0 0 "+
+          glowPx.toFixed(1)+
+          "px color-mix(in srgb,"+
+          c1+
+          " "+
+          Math.min(82,25+glow*.55).toFixed(0)+
+          "%,transparent)"
+        );
+
+        shadows.push(
+          "0 0 "+
+          (glowPx*1.45).toFixed(1)+
+          "px color-mix(in srgb,"+
+          (layered?lastEnabledColor:c3)+
+          " "+
+          Math.min(68,15+glow*.45).toFixed(0)+
+          "%,transparent)"
+        );
+      }
+
       preview.style.boxShadow=
-        glow<=0
-          ? "none"
-          : (
-              "0 0 "+
-              glowPx.toFixed(1)+
-              "px color-mix(in srgb,"+
-              c1+
-              " "+
-              Math.min(82,25+glow*.55).toFixed(0)+
-              "%,transparent),"+
-              "0 0 "+
-              (glowPx*1.45).toFixed(1)+
-              "px color-mix(in srgb,"+
-              c3+
-              " "+
-              Math.min(68,15+glow*.45).toFixed(0)+
-              "%,transparent)"
-            );
+        shadows.length
+          ? shadows.join(",")
+          : "none";
 
       const inner=
         preview.querySelector(
@@ -6961,10 +7196,14 @@ function decorateAll(){
 
       if(inner){
         inner.style.borderRadius=
-          Math.max(
-            0,
-            radius-activeWidth
-          )+"px";
+          layered
+            ? radius+"px"
+            : (
+                Math.max(
+                  0,
+                  radius-activeWidth
+                )+"px"
+              );
       }
     }
 
@@ -7072,7 +7311,23 @@ function decorateAll(){
       "gallery_frame_width",
       "gallery_frame_radius",
       "gallery_frame_glow",
+      "gallery_frame_shadow",
       "gallery_frame_angle",
+      "gallery_frame_gradient_layer",
+      "gallery_frame_animation",
+      "gallery_frame_animation_speed",
+      "gallery_frame_layer_1_enabled",
+      "gallery_frame_layer_1_width",
+      "gallery_frame_layer_1_gap",
+      "gallery_frame_layer_2_enabled",
+      "gallery_frame_layer_2_width",
+      "gallery_frame_layer_2_gap",
+      "gallery_frame_layer_3_enabled",
+      "gallery_frame_layer_3_width",
+      "gallery_frame_layer_3_gap",
+      "gallery_frame_layer_4_enabled",
+      "gallery_frame_layer_4_width",
+      "gallery_frame_layer_4_gap",
       "gallery_accent_color"
     ]
       .map(key=>
@@ -7404,7 +7659,32 @@ function decorateAll(){
         background:#090807;
       }
 
+      .m7ds-layer-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+        margin-top:10px;
+      }
+
+      .m7ds-layer-card{
+        min-width:0;
+        padding:9px;
+        border:1px solid rgba(216,170,88,.13);
+        border-radius:12px;
+        background:rgba(255,255,255,.018);
+      }
+
+      .m7ds-layer-card .m7ds-grid{
+        grid-template-columns:1fr;
+      }
+
+      .m7ds-check.compact{
+        margin-bottom:7px;
+      }
+
       .m7ds-gallery-frame-sample{
+        position:relative;
+        isolation:isolate;
         width:min(170px,70vw);
         aspect-ratio:1/1;
         box-sizing:border-box;
@@ -7415,7 +7695,48 @@ function decorateAll(){
         transition:
           border-radius .18s ease,
           box-shadow .18s ease,
-          padding .18s ease;
+          padding .18s ease,
+          margin .18s ease;
+      }
+
+      .m7ds-gallery-frame-layer{
+        position:absolute;
+        z-index:0;
+        display:none;
+        box-sizing:border-box;
+        pointer-events:none;
+        background:transparent;
+      }
+
+      .m7ds-gallery-frame-layer.gradient{
+        border:0!important;
+        padding:var(--m7ds-layer-width,2px);
+        background:var(--m7ds-layer-gradient,#f2caed);
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite:xor;
+        mask-composite:exclude;
+      }
+
+      @keyframes m7dsFramePulse{
+        0%,100%{filter:brightness(1);opacity:.82}
+        50%{filter:brightness(1.28);opacity:1}
+      }
+
+      @keyframes m7dsFrameWave{
+        0%,100%{filter:brightness(.92);opacity:.70}
+        45%,60%{filter:brightness(1.42);opacity:1}
+      }
+
+      .m7ds-gallery-frame-sample.frame-anim-pulse
+      .m7ds-gallery-frame-layer{
+        animation:m7dsFramePulse var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+
+      .m7ds-gallery-frame-sample.frame-anim-wave
+      .m7ds-gallery-frame-layer{
+        animation:m7dsFrameWave var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
       }
 
       .m7ds-gallery-frame-inner{
@@ -7448,7 +7769,7 @@ function decorateAll(){
       .m7ds-preview-divider span:last-child{transform:scaleX(-1)}
       .m7ds-preview-divider i{color:#e6c36f;font-style:normal;font-size:9px}
       .m7-design-studio[data-preset="basic"]{box-shadow:none!important}
-      @media(max-width:700px){.m7ds-top-grid,.m7ds-grid{grid-template-columns:1fr}.m7ds-intro{align-items:flex-start}}
+      @media(max-width:700px){.m7ds-top-grid,.m7ds-grid,.m7ds-layer-grid{grid-template-columns:1fr}.m7ds-intro{align-items:flex-start}}
     `;
 
     document.head.appendChild(style);
