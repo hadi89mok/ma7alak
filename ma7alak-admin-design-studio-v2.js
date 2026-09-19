@@ -38,6 +38,10 @@
 
     profile_ring_color:"$ACCENT",
 
+    profile_banner_enabled:false,
+    profile_banner_color:"#171217",
+    profile_banner_image_url:"",
+
     shop_label_text_color:"$ACCENT",
     shop_label_border_color:"$ACCENT",
     shop_label_bg_color:"#171217",
