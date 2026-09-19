@@ -9249,6 +9249,156 @@ function ensureCss(){
       line-height:1.35;
     }
 
+    .m7v4-state-action{
+      min-height:74px;
+      display:grid;
+      grid-template-columns:34px minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 11px;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:14px;
+      background:rgba(255,255,255,.018);
+      color:#e9dcc5;
+      text-align:left;
+      cursor:pointer;
+      transition:border-color .16s ease,background .16s ease,opacity .16s ease;
+    }
+
+    .m7v4-state-action:hover{
+      border-color:rgba(217,170,88,.30);
+      background:rgba(217,170,88,.045);
+    }
+
+    .m7v4-state-action:disabled,
+    .m7v4-state-action.is-busy{
+      opacity:.58;
+      cursor:wait;
+    }
+
+    .m7v4-state-icon{
+      width:32px;
+      height:32px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:10px;
+      background:rgba(255,255,255,.025);
+      color:#d9b466;
+      font-size:15px;
+    }
+
+    .m7v4-state-copy{
+      min-width:0;
+    }
+
+    .m7v4-state-copy b{
+      display:block;
+      color:#f4e8d3;
+      font-size:10px;
+    }
+
+    .m7v4-state-copy small{
+      display:block;
+      margin-top:3px;
+      color:#7f7463;
+      font-size:8px;
+      line-height:1.35;
+    }
+
+    .m7v4-state-side{
+      display:flex;
+      align-items:center;
+      gap:7px;
+    }
+
+    .m7v4-state-label{
+      min-width:24px;
+      color:#8d8374;
+      font-size:8px;
+      font-weight:950;
+      text-align:right;
+    }
+
+    .m7v4-switch{
+      position:relative;
+      width:38px;
+      height:22px;
+      flex:0 0 38px;
+      border:1px solid rgba(255,255,255,.13);
+      border-radius:999px;
+      background:#211c18;
+      box-shadow:inset 0 2px 6px rgba(0,0,0,.42);
+    }
+
+    .m7v4-switch:after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:#73695c;
+      transition:transform .17s ease,background .17s ease,box-shadow .17s ease;
+    }
+
+    .m7v4-state-action.is-on{
+      border-color:rgba(65,218,132,.24);
+      background:rgba(65,218,132,.035);
+    }
+
+    .m7v4-state-action.is-on .m7v4-state-label{
+      color:#74e5a2;
+    }
+
+    .m7v4-state-action.is-on .m7v4-switch{
+      border-color:rgba(65,218,132,.35);
+      background:#173523;
+    }
+
+    .m7v4-state-action.is-on .m7v4-switch:after{
+      transform:translateX(16px);
+      background:#65e89b;
+      box-shadow:0 0 10px rgba(65,218,132,.48);
+    }
+
+    .m7v4-state-action.tone-new.is-on{
+      border-color:rgba(87,183,255,.27);
+      background:rgba(87,183,255,.04);
+    }
+
+    .m7v4-state-action.tone-feature.is-on{
+      border-color:rgba(239,84,108,.34);
+      background:rgba(239,84,108,.045);
+    }
+
+    .m7v4-state-action.tone-feature.is-on .m7v4-state-label{
+      color:#ff8898;
+    }
+
+    .m7v4-state-action.tone-feature.is-on .m7v4-switch{
+      border-color:rgba(239,84,108,.44);
+      background:#431722;
+    }
+
+    .m7v4-state-action.tone-feature.is-on .m7v4-switch:after{
+      background:#ff6d82;
+      box-shadow:0 0 10px rgba(239,84,108,.52);
+    }
+
+    .m7v4-tag.new{
+      border-color:rgba(87,183,255,.28);
+      background:rgba(87,183,255,.065);
+      color:#83c9ff;
+    }
+
+    .m7v4-tag.featured{
+      border-color:rgba(239,84,108,.34);
+      background:rgba(239,84,108,.075);
+      color:#ff8998;
+    }
+
     .m7v4-system{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
@@ -9534,6 +9684,80 @@ function selectedShop(){
   return shops.find(shop=>norm(shop.shop_slug)===norm(selectedSlug))||null;
 }
 
+function newBadgeOn(shop){
+  return norm(
+    shop?.directory_options?.badge
+  )==="new";
+}
+
+function featureState(shop){
+  const options=
+    shop?.directory_options &&
+    typeof shop.directory_options==="object"
+      ? shop.directory_options
+      : {};
+
+  const rawEnd=
+    options.featured_until;
+
+  const end=
+    rawEnd
+      ? new Date(rawEnd)
+      : null;
+
+  const validEnd=
+    end &&
+    !Number.isNaN(end.getTime());
+
+  const on=
+    shop?.featured===true &&
+    (
+      !validEnd ||
+      end.getTime()>Date.now()
+    );
+
+  const days=
+    on &&
+    validEnd
+      ? Math.max(
+          1,
+          Math.ceil(
+            (end.getTime()-Date.now())/
+            86400000
+          )
+        )
+      : null;
+
+  return {
+    on:on,
+    days:days
+  };
+}
+
+function stateAction(key,icon,title,on,copy,tone){
+  return '<button type="button" class="m7v4-state-action '+(on?'is-on':'is-off')+(tone?' tone-'+esc(tone):'')+'" data-m7v4-action="'+esc(key)+'" aria-pressed="'+(on?'true':'false')+'">'+
+    '<span class="m7v4-state-icon">'+esc(icon)+'</span>'+
+    '<span class="m7v4-state-copy"><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></span>'+
+    '<span class="m7v4-state-side"><span class="m7v4-state-label">'+(on?'ON':'OFF')+'</span><span class="m7v4-switch" aria-hidden="true"></span></span>'+
+  '</button>';
+}
+
+async function logV4Activity(action,shop,details){
+  try{
+    await client.rpc(
+      "log_admin_activity",
+      {
+        p_action:action,
+        p_shop_slug:shop?.shop_slug||null,
+        p_details:{
+          shop_name:shop?.shop_name||shop?.shop_slug||"",
+          ...(details||{})
+        }
+      }
+    );
+  }catch(_){}
+}
+
 function shopImage(shop,sizeClass){
   const url=String(shop?.profile_image_url||"").trim();
   return url
@@ -9580,7 +9804,9 @@ function renderList(){
         '<small>/'+esc(shop.shop_slug)+(meta?" · "+meta:"")+'</small>'+
         '<div class="m7v4-badges">'+
           '<span class="m7v4-tag '+(shop.is_active?"on":"")+'">'+(shop.is_active?"VISIBLE":"HIDDEN")+'</span>'+
-          (shop.verified?'<span class="m7v4-tag verified">VERIFIED</span>':"")+
+          '<span class="m7v4-tag '+(shop.verified?"verified":"")+'">'+(shop.verified?"VERIFIED":"UNVERIFIED")+'</span>'+
+          (newBadgeOn(shop)?'<span class="m7v4-tag new">NEW</span>':"")+
+          (featureState(shop).on?'<span class="m7v4-tag featured">FEATURED</span>':"")+
         '</div>'+
       '</div>'+
       '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Manage →</button>'+
@@ -9626,9 +9852,10 @@ function renderWorkspace(){
     '<div class="m7v4-group-title">Account & publishing</div>'+
     '<div class="m7v4-actions">'+
       action("owner","♙","Owner access","Assign or manage this shop owner")+
-      action("visibility","◐","Visibility","Show or hide this shop")+
-      action("verify","✓","Verification","Verify or unverify this shop")+
-      action("feature","★","Featured","Feature this shop for a period")+
+      stateAction("visibility","◐","Shop visibility",shop.is_active===true,shop.is_active===true?"Visible to visitors":"Hidden from visitors","visibility")+
+      stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
+      stateAction("new","NEW","NEW badge",newBadgeOn(shop),newBadgeOn(shop)?"NEW badge is showing":"NEW badge is hidden","new")+
+      stateAction("feature","★","Featured",featureState(shop).on,featureState(shop).on?(featureState(shop).days?("Featured · "+featureState(shop).days+"d left"):"Featured is active"):"Featured is off","feature")+
     '</div>'+
 
     '<div class="m7v4-group-title">System tools</div>'+
@@ -9652,7 +9879,7 @@ async function loadShops(){
 
   const result=await client
     .from("shop_profiles")
-    .select("shop_slug,shop_name,arabic_name,profile_image_url,location,area,category,category_name,is_active,verified,featured,directory_options")
+    .select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url,location,area,category,category_name,is_active,verified,featured,directory_options")
     .order("shop_name",{ascending:true});
 
   if(result.error)throw result.error;
@@ -9710,20 +9937,183 @@ async function handleAction(key){
   }
 
   if(key==="visibility"){
-    if(!legacyAction(shop.shop_slug,"active"))throw new Error("Visibility action is not ready.");
-    setTimeout(loadShops,250);
+    const next=
+      shop.is_active!==true;
+
+    if(next){
+      const missing=[];
+
+      if(!String(shop.shop_url||"").trim()){
+        missing.push("shop URL");
+      }
+
+      if(!String(shop.category||"").trim()){
+        missing.push("category");
+      }
+
+      if(!String(shop.category_name||"").trim()){
+        missing.push("category name");
+      }
+
+      if(!String(shop.location||"").trim()){
+        missing.push("location");
+      }
+
+      if(missing.length){
+        throw new Error(
+          "Cannot show this shop yet. Missing: "+
+          missing.join(", ")+
+          "."
+        );
+      }
+    }
+
+    const result=
+      await client
+        .from("shop_profiles")
+        .update({
+          is_active:next
+        })
+        .eq(
+          "shop_slug",
+          shop.shop_slug
+        );
+
+    if(result.error)throw result.error;
+
+    await logV4Activity(
+      next
+        ? "shop_activated"
+        : "shop_hidden",
+      shop
+    );
+
+    await loadShops();
     return;
   }
 
   if(key==="verify"){
-    if(!legacyAction(shop.shop_slug,"verified"))throw new Error("Verification action is not ready.");
-    setTimeout(loadShops,250);
+    const next=
+      shop.verified!==true;
+
+    const result=
+      await client
+        .from("shop_profiles")
+        .update({
+          verified:next
+        })
+        .eq(
+          "shop_slug",
+          shop.shop_slug
+        );
+
+    if(result.error)throw result.error;
+
+    await logV4Activity(
+      next
+        ? "shop_verified"
+        : "shop_unverified",
+      shop
+    );
+
+    await loadShops();
+    return;
+  }
+
+  if(key==="new"){
+    const current=
+      shop.directory_options &&
+      typeof shop.directory_options==="object"
+        ? shop.directory_options
+        : {};
+
+    const nextOn=
+      !newBadgeOn(shop);
+
+    const nextOptions={
+      ...current,
+      badge:
+        nextOn
+          ? "NEW"
+          : null
+    };
+
+    const result=
+      await client
+        .from("shop_profiles")
+        .update({
+          directory_options:nextOptions
+        })
+        .eq(
+          "shop_slug",
+          shop.shop_slug
+        );
+
+    if(result.error)throw result.error;
+
+    await logV4Activity(
+      nextOn
+        ? "shop_marked_new"
+        : "shop_new_removed",
+      shop
+    );
+
+    await loadShops();
     return;
   }
 
   if(key==="feature"){
-    if(!legacyAction(shop.shop_slug,"featured"))throw new Error("Featured action is not ready.");
-    setTimeout(loadShops,250);
+    const state=
+      featureState(shop);
+
+    if(state.on){
+      const current=
+        shop.directory_options &&
+        typeof shop.directory_options==="object"
+          ? shop.directory_options
+          : {};
+
+      const nextOptions={
+        ...current
+      };
+
+      delete nextOptions.featured_until;
+
+      const result=
+        await client
+          .from("shop_profiles")
+          .update({
+            featured:false,
+            directory_options:nextOptions
+          })
+          .eq(
+            "shop_slug",
+            shop.shop_slug
+          );
+
+      if(result.error)throw result.error;
+
+      await logV4Activity(
+        "shop_unfeatured",
+        shop
+      );
+
+      await loadShops();
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "ma7alak:feature-shop",
+        {
+          detail:{
+            slug:shop.shop_slug
+          }
+        }
+      )
+    );
+
+    return;
   }
 }
 
@@ -9822,12 +10212,19 @@ function mount(){
 
     const actionButton=event.target.closest("[data-m7v4-action]");
     if(actionButton){
+      actionButton.disabled=true;
+      actionButton.classList.add("is-busy");
+
       try{
         await handleAction(actionButton.dataset.m7v4Action);
       }catch(error){
         console.error("MA7ALAK Admin V4 action:",error);
         window.alert(error?.message||"This admin tool could not open.");
+      }finally{
+        actionButton.disabled=false;
+        actionButton.classList.remove("is-busy");
       }
+
       return;
     }
 
