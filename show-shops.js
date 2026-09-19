@@ -293,6 +293,18 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
       50%{opacity:1;filter:drop-shadow(0 0 10px rgba(var(--m7-card-accent-rgb,193,166,106),.72))}
     }
 
+    /* Edge Pulse also works on normal/double/soft cards, not only Corner Lines. */
+    .m7d-card.m7d-anim-edge:not(.m7d-edge-corners)::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:7;
+      pointer-events:none;
+      border-radius:inherit;
+      border:max(1px,var(--m7-card-border-width,1px)) solid var(--card-accent);
+      opacity:.62;
+    }
+
     .m7d-card.m7d-anim-edge::before{
       animation:m7CardAdminEdge var(--m7-card-speed,2.4s) ease-in-out infinite!important;
       -webkit-animation:m7CardAdminEdge var(--m7-card-speed,2.4s) ease-in-out infinite!important;
