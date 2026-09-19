@@ -1626,6 +1626,36 @@
     state.live =
       value(5) || [];
 
+    if(state.live.length){
+      const first =
+        state.live[0];
+
+      if(
+        first &&
+        first.id &&
+        !String(first.media_url || "").trim()
+      ){
+        try{
+          const media =
+            await rest(
+              "shop_live_post_media?select=*&post_id=eq."+
+              encodeURIComponent(first.id)+
+              "&order=is_cover.desc,sort_order.asc&limit=1"
+            );
+
+          if(media && media[0]){
+            first.media_url =
+              media[0].media_url ||
+              "";
+
+            first.media_type =
+              media[0].media_type ||
+              "image";
+          }
+        }catch(_){}
+      }
+    }
+
     await loadFollow();
   }
 
