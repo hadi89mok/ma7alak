@@ -114,6 +114,17 @@
     about_signature_color:"$ACCENT",
 
     gallery_accent_color:"$ACCENT",
+
+    gallery_frame_style:"current",
+    gallery_frame_color_1:"#e2a6b8",
+    gallery_frame_color_2:"#f2d18d",
+    gallery_frame_color_3:"#c88f45",
+    gallery_frame_color_4:"#e7aa5b",
+    gallery_frame_width:"3",
+    gallery_frame_radius:"18",
+    gallery_frame_glow:"22",
+    gallery_frame_angle:"315",
+
     video_accent_color:"$ACCENT",
     follow_accent_color:"$ACCENT",
     live_accent_color:"$ACCENT",
