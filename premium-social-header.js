@@ -3,7 +3,7 @@
    - Following header icon no longer shows a count badge.
    - Following panel has a functional live search bar.
    - Followed shops with an active Story get a live animated gold ring.
-   - Story-ring state syncs through Supabase Realtime + safe 1.5s refresh.
+   - Story-ring state syncs through Supabase Realtime + safe 30s recovery refresh.
    - Existing Follow, Notifications, Reels, Search, owner profile and owner-only Story Likes are preserved.
 ========================================================= */
 
@@ -1706,6 +1706,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let followingRefreshTimer=null;
   let followingRealtimeChannel=null;
   let followingStoryRealtimeChannel=null;
+  let followingRefreshInFlight=false;
+  let followingRefreshQueued=false;
   let followingSearchQuery="";
   let activeFollowingStorySlugs=new Set();
   const FOLLOW_VISITOR_KEY="ma7alak_visitor_id";
@@ -1962,9 +1964,14 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   }
 
   async function refreshFollowingState(){
+    if(followingRefreshInFlight){
+      followingRefreshQueued=true;
+      return;
+    }
     const supabaseClient=getClient();
     const visitorId=getFollowVisitorId();
     if(!supabaseClient||!visitorId){return;}
+    followingRefreshInFlight=true;
     try{
       const result=await supabaseClient.rpc("get_visitor_followed_shops",{p_visitor_id:visitorId});
       if(result.error){throw result.error;}
@@ -1976,6 +1983,12 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       await refreshFollowingStoryState();
     }catch(error){
       console.error("MA7ALAK header Following:",error);
+    }finally{
+      followingRefreshInFlight=false;
+      if(followingRefreshQueued){
+        followingRefreshQueued=false;
+        setTimeout(refreshFollowingState,0);
+      }
     }
   }
 
@@ -2021,7 +2034,11 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     if(followingSearchClear){followingSearchClear.addEventListener("click",function(){if(followingSearch){followingSearch.value="";followingSearch.focus();}syncFollowingSearch();});}
 
     refreshFollowingState();
-    followingRefreshTimer=setInterval(refreshFollowingState,1500);
+    followingRefreshTimer=setInterval(function(){
+      if(!document.hidden){
+        refreshFollowingState();
+      }
+    },30000);
 
     const supabaseClient=getClient();
     if(supabaseClient&&typeof supabaseClient.channel==="function"){
@@ -3732,7 +3749,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    4. Every followed shop shows its real shop icon/name and “You are following this shop ✓”.
    5. Clicking the shop row/circle opens that shop page.
    6. Uses the existing get_visitor_followed_shops RPC and ma7alak_visitor_id — no second follow system.
-   7. Live refresh via Supabase Realtime when available + 1.5s safe fallback, focus/visibility/message sync.
+   7. Live refresh via Supabase Realtime when available + 30s recovery fallback, focus/visibility/message sync.
    8. Works for normal viewers and shop owners following other shops.
    9. Existing Reels, Search, Notifications, owner profile and owner-only Story Likes remain intact.
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
