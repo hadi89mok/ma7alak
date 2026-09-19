@@ -5889,48 +5889,17 @@ function decorateAll(){
 
     profile_ring_color:"#f2caed",
 
+    story_new_effect:"premium",
+    story_upload_effect:"spark-burst",
+    story_new_speed:"2.2",
+    story_new_intensity:"72",
+    story_new_image_pulse:true,
+    story_new_sparkle_count:"2",
+
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
     profile_banner_style:"rounded-fade",
-
-    profile_shell_enabled:true,
-    profile_shell_layout:"luxury",
-    profile_shell_bg_color:"#100d0b",
-    profile_shell_opacity:"92",
-    profile_shell_border_color:"$ACCENT",
-    profile_shell_border_width:"1",
-    profile_shell_radius:"30",
-    profile_shell_shadow:"42",
-    profile_shell_glow:"18",
-    profile_shell_blur:"10",
-    profile_shell_inner_highlight:true,
-    profile_shell_padding:"14",
-    profile_shell_top_gap:"8",
-    profile_shell_bottom_gap:"18",
-
-    profile_banner_height:"150",
-    profile_banner_overlay:"30",
-    profile_banner_position_y:"50",
-    profile_banner_border_color:"$ACCENT",
-    profile_banner_border_width:"1",
-
-    profile_logo_size:"210",
-    profile_logo_overlap:"62",
-
-    profile_stats_bg_color:"#0d0b0a",
-    profile_stats_border_color:"#5d472f",
-    profile_stats_radius:"18",
-    profile_stats_number_color:"#ffffff",
-    profile_stats_label_color:"#bcb5ae",
-
-    profile_action_style:"premium",
-    profile_follow_btn_bg_color:"#5a351a",
-    profile_follow_btn_border_color:"$ACCENT",
-    profile_follow_btn_text_color:"#ffffff",
-    profile_message_btn_bg_color:"#0d0d0e",
-    profile_message_btn_border_color:"#65543e",
-    profile_message_btn_text_color:"#ffffff",
 
     profile_shell_enabled:true,
     profile_shell_layout:"luxury",
@@ -6506,6 +6475,51 @@ function decorateAll(){
         <div class="m7ds-section-title">Profile & Shop Identity</div>
         <div class="m7ds-grid">
           ${colorField(prefix,"profile_ring_color","Story / profile ring color")}
+
+          <label class="m7ds-field">
+            <span>New Story animation</span>
+            <select id="${prefix}story_new_effect">
+              <option value="premium">Premium sweep + sparkle</option>
+              <option value="glow">Glow pulse</option>
+              <option value="shimmer">Shimmer sweep</option>
+              <option value="sparkle">Orbiting sparkle</option>
+              <option value="heartbeat">Heartbeat</option>
+              <option value="soft">Soft breathe</option>
+              <option value="none">Static ring</option>
+            </select>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Story upload burst</span>
+            <select id="${prefix}story_upload_effect">
+              <option value="spark-burst">Spark burst</option>
+              <option value="ripple">Ring ripple</option>
+              <option value="flash">Color flash</option>
+              <option value="pop">Circle pop</option>
+              <option value="none">Off</option>
+            </select>
+          </label>
+
+          ${effectNumberField(prefix,"story_new_speed","Story animation speed",1,6,0.1,"seconds")}
+          ${effectNumberField(prefix,"story_new_intensity","Story effect intensity",0,100,5,"%")}
+
+          <label class="m7ds-field">
+            <span>Orbit sparkles</span>
+            <select id="${prefix}story_new_sparkle_count">
+              <option value="0">None</option>
+              <option value="1">One sparkle</option>
+              <option value="2">Two sparkles</option>
+            </select>
+          </label>
+
+          <label class="m7ds-check">
+            <input id="${prefix}story_new_image_pulse" type="checkbox" checked>
+            <span>
+              <b>Subtle logo pulse</b>
+              <small>Very light brightness/saturation pulse while a new Story is unseen.</small>
+            </span>
+          </label>
+
           ${colorField(prefix,"shop_label_text_color","Shop Label text color")}
           ${colorField(prefix,"shop_label_border_color","Shop Label border color")}
           ${colorField(prefix,"shop_label_bg_color","Shop Label background")}
@@ -7280,6 +7294,33 @@ function decorateAll(){
           bannerColor;
       }
 
+      const storyEffect=
+        String(
+          get("story_new_effect")?.value ||
+          DEFAULTS.story_new_effect
+        )
+          .trim()
+          .toLowerCase();
+
+      const storySpeed=
+        number("story_new_speed",1,6,2.2);
+
+      const storyIntensity=
+        number("story_new_intensity",0,100,72);
+
+      preview.dataset.storyEffect=
+        storyEffect;
+
+      preview.style.setProperty(
+        "--m7ds-story-speed",
+        storySpeed+"s"
+      );
+
+      preview.style.setProperty(
+        "--m7ds-story-intensity",
+        String(storyIntensity/100)
+      );
+
       const logo=
         preview.querySelector(
           ".m7ds-profile-shell-logo"
@@ -7823,6 +7864,12 @@ function decorateAll(){
     );
 
     [
+      "story_new_effect",
+      "story_upload_effect",
+      "story_new_speed",
+      "story_new_intensity",
+      "story_new_image_pulse",
+      "story_new_sparkle_count",
       "profile_shell_enabled",
       "profile_shell_layout",
       "profile_shell_bg_color",
@@ -8238,7 +8285,23 @@ function decorateAll(){
       }
       .m7ds-profile-shell-demo.off{opacity:.38;filter:grayscale(.45)}
       .m7ds-profile-shell-banner{width:100%;min-height:62px;display:grid;place-items:center;border-radius:14px;color:rgba(255,255,255,.62);font-size:7px;font-weight:950;letter-spacing:1.2px}
-      .m7ds-profile-shell-logo{width:98px;height:98px;margin-top:-42px;display:grid;place-items:center;border:3px solid #d9a441;border-radius:50%;background:radial-gradient(circle at 32% 28%,#332116,#0a0807 70%);color:#e6bf72;font-size:9px;font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,.32)}
+      .m7ds-profile-shell-logo{position:relative;width:98px;height:98px;margin-top:-42px;display:grid;place-items:center;border:3px solid #d9a441;border-radius:50%;background:radial-gradient(circle at 32% 28%,#332116,#0a0807 70%);color:#e6bf72;font-size:9px;font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,.32);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+      @keyframes m7dsStoryPreviewGlow{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 5px rgba(217,164,65,.18)}50%{box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 calc(10px + 14px * var(--m7ds-story-intensity,.72)) rgba(217,164,65,.66)}}
+      @-webkit-keyframes m7dsStoryPreviewGlow{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 5px rgba(217,164,65,.18)}50%{box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 calc(10px + 14px * var(--m7ds-story-intensity,.72)) rgba(217,164,65,.66)}}
+      @keyframes m7dsStoryPreviewBeat{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + .025 * var(--m7ds-story-intensity,.72)))}}
+      @-webkit-keyframes m7dsStoryPreviewBeat{0%,100%{-webkit-transform:scale(1)}50%{-webkit-transform:scale(calc(1 + .025 * var(--m7ds-story-intensity,.72)))}}
+      .m7ds-profile-shell-demo[data-story-effect="premium"] .m7ds-profile-shell-logo,
+      .m7ds-profile-shell-demo[data-story-effect="glow"] .m7ds-profile-shell-logo,
+      .m7ds-profile-shell-demo[data-story-effect="shimmer"] .m7ds-profile-shell-logo,
+      .m7ds-profile-shell-demo[data-story-effect="sparkle"] .m7ds-profile-shell-logo,
+      .m7ds-profile-shell-demo[data-story-effect="soft"] .m7ds-profile-shell-logo{
+        animation:m7dsStoryPreviewGlow var(--m7ds-story-speed,2.2s) ease-in-out infinite;
+        -webkit-animation:m7dsStoryPreviewGlow var(--m7ds-story-speed,2.2s) ease-in-out infinite;
+      }
+      .m7ds-profile-shell-demo[data-story-effect="heartbeat"] .m7ds-profile-shell-logo{
+        animation:m7dsStoryPreviewBeat var(--m7ds-story-speed,2.2s) ease-in-out infinite;
+        -webkit-animation:m7dsStoryPreviewBeat var(--m7ds-story-speed,2.2s) ease-in-out infinite;
+      }
       .m7ds-profile-shell-pill{margin-top:8px;padding:5px 10px;border:1px solid rgba(216,170,88,.35);border-radius:999px;background:rgba(0,0,0,.28);color:#d9b56d;font-size:6.5px;font-weight:900;letter-spacing:1px}
       .m7ds-profile-shell-name{margin-top:7px;font-family:Georgia,"Times New Roman",serif;font-size:17px}
       .m7ds-profile-shell-arabic{margin-top:3px;color:#d9b056;font-size:9px}
@@ -14630,6 +14693,13 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
 
     profile_ring_color:"$ACCENT",
 
+    story_new_effect:"premium",
+    story_upload_effect:"spark-burst",
+    story_new_speed:"2.2",
+    story_new_intensity:"72",
+    story_new_image_pulse:true,
+    story_new_sparkle_count:"2",
+
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
@@ -15612,6 +15682,12 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
   const STORAGE_PREFIX="ma7alak_design_live_v1:";
   const DESIGN_KEYS=[
     "page_use_universal_accent",
+    "story_new_effect",
+    "story_upload_effect",
+    "story_new_speed",
+    "story_new_intensity",
+    "story_new_image_pulse",
+    "story_new_sparkle_count",
     "profile_shell_enabled",
     "profile_shell_layout",
     "profile_shell_bg_color",
