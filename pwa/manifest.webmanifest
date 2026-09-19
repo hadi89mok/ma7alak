@@ -1,0 +1,48 @@
+{
+  "id": "/",
+  "name": "Ma7alak",
+  "short_name": "Ma7alak",
+  "description": "Discover local shops, stories, reels and live offers in one place.",
+  "lang": "ar-LB",
+  "dir": "auto",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#090503",
+  "theme_color": "#d9a441",
+  "categories": ["shopping", "lifestyle", "social"],
+  "icons": [
+    {
+      "src": "/pwa-icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse shops",
+      "short_name": "Shops",
+      "url": "/shwf-almhlat-?source=pwa-shortcut"
+    },
+    {
+      "name": "Add your shop",
+      "short_name": "Add shop",
+      "url": "/add-shop-?source=pwa-shortcut"
+    }
+  ]
+}
