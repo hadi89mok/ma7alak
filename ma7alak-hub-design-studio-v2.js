@@ -1059,11 +1059,10 @@
           0 0 ${Math.max(glowNear,glowFar*.55)}px ${rgba(ornamentRgb,.28)}!important;
       }
 
-      html body #ma7alak-exact-merged-hub .zee-about-card.m7-fx-panel-glow{
-        box-shadow:
-          0 18px 42px rgba(0,0,0,.34),
-          0 0 ${glowFar}px ${rgba(rgb,Math.min(.55,.08+glowPower*.0047))}!important;
-      }
+      /*
+        Do not write a fixed !important box-shadow here.
+        The m7AboutPanelGlow keyframes in the hub own the animated shadow.
+      */
 
       html body #ma7alak-exact-merged-hub .zee-service-icon{
         animation-duration:${tunedSpeed}s!important;
