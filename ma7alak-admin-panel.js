@@ -2571,6 +2571,12 @@
     editCard.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
+  /*
+     Single direct Edit Shop entry point for Admin Workspace V4.
+     This reuses the real core editor instead of clicking a hidden legacy card.
+  */
+  window.Ma7alakAdminOpenEditShop = openEditShop;
+
 
   function closeEditShop(){
     editCard.hidden = true;
@@ -5353,158 +5359,12 @@ install().catch(console.error);
 })();
 
 
-/* MA7ALAK EDIT SHOP FAILSAFE V1 */
-(function(){
-"use strict";
-
-if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin") return;
-if(window.__MA7ALAK_EDIT_SHOP_FAILSAFE_V1__) return;
-window.__MA7ALAK_EDIT_SHOP_FAILSAFE_V1__=true;
-
-function byId(id){ return document.getElementById(id); }
-
-function setValue(id,value){
-  const el=byId(id);
-  if(el) el.value=value == null ? "" : String(value);
-}
-
-function setChecked(id,value){
-  const el=byId(id);
-  if(el) el.checked=value===true;
-}
-
-async function fetchShop(slug){
-  const client=window.Ma7alakAdminClient;
-  if(!client || !slug) return null;
-
-  const result=
-    await client
-      .from("shop_profiles")
-      .select("*")
-      .eq("shop_slug",slug)
-      .maybeSingle();
-
-  if(result.error) throw result.error;
-  return result.data || null;
-}
-
-function openCoreEditor(shop){
-  if(!shop) throw new Error("Shop data not found.");
-
-  const card=byId("ma-admin-edit-card");
-  const form=byId("ma-admin-edit-form");
-
-  if(!card || !form){
-    throw new Error("Edit Shop panel is missing from the page.");
-  }
-
-  setValue("ma-edit-original-slug",shop.shop_slug);
-  setValue("ma-edit-slug",shop.shop_slug);
-  setValue("ma-edit-name",shop.shop_name);
-  setValue("ma-edit-arabic",shop.arabic_name);
-  setValue("ma-edit-image",shop.profile_image_url);
-  setValue("ma-edit-url",shop.shop_url);
-  setValue("ma-edit-area",shop.area);
-  setValue("ma-edit-location",shop.location);
-  setValue("ma-edit-category",shop.category);
-  setValue("ma-edit-category-name",shop.category_name);
-
-  setChecked("ma-edit-verified",shop.verified);
-  setChecked("ma-edit-featured",shop.featured);
-  setChecked("ma-edit-red",shop.featured_red);
-  setChecked("ma-edit-active",shop.is_active);
-
-  const subtitle=byId("ma-admin-edit-subtitle");
-  if(subtitle){
-    subtitle.textContent="Editing " + (shop.shop_name || shop.shop_slug || "Shop");
-  }
-
-  const status=byId("ma-admin-edit-status");
-  if(status){
-    status.textContent="";
-    status.className="ma-admin-status";
-  }
-
-  card.hidden=false;
-  card.removeAttribute("hidden");
-  card.style.removeProperty("display");
-
-  try{
-    if(
-      window.Ma7alakDirectoryAdmin &&
-      typeof window.Ma7alakDirectoryAdmin.fill==="function"
-    ){
-      window.Ma7alakDirectoryAdmin.fill(shop);
-    }
-  }catch(error){
-    console.error("MA7ALAK extra edit controls:",error);
-    if(status){
-      status.textContent="Core editor opened. One extra control could not load.";
-      status.className="ma-admin-status error";
-    }
-  }
-
-  card.scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
-}
-
-document.addEventListener("click",async function(event){
-  const button=
-    event.target &&
-    event.target.closest
-      ? event.target.closest('#ma-admin-shop-list button[data-action="edit"]')
-      : null;
-
-  if(!button) return;
-
-  event.preventDefault();
-  event.stopPropagation();
-  if(event.stopImmediatePropagation){
-    event.stopImmediatePropagation();
-  }
-
-  const card=
-    button.closest(".ma-admin-shop-item");
-
-  const slug=
-    card &&
-    card.dataset
-      ? String(card.dataset.slug || "").trim()
-      : "";
-
-  if(!slug) return;
-
-  button.disabled=true;
-
-  try{
-    const shop=
-      await fetchShop(slug);
-
-    openCoreEditor(shop);
-  }catch(error){
-    console.error("MA7ALAK Edit Shop failsafe:",error);
-
-    const status=
-      byId("ma-admin-manage-status");
-
-    if(status){
-      status.textContent=
-        error && error.message
-          ? "Edit Shop error: " + error.message
-          : "Could not open Edit Shop.";
-
-      status.className=
-        "ma-admin-status error";
-    }
-  }finally{
-    button.disabled=false;
-  }
-},true);
-
-})();
-
+/* =========================================================
+   EDIT SHOP FAILSAFE RETIRED
+   Admin Workspace V4 now calls the original core editor directly through
+   window.Ma7alakAdminOpenEditShop, so no capture-phase duplicate click
+   handler or duplicate field-filling implementation is needed.
+========================================================= */
 
 
 /* =========================================================
@@ -10729,22 +10589,34 @@ function applyEditSectionVisibility(panel,mode,shop){
 }
 
 async function openEditMode(slug,mode){
-  if(!legacyAction(slug,"edit")){
-    throw new Error("Edit Shop action is not ready yet.");
+  if(
+    typeof window.Ma7alakAdminOpenEditShop!=="function"
+  ){
+    throw new Error("Core Edit Shop function is not ready yet.");
   }
+
+  const result=
+    await client
+      .from("shop_profiles")
+      .select("*")
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+  if(result.error)throw result.error;
+
+  const shop=result.data;
+
+  if(!shop){
+    throw new Error("Shop data not found.");
+  }
+
+  window.Ma7alakAdminOpenEditShop(shop);
 
   const panel=await waitForEdit(slug);
   if(!panel)throw new Error("Edit Shop panel did not open.");
 
   showLegacy("ma-admin-edit-card");
   panel.classList.add("m7v4-mode-"+mode);
-
-  const shop=
-    shops.find(row=>
-      norm(row.shop_slug)===
-      norm(slug)
-    ) ||
-    selectedShop();
 
   mountEditPreview(
     panel,
