@@ -36,6 +36,7 @@
     page_motion_mode:"preset",
     page_use_universal_accent:true,
 
+    profile_background_image:"",
     profile_ring_color:"$ACCENT",
 
     shop_label_text_color:"$ACCENT",
