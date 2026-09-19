@@ -53,7 +53,83 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
   function seenStoryTime(s){try{return new Date(localStorage.getItem('ma7alak_story_seen_'+s.shop_slug)||0).getTime()||0}catch{return 0}}
   function hasUnseenStory(s){const list=stories(s);if(!list.length)return false;const last=seenStoryTime(s);return list.some(item=>new Date(item.created_at||item.expires_at||0).getTime()>last)}
   function markStoriesSeen(s){const list=stories(s);if(!list.length)return;const latest=list.reduce((value,item)=>new Date(item.created_at||0).getTime()>new Date(value||0).getTime()?item.created_at:value,'');if(latest)try{localStorage.setItem('ma7alak_story_seen_'+s.shop_slug,latest)}catch{}renderCards()}
-  function card(s){const o=s.directory_options||{},slug=esc(s.shop_slug),rating=Number(o.rating),count=Number(o.review_count),isFollowed=followed.has(s.shop_slug),hasStory=hasUnseenStory(s),isOwner=norm(ownerSlug)===norm(s.shop_slug),isFeatured=featured(s),badge=isFeatured?'FEATURED':norm(o.badge)==='new'?'NEW':'',accent=cardColor(s),glow=o.card_glow===true||String(o.card_glow).toLowerCase()==='true';return `<div class="m7d-card-wrap">${badge?`<span class="m7d-card-tab ${isFeatured?'featured':''}">${isFeatured?'★ ':''}${badge}</span>`:''}<article class="m7d-card ${isFeatured?'is-featured':''} ${glow?'card-glow':''}" style="--card-accent:${accent}" data-shop-card="${slug}" data-shop-slug="${slug}" role="link" tabindex="0" aria-label="Open ${esc(s.shop_name)}"><div class="m7d-cover-button">${img(o.cover||s.main_image_url||s.intro_poster_url||s.profile_image_url,'m7d-cover')}</div>${live(s)?'<span class="m7d-live-badge">LIVE</span>':''}${isOwner?'<span class="m7d-owner-label">YOUR SHOP</span>':`<button class="m7d-heart" data-follow="${slug}" aria-label="${isFollowed?'Unfollow':'Follow'} ${esc(s.shop_name)}" aria-pressed="${isFollowed}" ${followBusy.has(s.shop_slug)?'disabled':''}>${icon('heart')}</button>`}<div class="m7d-card-content"><div class="m7d-identity"><div class="m7d-avatar-shell"><div class="m7d-avatar ${hasStory?'story':''}" style="--story:${storyColor(s)}">${img(s.profile_image_url)}</div>${s.verified?verifiedIcon():''}</div><h3>${esc(s.shop_name)}</h3><div class="m7d-card-label">${esc(s.category_name||s.category||'Local shop')}${o.price?' · '+esc(o.price):''}</div><div class="m7d-address">${icon('pin')}<span>${esc(s.location||s.area||s.city||'Location coming soon')}${coords&&Number.isFinite(distance(s))?' · '+distance(s).toFixed(1)+' km':''}</span></div></div>${rating>0&&count>0?`<div class="m7d-rating">★ ${rating.toFixed(1)} <span>(${count} reviews)</span></div>`:''}<button class="m7d-view" data-open-shop="${slug}">View shop ${icon('arrow')}</button></div></article></div>`}
+  function card(s){
+    const o=s.directory_options||{};
+    const slug=esc(s.shop_slug);
+    const rating=Number(o.rating);
+    const count=Number(o.review_count);
+    const isFollowed=followed.has(s.shop_slug);
+    const hasStory=hasUnseenStory(s);
+    const isOwner=norm(ownerSlug)===norm(s.shop_slug);
+    const isFeatured=featured(s);
+    const badge=isFeatured?"FEATURED":norm(o.badge)==="new"?"NEW":"";
+    const accent=cardColor(s);
+    const legacyGlow=o.card_glow===true||String(o.card_glow).toLowerCase()==="true";
+
+    const hex=(value,fallback)=>{
+      const raw=String(value||"").trim();
+      return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+    };
+
+    const num=(value,min,max,fallback)=>{
+      const n=Number(value);
+      return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+    };
+
+    const allowed=(value,list,fallback)=>{
+      const raw=String(value||"").trim().toLowerCase();
+      return list.includes(raw)?raw:fallback;
+    };
+
+    const edge=allowed(
+      o.card_edge_style,
+      ["rounded","corners","double","soft","none"],
+      "rounded"
+    );
+
+    const animation=allowed(
+      o.card_animation,
+      ["auto","none","glow","breathe","edge","shimmer"],
+      "auto"
+    );
+
+    const radius=num(o.card_radius,0,34,16);
+    const borderWidth=num(o.card_border_width,0,4,1);
+    const coverHeight=num(o.card_cover_height,90,220,126);
+    const shadow=num(o.card_shadow_strength,0,100,48)/100;
+    const glowStrength=num(o.card_glow_strength,0,100,28)/100;
+    const speed=num(o.card_animation_speed,0.8,8,2.4);
+
+    const surface=hex(o.card_surface_color,"#171611");
+    const nameColor=hex(o.card_name_color,"#ffffff");
+    const metaColor=hex(o.card_meta_color,"#c8c0b2");
+    const buttonColor=hex(o.card_button_color,"#ead49e");
+    const buttonBg=hex(o.card_button_bg_color,"#0b0b08");
+
+    const cleanAccent=accent.replace("#","");
+    const ar=parseInt(cleanAccent.slice(0,2),16)||193;
+    const ag=parseInt(cleanAccent.slice(2,4),16)||166;
+    const ab=parseInt(cleanAccent.slice(4,6),16)||106;
+
+    const style=[
+      "--card-accent:"+accent,
+      "--m7-card-accent-rgb:"+ar+","+ag+","+ab,
+      "--m7-card-radius:"+radius+"px",
+      "--m7-card-border-width:"+borderWidth+"px",
+      "--m7-card-cover-height:"+coverHeight+"px",
+      "--m7-card-shadow-alpha:"+shadow.toFixed(2),
+      "--m7-card-glow-alpha:"+glowStrength.toFixed(2),
+      "--m7-card-speed:"+speed+"s",
+      "--m7-card-surface:"+surface,
+      "--m7-card-name:"+nameColor,
+      "--m7-card-meta:"+metaColor,
+      "--m7-card-button:"+buttonColor,
+      "--m7-card-button-bg:"+buttonBg
+    ].join(";");
+
+    return `<div class="m7d-card-wrap">${badge?`<span class="m7d-card-tab ${isFeatured?"featured":""}">${isFeatured?"★ ":""}${badge}</span>`:""}<article class="m7d-card ${isFeatured?"is-featured":""} ${legacyGlow?"card-glow":""} m7d-edge-${edge} m7d-anim-${animation}" style="${style}" data-shop-card="${slug}" data-shop-slug="${slug}" role="link" tabindex="0" aria-label="Open ${esc(s.shop_name)}"><div class="m7d-cover-button">${img(o.cover||s.main_image_url||s.intro_poster_url||s.profile_image_url,"m7d-cover")}</div>${live(s)?'<span class="m7d-live-badge">LIVE</span>':""}${isOwner?'<span class="m7d-owner-label">YOUR SHOP</span>':`<button class="m7d-heart" data-follow="${slug}" aria-label="${isFollowed?"Unfollow":"Follow"} ${esc(s.shop_name)}" aria-pressed="${isFollowed}" ${followBusy.has(s.shop_slug)?"disabled":""}>${icon("heart")}</button>`}<div class="m7d-card-content"><div class="m7d-identity"><div class="m7d-avatar-shell"><div class="m7d-avatar ${hasStory?"story":""}" style="--story:${storyColor(s)}">${img(s.profile_image_url)}</div>${s.verified?verifiedIcon():""}</div><h3>${esc(s.shop_name)}</h3><div class="m7d-card-label">${esc(s.category_name||s.category||"Local shop")}${o.price?" · "+esc(o.price):""}</div><div class="m7d-address">${icon("pin")}<span>${esc(s.location||s.area||s.city||"Location coming soon")}${coords&&Number.isFinite(distance(s))?" · "+distance(s).toFixed(1)+" km":""}</span></div></div>${rating>0&&count>0?`<div class="m7d-rating">★ ${rating.toFixed(1)} <span>(${count} reviews)</span></div>`:""}<button class="m7d-view" data-open-shop="${slug}">View shop ${icon("arrow")}</button></div></article></div>`;
+  }
+
   function render(){const c=state.settings;root.querySelector('.m7d-hero').innerHTML=`${img(c.hero,'m7d-hero-bg')}${img(c.logo,'m7d-logo','Ma7alak')}<span class="m7d-side">Lebanon<br>Local<br>Always ♡</span><h1 dir="auto">${esc(c.title)}</h1><p>${esc(c.subtitle)}</p>`;root.querySelector('input').placeholder=c.search;root.querySelector('[data-location-title]').textContent=c.location_title;root.querySelector('[data-areas]').innerHTML=areaButtons();root.querySelector('[data-categories]').innerHTML=categoryButtons();root.querySelector('[data-category-section]').hidden=c.show_categories===false;root.querySelector('[data-category-title]').textContent=c.categories_title;root.querySelector('[data-cta]').hidden=c.show_cta===false;root.querySelector('[data-cta-title]').textContent=c.cta_title;root.querySelector('[data-cta-text]').textContent=c.cta_text;root.querySelector('[data-action=add]').textContent=c.cta_button+' →';renderCards()}
   function emptyState(){const label=[area,category].filter(Boolean).join(' · ');return `<div class="m7d-empty"><div class="m7d-empty-icon">${icon('search')}</div><strong>No matching shops yet</strong><p>${label?'Nothing is listed for '+esc(label)+' yet. ':''}New shops will appear here automatically.</p><button class="m7d-pill" data-action="reset">Explore every shop</button></div>`}
   function renderCards(){const a=filtered(),filteredMode=!!(q||category||area||coords||followedOnly||liveOnly),featuredShops=a.filter(featured);root.querySelector('[data-categories]').innerHTML=categoryButtons();root.querySelector('[data-results-title]').textContent=filteredMode?'Explore shops':state.settings.shops_title;root.querySelector('[data-count]').textContent=a.length+' shop'+(a.length===1?'':'s')+(coords?' nearby':'')+' ›';const grid=root.querySelector('[data-grid]'),markup=a.slice(0,limit).map(card).join('')||emptyState();grid.classList.remove('m7d-strip');if(grid.dataset.signature!==markup){grid.innerHTML=markup;grid.dataset.signature=markup}const section=root.querySelector('[data-featured-section]'),featuredGrid=root.querySelector('[data-featured-grid]');section.hidden=filteredMode||!featuredShops.length;const featureMarkup=featuredShops.map(card).join('');if(featuredGrid.dataset.signature!==featureMarkup){featuredGrid.innerHTML=featureMarkup;featuredGrid.dataset.signature=featureMarkup}root.querySelector('[data-featured-count]').textContent=featuredShops.length+' featured ›';root.querySelector('[data-action=more]').hidden=a.length<=limit;root.querySelector('[data-saved]').textContent=followedOnly?'Show all shops':'♡ Following ('+followed.size+')'}
@@ -93,3 +169,178 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     if(search)search.dispatchEvent(new Event('input',{bubbles:true}));
   },30000);
 })();
+
+/* =========================================================
+   MA7ALAK DIRECTORY — PER-SHOP CARD DESIGN RUNTIME V1
+========================================================= */
+(function(){
+  "use strict";
+  if(document.getElementById("m7-card-design-runtime-v1"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-card-design-runtime-v1";
+  style.textContent=`
+    .m7d-card{
+      border-width:var(--m7-card-border-width,1px)!important;
+      border-radius:var(--m7-card-radius,16px)!important;
+      border-color:color-mix(in srgb,var(--card-accent) 52%,transparent)!important;
+      background:
+        linear-gradient(
+          145deg,
+          color-mix(in srgb,var(--m7-card-surface,#171611) 88%,white 12%),
+          var(--m7-card-surface,#171611)
+        )!important;
+      box-shadow:
+        0 10px 26px rgba(0,0,0,var(--m7-card-shadow-alpha,.48)),
+        0 0 16px rgba(var(--m7-card-accent-rgb,193,166,106),var(--m7-card-glow-alpha,.16))!important;
+    }
+
+    .m7d-card .m7d-cover{
+      height:var(--m7-card-cover-height,126px)!important;
+    }
+
+    .m7d-card h3{
+      color:var(--m7-card-name,#fff)!important;
+    }
+
+    .m7d-card .m7d-card-label,
+    .m7d-card .m7d-address{
+      color:var(--m7-card-meta,#c8c0b2)!important;
+    }
+
+    .m7d-card .m7d-view{
+      color:var(--m7-card-button,#ead49e)!important;
+      background:var(--m7-card-button-bg,#0b0b08)!important;
+      border-color:var(--card-accent)!important;
+    }
+
+    .m7d-card.m7d-edge-none{
+      border-color:transparent!important;
+      border-width:0!important;
+    }
+
+    .m7d-card.m7d-edge-soft{
+      border-color:color-mix(in srgb,var(--card-accent) 26%,transparent)!important;
+      box-shadow:
+        0 10px 26px rgba(0,0,0,var(--m7-card-shadow-alpha,.48)),
+        inset 0 0 0 1px rgba(255,255,255,.035),
+        0 0 22px rgba(var(--m7-card-accent-rgb,193,166,106),var(--m7-card-glow-alpha,.16))!important;
+    }
+
+    .m7d-card.m7d-edge-double{
+      border-color:color-mix(in srgb,var(--card-accent) 72%,transparent)!important;
+      box-shadow:
+        0 10px 26px rgba(0,0,0,var(--m7-card-shadow-alpha,.48)),
+        inset 0 0 0 max(1px,var(--m7-card-border-width,1px))
+          color-mix(in srgb,var(--card-accent) 28%,transparent),
+        0 0 16px rgba(var(--m7-card-accent-rgb,193,166,106),var(--m7-card-glow-alpha,.16))!important;
+    }
+
+    .m7d-card.m7d-edge-corners{
+      border-color:transparent!important;
+    }
+
+    .m7d-card.m7d-edge-corners::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:7;
+      border-radius:inherit;
+      pointer-events:none;
+      background:
+        linear-gradient(90deg,var(--card-accent),var(--card-accent)) left top/34% var(--m7-card-border-width,2px) no-repeat,
+        linear-gradient(180deg,var(--card-accent),var(--card-accent)) left top/var(--m7-card-border-width,2px) 30px no-repeat,
+        linear-gradient(270deg,var(--card-accent),var(--card-accent)) right top/34% var(--m7-card-border-width,2px) no-repeat,
+        linear-gradient(180deg,var(--card-accent),var(--card-accent)) right top/var(--m7-card-border-width,2px) 30px no-repeat,
+        linear-gradient(90deg,var(--card-accent),var(--card-accent)) left bottom/34% var(--m7-card-border-width,2px) no-repeat,
+        linear-gradient(0deg,var(--card-accent),var(--card-accent)) left bottom/var(--m7-card-border-width,2px) 30px no-repeat,
+        linear-gradient(270deg,var(--card-accent),var(--card-accent)) right bottom/34% var(--m7-card-border-width,2px) no-repeat,
+        linear-gradient(0deg,var(--card-accent),var(--card-accent)) right bottom/var(--m7-card-border-width,2px) 30px no-repeat;
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(var(--m7-card-accent-rgb,193,166,106),var(--m7-card-glow-alpha,.20))
+        );
+    }
+
+    .m7d-card.m7d-anim-none{
+      animation:none!important;
+      -webkit-animation:none!important;
+    }
+
+    .m7d-card.m7d-anim-glow{
+      animation:m7d-card-accent var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7d-card-accent var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    @keyframes m7CardAdminBreathe{
+      0%,100%{transform:translateZ(0) scale(1)}
+      50%{transform:translateZ(0) scale(1.018)}
+    }
+
+    @-webkit-keyframes m7CardAdminBreathe{
+      0%,100%{-webkit-transform:translateZ(0) scale(1)}
+      50%{-webkit-transform:translateZ(0) scale(1.018)}
+    }
+
+    .m7d-card.m7d-anim-breathe{
+      animation:m7CardAdminBreathe var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminBreathe var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    @keyframes m7CardAdminEdge{
+      0%,100%{opacity:.58;filter:drop-shadow(0 0 3px rgba(var(--m7-card-accent-rgb,193,166,106),.20))}
+      50%{opacity:1;filter:drop-shadow(0 0 10px rgba(var(--m7-card-accent-rgb,193,166,106),.72))}
+    }
+
+    .m7d-card.m7d-anim-edge::before{
+      animation:m7CardAdminEdge var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+      -webkit-animation:m7CardAdminEdge var(--m7-card-speed,2.4s) ease-in-out infinite!important;
+    }
+
+    .m7d-card.m7d-anim-shimmer::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:6;
+      pointer-events:none;
+      border-radius:inherit;
+      background:
+        linear-gradient(
+          112deg,
+          transparent 0 38%,
+          rgba(255,255,255,.10) 48%,
+          rgba(var(--m7-card-accent-rgb,193,166,106),.22) 52%,
+          transparent 62% 100%
+        );
+      background-size:260% 100%;
+      animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) ease-in-out infinite;
+      -webkit-animation:m7CardAdminShimmer var(--m7-card-speed,2.8s) ease-in-out infinite;
+    }
+
+    @keyframes m7CardAdminShimmer{
+      0%,25%{background-position:140% 0;opacity:0}
+      45%{opacity:1}
+      78%,100%{background-position:-140% 0;opacity:0}
+    }
+
+    @-webkit-keyframes m7CardAdminShimmer{
+      0%,25%{background-position:140% 0;opacity:0}
+      45%{opacity:1}
+      78%,100%{background-position:-140% 0;opacity:0}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .m7d-card.m7d-anim-glow,
+      .m7d-card.m7d-anim-breathe,
+      .m7d-card.m7d-anim-edge::before,
+      .m7d-card.m7d-anim-shimmer::after{
+        animation:none!important;
+        -webkit-animation:none!important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
