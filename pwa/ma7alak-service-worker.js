@@ -1,13 +1,7 @@
-/* MA7ALAK PWA SERVICE WORKER
-   Safe strategy:
-   - live backend/API traffic stays network-only
-   - videos/audio stay network-only
-   - page navigations stay network-first and are not stored as stale HTML
-   - only PWA shell + immutable commit-pinned Ma7alak JS/CSS are cached
-*/
+/* MA7ALAK PWA SERVICE WORKER */
 "use strict";
 
-const VERSION="m7-pwa-2026-09-19-1";
+const VERSION="m7-pwa-2026-09-20-2";
 const CORE_CACHE=VERSION+"-core";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
 const OFFLINE_URL="/pwa-offline";
@@ -17,9 +11,8 @@ self.addEventListener("install",event=>{
     caches.open(CORE_CACHE).then(cache=>
       cache.addAll([
         OFFLINE_URL,
-        "/pwa-icon-192.svg",
-        "/pwa-icon-512.svg",
-        "/pwa-icon-maskable.svg"
+        "/pwa-icon-192.png",
+        "/pwa-icon-512.png"
       ])
     ).catch(()=>{})
   );
@@ -48,7 +41,6 @@ self.addEventListener("message",event=>{
 
 function isLiveBackend(url){
   const host=url.hostname.toLowerCase();
-
   return (
     host.endsWith(".supabase.co") ||
     host.includes("supabase") ||
@@ -69,32 +61,18 @@ function isMa7alakImmutableCdn(url){
 async function immutableCacheFirst(request){
   const cache=await caches.open(IMMUTABLE_CACHE);
   const hit=await cache.match(request);
-
-  if(hit){
-    return hit;
-  }
+  if(hit) return hit;
 
   const response=await fetch(request);
-
-  if(
-    response &&
-    (
-      response.ok ||
-      response.type==="opaque"
-    )
-  ){
+  if(response&&(response.ok||response.type==="opaque")){
     cache.put(request,response.clone()).catch(()=>{});
   }
-
   return response;
 }
 
 self.addEventListener("fetch",event=>{
   const request=event.request;
-
-  if(request.method!=="GET"){
-    return;
-  }
+  if(request.method!=="GET") return;
 
   const url=new URL(request.url);
 
@@ -103,30 +81,20 @@ self.addEventListener("fetch",event=>{
     return;
   }
 
-  if(
-    request.destination==="video" ||
-    request.destination==="audio"
-  ){
+  if(request.destination==="video"||request.destination==="audio"){
     event.respondWith(fetch(request));
     return;
   }
 
   if(request.mode==="navigate"){
     event.respondWith(
-      fetch(request).catch(async()=>{
-        return (
-          await caches.match(OFFLINE_URL) ||
-          new Response(
-            "Ma7alak is offline.",
-            {
-              status:503,
-              headers:{
-                "Content-Type":"text/plain; charset=utf-8"
-              }
-            }
-          )
-        );
-      })
+      fetch(request).catch(async()=>(
+        await caches.match(OFFLINE_URL) ||
+        new Response("Ma7alak is offline.",{
+          status:503,
+          headers:{"Content-Type":"text/plain; charset=utf-8"}
+        })
+      ))
     );
     return;
   }
@@ -134,22 +102,19 @@ self.addEventListener("fetch",event=>{
   if(
     url.origin===self.location.origin &&
     (
-      url.pathname==="/pwa-icon-192.svg" ||
-      url.pathname==="/pwa-icon-512.svg" ||
-      url.pathname==="/pwa-icon-maskable.svg" ||
+      url.pathname==="/pwa-icon-192.png" ||
+      url.pathname==="/pwa-icon-512.png" ||
       url.pathname==="/pwa-offline"
     )
   ){
     event.respondWith(
       caches.match(request).then(hit=>
-        hit ||
-        fetch(request).then(response=>{
+        hit || fetch(request).then(response=>{
           if(response.ok){
             caches.open(CORE_CACHE).then(cache=>
               cache.put(request,response.clone())
             ).catch(()=>{});
           }
-
           return response;
         })
       )
@@ -165,12 +130,6 @@ self.addEventListener("fetch",event=>{
       /\.(?:js|css)(?:$|\?)/i.test(url.pathname+url.search)
     )
   ){
-    event.respondWith(
-      immutableCacheFirst(request)
-        .catch(()=>fetch(request))
-    );
-    return;
+    event.respondWith(immutableCacheFirst(request).catch(()=>fetch(request)));
   }
-
-  // Everything else keeps normal browser/network behavior.
 });
