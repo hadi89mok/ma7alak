@@ -34,6 +34,11 @@
   const RESET_VALUES = {
     page_design_preset:"premium",
     page_motion_mode:"preset",
+    page_animation_speed:"2.4",
+    page_animation_intensity:"55",
+    page_glow_power:"55",
+    page_shimmer_brightness:"75",
+    page_float_distance:"6",
     page_use_universal_accent:true,
 
     profile_ring_color:"$ACCENT",
