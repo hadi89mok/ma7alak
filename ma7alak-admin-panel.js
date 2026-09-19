@@ -1837,17 +1837,113 @@
 
         return '' +
           '<article class="ma-video-item" data-reel-id="' + reelId + '">' +
-            '<video muted playsinline preload="metadata" src="' + videoUrl + '"></video>' +
+            '<div class="ma-reel-admin-preview">' +
+              '<video muted playsinline webkit-playsinline preload="none" data-reel-preview data-src="' + videoUrl + '"></video>' +
+              '<button type="button" class="ma-reel-admin-play" data-reel-action="preview">▶ Play Reel</button>' +
+            '</div>' +
             '<div class="ma-reel-admin-meta">' +
               '<strong>' + (caption || "Reel") + '</strong>' +
               '<span>' + statusText + '</span>' +
               '<span class="ma-reel-admin-id">' + reelId + '</span>' +
             '</div>' +
             '<div class="ma-video-item-actions">' +
+              '<button type="button" data-reel-action="preview">▶ Play Reel</button>' +
               '<button type="button" data-reel-action="delete">Delete Reel</button>' +
             '</div>' +
           '</article>';
       }).join("");
+  }
+
+
+  function playAdminReelPreview(item){
+    if(!item) return;
+
+    const video =
+      item.querySelector(
+        "video[data-reel-preview]"
+      );
+
+    if(!video) return;
+
+    reelsList
+      .querySelectorAll(
+        "video[data-reel-preview]"
+      )
+      .forEach(function(other){
+        if(other !== video){
+          try{
+            other.pause();
+          }catch(_){}
+        }
+      });
+
+    if(
+      video.dataset.m7Loaded !==
+      "1"
+    ){
+      const source =
+        normalizedText(
+          video.dataset.src
+        );
+
+      if(!source){
+        setStatus(
+          reelsStatus,
+          "This Reel has no playable video URL.",
+          "error"
+        );
+        return;
+      }
+
+      video.src =
+        source;
+
+      video.dataset.m7Loaded =
+        "1";
+
+      video.controls =
+        true;
+
+      try{
+        video.load();
+      }
+      catch(_){}
+    }
+
+    video.muted =
+      false;
+
+    video.controls =
+      true;
+
+    const promise =
+      video.play();
+
+    if(
+      promise &&
+      typeof promise.catch ===
+        "function"
+    ){
+      promise.catch(function(error){
+        setStatus(
+          reelsStatus,
+          error && error.message
+            ? "Could not play Reel: " + error.message
+            : "Could not play this Reel.",
+          "error"
+        );
+      });
+    }
+
+    const overlay =
+      item.querySelector(
+        ".ma-reel-admin-play"
+      );
+
+    if(overlay){
+      overlay.style.display =
+        "none";
+    }
   }
 
 
@@ -3796,6 +3892,31 @@
   reelsList.addEventListener(
     "click",
     async function(event){
+      const directVideo =
+        event.target.closest(
+          "video[data-reel-preview]"
+        );
+
+      if(directVideo){
+        const item =
+          directVideo.closest(
+            ".ma-video-item"
+          );
+
+        if(
+          directVideo.dataset.m7Loaded !==
+          "1" ||
+          directVideo.paused
+        ){
+          event.preventDefault();
+          playAdminReelPreview(
+            item
+          );
+        }
+
+        return;
+      }
+
       const button =
         event.target.closest(
           "button[data-reel-action]"
@@ -3819,6 +3940,14 @@
 
       const action =
         button.dataset.reelAction;
+
+      if(action === "preview"){
+        event.preventDefault();
+        playAdminReelPreview(
+          item
+        );
+        return;
+      }
 
       if(action !== "delete"){
         return;
@@ -5444,6 +5573,7 @@ function css(){
   ".m7drhead{display:flex;align-items:center;gap:8px}.m7drhead h3{margin:0 auto 0 0;color:#f1dfbd}.m7drtools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.m7drrow{display:flex;align-items:center;gap:8px;padding:9px 5px;border-bottom:1px solid rgba(217,170,88,.08)}.m7drrow label{flex:1;color:#dfcfb2;font-size:10px}.m7drrow input{accent-color:#d9aa58}",
   "#m7savebar{position:fixed;z-index:10020;left:50%;bottom:12px;transform:translateX(-50%) translateY(120px);width:min(620px,calc(100vw - 22px));min-height:56px;padding:8px 9px 8px 12px;border:1px solid rgba(217,170,88,.34);border-radius:16px;background:rgba(13,10,8,.96);box-shadow:0 18px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transition:.2s;backdrop-filter:blur(15px)}#m7savebar.on{transform:translateX(-50%)}.m7savecopy{flex:1;min-width:0}.m7savecopy b{display:block;color:#fff;font-size:10px}.m7savecopy small{color:#877a68;font-size:8px}.m7savemain{min-height:39px;min-width:120px;border:0;border-radius:10px;background:linear-gradient(135deg,#f2d18a,#d3a049);color:#1c1308;font-size:10px;font-weight:950;cursor:pointer}.m7savecancel{min-height:39px;border:1px solid var(--m7b);border-radius:10px;background:transparent;color:#d7c5a6;cursor:pointer}",
   ".ma-admin-form input,.ma-admin-form textarea,.ma-admin-form select,.m7da-field input,.m7da-field textarea,.m7da-field select{border-radius:10px!important}#ma-admin-shop-list .ma-admin-shop-item{border-radius:15px!important;border-color:rgba(217,170,88,.14)!important}",
+  ".ma-reel-admin-preview{position:relative;overflow:hidden;border-radius:14px;background:#050505;min-height:150px}.ma-reel-admin-preview video{display:block;width:100%;min-height:150px;max-height:420px;background:#050505;object-fit:contain}.ma-reel-admin-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;min-height:42px;padding:0 16px;border:1px solid rgba(240,204,130,.48);border-radius:999px;background:rgba(12,9,7,.88);color:#f0cc82;font-weight:900;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.45);backdrop-filter:blur(9px)}",
   "@media(max-width:700px){#m7deck{top:4px;border-radius:14px}.m7brand{min-width:145px}#m7savebar{bottom:7px}.m7savemain{min-width:100px}}"
   ].join("");
   document.head.appendChild(s);
