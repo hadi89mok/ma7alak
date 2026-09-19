@@ -2622,7 +2622,49 @@ async function openExactLiveFromNotification(postId){
    visitor about every shop.
 ========================================================= */
 
+function getSharedFollowingSlugSet(){
+
+  try{
+
+    const state =
+      window.Ma7alakFollowingState;
+
+    if(
+      !state ||
+      state.visitorId !== visitorId ||
+      !Array.isArray(state.slugs) ||
+      !Number.isFinite(Number(state.updatedAt)) ||
+      Date.now() - Number(state.updatedAt) > 60000
+    ){
+      return null;
+    }
+
+    return new Set(
+      state.slugs
+        .map(function(value){
+          return String(value || "").trim();
+        })
+        .filter(Boolean)
+    );
+
+  }
+  catch(error){
+
+    return null;
+
+  }
+
+}
+
+
 async function getFollowedShopSlugSet(client){
+
+  const shared =
+    getSharedFollowingSlugSet();
+
+  if(shared){
+    return shared;
+  }
 
   try{
 
@@ -4566,6 +4608,66 @@ function startNotificationRefresh(){
     );
 
 }
+
+
+let lastSharedFollowingSignature = "";
+
+function getSharedFollowingSignature(state){
+
+  if(
+    !state ||
+    state.visitorId !== visitorId ||
+    !Array.isArray(state.slugs)
+  ){
+    return "";
+  }
+
+  return state.slugs
+    .map(function(value){
+      return String(value || "").trim();
+    })
+    .filter(Boolean)
+    .sort()
+    .join("|");
+
+}
+
+window.addEventListener(
+  "ma7alak:following-state",
+  function(event){
+
+    const state =
+      (event && event.detail) ||
+      window.Ma7alakFollowingState ||
+      null;
+
+    const signature =
+      getSharedFollowingSignature(
+        state
+      );
+
+    if(
+      !signature &&
+      lastSharedFollowingSignature === ""
+    ){
+      return;
+    }
+
+    if(
+      signature ===
+      lastSharedFollowingSignature
+    ){
+      return;
+    }
+
+    lastSharedFollowingSignature =
+      signature;
+
+    loadNotifications()
+      .catch(function(){});
+
+  }
+);
 
 
 /* =========================================================
