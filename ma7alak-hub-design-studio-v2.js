@@ -89,9 +89,20 @@
     return (
       {
         diamond:"◆",
+        ring:"◇",
         star:"★",
         sparkle:"✦",
         dot:"•",
+        circle:"●",
+        heart:"♥",
+        bolt:"⚡",
+        crown:"♛",
+        flame:"🔥",
+        coffee:"☕",
+        flower:"✿",
+        moon:"☾",
+        plus:"✚",
+        chevron:"❯",
         none:""
       }[kind] ||
       "◆"
@@ -118,9 +129,9 @@
       return (
         "linear-gradient(to bottom," +
         color +
-        " 0 1px,transparent 1px 2px," +
+        " 0 1px,transparent 1px 3px," +
         color +
-        " 2px 3px)"
+        " 3px 4px)"
       );
     }
 
@@ -129,6 +140,46 @@
         "radial-gradient(circle," +
         color +
         " 0 1.2px,transparent 1.4px) 0 50% / 7px 3px repeat-x"
+      );
+    }
+
+    if(style === "dashed"){
+      return (
+        "repeating-linear-gradient(90deg," +
+        color +
+        " 0 9px,transparent 9px 15px)"
+      );
+    }
+
+    if(style === "segmented"){
+      return (
+        "repeating-linear-gradient(90deg," +
+        color +
+        " 0 5px,transparent 5px 8px," +
+        color +
+        " 8px 16px,transparent 16px 23px)"
+      );
+    }
+
+    if(style === "gradient"){
+      return (
+        "linear-gradient(90deg,transparent," +
+        color +
+        ",#ffffff," +
+        color +
+        ",transparent)"
+      );
+    }
+
+    if(style === "neon"){
+      return color;
+    }
+
+    if(style === "beam"){
+      return (
+        "linear-gradient(90deg,transparent 0 8%," +
+        color +
+        " 30% 70%,transparent 92%)"
       );
     }
 
@@ -141,6 +192,13 @@
       rgbaColor +
       " 70%,transparent 100%)"
     );
+  }
+
+  function clampNumber(value,min,max,fallback){
+    const n=Number(value);
+    return Number.isFinite(n)
+      ? Math.max(min,Math.min(max,n))
+      : fallback;
   }
 
   function apply(profile){
@@ -225,6 +283,78 @@
     const motionSubtle =
       motionMode === "subtle";
 
+    const animationSpeed =
+      clampNumber(
+        options.page_animation_speed,
+        .6,
+        6,
+        2.4
+      );
+
+    const animationIntensity =
+      clampNumber(
+        options.page_animation_intensity,
+        0,
+        100,
+        55
+      );
+
+    const glowPower =
+      clampNumber(
+        options.page_glow_power,
+        0,
+        100,
+        55
+      );
+
+    const shimmerBrightness =
+      clampNumber(
+        options.page_shimmer_brightness,
+        0,
+        100,
+        75
+      );
+
+    const floatDistance =
+      clampNumber(
+        options.page_float_distance,
+        0,
+        20,
+        6
+      );
+
+    const tunedSpeed =
+      motionSubtle
+        ? Math.min(9,animationSpeed*1.75)
+        : animationSpeed;
+
+    const tunedFloat =
+      floatDistance*
+      (.35+animationIntensity/100);
+
+    const tunedScale =
+      1+
+      animationIntensity*.0007;
+
+    const tunedRotate =
+      .35+
+      animationIntensity*.02;
+
+    const glowNear =
+      2+
+      glowPower*.12;
+
+    const glowFar =
+      4+
+      glowPower*.24;
+
+    const shimmerAlpha =
+      Math.min(
+        1,
+        .20+
+        shimmerBrightness*.008
+      );
+
     function picked(key,fallback){
       /*
         Fine-grained About controls always win. The Universal Accent
@@ -273,24 +403,80 @@
 
     if(titleMode === "glow"){
       titleVisualCss = `
+        display:inline-block!important;
         background:none!important;
         color:${titleColor}!important;
         -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleGlow 2.2s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleGlow 2.2s ease-in-out infinite!important;
+        animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleGlow ${tunedSpeed}s ease-in-out infinite!important;
       `;
     }
     else if(titleMode === "breathe"){
       titleVisualCss = `
+        display:inline-block!important;
         background:none!important;
         color:${titleColor}!important;
         -webkit-text-fill-color:${titleColor}!important;
-        animation:m7HubTitleBreathe 2.8s ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleBreathe 2.8s ease-in-out infinite!important;
+        animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleBreathe ${tunedSpeed}s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "float"){
+      titleVisualCss = `
+        display:inline-block!important;
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleFloat ${tunedSpeed}s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "pulse"){
+      titleVisualCss = `
+        display:inline-block!important;
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitlePulse ${tunedSpeed}s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "sway"){
+      titleVisualCss = `
+        display:inline-block!important;
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleSway ${tunedSpeed}s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "bounce"){
+      titleVisualCss = `
+        display:inline-block!important;
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleBounce ${tunedSpeed}s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "flicker"){
+      titleVisualCss = `
+        display:inline-block!important;
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        text-shadow:
+          0 0 ${glowNear}px ${rgba(titleRgb,.72)},
+          0 0 ${glowFar}px ${rgba(titleRgb,.34)}!important;
+        animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
+        -webkit-animation:m7HubTitleFlicker ${tunedSpeed}s linear infinite!important;
       `;
     }
     else if(titleMode === "none"){
       titleVisualCss = `
+        display:inline-block!important;
         background:none!important;
         color:${titleColor}!important;
         -webkit-text-fill-color:${titleColor}!important;
@@ -300,23 +486,31 @@
     }
     else{
       titleVisualCss = `
+        display:inline-block!important;
         background:
           linear-gradient(
-            105deg,
-            ${titleLight} 0%,
-            ${titleSoft} 24%,
-            #ffffff 39%,
-            ${titleColor} 52%,
-            ${titleLight} 72%,
-            #ffffff 100%
+            110deg,
+            ${titleColor} 0%,
+            ${titleSoft} 30%,
+            rgba(255,255,255,${shimmerAlpha}) 46%,
+            #ffffff 51%,
+            rgba(255,255,255,${shimmerAlpha}) 56%,
+            ${titleLight} 70%,
+            ${titleColor} 100%
           )!important;
-        background-size:280% 100%!important;
+        background-size:320% 100%!important;
+        background-position:145% 50%!important;
         -webkit-background-clip:text!important;
         background-clip:text!important;
         color:transparent!important;
         -webkit-text-fill-color:transparent!important;
-        animation:m7HubTitleShimmer ${titleMode === "shimmer" ? "3.4s" : "3.7s"} ease-in-out infinite!important;
-        -webkit-animation:m7HubTitleShimmer ${titleMode === "shimmer" ? "3.4s" : "3.7s"} ease-in-out infinite!important;
+        animation:m7HubTitleShimmer ${titleMode === "shimmer" ? tunedSpeed : tunedSpeed*1.12}s linear infinite!important;
+        -webkit-animation:m7HubTitleShimmer ${titleMode === "shimmer" ? tunedSpeed : tunedSpeed*1.12}s linear infinite!important;
+        filter:
+          drop-shadow(
+            0 0 ${Math.max(1,glowNear*.35)}px
+            ${rgba(titleRgb,.34)}
+          )!important;
       `;
     }
 
@@ -328,8 +522,8 @@
     }
     else if(motionSubtle && titleMode !== "none"){
       titleVisualCss += `
-        animation-duration:5.8s!important;
-        -webkit-animation-duration:5.8s!important;
+        animation-duration:${tunedSpeed}s!important;
+        -webkit-animation-duration:${tunedSpeed}s!important;
       `;
     }
 
@@ -494,6 +688,26 @@
       rgb.r + "," + rgb.g + "," + rgb.b
     );
 
+    root.style.setProperty(
+      "--m7-page-animation-speed",
+      tunedSpeed + "s"
+    );
+
+    root.style.setProperty(
+      "--m7-page-animation-intensity",
+      String(animationIntensity/100)
+    );
+
+    root.style.setProperty(
+      "--m7-page-glow-power",
+      String(glowPower/100)
+    );
+
+    root.style.setProperty(
+      "--m7-page-float-distance",
+      tunedFloat + "px"
+    );
+
     let style =
       document.getElementById(
         "m7-hub-page-design-studio"
@@ -597,25 +811,25 @@
       }
 
       @keyframes m7HubTitleShimmer{
-        from{background-position:120% 50%}
-        to{background-position:-120% 50%}
+        from{background-position:145% 50%}
+        to{background-position:-145% 50%}
       }
 
       @-webkit-keyframes m7HubTitleShimmer{
-        from{background-position:120% 50%}
-        to{background-position:-120% 50%}
+        from{background-position:145% 50%}
+        to{background-position:-145% 50%}
       }
 
       @keyframes m7HubTitleGlow{
         0%,100%{
           text-shadow:
-            0 0 5px ${rgba(titleRgb,.24)},
+            0 0 ${Math.max(1,glowNear*.28)}px ${rgba(titleRgb,.26)},
             0 2px 10px rgba(0,0,0,.45);
         }
         50%{
           text-shadow:
-            0 0 13px ${rgba(titleRgb,.80)},
-            0 0 22px ${rgba(titleRgb,.34)},
+            0 0 ${glowNear}px ${rgba(titleRgb,.88)},
+            0 0 ${glowFar}px ${rgba(titleRgb,.44)},
             0 2px 10px rgba(0,0,0,.45);
         }
       }
@@ -623,49 +837,112 @@
       @-webkit-keyframes m7HubTitleGlow{
         0%,100%{
           text-shadow:
-            0 0 5px ${rgba(titleRgb,.24)},
+            0 0 ${Math.max(1,glowNear*.28)}px ${rgba(titleRgb,.26)},
             0 2px 10px rgba(0,0,0,.45);
         }
         50%{
           text-shadow:
-            0 0 13px ${rgba(titleRgb,.80)},
-            0 0 22px ${rgba(titleRgb,.34)},
+            0 0 ${glowNear}px ${rgba(titleRgb,.88)},
+            0 0 ${glowFar}px ${rgba(titleRgb,.44)},
             0 2px 10px rgba(0,0,0,.45);
         }
       }
 
       @keyframes m7HubTitleBreathe{
         0%,100%{transform:scale(1);opacity:.94}
-        50%{transform:scale(1.035);opacity:1}
+        50%{transform:scale(${tunedScale});opacity:1}
       }
 
       @-webkit-keyframes m7HubTitleBreathe{
         0%,100%{-webkit-transform:scale(1);opacity:.94}
-        50%{-webkit-transform:scale(1.035);opacity:1}
+        50%{-webkit-transform:scale(${tunedScale});opacity:1}
+      }
+
+      @keyframes m7HubTitleFloat{
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-${tunedFloat}px)}
+      }
+
+      @-webkit-keyframes m7HubTitleFloat{
+        0%,100%{-webkit-transform:translateY(0)}
+        50%{-webkit-transform:translateY(-${tunedFloat}px)}
+      }
+
+      @keyframes m7HubTitlePulse{
+        0%,100%{transform:scale(1);opacity:1}
+        50%{transform:scale(${tunedScale});opacity:${Math.max(.55,1-animationIntensity*.0035)}}
+      }
+
+      @-webkit-keyframes m7HubTitlePulse{
+        0%,100%{-webkit-transform:scale(1);opacity:1}
+        50%{-webkit-transform:scale(${tunedScale});opacity:${Math.max(.55,1-animationIntensity*.0035)}}
+      }
+
+      @keyframes m7HubTitleSway{
+        25%{transform:rotate(-${tunedRotate}deg)}
+        75%{transform:rotate(${tunedRotate}deg)}
+      }
+
+      @-webkit-keyframes m7HubTitleSway{
+        25%{-webkit-transform:rotate(-${tunedRotate}deg)}
+        75%{-webkit-transform:rotate(${tunedRotate}deg)}
+      }
+
+      @keyframes m7HubTitleBounce{
+        0%,100%{transform:translateY(0)}
+        45%{transform:translateY(-${tunedFloat}px)}
+        62%{transform:translateY(${Math.max(.5,tunedFloat*.25)}px)}
+      }
+
+      @-webkit-keyframes m7HubTitleBounce{
+        0%,100%{-webkit-transform:translateY(0)}
+        45%{-webkit-transform:translateY(-${tunedFloat}px)}
+        62%{-webkit-transform:translateY(${Math.max(.5,tunedFloat*.25)}px)}
+      }
+
+      @keyframes m7HubTitleFlicker{
+        0%,18%,22%,25%,53%,57%,100%{opacity:1}
+        20%,24%,55%{opacity:.38}
+      }
+
+      @-webkit-keyframes m7HubTitleFlicker{
+        0%,18%,22%,25%,53%,57%,100%{opacity:1}
+        20%,24%,55%{opacity:.38}
       }
 
       html body #ma7alak-exact-merged-hub #ma7alak-about-title{
-        filter:
-          drop-shadow(
-            0 3px 10px
-            rgba(0,0,0,.30)
-          )!important;
+        transform-origin:center!important;
+        will-change:transform,filter,background-position,opacity!important;
         ${titleVisualCss}
       }
 
       html body #ma7alak-exact-merged-hub .zee-line{
         ${ornamentStyle === "none" ? "display:none!important;" : ""}
-        height:${ornamentStyle === "double" ? "3px" : "2px"}!important;
+        height:${ornamentStyle === "double" ? "4px" : ornamentStyle === "beam" ? "3px" : "2px"}!important;
         background:${ornamentBg}!important;
         box-shadow:
-          0 0 6px ${rgba(ornamentRgb,.18)}!important;
+          ${ornamentStyle === "neon"
+            ? "0 0 "+glowNear+"px "+rgba(ornamentRgb,.86)+",0 0 "+glowFar+"px "+rgba(ornamentRgb,.44)
+            : "0 0 "+Math.max(1,glowNear*.45)+"px "+rgba(ornamentRgb,.28)}!important;
       }
 
       html body #ma7alak-exact-merged-hub .zee-center-symbol{
         display:${ornamentSymbol ? "inline-block" : "none"}!important;
         color:${ornamentColor}!important;
         text-shadow:
-          0 0 8px ${rgba(ornamentRgb,.48)}!important;
+          0 0 ${glowNear}px ${rgba(ornamentRgb,.62)},
+          0 0 ${Math.max(glowNear,glowFar*.55)}px ${rgba(ornamentRgb,.28)}!important;
+      }
+
+      html body #ma7alak-exact-merged-hub .zee-about-card.m7-fx-panel-glow{
+        box-shadow:
+          0 18px 42px rgba(0,0,0,.34),
+          0 0 ${glowFar}px ${rgba(rgb,Math.min(.55,.08+glowPower*.0047))}!important;
+      }
+
+      html body #ma7alak-exact-merged-hub .zee-service-icon{
+        animation-duration:${tunedSpeed}s!important;
+        -webkit-animation-duration:${tunedSpeed}s!important;
       }
 
       html body #ma7alak-exact-merged-hub .zee-about-text{
