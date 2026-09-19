@@ -6747,3 +6747,289 @@ function observe(){
   document.head.appendChild(script);
 
 })();
+
+
+;(function adminDesignStudioFixV2(){
+  "use strict";
+
+  if(
+    location.pathname.replace(/\/+$/,"") !== "/admin" ||
+    window.__MA7ALAK_ADMIN_DESIGN_STUDIO_FIX_V2__
+  ){
+    return;
+  }
+
+  window.__MA7ALAK_ADMIN_DESIGN_STUDIO_FIX_V2__=true;
+
+  const snapshots={"m7da-":null,"m7de-":null};
+  let apiPatched=false;
+  let applying=false;
+
+  function safeHex(value,fallback){
+    const raw=String(value||"").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+  }
+
+  function prefixFor(form){
+    return form&&form.id==="ma-admin-edit-form"?"m7de-":"m7da-";
+  }
+
+  function accentFor(form){
+    const p=prefixFor(form);
+    const story=document.getElementById(p+"story-color");
+    const card=document.getElementById(p+"card-color");
+    return safeHex(story&&story.value,safeHex(card&&card.value,"#f2caed"));
+  }
+
+  function controls(box){
+    return [...box.querySelectorAll("input[id],select[id],textarea[id]")]
+      .filter(el=>/^m7d[ae]-/.test(el.id));
+  }
+
+  function capture(box){
+    const state={};
+    controls(box).forEach(el=>{
+      state[el.id]=el.type==="checkbox"?!!el.checked:String(el.value||"");
+    });
+    return state;
+  }
+
+  function universal(box){
+    return box.querySelector('input[id$="page_use_universal_accent"]');
+  }
+
+  function stateBadge(box){
+    const badge=box.querySelector("[data-m7ds-fix-state]");
+    if(!badge)return;
+    const on=!!(universal(box)&&universal(box).checked);
+    badge.textContent=on
+      ?"Universal Accent ON — individual accent colors are overridden"
+      :"Individual colors ON";
+    badge.classList.toggle("individual",!on);
+    box.classList.toggle("m7ds-fix-universal",on);
+  }
+
+  function refresh(box){
+    box.querySelectorAll('input[type="color"]').forEach(input=>{
+      const code=box.querySelector('[data-color-for="'+input.id+'"]');
+      if(code)code.textContent=String(input.value||"").toUpperCase();
+    });
+    stateBadge(box);
+  }
+
+  function apply(box,state){
+    if(!state)return;
+    applying=true;
+
+    controls(box).forEach(el=>{
+      if(!Object.prototype.hasOwnProperty.call(state,el.id))return;
+      if(el.type==="checkbox"){
+        el.checked=!!state[el.id];
+      }else{
+        el.value=String(state[el.id]??"");
+      }
+      el.dispatchEvent(new Event("input",{bubbles:true}));
+      el.dispatchEvent(new Event("change",{bubbles:true}));
+    });
+
+    applying=false;
+    refresh(box);
+  }
+
+  function surfaceColor(id){
+    return (
+      /_bg_color$/.test(id) ||
+      /about_text_color$/.test(id) ||
+      /about_content_border_color$/.test(id) ||
+      /about_service_text_color$/.test(id)
+    );
+  }
+
+  function defaults(box){
+    const form=box.closest("form");
+    const p=prefixFor(form);
+    const accent=accentFor(form);
+    const state=capture(box);
+
+    Object.keys(state).forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el||el.type!=="color")return;
+
+      if(/shop_label_bg_color$/.test(id))state[id]="#171217";
+      else if(/about_panel_bg_color$/.test(id))state[id]="#141014";
+      else if(/about_content_bg_color$/.test(id))state[id]="#161316";
+      else if(/about_service_bg_color$/.test(id))state[id]="#151215";
+      else if(/about_text_color$/.test(id)||/about_service_text_color$/.test(id))state[id]="#ffffff";
+      else if(/about_content_border_color$/.test(id))state[id]="#453b43";
+      else state[id]=accent;
+    });
+
+    const set=(key,val)=>{
+      const id=p+key;
+      if(Object.prototype.hasOwnProperty.call(state,id))state[id]=val;
+    };
+
+    set("page_design_preset","premium");
+    set("page_motion_mode","preset");
+    set("page_use_universal_accent",true);
+    set("shop_label_line_style","fade");
+    set("shop_label_symbol","diamond");
+    set("shop_label_symbol_text","");
+    set("shop_name_animation","current");
+    set("arabic_name_animation","none");
+    set("identity_divider_style","fade");
+    set("identity_divider_symbol","diamond");
+    set("identity_divider_symbol_text","");
+    set("about_title_animation","current");
+    set("about_ornament_style","fade");
+    set("about_ornament_symbol","diamond");
+    set("about_ornament_symbol_text","");
+
+    return state;
+  }
+
+  function ensureCss(){
+    if(document.getElementById("m7ds-fix-v2-css"))return;
+
+    const style=document.createElement("style");
+    style.id="m7ds-fix-v2-css";
+    style.textContent=`
+      .m7ds-fix-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 11px}
+      .m7ds-fix-btn{min-height:32px;padding:0 10px;border-radius:9px;border:1px solid rgba(216,170,88,.18);background:rgba(255,255,255,.025);color:#e4d2b3;font-size:8px;font-weight:900;cursor:pointer}
+      .m7ds-fix-btn:hover{border-color:rgba(216,170,88,.38);background:rgba(216,170,88,.075)}
+      .m7ds-fix-btn.danger{color:#ffc1bd;border-color:rgba(255,96,86,.24)}
+      .m7ds-fix-state{margin-left:auto;padding:5px 8px;border-radius:999px;border:1px solid rgba(216,170,88,.18);background:rgba(216,170,88,.05);color:#d8b874;font-size:7.5px;font-weight:900}
+      .m7ds-fix-state.individual{color:#77e7ae;border-color:rgba(64,210,130,.22);background:rgba(64,210,130,.055)}
+      .m7-design-studio.m7ds-fix-universal .m7ds-pane input[type="color"]{opacity:.66}
+      @media(max-width:700px){
+        .m7ds-fix-actions{display:grid;grid-template-columns:1fr 1fr}
+        .m7ds-fix-state{grid-column:1/-1;margin-left:0;text-align:center}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function mount(box){
+    if(!box||box.dataset.m7dsFixV2==="1")return;
+    box.dataset.m7dsFixV2="1";
+
+    const form=box.closest("form");
+    const p=prefixFor(form);
+
+    const row=document.createElement("div");
+    row.className="m7ds-fix-actions";
+    row.innerHTML=`
+      <button type="button" class="m7ds-fix-btn" data-revert>↶ Revert Unsaved</button>
+      <button type="button" class="m7ds-fix-btn danger" data-reset>Reset Design Defaults</button>
+      <span class="m7ds-fix-state" data-m7ds-fix-state></span>
+    `;
+
+    const intro=box.querySelector(".m7ds-intro");
+    if(intro)intro.after(row);
+    else box.insertBefore(row,box.firstChild);
+
+    const u=universal(box);
+
+    box.addEventListener("input",event=>{
+      const input=event.target;
+
+      if(
+        !applying &&
+        input &&
+        input.matches('input[type="color"]') &&
+        u &&
+        u.checked &&
+        !surfaceColor(input.id)
+      ){
+        u.checked=false;
+        u.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+
+      stateBadge(box);
+    });
+
+    box.addEventListener("change",event=>{
+      const el=event.target;
+
+      if(
+        !applying &&
+        el &&
+        /page_design_preset$/.test(el.id) &&
+        el.value==="custom" &&
+        u &&
+        u.checked
+      ){
+        u.checked=false;
+      }
+
+      stateBadge(box);
+    });
+
+    row.querySelector("[data-revert]").addEventListener("click",()=>{
+      if(snapshots[p])apply(box,snapshots[p]);
+    });
+
+    row.querySelector("[data-reset]").addEventListener("click",()=>{
+      if(!window.confirm(
+        "Reset Page Design Studio to the default theme?\n\nThis only changes the form. Press Save Changes to make it live."
+      ))return;
+      apply(box,defaults(box));
+    });
+
+    if(!snapshots[p])snapshots[p]=capture(box);
+
+    refresh(box);
+  }
+
+  function mountAll(){
+    document.querySelectorAll(".m7-design-studio").forEach(mount);
+  }
+
+  function patchApi(){
+    if(apiPatched)return;
+
+    const api=window.Ma7alakDirectoryAdmin;
+    if(!api||typeof api.fill!=="function")return;
+
+    apiPatched=true;
+    const oldFill=api.fill.bind(api);
+
+    api.fill=function(shop){
+      const result=oldFill(shop);
+
+      setTimeout(()=>{
+        mountAll();
+        const box=document.getElementById("ma-admin-edit-form")?.querySelector(".m7-design-studio");
+        if(box){
+          snapshots["m7de-"]=capture(box);
+          refresh(box);
+        }
+      },0);
+
+      return result;
+    };
+  }
+
+  function boot(){
+    ensureCss();
+    mountAll();
+    patchApi();
+  }
+
+  boot();
+
+  let queued=false;
+
+  new MutationObserver(()=>{
+    if(queued)return;
+    queued=true;
+
+    requestAnimationFrame(()=>{
+      queued=false;
+      boot();
+    });
+  }).observe(
+    document.getElementById("ma-admin-dashboard")||document.documentElement,
+    {childList:true,subtree:true}
+  );
+})();
