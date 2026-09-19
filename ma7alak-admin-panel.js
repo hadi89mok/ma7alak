@@ -5852,6 +5852,11 @@ function decorateAll(){
   const DEFAULTS = {
     page_design_preset:"premium",
     page_motion_mode:"preset",
+    page_animation_speed:"2.4",
+    page_animation_intensity:"55",
+    page_glow_power:"55",
+    page_shimmer_brightness:"75",
+    page_float_distance:"6",
     page_use_universal_accent:true,
 
     profile_ring_color:"#f2caed",
@@ -5935,9 +5940,20 @@ function decorateAll(){
 
   const SYMBOLS = [
     ["diamond","Diamond ◆"],
+    ["ring","Ring ◇"],
     ["star","Star ★"],
     ["sparkle","Sparkle ✦"],
     ["dot","Dot •"],
+    ["circle","Circle ●"],
+    ["heart","Heart ♥"],
+    ["bolt","Bolt ⚡"],
+    ["crown","Crown ♛"],
+    ["flame","Flame 🔥"],
+    ["coffee","Coffee ☕"],
+    ["flower","Flower ✿"],
+    ["moon","Moon ☾"],
+    ["plus","Plus ✚"],
+    ["chevron","Chevron ❯"],
     ["none","None"],
     ["custom","Custom text / symbol"]
   ];
@@ -5947,14 +5963,24 @@ function decorateAll(){
     ["solid","Solid"],
     ["double","Double"],
     ["dotted","Dotted"],
+    ["dashed","Dashed"],
+    ["segmented","Segmented"],
+    ["gradient","Bright gradient"],
+    ["neon","Neon glow"],
+    ["beam","Center beam"],
     ["none","None"]
   ];
 
   const ANIMS = [
-    ["current","Current premium effect"],
-    ["shimmer","Shimmer"],
+    ["current","Current premium flow"],
+    ["shimmer","Shimmer sweep"],
     ["glow","Glow pulse"],
     ["breathe","Breathing"],
+    ["float","Soft float"],
+    ["pulse","Soft pulse"],
+    ["sway","Gentle sway"],
+    ["bounce","Soft bounce"],
+    ["flicker","Neon flicker"],
     ["none","Static / no animation"]
   ];
 
@@ -6044,6 +6070,25 @@ function decorateAll(){
         <select id="${prefix}${key}">
           ${opts(ANIMS,DEFAULTS[key])}
         </select>
+      </label>
+    `;
+  }
+
+  function effectNumberField(prefix,key,label,min,max,step,suffix){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)}</span>
+        <div class="m7ds-number-row">
+          <input
+            id="${prefix}${key}"
+            type="number"
+            min="${esc(min)}"
+            max="${esc(max)}"
+            step="${esc(step)}"
+            value="${esc(DEFAULTS[key])}"
+          >
+          <small>${esc(suffix||"")}</small>
+        </div>
       </label>
     `;
   }
@@ -6277,6 +6322,7 @@ function decorateAll(){
 
       <div class="m7ds-tabs" role="tablist">
         <button type="button" class="active" data-m7ds-tab="identity">Identity</button>
+        <button type="button" data-m7ds-tab="motion">Motion FX</button>
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
         <button type="button" data-m7ds-tab="follow">Follow / Banner</button>
@@ -6297,6 +6343,20 @@ function decorateAll(){
           ${colorField(prefix,"arabic_name_color","Arabic name color")}
           ${animField(prefix,"arabic_name_animation","Arabic name animation")}
         </div>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="motion">
+        <div class="m7ds-section-title">Animation Tuning</div>
+        <div class="m7ds-grid">
+          ${effectNumberField(prefix,"page_animation_speed","Animation speed",0.6,6,0.1,"seconds")}
+          ${effectNumberField(prefix,"page_animation_intensity","Animation intensity",0,100,5,"%")}
+          ${effectNumberField(prefix,"page_glow_power","Glow power",0,100,5,"%")}
+          ${effectNumberField(prefix,"page_shimmer_brightness","Shimmer brightness",0,100,5,"%")}
+          ${effectNumberField(prefix,"page_float_distance","Float / bounce distance",0,20,1,"px")}
+        </div>
+        <p class="m7ds-help">
+          These controls tune supported text, glow and ornament animations. Set intensity or glow to 0 for a very calm effect.
+        </p>
       </div>
 
       <div class="m7ds-pane" data-m7ds-pane="lines">
@@ -6999,6 +7059,8 @@ function decorateAll(){
       .m7ds-top-grid{margin-bottom:11px}
       .m7ds-field{display:flex;flex-direction:column;gap:5px;min-width:0;color:#cdbb9d;font-size:9px;font-weight:800}
       .m7ds-field input,.m7ds-field select{width:100%;min-height:38px;border:1px solid rgba(216,170,88,.16);border-radius:10px;background:#0a0807;color:#fff;padding:0 9px;outline:0;box-sizing:border-box}
+      .m7ds-number-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center}
+      .m7ds-number-row small{min-width:44px;color:#887b68;font-size:8px;font-weight:850;text-align:right}
       .m7ds-field input[type="color"]{width:44px;min-width:44px;height:34px;min-height:34px;padding:3px;cursor:pointer}
       .m7ds-color-row{display:flex;align-items:center;gap:7px}
       .m7ds-color-row code{flex:1;min-width:0;padding:7px 8px;border-radius:8px;color:#9f927e;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);font-size:8px}
@@ -9681,33 +9743,98 @@ function ensureCss(){
       line-height:1.05;
     }
 
+    .m7pv-anim{
+      display:inline-block;
+      transform-origin:center;
+      will-change:transform,filter,background-position,opacity;
+    }
+
     .m7pv-anim-glow{
-      animation:m7pvTextGlow 1.8s ease-in-out infinite;
+      animation:m7pvTextGlow var(--m7-anim-speed,2.4s) ease-in-out infinite;
     }
 
     .m7pv-anim-breathe{
-      animation:m7pvTextBreathe 2s ease-in-out infinite;
+      animation:m7pvTextBreathe var(--m7-anim-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-anim-float{
+      animation:m7pvTextFloat var(--m7-anim-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-anim-pulse{
+      animation:m7pvTextPulse var(--m7-anim-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-anim-sway{
+      animation:m7pvTextSway var(--m7-anim-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-anim-bounce{
+      animation:m7pvTextBounce var(--m7-anim-speed,2.4s) ease-in-out infinite;
+    }
+
+    .m7pv-anim-flicker{
+      animation:m7pvTextFlicker var(--m7-anim-speed,2.4s) linear infinite;
+      text-shadow:0 0 var(--m7-glow-px,10px) var(--m7-anim-color,currentColor);
     }
 
     .m7pv-anim-shimmer{
-      background:linear-gradient(90deg,currentColor,#fff,currentColor);
-      background-size:200% 100%;
+      background:
+        linear-gradient(
+          110deg,
+          var(--m7-anim-color,#d9aa58) 0%,
+          var(--m7-anim-color,#d9aa58) 34%,
+          var(--m7-shimmer-color,rgba(255,255,255,.92)) 48%,
+          #ffffff 52%,
+          var(--m7-anim-color,#d9aa58) 66%,
+          var(--m7-anim-color,#d9aa58) 100%
+        );
+      background-size:260% 100%;
+      background-position:130% 50%;
       -webkit-background-clip:text;
       background-clip:text;
       color:transparent!important;
-      animation:m7pvTextShimmer 1.8s linear infinite;
+      -webkit-text-fill-color:transparent!important;
+      animation:m7pvTextShimmer var(--m7-anim-speed,2.4s) linear infinite;
+      filter:drop-shadow(0 0 calc(var(--m7-glow-px,10px) * .35) var(--m7-anim-color,#d9aa58));
     }
 
     @keyframes m7pvTextGlow{
-      50%{text-shadow:0 0 14px currentColor}
+      0%,100%{text-shadow:0 0 calc(var(--m7-glow-px,10px) * .25) var(--m7-anim-color,currentColor)}
+      50%{text-shadow:0 0 var(--m7-glow-px,10px) var(--m7-anim-color,currentColor),0 0 calc(var(--m7-glow-px,10px) * 1.7) var(--m7-anim-color,currentColor)}
     }
 
     @keyframes m7pvTextBreathe{
-      50%{transform:scale(1.035)}
+      50%{transform:scale(var(--m7-scale-max,1.035))}
+    }
+
+    @keyframes m7pvTextFloat{
+      50%{transform:translateY(calc(var(--m7-float-px,6px) * -1))}
+    }
+
+    @keyframes m7pvTextPulse{
+      50%{transform:scale(var(--m7-scale-max,1.035));opacity:.72}
+    }
+
+    @keyframes m7pvTextSway{
+      25%{transform:rotate(calc(var(--m7-rotate-deg,1.5deg) * -1))}
+      75%{transform:rotate(var(--m7-rotate-deg,1.5deg))}
+    }
+
+    @keyframes m7pvTextBounce{
+      0%,100%{transform:translateY(0)}
+      45%{transform:translateY(calc(var(--m7-float-px,6px) * -1))}
+      62%{transform:translateY(calc(var(--m7-float-px,6px) * .25))}
+    }
+
+    @keyframes m7pvTextFlicker{
+      0%,18%,22%,25%,53%,57%,100%{opacity:1}
+      20%,24%,55%{opacity:.42}
     }
 
     @keyframes m7pvTextShimmer{
-      to{background-position:-200% 0}
+      from{background-position:130% 50%}
+      to{background-position:-130% 50%}
     }
 
     .m7pv-arabic{
@@ -9730,22 +9857,40 @@ function ensureCss(){
       vertical-align:1px;
     }
 
+    .m7pv-label-row,
     .m7pv-divider{
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:7px;
-      width:76%;
-      margin:10px auto 0;
+      width:82%;
+      margin-left:auto;
+      margin-right:auto;
       color:var(--pv-divider,var(--pv-accent,#d9aa58));
     }
 
-    .m7pv-divider:before,
-    .m7pv-divider:after{
-      content:"";
-      height:1px;
+    .m7pv-label-row{
+      margin-top:2px;
+    }
+
+    .m7pv-divider{
+      margin-top:10px;
+    }
+
+    .m7pv-design-line{
       flex:1;
-      background:currentColor;
-      opacity:.65;
+      min-width:18px;
+      height:2px;
+      border-radius:999px;
+      opacity:.9;
+    }
+
+    .m7pv-line-symbol,
+    .m7pv-divider-symbol{
+      flex:0 0 auto;
+      color:currentColor;
+      font-size:9px;
+      text-shadow:0 0 var(--m7-line-glow,6px) currentColor;
     }
 
     .m7pv-actions{
@@ -11095,10 +11240,194 @@ function currentPreviewShop(){
 }
 
 function previewAnimClass(value){
-  const key=String(value||"").trim().toLowerCase();
-  return ["glow","breathe","shimmer"].includes(key)
-    ? " m7pv-anim-"+key
+  let key=String(value||"").trim().toLowerCase();
+
+  if(key==="current"){
+    key="shimmer";
+  }
+
+  return [
+    "glow",
+    "breathe",
+    "shimmer",
+    "float",
+    "pulse",
+    "sway",
+    "bounce",
+    "flicker"
+  ].includes(key)
+    ? " m7pv-anim m7pv-anim-"+key
     : "";
+}
+
+function previewEffectSettings(){
+  const speed=
+    Math.max(
+      .6,
+      Math.min(
+        6,
+        Number(
+          previewVal(
+            "m7de-page_animation_speed",
+            "2.4"
+          )
+        )||2.4
+      )
+    );
+
+  const intensity=
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(
+          previewVal(
+            "m7de-page_animation_intensity",
+            "55"
+          )
+        )||55
+      )
+    );
+
+  const glow=
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(
+          previewVal(
+            "m7de-page_glow_power",
+            "55"
+          )
+        )||55
+      )
+    );
+
+  const shimmer=
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(
+          previewVal(
+            "m7de-page_shimmer_brightness",
+            "75"
+          )
+        )||75
+      )
+    );
+
+  const distance=
+    Math.max(
+      0,
+      Math.min(
+        20,
+        Number(
+          previewVal(
+            "m7de-page_float_distance",
+            "6"
+          )
+        )||6
+      )
+    );
+
+  return {
+    speed:speed,
+    intensity:intensity,
+    glow:glow,
+    shimmer:shimmer,
+    distance:distance
+  };
+}
+
+function previewAnimStyle(color){
+  const fx=previewEffectSettings();
+  const alpha=(.2+fx.shimmer*.008).toFixed(2);
+  const scale=(1+fx.intensity*.0007).toFixed(4);
+  const rotate=(.35+fx.intensity*.02).toFixed(2);
+  const floatPx=(fx.distance*(.35+fx.intensity/100)).toFixed(2);
+  const glowPx=(2+fx.glow*.18).toFixed(2);
+
+  return [
+    "--m7-anim-color:"+color,
+    "--m7-anim-speed:"+fx.speed+"s",
+    "--m7-glow-px:"+glowPx+"px",
+    "--m7-scale-max:"+scale,
+    "--m7-rotate-deg:"+rotate+"deg",
+    "--m7-float-px:"+floatPx+"px",
+    "--m7-shimmer-color:rgba(255,255,255,"+Math.min(1,Number(alpha))+")"
+  ].join(";");
+}
+
+function previewSymbol(kind,custom){
+  const own=String(custom||"").trim();
+
+  if(kind==="custom"&&own){
+    return own.slice(0,5);
+  }
+
+  return ({
+    diamond:"◆",
+    ring:"◇",
+    star:"★",
+    sparkle:"✦",
+    dot:"•",
+    circle:"●",
+    heart:"♥",
+    bolt:"⚡",
+    crown:"♛",
+    flame:"🔥",
+    coffee:"☕",
+    flower:"✿",
+    moon:"☾",
+    plus:"✚",
+    chevron:"❯",
+    none:""
+  })[String(kind||"diamond").toLowerCase()]||"◆";
+}
+
+function previewLineStyle(style,color){
+  const fx=previewEffectSettings();
+  const key=String(style||"fade").toLowerCase();
+  const glow=(2+fx.glow*.12).toFixed(1);
+
+  if(key==="none"){
+    return "display:none";
+  }
+
+  if(key==="solid"){
+    return "background:"+color+";box-shadow:0 0 "+glow+"px "+color;
+  }
+
+  if(key==="double"){
+    return "height:4px;background:linear-gradient(to bottom,"+color+" 0 1px,transparent 1px 3px,"+color+" 3px 4px);box-shadow:0 0 "+glow+"px "+color;
+  }
+
+  if(key==="dotted"){
+    return "background:radial-gradient(circle,"+color+" 0 1.2px,transparent 1.4px) 0 50% / 7px 3px repeat-x";
+  }
+
+  if(key==="dashed"){
+    return "background:repeating-linear-gradient(90deg,"+color+" 0 9px,transparent 9px 15px)";
+  }
+
+  if(key==="segmented"){
+    return "background:repeating-linear-gradient(90deg,"+color+" 0 5px,transparent 5px 8px,"+color+" 8px 16px,transparent 16px 23px)";
+  }
+
+  if(key==="gradient"){
+    return "background:linear-gradient(90deg,transparent,"+color+",#fff,"+color+",transparent)";
+  }
+
+  if(key==="neon"){
+    return "background:"+color+";box-shadow:0 0 "+glow+"px "+color+",0 0 "+(Number(glow)*1.8).toFixed(1)+"px "+color;
+  }
+
+  if(key==="beam"){
+    return "height:3px;background:linear-gradient(90deg,transparent 0 8%,"+color+" 30% 70%,transparent 92%);box-shadow:0 0 "+glow+"px "+color;
+  }
+
+  return "background:linear-gradient(90deg,transparent 0%,"+color+" 30%,"+color+" 70%,transparent 100%)";
 }
 
 function previewFontFamily(value){
@@ -11216,6 +11545,16 @@ function previewLabelIcon(value){
     star:"★",
     heart:"♥",
     sparkle:"✦",
+    ring:"◇",
+    circle:"●",
+    bolt:"⚡",
+    crown:"♛",
+    flame:"🔥",
+    coffee:"☕",
+    flower:"✿",
+    moon:"☾",
+    plus:"✚",
+    chevron:"❯",
     none:""
   };
 
@@ -11505,6 +11844,57 @@ function previewIdentityHtml(shop,mode){
       "none"
     );
 
+  const aboutTitleAnimation=
+    previewVal(
+      "m7de-about_title_animation",
+      "current"
+    );
+
+  const labelLineStyle=
+    previewVal(
+      "m7de-shop_label_line_style",
+      "fade"
+    );
+
+  const labelLineColor=
+    previewColor(
+      "m7de-shop_label_line_color",
+      accent
+    );
+
+  const labelLineSymbol=
+    previewSymbol(
+      previewVal(
+        "m7de-shop_label_symbol",
+        "diamond"
+      ),
+      previewVal(
+        "m7de-shop_label_symbol_text",
+        ""
+      )
+    );
+
+  const dividerStyle=
+    previewVal(
+      "m7de-identity_divider_style",
+      "fade"
+    );
+
+  const dividerSymbol=
+    previewSymbol(
+      previewVal(
+        "m7de-identity_divider_symbol",
+        "diamond"
+      ),
+      previewVal(
+        "m7de-identity_divider_symbol_text",
+        ""
+      )
+    );
+
+  const lineGlow=
+    (2+previewEffectSettings().glow*.12).toFixed(1)+"px";
+
   return ''+
     '<div class="m7pv-banner" style="'+bannerStyle+'"></div>'+
     '<div class="m7pv-identity" style="--pv-accent:'+esc(accent)+';--pv-label-text:'+esc(labelText)+';--pv-label-border:'+esc(labelBorder)+';--pv-label-bg:'+esc(labelBg)+';--pv-name:'+esc(nameColor)+';--pv-arabic:'+esc(arabicColor)+';--pv-divider:'+esc(divider)+';">'+
@@ -11515,16 +11905,26 @@ function previewIdentityHtml(shop,mode){
             : '🏪'
         )+
       '</div>'+
-      '<span class="m7pv-kicker" style="font-family:'+esc(profileTypography.family)+';font-size:'+profileTypography.size+'%;">'+(shopLabelIcon?esc(shopLabelIcon)+' ':'')+esc(shopLabel)+'</span>'+
-      '<div class="m7pv-name'+previewAnimClass(shopNameAnimation)+'" style="font-family:'+esc(profileTypography.family)+';font-size:calc(20px * '+(profileTypography.size/100)+');">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
-      (arabic?'<div class="m7pv-arabic'+previewAnimClass(arabicAnimation)+'" style="color:'+esc(arabicStyle.color)+';font-family:'+esc(arabicStyle.family==='inherit'?profileTypography.family:arabicStyle.family)+';font-size:calc(11px * '+(profileTypography.size/100)+' * '+(arabicStyle.size/100)+');">'+esc(arabic)+'</div>':'')+
+      '<div class="m7pv-label-row" style="--m7-line-glow:'+esc(lineGlow)+';color:'+esc(labelLineColor)+'">'+
+        '<span class="m7pv-design-line" style="'+esc(previewLineStyle(labelLineStyle,labelLineColor))+'"></span>'+
+        (labelLineSymbol?'<span class="m7pv-line-symbol">'+esc(labelLineSymbol)+'</span>':'')+
+        '<span class="m7pv-kicker" style="font-family:'+esc(profileTypography.family)+';font-size:'+profileTypography.size+'%;">'+(shopLabelIcon?esc(shopLabelIcon)+' ':'')+esc(shopLabel)+'</span>'+
+        (labelLineSymbol?'<span class="m7pv-line-symbol">'+esc(labelLineSymbol)+'</span>':'')+
+        '<span class="m7pv-design-line" style="'+esc(previewLineStyle(labelLineStyle,labelLineColor))+'"></span>'+
+      '</div>'+
+      '<div class="m7pv-name'+previewAnimClass(shopNameAnimation)+'" style="font-family:'+esc(profileTypography.family)+';font-size:calc(20px * '+(profileTypography.size/100)+');'+esc(previewAnimStyle(nameColor))+'">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
+      (arabic?'<div class="m7pv-arabic'+previewAnimClass(arabicAnimation)+'" style="color:'+esc(arabicStyle.color)+';font-family:'+esc(arabicStyle.family==='inherit'?profileTypography.family:arabicStyle.family)+';font-size:calc(11px * '+(profileTypography.size/100)+' * '+(arabicStyle.size/100)+');'+esc(previewAnimStyle(arabicStyle.color))+'">'+esc(arabic)+'</div>':'')+
       '<div class="m7pv-meta" style="font-family:'+esc(profileTypography.family)+';font-size:calc(8px * '+(profileTypography.size/100)+');">📍 '+esc(location)+'</div>'+
-      '<div class="m7pv-divider">◆</div>'+
+      '<div class="m7pv-divider" style="--m7-line-glow:'+esc(lineGlow)+';color:'+esc(divider)+'">'+
+        '<span class="m7pv-design-line" style="'+esc(previewLineStyle(dividerStyle,divider))+'"></span>'+
+        (dividerSymbol?'<span class="m7pv-divider-symbol">'+esc(dividerSymbol)+'</span>':'')+
+        '<span class="m7pv-design-line" style="'+esc(previewLineStyle(dividerStyle,divider))+'"></span>'+
+      '</div>'+
     '</div>'+
     '<div class="m7pv-actions" style="--pv-accent:'+esc(previewColor("m7de-follow_accent_color",accent))+';font-family:'+esc(followTypography.family)+';font-size:'+followTypography.size+'%;"><span>＋ Follow</span><span>✉ Message</span></div>'+
     '<div class="m7pv-block" style="--pv-title:'+esc(titleColor)+';--pv-text:'+esc(textColor)+';--pv-panel-bg:'+esc(panelBg)+';--pv-panel-border:'+esc(panelBorder)+';--pv-service-text:'+esc(serviceText)+';--pv-service-border:'+esc(serviceBorder)+';--pv-service-bg:'+esc(serviceBg)+';--pv-signature:'+esc(signatureColor)+';">'+
       '<div style="margin-bottom:3px;color:'+esc(kickerStyle.color)+';font-family:'+esc(kickerStyle.family==='inherit'?aboutTypography.family:kickerStyle.family)+';font-size:calc(7px * '+(aboutTypography.size/100)+' * '+(kickerStyle.size/100)+');font-weight:900;text-transform:uppercase;letter-spacing:.6px;">About</div>'+
-      '<h4 style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family==='inherit'?aboutTypography.family:titleStyle.family)+';font-size:calc(11px * '+(aboutTypography.size/100)+' * '+(titleStyle.size/100)+');">About Me</h4>'+
+      '<h4 class="'+previewAnimClass(aboutTitleAnimation).trim()+'" style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family==='inherit'?aboutTypography.family:titleStyle.family)+';font-size:calc(11px * '+(aboutTypography.size/100)+' * '+(titleStyle.size/100)+');'+esc(previewAnimStyle(titleStyle.color))+'">About Me</h4>'+
       '<p style="color:'+esc(bodyStyle.color)+';font-family:'+esc(bodyStyle.family==='inherit'?aboutTypography.family:bodyStyle.family)+';font-size:calc(8px * '+(aboutTypography.size/100)+' * '+(bodyStyle.size/100)+');">'+esc(about)+'</p>'+
       (
         services.length
