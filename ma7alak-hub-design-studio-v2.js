@@ -243,6 +243,96 @@
         accent
       );
 
+    const titleMode =
+      String(
+        options.about_title_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+    const titleRgb =
+      hexToRgb(titleColor) ||
+      rgb;
+
+    const titleLight =
+      mix(
+        titleRgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+    const titleSoft =
+      mix(
+        titleRgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+    let titleVisualCss = "";
+
+    if(titleMode === "glow"){
+      titleVisualCss = `
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitleGlow 2.2s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleGlow 2.2s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "breathe"){
+      titleVisualCss = `
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:m7HubTitleBreathe 2.8s ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleBreathe 2.8s ease-in-out infinite!important;
+      `;
+    }
+    else if(titleMode === "none"){
+      titleVisualCss = `
+        background:none!important;
+        color:${titleColor}!important;
+        -webkit-text-fill-color:${titleColor}!important;
+        animation:none!important;
+        -webkit-animation:none!important;
+      `;
+    }
+    else{
+      titleVisualCss = `
+        background:
+          linear-gradient(
+            105deg,
+            ${titleLight} 0%,
+            ${titleSoft} 24%,
+            #ffffff 39%,
+            ${titleColor} 52%,
+            ${titleLight} 72%,
+            #ffffff 100%
+          )!important;
+        background-size:280% 100%!important;
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+        color:transparent!important;
+        -webkit-text-fill-color:transparent!important;
+        animation:m7HubTitleShimmer ${titleMode === "shimmer" ? "3.4s" : "3.7s"} ease-in-out infinite!important;
+        -webkit-animation:m7HubTitleShimmer ${titleMode === "shimmer" ? "3.4s" : "3.7s"} ease-in-out infinite!important;
+      `;
+    }
+
+    if(motionOff){
+      titleVisualCss += `
+        animation:none!important;
+        -webkit-animation:none!important;
+      `;
+    }
+    else if(motionSubtle && titleMode !== "none"){
+      titleVisualCss += `
+        animation-duration:5.8s!important;
+        -webkit-animation-duration:5.8s!important;
+      `;
+    }
+
     const kickerColor =
       picked(
         "about_kicker_color",
@@ -506,8 +596,61 @@
         color:${kickerColor}!important;
       }
 
+      @keyframes m7HubTitleShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @-webkit-keyframes m7HubTitleShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @keyframes m7HubTitleGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${rgba(titleRgb,.24)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+        50%{
+          text-shadow:
+            0 0 13px ${rgba(titleRgb,.80)},
+            0 0 22px ${rgba(titleRgb,.34)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+      }
+
+      @-webkit-keyframes m7HubTitleGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${rgba(titleRgb,.24)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+        50%{
+          text-shadow:
+            0 0 13px ${rgba(titleRgb,.80)},
+            0 0 22px ${rgba(titleRgb,.34)},
+            0 2px 10px rgba(0,0,0,.45);
+        }
+      }
+
+      @keyframes m7HubTitleBreathe{
+        0%,100%{transform:scale(1);opacity:.94}
+        50%{transform:scale(1.035);opacity:1}
+      }
+
+      @-webkit-keyframes m7HubTitleBreathe{
+        0%,100%{-webkit-transform:scale(1);opacity:.94}
+        50%{-webkit-transform:scale(1.035);opacity:1}
+      }
+
       html body #ma7alak-exact-merged-hub #ma7alak-about-title{
-        ${motionOff ? "animation:none!important;-webkit-animation:none!important;" : ""}
+        filter:
+          drop-shadow(
+            0 3px 10px
+            rgba(0,0,0,.30)
+          )!important;
+        ${titleVisualCss}
       }
 
       html body #ma7alak-exact-merged-hub .zee-line{
