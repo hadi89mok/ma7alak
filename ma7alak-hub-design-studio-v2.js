@@ -256,12 +256,10 @@
       );
 
     const serviceText =
-      useUniversal
-        ? "#ffffff"
-        : safeHex(
-            options.about_service_text_color,
-            "#ffffff"
-          );
+      safeHex(
+        options.about_service_text_color,
+        "#ffffff"
+      );
 
     const serviceBorder =
       picked(
