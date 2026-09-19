@@ -4853,14 +4853,58 @@ if((location.pathname.replace(/\/+$/,"" )||"/")!=="/admin")return;
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 let sb=null,userRows=[],presenceMap=new Map(),analyticsTimer=null,currentOwnerUserId=null,adminRealtime=null,activeAdminTool="",adminToolRefreshBusy=false;
 function css(){if(document.getElementById("m7adm-v3-css"))return;let s=document.createElement("style");s.id="m7adm-v3-css";s.textContent=`
-#m7adm-v3{margin:12px 0 18px;font-family:Arial;color:#fff;background:#12100f;border:1px solid #d99a4544;border-radius:20px;padding:10px;overflow:hidden}.m7adm-hub-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 3px 9px}.m7adm-hub-title{min-width:0}.m7adm-hub-title b{display:block;color:#f4b85d;font-size:13px;font-weight:950}.m7adm-hub-title small{display:block;margin-top:2px;color:#88796a;font-size:9px}.m7adm-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.m7adm-tab{min-height:40px;border:1px solid #d99a4538;border-radius:11px;background:#1b1511;color:#cdb48e;font-size:10px;font-weight:900;cursor:pointer}.m7adm-tab:hover,.m7adm-tab.active{border-color:#d99a4575;background:#2a1d13;color:#f4b85d}.m7adm-tab.active{box-shadow:inset 0 0 0 1px #d99a4528}.m7adm-hub-content{margin-top:8px}.m7adm-body{padding:12px;border:1px solid #ffffff0d;border-radius:14px;background:#0f0d0c}.m7adm-body.hidden,.m7adm-body[hidden]{display:none!important}.m7adm-tools{display:flex;gap:8px;margin-bottom:10px}.m7adm-search,.m7adm-select,.m7adm-input{width:100%;box-sizing:border-box;background:#0e0c0b;color:#fff;border:1px solid #d99a4544;border-radius:12px;padding:11px 12px;outline:none}.m7adm-user,.m7adm-report{display:flex;gap:11px;align-items:center;background:#1a1613;border:1px solid #ffffff12;border-radius:15px;padding:11px;margin:8px 0}.m7adm-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#30251f;flex:0 0 auto}.m7adm-copy{min-width:0;flex:1}.m7adm-copy strong,.m7adm-copy small{display:block}.m7adm-copy small{color:#aaa;margin-top:3px}.m7adm-email{overflow-wrap:anywhere;word-break:break-word;color:#f0d5ad!important}.m7adm-actions{display:flex;gap:6px;flex-wrap:wrap}.m7adm-btn{border:0;border-radius:9px;padding:8px 9px;font-weight:800;cursor:pointer}.ban{background:#b64635;color:#fff}.ok{background:#39734c;color:#fff}.del{background:#6d3030;color:#fff}.view{background:#d99a45;color:#16100c}.m7adm-banned{opacity:.68;border-color:#b64635}.m7adm-chat{max-height:360px;overflow:auto;background:#0c0b0a;padding:10px;border-radius:12px;margin-top:8px}.m7adm-msg{padding:8px;background:#211b17;border-radius:10px;margin:5px 0}.m7adm-empty{padding:20px;text-align:center;color:#999}.m7adm-presence{display:inline-flex;align-items:center;gap:6px;font-weight:800}.m7adm-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.m7adm-dot.on{background:#31d56b;box-shadow:0 0 9px #31d56b88}.m7adm-dot.off{background:#e04d43}.m7adm-analytics{text-align:center;padding:20px}.m7adm-big{font-size:46px;font-weight:950;color:#f4b85d;line-height:1}.m7adm-sub{color:#aaa;margin-top:8px}.m7adm-ownerbox{display:grid;gap:10px}.m7adm-ownerstate{padding:13px;border-radius:13px;border:1px solid #ffffff16;background:#171310}.m7adm-ownerstate.good{border-color:#36c66c66;background:#14301d}.m7adm-ownerstate.bad{border-color:#d85b5266;background:#321817}.m7adm-danger{margin-top:16px;padding:14px;border:1px solid #c44a4266;border-radius:14px;background:#2a1212}.m7adm-danger strong{color:#ff8c84;display:block;margin-bottom:6px}.m7-collapse-btn{margin-left:auto;border:1px solid #d99a4555;background:#211812;color:#f4b85d;border-radius:9px;padding:7px 10px;font-weight:900;cursor:pointer}.m7-collapsed-body{display:none!important}@media(max-width:620px){#m7adm-v3{padding:8px}.m7adm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.m7adm-tab{min-height:38px}.m7adm-user,.m7adm-report{align-items:flex-start;flex-wrap:wrap}.m7adm-actions{width:100%}}
+#m7adm-v3{margin:12px 0 18px;font-family:Arial;color:#fff;background:#12100f;border:1px solid #d99a4544;border-radius:20px;padding:10px;overflow:hidden}.m7adm-hub-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 3px 9px}.m7adm-hub-title{min-width:0}.m7adm-hub-title b{display:block;color:#f4b85d;font-size:13px;font-weight:950}.m7adm-hub-title small{display:block;margin-top:2px;color:#88796a;font-size:9px}.m7adm-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.m7adm-tab{min-height:40px;border:1px solid #d99a4538;border-radius:11px;background:#1b1511;color:#cdb48e;font-size:10px;font-weight:900;cursor:pointer}.m7adm-tab:hover,.m7adm-tab.active{border-color:#d99a4575;background:#2a1d13;color:#f4b85d}.m7adm-tab.active{box-shadow:inset 0 0 0 1px #d99a4528}.m7adm-hub-content{margin-top:8px}.m7adm-body{padding:12px;border:1px solid #ffffff0d;border-radius:14px;background:#0f0d0c}.m7adm-body.hidden,.m7adm-body[hidden]{display:none!important}.m7adm-tools{display:flex;gap:8px;margin-bottom:10px}.m7adm-search,.m7adm-select,.m7adm-input{width:100%;box-sizing:border-box;background:#0e0c0b;color:#fff;border:1px solid #d99a4544;border-radius:12px;padding:11px 12px;outline:none}.m7adm-user,.m7adm-report{display:flex;gap:11px;align-items:center;background:#1a1613;border:1px solid #ffffff12;border-radius:15px;padding:11px;margin:8px 0}.m7adm-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#30251f;flex:0 0 auto}.m7adm-copy{min-width:0;flex:1}.m7adm-copy strong,.m7adm-copy small{display:block}.m7adm-copy small{color:#aaa;margin-top:3px}.m7adm-email{overflow-wrap:anywhere;word-break:break-word;color:#f0d5ad!important}.m7adm-actions{display:flex;gap:6px;flex-wrap:wrap}.m7adm-btn{border:0;border-radius:9px;padding:8px 9px;font-weight:800;cursor:pointer}.ban{background:#b64635;color:#fff}.ok{background:#39734c;color:#fff}.del{background:#6d3030;color:#fff}.view{background:#d99a45;color:#16100c}.m7adm-banned{opacity:.68;border-color:#b64635}.m7adm-chat{max-height:360px;overflow:auto;background:#0c0b0a;padding:10px;border-radius:12px;margin-top:8px}.m7adm-msg{padding:8px;background:#211b17;border-radius:10px;margin:5px 0}.m7adm-empty{padding:20px;text-align:center;color:#999}.m7adm-presence{display:inline-flex;align-items:center;gap:6px;font-weight:800}.m7adm-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.m7adm-dot.on{background:#31d56b;box-shadow:0 0 9px #31d56b88}.m7adm-dot.off{background:#e04d43}.m7adm-analytics{text-align:center;padding:20px}.m7adm-big{font-size:46px;font-weight:950;color:#f4b85d;line-height:1}.m7adm-sub{color:#aaa;margin-top:8px}.m7adm-ownerbox{display:grid;gap:10px}.m7adm-ownerstate{padding:13px;border-radius:13px;border:1px solid #ffffff16;background:#171310}.m7adm-ownerstate.good{border-color:#36c66c66;background:#14301d}.m7adm-ownerstate.bad{border-color:#d85b5266;background:#321817}.m7adm-danger{margin-top:16px;padding:14px;border:1px solid #c44a4266;border-radius:14px;background:#2a1212}.m7adm-danger strong{color:#ff8c84;display:block;margin-bottom:6px}.m7-collapse-btn{margin-left:auto;border:1px solid #d99a4555;background:#211812;color:#f4b85d;border-radius:9px;padding:7px 10px;font-weight:900;cursor:pointer}.m7-collapsed-body{display:none!important}@media(max-width:620px){#m7adm-v3{padding:8px}.m7adm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.m7adm-tab{min-height:38px}.m7adm-user,.m7adm-report{align-items:flex-start;flex-wrap:wrap}.m7adm-actions{width:100%}}
 `;document.head.appendChild(s)}
 function addCollapse(section,label){if(!section||section.dataset.m7collapse)return;section.dataset.m7collapse="1";let head=section.querySelector(":scope > .ma-admin-section-head, :scope > .ma-v2-head");if(!head)return;let b=document.createElement("button");b.type="button";b.className="m7-collapse-btn";b.textContent="Hide";b.onclick=e=>{e.stopPropagation();let kids=[...section.children].filter(x=>x!==head);let hide=b.textContent==="Hide";kids.forEach(x=>x.classList.toggle("m7-collapsed-body",hide));b.textContent=hide?"Unhide":"Hide"};head.appendChild(b)}
 function installCollapsers(){let dash=document.getElementById("ma-admin-dashboard");if(!dash)return;[...dash.querySelectorAll("section.ma-admin-card")].forEach(sec=>{let h=(sec.querySelector("h2")?.textContent||"").trim();if(["Add New Shop","Manage Shops"].includes(h))addCollapse(sec,h)});let dir=document.getElementById("ma-v2-hub")||[...document.querySelectorAll("section,div")].find(x=>x.querySelector?.("h2")?.textContent?.trim()==="Directory Control");if(dir)addCollapse(dir,"Directory Control")}
 function stopAdminToolPolling(){if(analyticsTimer){clearInterval(analyticsTimer);analyticsTimer=null}}
 async function refreshActiveAdminTool(){if(adminToolRefreshBusy)return;adminToolRefreshBusy=true;try{if(activeAdminTool==="m7adm-analytics")await loadAnalytics();else if(activeAdminTool==="m7adm-users"){await loadPresence();renderUsers()}}finally{adminToolRefreshBusy=false}}
 function setActiveAdminTool(target,open){stopAdminToolPolling();activeAdminTool=open?String(target||""):"";if(activeAdminTool==="m7adm-analytics"||activeAdminTool==="m7adm-users"){refreshActiveAdminTool().catch(()=>{});analyticsTimer=setInterval(()=>refreshActiveAdminTool().catch(()=>{}),2000)}}
-function selectAdminTool(target){let root=document.getElementById("m7adm-v3");if(!root)return;let bodies=[...root.querySelectorAll(".m7adm-body")],tabs=[...root.querySelectorAll(".m7adm-tab")],body=document.getElementById(target),tab=root.querySelector('.m7adm-tab[data-target="'+target+'"]'),wasOpen=!!body&&!body.hidden&&!body.classList.contains("hidden");bodies.forEach(x=>{x.hidden=true;x.classList.add("hidden")});tabs.forEach(x=>{x.classList.remove("active");x.setAttribute("aria-selected","false")});if(body&&!wasOpen){body.hidden=false;body.classList.remove("hidden");if(tab){tab.classList.add("active");tab.setAttribute("aria-selected","true")}window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:target,open:true}}))}else{window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:target,open:false}}))}}
+function selectAdminTool(target){
+  let root=document.getElementById("m7adm-v3");
+  if(!root)return;
+
+  let bodies=[...root.querySelectorAll(".m7adm-body")];
+  let tabs=[...root.querySelectorAll(".m7adm-tab")];
+  let body=document.getElementById(target);
+  let tab=root.querySelector('.m7adm-tab[data-target="'+target+'"]');
+  let wasOpen=!!body&&!body.hidden&&!body.classList.contains("hidden");
+
+  bodies.forEach(x=>{x.hidden=true;x.classList.add("hidden")});
+  tabs.forEach(x=>{x.classList.remove("active");x.setAttribute("aria-selected","false")});
+
+  if(body&&!wasOpen){
+    body.hidden=false;
+    body.classList.remove("hidden");
+
+    if(tab){
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected","true");
+    }
+
+    if(target==="m7adm-history"){
+      document.getElementById("ma-admin-activity-card")?.removeAttribute("hidden");
+      setTimeout(
+        ()=>document.getElementById("ma-admin-refresh-activity")?.click(),
+        0
+      );
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "ma7alak:admin-tool-visibility",
+        {detail:{target:target,open:true}}
+      )
+    );
+  }else{
+    window.dispatchEvent(
+      new CustomEvent(
+        "ma7alak:admin-tool-visibility",
+        {detail:{target:target,open:false}}
+      )
+    );
+  }
+}
 function mount(){css();document.getElementById("m7adm-mod")?.remove();if(document.getElementById("m7adm-v3"))return true;let host=document.getElementById("ma-admin-dashboard");if(!host)return false;let x=document.createElement("section");x.id="m7adm-v3";x.innerHTML=`
 <div class="m7adm-hub-top"><div class="m7adm-hub-title"><b>🛠 Admin Tools</b><small>Open one tool at a time — tap again to close.</small></div></div>
 <div class="m7adm-tabs" role="tablist">
@@ -4868,12 +4912,14 @@ function mount(){css();document.getElementById("m7adm-mod")?.remove();if(documen
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-users">👥 Viewer Users</button>
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-owner">👤 Owner Assignment</button>
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-reports">🚩 Chat Reports</button>
+  <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-history">🕘 Activity History</button>
 </div>
 <div class="m7adm-hub-content">
   <div id="m7adm-analytics" class="m7adm-body hidden" hidden><div class="m7adm-analytics"><div id="m7adm-online-total" class="m7adm-big">0</div><div class="m7adm-sub">visitors browsing Ma7alak right now</div></div></div>
   <div id="m7adm-users" class="m7adm-body hidden" hidden><div class="m7adm-tools"><input id="m7adm-user-search" class="m7adm-search" type="search" placeholder="Search name, full email or status…" autocomplete="off"></div><div id="m7adm-user-list"><div class="m7adm-empty">Loading users...</div></div></div>
   <div id="m7adm-owner" class="m7adm-body hidden" hidden><div class="m7adm-ownerbox"><select id="m7adm-owner-shop" class="m7adm-select"><option value="">Select shop…</option></select><input id="m7adm-owner-email" class="m7adm-input" type="email" placeholder="Google account email"><button id="m7adm-owner-assign" class="m7adm-btn view" type="button">Assign Owner</button><div id="m7adm-owner-state" class="m7adm-ownerstate bad">❌ Select a shop to check its owner.</div><div class="m7adm-danger"><strong>Owner access</strong><div style="color:#bbb;font-size:12px;margin-bottom:10px">Removing owner access keeps the normal Google viewer account and the shop itself.</div><button id="m7adm-owner-delete" class="m7adm-btn del" type="button">Remove Owner Access</button></div></div></div>
   <div id="m7adm-reports" class="m7adm-body hidden" hidden><div class="m7adm-empty">Loading reports...</div></div>
+  <div id="m7adm-history" class="m7adm-body hidden" hidden><div data-m7adm-history-host><div class="m7adm-empty">Activity history is loading…</div></div></div>
 </div>`;host.appendChild(x);x.dataset.m7GlobalFooter="1";x.querySelectorAll(".m7adm-tab").forEach(b=>b.onclick=()=>selectAdminTool(b.dataset.target));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.remove();let post=document.getElementById("ma-admin-post-add-owner");if(post)post.remove();return true}
 async function loadPresence(){let r=await sb.rpc("ma7alak_admin_user_presence");presenceMap.clear();if(!r.error)(r.data||[]).forEach(p=>presenceMap.set(String(p.user_id),p));}
 function renderUsers(){let box=document.getElementById("m7adm-user-list");if(!box)return;let q=(document.getElementById("m7adm-user-search")?.value||"").trim().toLowerCase();let rows=userRows.filter(u=>!q||[u.display_name,u.username,u.email,u.account_status].some(v=>String(v||"").toLowerCase().includes(q)));box.innerHTML=rows.length?rows.map(u=>{let p=presenceMap.get(String(u.user_id)),on=!!p?.is_online;return `<div class="m7adm-user ${u.account_status!=="active"?"m7adm-banned":""}" data-user-row="${esc(u.user_id)}">${u.avatar_url?`<img class="m7adm-avatar" src="${esc(u.avatar_url)}">`:'<div class="m7adm-avatar"></div>'}<div class="m7adm-copy"><strong>${esc(u.display_name||u.username||"Google User")}</strong><small class="m7adm-email">${esc(u.email||"Email unavailable")}</small><small><span class="m7adm-presence"><i class="m7adm-dot ${on?"on":"off"}"></i>${on?"Browsing now":"Offline"}</span> · Account: ${esc(u.account_status||"active")}</small><small>Created: ${esc(u.created_at?new Date(u.created_at).toLocaleString():"")}</small>${u.banned_reason?`<small>Reason: ${esc(u.banned_reason)}</small>`:""}</div><div class="m7adm-actions">${u.account_status==="banned"?`<button class="m7adm-btn ok" data-act="active" data-id="${esc(u.user_id)}">Unban</button>`:`<button class="m7adm-btn ban" data-act="banned" data-id="${esc(u.user_id)}">Ban</button>`}<button class="m7adm-btn del" data-act="deleted" data-id="${esc(u.user_id)}">Delete permanently</button></div></div>`}).join(""):'<div class="m7adm-empty">No matching viewer users.</div>';box.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const action=b.dataset.act,id=b.dataset.id;if(action==="deleted"){if(!confirm("Permanently delete this Google user and all linked Ma7alak account data? This cannot be undone."))return;b.disabled=true;b.textContent="Deleting…";const r=await sb.functions.invoke("delete-ma7alak-user",{body:{user_id:id}});if(r.error||r.data?.success===false){b.disabled=false;b.textContent="Delete permanently";alert(r.data?.error||r.error?.message||"Could not delete user.");return}userRows=userRows.filter(u=>String(u.user_id)!==String(id));document.querySelector(`[data-user-row="${CSS.escape(id)}"]`)?.remove();await Promise.all([loadUsers(),loadOwnerState()]);return}let reason=action==="banned"?prompt("Ban reason:","Chat abuse"):null;let r=await sb.rpc("ma7alak_admin_set_user_status",{p_user_id:id,p_status:action,p_reason:reason});if(r.error)alert(r.error.message);else loadUsers()})}
@@ -8800,9 +8846,7 @@ const PANEL_IDS=[
   "ma-admin-reels-card",
   "m7da-settings",
   "ma-admin-v2-hub",
-  "m7-sub-admin",
-  "m7adm-v3",
-  "ma-admin-activity-card"
+  "m7-sub-admin"
 ];
 
 function esc(value){
@@ -8849,8 +8893,65 @@ function ensureCss(){
 
     body.m7-admin-v4 .m7v4-legacy-panel.m7v4-show{
       display:block!important;
+      position:relative!important;
       margin:15px 0!important;
       scroll-margin-top:18px;
+    }
+
+    .m7v4-panel-close{
+      position:absolute!important;
+      top:10px!important;
+      right:10px!important;
+      z-index:80!important;
+      width:34px!important;
+      height:34px!important;
+      display:grid!important;
+      place-items:center!important;
+      padding:0!important;
+      border:1px solid rgba(255,255,255,.13)!important;
+      border-radius:50%!important;
+      background:rgba(10,8,7,.92)!important;
+      color:#f4d69d!important;
+      font-size:22px!important;
+      font-weight:500!important;
+      line-height:1!important;
+      cursor:pointer!important;
+      box-shadow:0 8px 22px rgba(0,0,0,.34)!important;
+      backdrop-filter:blur(10px)!important;
+      -webkit-backdrop-filter:blur(10px)!important;
+    }
+
+    .m7v4-panel-close:hover{
+      border-color:rgba(217,170,88,.42)!important;
+      background:#21170f!important;
+      color:#fff!important;
+    }
+
+    #m7adm-v3.m7v4-admin-footer{
+      display:block!important;
+      position:relative!important;
+      width:100%!important;
+      box-sizing:border-box!important;
+      margin:24px 0 12px!important;
+      order:9999;
+    }
+
+    #m7adm-v3.m7v4-admin-footer > .m7v4-panel-close{
+      top:8px!important;
+      right:8px!important;
+    }
+
+    #m7adm-v3.m7v4-admin-footer .m7adm-hub-top{
+      padding-right:44px!important;
+    }
+
+    #m7adm-history > #ma-admin-activity-card,
+    #m7adm-history [data-m7adm-history-host] > #ma-admin-activity-card{
+      display:block!important;
+      margin:0!important;
+      border:0!important;
+      box-shadow:none!important;
+      background:transparent!important;
     }
 
     #m7-admin-workspace-v4{
@@ -9351,23 +9452,46 @@ function ensureCss(){
     /* V4 live edit preview — controls left, sticky preview right. */
     #ma-admin-edit-card.m7v4-has-preview{
       overflow:visible!important;
-      contain:none!important;
+      container-type:inline-size;
+      container-name:m7-edit-panel;
     }
 
     .m7v4-preview-grid{
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(300px,360px);
+      grid-template-columns:minmax(420px,1fr) minmax(300px,360px);
       gap:16px;
       align-items:start;
       width:100%;
+      max-width:100%;
       min-width:0;
+      box-sizing:border-box;
       overflow:visible!important;
     }
 
     .m7v4-preview-grid > #ma-admin-edit-form{
-      min-width:0;
+      width:100%!important;
+      max-width:100%!important;
+      min-width:0!important;
       margin:0!important;
-      overflow:visible!important;
+      overflow:hidden!important;
+      box-sizing:border-box!important;
+    }
+
+    .m7v4-preview-grid > #ma-admin-edit-form > *,
+    .m7v4-preview-grid > #ma-admin-edit-form fieldset,
+    .m7v4-preview-grid > #ma-admin-edit-form .m7da-grid,
+    .m7v4-preview-grid > #ma-admin-edit-form .m7ats-list,
+    .m7v4-preview-grid > #ma-admin-edit-form .m7ds-pane{
+      max-width:100%!important;
+      min-width:0!important;
+      box-sizing:border-box!important;
+    }
+
+    .m7v4-preview-grid > #ma-admin-edit-form input,
+    .m7v4-preview-grid > #ma-admin-edit-form textarea,
+    .m7v4-preview-grid > #ma-admin-edit-form select{
+      max-width:100%!important;
+      box-sizing:border-box!important;
     }
 
     .m7v4-edit-preview{
@@ -9517,6 +9641,35 @@ function ensureCss(){
       font-size:20px;
       font-weight:950;
       line-height:1.05;
+    }
+
+    .m7pv-anim-glow{
+      animation:m7pvTextGlow 1.8s ease-in-out infinite;
+    }
+
+    .m7pv-anim-breathe{
+      animation:m7pvTextBreathe 2s ease-in-out infinite;
+    }
+
+    .m7pv-anim-shimmer{
+      background:linear-gradient(90deg,currentColor,#fff,currentColor);
+      background-size:200% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent!important;
+      animation:m7pvTextShimmer 1.8s linear infinite;
+    }
+
+    @keyframes m7pvTextGlow{
+      50%{text-shadow:0 0 14px currentColor}
+    }
+
+    @keyframes m7pvTextBreathe{
+      50%{transform:scale(1.035)}
+    }
+
+    @keyframes m7pvTextShimmer{
+      to{background-position:-200% 0}
     }
 
     .m7pv-arabic{
@@ -9737,21 +9890,38 @@ function ensureCss(){
       50%{box-shadow:0 14px 34px rgba(0,0,0,.5),0 0 28px color-mix(in srgb,var(--pc-accent,#dabb7a) 68%,transparent)}
     }
 
-    @media(max-width:980px){
+    @container m7-edit-panel (max-width:940px){
       .m7v4-preview-grid{
-        grid-template-columns:1fr;
+        grid-template-columns:minmax(0,1fr)!important;
       }
 
       .m7v4-edit-preview{
         position:relative!important;
-        top:auto;
+        top:auto!important;
         order:-1;
-        max-height:none;
-        overflow:visible;
+        width:100%!important;
+        max-width:100%!important;
+        max-height:none!important;
+        overflow:visible!important;
+        box-sizing:border-box!important;
       }
 
       .m7v4-preview-phone{
         min-height:360px;
+      }
+    }
+
+    @media(max-width:700px){
+      .m7v4-preview-grid{
+        grid-template-columns:minmax(0,1fr)!important;
+      }
+
+      .m7v4-edit-preview{
+        position:relative!important;
+        top:auto!important;
+        order:-1;
+        max-height:none!important;
+        overflow:visible!important;
       }
     }
 
@@ -9966,6 +10136,133 @@ function markLegacyPanels(){
   });
 }
 
+function closeV4Panel(panel){
+  if(!panel)return;
+
+  const id=panel.id||"";
+
+  const nativeClose={
+    "ma-admin-edit-card":"ma-admin-cancel-edit",
+    "ma-admin-gallery-card":"ma-gallery-close",
+    "ma-admin-video-card":"ma-video-close",
+    "ma-admin-reels-card":"ma-reels-close"
+  }[id];
+
+  if(nativeClose){
+    document.getElementById(nativeClose)?.click();
+  }
+
+  if(id==="m7adm-v3"){
+    panel.querySelectorAll(".m7adm-body").forEach(body=>{
+      body.hidden=true;
+      body.classList.add("hidden");
+    });
+
+    panel.querySelectorAll(".m7adm-tab").forEach(tab=>{
+      tab.classList.remove("active");
+      tab.setAttribute("aria-selected","false");
+    });
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "ma7alak:admin-tool-visibility",
+        {detail:{target:"",open:false}}
+      )
+    );
+
+    panel.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+
+  if(id==="ma-manage-shops-card"){
+    panel.classList.remove("m7v4-show-add");
+    const drawer=document.getElementById("ma-admin-shop-form")?.closest(".m7sc-add-drawer");
+    if(drawer)drawer.open=false;
+  }
+
+  panel.classList.remove(
+    "m7v4-show",
+    "m7v4-mode-details",
+    "m7v4-mode-about",
+    "m7v4-mode-hours",
+    "m7v4-mode-label",
+    "m7v4-mode-card",
+    "m7v4-mode-design"
+  );
+
+  if(id!=="ma-manage-shops-card"){
+    panel.hidden=true;
+  }
+
+  if(id==="ma-admin-edit-card"){
+    document.getElementById("m7savebar")?.classList.remove("on");
+  }
+}
+
+function ensurePanelCloseButton(panel){
+  if(!panel||panel.querySelector(":scope > .m7v4-panel-close"))return;
+
+  const button=document.createElement("button");
+  button.type="button";
+  button.className="m7v4-panel-close";
+  button.setAttribute("aria-label","Close");
+  button.title="Close";
+  button.textContent="×";
+  button.addEventListener("click",event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    closeV4Panel(panel);
+  });
+
+  panel.prepend(button);
+}
+
+function ensureAdminToolsFooter(){
+  const dashboard=document.getElementById("ma-admin-dashboard");
+  const tools=document.getElementById("m7adm-v3");
+
+  if(!dashboard||!tools)return;
+
+  tools.hidden=false;
+  tools.removeAttribute("hidden");
+  tools.classList.remove(
+    "m7hidden",
+    "m7collapsed",
+    "m7-admin-collapsed",
+    "m7v4-legacy-panel"
+  );
+  tools.classList.add("m7v4-admin-footer");
+
+  const historyHost=
+    tools.querySelector("[data-m7adm-history-host]");
+
+  const historyCard=
+    document.getElementById("ma-admin-activity-card");
+
+  if(
+    historyHost &&
+    historyCard &&
+    !historyHost.contains(historyCard)
+  ){
+    historyCard.hidden=false;
+    historyCard.removeAttribute("hidden");
+    historyCard.classList.remove(
+      "m7v4-legacy-panel",
+      "m7v4-show",
+      "m7hidden",
+      "m7collapsed",
+      "m7-admin-collapsed"
+    );
+    historyHost.replaceChildren(historyCard);
+  }
+
+  ensurePanelCloseButton(tools);
+
+  if(dashboard.lastElementChild!==tools){
+    dashboard.appendChild(tools);
+  }
+}
+
 function clearLegacy(){
   window.dispatchEvent(new CustomEvent("ma7alak:admin-tool-visibility",{detail:{target:"",open:false}}));
   document.querySelectorAll(".m7v4-legacy-panel").forEach(el=>{
@@ -9991,6 +10288,7 @@ function showLegacy(id){
   el.hidden=false;
   el.removeAttribute("hidden");
   el.classList.add("m7v4-show");
+  ensurePanelCloseButton(el);
   setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),60);
   return el;
 }
@@ -10010,6 +10308,7 @@ async function openAdminHub(target,shopSlug){
 
   markLegacyPanels();
   clearLegacy();
+  ensureAdminToolsFooter();
 
   root.hidden=false;
   root.removeAttribute("hidden");
@@ -10018,7 +10317,8 @@ async function openAdminHub(target,shopSlug){
     "m7collapsed",
     "m7-admin-collapsed"
   );
-  root.classList.add("m7v4-show");
+  root.classList.add("m7v4-admin-footer");
+  ensurePanelCloseButton(root);
 
   const bodies=[
     ...root.querySelectorAll(".m7adm-body")
@@ -10748,6 +11048,80 @@ function currentPreviewShop(){
   return selectedShop()||{};
 }
 
+function previewAnimClass(value){
+  const key=String(value||"").trim().toLowerCase();
+  return ["glow","breathe","shimmer"].includes(key)
+    ? " m7pv-anim-"+key
+    : "";
+}
+
+function previewAboutStyle(key,fallbackColor){
+  const row=
+    document.querySelector(
+      '#ma-admin-edit-form .m7-about-text-style-box [data-m7ats-row="'+CSS.escape(key)+'"]'
+    );
+
+  const color=
+    row?.querySelector("[data-m7ats-color]")?.value||
+    fallbackColor;
+
+  const font=
+    String(
+      row?.querySelector("[data-m7ats-font]")?.value||
+      "inherit"
+    );
+
+  const size=
+    Math.max(
+      60,
+      Math.min(
+        200,
+        Number(
+          row?.querySelector("[data-m7ats-size]")?.value||
+          100
+        )
+      )
+    );
+
+  const families={
+    system:'Arial,"Segoe UI",sans-serif',
+    modern:'Inter,Arial,"Segoe UI",sans-serif',
+    elegant:'Georgia,"Times New Roman",serif',
+    classic:'"Times New Roman",Georgia,serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,monospace'
+  };
+
+  return {
+    color:color,
+    size:size,
+    family:families[font]||"inherit"
+  };
+}
+
+function previewLabelIcon(value){
+  const icons={
+    shop:"⌂",
+    fashion:"♙",
+    hijab:"◒",
+    tattoo:"✒",
+    piercing:"◈",
+    cafe:"☕",
+    food:"◉",
+    beauty:"✦",
+    perfume:"♢",
+    phone:"▯",
+    barber:"✂",
+    gym:"↔",
+    kiosk:"▣",
+    star:"★",
+    heart:"♥",
+    sparkle:"✦",
+    none:""
+  };
+
+  return icons[String(value||"shop").toLowerCase()]||"⌂";
+}
+
 function previewIdentityHtml(shop,mode){
   const name=
     previewVal(
@@ -10768,6 +11142,28 @@ function previewIdentityHtml(shop,mode){
       shop.category_name||shop.category||"Category"
     ) ||
     "Category";
+
+  const shopLabel=
+    previewVal(
+      "m7de-shop_label",
+      shop?.directory_options?.shop_label||
+      category
+    ) ||
+    category;
+
+  const shopLabelIcon=
+    previewVal(
+      "m7de-shop_label_icon_text",
+      shop?.directory_options?.shop_label_icon_text||
+      ""
+    ) ||
+    previewLabelIcon(
+      previewVal(
+        "m7de-shop_label_icon",
+        shop?.directory_options?.shop_label_icon||
+        "shop"
+      )
+    );
 
   const location=
     previewVal(
@@ -10946,6 +11342,36 @@ function previewIdentityHtml(shop,mode){
       ""
     );
 
+  const titleStyle=
+    previewAboutStyle(
+      "title",
+      titleColor
+    );
+
+  const bodyStyle=
+    previewAboutStyle(
+      "body",
+      textColor
+    );
+
+  const signatureStyle=
+    previewAboutStyle(
+      "signature",
+      signatureColor
+    );
+
+  const shopNameAnimation=
+    previewVal(
+      "m7de-shop_name_animation",
+      "current"
+    );
+
+  const arabicAnimation=
+    previewVal(
+      "m7de-arabic_name_animation",
+      "none"
+    );
+
   return ''+
     '<div class="m7pv-banner" style="'+bannerStyle+'"></div>'+
     '<div class="m7pv-identity" style="--pv-accent:'+esc(accent)+';--pv-label-text:'+esc(labelText)+';--pv-label-border:'+esc(labelBorder)+';--pv-label-bg:'+esc(labelBg)+';--pv-name:'+esc(nameColor)+';--pv-arabic:'+esc(arabicColor)+';--pv-divider:'+esc(divider)+';">'+
@@ -10956,16 +11382,16 @@ function previewIdentityHtml(shop,mode){
             : '🏪'
         )+
       '</div>'+
-      '<span class="m7pv-kicker">'+esc(category)+'</span>'+
-      '<div class="m7pv-name">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
-      (arabic?'<div class="m7pv-arabic">'+esc(arabic)+'</div>':'')+
+      '<span class="m7pv-kicker">'+(shopLabelIcon?esc(shopLabelIcon)+' ':'')+esc(shopLabel)+'</span>'+
+      '<div class="m7pv-name'+previewAnimClass(shopNameAnimation)+'">'+esc(name)+(verified?'<span class="m7pv-verified">✓</span>':'')+'</div>'+
+      (arabic?'<div class="m7pv-arabic'+previewAnimClass(arabicAnimation)+'">'+esc(arabic)+'</div>':'')+
       '<div class="m7pv-meta">📍 '+esc(location)+'</div>'+
       '<div class="m7pv-divider">◆</div>'+
     '</div>'+
     '<div class="m7pv-actions" style="--pv-accent:'+esc(previewColor("m7de-follow_accent_color",accent))+'"><span>＋ Follow</span><span>✉ Message</span></div>'+
     '<div class="m7pv-block" style="--pv-title:'+esc(titleColor)+';--pv-text:'+esc(textColor)+';--pv-panel-bg:'+esc(panelBg)+';--pv-panel-border:'+esc(panelBorder)+';--pv-service-text:'+esc(serviceText)+';--pv-service-border:'+esc(serviceBorder)+';--pv-service-bg:'+esc(serviceBg)+';--pv-signature:'+esc(signatureColor)+';">'+
-      '<h4>About Me</h4>'+
-      '<p>'+esc(about)+'</p>'+
+      '<h4 style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family)+';font-size:'+titleStyle.size+'%;">About Me</h4>'+
+      '<p style="color:'+esc(bodyStyle.color)+';font-family:'+esc(bodyStyle.family)+';font-size:'+bodyStyle.size+'%;">'+esc(about)+'</p>'+
       (
         services.length
           ? '<div class="m7pv-services">'+services.join("")+'</div>'
@@ -10973,7 +11399,7 @@ function previewIdentityHtml(shop,mode){
       )+
       (
         signature
-          ? '<div class="m7pv-signature">'+esc(signature)+'</div>'
+          ? '<div class="m7pv-signature" style="color:'+esc(signatureStyle.color)+';font-family:'+esc(signatureStyle.family)+';font-size:'+signatureStyle.size+'%;">'+esc(signature)+'</div>'
           : ''
       )+
     '</div>'+
@@ -11187,8 +11613,35 @@ function previewHoursHtml(shop){
     ) ||
     "Asia/Beirut";
 
-  return '<div class="m7pv-identity" style="padding-top:18px"><span class="m7pv-kicker">◷ '+esc(status)+'</span><div class="m7pv-meta">'+esc(sub)+'</div></div>'+
-    '<div class="m7pv-block"><h4>Weekly schedule</h4><div class="m7pv-hours">'+rows+'</div></div>';
+  const accent=
+    previewColor(
+      "m7de-hours_accent_color",
+      "#d9aa58"
+    );
+
+  const mainColor=
+    previewColor(
+      "m7de-hours_text_color",
+      "#ffffff"
+    );
+
+  const subColor=
+    previewColor(
+      "m7de-hours_sub_color",
+      "#9b8f7e"
+    );
+
+  const dotColor=
+    previewColor(
+      "m7de-hours_dot_color",
+      accent
+    );
+
+  return '<div class="m7pv-identity" style="padding-top:18px;--pv-accent:'+esc(accent)+'">'+
+      '<span class="m7pv-kicker" style="color:'+esc(mainColor)+';border-color:'+esc(accent)+'"><i style="display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:'+esc(dotColor)+'"></i>◷ '+esc(status)+'</span>'+
+      '<div class="m7pv-meta" style="color:'+esc(subColor)+'">'+esc(sub)+'</div>'+
+    '</div>'+
+    '<div class="m7pv-block" style="--pv-panel-border:'+esc(accent)+'"><h4 style="color:'+esc(accent)+'">Weekly schedule</h4><div class="m7pv-hours">'+rows+'</div></div>';
 }
 
 function refreshEditPreview(panel){
@@ -11371,19 +11824,42 @@ function mountEditPreview(panel,mode,shop){
         );
     };
 
+    const queueSettled=()=>{
+      queue();
+
+      clearTimeout(
+        form.__m7v4PreviewSettleTimer
+      );
+
+      form.__m7v4PreviewSettleTimer=
+        setTimeout(
+          queue,
+          90
+        );
+    };
+
     form.addEventListener(
       "input",
-      queue
+      queueSettled,
+      true
     );
 
     form.addEventListener(
       "change",
-      queue
+      queueSettled,
+      true
+    );
+
+    form.addEventListener(
+      "keyup",
+      queueSettled,
+      true
     );
 
     form.addEventListener(
       "click",
       function(event){
+        queueSettled();
         const tab=
           event.target.closest(
             "[data-m7ds-tab]"
@@ -11407,6 +11883,11 @@ function mountEditPreview(panel,mode,shop){
             panel
           );
         },0);
+
+        setTimeout(
+          ()=>refreshEditPreview(panel),
+          140
+        );
       }
     );
   }
@@ -11597,7 +12078,7 @@ function renderWorkspace(){
       '<button type="button" data-m7v4-system="ma-admin-v2-hub">Categories & areas</button>'+
       '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
       '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
-      '<button type="button" data-m7v4-system="ma-admin-activity-card">Activity</button>'+
+      '<button type="button" data-m7v4-system="m7adm-history">Activity history</button>'+
     '</div>';
 }
 
@@ -11917,6 +12398,7 @@ function mount(){
   `;
 
   dash.prepend(root);
+  ensureAdminToolsFooter();
 
   root.addEventListener("input",event=>{
     if(event.target.matches("[data-m7v4-search]"))renderList();
@@ -11948,6 +12430,7 @@ function mount(){
       if(manage){
         manage.classList.add("m7v4-show-add");
         manage.hidden=false;
+        ensurePanelCloseButton(manage);
       }
 
       if(drawer){
@@ -11990,7 +12473,8 @@ function mount(){
         id==="m7adm-analytics" ||
         id==="m7adm-users" ||
         id==="m7adm-owner" ||
-        id==="m7adm-reports"
+        id==="m7adm-reports" ||
+        id==="m7adm-history"
       ){
         try{
           await openAdminHub(
@@ -12063,6 +12547,7 @@ async function ready(){
       markLegacyPanels();
       window.Ma7alakRemoveLegacyPanelToggleUi?.();
       window.Ma7alakRemoveLegacyDeckUi?.();
+      ensureAdminToolsFooter();
     });
 
     observer.observe(
