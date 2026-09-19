@@ -1,17 +1,17 @@
-/* MA7ALAK PWA SERVICE WORKER */
+/* MA7ALAK PWA SERVICE WORKER
+   Live-first strategy:
+   - never intercept page navigations
+   - never cache Supabase/API traffic
+   - never cache video/audio
+   - only cache immutable commit-pinned Ma7alak JS/CSS
+*/
 "use strict";
 
-const VERSION="m7-pwa-2026-09-20-3";
-const CORE_CACHE=VERSION+"-core";
+const VERSION="m7-pwa-2026-09-20-4";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
-const OFFLINE_URL="/pwa-offline";
 
 self.addEventListener("install",event=>{
-  event.waitUntil(
-    caches.open(CORE_CACHE)
-      .then(cache=>cache.add(OFFLINE_URL))
-      .catch(()=>{})
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate",event=>{
@@ -68,51 +68,18 @@ async function immutableCacheFirst(request){
 
 self.addEventListener("fetch",event=>{
   const request=event.request;
+
   if(request.method!=="GET") return;
 
   const url=new URL(request.url);
 
-  if(isLiveBackend(url)){
-    event.respondWith(fetch(request));
-    return;
-  }
+  // IMPORTANT: let the browser load all page navigations directly from the live site.
+  // This prevents an old/offline fallback page from appearing while the user is online.
+  if(request.mode==="navigate") return;
 
-  if(request.destination==="video"||request.destination==="audio"){
-    event.respondWith(fetch(request));
-    return;
-  }
+  if(isLiveBackend(url)) return;
 
-  if(request.mode==="navigate"){
-    event.respondWith(
-      fetch(request).catch(async()=>(
-        await caches.match(OFFLINE_URL) ||
-        new Response("Ma7alak is offline.",{
-          status:503,
-          headers:{"Content-Type":"text/plain; charset=utf-8"}
-        })
-      ))
-    );
-    return;
-  }
-
-  if(
-    url.origin===self.location.origin &&
-    url.pathname==="/pwa-offline"
-  ){
-    event.respondWith(
-      caches.match(request).then(hit=>
-        hit || fetch(request).then(response=>{
-          if(response.ok){
-            caches.open(CORE_CACHE).then(cache=>
-              cache.put(request,response.clone())
-            ).catch(()=>{});
-          }
-          return response;
-        })
-      )
-    );
-    return;
-  }
+  if(request.destination==="video"||request.destination==="audio") return;
 
   if(
     isMa7alakImmutableCdn(url) &&
@@ -122,6 +89,8 @@ self.addEventListener("fetch",event=>{
       /\.(?:js|css)(?:$|\?)/i.test(url.pathname+url.search)
     )
   ){
-    event.respondWith(immutableCacheFirst(request).catch(()=>fetch(request)));
+    event.respondWith(
+      immutableCacheFirst(request).catch(()=>fetch(request))
+    );
   }
 });
