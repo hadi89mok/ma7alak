@@ -5998,3 +5998,694 @@ function observe(){
   })();
 
 })();
+
+
+/* =========================================================
+   MA7ALAK ADMIN — PAGE DESIGN STUDIO
+   Full visual control stored in directory_options.
+
+   Safe additive layer:
+   - does not replace core Admin save/edit logic
+   - wraps Ma7alakDirectoryAdmin.fill/collect
+   - no SQL migration required
+========================================================= */
+(function(){
+  "use strict";
+
+  if(
+    location.pathname.replace(/\/+$/,"") !== "/admin" ||
+    window.__MA7ALAK_ADMIN_PAGE_DESIGN_STUDIO__
+  ){
+    return;
+  }
+
+  window.__MA7ALAK_ADMIN_PAGE_DESIGN_STUDIO__ = true;
+
+  let patched = false;
+
+  const COLORS = [
+    ["profile_ring_color","Story / profile ring"],
+    ["shop_label_text_color","Shop Label text"],
+    ["shop_label_border_color","Shop Label border"],
+    ["shop_label_bg_color","Shop Label background"],
+    ["shop_label_icon_color","Shop Label icon"],
+    ["shop_label_line_color","Shop Label side lines"],
+    ["arabic_name_color","Arabic name"],
+    ["identity_divider_color","Divider under shop name"],
+    ["about_kicker_color","About kicker"],
+    ["about_text_color","About body text"],
+    ["about_panel_bg_color","About panel background"],
+    ["about_panel_border_color","About panel border"],
+    ["about_content_bg_color","About inner box background"],
+    ["about_content_border_color","About inner box border"],
+    ["about_ornament_color","About top ornament"],
+    ["about_service_text_color","Service text"],
+    ["about_service_border_color","Service border"],
+    ["about_service_bg_color","Service background"],
+    ["about_service_icon_color","Service icon"],
+    ["about_signature_color","Signature"],
+    ["gallery_accent_color","Gallery accent"],
+    ["video_accent_color","Video accent"],
+    ["hub_accent_color","Profile hub accent"]
+  ];
+
+  const DEFAULTS = {
+    page_design_preset:"premium",
+    page_motion_mode:"preset",
+    page_use_universal_accent:true,
+
+    profile_ring_color:"#f2caed",
+
+    shop_label_text_color:"#f2caed",
+    shop_label_border_color:"#f2caed",
+    shop_label_bg_color:"#171217",
+    shop_label_icon_color:"#f2caed",
+    shop_label_line_color:"#f2caed",
+    shop_label_line_style:"fade",
+    shop_label_symbol:"diamond",
+    shop_label_symbol_text:"",
+
+    shop_name_color:"#f2caed",
+    shop_name_animation:"current",
+
+    arabic_name_color:"#f2caed",
+    arabic_name_animation:"none",
+
+    identity_divider_color:"#f2caed",
+    identity_divider_style:"fade",
+    identity_divider_symbol:"diamond",
+    identity_divider_symbol_text:"",
+
+    about_title_color:"#f2caed",
+    about_title_animation:"current",
+    about_kicker_color:"#f2caed",
+    about_text_color:"#ffffff",
+    about_panel_bg_color:"#141014",
+    about_panel_border_color:"#f2caed",
+    about_content_bg_color:"#161316",
+    about_content_border_color:"#453b43",
+    about_ornament_color:"#f2caed",
+    about_ornament_style:"fade",
+    about_ornament_symbol:"diamond",
+    about_ornament_symbol_text:"",
+    about_service_text_color:"#ffffff",
+    about_service_border_color:"#f2caed",
+    about_service_bg_color:"#151215",
+    about_service_icon_color:"#f2caed",
+    about_signature_color:"#f2caed",
+
+    gallery_accent_color:"#f2caed",
+    video_accent_color:"#f2caed",
+    hub_accent_color:"#f2caed"
+  };
+
+  const SYMBOLS = [
+    ["diamond","Diamond ◆"],
+    ["star","Star ★"],
+    ["sparkle","Sparkle ✦"],
+    ["dot","Dot •"],
+    ["none","None"],
+    ["custom","Custom text / symbol"]
+  ];
+
+  const LINES = [
+    ["fade","Fade / premium"],
+    ["solid","Solid"],
+    ["double","Double"],
+    ["dotted","Dotted"],
+    ["none","None"]
+  ];
+
+  const ANIMS = [
+    ["current","Current premium effect"],
+    ["shimmer","Shimmer"],
+    ["glow","Glow pulse"],
+    ["breathe","Breathing"],
+    ["none","Static / no animation"]
+  ];
+
+  function esc(value){
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function opts(rows,selected){
+    return rows.map(([value,label])=>
+      '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
+    ).join("");
+  }
+
+  function safeHex(value,fallback){
+    const raw = String(value || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)
+      ? raw
+      : fallback;
+  }
+
+  function colorField(prefix,key,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)}</span>
+        <div class="m7ds-color-row">
+          <input id="${prefix}${key}" type="color" value="${esc(DEFAULTS[key])}">
+          <code data-color-for="${prefix}${key}">${esc(DEFAULTS[key])}</code>
+        </div>
+      </label>
+    `;
+  }
+
+  function symbolFields(prefix,base,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)} symbol</span>
+        <select id="${prefix}${base}_symbol">
+          ${opts(SYMBOLS,DEFAULTS[base+"_symbol"])}
+        </select>
+      </label>
+
+      <label class="m7ds-field">
+        <span>Custom symbol / text</span>
+        <input id="${prefix}${base}_symbol_text" maxlength="5" placeholder="e.g. ✦  ◆  ☕">
+      </label>
+    `;
+  }
+
+  function lineField(prefix,key,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)}</span>
+        <select id="${prefix}${key}">
+          ${opts(LINES,DEFAULTS[key])}
+        </select>
+      </label>
+    `;
+  }
+
+  function animField(prefix,key,label){
+    return `
+      <label class="m7ds-field">
+        <span>${esc(label)}</span>
+        <select id="${prefix}${key}">
+          ${opts(ANIMS,DEFAULTS[key])}
+        </select>
+      </label>
+    `;
+  }
+
+  function mount(form,prefix){
+    if(
+      !form ||
+      form.querySelector(".m7-design-studio")
+    ){
+      return;
+    }
+
+    const box = document.createElement("fieldset");
+    box.className =
+      "m7da-fields m7-design-studio m7fieldset";
+
+    box.innerHTML = `
+      <legend>🎨 Page Design Studio</legend>
+
+      <div class="m7ds-intro">
+        <div>
+          <strong>Whole shop-page design</strong>
+          <small>
+            Presets for Basic/Premium shops, or switch to Custom for full control.
+            All settings are saved per shop and update live.
+          </small>
+        </div>
+        <span class="m7ds-live">LIVE</span>
+      </div>
+
+      <div class="m7ds-top-grid">
+        <label class="m7ds-field">
+          <span>Design preset</span>
+          <select id="${prefix}page_design_preset">
+            <option value="premium">Premium — animated</option>
+            <option value="basic">Basic — static elegant</option>
+            <option value="minimal">Minimal — clean static</option>
+            <option value="custom">Custom — use every control below</option>
+          </select>
+        </label>
+
+        <label class="m7ds-field">
+          <span>Motion</span>
+          <select id="${prefix}page_motion_mode">
+            <option value="preset">Follow preset</option>
+            <option value="full">Full animations</option>
+            <option value="subtle">Subtle animations</option>
+            <option value="off">No animations</option>
+          </select>
+        </label>
+
+        <label class="m7ds-check">
+          <input id="${prefix}page_use_universal_accent" type="checkbox" checked>
+          <span>
+            <b>Use Universal Accent everywhere</b>
+            <small>Uncheck to use individual colors below.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="m7ds-tabs" role="tablist">
+        <button type="button" class="active" data-m7ds-tab="identity">Identity</button>
+        <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
+        <button type="button" data-m7ds-tab="about">About Panel</button>
+        <button type="button" data-m7ds-tab="modules">Gallery / Video / Hub</button>
+      </div>
+
+      <div class="m7ds-pane active" data-m7ds-pane="identity">
+        <div class="m7ds-section-title">Profile & Shop Identity</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"profile_ring_color","Story / profile ring color")}
+          ${colorField(prefix,"shop_label_text_color","Shop Label text color")}
+          ${colorField(prefix,"shop_label_border_color","Shop Label border color")}
+          ${colorField(prefix,"shop_label_bg_color","Shop Label background")}
+          ${colorField(prefix,"shop_label_icon_color","Shop Label icon color")}
+          ${colorField(prefix,"shop_name_color","Shop name color")}
+          ${animField(prefix,"shop_name_animation","Shop name animation")}
+          ${colorField(prefix,"arabic_name_color","Arabic name color")}
+          ${animField(prefix,"arabic_name_animation","Arabic name animation")}
+        </div>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="lines">
+        <div class="m7ds-section-title">Lines beside Shop Label</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"shop_label_line_color","Label side-line color")}
+          ${lineField(prefix,"shop_label_line_style","Label side-line design")}
+          ${symbolFields(prefix,"shop_label","Label side")}
+        </div>
+
+        <div class="m7ds-section-title">Divider under Shop Name</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"identity_divider_color","Divider color")}
+          ${lineField(prefix,"identity_divider_style","Divider line design")}
+          ${symbolFields(prefix,"identity_divider","Divider center")}
+        </div>
+
+        <div class="m7ds-preview-card">
+          <div class="m7ds-preview-label">
+            <span class="m7ds-line left"></span>
+            <b>SHOP LABEL</b>
+            <span class="m7ds-line right"></span>
+          </div>
+          <div class="m7ds-preview-name">Shop Name</div>
+          <div class="m7ds-preview-divider">
+            <span></span><i>◆</i><span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="about">
+        <div class="m7ds-section-title">About Header</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"about_title_color","About title color")}
+          ${animField(prefix,"about_title_animation","About title animation")}
+          ${colorField(prefix,"about_kicker_color","About kicker color")}
+          ${colorField(prefix,"about_ornament_color","Top ornament color")}
+          ${lineField(prefix,"about_ornament_style","Top ornament line design")}
+          ${symbolFields(prefix,"about_ornament","Top ornament")}
+        </div>
+
+        <div class="m7ds-section-title">About Panel Surfaces</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"about_text_color","Body text color")}
+          ${colorField(prefix,"about_panel_bg_color","Outer panel background")}
+          ${colorField(prefix,"about_panel_border_color","Outer panel border")}
+          ${colorField(prefix,"about_content_bg_color","Inner content background")}
+          ${colorField(prefix,"about_content_border_color","Inner content border")}
+        </div>
+
+        <div class="m7ds-section-title">Services & Signature</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"about_service_text_color","Service text")}
+          ${colorField(prefix,"about_service_border_color","Service border")}
+          ${colorField(prefix,"about_service_bg_color","Service background")}
+          ${colorField(prefix,"about_service_icon_color","Service icon")}
+          ${colorField(prefix,"about_signature_color","Signature")}
+        </div>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="modules">
+        <div class="m7ds-section-title">Module Accent Overrides</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"gallery_accent_color","Gallery")}
+          ${colorField(prefix,"video_accent_color","Videos")}
+          ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
+        </div>
+
+        <p class="m7ds-help">
+          If “Use Universal Accent everywhere” is checked, these override colors are ignored.
+          Basic preset also forces static/no-animation styling across supported modules.
+        </p>
+      </div>
+    `;
+
+    const titleBox =
+      form.querySelector(".m7-title-style-box");
+
+    const labelBox =
+      form.querySelector(".m7labelbox");
+
+    if(titleBox){
+      titleBox.after(box);
+    }
+    else if(labelBox){
+      labelBox.after(box);
+    }
+    else{
+      form.appendChild(box);
+    }
+
+    if(titleBox){
+      titleBox.style.display = "none";
+    }
+
+    const tabs = [...box.querySelectorAll("[data-m7ds-tab]")];
+    const panes = [...box.querySelectorAll("[data-m7ds-pane]")];
+
+    tabs.forEach(button=>{
+      button.addEventListener("click",()=>{
+        const key = button.dataset.m7dsTab;
+        tabs.forEach(b=>b.classList.toggle("active",b===button));
+        panes.forEach(p=>p.classList.toggle("active",p.dataset.m7dsPane===key));
+      });
+    });
+
+    box.querySelectorAll('input[type="color"]').forEach(input=>{
+      const code = box.querySelector('[data-color-for="'+input.id+'"]');
+      const sync = ()=>{
+        if(code) code.textContent = input.value.toUpperCase();
+      };
+      input.addEventListener("input",sync);
+      input.addEventListener("change",sync);
+      sync();
+    });
+
+    const preset =
+      box.querySelector("#"+prefix+"page_design_preset");
+
+    const motion =
+      box.querySelector("#"+prefix+"page_motion_mode");
+
+    function updatePresetHint(){
+      box.dataset.preset = preset.value;
+
+      if(preset.value === "basic" && motion.value === "preset"){
+        box.classList.add("m7ds-static-preview");
+      }else{
+        box.classList.remove("m7ds-static-preview");
+      }
+    }
+
+    preset.addEventListener("change",updatePresetHint);
+    motion.addEventListener("change",updatePresetHint);
+    updatePresetHint();
+
+    box.__m7dsRefresh = function(){
+      box.querySelectorAll('input[type="color"]').forEach(input=>{
+        const code = box.querySelector('[data-color-for="'+input.id+'"]');
+        if(code) code.textContent = input.value.toUpperCase();
+      });
+      updatePresetHint();
+    };
+  }
+
+  function mountAll(){
+    mount(
+      document.getElementById("ma-admin-shop-form"),
+      "m7da-"
+    );
+
+    mount(
+      document.getElementById("ma-admin-edit-form"),
+      "m7de-"
+    );
+  }
+
+  function fillForm(prefix,options){
+    const accent =
+      safeHex(
+        options.story_color ||
+        options.card_color,
+        "#f2caed"
+      );
+
+    const values = Object.assign({},DEFAULTS,options);
+
+    COLORS.forEach(([key])=>{
+      values[key] =
+        safeHex(
+          options[key],
+          key.includes("_bg_") || key.endsWith("_bg_color")
+            ? DEFAULTS[key]
+            : accent
+        );
+    });
+
+    Object.keys(DEFAULTS).forEach(key=>{
+      const el =
+        document.getElementById(
+          prefix + key
+        );
+
+      if(!el){
+        return;
+      }
+
+      if(el.type === "checkbox"){
+        el.checked =
+          options[key] === undefined
+            ? !!DEFAULTS[key]
+            : !!options[key];
+      }
+      else{
+        el.value =
+          values[key] === undefined ||
+          values[key] === null
+            ? DEFAULTS[key]
+            : String(values[key]);
+      }
+    });
+
+    document
+      .getElementById(prefix+"page_design_preset")
+      ?.closest(".m7-design-studio")
+      ?.__m7dsRefresh?.();
+  }
+
+  function collectForm(prefix,result){
+    result.directory_options =
+      result.directory_options &&
+      typeof result.directory_options === "object"
+        ? result.directory_options
+        : {};
+
+    const options =
+      result.directory_options;
+
+    Object.keys(DEFAULTS).forEach(key=>{
+      const el =
+        document.getElementById(
+          prefix + key
+        );
+
+      if(!el){
+        return;
+      }
+
+      options[key] =
+        el.type === "checkbox"
+          ? !!el.checked
+          : (
+              el.type === "color"
+                ? safeHex(el.value,DEFAULTS[key])
+                : String(el.value || "").trim()
+            );
+    });
+
+    return result;
+  }
+
+  function patch(){
+    if(patched){
+      return;
+    }
+
+    const api =
+      window.Ma7alakDirectoryAdmin;
+
+    if(
+      !api ||
+      typeof api.fill !== "function" ||
+      typeof api.collect !== "function"
+    ){
+      return;
+    }
+
+    patched = true;
+
+    const oldFill =
+      api.fill.bind(api);
+
+    const oldCollect =
+      api.collect.bind(api);
+
+    api.fill = function(shop){
+      oldFill(shop);
+      mountAll();
+
+      const options =
+        shop &&
+        shop.directory_options &&
+        typeof shop.directory_options === "object"
+          ? shop.directory_options
+          : {};
+
+      fillForm(
+        "m7de-",
+        options
+      );
+    };
+
+    api.collect = function(edit){
+      const result =
+        oldCollect(edit);
+
+      return collectForm(
+        edit ? "m7de-" : "m7da-",
+        result
+      );
+    };
+  }
+
+  function css(){
+    if(document.getElementById("m7-design-studio-css")){
+      return;
+    }
+
+    const style =
+      document.createElement("style");
+
+    style.id =
+      "m7-design-studio-css";
+
+    style.textContent = `
+      .m7-design-studio{
+        border-color:rgba(216,170,88,.34)!important;
+        background:
+          radial-gradient(circle at 12% 0%,rgba(216,170,88,.08),transparent 31%),
+          radial-gradient(circle at 90% 100%,rgba(242,202,237,.06),transparent 34%),
+          rgba(17,13,10,.94)!important;
+      }
+
+      .m7ds-intro{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin:0 0 12px;
+        padding:10px 11px;
+        border:1px solid rgba(216,170,88,.16);
+        border-radius:12px;
+        background:rgba(255,255,255,.02);
+      }
+
+      .m7ds-intro > div{flex:1;min-width:0}
+      .m7ds-intro strong{display:block;color:#f5e5c7;font-size:11px}
+      .m7ds-intro small{display:block;margin-top:4px;color:#988a74;font-size:8px;line-height:1.45}
+      .m7ds-live{padding:4px 7px;border-radius:999px;color:#67e6a0;border:1px solid rgba(65,218,132,.22);background:rgba(65,218,132,.07);font-size:8px;font-weight:900;letter-spacing:1px}
+      .m7ds-top-grid,.m7ds-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .m7ds-top-grid{margin-bottom:11px}
+      .m7ds-field{display:flex;flex-direction:column;gap:5px;min-width:0;color:#cdbb9d;font-size:9px;font-weight:800}
+      .m7ds-field input,.m7ds-field select{width:100%;min-height:38px;border:1px solid rgba(216,170,88,.16);border-radius:10px;background:#0a0807;color:#fff;padding:0 9px;outline:0;box-sizing:border-box}
+      .m7ds-field input[type="color"]{width:44px;min-width:44px;height:34px;min-height:34px;padding:3px;cursor:pointer}
+      .m7ds-color-row{display:flex;align-items:center;gap:7px}
+      .m7ds-color-row code{flex:1;min-width:0;padding:7px 8px;border-radius:8px;color:#9f927e;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);font-size:8px}
+      .m7ds-check{grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;border:1px solid rgba(216,170,88,.14);background:rgba(216,170,88,.035);cursor:pointer}
+      .m7ds-check input{width:17px;height:17px;accent-color:#d9a84e}
+      .m7ds-check b{display:block;color:#ebdcc2;font-size:9px}
+      .m7ds-check small{display:block;margin-top:2px;color:#877b69;font-size:8px}
+      .m7ds-tabs{display:flex;gap:5px;overflow-x:auto;margin:11px 0 10px;padding-bottom:2px;scrollbar-width:none}
+      .m7ds-tabs::-webkit-scrollbar{display:none}
+      .m7ds-tabs button{flex:0 0 auto;min-height:31px;padding:0 10px;border-radius:999px;border:1px solid rgba(216,170,88,.15);background:rgba(255,255,255,.02);color:#a99b84;cursor:pointer;font-size:8px;font-weight:900}
+      .m7ds-tabs button.active{color:#1a1208;border-color:#e0b35c;background:linear-gradient(135deg,#f0cf88,#d5a247)}
+      .m7ds-pane{display:none}.m7ds-pane.active{display:block}
+      .m7ds-section-title{margin:11px 0 7px;padding-bottom:6px;border-bottom:1px solid rgba(216,170,88,.10);color:#e9d4ad;font-size:9px;font-weight:950;letter-spacing:.5px;text-transform:uppercase}
+      .m7ds-help{margin:10px 0 0;color:#837765;font-size:8px;line-height:1.5}
+      .m7ds-preview-card{margin-top:12px;padding:14px 12px;border-radius:14px;border:1px solid rgba(216,170,88,.16);background:#0c0a08;text-align:center}
+      .m7ds-preview-label{display:flex;align-items:center;justify-content:center;gap:8px;color:#e6c36f;font-size:8px;letter-spacing:1.5px}
+      .m7ds-preview-label .m7ds-line{width:52px;height:1px;background:linear-gradient(90deg,transparent,#d9a84e)}
+      .m7ds-preview-label .right{transform:scaleX(-1)}
+      .m7ds-preview-name{margin-top:9px;color:#fff;font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:800}
+      .m7ds-preview-divider{margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px}
+      .m7ds-preview-divider span{width:55px;height:1px;background:linear-gradient(90deg,transparent,#d9a84e)}
+      .m7ds-preview-divider span:last-child{transform:scaleX(-1)}
+      .m7ds-preview-divider i{color:#e6c36f;font-style:normal;font-size:9px}
+      .m7-design-studio[data-preset="basic"]{box-shadow:none!important}
+      @media(max-width:700px){.m7ds-top-grid,.m7ds-grid{grid-template-columns:1fr}.m7ds-intro{align-items:flex-start}}
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function refresh(){
+    css();
+    mountAll();
+    patch();
+  }
+
+  (async function(){
+    for(let i=0;i<200;i++){
+      refresh();
+
+      if(
+        patched &&
+        document.querySelector(".m7-design-studio")
+      ){
+        break;
+      }
+
+      await new Promise(resolve=>
+        setTimeout(resolve,50)
+      );
+    }
+
+    window.addEventListener(
+      "ma7alak:admin-ready",
+      refresh
+    );
+
+    let queued = false;
+
+    const root =
+      document.getElementById("ma-admin-dashboard") ||
+      document.documentElement;
+
+    new MutationObserver(function(){
+      if(queued){
+        return;
+      }
+
+      queued = true;
+
+      requestAnimationFrame(function(){
+        queued = false;
+        refresh();
+      });
+    })
+      .observe(
+        root,
+        {
+          childList:true,
+          subtree:true
+        }
+      );
+  })();
+
+})();
