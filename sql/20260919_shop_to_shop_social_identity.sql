@@ -87,7 +87,7 @@ as $$
     end as actor_name,
     case
       when n.type = 'follow' and actor_shop.shop_slug is not null
-        then coalesce(nullif(actor_shop.shop_url,''),actor_shop.shop_slug)
+        then 'shop:' || coalesce(nullif(actor_shop.shop_url,''),actor_shop.shop_slug)
       else v.username
     end as actor_username,
     case
