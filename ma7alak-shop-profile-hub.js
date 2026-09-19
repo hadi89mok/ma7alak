@@ -1881,8 +1881,8 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
 
     const locationValue =
       String(
-        profile.location ||
-        "Location not added"
+        profile.address_text ||
+        "Full address not added"
       ).trim();
 
 
