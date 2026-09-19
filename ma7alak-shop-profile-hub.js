@@ -938,7 +938,7 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
     box.innerHTML =
       services
         .slice(0,4)
-        .map(function(row){
+        .map(function(row,index){
 
           const label =
             String(row.label || "").trim();
@@ -958,11 +958,11 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
                 );
 
           return (
-            '<div class="zee-service-pill zee-service-' + icon.replace(/[^a-z0-9_-]/g,"") + '">' +
+            '<div class="zee-service-pill zee-service-' + icon.replace(/[^a-z0-9_-]/g,"") + '" data-about-service-index="' + (index+1) + '">' +
               '<span class="zee-service-icon">' +
                 iconSVG(icon) +
               '</span>' +
-              '<span>' +
+              '<span class="zee-service-label">' +
                 label
                   .replace(/&/g,"&amp;")
                   .replace(/</g,"&lt;")
@@ -4093,3 +4093,223 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
   document.head.appendChild(script);
 
 })();
+
+
+/* =========================================================
+   MA7ALAK PROFILE HUB — INDIVIDUAL ABOUT TEXT STYLE V1
+   ---------------------------------------------------------
+   Per-text Admin controls:
+   - Kicker
+   - About title
+   - Arabic name
+   - Description
+   - Signature
+   - Service labels 1–4
+
+   Existing About module typography remains the fallback.
+========================================================= */
+(function(){
+"use strict";
+
+if(window.__MA7ALAK_ABOUT_INDIVIDUAL_TEXT_RUNTIME_V1__)return;
+window.__MA7ALAK_ABOUT_INDIVIDUAL_TEXT_RUNTIME_V1__=true;
+
+const FONT_STACKS={
+  system:'"Segoe UI",Arial,Helvetica,sans-serif',
+  modern:'"Trebuchet MS","Segoe UI",Arial,sans-serif',
+  elegant:'Georgia,"Times New Roman",serif',
+  classic:'"Times New Roman",Georgia,serif',
+  mono:'"Courier New",Courier,monospace'
+};
+
+function safeHex(value,fallback){
+  const raw=String(value||"").trim();
+  return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+}
+
+function percent(value){
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(60,Math.min(200,n)):100;
+}
+
+function fontFamily(value){
+  const mode=String(value||"inherit").trim().toLowerCase();
+  return FONT_STACKS[mode]||"";
+}
+
+function baseSize(el){
+  if(!el)return 0;
+
+  let base=Number(el.dataset.m7IndividualAboutBaseSize);
+
+  if(!Number.isFinite(base)||base<=0){
+    const current=parseFloat(getComputedStyle(el).fontSize);
+    if(!Number.isFinite(current)||current<=0)return 0;
+    base=current;
+    el.dataset.m7IndividualAboutBaseSize=String(base);
+  }
+
+  return base;
+}
+
+function styleText(el,options,key,colorKey,fallbackColor){
+  if(!el)return;
+
+  const family=fontFamily(options["about_"+key+"_font_style"]);
+  const scale=percent(options["about_"+key+"_font_size"])/100;
+  const base=baseSize(el);
+
+  if(family){
+    el.style.setProperty("font-family",family,"important");
+  }else{
+    el.style.removeProperty("font-family");
+  }
+
+  if(base>0){
+    el.style.setProperty("font-size",(base*scale).toFixed(2)+"px","important");
+  }
+
+  if(colorKey){
+    const color=safeHex(options[colorKey],fallbackColor||"#ffffff");
+
+    /*
+      About title color is already rendered by the title animation engine.
+      Do not kill its shimmer/gradient. Every other element can take the
+      color directly.
+    */
+    if(key!=="title"){
+      el.style.setProperty("color",color,"important");
+      el.style.setProperty("-webkit-text-fill-color",color,"important");
+    }
+  }
+}
+
+function apply(profile){
+  const options=
+    profile &&
+    profile.directory_options &&
+    typeof profile.directory_options==="object"
+      ? profile.directory_options
+      : {};
+
+  const accent=safeHex(
+    options.story_color||options.card_color,
+    "#f2caed"
+  );
+
+  styleText(
+    document.getElementById("ma7alak-about-kicker"),
+    options,
+    "kicker",
+    "about_kicker_color",
+    accent
+  );
+
+  styleText(
+    document.getElementById("ma7alak-about-title"),
+    options,
+    "title",
+    "about_title_color",
+    accent
+  );
+
+  styleText(
+    document.getElementById("ma7alak-about-arabic-name"),
+    options,
+    "arabic",
+    "about_arabic_color",
+    safeHex(options.arabic_name_color,"#ffffff")
+  );
+
+  styleText(
+    document.getElementById("ma7alak-about-text"),
+    options,
+    "body",
+    "about_text_color",
+    "#ffffff"
+  );
+
+  styleText(
+    document.getElementById("ma7alak-about-signature"),
+    options,
+    "signature",
+    "about_signature_color",
+    accent
+  );
+
+  for(let i=1;i<=4;i++){
+    const label=document.querySelector(
+      '.zee-service-pill[data-about-service-index="'+i+'"] .zee-service-label'
+    );
+
+    if(!label)continue;
+
+    const key="service_"+i;
+    const colorKey="about_service_"+i+"_color";
+
+    styleText(
+      label,
+      options,
+      key,
+      colorKey,
+      safeHex(options.about_service_text_color,"#ffffff")
+    );
+  }
+}
+
+async function load(){
+  const slug=String(
+    window.__MA7ALAK_EXACT_HUB_SLUG__||
+    document.getElementById("ma7alak-shop-profile-hub-mount")?.getAttribute("data-shop-slug")||
+    ""
+  ).trim().toLowerCase();
+
+  const client=window.__MA7ALAK_EXACT_HUB_REST_CLIENT__;
+
+  if(!slug||!client)return;
+
+  const result=await client
+    .from("shop_profiles")
+    .select("shop_slug,directory_options")
+    .eq("shop_slug",slug)
+    .maybeSingle();
+
+  if(result.error||!result.data)return;
+
+  apply(result.data);
+
+  /*
+    The external Design Studio V2 loader may finish a fraction later.
+    Reapply only the individual text overrides after it settles.
+  */
+  window.setTimeout(()=>apply(result.data),140);
+  window.setTimeout(()=>apply(result.data),420);
+}
+
+async function start(){
+  for(let i=0;i<160;i++){
+    if(
+      document.getElementById("ma7alak-about-title") &&
+      window.__MA7ALAK_EXACT_HUB_REST_CLIENT__
+    ){
+      break;
+    }
+
+    await new Promise(resolve=>setTimeout(resolve,50));
+  }
+
+  await load();
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__==="function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(load);
+  }
+}
+
+start().catch(error=>
+  console.warn("[Ma7alak Hub] individual About text:",error)
+);
+})();
+
+
