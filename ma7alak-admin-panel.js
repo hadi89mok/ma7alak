@@ -5843,6 +5843,21 @@ function decorateAll(){
     ["about_service_icon_color","Service icon"],
     ["about_signature_color","Signature"],
     ["gallery_accent_color","Gallery accent"],
+    ["media_title_color","Shop Media title"],
+    ["media_count_color","Shop Media counts"],
+    ["media_header_bg_color","Shop Media header background"],
+    ["media_header_frame_color","Shop Media header frame"],
+    ["media_symbol_color","Shop Media symbol"],
+    ["media_symbol_frame_color","Shop Media symbol frame"],
+    ["media_symbol_bg_color","Shop Media symbol background"],
+    ["media_filter_bar_bg_color","Shop Media filter bar background"],
+    ["media_filter_bar_frame_color","Shop Media filter bar frame"],
+    ["media_button_text_color","Shop Media button text"],
+    ["media_button_frame_color","Shop Media button frame"],
+    ["media_button_bg_color","Shop Media button inside"],
+    ["media_button_active_text_color","Shop Media active button text"],
+    ["media_button_active_frame_color","Shop Media active button frame"],
+    ["media_button_active_bg_color","Shop Media active button inside"],
     ["video_accent_color","Video accent"],
     ["follow_accent_color","Follow / Message accent"],
     ["live_accent_color","Live / Offers accent"],
@@ -5932,6 +5947,22 @@ function decorateAll(){
     about_signature_color:"#f2caed",
 
     gallery_accent_color:"#f2caed",
+
+    media_title_color:"#ffffff",
+    media_count_color:"#d6cec6",
+    media_header_bg_color:"#100e0c",
+    media_header_frame_color:"#3f352c",
+    media_symbol_color:"#f2caed",
+    media_symbol_frame_color:"#6d5669",
+    media_symbol_bg_color:"#191419",
+    media_filter_bar_bg_color:"#100e0c",
+    media_filter_bar_frame_color:"#40362c",
+    media_button_text_color:"#ded7cf",
+    media_button_frame_color:"#4d4136",
+    media_button_bg_color:"#17130f",
+    media_button_active_text_color:"#ffffff",
+    media_button_active_frame_color:"#f2caed",
+    media_button_active_bg_color:"#2b2029",
 
     gallery_frame_style:"current",
     gallery_frame_color_1:"#e2a6b8",
@@ -6600,6 +6631,44 @@ function decorateAll(){
           ${colorField(prefix,"video_accent_color","Videos")}
           ${colorField(prefix,"live_accent_color","Live / Offers")}
           ${colorField(prefix,"hub_accent_color","About / Social / Location / Stats")}
+        </div>
+
+        <div class="m7ds-section-title">Shop Media Header & Filter Buttons</div>
+
+        <p class="m7ds-help">
+          These controls affect the real combined <b>Media</b> section on the shop page.
+          Colors are solid by default so the Hostinger page background cannot wash out the title or All / Photos / Videos buttons.
+        </p>
+
+        <div class="m7ds-section-title">Media Header</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"media_title_color","Media title text")}
+          ${colorField(prefix,"media_count_color","Photo / video count text")}
+          ${colorField(prefix,"media_header_bg_color","Header background")}
+          ${colorField(prefix,"media_header_frame_color","Header frame")}
+          ${colorField(prefix,"media_symbol_color","Header symbol")}
+          ${colorField(prefix,"media_symbol_frame_color","Symbol frame")}
+          ${colorField(prefix,"media_symbol_bg_color","Symbol inside")}
+        </div>
+
+        <div class="m7ds-section-title">Filter Bar</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"media_filter_bar_bg_color","Filter bar inside")}
+          ${colorField(prefix,"media_filter_bar_frame_color","Filter bar frame")}
+        </div>
+
+        <div class="m7ds-section-title">Filter Buttons — Normal</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"media_button_text_color","Button text")}
+          ${colorField(prefix,"media_button_frame_color","Button frame")}
+          ${colorField(prefix,"media_button_bg_color","Button inside")}
+        </div>
+
+        <div class="m7ds-section-title">Filter Buttons — Selected</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"media_button_active_text_color","Selected text")}
+          ${colorField(prefix,"media_button_active_frame_color","Selected frame")}
+          ${colorField(prefix,"media_button_active_bg_color","Selected inside")}
         </div>
 
         <div class="m7ds-section-title">Gallery Multi-Color Frame</div>
@@ -14097,6 +14166,22 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
 
     gallery_accent_color:"$ACCENT",
 
+    media_title_color:"#ffffff",
+    media_count_color:"#d6cec6",
+    media_header_bg_color:"#100e0c",
+    media_header_frame_color:"#3f352c",
+    media_symbol_color:"$ACCENT",
+    media_symbol_frame_color:"#6d5669",
+    media_symbol_bg_color:"#191419",
+    media_filter_bar_bg_color:"#100e0c",
+    media_filter_bar_frame_color:"#40362c",
+    media_button_text_color:"#ded7cf",
+    media_button_frame_color:"#4d4136",
+    media_button_bg_color:"#17130f",
+    media_button_active_text_color:"#ffffff",
+    media_button_active_frame_color:"$ACCENT",
+    media_button_active_bg_color:"#2b2029",
+
     gallery_frame_style:"current",
     gallery_frame_color_1:"#e2a6b8",
     gallery_frame_color_2:"#f2d18d",
@@ -14992,6 +15077,21 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
   const DESIGN_KEYS=[
     "page_use_universal_accent",
     "gallery_accent_color",
+    "media_title_color",
+    "media_count_color",
+    "media_header_bg_color",
+    "media_header_frame_color",
+    "media_symbol_color",
+    "media_symbol_frame_color",
+    "media_symbol_bg_color",
+    "media_filter_bar_bg_color",
+    "media_filter_bar_frame_color",
+    "media_button_text_color",
+    "media_button_frame_color",
+    "media_button_bg_color",
+    "media_button_active_text_color",
+    "media_button_active_frame_color",
+    "media_button_active_bg_color",
     "gallery_frame_style",
     "gallery_frame_color_1",
     "gallery_frame_color_2",
