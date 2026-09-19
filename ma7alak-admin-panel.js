@@ -7493,3 +7493,405 @@ async function install(){
 install().catch(console.error);
 })();
 
+
+/* =========================================================
+   MA7ALAK — MULTI AVAILABILITY ROWS ADMIN V1
+   ---------------------------------------------------------
+   Keeps the existing primary:
+     availability_days + availability_time
+
+   Adds optional extra rows underneath:
+     directory_options.availability_extra_rows = [
+       {days:"Sunday", time:"1 PM – 2 PM"},
+       ...
+     ]
+========================================================= */
+(function(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin") return;
+if(window.__MA7ALAK_MULTI_AVAILABILITY_ADMIN_V1__) return;
+window.__MA7ALAK_MULTI_AVAILABILITY_ADMIN_V1__=true;
+
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function ensureCss(){
+  if(document.getElementById("m7-availability-extra-admin-css"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-availability-extra-admin-css";
+  style.textContent=`
+    .m7-availability-extra-box{
+      margin:10px 0 18px;
+      padding:12px;
+      border:1px solid rgba(217,164,65,.18);
+      border-radius:13px;
+      background:rgba(217,164,65,.025);
+      color:#d9c7a6;
+    }
+
+    .m7-availability-extra-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .m7-availability-extra-head b{
+      display:block;
+      color:#ead6b0;
+      font-size:10px;
+    }
+
+    .m7-availability-extra-head small{
+      display:block;
+      margin-top:3px;
+      color:#837764;
+      font-size:8px;
+      line-height:1.4;
+    }
+
+    .m7-availability-add{
+      flex:0 0 auto;
+      min-height:32px;
+      padding:0 10px;
+      border:1px solid rgba(217,164,65,.25);
+      border-radius:10px;
+      background:rgba(217,164,65,.08);
+      color:#efdaa9;
+      font-size:8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .m7-availability-extra-list{
+      display:grid;
+      gap:7px;
+    }
+
+    .m7-availability-extra-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+      gap:7px;
+      align-items:end;
+      padding:8px;
+      border:1px solid rgba(255,255,255,.055);
+      border-radius:11px;
+      background:rgba(255,255,255,.018);
+    }
+
+    .m7-availability-extra-row label{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      color:#8d806d;
+      font-size:7px;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.35px;
+    }
+
+    .m7-availability-extra-row input{
+      width:100%!important;
+      min-height:35px!important;
+      padding:0 9px!important;
+      border:1px solid rgba(217,164,65,.15)!important;
+      border-radius:9px!important;
+      background:#090807!important;
+      color:#fff!important;
+      box-sizing:border-box!important;
+    }
+
+    .m7-availability-remove{
+      width:35px;
+      height:35px;
+      border:1px solid rgba(255,92,92,.18);
+      border-radius:9px;
+      background:rgba(255,92,92,.06);
+      color:#ff9b9b;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .m7-availability-empty{
+      padding:8px 4px;
+      color:#756b5b;
+      font-size:8px;
+      text-align:center;
+    }
+
+    @media(max-width:620px){
+      .m7-availability-extra-row{
+        grid-template-columns:1fr 1fr;
+      }
+      .m7-availability-remove{
+        grid-column:1/-1;
+        justify-self:end;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function rowHtml(index,row){
+  const days=String(row?.days||"");
+  const time=String(row?.time||"");
+
+  return `
+    <div class="m7-availability-extra-row" data-avail-extra-index="${index}">
+      <label>
+        Days / label
+        <input
+          type="text"
+          data-avail-extra-days
+          value="${esc(days)}"
+          placeholder="e.g. Sunday"
+        >
+      </label>
+
+      <label>
+        Time / text
+        <input
+          type="text"
+          data-avail-extra-time
+          value="${esc(time)}"
+          placeholder="e.g. 1 PM – 2 PM"
+        >
+      </label>
+
+      <button
+        type="button"
+        class="m7-availability-remove"
+        data-avail-extra-remove
+        aria-label="Remove availability row"
+        title="Remove row"
+      >×</button>
+    </div>
+  `;
+}
+
+function ensureBox(form,prefix){
+  if(!form)return null;
+
+  let box=form.querySelector(".m7-availability-extra-box");
+
+  if(box)return box;
+
+  ensureCss();
+
+  box=document.createElement("div");
+  box.className="m7-availability-extra-box";
+  box.innerHTML=`
+    <div class="m7-availability-extra-head">
+      <div>
+        <b>Extra availability lines</b>
+        <small>
+          Add extra day/time rows below the main Availability fields.
+        </small>
+      </div>
+
+      <button
+        type="button"
+        class="m7-availability-add"
+        data-avail-extra-add
+      >
+        + Add row
+      </button>
+    </div>
+
+    <div class="m7-availability-extra-list"></div>
+  `;
+
+  const anchor=
+    document.getElementById(prefix+"availability_time")
+      ?.closest("label");
+
+  if(anchor){
+    anchor.after(box);
+  }else{
+    form.appendChild(box);
+  }
+
+  box.querySelector("[data-avail-extra-add]")?.addEventListener(
+    "click",
+    function(){
+      const rows=getRows(box);
+      rows.push({days:"",time:""});
+      renderRows(box,rows);
+    }
+  );
+
+  box.addEventListener("click",function(event){
+    const button=event.target.closest("[data-avail-extra-remove]");
+    if(!button)return;
+
+    const row=button.closest(".m7-availability-extra-row");
+    if(!row)return;
+
+    row.remove();
+    syncEmpty(box);
+  });
+
+  return box;
+}
+
+function syncEmpty(box){
+  const list=box.querySelector(".m7-availability-extra-list");
+  if(!list)return;
+
+  if(list.querySelector(".m7-availability-extra-row")){
+    list.querySelector(".m7-availability-empty")?.remove();
+    return;
+  }
+
+  if(!list.querySelector(".m7-availability-empty")){
+    const empty=document.createElement("div");
+    empty.className="m7-availability-empty";
+    empty.textContent="No extra availability rows.";
+    list.appendChild(empty);
+  }
+}
+
+function renderRows(box,rows){
+  const list=box.querySelector(".m7-availability-extra-list");
+  if(!list)return;
+
+  const normalized=Array.isArray(rows)?rows:[];
+
+  list.innerHTML=normalized
+    .map((row,index)=>rowHtml(index,row))
+    .join("");
+
+  syncEmpty(box);
+}
+
+function getRows(box){
+  if(!box)return [];
+
+  return Array.from(
+    box.querySelectorAll(".m7-availability-extra-row")
+  )
+    .map(row=>({
+      days:String(row.querySelector("[data-avail-extra-days]")?.value||"").trim(),
+      time:String(row.querySelector("[data-avail-extra-time]")?.value||"").trim()
+    }))
+    .filter(row=>row.days||row.time);
+}
+
+function fill(prefix,options){
+  const form=document.getElementById(
+    prefix==="m7de-"
+      ? "ma-admin-edit-form"
+      : "ma-admin-shop-form"
+  );
+
+  const box=ensureBox(form,prefix);
+  if(!box)return;
+
+  const rows=
+    Array.isArray(options?.availability_extra_rows)
+      ? options.availability_extra_rows
+      : [];
+
+  renderRows(box,rows);
+}
+
+function collect(prefix,result){
+  result.directory_options=
+    result.directory_options &&
+    typeof result.directory_options==="object"
+      ? result.directory_options
+      : {};
+
+  const form=document.getElementById(
+    prefix==="m7de-"
+      ? "ma-admin-edit-form"
+      : "ma-admin-shop-form"
+  );
+
+  const box=ensureBox(form,prefix);
+
+  result.directory_options.availability_extra_rows=
+    getRows(box);
+
+  return result;
+}
+
+async function install(){
+  ensureCss();
+
+  for(let i=0;i<240&&!window.Ma7alakDirectoryAdmin;i++){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api||api.__multiAvailabilityWrappedV1)return;
+
+  const oldFill=api.fill.bind(api);
+  const oldCollect=api.collect.bind(api);
+
+  api.fill=function(shop){
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+    oldFill(shop);
+
+    fill(
+      "m7de-",
+      shop?.directory_options||{}
+    );
+  };
+
+  api.collect=function(edit){
+    const prefix=edit?"m7de-":"m7da-";
+
+    ensureBox(
+      document.getElementById(
+        edit
+          ? "ma-admin-edit-form"
+          : "ma-admin-shop-form"
+      ),
+      prefix
+    );
+
+    const result=oldCollect(edit);
+
+    return collect(
+      prefix,
+      result
+    );
+  };
+
+  api.__multiAvailabilityWrappedV1=true;
+
+  ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+  ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+
+  fill("m7da-",{});
+
+  const observer=new MutationObserver(()=>{
+    ensureBox(document.getElementById("ma-admin-shop-form"),"m7da-");
+    ensureBox(document.getElementById("ma-admin-edit-form"),"m7de-");
+  });
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
+}
+
+install().catch(console.error);
+})();
+
