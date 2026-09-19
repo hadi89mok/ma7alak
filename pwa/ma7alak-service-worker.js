@@ -1,20 +1,16 @@
 /* MA7ALAK PWA SERVICE WORKER */
 "use strict";
 
-const VERSION="m7-pwa-2026-09-20-2";
+const VERSION="m7-pwa-2026-09-20-3";
 const CORE_CACHE=VERSION+"-core";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
 const OFFLINE_URL="/pwa-offline";
 
 self.addEventListener("install",event=>{
   event.waitUntil(
-    caches.open(CORE_CACHE).then(cache=>
-      cache.addAll([
-        OFFLINE_URL,
-        "/pwa-icon-192.png",
-        "/pwa-icon-512.png"
-      ])
-    ).catch(()=>{})
+    caches.open(CORE_CACHE)
+      .then(cache=>cache.add(OFFLINE_URL))
+      .catch(()=>{})
   );
 });
 
@@ -101,11 +97,7 @@ self.addEventListener("fetch",event=>{
 
   if(
     url.origin===self.location.origin &&
-    (
-      url.pathname==="/pwa-icon-192.png" ||
-      url.pathname==="/pwa-icon-512.png" ||
-      url.pathname==="/pwa-offline"
-    )
+    url.pathname==="/pwa-offline"
   ){
     event.respondWith(
       caches.match(request).then(hit=>
