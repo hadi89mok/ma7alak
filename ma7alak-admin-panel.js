@@ -7988,6 +7988,39 @@ function decorateAll(){
           : fallback;
       };
 
+      const globalFontStyle=
+        String(
+          get("global_font_style")?.value ||
+          DEFAULTS.global_font_style
+        ).trim().toLowerCase();
+
+      const mediaFontStyleRaw=
+        String(
+          get("media_font_style")?.value ||
+          DEFAULTS.media_font_style
+        ).trim().toLowerCase();
+
+      const mediaFontStyle=
+        mediaFontStyleRaw==="inherit"
+          ? globalFontStyle
+          : mediaFontStyleRaw;
+
+      const fontStacks={
+        inherit:"inherit",
+        current:"inherit",
+        system:'Arial,"Segoe UI",sans-serif',
+        modern:'"Trebuchet MS","Segoe UI",Arial,sans-serif',
+        elegant:'Georgia,"Times New Roman",serif',
+        classic:'"Times New Roman",Georgia,serif',
+        mono:'"Courier New",Courier,monospace'
+      };
+
+      const mediaFontScale=
+        (
+          number("global_font_size",70,150,100) *
+          number("media_font_size",70,150,100)
+        ) / 10000;
+
       const width=
         number(
           "gallery_frame_width",
@@ -8350,6 +8383,11 @@ function decorateAll(){
            when the frame radius and inner preview radius drifted apart.
         */
         inner.style.overflow="hidden";
+        inner.style.fontFamily=
+          fontStacks[mediaFontStyle] ||
+          fontStacks.current;
+        inner.style.fontSize=
+          (10*mediaFontScale).toFixed(1)+"px";
       }
     }
 
@@ -8640,7 +8678,11 @@ function decorateAll(){
       "gallery_frame_layer_4_enabled",
       "gallery_frame_layer_4_width",
       "gallery_frame_layer_4_gap",
-      "gallery_accent_color"
+      "gallery_accent_color",
+      "media_font_style",
+      "media_font_size",
+      "global_font_style",
+      "global_font_size"
     ]
       .map(key=>
         box.querySelector(
