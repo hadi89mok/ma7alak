@@ -16296,7 +16296,9 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   function style(){
     if(document.getElementById("m7hfa-css"))return;
     const s=document.createElement("style");s.id="m7hfa-css";s.textContent=`
-#m7hfa-launch{width:100%;margin:0 0 16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d9a44166;border-radius:17px;background:radial-gradient(circle at 95% 0,#d9a4411f,transparent 35%),linear-gradient(135deg,#1b130c,#0b0a08);color:#f3cf83;box-shadow:0 10px 26px #0005;cursor:pointer;text-align:left}#m7hfa-launch strong{display:block;font-size:15px}#m7hfa-launch small{display:block;margin-top:3px;color:#ffffff86;font-size:11px}#m7hfa-launch b{min-width:45px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid #d9a44155;border-radius:11px;background:#d9a44116;font-size:19px}
+#m7hfa-launch{width:100%;margin:0 0 16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d9a44166;border-radius:17px;background:radial-gradient(circle at 95% 0,#d9a4411f,transparent 35%),linear-gradient(135deg,#1b130c,#0b0a08);color:#f3cf83;box-shadow:0 10px 26px #0005;cursor:pointer;text-align:left}
+#m7-admin-workspace-v4 .m7v4-shell>#m7hfa-launch{width:calc(100% - 32px);margin:14px 16px 0}
+@media(max-width:470px){#m7-admin-workspace-v4 .m7v4-shell>#m7hfa-launch{width:calc(100% - 22px);margin:11px 11px 0}}#m7hfa-launch strong{display:block;font-size:15px}#m7hfa-launch small{display:block;margin-top:3px;color:#ffffff86;font-size:11px}#m7hfa-launch b{min-width:45px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid #d9a44155;border-radius:11px;background:#d9a44116;font-size:19px}
 #m7hfa-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(2,2,2,.76);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));overflow:auto;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#fff}#m7hfa-overlay[hidden]{display:none!important}.m7hfa-modal{width:min(1180px,100%);min-height:calc(100dvh - 16px);margin:0 auto;border:1px solid #d9a44155;border-radius:23px;background:radial-gradient(circle at 100% 0,#d9a4411a,transparent 25%),#0b0c0d;box-shadow:0 30px 80px #000b;overflow:hidden}.m7hfa-head{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid #ffffff12;background:rgba(10,11,12,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.m7hfa-head h2{margin:0;color:#f0c36c;font-size:19px}.m7hfa-head small{display:block;margin-top:3px;color:#ffffff70}.m7hfa-head-actions{display:flex;gap:7px}.m7hfa-btn{min-height:40px;padding:8px 12px;border:1px solid #d9a44155;border-radius:11px;background:#24190f;color:#f3ca73;font-weight:850;cursor:pointer}.m7hfa-btn.primary{border:0;background:linear-gradient(110deg,#f5d384,#d59736);color:#211407}.m7hfa-btn.danger{border-color:#cc595955;background:#2b1010;color:#ff9b9b}.m7hfa-btn.icon{width:40px;padding:0;font-size:19px}.m7hfa-tabs{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid #ffffff0f;overflow-x:auto;scrollbar-width:none;background:#0c0d0e}.m7hfa-tabs::-webkit-scrollbar{display:none}.m7hfa-tab{white-space:nowrap;min-height:38px;padding:7px 12px;border:1px solid #ffffff14;border-radius:10px;background:#121416;color:#bdb7aa;font-size:11px;font-weight:800;cursor:pointer}.m7hfa-tab.active{border-color:#d9a44166;background:#d9a44114;color:#f1ca75}.m7hfa-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:12px;padding:12px}.m7hfa-form{min-width:0}.m7hfa-pane{display:none}.m7hfa-pane.active{display:block}.m7hfa-card{margin-bottom:11px;padding:13px;border:1px solid #ffffff12;border-radius:16px;background:#101214}.m7hfa-card h3{margin:0 0 11px;color:#edc36e;font-size:13px}.m7hfa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.m7hfa-field{display:grid;gap:5px;min-width:0;color:#cbbfa9;font-size:10px}.m7hfa-field.full{grid-column:1/-1}.m7hfa-field input,.m7hfa-field textarea,.m7hfa-field select{width:100%;min-width:0;min-height:42px;padding:9px 10px;border:1px solid #ffffff16;border-radius:10px;background:#090a0b;color:#fff;outline:0}.m7hfa-field input[type=color]{padding:3px;height:42px}.m7hfa-field input[type=range]{padding:0;accent-color:#d9a441}.m7hfa-field textarea{min-height:68px;resize:vertical}.m7hfa-check{display:flex;align-items:center;gap:8px;color:#dbcaa9;font-size:11px}.m7hfa-check input{width:18px;height:18px;accent-color:#d9a441}.m7hfa-list{display:grid;gap:8px}.m7hfa-row{display:grid;grid-template-columns:28px 110px minmax(95px,1fr) minmax(150px,1.4fr) auto;gap:6px;align-items:center;padding:8px;border:1px solid #ffffff10;border-radius:12px;background:#090a0b}.m7hfa-row.nav{grid-template-columns:28px minmax(110px,1fr) minmax(150px,1.2fr) auto}.m7hfa-row input,.m7hfa-row select{width:100%;min-width:0;height:38px;border:1px solid #ffffff14;border-radius:9px;background:#0f1112;color:#fff;padding:7px}.m7hfa-row input[type=checkbox]{width:18px;height:18px;accent-color:#d9a441}.m7hfa-row button{width:34px;height:34px;border:1px solid #c6575755;border-radius:9px;background:#2a1010;color:#ff8e8e;cursor:pointer}.m7hfa-preview-wrap{position:sticky;top:78px;align-self:start}.m7hfa-preview-label{display:flex;align-items:center;justify-content:space-between;margin:0 0 7px;color:#cdbd9e;font-size:10px}.m7hfa-preview{position:relative;min-height:510px;border:1px solid #d9a44155;border-radius:17px;overflow:hidden;background:#070503;isolation:isolate}.m7hfa-pbg{position:absolute;inset:-4%;z-index:-4;background-color:var(--pbg,#080604);background-image:var(--pimg);background-size:var(--pzoom,115%);background-position:var(--ppos,center 54%);background-repeat:no-repeat;filter:brightness(1.02) saturate(1.08)}.m7hfa-pover{position:absolute;inset:0;z-index:-3;background:linear-gradient(180deg,rgba(6,3,2,.18),rgba(4,2,1,.32) 58%,rgba(3,2,1,.80)),radial-gradient(circle at 50% 10%,#d9a44118,transparent 38%)}.m7hfa-pline{position:absolute;inset:0;z-index:4;pointer-events:none;border:2px solid var(--paccent);border-bottom-color:transparent;border-radius:17px;clip-path:inset(0 0 calc(100% - 52px) 0);filter:drop-shadow(0 0 5px var(--paccent))}.m7hfa-pline:after{content:"";position:absolute;top:-2px;left:34%;width:32%;height:3px;background:linear-gradient(90deg,transparent,#fff1ba,transparent);box-shadow:0 0 9px var(--paccent)}.m7hfa-pcontent{display:flex;min-height:510px;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 18px 24px}.m7hfa-plogo{width:min(var(--plogo,220px),68%);height:auto;max-height:170px;object-fit:contain;filter:drop-shadow(0 8px 16px #000b) drop-shadow(0 0 11px #d9a44138)}.m7hfa-ptitle{margin-top:7px;color:var(--ptitle);font-size:var(--ptitlesize);font-weight:900;direction:rtl}.m7hfa-psub{margin-top:6px;color:var(--psub);font-size:var(--psubsize);direction:rtl}.m7hfa-pcedar{margin:12px 0;color:var(--paccent2);font-size:23px}.m7hfa-pnav{display:flex;justify-content:center;flex-wrap:wrap;gap:6px}.m7hfa-pnav span{padding:4px 2px;color:var(--pnav);font-size:10px;font-weight:800;text-shadow:0 2px 8px #000}.m7hfa-pnav i{color:var(--paccent2);font-style:normal;opacity:.85}.m7hfa-psocial{display:flex;justify-content:center;gap:8px;margin:15px 0}.m7hfa-psocial b{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--psglow);border-radius:50%;color:var(--psocial);background:#080706;box-shadow:0 0 8px #d9a4412b;font-size:10px;text-transform:uppercase}.m7hfa-prule{width:72%;height:1px;background:linear-gradient(90deg,transparent,#d9a44177,transparent);margin-bottom:12px}.m7hfa-pcopy{color:var(--pcopy);font-size:var(--pcopysize)}.m7hfa-pbottom{margin-top:7px;color:var(--pbottom);font-size:var(--pbottomsize);font-weight:750}.m7hfa-status{position:sticky;bottom:0;z-index:21;min-height:38px;display:flex;align-items:center;justify-content:center;padding:8px 12px;border-top:1px solid #ffffff10;background:rgba(10,11,12,.96);color:#e9c36f;font-size:11px}.m7hfa-status[data-type=error]{color:#ff8f8f}.m7hfa-status[data-type=success]{color:#7be2a7}
 @media(max-width:820px){.m7hfa-main{grid-template-columns:1fr}.m7hfa-preview-wrap{position:relative;top:auto;order:-1}.m7hfa-preview{min-height:390px}.m7hfa-pcontent{min-height:390px;padding-top:32px}.m7hfa-grid{grid-template-columns:1fr}.m7hfa-field.full{grid-column:auto}.m7hfa-row,.m7hfa-row.nav{grid-template-columns:28px minmax(0,1fr) 34px}.m7hfa-row select,.m7hfa-row.nav input:nth-of-type(2){grid-column:2}.m7hfa-row input[type=text],.m7hfa-row input[type=url]{grid-column:2}.m7hfa-modal{border-radius:15px}.m7hfa-head{align-items:flex-start}.m7hfa-head-actions{flex-direction:column}.m7hfa-btn{min-height:36px}}
 `;(document.head||document.documentElement).appendChild(s)
@@ -16409,15 +16411,58 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     overlay.addEventListener("click",e=>{const dn=e.target.closest("[data-del-nav]");if(dn){collect();settings.navigation.splice(Number(dn.dataset.delNav),1);renderLists();markDirty();renderPreview();return}const ds=e.target.closest("[data-del-social]");if(ds){collect();settings.socials.splice(Number(ds.dataset.delSocial),1);renderLists();markDirty();renderPreview();return}const up=e.target.closest("[data-upload]");if(up)upload(up.dataset.upload);const reset=e.target.closest("[data-reset]");if(reset&&confirm("Reset the editor to the ShoufHon footer defaults?")){settings=merged({});fill();markDirty();setStatus("Defaults loaded in editor. Save to publish.")}});
   }
 
-  function mountLauncher(){
-    if(document.getElementById("m7hfa-launch"))return true;
-    const dash=document.getElementById("ma-admin-dashboard");if(!dash)return false;
-    launcher=document.createElement("button");launcher.id="m7hfa-launch";launcher.type="button";launcher.innerHTML='<span><strong>🌙 Homepage Footer</strong><small>Logo · Lebanon background · links · socials · colors · mobile animations</small></span><b>›</b>';
-    launcher.onclick=async()=>{if(!overlay)build();overlay.hidden=false;document.documentElement.style.overflow="hidden";setStatus("Loading footer settings…");await load()};
-    dash.prepend(launcher);return true;
+  function launcherHost(){
+    const shell=document.querySelector("#m7-admin-workspace-v4 .m7v4-shell");
+    if(shell)return {host:shell,after:shell.querySelector(".m7v4-top")};
+    const dash=document.getElementById("ma-admin-dashboard");
+    return dash?{host:dash,after:null}:null;
   }
 
-  function boot(){style();window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(overlay&&!overlay.hidden)renderPreview()});if(mountLauncher())return;let tries=0;const t=setInterval(()=>{tries++;if(mountLauncher()||tries>150)clearInterval(t)},100)}
+  function mountLauncher(){
+    const target=launcherHost();
+    if(!target)return false;
+
+    launcher=document.getElementById("m7hfa-launch")||launcher;
+
+    if(!launcher){
+      launcher=document.createElement("button");
+      launcher.id="m7hfa-launch";
+      launcher.type="button";
+      launcher.innerHTML='<span><strong>🌙 Homepage Footer</strong><small>Logo · Lebanon background · links · socials · colors · mobile animations</small></span><b>›</b>';
+      launcher.onclick=async()=>{if(!overlay)build();overlay.hidden=false;document.documentElement.style.overflow="hidden";setStatus("Loading footer settings…");await load()};
+    }
+
+    if(target.after){
+      if(launcher.parentNode!==target.host||target.after.nextElementSibling!==launcher){
+        target.after.insertAdjacentElement("afterend",launcher);
+      }
+    }else if(launcher.parentNode!==target.host){
+      target.host.prepend(launcher);
+    }
+
+    launcher.hidden=false;
+    launcher.removeAttribute("hidden");
+    return true;
+  }
+
+  function boot(){
+    style();
+    window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(overlay&&!overlay.hidden)renderPreview()});
+
+    /* Admin Workspace V4 mounts asynchronously. Keep moving the standalone
+       Footer button into the visible V4 shell as soon as that shell exists. */
+    mountLauncher();
+    let tries=0;
+    const t=setInterval(()=>{
+      tries++;
+      mountLauncher();
+      if(document.querySelector("#m7-admin-workspace-v4 .m7v4-shell")||tries>200)clearInterval(t);
+    },100);
+
+    window.addEventListener("ma7alak:admin-ready",mountLauncher);
+    window.addEventListener("focus",mountLauncher);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")mountLauncher()});
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
 
