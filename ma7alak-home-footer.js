@@ -301,7 +301,35 @@ body.m7hf-home-mounted{background:#050403!important}
   animation:m7hfEdgeTravel var(--m7hf-dur-line,4.4s) linear infinite!important;
   -webkit-animation:m7hfEdgeTravel var(--m7hf-dur-line,4.4s) linear infinite!important
 }
-.m7hf-topline{display:none!important}
+.m7hf-topline{
+  display:block!important;
+  position:absolute!important;
+  top:7px!important;
+  left:50%!important;
+  right:auto!important;
+  z-index:9!important;
+  width:9px!important;
+  height:9px!important;
+  border:1px solid var(--m7hf-accent2)!important;
+  border-radius:1px!important;
+  background:color-mix(in srgb,var(--m7hf-accent) 68%,#2a1708)!important;
+  box-shadow:0 0 5px #fff1b0,0 0 13px color-mix(in srgb,var(--m7hf-line) 74%,transparent)!important;
+  transform:translateX(-50%) rotate(45deg)!important;
+  -webkit-transform:translateX(-50%) rotate(45deg)!important;
+  overflow:visible!important;
+  pointer-events:none!important
+}
+.m7hf-topline::after{
+  content:""!important;
+  position:absolute!important;
+  inset:2px!important;
+  border:1px solid rgba(255,244,194,.85)!important;
+  background:transparent!important;
+  filter:none!important;
+  opacity:1!important;
+  animation:none!important;
+  -webkit-animation:none!important
+}
 .m7hf-bg{
   inset:0!important;
   background-size:cover!important;
@@ -310,7 +338,7 @@ body.m7hf-home-mounted{background:#050403!important}
   opacity:1!important
 }
 .m7hf-overlay{
-  background:linear-gradient(180deg,rgba(6,3,1,.18) 0%,rgba(5,3,2,.30) 48%,rgba(3,2,1,.78) 100%),radial-gradient(circle at 50% 16%,rgba(217,164,65,.08),transparent 38%)!important
+  background:linear-gradient(180deg,rgba(6,3,1,.16) 0%,rgba(5,3,2,var(--m7hf-overlay,.50)) 54%,rgba(3,2,1,.82) 100%),radial-gradient(circle at 50% 16%,rgba(217,164,65,.08),transparent 38%)!important
 }
 .m7hf-vignette{
   background:radial-gradient(ellipse at 50% 35%,transparent 28%,rgba(0,0,0,.10) 62%,rgba(0,0,0,.54) 100%),linear-gradient(90deg,rgba(0,0,0,.26),transparent 18% 82%,rgba(0,0,0,.26))!important
