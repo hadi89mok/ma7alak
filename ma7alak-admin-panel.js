@@ -16745,6 +16745,16 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     if(fromEditForm(event.target))schedule();
   },true);
 
+  /*
+     Row add/remove buttons and other click-driven controls can mutate the
+     edit form without firing input/change themselves. Run after their own
+     click handler so the live snapshot sees the final DOM state.
+  */
+  document.addEventListener("click",event=>{
+    if(!fromEditForm(event.target))return;
+    setTimeout(schedule,0);
+  },false);
+
   window.addEventListener("ma7alak:design-preview-request",schedule);
 
   window.addEventListener(
