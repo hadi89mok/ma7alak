@@ -334,11 +334,36 @@
     return card;
   }
 
-  function studioUrl(){
+  function studioPublicUrl(){
     const explicit=String(document.getElementById("ma-edit-url")?.value||"").trim();
     if(/^https?:\/\//i.test(explicit))return explicit;
     const slug=String(document.getElementById("ma-edit-original-slug")?.value||document.getElementById("ma-edit-slug")?.value||"").trim();
     return slug?"https://shoufhon.com/"+encodeURIComponent(slug):"";
+  }
+
+  /*
+     The phone preview must stay on the exact same origin as /admin.
+     Some shops still have an older absolute Shop Page URL saved (for example
+     ma7alak.com), and www/non-www redirects can also turn the iframe into a
+     cross-origin frame. Hostinger/browser frame protection then shows a broken
+     document instead of the shop page. Keep the saved public URL for "Open
+     site", but mirror its path onto the current Admin origin for the iframe.
+  */
+  function studioPreviewUrl(){
+    const slug=String(document.getElementById("ma-edit-original-slug")?.value||document.getElementById("ma-edit-slug")?.value||"").trim();
+    const publicUrl=studioPublicUrl();
+
+    if(publicUrl){
+      try{
+        const target=new URL(publicUrl,window.location.href);
+        const path=(target.pathname&&target.pathname!=="/")
+          ?target.pathname
+          :(slug?"/"+encodeURIComponent(slug):"/");
+        return window.location.origin+path+target.search+target.hash;
+      }catch(_){}
+    }
+
+    return slug?window.location.origin+"/"+encodeURIComponent(slug):"";
   }
 
   function ensureRealPreview(panel){
@@ -352,7 +377,7 @@
       dock.appendChild(real);
     }
     const frame=real.querySelector("[data-m7studio-frame]");
-    const url=studioUrl();
+    const url=studioPreviewUrl();
     if(frame&&url&&String(frame.dataset.currentUrl||"")!==url){frame.dataset.currentUrl=url;frame.src=url}
     const title=dock.querySelector("[data-m7v4-preview-title]");if(title)title.textContent="Live Preview · Real shop page";
     const copy=dock.querySelector(".m7v4-preview-head-copy small");if(copy)copy.textContent="Scroll the phone and watch unsaved changes instantly";
@@ -367,7 +392,7 @@
       top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Synced to shop page</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>▣ Preview on Mobile</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
       panel.prepend(top);
       top.querySelector("[data-m7studio-save]")?.addEventListener("click",()=>document.getElementById("ma-admin-save-edit")?.click());
-      top.querySelector("[data-m7studio-open]")?.addEventListener("click",()=>{const url=studioUrl();if(url)window.open(url,"_blank","noopener")});
+      top.querySelector("[data-m7studio-open]")?.addEventListener("click",()=>{const url=studioPublicUrl();if(url)window.open(url,"_blank","noopener")});
       top.querySelector("[data-m7studio-close]")?.addEventListener("click",()=>{closeStudio();document.getElementById("ma-admin-cancel-edit")?.click()});
     }
     let nav=panel.querySelector(":scope > .m7studio-tabs");
@@ -634,7 +659,7 @@
     if(!document.body.classList.contains("m7studio-body-open"))return;
     if(event.target?.id==="ma-edit-url"||event.target?.id==="ma-edit-slug"){
       const frame=document.querySelector("#ma-admin-edit-card .m7studio-real-preview iframe");
-      const url=studioUrl();
+      const url=studioPreviewUrl();
       if(frame&&url){frame.dataset.currentUrl=url;frame.src=url}
     }
   },true);
