@@ -2,9 +2,10 @@
    SHOUFHON — UNIVERSAL SHOP CONTEXT V1
 
    One file, two jobs:
-   1) Top-level ShoufHon page: remembers one shop slug and shares it
-      with all Hostinger Custom Embed iframes.
-   2) Inside an embed iframe: requests that slug before the module boots.
+   1) ShoufHon page document: remembers one shop slug and shares it
+      with all Hostinger Custom Embed iframes. This also works when the full
+      shop page is nested inside the Admin Design Studio phone preview.
+   2) Inside a Custom Embed iframe: requests that slug before the module boots.
 
    No database polling. Reuses the site's existing Supabase client only for
    instant Admin design-preview broadcast; shop identity is never stored locally.
@@ -60,14 +61,39 @@
     return "";
   }
 
+  function ownDocumentSlug(){
+    try{
+      if(!/^https?:$/i.test(window.location.protocol||""))return "";
+      const parts=String(window.location.pathname||"").split("/").filter(Boolean);
+      if(!parts.length)return "";
+      let last=parts[parts.length-1];
+      try{last=decodeURIComponent(last)}catch(_){}
+      last=normalize(last);
+      if(!last||last==="embed"||last==="editor"||last==="admin")return "";
+      return last;
+    }catch(_){
+      return "";
+    }
+  }
+
+  /*
+     A full published shop page can also run inside the Admin Studio's
+     phone iframe. Treat that real http(s) document as a page bridge too,
+     while Hostinger srcdoc/about:blank Custom Embeds remain clients.
+  */
+  const OWN_DOCUMENT_SLUG=ownDocumentSlug();
+  const IS_PAGE_BRIDGE=
+    window.top===window ||
+    !!OWN_DOCUMENT_SLUG;
+
   /* =======================================================
-     TOP-LEVEL BRIDGE
+     PAGE BRIDGE
   ======================================================= */
-  if(window.top===window){
+  if(IS_PAGE_BRIDGE){
     if(window.__SHOUFHON_SHOP_CONTEXT_BRIDGE_V1__)return;
     window.__SHOUFHON_SHOP_CONTEXT_BRIDGE_V1__=true;
 
-    let pageSlug=detectPageSlug();
+    let pageSlug=OWN_DOCUMENT_SLUG||detectPageSlug();
     let revision=pageSlug?1:0;
 
     const DESIGN_TYPE="MA7ALAK_DESIGN_PREVIEW";
