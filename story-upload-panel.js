@@ -58,6 +58,23 @@
 
   function loadSupabase(){
 
+    const sharedClient =
+      (
+        window.Ma7alakAccount &&
+        window.Ma7alakAccount.client
+      ) ||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+      (
+        window.Ma7alakSupabaseBootstrap &&
+        window.Ma7alakSupabaseBootstrap.client
+      ) ||
+      null;
+
+    if(sharedClient){
+      supabaseClient = sharedClient;
+      return Promise.resolve(supabaseClient);
+    }
+
     if(
       window.supabase &&
       typeof window.supabase.createClient === "function"
