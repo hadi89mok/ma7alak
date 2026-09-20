@@ -1503,6 +1503,126 @@ window.addEventListener(
   }
 
 
+  function applyAboutDraft(message){
+    const draft =
+      message &&
+      message.profile &&
+      typeof message.profile === "object"
+        ? message.profile
+        : {};
+
+    const options =
+      message &&
+      message.directory_options &&
+      typeof message.directory_options === "object"
+        ? message.directory_options
+        : {};
+
+    const shopName =
+      String(
+        draft.shop_name ||
+        SHOP_SLUG
+      ).trim();
+
+    const arabicName =
+      String(
+        draft.arabic_name ||
+        ""
+      ).trim();
+
+    const cardLabel =
+      String(
+        draft.category_name ||
+        draft.category ||
+        ""
+      ).trim();
+
+    const aboutText =
+      String(
+        draft.about_text ||
+        ""
+      ).trim();
+
+    const kicker =
+      document.getElementById(
+        "ma7alak-about-kicker"
+      );
+
+    const title =
+      document.getElementById(
+        "ma7alak-about-title"
+      );
+
+    const arabic =
+      document.getElementById(
+        "ma7alak-about-arabic-name"
+      );
+
+    const text =
+      document.getElementById(
+        "ma7alak-about-text"
+      );
+
+    const signature =
+      document.getElementById(
+        "ma7alak-about-signature"
+      );
+
+    if(kicker){
+      kicker.textContent =
+        cardLabel ||
+        shopName;
+    }
+
+    if(title){
+      title.textContent =
+        "About " + shopName;
+    }
+
+    if(arabic){
+      arabic.textContent =
+        arabicName;
+
+      arabic.hidden =
+        !arabicName;
+    }
+
+    if(text){
+      text.textContent =
+        aboutText ||
+        "About information coming soon.";
+    }
+
+    if(signature){
+      signature.textContent =
+        String(
+          options.about_signature ||
+          "Your style. Your story."
+        ).trim() ||
+        "Your style. Your story.";
+    }
+
+    renderServices(
+      options.about_services
+    );
+
+    applyAboutEffects(
+      options
+    );
+
+    const color =
+      String(
+        options.story_color ||
+        options.card_color ||
+        ""
+      ).trim();
+
+    if(color){
+      applyAccent(color);
+    }
+  }
+
+
   loadAbout();
 
   if(
@@ -1511,6 +1631,15 @@ window.addEventListener(
   ){
     window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
       loadAbout
+    );
+  }
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+      applyAboutDraft
     );
   }
 
