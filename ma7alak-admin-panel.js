@@ -5920,6 +5920,9 @@ function decorateAll(){
     profile_shell_enabled:true,
     profile_shell_layout:"luxury",
     profile_shell_bg_color:"#100d0b",
+    profile_shell_bg_image_url:"",
+    profile_shell_bg_image_overlay:"48",
+    profile_shell_bg_image_position_y:"50",
     profile_shell_opacity:"92",
     profile_shell_border_color:"#d9a441",
     profile_shell_border_width:"1",
@@ -6444,6 +6447,112 @@ function decorateAll(){
     return publicUrl;
   }
 
+  async function uploadProfileShellBackground(prefix,file,box){
+    if(!file){
+      return "";
+    }
+
+    const slug=
+      bannerShopSlug(prefix);
+
+    if(!slug){
+      throw new Error(
+        prefix === "m7de-"
+          ? "No shop selected."
+          : "Enter the Shop Slug first, then choose the profile background image."
+      );
+    }
+
+    if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type || "")){
+      throw new Error(
+        "Profile background must be JPG, PNG, WEBP or GIF."
+      );
+    }
+
+    if(file.size > 12 * 1024 * 1024){
+      throw new Error(
+        "Profile background must be smaller than 12 MB."
+      );
+    }
+
+    const client=
+      window.Ma7alakAdminClient;
+
+    if(!client || !client.storage){
+      throw new Error(
+        "Admin storage is still loading. Try again."
+      );
+    }
+
+    const adminCheck=
+      await client.rpc("is_site_admin");
+
+    if(adminCheck.error || adminCheck.data !== true){
+      throw new Error(
+        "Admin session is no longer valid. Login again."
+      );
+    }
+
+    const ext=(
+      String(file.name || "")
+        .split(".")
+        .pop() ||
+      "jpg"
+    )
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g,"") ||
+      "jpg";
+
+    const storagePath=
+      "profile-shell-backgrounds/" +
+      slug +
+      "/" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).slice(2,8) +
+      "." +
+      ext;
+
+    const upload=
+      await client
+        .storage
+        .from("shop-gallery")
+        .upload(
+          storagePath,
+          file,
+          {
+            cacheControl:"31536000",
+            upsert:false,
+            contentType:file.type || undefined
+          }
+        );
+
+    if(upload.error){
+      throw upload.error;
+    }
+
+    const publicData=
+      client
+        .storage
+        .from("shop-gallery")
+        .getPublicUrl(storagePath);
+
+    const publicUrl=
+      publicData &&
+      publicData.data &&
+      publicData.data.publicUrl
+        ? publicData.data.publicUrl
+        : "";
+
+    if(!publicUrl){
+      throw new Error(
+        "Could not create the public profile background URL."
+      );
+    }
+
+    return publicUrl;
+  }
+
   function mount(form,prefix){
     if(
       !form ||
@@ -6681,6 +6790,45 @@ function decorateAll(){
           ${effectNumberField(prefix,"profile_shell_padding","Inner padding",0,28,1,"px")}
           ${effectNumberField(prefix,"profile_shell_top_gap","Top spacing",0,40,1,"px")}
           ${effectNumberField(prefix,"profile_shell_bottom_gap","Bottom spacing",0,50,1,"px")}
+          ${effectNumberField(prefix,"profile_shell_bg_image_overlay","Background image dark overlay",0,90,5,"%")}
+          ${effectNumberField(prefix,"profile_shell_bg_image_position_y","Background image crop position",0,100,5,"%")}
+        </div>
+
+        <div class="m7ds-grid m7ds-banner-grid">
+          <label class="m7ds-banner-upload">
+            <span>
+              <b>▧ Upload profile-card background</b>
+              <small>JPG, PNG, WEBP or GIF · max 12 MB</small>
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              data-m7-shell-bg-upload
+            >
+          </label>
+        </div>
+
+        <input
+          id="${prefix}profile_shell_bg_image_url"
+          type="hidden"
+        >
+
+        <div class="m7ds-banner-preview" data-m7-shell-bg-preview>
+          <span>Profile-card background preview</span>
+        </div>
+
+        <div class="m7ds-banner-actions">
+          <button
+            type="button"
+            class="m7ds-banner-clear"
+            data-m7-shell-bg-clear
+          >Remove profile background image</button>
+
+          <span
+            class="m7ds-banner-status"
+            data-m7-shell-bg-status
+            aria-live="polite"
+          ></span>
         </div>
 
         <label class="m7ds-check">
@@ -7132,6 +7280,70 @@ function decorateAll(){
         "[data-m7-banner-status]"
       );
 
+    const shellBgUrl=
+      box.querySelector(
+        "#"+prefix+"profile_shell_bg_image_url"
+      );
+
+    const shellBgFile=
+      box.querySelector(
+        "[data-m7-shell-bg-upload]"
+      );
+
+    const shellBgPreview=
+      box.querySelector(
+        "[data-m7-shell-bg-preview]"
+      );
+
+    const shellBgClear=
+      box.querySelector(
+        "[data-m7-shell-bg-clear]"
+      );
+
+    const shellBgStatus=
+      box.querySelector(
+        "[data-m7-shell-bg-status]"
+      );
+
+    function refreshShellBgPreview(){
+      if(!shellBgPreview)return;
+
+      const url=String(shellBgUrl?.value||"").trim();
+      const color=safeHex(
+        box.querySelector("#"+CSS.escape(prefix+"profile_shell_bg_color"))?.value,
+        DEFAULTS.profile_shell_bg_color
+      );
+      const overlayRaw=Number(
+        box.querySelector("#"+CSS.escape(prefix+"profile_shell_bg_image_overlay"))?.value
+      );
+      const overlay=Number.isFinite(overlayRaw)
+        ? Math.max(0,Math.min(90,overlayRaw))/100
+        : .48;
+      const posRaw=Number(
+        box.querySelector("#"+CSS.escape(prefix+"profile_shell_bg_image_position_y"))?.value
+      );
+      const pos=Number.isFinite(posRaw)
+        ? Math.max(0,Math.min(100,posRaw))
+        : 50;
+
+      shellBgPreview.style.backgroundColor=color;
+      shellBgPreview.style.backgroundImage=
+        /^https?:\/\//i.test(url)
+          ? "linear-gradient(rgba(0,0,0,"+overlay+"),rgba(0,0,0,"+overlay+")),url(\""+
+            url.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")+
+            "\")"
+          : "none";
+      shellBgPreview.style.backgroundSize="cover";
+      shellBgPreview.style.backgroundPosition="center "+pos+"%";
+
+      const label=shellBgPreview.querySelector("span");
+      if(label){
+        label.textContent=url
+          ? "Profile-card background selected"
+          : "Color only";
+      }
+    }
+
     function refreshBannerPreview(){
       if(!bannerPreview){
         return;
@@ -7242,6 +7454,18 @@ function decorateAll(){
 
       const opacity=
         number("profile_shell_opacity",0,100,92)/100;
+
+      const shellBgImage=
+        String(
+          get("profile_shell_bg_image_url")?.value ||
+          ""
+        ).trim();
+
+      const shellBgImageOverlay=
+        number("profile_shell_bg_image_overlay",0,90,48)/100;
+
+      const shellBgImagePosition=
+        number("profile_shell_bg_image_position_y",0,100,50);
 
       const border=
         safeHex(
@@ -7359,7 +7583,16 @@ function decorateAll(){
 
       preview.dataset.layout=layout;
       preview.classList.toggle("off",!enabled);
-      preview.style.background=hexToRgba(bg,opacity);
+      preview.style.backgroundColor=hexToRgba(bg,opacity);
+      preview.style.backgroundImage=
+        /^https?:\/\//i.test(shellBgImage)
+          ? "linear-gradient(rgba(0,0,0,"+shellBgImageOverlay+"),rgba(0,0,0,"+shellBgImageOverlay+")),url(\""+
+            shellBgImage.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")+
+            "\")"
+          : "none";
+      preview.style.backgroundSize="cover";
+      preview.style.backgroundPosition="center "+shellBgImagePosition+"%";
+      preview.style.backgroundRepeat="no-repeat";
       preview.style.border=borderWidth+"px solid "+border;
       preview.style.borderRadius=radius+"px";
       preview.style.padding=padding+"px";
@@ -8023,6 +8256,78 @@ function decorateAll(){
       }
     );
 
+    shellBgFile?.addEventListener(
+      "change",
+      async function(){
+        const file=
+          shellBgFile.files &&
+          shellBgFile.files[0];
+
+        if(!file)return;
+
+        shellBgFile.disabled=true;
+        if(shellBgStatus){
+          shellBgStatus.textContent="Uploading profile background…";
+        }
+
+        try{
+          const url=
+            await uploadProfileShellBackground(
+              prefix,
+              file,
+              box
+            );
+
+          if(shellBgUrl){
+            shellBgUrl.value=url;
+            shellBgUrl.dispatchEvent(
+              new Event("input",{bubbles:true})
+            );
+          }
+
+          if(shellBgStatus){
+            shellBgStatus.textContent=
+              "Uploaded — press Save Changes to apply.";
+          }
+
+          refreshShellBgPreview();
+          refreshProfileShellPreview();
+        }
+        catch(error){
+          if(shellBgStatus){
+            shellBgStatus.textContent=
+              error && error.message
+                ? error.message
+                : "Profile background upload failed.";
+          }
+        }
+        finally{
+          shellBgFile.disabled=false;
+          shellBgFile.value="";
+        }
+      }
+    );
+
+    shellBgClear?.addEventListener(
+      "click",
+      function(){
+        if(shellBgUrl){
+          shellBgUrl.value="";
+          shellBgUrl.dispatchEvent(
+            new Event("input",{bubbles:true})
+          );
+        }
+
+        if(shellBgStatus){
+          shellBgStatus.textContent=
+            "Profile background removed locally — press Save Changes.";
+        }
+
+        refreshShellBgPreview();
+        refreshProfileShellPreview();
+      }
+    );
+
     [
       "story_new_effect",
       "story_upload_effect",
@@ -8033,6 +8338,9 @@ function decorateAll(){
       "profile_shell_enabled",
       "profile_shell_layout",
       "profile_shell_bg_color",
+      "profile_shell_bg_image_url",
+      "profile_shell_bg_image_overlay",
+      "profile_shell_bg_image_position_y",
       "profile_shell_opacity",
       "profile_shell_border_color",
       "profile_shell_border_width",
@@ -8199,6 +8507,7 @@ function decorateAll(){
     preset.addEventListener("change",updatePresetHint);
     motion.addEventListener("change",updatePresetHint);
     updatePresetHint();
+    refreshShellBgPreview();
     refreshBannerPreview();
     refreshProfileShellPreview();
     refreshLiveOffersPreview();
@@ -8210,6 +8519,7 @@ function decorateAll(){
         if(code) code.textContent = input.value.toUpperCase();
       });
       updatePresetHint();
+      refreshShellBgPreview();
       refreshBannerPreview();
       refreshProfileShellPreview();
       refreshLiveOffersPreview();
@@ -15956,6 +16266,9 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "profile_shell_enabled",
     "profile_shell_layout",
     "profile_shell_bg_color",
+    "profile_shell_bg_image_url",
+    "profile_shell_bg_image_overlay",
+    "profile_shell_bg_image_position_y",
     "profile_shell_opacity",
     "profile_shell_border_color",
     "profile_shell_border_width",
