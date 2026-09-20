@@ -17,7 +17,29 @@ function readOwnerCache(userId){try{const value=JSON.parse(localStorage.getItem(
 function writeOwnerCache(userId,nextOwner,nextShop){try{if(userId&&nextOwner?.shop_slug)localStorage.setItem(OWNER_CACHE_KEY,JSON.stringify({user_id:userId,owner:nextOwner,shop:nextShop||null,saved_at:Date.now()}));else localStorage.removeItem(OWNER_CACHE_KEY)}catch(_){}}
 async function accountReady(){for(let i=0;i<150&&!window.Ma7alakAccount?.client;i++)await sleep(100);try{await window.Ma7alakAccount?.ready?.()}catch(_){}}
 function client(){return window.Ma7alakAccount?.client||null}
-function emit(){dispatchEvent(new CustomEvent("ma7alak:owner-auth-change",{detail:{session,user:session?.user||null,owner,shop}}))}
+function ownerStatePayload(){
+  return {
+    type:"MA7ALAK_OWNER_STATE",
+    isOwner:!!owner,
+    shopSlug:String(owner?.shop_slug||""),
+    shop:shop||null,
+    sentAt:Date.now()
+  };
+}
+function sendOwnerState(target){
+  try{target?.postMessage(ownerStatePayload(),"*")}catch(_){}
+}
+function broadcastOwnerState(){
+  const payload=ownerStatePayload();
+  try{window.postMessage(payload,"*")}catch(_){}
+  document.querySelectorAll("iframe").forEach(frame=>{
+    try{frame.contentWindow?.postMessage(payload,"*")}catch(_){}
+  });
+}
+function emit(){
+  dispatchEvent(new CustomEvent("ma7alak:owner-auth-change",{detail:{session,user:session?.user||null,owner,shop}}));
+  broadcastOwnerState();
+}
 function removeOldLogin(){document.querySelectorAll("#ma7alak-header-menu-panel a.ma7alak-header-menu-link").forEach(a=>{const main=(a.querySelector(".ma7alak-header-menu-main")?.textContent||"").trim(),sub=(a.querySelector(".ma7alak-header-menu-sub")?.textContent||"").trim(),href=(a.getAttribute("href")||"").toLowerCase();if(/^login$/i.test(main)||/shop owner access/i.test(sub)||/\/login\/?$/.test(href))a.remove()})}
 function normalAvatar(){const p=window.Ma7alakAccount?.profile,u=session?.user;return p?.avatar_url||u?.user_metadata?.avatar_url||u?.user_metadata?.picture||""}
 function normalName(){const p=window.Ma7alakAccount?.profile,u=session?.user;return p?.display_name||p?.username||u?.user_metadata?.full_name||u?.email||"ShoufHon User"}
@@ -46,6 +68,27 @@ async function renderOwnerManager(slug,shopName){const root=document.getElementB
 function openUnifiedOwnerAdmin(card){const slug=String(card?.dataset?.slug||"").trim();if(!slug)return;const shopName=(card.querySelector(".ma-admin-shop-name")?.textContent||slug).trim(),ownerCard=document.getElementById("ma-admin-owner-card");if(!ownerCard)return;const slugInput=document.getElementById("ma-owner-shop-slug");if(slugInput)slugInput.value=slug;const n=document.getElementById("ma-owner-selected-name");if(n)n.textContent=shopName;const s=document.getElementById("ma-owner-selected-slug");if(s)s.textContent="/"+slug;["ma-admin-owner-form","ma-owner-existing-panel","ma-owner-loading"].forEach(id=>{const x=document.getElementById(id);if(x)x.hidden=true});let root=document.getElementById("m7-owner-assign-v4");if(!root){root=document.createElement("div");root.id="m7-owner-assign-v4";ownerCard.appendChild(root)}ownerCard.hidden=false;renderOwnerManager(slug,shopName).catch(e=>adminStatus(e.message,true));setTimeout(()=>ownerCard.scrollIntoView({behavior:"smooth",block:"start"}),30)}
 async function decorateAdmin(){if(path()!=="/admin")return;ensureCss();for(let i=0;i<150&&!window.Ma7alakAdminClient;i++)await sleep(100);if(!adminClient())return;document.addEventListener("click",e=>{const b=e.target.closest?.('button[data-action="owner"]');if(!b)return;const card=b.closest(".ma-admin-shop-item");if(!card)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openUnifiedOwnerAdmin(card)},true);const hideLegacy=()=>{["ma-admin-owner-form","ma-owner-existing-panel","ma-owner-loading"].forEach(id=>{const x=document.getElementById(id);if(x)x.hidden=true});document.querySelectorAll('button[data-action="owner"]').forEach(b=>{if(b.textContent!=="Assign Owner")b.textContent="Assign Owner"})};hideLegacy();const list=document.getElementById("ma-admin-shop-list");if(list)new MutationObserver(hideLegacy).observe(list,{childList:true,subtree:true})}
 function watchForHeader(){if(syncCircle())return;const root=document.documentElement;if(!root)return;const mo=new MutationObserver(()=>{if(document.getElementById("ma7alak-header-owner")){mo.disconnect();syncCircle()}});mo.observe(root,{childList:true,subtree:true});setTimeout(()=>mo.disconnect(),30000)}
-async function boot(){ensureCss();removeOldLogin();if(path()==="/admin"){decorateAdmin().catch(console.error);readyResolve();return}await refresh(false);startLiveOwnership();addEventListener("ma7alak:account-change",()=>setTimeout(async()=>{await refresh(false);startLiveOwnership();syncCircle()},0));addEventListener("focus",()=>refresh(true).catch(()=>{}));document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(true).catch(()=>{})});watchForHeader();readyResolve()}
+async function boot(){
+  ensureCss();
+  removeOldLogin();
+  window.addEventListener("message",event=>{
+    const data=event?.data||{};
+    if(data.type!=="MA7ALAK_OWNER_STATE_GET")return;
+    sendOwnerState(event.source);
+  });
+  if(path()==="/admin"){decorateAdmin().catch(console.error);readyResolve();return}
+  await refresh(false);
+  startLiveOwnership();
+  addEventListener("ma7alak:account-change",()=>setTimeout(async()=>{await refresh(false);startLiveOwnership();syncCircle()},0));
+  addEventListener("focus",()=>refresh(true).catch(()=>{}));
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(true).catch(()=>{})});
+  document.addEventListener("load",event=>{
+    const frame=event.target;
+    if(frame&&frame.tagName==="IFRAME")sendOwnerState(frame.contentWindow);
+  },true);
+  watchForHeader();
+  broadcastOwnerState();
+  readyResolve()
+}
 window.Ma7alakOwnerAuth={open:()=>window.Ma7alakAccount?.open?.(),close:()=>window.Ma7alakAccount?.close?.(),logout:()=>window.Ma7alakAccount?.logout?.(),refresh,get client(){return client()},get session(){return session},get user(){return session?.user||null},get owner(){return owner},get shop(){return shop},ready:()=>readyPromise};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
