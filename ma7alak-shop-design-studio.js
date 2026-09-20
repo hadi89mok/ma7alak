@@ -14,8 +14,8 @@
     ["profile","♙","Profile","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
     ["story","◉","Story","New-Story effects, upload effects, speed, sparkle and pulse"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
-    ["media","▧","Media","Gallery and video colors, filters, typography, frame shape, layers and animation"],
-    ["about","●","About","About content, services, colors, typography, ornaments and signature"],
+    ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
+    ["about","●","About / Hub","About text, services, social links, location, Hub colors and typography"],
     ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
     ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
   ];
@@ -71,7 +71,16 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode input[type="color"]{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;padding:3px!important;border-radius:9px!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-color-row code{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;padding:6px 7px!important;font-size:7px!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-group-hidden{display:none!important}
-      #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin-top:15px!important;padding-top:11px!important;border-top:1px solid rgba(218,170,82,.09)!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="about_text"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="facebook_url"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="tiktok_url"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="instagram_url"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="whatsapp_url"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="address_text"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="menu_image_url"]{display:flex!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-note{margin:0 0 12px;padding:11px 12px;border:1px solid rgba(95,199,255,.20);border-radius:11px;background:rgba(95,199,255,.055);color:#a9dfff;font-size:8px;line-height:1.55}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-note b{color:#d9f2ff}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin:16px 0 10px!important;padding:8px 10px!important;border:1px solid rgba(244,191,80,.24)!important;border-left:4px solid #f4bf50!important;border-radius:9px!important;background:linear-gradient(90deg,rgba(244,191,80,.10),rgba(244,191,80,.025))!important;color:#ffd878!important;font-size:10px!important;font-weight:950!important;letter-spacing:.8px!important;text-transform:uppercase!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7ds-pane>.m7ds-section-title:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7ds-field:has(input[type="color"]){padding:8px!important;border:1px solid rgba(218,170,82,.10)!important;border-radius:11px!important;background:rgba(255,255,255,.012)!important}
       #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form::-webkit-scrollbar,#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview::-webkit-scrollbar{width:9px}
@@ -110,6 +119,8 @@
   function resetView(form){
     form.classList.remove("m7studio-colors-mode");
     form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
+    form.querySelector(":scope > .m7studio-hub-note")?.remove();
+    form.querySelector(".m7da-sectioned-extras")?.classList.remove("m7studio-hub-extras");
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
     form.querySelectorAll(".m7studio-field-hidden,.m7studio-group-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden","m7studio-group-hidden"));
     const design=form.querySelector(".m7-design-studio");
@@ -139,7 +150,11 @@
     design.classList.remove("m7v4-section-off","m7studio-hidden");
     const root=directFormChild(form,design);
     if(root){root.classList.remove("m7v4-section-off","m7studio-hidden");root.classList.add("m7studio-force-show")}
-    design.querySelectorAll(":scope > .m7ds-pane").forEach(pane=>pane.classList.toggle("m7studio-pane-on",names.includes(String(pane.dataset.m7dsPane||""))));
+    design.querySelectorAll(":scope > .m7ds-tabs [data-m7ds-tab]").forEach(button=>button.classList.remove("active"));
+    design.querySelectorAll(":scope > .m7ds-pane").forEach(pane=>{
+      pane.classList.remove("active");
+      pane.classList.toggle("m7studio-pane-on",names.includes(String(pane.dataset.m7dsPane||"")));
+    });
     return design;
   }
 
@@ -675,7 +690,13 @@
       nav.setAttribute("aria-label","Shop Design Studio sections");
       nav.innerHTML=TABS.map(([key,icon,label])=>'<button type="button" class="m7studio-tab" data-m7studio-tab="'+esc(key)+'"><i>'+esc(icon)+'</i><span>'+esc(label)+'</span></button>').join("");
       top.after(nav);
-      nav.addEventListener("click",event=>{const button=event.target.closest("[data-m7studio-tab]");if(button)activateTab(button.dataset.m7studioTab)});
+      nav.addEventListener("click",event=>{
+        const button=event.target.closest("[data-m7studio-tab]");
+        if(!button)return;
+        event.preventDefault();
+        event.stopPropagation();
+        activateTab(button.dataset.m7studioTab);
+      });
     }
     const name=String(document.getElementById("ma-edit-name")?.value||document.getElementById("ma-edit-original-slug")?.value||"Shop").trim();
     const subtitle=top.querySelector("[data-m7studio-subtitle]");if(subtitle)subtitle.textContent="Editing "+name+" · real controls, real Save, live shop sync.";
@@ -744,6 +765,8 @@
       fieldWrapper(document.getElementById("ma-edit-image"))?.classList.add("m7studio-field-hidden");
 
       const identity=design?.querySelector('[data-m7ds-pane="identity"]');
+      const identityTitle=identity?.querySelector(":scope > .m7ds-section-title");
+      if(identityTitle)identityTitle.textContent="Profile & Shop Identity";
       const typography=design?.querySelector('[data-m7ds-pane="typography"]');
 
       /* Profile owns the ring color. Story owns only Story motion. */
@@ -762,10 +785,13 @@
     else if(key==="story"){
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["identity"]);
+      const storyPane=design?.querySelector('[data-m7ds-pane="identity"]');
       filterFields(
-        design?.querySelector('[data-m7ds-pane="identity"]'),
+        storyPane,
         id=>id.includes("story_")
       );
+      const storyTitle=storyPane?.querySelector(":scope > .m7ds-section-title");
+      if(storyTitle)storyTitle.textContent="Story Effects";
       hideDesignChrome();
       tidyPane(design?.querySelector('[data-m7ds-pane="identity"]'));
       hideFormRoots(form,roots);
@@ -774,10 +800,13 @@
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["modules","typography"]);
 
+      const liveModules=design?.querySelector('[data-m7ds-pane="modules"]');
       filterFields(
-        design?.querySelector('[data-m7ds-pane="modules"]'),
+        liveModules,
         id=>id.includes("live_")
       );
+      const liveHeading=liveModules?.querySelector(":scope > .m7ds-section-title");
+      if(liveHeading)liveHeading.textContent="Live / Offers Accent & Design";
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
         id=>/live_font_(?:style|size)$/.test(id)
@@ -792,10 +821,16 @@
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["modules","typography"]);
 
+      const mediaModules=design?.querySelector('[data-m7ds-pane="modules"]');
       filterFields(
-        design?.querySelector('[data-m7ds-pane="modules"]'),
+        mediaModules,
         id=>/gallery_|media_|video_/.test(id)
       );
+      const mediaHeading=mediaModules?.querySelector(":scope > .m7ds-section-title");
+      if(mediaHeading)mediaHeading.textContent="Photos & Videos — Accent Colors";
+      const galleryHeading=[...mediaModules?.querySelectorAll(".m7ds-section-title")||[]]
+        .find(el=>/Gallery Multi-Color Frame/i.test(el.textContent||""));
+      if(galleryHeading)galleryHeading.textContent="Gallery Photo Frame";
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
         id=>/media_font_(?:style|size)$/.test(id)
@@ -815,21 +850,29 @@
       ]);
 
       showPanes(form,["about","typography","modules"]);
-      markExtras("about");
+      markExtras("");
+
+      if(extras){
+        extras.classList.add("m7studio-hub-extras");
+      }
+
+      const hubNote=document.createElement("div");
+      hubNote.className="m7studio-hub-note";
+      hubNote.innerHTML="<b>Profile Hub controls</b><br>About text, services, social links, address/location styling and Hub appearance are grouped here. Followers / Following / Likes are live stats and are not manually editable.";
+      form.insertBefore(hubNote,form.firstChild.nextSibling);
 
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
-        id=>/about_font_(?:style|size)$/.test(id)
+        id=>/(?:about|hub)_font_(?:style|size)$/.test(id)
       );
 
-      /*
-         Profile Hub powers About / Social / Location / Stats on the current
-         shop pages, so keep its working accent beside the About controls.
-      */
+      const hubModules=design?.querySelector('[data-m7ds-pane="modules"]');
       filterFields(
-        design?.querySelector('[data-m7ds-pane="modules"]'),
+        hubModules,
         id=>id.includes("hub_")
       );
+      const hubHeading=hubModules?.querySelector(":scope > .m7ds-section-title");
+      if(hubHeading)hubHeading.textContent="Profile Hub Accent";
 
       hideDesignChrome();
       tidyPane(design?.querySelector('[data-m7ds-pane="about"]'));
