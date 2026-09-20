@@ -6,7 +6,8 @@
       with all Hostinger Custom Embed iframes.
    2) Inside an embed iframe: requests that slug before the module boots.
 
-   No Supabase. No polling database. No localStorage shop identity.
+   No database polling. Reuses the site's existing Supabase client only for
+   instant Admin design-preview broadcast; shop identity is never stored locally.
 ========================================================= */
 (function(){
   "use strict";
@@ -69,6 +70,145 @@
     let pageSlug=detectPageSlug();
     let revision=pageSlug?1:0;
 
+    const DESIGN_TYPE="MA7ALAK_DESIGN_PREVIEW";
+    const DESIGN_CHANNEL_LOCAL="ma7alak-design-live-v1";
+    let designRealtimeChannel=null;
+    let designRealtimeClient=null;
+    let designRealtimeSlug="";
+    let designRetryTimer=0;
+    let designBc=null;
+    let lastDesignStamp=0;
+
+    function designClient(){
+      return (
+        window.Ma7alakSupabase?.client ||
+        window.Ma7alakSupabaseBootstrap?.client ||
+        window.Ma7alakAccount?.client ||
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+        null
+      );
+    }
+
+    function relayDesignPreview(message,source){
+      if(!message||message.type!==DESIGN_TYPE)return;
+      const slug=normalize(message.shop_slug||message.shopSlug||"");
+      if(!slug||!pageSlug||slug!==pageSlug)return;
+
+      const stamp=Number(message.sent_at)||Date.now();
+      if(stamp<=lastDesignStamp)return;
+      lastDesignStamp=stamp;
+
+      const payload={
+        ...message,
+        shop_slug:pageSlug,
+        shopSlug:pageSlug,
+        source:source||message.source||"shop-context-relay"
+      };
+
+      try{window.postMessage(payload,"*")}catch(_){}
+      document.querySelectorAll("iframe").forEach(function(frame){
+        try{post(frame.contentWindow,payload)}catch(_){}
+      });
+
+      try{
+        window.dispatchEvent(
+          new CustomEvent(
+            "shoufhon:design-preview",
+            {detail:payload}
+          )
+        );
+      }catch(_){}
+    }
+
+    function stopDesignRealtime(){
+      if(designRealtimeClient&&designRealtimeChannel){
+        try{
+          designRealtimeClient.removeChannel(designRealtimeChannel);
+        }catch(_){}
+      }
+      designRealtimeChannel=null;
+      designRealtimeClient=null;
+      designRealtimeSlug="";
+    }
+
+    async function startDesignRealtime(){
+      clearTimeout(designRetryTimer);
+      designRetryTimer=0;
+
+      if(!pageSlug){
+        stopDesignRealtime();
+        return;
+      }
+
+      let client=designClient();
+
+      if(
+        !client &&
+        window.Ma7alakSupabaseBootstrap &&
+        typeof window.Ma7alakSupabaseBootstrap.ready==="function"
+      ){
+        try{
+          client=await window.Ma7alakSupabaseBootstrap.ready();
+        }catch(_){}
+      }
+
+      client=client||designClient();
+
+      if(!client||typeof client.channel!=="function"){
+        designRetryTimer=setTimeout(startDesignRealtime,350);
+        return;
+      }
+
+      if(
+        designRealtimeChannel &&
+        designRealtimeClient===client &&
+        designRealtimeSlug===pageSlug
+      ){
+        return;
+      }
+
+      stopDesignRealtime();
+
+      designRealtimeClient=client;
+      designRealtimeSlug=pageSlug;
+      designRealtimeChannel=
+        client
+          .channel("ma7alak-design-preview-"+pageSlug)
+          .on(
+            "broadcast",
+            {event:"design-preview"},
+            function(payload){
+              relayDesignPreview(
+                payload&&payload.payload,
+                "supabase"
+              );
+            }
+          )
+          .subscribe();
+    }
+
+    function scheduleDesignRealtime(){
+      clearTimeout(designRetryTimer);
+      designRetryTimer=setTimeout(startDesignRealtime,0);
+    }
+
+    try{
+      if("BroadcastChannel" in window){
+        designBc=new BroadcastChannel(DESIGN_CHANNEL_LOCAL);
+        designBc.onmessage=function(event){
+          relayDesignPreview(event.data,"broadcast-channel");
+        };
+      }
+    }catch(_){}
+
+    window.addEventListener("storage",function(event){
+      if(!event.key||!event.newValue)return;
+      if(event.key!=="ma7alak_design_live_v1:"+pageSlug)return;
+      try{
+        relayDesignPreview(JSON.parse(event.newValue),"storage");
+      }catch(_){}
+    });
+
     function payload(type){
       return {type,shopSlug:pageSlug,shop_slug:pageSlug,revision,sentAt:Date.now()};
     }
@@ -94,6 +234,7 @@
         revision++;
       }
       broadcast(source||"set");
+      scheduleDesignRealtime();
       return true;
     }
 
@@ -158,6 +299,15 @@
       detectPageSlug,
       normalize
     };
+
+    window.addEventListener("ma7alak:account-change",scheduleDesignRealtime);
+    window.addEventListener("ma7alak:owner-auth-change",scheduleDesignRealtime);
+    window.addEventListener("pageshow",scheduleDesignRealtime);
+    document.addEventListener("visibilitychange",function(){
+      if(document.visibilityState==="visible")scheduleDesignRealtime();
+    });
+
+    scheduleDesignRealtime();
 
     return;
   }
