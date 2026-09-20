@@ -76,6 +76,7 @@
     let designRealtimeClient=null;
     let designRealtimeSlug="";
     let designRetryTimer=0;
+    let designRetryCount=0;
     let designBc=null;
     let lastDesignStamp=0;
 
@@ -155,9 +156,19 @@
       client=client||designClient();
 
       if(!client||typeof client.channel!=="function"){
-        designRetryTimer=setTimeout(startDesignRealtime,350);
+        /*
+           Do not retry forever on a page where the shared Supabase runtime
+           is intentionally absent. Account/page/context events below reset
+           the counter and try again when the environment changes.
+        */
+        if(designRetryCount<30){
+          designRetryCount++;
+          designRetryTimer=setTimeout(startDesignRealtime,350);
+        }
         return;
       }
+
+      designRetryCount=0;
 
       if(
         designRealtimeChannel &&
@@ -189,6 +200,7 @@
 
     function scheduleDesignRealtime(){
       clearTimeout(designRetryTimer);
+      designRetryCount=0;
       designRetryTimer=setTimeout(startDesignRealtime,0);
     }
 
