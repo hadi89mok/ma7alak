@@ -1891,6 +1891,40 @@
         load
       );
     }
+
+    if(
+      typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ ===
+        "function"
+    ){
+      window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+        function(message){
+          const profile = {
+            ...(
+              message &&
+              message.profile &&
+              typeof message.profile === "object"
+                ? message.profile
+                : {}
+            ),
+            shop_slug:
+              String(
+                window.__MA7ALAK_EXACT_HUB_SLUG__ ||
+                ""
+              )
+                .trim()
+                .toLowerCase(),
+            directory_options:
+              message &&
+              message.directory_options &&
+              typeof message.directory_options === "object"
+                ? message.directory_options
+                : {}
+          };
+
+          apply(profile);
+        }
+      );
+    }
   }
 
   start().catch(error=>
