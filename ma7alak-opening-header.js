@@ -609,9 +609,41 @@ function renderLive(){let n=livePosts.length;liveRoot.classList.toggle("m7-live-
 let liveStateReceived=false;
 const liveRequestTimers=[];
 function stopLiveRequests(){while(liveRequestTimers.length)clearTimeout(liveRequestTimers.pop())}
-addEventListener("message",e=>{let d=e.data||{};if((d.type==="MA7ALAK_LIVE_OFFERS_STATE"&&!d.shopSlug)||d.type==="MA7ALAK_LIVE_OFFERS_UPDATED"){liveStateReceived=true;stopLiveRequests();let next=Array.isArray(d.items)?d.items:[],signature=getLiveSignature(next);livePosts=next;if(signature!==liveSignature){liveSignature=signature;renderLive()}else updateLiveTimers()}if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel()});
+function applyLiveState(next){
+  next=Array.isArray(next)?next:[];
+  liveStateReceived=true;
+  stopLiveRequests();
+  const signature=getLiveSignature(next);
+  livePosts=next;
+  if(signature!==liveSignature){
+    liveSignature=signature;
+    renderLive();
+  }else{
+    updateLiveTimers();
+  }
+}
+function syncLiveFromProviderCache(){
+  if(document.hidden)return;
+  const provider=window.Ma7alakLiveOffers;
+  if(!provider)return;
+  try{
+    const next=provider.items;
+    if(Array.isArray(next))applyLiveState(next);
+  }catch(_){}
+}
+addEventListener("message",e=>{
+  const d=e.data||{};
+  if((d.type==="MA7ALAK_LIVE_OFFERS_STATE"&&!d.shopSlug)||d.type==="MA7ALAK_LIVE_OFFERS_UPDATED"){
+    applyLiveState(d.items);
+  }
+  if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel();
+});
 function requestLive(){if(!liveStateReceived)window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}
 [0,250,750,1500,3000,5000,8000,12000].forEach(ms=>liveRequestTimers.push(setTimeout(requestLive,ms)));
+const liveProviderCacheTimer=setInterval(syncLiveFromProviderCache,4000);
+window.addEventListener("focus",syncLiveFromProviderCache);
+window.addEventListener("pageshow",syncLiveFromProviderCache);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){syncLiveFromProviderCache();requestLive()}});
 setInterval(updateLiveTimers,1000);
 const liveMediaObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
  const v=entry.target;
