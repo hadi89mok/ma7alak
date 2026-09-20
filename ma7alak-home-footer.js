@@ -419,16 +419,35 @@ body.m7hf-home-mounted{background:#050403!important}
     return `<a class="${animationClass(current.nav_animation)}" href="${esc(url)}"${target} style="animation-delay:${(i%4)*.1}s;-webkit-animation-delay:${(i%4)*.1}s">${esc(x.label||"Link")}</a>`;
   }
 
-  function render(){
-    ensureStyle();
+  function footerHost(){
+    return document.querySelector("main")||document.body;
+  }
+
+  function ensureRootConnected(){
+    const host=footerHost();
+    if(!host)return null;
+
     if(!root){
       root=document.createElement("footer");
       root.id="shoufhon-home-footer";
       root.setAttribute("aria-label","ShoufHon footer");
-      (document.querySelector("main")||document.body).appendChild(root);
-      document.documentElement.classList.add("m7hf-home-mounted");
-      document.body.classList.add("m7hf-home-mounted");
     }
+
+    /* Hostinger can rebuild/replace page content after Custom Code has run.
+       If that removes the footer node, reconnect the SAME footer instance
+       to the current live page instead of letting the one-time guard hide it forever. */
+    if(!root.isConnected||root.parentNode!==host){
+      host.appendChild(root);
+    }
+
+    document.documentElement.classList.add("m7hf-home-mounted");
+    document.body?.classList.add("m7hf-home-mounted");
+    return root;
+  }
+
+  function render(){
+    ensureStyle();
+    if(!ensureRootConnected())return;
 
     root.hidden=current.enabled===false;
     if(root.hidden)return;
@@ -572,11 +591,13 @@ body.m7hf-home-mounted{background:#050403!important}
     }catch(e){console.warn("ShoufHon footer realtime:",e)}
   }
 
-  function keepLast(){
-    if(root&&root.isConnected&&document.body.lastElementChild!==root){
-      const last=document.body.lastElementChild;
-      if(last&&!/SCRIPT/i.test(last.tagName)&&!last.matches?.("#ma7alak-live-stats"))document.body.appendChild(root);
-    }
+  let reconnectTimer=null;
+
+  function reconnect(){
+    if((location.pathname||"/").replace(/\/+$/,"")!=="/")return;
+    const wasConnected=!!root?.isConnected;
+    if(!ensureRootConnected())return;
+    if(!wasConnected)render();
   }
 
   async function boot(){
@@ -585,11 +606,21 @@ body.m7hf-home-mounted{background:#050403!important}
     render();
     await load();
     subscribe();
-    setTimeout(keepLast,1200);
-    setTimeout(keepLast,3200);
+
+    /* Keep the footer alive through Hostinger UI hydration / soft refreshes.
+       One lightweight check every 1.5s; no document-wide MutationObserver. */
+    clearInterval(reconnectTimer);
+    reconnectTimer=setInterval(()=>{
+      if(!document.hidden)reconnect();
+    },1500);
+
     setInterval(()=>{if(!document.hidden)load()},45000);
   }
 
-  window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(current.background_url==="builtin"&&root)render()});
+  window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(current.background_url==="builtin")render()});
+  window.addEventListener("pageshow",reconnect);
+  window.addEventListener("popstate",reconnect);
+  window.addEventListener("focus",reconnect);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reconnect()});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
