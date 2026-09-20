@@ -142,8 +142,39 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
      document.body.appendChild(shell);
    }
  }
+
+ /* Hostinger can hydrate/rebuild the page after Custom Code first renders.
+    Reinsert the SAME feed node if its Hostinger section gets replaced.
+    Reusing the same node preserves all Reel/Live click handlers, observers,
+    realtime subscriptions and mobile video behavior. */
+ let m7PlacementTimer=null;
+ function keepFeedMounted(){
+   if(document.hidden)return;
+   if(!style.isConnected&&document.head)document.head.appendChild(style);
+   if(!shell.isConnected){
+     place();
+     return;
+   }
+
+   const hero=document.getElementById("ma7alak-opening-header-root");
+   const wanted=hero?m7FindHostingerBackgroundHost(hero):null;
+   if(wanted&&shell.parentNode!==wanted)place();
+ }
+
  place();
  [80,300,800,1600,3000].forEach(ms=>setTimeout(place,ms));
+ clearInterval(m7PlacementTimer);
+ m7PlacementTimer=setInterval(keepFeedMounted,1200);
+ window.addEventListener("pageshow",keepFeedMounted);
+ window.addEventListener("focus",keepFeedMounted);
+ window.addEventListener("popstate",keepFeedMounted);
+ document.addEventListener("visibilitychange",()=>{
+   if(document.visibilityState==="visible"){
+     keepFeedMounted();
+     setTimeout(keepFeedMounted,120);
+     setTimeout(keepFeedMounted,600);
+   }
+ });
 
 (function(){"use strict";
 const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
