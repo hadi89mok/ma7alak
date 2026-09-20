@@ -835,6 +835,29 @@ window.addEventListener(
       loadTypography
     );
   }
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+      function(message){
+        const options =
+          message &&
+          message.directory_options &&
+          typeof message.directory_options === "object"
+            ? message.directory_options
+            : {};
+
+        applyAll(options);
+
+        setTimeout(
+          ()=>applyAll(options),
+          80
+        );
+      }
+    );
+  }
 })();
 
 
