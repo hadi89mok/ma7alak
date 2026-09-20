@@ -111,4 +111,14 @@
     url:URL,
     key:KEY
   };
+
+  /* Compatibility alias for older ShoufHon modules.
+     This avoids them creating a second project client when the shared
+     bootstrap client is already available. */
+  window.Ma7alakSupabase = {
+    ready:function(){ return readyPromise; },
+    get client(){ return window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ || null; },
+    url:URL,
+    key:KEY
+  };
 })();
