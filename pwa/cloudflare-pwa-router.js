@@ -14,11 +14,15 @@
 const SOURCE_BASE =
   "https://raw.githubusercontent.com/hadi89mok/ma7alak/main/pwa/";
 
+const BRAND_ICON =
+  "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
+
 export default {
   async fetch(request) {
     const url = new URL(request.url);
 
     let file = null;
+    let upstreamUrl = null;
     let contentType = null;
     let cacheControl = "no-cache, max-age=0";
 
@@ -26,11 +30,11 @@ export default {
       const icon = url.searchParams.get("icon");
 
       if (icon === "192") {
-        file = "icon-192.png";
+        upstreamUrl = BRAND_ICON + "?w=192&h=192&fit=crop&fm=png&auto=compress";
         contentType = "image/png";
         cacheControl = "public, max-age=86400";
       } else if (icon === "512") {
-        file = "icon-512.png";
+        upstreamUrl = BRAND_ICON + "?w=512&h=512&fit=crop&fm=png&auto=compress";
         contentType = "image/png";
         cacheControl = "public, max-age=86400";
       } else {
@@ -45,19 +49,23 @@ export default {
       file = "offline.html";
       contentType = "text/html; charset=utf-8";
     } else if (url.pathname === "/pwa-icon-192.png") {
-      file = "icon-192.png";
+      upstreamUrl = BRAND_ICON + "?w=192&h=192&fit=crop&fm=png&auto=compress";
       contentType = "image/png";
       cacheControl = "public, max-age=86400";
     } else if (url.pathname === "/pwa-icon-512.png") {
-      file = "icon-512.png";
+      upstreamUrl = BRAND_ICON + "?w=512&h=512&fit=crop&fm=png&auto=compress";
       contentType = "image/png";
       cacheControl = "public, max-age=86400";
     } else {
       return fetch(request);
     }
 
+    if (!upstreamUrl) {
+      upstreamUrl = SOURCE_BASE + file + "?v=" + Date.now();
+    }
+
     const upstream = await fetch(
-      SOURCE_BASE + file + "?v=" + Date.now(),
+      upstreamUrl,
       {
         headers: {
           "User-Agent": "ShoufHon-PWA-Worker/1.2"

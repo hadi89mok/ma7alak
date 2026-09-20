@@ -16,13 +16,13 @@
   "categories": ["shopping", "lifestyle", "social"],
   "icons": [
     {
-      "src": "/manifest.webmanifest?icon=192&v=5",
+      "src": "/manifest.webmanifest?icon=192&v=6",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/manifest.webmanifest?icon=512&v=5",
+      "src": "/manifest.webmanifest?icon=512&v=6",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
