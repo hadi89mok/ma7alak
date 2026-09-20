@@ -66,8 +66,8 @@
     if(window.__SHOUFHON_SHOP_CONTEXT_BRIDGE_V1__)return;
     window.__SHOUFHON_SHOP_CONTEXT_BRIDGE_V1__=true;
 
-    let pageSlug="";
-    let revision=0;
+    let pageSlug=detectPageSlug();
+    let revision=pageSlug?1:0;
 
     function payload(type){
       return {type,shopSlug:pageSlug,shop_slug:pageSlug,revision,sentAt:Date.now()};
@@ -209,7 +209,7 @@
       };
       waiters.push(done);
       request();
-      const retryTimer=setInterval(request,180);
+      const retryTimer=setInterval(request,120);
       const timeoutTimer=setTimeout(function(){
         const index=waiters.indexOf(done);
         if(index>=0)waiters.splice(index,1);
@@ -221,14 +221,21 @@
   async function resolveSlug(options){
     options=options||{};
     if(currentSlug)return currentSlug;
-    const fromContext=await waitForContext(options.timeout||4500);
-    if(fromContext)return fromContext;
 
     const explicit=normalize(options.explicit||"");
     if(explicit){
-      settle(explicit,"explicit-fallback");
+      settle(explicit,"explicit");
       return explicit;
     }
+
+    /*
+       The parent bridge now pre-seeds from the published page URL, so under
+       normal conditions this resolves on the first postMessage round-trip.
+       Keep only a short wait for Hostinger/editor startup before falling
+       back locally.
+    */
+    const fromContext=await waitForContext(options.timeout||800);
+    if(fromContext)return fromContext;
 
     const fallback=normalize(
       typeof options.fallback==="function"
