@@ -7,7 +7,7 @@
 */
 "use strict";
 
-const VERSION="m7-pwa-2026-09-20-5";
+const VERSION="m7-pwa-2026-09-20-6";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
 
 self.addEventListener("install",event=>{
