@@ -7494,6 +7494,12 @@ function decorateAll(){
           DEFAULTS.profile_shell_border_color
         );
 
+      const ringColor=
+        safeHex(
+          get("profile_ring_color")?.value,
+          DEFAULTS.profile_ring_color
+        );
+
       const borderWidth=
         number("profile_shell_border_width",0,4,1);
 
@@ -7735,7 +7741,10 @@ function decorateAll(){
           bannerEnabled
             ? (-Math.min(82,overlap*.58))+"px"
             : "8px";
-        logo.style.borderColor=border;
+        logo.style.borderColor=ringColor;
+        logo.style.boxShadow=
+          "0 0 0 1px "+hexToRgba(ringColor,.18)+
+          ",0 0 18px "+hexToRgba(ringColor,.26);
 
         /*
            Edit Shop profile image is a core field, not a directory option.
