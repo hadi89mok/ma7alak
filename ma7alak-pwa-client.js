@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.20.5";
+  const VERSION="2026.09.20.6";
   const DISMISS_KEY="ma7alak_pwa_install_dismissed_until";
   const THREE_DAYS=3*24*60*60*1000;
   let deferredPrompt=null;
