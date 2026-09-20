@@ -16374,6 +16374,9 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   let realtimePreviewSlug="";
   let realtimePreviewReady=false;
   let pendingRealtimeMessage=null;
+  let globalPreviewChannel=null;
+  let globalPreviewReady=false;
+  let pendingGlobalMessage=null;
 
   try{
     if("BroadcastChannel" in window){
@@ -16598,6 +16601,81 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       })
     ).catch(()=>{});
   }
+  function ensureGlobalPreview(){
+    const client=window.Ma7alakAdminClient;
+
+    if(
+      globalPreviewChannel ||
+      !client ||
+      typeof client.channel!=="function"
+    ){
+      return globalPreviewChannel;
+    }
+
+    globalPreviewReady=false;
+
+    globalPreviewChannel=
+      client.channel(
+        "ma7alak-design-preview-global",
+        {
+          config:{
+            broadcast:{
+              self:false
+            }
+          }
+        }
+      );
+
+    globalPreviewChannel.subscribe(
+      status=>{
+        globalPreviewReady=
+          status==="SUBSCRIBED";
+
+        if(
+          globalPreviewReady &&
+          pendingGlobalMessage
+        ){
+          const message=pendingGlobalMessage;
+          pendingGlobalMessage=null;
+
+          Promise.resolve(
+            globalPreviewChannel.send({
+              type:"broadcast",
+              event:"design-preview",
+              payload:message
+            })
+          ).catch(()=>{});
+        }
+      }
+    );
+
+    return globalPreviewChannel;
+  }
+
+  function sendGlobalPreview(message){
+    pendingGlobalMessage=message;
+
+    const channel=
+      ensureGlobalPreview();
+
+    if(
+      !channel ||
+      !globalPreviewReady
+    ){
+      return;
+    }
+
+    pendingGlobalMessage=null;
+
+    Promise.resolve(
+      channel.send({
+        type:"broadcast",
+        event:"design-preview",
+        payload:message
+      })
+    ).catch(()=>{});
+  }
+
 
   function publish(){
     timer=0;
@@ -16632,6 +16710,10 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     }catch(_){}
 
     sendRealtimePreview(
+      message
+    );
+
+    sendGlobalPreview(
       message
     );
   }
@@ -16671,15 +16753,22 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       const client=
         window.Ma7alakAdminClient;
 
-      if(
-        client &&
-        realtimePreviewChannel
-      ){
-        try{
-          client.removeChannel(
-            realtimePreviewChannel
-          );
-        }catch(_){}
+      if(client){
+        if(realtimePreviewChannel){
+          try{
+            client.removeChannel(
+              realtimePreviewChannel
+            );
+          }catch(_){}
+        }
+
+        if(globalPreviewChannel){
+          try{
+            client.removeChannel(
+              globalPreviewChannel
+            );
+          }catch(_){}
+        }
       }
     }
   );
