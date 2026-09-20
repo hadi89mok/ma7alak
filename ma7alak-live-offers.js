@@ -533,18 +533,62 @@ function bridge(){
     if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
       const previewSlug=String(d.shop_slug||d.shopSlug||"").trim().toLowerCase();
       if(!previewSlug)return;
+
+      const draft=
+        d.profile&&typeof d.profile==="object"
+          ? d.profile
+          : {};
+
       const old=profileOptions.get(previewSlug)||{shop_slug:previewSlug};
+
       profileOptions.set(previewSlug,{
         ...old,
-        ...(d.profile&&typeof d.profile==="object"?d.profile:{}),
+        ...draft,
         shop_slug:previewSlug,
         directory_options:{
           ...(old.directory_options&&typeof old.directory_options==="object"?old.directory_options:{}),
           ...(d.directory_options&&typeof d.directory_options==="object"?d.directory_options:{})
         }
       });
+
+      /*
+         Existing Live rows contain a saved snapshot of shop identity.
+         Overlay the unsaved Admin draft locally so name/avatar/shop URL
+         change instantly without touching the database until Save.
+      */
+      const patchIdentity=function(row){
+        if(String(row&&row.shop_slug||"").trim().toLowerCase()!==previewSlug){
+          return row;
+        }
+
+        return {
+          ...row,
+          shop_name:
+            String(draft.shop_name||"").trim() ||
+            row.shop_name,
+          profile_image_url:
+            String(draft.profile_image_url||"").trim() ||
+            row.profile_image_url,
+          shop_url:
+            String(draft.shop_url||"").trim() ||
+            row.shop_url
+        };
+      };
+
+      items=items.map(patchIdentity);
+      ownerItems=ownerItems.map(patchIdentity);
+
       lastRenderSignature="";
       render();
+
+      if(
+        viewId!=null &&
+        [...items,...ownerItems]
+          .some(row=>String(row.id)===String(viewId)&&String(row.shop_slug||"").trim().toLowerCase()===previewSlug)
+      ){
+        view(viewId);
+      }
+
       return;
     }
 
