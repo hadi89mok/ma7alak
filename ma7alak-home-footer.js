@@ -15,7 +15,7 @@
   /* Built-in footer background derived from the approved ShoufHon footer mockup.
      Stored as base64 text in the repository so it stays exact and cacheable. */
   const M7HF_BUILTIN_BG_SOURCE =
-    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@9fb0fd3107484aca8bf7cde29951ffc60aed15ce/assets/shoufhon-footer-background.b64.txt";
+    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@fd93b0f2f0f7914eadf521b13d4c1b463f83a0dc/assets/shoufhon-footer-background.b64.txt";
 
   if(!window.__SHOUFHON_FOOTER_BUILTIN_BG_PROMISE__){
     window.__SHOUFHON_FOOTER_BUILTIN_BG_PROMISE__ = fetch(M7HF_BUILTIN_BG_SOURCE,{cache:"force-cache"})
@@ -44,9 +44,9 @@
   const DEFAULTS={
     enabled:true,
     background_url:"builtin",
-    background_overlay:72,
+    background_overlay:50,
     background_position:"center 54%",
-    background_zoom:115,
+    background_zoom:105,
     background_color:"#080604",
     accent_color:"#d9a441",
     accent_color_2:"#f2cc7b",
@@ -54,7 +54,7 @@
     text_color:"#f7dfaa",
     muted_color:"#d8c8a8",
     logo_url:"https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png",
-    logo_size:190,
+    logo_size:245,
     logo_animation:"float-glow",
     title:"شوف هون المحلات",
     title_color:"#e7bd6b",
@@ -92,7 +92,7 @@
     bottom_size:14,
     bottom_animation:"heartbeat",
     show_flag:true,
-    footer_min_height:590,
+    footer_min_height:520,
     top_radius:34,
     content_max_width:760,
     overall_animation:"subtle",
@@ -146,6 +146,15 @@
     telegram:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 4-3.15 15.1c-.24 1.06-.86 1.32-1.75.82l-4.8-3.54-2.32 2.23c-.25.25-.47.47-.96.47l.34-4.9 8.93-8.07c.39-.34-.08-.53-.6-.19L5.65 12.88.9 11.4c-1.03-.32-1.05-1.03.22-1.53L19.7 2.7C20.56 2.38 21.32 2.9 21 4Z" fill="currentColor"/></svg>',
     website:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.8 12h16.4M12 3.5c2.1 2.3 3.1 5.13 3.1 8.5S14.1 18.2 12 20.5M12 3.5C9.9 5.8 8.9 8.63 8.9 12s1 6.2 3.1 8.5" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/></svg>'
   };
+
+  const ORIGINAL_LOGO_URL="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png";
+  const CROPPED_LOGO_URL=ORIGINAL_LOGO_URL+"?rect=76,215,223,152&fit=crop&w=669&h=456&fm=png&auto=compress";
+  function footerLogoUrl(value){
+    const v=String(value||"").trim();
+    if(!v)return "";
+    if(v===ORIGINAL_LOGO_URL || v.startsWith(ORIGINAL_LOGO_URL+"?"))return CROPPED_LOGO_URL;
+    return v;
+  }
 
   function animationClass(name){
     name=String(name||"none").toLowerCase().replace(/[^a-z0-9-]/g,"");
@@ -239,6 +248,109 @@
 }
 @media(max-width:390px){.m7hf-content{padding-top:56px}.m7hf-nav a{font-size:11px;padding:7px 11px}.m7hf-side-note{display:none}.m7hf-side-cedar{display:none}}
 
+
+/* =========================================================
+   V2 — APPROVED MOCKUP MATCH + SEAM FIX
+========================================================= */
+html.m7hf-home-mounted,
+body.m7hf-home-mounted{background:#050403!important}
+
+#shoufhon-home-footer{
+  width:100vw!important;
+  max-width:none!important;
+  margin:0 calc(50% - 50vw)!important;
+  padding:0 0 max(84px,env(safe-area-inset-bottom))!important;
+  background:#050403!important;
+  overflow:visible!important;
+}
+#shoufhon-home-footer::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:-36px;height:38px;
+  background:linear-gradient(180deg,transparent,#050403 72%);
+  pointer-events:none;z-index:-1
+}
+.m7hf-shell{
+  min-height:var(--m7hf-minh,520px)!important;
+  border-radius:var(--m7hf-radius,34px) var(--m7hf-radius,34px) 0 0!important;
+  border:1px solid color-mix(in srgb,var(--m7hf-line) 50%,transparent)!important;
+  border-bottom:0!important;
+  box-shadow:0 -12px 38px rgba(0,0,0,.48),0 0 28px color-mix(in srgb,var(--m7hf-line) 7%,transparent),inset 0 1px 0 rgba(255,255,255,.035)!important
+}
+.m7hf-shell::before{
+  content:"";
+  position:absolute;inset:0;z-index:7;pointer-events:none;
+  border:2px solid var(--m7hf-line);
+  border-bottom-color:transparent;
+  border-left-color:color-mix(in srgb,var(--m7hf-line) 62%,transparent);
+  border-right-color:color-mix(in srgb,var(--m7hf-line) 62%,transparent);
+  border-radius:inherit;
+  clip-path:inset(0 0 calc(100% - 64px) 0);
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--m7hf-line) 76%,transparent)) drop-shadow(0 0 13px color-mix(in srgb,var(--m7hf-line) 24%,transparent));
+  opacity:.92
+}
+.m7hf-shell::after{
+  content:"";
+  position:absolute;top:0;left:-24%;z-index:8;width:24%;height:3px;border-radius:999px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#fff3bd 42%,#ffd16f 56%,transparent);
+  box-shadow:0 0 8px #ffd16f,0 0 16px color-mix(in srgb,var(--m7hf-line) 60%,transparent);
+  opacity:.96;will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden
+}
+.m7hf-line-off .m7hf-shell::before,.m7hf-line-off .m7hf-shell::after{display:none!important}
+.m7hf-line-traveling .m7hf-shell::after{
+  animation:m7hfEdgeTravel var(--m7hf-dur-line,4.4s) linear infinite!important;
+  -webkit-animation:m7hfEdgeTravel var(--m7hf-dur-line,4.4s) linear infinite!important
+}
+.m7hf-topline{display:none!important}
+.m7hf-bg{
+  inset:0!important;
+  background-size:cover!important;
+  background-position:var(--m7hf-bg-pos,center 54%)!important;
+  filter:saturate(1.08) contrast(1.08) brightness(1.05)!important;
+  opacity:1!important
+}
+.m7hf-overlay{
+  background:linear-gradient(180deg,rgba(6,3,1,.18) 0%,rgba(5,3,2,.30) 48%,rgba(3,2,1,.78) 100%),radial-gradient(circle at 50% 16%,rgba(217,164,65,.08),transparent 38%)!important
+}
+.m7hf-vignette{
+  background:radial-gradient(ellipse at 50% 35%,transparent 28%,rgba(0,0,0,.10) 62%,rgba(0,0,0,.54) 100%),linear-gradient(90deg,rgba(0,0,0,.26),transparent 18% 82%,rgba(0,0,0,.26))!important
+}
+.m7hf-content{min-height:0!important;padding:46px 12px 32px!important}
+.m7hf-logo{
+  width:min(var(--m7hf-logo,245px),72vw)!important;height:auto!important;max-height:none!important;margin:0 auto!important;
+  object-fit:contain!important;transform-origin:center center!important;-webkit-transform-origin:center center!important;
+  will-change:transform,filter,opacity!important;-webkit-backface-visibility:hidden!important;backface-visibility:hidden!important
+}
+.m7hf-title{margin-top:8px!important}
+.m7hf-subtitle{margin-top:7px!important}
+.m7hf-cedar{margin:17px auto 14px!important}
+.m7hf-nav{margin:0 0 16px!important}
+.m7hf-socials{margin-bottom:18px!important}
+.m7hf-rule{margin-bottom:14px!important}
+@keyframes m7hfEdgeTravel{from{transform:translate3d(0,0,0)}to{transform:translate3d(620%,0,0)}}
+@-webkit-keyframes m7hfEdgeTravel{from{-webkit-transform:translate3d(0,0,0)}to{-webkit-transform:translate3d(620%,0,0)}}
+@media(max-width:700px){
+  #shoufhon-home-footer{margin:0 calc(50% - 50vw)!important;padding-left:0!important;padding-right:0!important;padding-bottom:max(82px,env(safe-area-inset-bottom))!important}
+  #shoufhon-home-footer::before{top:-48px;height:50px}
+  .m7hf-shell{min-height:0!important;border-radius:min(30px,var(--m7hf-radius,34px)) min(30px,var(--m7hf-radius,34px)) 0 0!important}
+  .m7hf-content{width:calc(100% - 18px)!important;padding:34px 8px 26px!important}
+  .m7hf-logo{width:min(var(--m7hf-logo,245px),67vw)!important}
+  .m7hf-title{margin-top:5px!important;font-size:min(var(--m7hf-title-size,31px),8.5vw)!important}
+  .m7hf-subtitle{margin-top:6px!important;font-size:min(var(--m7hf-subtitle-size,17px),4.2vw)!important}
+  .m7hf-cedar{margin:15px auto 12px!important}
+  .m7hf-nav{gap:6px 10px!important;margin-bottom:15px!important}
+  .m7hf-nav a{font-size:12px!important}
+  .m7hf-socials{margin-bottom:16px!important}
+  .m7hf-side-note{display:block!important;right:10px!important;bottom:92px!important;font-size:12px!important;opacity:.58!important}
+  .m7hf-side-cedar{display:block!important;left:11px!important;bottom:94px!important;width:42px!important;height:42px!important;opacity:.20!important}
+}
+@media(max-width:390px){
+  .m7hf-content{padding-top:30px!important}
+  .m7hf-logo{width:min(var(--m7hf-logo,245px),70vw)!important}
+  .m7hf-nav a{font-size:11px!important;padding:5px 7px!important}
+  .m7hf-side-note{font-size:11px!important;right:7px!important;bottom:86px!important}
+  .m7hf-side-cedar{width:36px!important;height:36px!important;left:7px!important;bottom:88px!important}
+}
 /* Keep deliberate footer motion alive on phone browsers even when reduced-motion
    is reported by the OS/browser. This is an admin-controlled branded section. */
 @media(prefers-reduced-motion:reduce){
@@ -285,14 +397,16 @@
       root=document.createElement("footer");
       root.id="shoufhon-home-footer";
       root.setAttribute("aria-label","ShoufHon footer");
-      document.body.appendChild(root);
+      (document.querySelector("main")||document.body).appendChild(root);
+      document.documentElement.classList.add("m7hf-home-mounted");
+      document.body.classList.add("m7hf-home-mounted");
     }
 
     root.hidden=current.enabled===false;
     if(root.hidden)return;
 
     const overall=["off","full","subtle"].includes(String(current.overall_animation))?String(current.overall_animation):"subtle";
-    root.className="m7hf-overall-"+overall;
+    root.className="m7hf-overall-"+overall+" "+(current.top_line_enabled===false?"m7hf-line-off":"m7hf-line-on")+" "+(String(current.top_line_animation)==="travel"?"m7hf-line-traveling":"");
 
     const accent=color(current.accent_color,DEFAULTS.accent_color);
     const accent2=color(current.accent_color_2,DEFAULTS.accent_color_2);
@@ -357,7 +471,7 @@
     `;
 
     const line=current.top_line_enabled===false?"":`<div class="m7hf-topline ${String(current.top_line_animation)==="travel"?"m7hf-line-travel":""}" aria-hidden="true"></div>`;
-    const logo=current.logo_url?`<img class="m7hf-logo ${animationClass(current.logo_animation)}" src="${esc(current.logo_url)}" alt="ShoufHon" decoding="async" loading="lazy">`:"";
+    const logo=current.logo_url?`<img class="m7hf-logo ${animationClass(current.logo_animation)}" src="${esc(footerLogoUrl(current.logo_url))}" alt="ShoufHon" decoding="async" loading="lazy">`:"";
     const cedar=current.cedar_enabled===false?"":`<div class="m7hf-cedar" aria-hidden="true">${CEDAR_SVG}</div>`;
     const side=current.side_note_enabled===false?"":`<div class="m7hf-side-note" aria-hidden="true">${esc(current.side_note_text||"")}</div>`;
     const sideCedar=current.cedar_enabled===false?"":`<div class="m7hf-side-cedar" aria-hidden="true">${CEDAR_SVG}</div>`;
