@@ -1715,6 +1715,13 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
   function getClient(){
     if(client){return client;}
+    client=
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      window.Ma7alakSupabase?.client||
+      window.Ma7alakSupabaseBootstrap?.client||
+      window.Ma7alakAccount?.client||
+      null;
+    if(client){return client;}
     if(!window.supabase||typeof window.supabase.createClient!=="function"){return null;}
     client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     return client;
