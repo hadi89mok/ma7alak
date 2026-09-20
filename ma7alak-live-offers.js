@@ -230,7 +230,6 @@ function openShopPanel(slug){
   let own=shopSlug===currentOwnerSlug();
   let list=items.filter(x=>String(x.shop_slug||"").toLowerCase()===shopSlug);
   let management=own?ownerItems.filter(x=>String(x.shop_slug||"").toLowerCase()===shopSlug):list;
-  if(!management.length&&!own)return;
   let old=$("#m7lo-overlay");
   if(old)old.remove();else lock();
   let d=document.createElement("div");
@@ -340,14 +339,50 @@ function send(win,type,shop){
   }catch(_){}
 }
 function broadcast(){
-  try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:publicData("")},"*")}catch(_){}
+  const allItems=publicData("");
+  try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:allItems},"*")}catch(_){}
   const activeOwner=currentOwnerSlug();
   document.querySelectorAll("iframe").forEach(f=>{
     try{
+      f.contentWindow?.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:allItems},"*");
       send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");
       if(activeOwner)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",activeOwner);
     }catch(_){}
   });
+}
+let liveStateRefreshPromise=null;
+async function ensureFreshLiveState(){
+  if(liveStateRefreshPromise)return liveStateRefreshPromise;
+  liveStateRefreshPromise=(async()=>{
+    if(!c){
+      try{await ready()}catch(_){}
+      c=resolveClient()||c;
+    }
+    if(!c)return false;
+
+    let wait=0;
+    while(refreshing&&wait<40){
+      await sleep(50);
+      wait++;
+    }
+
+    await identity();
+
+    if(!refreshing){
+      await load();
+    }else{
+      wait=0;
+      while(refreshing&&wait<40){
+        await sleep(50);
+        wait++;
+      }
+    }
+
+    return true;
+  })().finally(()=>{
+    liveStateRefreshPromise=null;
+  });
+  return liveStateRefreshPromise;
 }
 async function refreshOwnerStateForShop(shopSlug){
   c=resolveClient()||c;
@@ -361,13 +396,10 @@ function bridge(){
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){
       send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
-      if(c&&!refreshing){
-        (async()=>{
-          await identity();
-          await load();
-          send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
-        })().catch(err=>console.warn("SHOUFHON Live state refresh:",err));
-      }
+      (async()=>{
+        await ensureFreshLiveState();
+        send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
+      })().catch(err=>console.warn("SHOUFHON Live state refresh:",err));
       return;
     }
 
@@ -375,13 +407,10 @@ function bridge(){
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_OPEN_SHOP"){
       openShopPanel(s);
-      if(c&&!refreshing){
-        (async()=>{
-          await identity();
-          await load();
-          if(document.querySelector("#m7lo-overlay .m7lo-shop-panel"))openShopPanel(s);
-        })().catch(err=>console.warn("SHOUFHON Live shop panel refresh:",err));
-      }
+      (async()=>{
+        await ensureFreshLiveState();
+        if(document.querySelector("#m7lo-overlay .m7lo-shop-panel"))openShopPanel(s);
+      })().catch(err=>console.warn("SHOUFHON Live shop panel refresh:",err));
       return;
     }
 
