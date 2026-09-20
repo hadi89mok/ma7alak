@@ -7705,14 +7705,44 @@ function decorateAll(){
 
       if(logo){
         const scaled=
-          Math.max(74,Math.min(130,logoSize*.48));
+          Math.max(64,Math.min(136,logoSize*.50));
         logo.style.width=scaled+"px";
         logo.style.height=scaled+"px";
         logo.style.marginTop=
           bannerEnabled
-            ? (-Math.min(78,overlap*.56))+"px"
+            ? (-Math.min(82,overlap*.58))+"px"
             : "8px";
         logo.style.borderColor=border;
+
+        /*
+           Edit Shop profile image is a core field, not a directory option.
+           Keep the Design Studio demo tied to that real field so changing the
+           circle image is immediately visible before Save Changes.
+        */
+        const profileImage=
+          prefix==="m7de-"
+            ?String(document.getElementById("ma-edit-image")?.value||"").trim()
+            :"";
+
+        if(profileImage&&/^https?:\/\//i.test(profileImage)){
+          let img=logo.querySelector("img");
+          if(!img){
+            logo.textContent="";
+            img=document.createElement("img");
+            img.alt="";
+            img.style.width="100%";
+            img.style.height="100%";
+            img.style.display="block";
+            img.style.objectFit="cover";
+            img.style.borderRadius="50%";
+            logo.appendChild(img);
+          }
+          if(img.src!==profileImage)img.src=profileImage;
+        }
+        else if(prefix==="m7de-"){
+          logo.querySelector("img")?.remove();
+          if(!logo.textContent.trim())logo.textContent="LOGO";
+        }
       }
 
       const stats=
