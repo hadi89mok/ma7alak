@@ -116,6 +116,49 @@
       refresh:function(){broadcast("api-refresh")}
     };
 
+    /*
+       Hostinger normally isolates Custom Embeds in iframes, but expose the
+       same client API on the top window too. This keeps the universal embeds
+       working even if Hostinger renders one directly in the page document.
+    */
+    window.ShoufHonShopContextClient={
+      get slug(){return pageSlug},
+      request:function(){},
+      resolve:async function(options){
+        options=options||{};
+        if(pageSlug)return pageSlug;
+
+        const waitMs=Math.max(300,Number(options.timeout)||4500);
+        const started=Date.now();
+        while(!pageSlug&&Date.now()-started<waitMs){
+          await new Promise(function(resolve){setTimeout(resolve,50)});
+        }
+        if(pageSlug)return pageSlug;
+
+        const explicit=normalize(options.explicit||"");
+        if(explicit){
+          setPageSlug(explicit,"top-explicit-fallback");
+          return pageSlug;
+        }
+
+        const fallback=normalize(
+          typeof options.fallback==="function"
+            ? options.fallback()
+            : (options.fallback||detectPageSlug())
+        );
+        if(fallback){
+          setPageSlug(fallback,"top-page-fallback");
+          return pageSlug;
+        }
+        return "";
+      },
+      setPage:function(value){
+        return Promise.resolve(setPageSlug(value,"top-client-set"));
+      },
+      detectPageSlug,
+      normalize
+    };
+
     return;
   }
 
