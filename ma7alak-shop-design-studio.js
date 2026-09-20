@@ -123,6 +123,10 @@
   function hideFormRoots(form,keep){
     const keepSet=new Set(keep);
     [...form.children].forEach(child=>{
+      if(child.classList.contains("m7studio-section-banner")){
+        child.classList.remove("m7studio-hidden");
+        return;
+      }
       if(child.classList.contains("m7v4-edit-context")){child.classList.add("m7studio-hidden");return}
       if(!keepSet.has(child)){child.classList.add("m7studio-hidden")}
       else{child.classList.remove("m7studio-hidden","m7v4-section-off");child.classList.add("m7studio-force-show")}
