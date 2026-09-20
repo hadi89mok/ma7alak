@@ -11,16 +11,13 @@
   window.__SHOUFHON_FULLSCREEN_SHOP_STUDIO_V1__=true;
 
   const TABS=[
-    ["profile","♙","Profile","Profile image, identity, label, banner, shell, Follow and Message"],
-    ["story","◉","Story","Story/profile ring and new-Story effects"],
-    ["live","◉","Live","Live panel, cards, status and offer styling"],
-    ["media","▧","Media","Gallery, videos, filters and multi-layer frames"],
-    ["about","●","About","About content, services, panel design and text"],
-    ["hours","◷","Hours","Weekly opening hours and availability"],
-    ["colors","◒","Colors","Every visible shop-page color in one compact place"],
-    ["typography","Aa","Typography","Global and module fonts, sizes and individual About text"],
-    ["animations","✦","Animations","Motion, shimmer, glow, pulse and animation tuning"],
-    ["advanced","⚙","Advanced","Presets, lines, symbols and Directory Card design"]
+    ["profile","♙","Profile","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
+    ["story","◉","Story","New-Story effects, upload effects, speed, sparkle and pulse"],
+    ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
+    ["media","▧","Media","Gallery and video colors, filters, typography, frame shape, layers and animation"],
+    ["about","●","About","About content, services, colors, typography, ornaments and signature"],
+    ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
+    ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
   ];
 
   let activeTab="profile";
@@ -43,18 +40,18 @@
     style.textContent=`
       body.m7studio-body-open{overflow:hidden!important}
       body.m7studio-body-open #m7savebar{display:none!important}
-      #ma-admin-edit-card.m7studio-fullscreen{position:fixed!important;inset:0!important;z-index:100000!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;overflow-x:hidden!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;overscroll-behavior-y:contain!important;scrollbar-gutter:stable!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at 8% 0%,rgba(218,170,82,.07),transparent 29%),linear-gradient(180deg,#0b0d0e,#070809 58%,#060707)!important;box-shadow:none!important;container-type:normal!important;color:#f4ead9!important}
+      #ma-admin-edit-card.m7studio-fullscreen{position:fixed!important;inset:0!important;z-index:100000!important;width:100vw!important;height:100dvh!important;min-height:0!important;max-width:none!important;max-height:none!important;display:flex!important;flex-direction:column!important;margin:0!important;padding:0!important;overflow:hidden!important;touch-action:auto!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at 8% 0%,rgba(218,170,82,.07),transparent 29%),linear-gradient(180deg,#0b0d0e,#070809 58%,#060707)!important;box-shadow:none!important;container-type:normal!important;color:#f4ead9!important}
       #ma-admin-edit-card.m7studio-fullscreen>.m7v4-panel-close{display:none!important}
       #ma-admin-edit-card.m7studio-fullscreen>:not(.m7studio-topbar):not(.m7studio-tabs):not(.m7v4-preview-grid){display:none!important}
-      .m7studio-topbar{position:sticky;top:0;z-index:130;min-height:72px;display:flex;align-items:center;gap:14px;padding:10px clamp(16px,2.2vw,34px);border-bottom:1px solid rgba(218,170,82,.15);background:rgba(8,10,11,.965);box-shadow:0 10px 28px rgba(0,0,0,.30);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+      .m7studio-topbar{position:relative;flex:0 0 auto;z-index:130;min-height:72px;display:flex;align-items:center;gap:14px;padding:10px clamp(16px,2.2vw,34px);border-bottom:1px solid rgba(218,170,82,.15);background:rgba(8,10,11,.965);box-shadow:0 10px 28px rgba(0,0,0,.30);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
       .m7studio-brand-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border:1px solid rgba(218,170,82,.25);border-radius:14px;background:rgba(218,170,82,.07);color:#efc76e;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
       .m7studio-title{min-width:0;margin-right:auto}.m7studio-title b{display:block;color:#f3ca70;font-size:clamp(18px,1.55vw,25px);line-height:1.1;font-weight:950}.m7studio-title small{display:block;margin-top:4px;color:#938878;font-size:10px;line-height:1.35}
       .m7studio-sync{display:flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid rgba(72,219,138,.18);border-radius:999px;background:rgba(72,219,138,.055);color:#74e3a4;font-size:8px;font-weight:900;white-space:nowrap}.m7studio-sync:before{content:"";width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 11px rgba(70,220,136,.65)}
       .m7studio-top-btn{min-height:42px;padding:0 15px;border:1px solid rgba(218,170,82,.28);border-radius:12px;background:rgba(218,170,82,.035);color:#e9c57b;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}.m7studio-top-btn.primary{min-width:130px;border-color:#e4b355;background:linear-gradient(135deg,#f4d383,#d9a13f);color:#1a1208;box-shadow:0 8px 22px rgba(218,170,82,.12)}.m7studio-top-btn.close{width:42px;min-width:42px;padding:0;font-size:21px;line-height:1}
-      .m7studio-tabs{position:sticky;top:72px;z-index:125;display:flex;gap:7px;padding:10px clamp(16px,2.2vw,34px);overflow-x:auto;border-bottom:1px solid rgba(218,170,82,.11);background:rgba(9,11,12,.955);scrollbar-width:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.m7studio-tabs::-webkit-scrollbar{display:none}
+      .m7studio-tabs{position:relative;flex:0 0 auto;z-index:125;display:flex;gap:7px;padding:10px clamp(16px,2.2vw,34px);overflow-x:auto;border-bottom:1px solid rgba(218,170,82,.11);background:rgba(9,11,12,.955);scrollbar-width:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.m7studio-tabs::-webkit-scrollbar{display:none}
       .m7studio-tab{flex:0 0 auto;min-height:42px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:#101214;color:#b7aea1;font-size:9px;font-weight:900;cursor:pointer;transition:.15s ease}.m7studio-tab i{color:#d9aa58;font-style:normal;font-size:12px}.m7studio-tab.active{border-color:#d9aa58;background:radial-gradient(circle at 20% 0%,rgba(239,194,101,.17),transparent 58%),#17150f;color:#f2ce83;box-shadow:0 0 0 1px rgba(217,170,88,.10),0 0 16px rgba(217,170,88,.12)}
-      #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{display:grid!important;grid-template-columns:minmax(580px,1fr) minmax(360px,430px)!important;gap:18px!important;align-items:start!important;width:min(1760px,calc(100vw - 38px))!important;max-width:none!important;min-height:max-content!important;margin:16px auto 48px!important;overflow:visible!important}
-      #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{width:100%!important;max-width:none!important;min-width:0!important;min-height:max-content!important;padding:0 0 40px!important;overflow:visible!important;background:transparent!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{display:grid!important;grid-template-columns:minmax(580px,1fr) minmax(360px,430px)!important;gap:18px!important;align-items:stretch!important;flex:1 1 auto!important;width:min(1760px,calc(100vw - 38px))!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:14px 0 18px!important;overflow:hidden!important;box-sizing:border-box!important}
+      #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{width:100%!important;max-width:none!important;min-width:0!important;height:100%!important;min-height:0!important;padding:0 8px 56px 0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;scrollbar-gutter:stable!important;touch-action:pan-y!important;background:transparent!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-context{display:none!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-hidden,#ma-admin-edit-card.m7studio-fullscreen .m7studio-field-hidden{display:none!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-section-off.m7studio-force-show{display:block!important}
@@ -73,7 +70,13 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-color-row{display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;gap:8px!important;align-items:center!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode input[type="color"]{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;padding:3px!important;border-radius:9px!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-color-row code{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;padding:6px 7px!important;font-size:7px!important}
-      #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:sticky!important;top:137px!important;width:100%!important;max-width:none!important;max-height:calc(100dvh - 155px)!important;overflow:auto!important;border:1px solid rgba(218,170,82,.25)!important;border-radius:18px!important;background:#0b0d0e!important;box-shadow:0 18px 50px rgba(0,0,0,.46)!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-group-hidden{display:none!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin-top:15px!important;padding-top:11px!important;border-top:1px solid rgba(218,170,82,.09)!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-pane>.m7ds-section-title:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-field:has(input[type="color"]){padding:8px!important;border:1px solid rgba(218,170,82,.10)!important;border-radius:11px!important;background:rgba(255,255,255,.012)!important}
+      #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form::-webkit-scrollbar,#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview::-webkit-scrollbar{width:9px}
+      #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form::-webkit-scrollbar-thumb,#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background:rgba(217,170,88,.32);background-clip:padding-box}
+      #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:relative!important;top:auto!important;width:100%!important;max-width:none!important;height:100%!important;min-height:0!important;max-height:none!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;border:1px solid rgba(218,170,82,.25)!important;border-radius:18px!important;background:#0b0d0e!important;box-shadow:0 18px 50px rgba(0,0,0,.46)!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-head{position:sticky!important;top:0!important;z-index:4!important;background:rgba(11,13,14,.97)!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-stage,#ma-admin-edit-card.m7studio-fullscreen .m7pv-note{display:none!important}
       .m7studio-real-preview{padding:12px 12px 14px}.m7studio-phone{position:relative;width:min(100%,386px);height:min(720px,calc(100dvh - 235px));min-height:500px;margin:0 auto;overflow:hidden;border:2px solid #342716;border-radius:32px;background:#050606;box-shadow:0 20px 55px rgba(0,0,0,.58),0 0 28px rgba(218,170,82,.09),inset 0 0 0 4px #080808}.m7studio-phone:before{content:"";position:absolute;z-index:8;top:8px;left:50%;width:94px;height:20px;transform:translateX(-50%);border-radius:999px;background:#030303;border:1px solid rgba(255,255,255,.055);pointer-events:none}.m7studio-phone-scroll{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain;padding:42px 12px 24px;box-sizing:border-box;background:radial-gradient(circle at 50% 0%,rgba(217,164,65,.055),transparent 34%),linear-gradient(180deg,#090a0b,#050606 58%,#040505);scrollbar-width:thin}.m7studio-phone-content{min-height:100%;display:flex;flex-direction:column;justify-content:flex-start;gap:12px}.m7studio-phone-content>.m7ds-profile-shell-demo,.m7studio-phone-content>.m7ds-live-offers-demo,.m7studio-phone-content>.m7ds-gallery-frame-sample{width:100%!important;max-width:none!important;margin:0 auto!important;box-sizing:border-box!important}.m7studio-phone-content .m7ds-profile-shell-demo{transform:none!important}.m7studio-phone-content .m7ds-profile-shell-logo{flex:0 0 auto}.m7studio-phone-content .m7ds-profile-shell-logo img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}.m7studio-phone-content .m7v4-preview-phone{width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}.m7studio-phone-content .m7v4-preview-stage{display:block!important}.m7studio-preview-empty{min-height:390px;display:grid;place-items:center;text-align:center;padding:24px;color:#918675;font-size:10px;line-height:1.55}.m7studio-preview-empty b{display:block;margin-bottom:6px;color:#ebc774;font-size:13px}.m7studio-preview-note{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;color:#82796d;font-size:8px;line-height:1.4;text-align:center}.m7studio-preview-note i{width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 9px rgba(70,220,136,.55)}
@@ -81,7 +84,7 @@
       .m7studio-profile-image-card{display:grid!important;grid-template-columns:minmax(170px,1fr) 132px minmax(170px,.85fr);gap:18px;align-items:center;margin:0 0 12px!important;padding:16px!important;border:1px solid rgba(218,170,82,.14)!important;border-radius:16px!important;background:radial-gradient(circle at 14% 0%,rgba(218,170,82,.06),transparent 45%),rgba(17,19,20,.88)!important;box-sizing:border-box}.m7studio-profile-image-copy small{display:block;color:#907f64;font-size:7px;font-weight:950;letter-spacing:.9px}.m7studio-profile-image-copy b{display:block;margin-top:5px;color:#efd49a;font-size:15px}.m7studio-profile-image-copy span{display:block;margin-top:5px;color:#847a6d;font-size:8px;line-height:1.5}.m7studio-profile-image-preview{width:112px;height:112px;margin:auto;display:grid;place-items:center;overflow:hidden;border:3px solid #d9aa58;border-radius:50%;background:#0a0b0c;color:#e3bc6c;font-size:30px;font-weight:950;box-shadow:0 0 24px rgba(217,170,88,.18)}.m7studio-profile-image-preview img{width:100%;height:100%;display:block;object-fit:cover}.m7studio-profile-image-actions{display:grid;gap:8px}.m7studio-profile-image-actions button,.m7studio-image-upload{position:relative;min-height:38px;display:flex;align-items:center;justify-content:center;padding:0 11px;border:1px solid rgba(218,170,82,.20);border-radius:10px;background:rgba(218,170,82,.045);color:#e7c57d;font-size:9px;font-weight:900;cursor:pointer;box-sizing:border-box}.m7studio-profile-image-actions button{border-color:rgba(255,91,91,.22);background:rgba(255,91,91,.045);color:#ff9c94}.m7studio-image-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.m7studio-profile-image-actions small{min-height:15px;color:#78dca0;font-size:7px;line-height:1.4}.m7studio-profile-core{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
       .m7v4-actions-studio{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important}.m7v4-actions-studio [data-m7v4-action="design"]{border-color:rgba(217,170,88,.35)!important;background:radial-gradient(circle at 15% 0%,rgba(217,170,88,.11),transparent 50%),rgba(217,170,88,.035)!important}
       @media(max-width:1100px){#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:minmax(0,1fr) 350px!important;width:calc(100vw - 24px)!important;gap:12px!important}#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-      @media(max-width:820px){.m7studio-topbar{flex-wrap:wrap;min-height:auto;padding:9px 10px}.m7studio-title{flex:1 1 180px}.m7studio-sync{display:none}.m7studio-top-btn{min-height:37px;padding:0 10px}.m7studio-tabs{top:103px;padding:8px 10px}#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:1fr!important;width:calc(100vw - 18px)!important;margin:10px auto 22px!important}#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:relative!important;top:auto!important;order:-1!important;max-height:none!important}.m7studio-phone{height:590px}}
+      @media(max-width:820px){#ma-admin-edit-card.m7studio-fullscreen{display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}.m7studio-topbar{position:sticky;top:0;flex-wrap:wrap;min-height:auto;padding:9px 10px}.m7studio-title{flex:1 1 180px}.m7studio-sync{display:none}.m7studio-top-btn{min-height:37px;padding:0 10px}.m7studio-tabs{position:relative;top:auto;padding:8px 10px}#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:1fr!important;width:calc(100vw - 18px)!important;height:auto!important;min-height:0!important;margin:10px auto 28px!important;padding:0!important;overflow:visible!important}#ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{height:auto!important;min-height:0!important;padding:0 0 48px!important;overflow:visible!important;touch-action:auto!important}#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:relative!important;top:auto!important;order:-1!important;height:auto!important;max-height:none!important;overflow:visible!important}.m7studio-phone{height:590px}}
       @media(max-width:560px){.m7studio-brand-icon{display:none}.m7studio-title b{font-size:16px}.m7studio-title small{font-size:8px}.m7studio-top-btn.preview{display:none}.m7studio-tabs{top:94px}#ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:1fr!important}.m7v4-actions-studio{grid-template-columns:1fr!important}}
     `;
     document.head.appendChild(style);
@@ -108,7 +111,7 @@
     form.classList.remove("m7studio-colors-mode");
     form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
-    form.querySelectorAll(".m7studio-field-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden"));
+    form.querySelectorAll(".m7studio-field-hidden,.m7studio-group-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden","m7studio-group-hidden"));
     const design=form.querySelector(".m7-design-studio");
     if(design){
       design.querySelectorAll(":scope > .m7ds-pane").forEach(pane=>pane.classList.remove("m7studio-pane-on"));
@@ -157,6 +160,55 @@
     scope.querySelectorAll(".m7ds-field,.m7da-field,.m7cd-field,.m7ats-row").forEach(wrap=>{
       if(!wrap.querySelector('input[type="color"]'))wrap.classList.add("m7studio-field-hidden");
     });
+  }
+
+  /*
+     Hide empty headings/previews left behind after a module-specific filter.
+     The real inputs remain in their original Admin form; this only makes the
+     fullscreen Studio read like one clean panel per component.
+  */
+  function tidyPane(scope){
+    if(!scope)return;
+    const children=[...scope.children];
+    let segment=[];
+
+    const flush=()=>{
+      if(!segment.length)return;
+      const inputs=segment.flatMap(node=>[...node.querySelectorAll("input[id],select[id],textarea[id]")]);
+      const hasVisibleInput=inputs.some(input=>{
+        const wrap=fieldWrapper(input);
+        return wrap&&!wrap.classList.contains("m7studio-field-hidden");
+      });
+
+      segment.forEach(node=>{
+        if(node.classList.contains("m7ds-section-title")||!node.matches(".m7ds-grid,.m7ds-layer-grid")){
+          node.classList.toggle("m7studio-group-hidden",!hasVisibleInput);
+        }else{
+          const visibleChild=[...node.children].some(child=>!child.classList.contains("m7studio-field-hidden"));
+          node.classList.toggle("m7studio-group-hidden",!visibleChild);
+        }
+      });
+      segment=[];
+    };
+
+    children.forEach(node=>{
+      if(node.classList.contains("m7ds-section-title")){
+        flush();
+        segment=[node];
+      }else if(segment.length){
+        segment.push(node);
+      }
+    });
+    flush();
+  }
+
+  function syncProfileImageCardAccent(){
+    const ring=String(document.getElementById("m7de-profile_ring_color")?.value||"#d9aa58").trim();
+    const circle=document.querySelector("#ma-admin-edit-form > .m7studio-profile-image-card .m7studio-profile-image-preview");
+    if(!circle)return;
+    const color=/^#[0-9a-f]{6}$/i.test(ring)?ring:"#d9aa58";
+    circle.style.borderColor=color;
+    circle.style.boxShadow="0 0 0 1px "+color+"33,0 0 24px "+color+"38";
   }
 
   function profileImageUrl(){
@@ -333,6 +385,7 @@
       scheduleStudioPreview();
     });
 
+    syncProfileImageCardAccent();
     return card;
   }
 
@@ -645,12 +698,23 @@
     const form=document.getElementById("ma-admin-edit-form");
     if(!panel||!form||!panel.classList.contains("m7studio-fullscreen"))return;
     if(!TABS.some(row=>row[0]===key))key="profile";
+
     activeTab=key;
     resetView(form);
     sectionBanner(form,key);
+
     const design=form.querySelector(".m7-design-studio");
     const extras=form.querySelector(".m7da-sectioned-extras");
-    const markExtras=function(mode){if(!extras)return;["details","card","design","about","hours"].forEach(name=>extras.classList.remove("m7v4-extras-"+name));if(mode)extras.classList.add("m7v4-extras-"+mode)};
+    const markExtras=function(mode){
+      if(!extras)return;
+      ["details","card","design","about","hours"].forEach(name=>extras.classList.remove("m7v4-extras-"+name));
+      if(mode)extras.classList.add("m7v4-extras-"+mode);
+    };
+
+    const hideDesignChrome=()=>{
+      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
+      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
+    };
 
     if(key==="profile"){
       const roots=showRoots(form,[
@@ -660,13 +724,10 @@
         ".m7labelbox",
         ".m7-design-studio"
       ]);
-      showPanes(form,["identity","follow"]);
+
+      showPanes(form,["identity","lines","follow","typography"]);
       markExtras("");
 
-      /*
-         Keep core identity fields real, not cloned. If the base Admin groups
-         them in one fieldset, hide unrelated fields inside that same root.
-      */
       rootsFor(form,["#ma-edit-name","#ma-edit-arabic","#ma-edit-image"]).forEach(root=>{
         root.classList.add("m7studio-profile-core");
         filterFields(root,id=>
@@ -676,141 +737,150 @@
         );
       });
 
-      const imageField=document.getElementById("ma-edit-image");
-      fieldWrapper(imageField)?.classList.add("m7studio-field-hidden");
+      fieldWrapper(document.getElementById("ma-edit-image"))?.classList.add("m7studio-field-hidden");
 
-      filterFields(
-        design?.querySelector('[data-m7ds-pane="identity"]'),
-        (id,input)=>
-          !id.includes("story_") &&
-          input.type!=="color" &&
-          !/_color(?:$|_)/.test(id) &&
-          !/_font_(?:style|size)$/.test(id) &&
-          !/_animation$/.test(id)
+      const identity=design?.querySelector('[data-m7ds-pane="identity"]');
+      const typography=design?.querySelector('[data-m7ds-pane="typography"]');
+
+      /* Profile owns the ring color. Story owns only Story motion. */
+      filterFields(identity,id=>!id.includes("story_"));
+      filterFields(typography,id=>/(?:profile|follow)_font_(?:style|size)$/.test(id));
+
+      hideDesignChrome();
+      ["identity","lines","follow","typography"].forEach(name=>
+        tidyPane(design?.querySelector('[data-m7ds-pane="'+name+'"]'))
       );
 
-      filterFields(
-        design?.querySelector('[data-m7ds-pane="follow"]'),
-        (id,input)=>
-          input.type!=="color" &&
-          !/_color(?:$|_)/.test(id) &&
-          !/_font_(?:style|size)$/.test(id)
-      );
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       hideFormRoots(form,roots);
       ensureProfileImageCard(form);
-    }else if(key==="story"){
+      syncProfileImageCardAccent();
+    }
+    else if(key==="story"){
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["identity"]);
-      filterFields(design?.querySelector('[data-m7ds-pane="identity"]'),id=>/story_|profile_ring_color/.test(id));
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="identity"]'),
+        id=>id.includes("story_")
+      );
+      hideDesignChrome();
+      tidyPane(design?.querySelector('[data-m7ds-pane="identity"]'));
       hideFormRoots(form,roots);
-    }else if(key==="live"){
+    }
+    else if(key==="live"){
       const roots=showRoots(form,[".m7-design-studio"]);
-      showPanes(form,["modules"]);
+      showPanes(form,["modules","typography"]);
+
       filterFields(
         design?.querySelector('[data-m7ds-pane="modules"]'),
-        (id,input)=>
-          id.includes("live_") &&
-          input.type!=="color" &&
-          !/_color(?:$|_)/.test(id) &&
-          !/_font_(?:style|size)$/.test(id)
+        id=>id.includes("live_")
       );
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="typography"]'),
+        id=>/live_font_(?:style|size)$/.test(id)
+      );
+
+      hideDesignChrome();
+      tidyPane(design?.querySelector('[data-m7ds-pane="modules"]'));
+      tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       hideFormRoots(form,roots);
-    }else if(key==="media"){
+    }
+    else if(key==="media"){
       const roots=showRoots(form,[".m7-design-studio"]);
-      showPanes(form,["modules"]);
+      showPanes(form,["modules","typography"]);
+
       filterFields(
         design?.querySelector('[data-m7ds-pane="modules"]'),
-        (id,input)=>
-          /gallery_|media_|video_/.test(id) &&
-          input.type!=="color" &&
-          !/_color(?:$|_)/.test(id) &&
-          !/_font_(?:style|size)$/.test(id) &&
-          !/_animation(?:_|$)/.test(id)
+        id=>/gallery_|media_|video_/.test(id)
       );
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="typography"]'),
+        id=>/(?:gallery|video)_font_(?:style|size)$/.test(id)
+      );
+
+      hideDesignChrome();
+      tidyPane(design?.querySelector('[data-m7ds-pane="modules"]'));
+      tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       hideFormRoots(form,roots);
-    }else if(key==="about"){
+    }
+    else if(key==="about"){
       const roots=showRoots(form,[
         ".m7-about-services-fields",
-        ".m7da-sectioned-extras"
+        ".m7-about-text-style-box",
+        ".m7da-sectioned-extras",
+        ".m7-design-studio"
       ]);
+
+      showPanes(form,["about","typography"]);
       markExtras("about");
 
-      if(extras){
-        filterFields(
-          extras,
-          (id,input)=>
-            input.type!=="color" &&
-            !/_color(?:$|_)/.test(id)
-        );
-      }
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="typography"]'),
+        id=>/about_font_(?:style|size)$/.test(id)
+      );
 
+      hideDesignChrome();
+      tidyPane(design?.querySelector('[data-m7ds-pane="about"]'));
+      tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       hideFormRoots(form,roots);
-    }else if(key==="hours"){
+    }
+    else if(key==="hours"){
       const roots=showRoots(form,[
         ".m7-hours-schedule-box",
         ".m7-availability-extra-box",
-        ".m7da-sectioned-extras"
+        ".m7da-sectioned-extras",
+        ".m7-design-studio"
       ]);
+
+      showPanes(form,["typography"]);
       markExtras("hours");
 
-      if(extras){
-        filterFields(
-          extras,
-          (id,input)=>
-            input.type!=="color" &&
-            !/_color(?:$|_)/.test(id)
-        );
-      }
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="typography"]'),
+        id=>/hours_font_(?:style|size)$/.test(id)
+      );
 
+      hideDesignChrome();
+      tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       hideFormRoots(form,roots);
-    }else if(key==="colors"){
-      form.classList.add("m7studio-colors-mode");
-      const roots=showRoots(form,[".m7-design-studio",".m7-card-designer-box",".m7-about-text-style-box",".m7da-sectioned-extras"]);
-      showPanes(form,["identity","lines","about","follow","modules","typography"]);
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
-      roots.forEach(root=>filterToColors(root));
-      hideFormRoots(form,roots);
-    }else if(key==="typography"){
-      const roots=showRoots(form,[".m7-design-studio",".m7-about-text-style-box"]);
-      showPanes(form,["typography"]);
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
-      const aboutText=form.querySelector(".m7-about-text-style-box");
-      if(aboutText)aboutText.querySelectorAll('input[type="color"]').forEach(input=>fieldWrapper(input)?.classList.add("m7studio-field-hidden"));
-      hideFormRoots(form,roots);
-    }else if(key==="animations"){
-      const roots=showRoots(form,[".m7-design-studio",".m7-card-designer-box"]);
-      showPanes(form,["identity","motion","about","modules"]);
-      const matcher=id=>
-        /animation|motion|effect|pulse|glow|shimmer|intensity|speed|float|sparkle|bounce|sway|flicker/.test(id) &&
-        !id.includes("story_") &&
-        !id.includes("live_");
-      roots.forEach(root=>filterFields(root,matcher));
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      hideFormRoots(form,roots);
-    }else{
-      const roots=showRoots(form,[".m7-design-studio",".m7-card-designer-box",".m7da-sectioned-extras"]);
-      showPanes(form,["lines"]);
+    }
+    else{
+      const roots=showRoots(form,[
+        ".m7-design-studio",
+        ".m7-card-designer-box",
+        ".m7da-sectioned-extras"
+      ]);
+
+      showPanes(form,["motion","typography"]);
       markExtras("card");
+
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="typography"]'),
+        id=>/global_font_(?:style|size)$/.test(id)
+      );
+
+      /* Global preset / universal accent belong here, not repeated per module. */
+      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
+      design?.querySelector(":scope > .m7ds-top-grid")?.classList.remove("m7studio-field-hidden");
+
+      tidyPane(design?.querySelector('[data-m7ds-pane="motion"]'));
+      tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       hideFormRoots(form,roots);
     }
 
     ensureChrome(panel);
     ensureStudioPreview(panel);
-    panel.querySelectorAll("[data-m7studio-tab]").forEach(button=>button.classList.toggle("active",button.dataset.m7studioTab===key));
+
+    panel.querySelectorAll("[data-m7studio-tab]").forEach(button=>
+      button.classList.toggle("active",button.dataset.m7studioTab===key)
+    );
+
     const nudge=form.querySelector("input:not([type='file']),select,textarea");
-    if(nudge){try{nudge.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}}
+    if(nudge){
+      try{nudge.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}
+    }
+
     scheduleStudioPreview(panel);
+    form.scrollTop=0;
     panel.scrollTop=0;
   }
 
@@ -870,6 +940,7 @@
   document.addEventListener("input",event=>{
     if(!document.body.classList.contains("m7studio-body-open"))return;
     if(event.target?.id==="ma-edit-name")ensureChrome(document.getElementById("ma-admin-edit-card"));
+    if(event.target?.id==="m7de-profile_ring_color")syncProfileImageCardAccent();
     scheduleStudioPreview();
   },true);
 
