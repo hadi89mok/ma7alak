@@ -285,9 +285,82 @@ async function saveEdit(e,id){e.preventDefault();let st=$("#m7lo-status"),p=payl
 async function uploadLiveFile(file,postKey,statusEl){if(file.size>50*1024*1024)throw new Error(`${file.name}: maximum file size is 50 MB.`);let mediaType=file.type.startsWith("video/")?"video":"image",ext=(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,""),path=`${ownerSlug}/${postKey}/${crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random()}.${ext}`;statusEl&&(statusEl.textContent=`Uploading ${file.name}…`);let u=await c.storage.from(BUCKET).upload(path,file,{contentType:file.type,cacheControl:"86400",upsert:false});if(u.error)throw u.error;return{media_url:c.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,media_type:mediaType,storage_path:path}}
 async function publish(e){e.preventDefault();let st=$("#m7lo-status"),btn=e.submitter;btn.disabled=true;try{await identity();if(!ownerSlug||!ent?.enabled)throw new Error("Live & Offers is not enabled.");let p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48),files=[...($("#m7lo-file").files||[])];if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);let uploaded=[];for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));let sp=await c.from("shop_profiles").select("shop_name").eq("shop_slug",ownerSlug).maybeSingle(),cover=uploaded[0]||{};Object.assign(p,{shop_slug:ownerSlug,shop_name:sp.data?.shop_name||ownerSlug,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="Publishing…";let r=await c.rpc("ma7alak_create_live_post",{p_post:p});if(r.error)throw r.error;let postId=Number(r.data);if(uploaded.length){let rows=uploaded.map((m,i)=>({post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,sort_order:i,is_cover:i===0,created_by:session.user.id})),ins=await c.from("shop_live_post_media").insert(rows);if(ins.error)throw ins.error}close();await load();setTimeout(load,150);setTimeout(load,700)}catch(err){st.textContent=err.message||String(err);btn.disabled=false}}
 function publicData(shop){let list=shop?items.filter(x=>String(x.shop_slug).toLowerCase()===String(shop).toLowerCase()):items;return list.map(x=>({...x}))}
-function send(win,type,shop){try{win?.postMessage({type,shopSlug:shop||"",items:publicData(shop),owner:!!(shop&&ownerSlug===String(shop).toLowerCase()),entitlement:shop&&ownerSlug===String(shop).toLowerCase()?ent:null,ownerActive:shop&&ownerSlug===String(shop).toLowerCase()?ownerItems.length:0},"*")}catch(_){}}
-function broadcast(){try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:publicData("")},"*")}catch(_){}document.querySelectorAll("iframe").forEach(f=>{try{send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");if(ownerSlug)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",ownerSlug)}catch(_){}})}
-function bridge(){addEventListener("message",e=>{let d=e.data||{},s=String(d.shopSlug||"").toLowerCase();if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);if(c&&!refreshing)load();return}if(d.type==="MA7ALAK_LIVE_OFFERS_VIEW")return view(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_OPEN_SHOP")return openShopPanel(s);if(d.type==="MA7ALAK_LIVE_OFFERS_CREATE"&&s===ownerSlug)return creator();if(d.type==="MA7ALAK_LIVE_OFFERS_END"&&s===ownerSlug)return endPost(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_EDIT"&&s===ownerSlug)return editor(d.id)})}
+function currentOwnerSlug(){
+  return String(window.Ma7alakOwnerAuth?.owner?.shop_slug||ownerSlug||"").trim().toLowerCase();
+}
+function send(win,type,shop){
+  try{
+    const s=String(shop||"").trim().toLowerCase();
+    const activeOwner=currentOwnerSlug();
+    const own=!!(s&&activeOwner===s);
+    win?.postMessage({
+      type,
+      shopSlug:s,
+      items:publicData(s),
+      owner:own,
+      entitlement:own?ent:null,
+      ownerActive:own?ownerItems.filter(x=>String(x.shop_slug||"").toLowerCase()===s).length:0
+    },"*");
+  }catch(_){}
+}
+function broadcast(){
+  try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:publicData("")},"*")}catch(_){}
+  const activeOwner=currentOwnerSlug();
+  document.querySelectorAll("iframe").forEach(f=>{
+    try{
+      send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");
+      if(activeOwner)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",activeOwner);
+    }catch(_){}
+  });
+}
+async function refreshOwnerStateForShop(shopSlug){
+  c=resolveClient()||c;
+  if(!c)return false;
+  await identity();
+  await load();
+  return currentOwnerSlug()===String(shopSlug||"").trim().toLowerCase();
+}
+function bridge(){
+  addEventListener("message",e=>{
+    const d=e.data||{},s=String(d.shopSlug||"").trim().toLowerCase();
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){
+      send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
+      if(c&&!refreshing){
+        (async()=>{
+          await identity();
+          await load();
+          send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
+        })().catch(err=>console.warn("SHOUFHON Live state refresh:",err));
+      }
+      return;
+    }
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_VIEW")return view(d.id);
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_OPEN_SHOP"){
+      (async()=>{
+        await refreshOwnerStateForShop(s);
+        openShopPanel(s);
+      })().catch(err=>console.warn("SHOUFHON Live shop panel:",err));
+      return;
+    }
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_CREATE"){
+      (async()=>{if(await refreshOwnerStateForShop(s))creator()})().catch(err=>console.warn("SHOUFHON Live create:",err));
+      return;
+    }
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_END"){
+      (async()=>{if(await refreshOwnerStateForShop(s))endPost(d.id)})().catch(err=>console.warn("SHOUFHON Live end:",err));
+      return;
+    }
+
+    if(d.type==="MA7ALAK_LIVE_OFFERS_EDIT"){
+      (async()=>{if(await refreshOwnerStateForShop(s))editor(d.id)})().catch(err=>console.warn("SHOUFHON Live edit:",err));
+    }
+  });
+}
 async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},()=>{load()}).subscribe()}
 async function init(){
   css();
