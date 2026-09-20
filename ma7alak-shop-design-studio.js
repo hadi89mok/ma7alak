@@ -313,6 +313,7 @@
       try{
         await uploadProfileImage(picked,status);
         ensureProfileImageCard(form);
+        scheduleStudioPreview();
       }catch(error){
         if(status)status.textContent=error?.message||"Profile image upload failed.";
       }finally{
@@ -329,6 +330,7 @@
         target.dispatchEvent(new Event("change",{bubbles:true}));
       }
       ensureProfileImageCard(form);
+      scheduleStudioPreview();
     });
 
     return card;
@@ -366,13 +368,23 @@
   function hydrateProfilePreview(clone){
     if(!clone)return;
 
+    const byId=id=>document.getElementById(id);
+    const num=(id,min,max,fallback)=>{
+      const n=Number(byId(id)?.value);
+      return Number.isFinite(n)
+        ?Math.max(min,Math.min(max,n))
+        :fallback;
+    };
+    const value=(id,fallback="")=>
+      String(byId(id)?.value??fallback).trim();
+
     const name=String(
-      document.getElementById("ma-edit-name")?.value||
+      byId("ma-edit-name")?.value||
       "Shop Name"
     ).trim()||"Shop Name";
 
     const arabic=String(
-      document.getElementById("ma-edit-arabic")?.value||
+      byId("ma-edit-arabic")?.value||
       ""
     ).trim();
 
@@ -387,8 +399,90 @@
       arabicNode.hidden=!arabic;
     }
 
+    /*
+       Apply the two most important visual controls directly to the fullscreen
+       phone clone. This avoids stale sample state/event-order problems.
+    */
+    const bannerEnabled=!!byId("m7de-profile_banner_enabled")?.checked;
+    const bannerHeight=num("m7de-profile_banner_height",80,260,150);
+    const bannerOverlay=num("m7de-profile_banner_overlay",0,85,30)/100;
+    const bannerPosition=num("m7de-profile_banner_position_y",0,100,50);
+    const bannerWidth=num("m7de-profile_banner_border_width",0,4,1);
+    const bannerColor=value("m7de-profile_banner_color","#171217");
+    const bannerBorder=value("m7de-profile_banner_border_color","#d9a441");
+    const bannerImage=value("m7de-profile_banner_image_url","");
+    const bannerStyle=value("m7de-profile_banner_style","rounded-fade").toLowerCase();
+    const logoSize=num("m7de-profile_logo_size",120,270,210);
+    const logoOverlap=num("m7de-profile_logo_overlap",0,130,62);
+
+    clone.classList.toggle("has-banner",bannerEnabled);
+    clone.dataset.bannerStyle=bannerStyle;
+
+    const banner=clone.querySelector(".m7ds-profile-shell-banner");
+    if(banner){
+      const safeImage=bannerImage
+        .replace(/\\/g,"%5C")
+        .replace(/"/g,"%22")
+        .replace(/[\r\n]/g,"");
+
+      banner.style.setProperty(
+        "display",
+        bannerEnabled?"grid":"none",
+        "important"
+      );
+      banner.style.setProperty(
+        "height",
+        Math.max(62,bannerHeight*.55)+"px",
+        "important"
+      );
+      banner.style.setProperty(
+        "border",
+        bannerWidth+"px solid "+bannerBorder,
+        "important"
+      );
+      banner.style.setProperty(
+        "background-color",
+        bannerColor,
+        "important"
+      );
+      banner.style.setProperty(
+        "background-image",
+        bannerEnabled&&/^https?:\/\//i.test(bannerImage)
+          ?"linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+")),url(\""+safeImage+"\")"
+          :"linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+"))",
+        "important"
+      );
+      banner.style.setProperty("background-size","cover","important");
+      banner.style.setProperty(
+        "background-position",
+        "center "+bannerPosition+"%",
+        "important"
+      );
+      banner.style.setProperty("background-repeat","no-repeat","important");
+
+      if(bannerStyle==="fade"||bannerStyle==="rounded-fade"){
+        const mask="linear-gradient(to bottom,#000 0 72%,rgba(0,0,0,.82) 84%,transparent 100%)";
+        banner.style.setProperty("-webkit-mask-image",mask,"important");
+        banner.style.setProperty("mask-image",mask,"important");
+      }else{
+        banner.style.setProperty("-webkit-mask-image","none","important");
+        banner.style.setProperty("mask-image","none","important");
+      }
+    }
+
     const logo=clone.querySelector(".m7ds-profile-shell-logo");
     if(logo){
+      const scaled=Math.max(64,Math.min(136,logoSize*.50));
+      logo.style.setProperty("width",scaled+"px","important");
+      logo.style.setProperty("height",scaled+"px","important");
+      logo.style.setProperty(
+        "margin-top",
+        bannerEnabled
+          ?(-Math.min(82,logoOverlap*.58))+"px"
+          :"8px",
+        "important"
+      );
+
       if(/^https?:\/\//i.test(image)){
         logo.innerHTML='<img src="'+esc(image)+'" alt="">';
       }
