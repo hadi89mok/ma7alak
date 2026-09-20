@@ -6042,6 +6042,7 @@ function decorateAll(){
     media_button_active_bg_color:"#2b2029",
 
     gallery_frame_style:"current",
+    gallery_frame_shape:"rounded",
     gallery_frame_color_1:"#e2a6b8",
     gallery_frame_color_2:"#f2d18d",
     gallery_frame_color_3:"#c88f45",
@@ -6151,6 +6152,13 @@ function decorateAll(){
     ["quad","4-color split"],
     ["blend","4-color soft blend"],
     ["none","No frame"]
+  ];
+
+  const GALLERY_FRAME_SHAPES = [
+    ["rounded","Rounded"],
+    ["soft","Soft corners"],
+    ["square","Square"],
+    ["pill","Extra round"]
   ];
 
   const BANNER_STYLES = [
@@ -6265,11 +6273,25 @@ function decorateAll(){
   function galleryFrameStyleField(prefix){
     return `
       <label class="m7ds-field">
-        <span>Gallery frame design</span>
+        <span>Frame color design</span>
         <select id="${prefix}gallery_frame_style">
           ${opts(
             GALLERY_FRAME_STYLES,
             DEFAULTS.gallery_frame_style
+          )}
+        </select>
+      </label>
+    `;
+  }
+
+  function galleryFrameShapeField(prefix){
+    return `
+      <label class="m7ds-field">
+        <span>Frame shape</span>
+        <select id="${prefix}gallery_frame_shape">
+          ${opts(
+            GALLERY_FRAME_SHAPES,
+            DEFAULTS.gallery_frame_shape
           )}
         </select>
       </label>
@@ -7128,7 +7150,8 @@ function decorateAll(){
 
         <div class="m7ds-grid">
           ${galleryFrameStyleField(prefix)}
-          ${effectNumberField(prefix,"gallery_frame_radius","Corner radius",0,44,1,"px")}
+          ${galleryFrameShapeField(prefix)}
+          ${effectNumberField(prefix,"gallery_frame_radius","Rounded corner radius",0,44,1,"px")}
           ${effectNumberField(prefix,"gallery_frame_glow","Frame glow",0,100,5,"%")}
           ${effectNumberField(prefix,"gallery_frame_shadow","Shadow strength",0,100,5,"%")}
           ${effectNumberField(prefix,"gallery_frame_angle","Gradient / color angle",0,360,5,"°")}
@@ -7970,9 +7993,26 @@ function decorateAll(){
         number(
           "gallery_frame_radius",
           0,
-          36,
+          44,
           18
         );
+
+      const shape=
+        String(
+          get("gallery_frame_shape")?.value ||
+          DEFAULTS.gallery_frame_shape
+        )
+          .trim()
+          .toLowerCase();
+
+      const effectiveRadius=
+        shape==="square"
+          ? 0
+          : shape==="soft"
+            ? Math.min(radius,10)
+            : shape==="pill"
+              ? 999
+              : radius;
 
       const glow=
         number(
@@ -8099,7 +8139,7 @@ function decorateAll(){
         activeWidth+"px";
 
       preview.style.borderRadius=
-        radius+"px";
+        effectiveRadius+"px";
 
       preview.style.background=
         layered
@@ -8146,7 +8186,11 @@ function decorateAll(){
             (-extent)+"px";
 
           layerEl.style.borderRadius=
-            (radius+extent)+"px";
+            (
+              effectiveRadius>=999
+                ? 999
+                : effectiveRadius+extent
+            )+"px";
 
           layerEl.style.borderWidth=
             data.width+"px";
@@ -8277,13 +8321,28 @@ function decorateAll(){
       if(inner){
         inner.style.borderRadius=
           layered
-            ? radius+"px"
+            ? (
+                effectiveRadius>=999
+                  ? "999px"
+                  : effectiveRadius+"px"
+              )
             : (
-                Math.max(
-                  0,
-                  radius-activeWidth
-                )+"px"
+                effectiveRadius>=999
+                  ? "999px"
+                  : (
+                      Math.max(
+                        0,
+                        effectiveRadius-activeWidth
+                      )+"px"
+                    )
               );
+
+        /*
+           Always clip the sample itself to the selected inner shape.
+           This removes the square/empty corner wedges that could appear
+           when the frame radius and inner preview radius drifted apart.
+        */
+        inner.style.overflow="hidden";
       }
     }
 
@@ -8549,6 +8608,7 @@ function decorateAll(){
 
     [
       "gallery_frame_style",
+      "gallery_frame_shape",
       "gallery_frame_color_1",
       "gallery_frame_color_2",
       "gallery_frame_color_3",
@@ -15433,6 +15493,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     media_button_active_bg_color:"#2b2029",
 
     gallery_frame_style:"current",
+    gallery_frame_shape:"rounded",
     gallery_frame_color_1:"#e2a6b8",
     gallery_frame_color_2:"#f2d18d",
     gallery_frame_color_3:"#c88f45",
