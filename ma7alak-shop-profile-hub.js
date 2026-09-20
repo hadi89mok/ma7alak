@@ -2414,6 +2414,173 @@ window.addEventListener(
   }
 
 
+  function applyLocationDraft(message){
+    const draft =
+      message &&
+      message.profile &&
+      typeof message.profile === "object"
+        ? message.profile
+        : {};
+
+    const options =
+      message &&
+      message.directory_options &&
+      typeof message.directory_options === "object"
+        ? message.directory_options
+        : {};
+
+    const locationValue =
+      String(
+        draft.address_text ||
+        draft.location ||
+        "Full address not added"
+      ).trim();
+
+    const days =
+      String(
+        options.availability_days ||
+        ""
+      ).trim();
+
+    const time =
+      String(
+        options.availability_time ||
+        ""
+      ).trim();
+
+    const extraRows =
+      Array.isArray(
+        options.availability_extra_rows
+      )
+        ? options.availability_extra_rows
+            .map(function(row){
+              return {
+                days:String(
+                  row && row.days || ""
+                ).trim(),
+                time:String(
+                  row && row.time || ""
+                ).trim()
+              };
+            })
+            .filter(function(row){
+              return row.days || row.time;
+            })
+        : [];
+
+    const locationEl =
+      document.getElementById(
+        "ma7alak-location-value"
+      );
+
+    const daysEl =
+      document.getElementById(
+        "ma7alak-availability-days"
+      );
+
+    const timeEl =
+      document.getElementById(
+        "ma7alak-availability-time"
+      );
+
+    const extraEl =
+      document.getElementById(
+        "ma7alak-availability-extra"
+      );
+
+    if(locationEl){
+      locationEl.textContent =
+        locationValue;
+    }
+
+    if(daysEl){
+      daysEl.textContent =
+        days ||
+        (
+          time || extraRows.length
+            ? ""
+            : "Contact shop for availability"
+        );
+
+      daysEl.hidden =
+        !days &&
+        (
+          !!time ||
+          extraRows.length > 0
+        );
+    }
+
+    if(timeEl){
+      timeEl.textContent =
+        time;
+
+      timeEl.hidden =
+        !time;
+    }
+
+    if(extraEl){
+      extraEl.innerHTML = "";
+
+      extraRows.forEach(function(row){
+        const line =
+          document.createElement(
+            "div"
+          );
+
+        line.className =
+          "ma7alak-availability-line";
+
+        if(row.days){
+          const daysPart =
+            document.createElement(
+              "span"
+            );
+
+          daysPart.textContent =
+            row.days;
+
+          line.appendChild(
+            daysPart
+          );
+        }
+
+        if(row.time){
+          const timePart =
+            document.createElement(
+              "strong"
+            );
+
+          timePart.textContent =
+            row.time;
+
+          line.appendChild(
+            timePart
+          );
+        }
+
+        extraEl.appendChild(
+          line
+        );
+      });
+    }
+
+    const profile = {
+      ...draft,
+      shop_slug:SHOP_SLUG,
+      directory_options:options
+    };
+
+    const accent =
+      m7AccentFromProfile(
+        profile
+      );
+
+    if(accent){
+      m7ApplyAccent(accent);
+    }
+  }
+
+
   loadLocationPanel();
 
   if(
@@ -2422,6 +2589,15 @@ window.addEventListener(
   ){
     window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
       loadLocationPanel
+    );
+  }
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+      applyLocationDraft
     );
   }
 
