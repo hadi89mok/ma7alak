@@ -42,11 +42,23 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
   border-radius:0!important;
   width:100%!important;
   max-width:100%!important;
-  margin:12px 0 0!important;
-  padding:0 12px 18px!important;
+  margin:10px 0 0!important;
+  padding:18px 12px 18px!important;
   overflow:visible!important;
 }
-#m7-global-home-feed-shell:before,
+/* Visual separator only — this does NOT paint any background behind the feed. */
+#m7-global-home-feed-shell:before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  top:0!important;
+  left:12px!important;
+  right:12px!important;
+  height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(217,164,65,.48) 20%,rgba(245,215,150,.82) 50%,rgba(217,164,65,.48) 80%,transparent)!important;
+  box-shadow:0 0 10px rgba(217,164,65,.18)!important;
+  pointer-events:none!important;
+}
 #m7-global-home-feed-shell:after{
   content:none!important;
   display:none!important;
@@ -56,9 +68,13 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
 @media(max-width:600px){
   #m7-global-home-feed-shell{
     width:100%!important;
-    margin:12px 0 0!important;
-    padding:0 10px 16px!important;
+    margin:10px 0 0!important;
+    padding:17px 10px 16px!important;
     border-radius:0!important;
+  }
+  #m7-global-home-feed-shell:before{
+    left:8px!important;
+    right:8px!important;
   }
 }
 /* Keep the original phone animations alive. */
