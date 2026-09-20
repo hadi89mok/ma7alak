@@ -10729,6 +10729,30 @@ function ensureCss(){
       padding:16px;
     }
 
+    .m7v4-home-footer-btn{
+      width:100%;
+      min-height:58px;
+      margin:0 0 14px;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid rgba(217,170,88,.26);
+      border-radius:15px;
+      background:
+        radial-gradient(circle at 96% 0%,rgba(217,170,88,.10),transparent 34%),
+        rgba(217,170,88,.035);
+      color:#f1cf8b;
+      text-align:left;
+      cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .m7v4-home-footer-btn span{display:block;min-width:0}
+    .m7v4-home-footer-btn strong{display:block;color:#f5d58e;font-size:12px}
+    .m7v4-home-footer-btn small{display:block;margin-top:4px;color:#918674;font-size:8px;line-height:1.35}
+    .m7v4-home-footer-btn b{font-size:21px;color:#e3b85f}
+
     .m7v4-search-row{
       display:grid;
       grid-template-columns:1fr auto;
@@ -14664,6 +14688,10 @@ function mount(){
       </header>
 
       <div class="m7v4-home" data-m7v4-home>
+        <button class="m7v4-home-footer-btn" type="button" data-m7v4-footer-manager>
+          <span><strong>🌙 Homepage Footer</strong><small>Edit footer background, logo, text, navigation, socials, colors and phone animations.</small></span>
+          <b>›</b>
+        </button>
         <div class="m7v4-search-row">
           <input class="m7v4-search" type="search" placeholder="Search shop, slug, area, category…" data-m7v4-search>
           <button class="m7v4-add" type="button" data-m7v4-add>＋ Add shop</button>
@@ -14686,6 +14714,16 @@ function mount(){
   });
 
   root.addEventListener("click",async event=>{
+    const footerManager=event.target.closest("[data-m7v4-footer-manager]");
+    if(footerManager){
+      if(typeof window.Ma7alakOpenHomepageFooterManager==="function"){
+        await window.Ma7alakOpenHomepageFooterManager();
+      }else{
+        window.dispatchEvent(new CustomEvent("ma7alak:open-homepage-footer-manager"));
+      }
+      return;
+    }
+
     const manage=event.target.closest("[data-m7v4-manage]");
     if(manage){
       selectedSlug=manage.dataset.m7v4Manage||"";
@@ -16411,6 +16449,20 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     overlay.addEventListener("click",e=>{const dn=e.target.closest("[data-del-nav]");if(dn){collect();settings.navigation.splice(Number(dn.dataset.delNav),1);renderLists();markDirty();renderPreview();return}const ds=e.target.closest("[data-del-social]");if(ds){collect();settings.socials.splice(Number(ds.dataset.delSocial),1);renderLists();markDirty();renderPreview();return}const up=e.target.closest("[data-upload]");if(up)upload(up.dataset.upload);const reset=e.target.closest("[data-reset]");if(reset&&confirm("Reset the editor to the ShoufHon footer defaults?")){settings=merged({});fill();markDirty();setStatus("Defaults loaded in editor. Save to publish.")}});
   }
 
+  async function openManager(){
+    if(!overlay)build();
+    overlay.hidden=false;
+    document.documentElement.style.overflow="hidden";
+    setStatus("Loading footer settings…");
+    await load();
+    return overlay;
+  }
+
+  window.Ma7alakOpenHomepageFooterManager=openManager;
+  window.addEventListener("ma7alak:open-homepage-footer-manager",()=>{
+    openManager().catch(e=>console.error("ShoufHon footer manager:",e));
+  });
+
   function launcherHost(){
     const shell=document.querySelector("#m7-admin-workspace-v4 .m7v4-shell");
     if(shell)return {host:shell,after:shell.querySelector(".m7v4-top")};
@@ -16429,7 +16481,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       launcher.id="m7hfa-launch";
       launcher.type="button";
       launcher.innerHTML='<span><strong>🌙 Homepage Footer</strong><small>Logo · Lebanon background · links · socials · colors · mobile animations</small></span><b>›</b>';
-      launcher.onclick=async()=>{if(!overlay)build();overlay.hidden=false;document.documentElement.style.overflow="hidden";setStatus("Loading footer settings…");await load()};
+      launcher.onclick=()=>openManager();
     }
 
     if(target.after){
@@ -16459,7 +16511,10 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       if(document.querySelector("#m7-admin-workspace-v4 .m7v4-shell")||tries>200)clearInterval(t);
     },100);
 
-    window.addEventListener("ma7alak:admin-ready",mountLauncher);
+    window.addEventListener("ma7alak:admin-ready",()=>{
+      mountLauncher();
+      window.dispatchEvent(new CustomEvent("ma7alak:footer-manager-ready"));
+    });
     window.addEventListener("focus",mountLauncher);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")mountLauncher()});
   }
