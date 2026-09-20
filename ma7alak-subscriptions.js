@@ -9,7 +9,7 @@
   if(path!=="/add-shop-"||window.__MA7ALAK_SUBSCRIPTIONS_V1__)return;
   window.__MA7ALAK_SUBSCRIPTIONS_V1__=true;
 
-  const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
+  const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png";
   const defaults={
     eyebrow:"SHOUFHON FOR BUSINESS",
     title:"Your shop deserves to be seen.",
