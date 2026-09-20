@@ -92,6 +92,9 @@
   const ROOT_ID = "ma7alak-opening-header-root";
   const HOME_BLOCK_ID = "shoufhon-homepage-content-block";
   let homepageBlock = null;
+  let openingRootRef = null;
+  let openingGlobalEventsBound = false;
+  let openingResizeObserver = null;
 
   function ensureHomepageBlock(){
     const body=document.body;
@@ -240,7 +243,13 @@
   function boot() {
     if (!document.body) return;
 
-    let root = document.getElementById(ROOT_ID);
+    /* Reuse the SAME header node if Hostinger temporarily removed it.
+       This preserves the existing header animation DOM and avoids duplicate
+       animation loops/listeners from recreating the component. */
+    let root =
+      document.getElementById(ROOT_ID) ||
+      openingRootRef;
+
     if (!root) {
       root = document.createElement("div");
       root.id = ROOT_ID;
@@ -261,53 +270,116 @@
       });
 
       /* This component must never create a white Hostinger-style box. */
-      const transparentFix = document.createElement("style");
-      transparentFix.textContent = `
-        #${ROOT_ID},
-        #${ROOT_ID} > *,
-        #${ROOT_ID} .ma7alak-ultra-hero {
-          background-color: transparent !important;
-        }
-        #${ROOT_ID} {
-          padding: 0 !important;
-          border: 0 !important;
-          box-shadow: none !important;
-        }
-      `;
-      document.head.appendChild(transparentFix);
+      if(!document.getElementById("ma7alak-opening-transparent-fix")){
+        const transparentFix = document.createElement("style");
+        transparentFix.id = "ma7alak-opening-transparent-fix";
+        transparentFix.textContent = `
+          #${ROOT_ID},
+          #${ROOT_ID} > *,
+          #${ROOT_ID} .ma7alak-ultra-hero {
+            background-color: transparent !important;
+          }
+          #${ROOT_ID} {
+            padding: 0 !important;
+            border: 0 !important;
+            box-shadow: none !important;
+          }
+        `;
+        document.head.appendChild(transparentFix);
+      }
     }
+
+    openingRootRef = root;
 
     if (!placeRoot(root)) return;
 
     syncWidth();
 
-    try {
-      if (ORIGINAL_BEHAVIOR) (new Function(ORIGINAL_BEHAVIOR))();
-    } catch (err) {
-      console.error("[ShoufHon Opening Header] animation init:", err);
+    /* ORIGINAL_BEHAVIOR is initialized once for this exact DOM node.
+       Reattaching after a Hostinger refresh does not duplicate animations. */
+    if(root.dataset.m7OpeningBehaviorInit!=="1"){
+      root.dataset.m7OpeningBehaviorInit="1";
+      try {
+        if (ORIGINAL_BEHAVIOR) (new Function(ORIGINAL_BEHAVIOR))();
+      } catch (err) {
+        root.dataset.m7OpeningBehaviorInit="";
+        console.error("[ShoufHon Opening Header] animation init:", err);
+      }
     }
 
-    window.addEventListener("resize", syncWidth, {passive:true});
-    window.addEventListener("orientationchange", syncWidth, {passive:true});
-
-    if(!window.__SHOUFHON_HOME_BLOCK_KEEPER__){
-      window.__SHOUFHON_HOME_BLOCK_KEEPER__=setInterval(()=>{
-        if(!document.hidden)ensureHomepageBlock();
-      },1200);
-      window.addEventListener("pageshow",ensureHomepageBlock);
-      window.addEventListener("focus",ensureHomepageBlock);
-      document.addEventListener("visibilitychange",()=>{
-        if(document.visibilityState==="visible")ensureHomepageBlock();
-      });
+    if(!openingGlobalEventsBound){
+      openingGlobalEventsBound=true;
+      window.addEventListener("resize", syncWidth, {passive:true});
+      window.addEventListener("orientationchange", syncWidth, {passive:true});
     }
 
     if ("ResizeObserver" in window) {
       const premium = findPremiumPanel();
       if (premium) {
-        const ro = new ResizeObserver(syncWidth);
-        ro.observe(premium);
+        try{
+          openingResizeObserver?.disconnect?.();
+        }catch(_){}
+        openingResizeObserver = new ResizeObserver(syncWidth);
+        openingResizeObserver.observe(premium);
       }
     }
+  }
+
+  function ensureOpeningHeaderAlive(){
+    if(document.hidden)return;
+
+    const block=ensureHomepageBlock();
+    if(!block)return;
+
+    let root =
+      document.getElementById(ROOT_ID) ||
+      openingRootRef;
+
+    /* If the node never existed, boot creates it.
+       Otherwise reattach the SAME node if Hostinger detached it. */
+    if(!root){
+      boot();
+      return;
+    }
+
+    openingRootRef=root;
+
+    if(
+      root.parentNode!==block ||
+      block.firstElementChild!==root
+    ){
+      block.insertBefore(root,block.firstElementChild);
+    }
+
+    syncWidth();
+  }
+
+  if(!window.__SHOUFHON_HOME_BLOCK_KEEPER__){
+    window.__SHOUFHON_HOME_BLOCK_KEEPER__=setInterval(
+      ensureOpeningHeaderAlive,
+      1200
+    );
+
+    window.addEventListener(
+      "pageshow",
+      ensureOpeningHeaderAlive
+    );
+
+    window.addEventListener(
+      "focus",
+      ensureOpeningHeaderAlive
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      ()=>{
+        if(document.visibilityState==="visible"){
+          ensureOpeningHeaderAlive();
+          setTimeout(ensureOpeningHeaderAlive,120);
+          setTimeout(ensureOpeningHeaderAlive,600);
+        }
+      }
+    );
   }
 
   let tries = 0;
