@@ -556,10 +556,40 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
      setTimeout(keepFeedMounted,600);
    }
  });
-(function(){"use strict";
-const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
-const sb=(window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||(window.Ma7alakSupabaseBootstrap&&window.Ma7alakSupabaseBootstrap.client)||(window.supabase&&window.supabase.createClient?window.supabase.createClient(SB_URL,SB_KEY):null));
-if(!sb){console.error("SHOUFHON home feed: Supabase client unavailable");return;}
+const M7_HOME_FEED_SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",M7_HOME_FEED_SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+const M7_HOME_FEED_START_DELAYS=[100,250,500,1000,2000,4000,8000,12000];
+let m7HomeFeedDataStarted=false,m7HomeFeedStartTimer=null,m7HomeFeedStartIndex=0;
+
+function m7ResolveHomeFeedClient(){
+  const shared=
+    (window.Ma7alakAccount&&window.Ma7alakAccount.client)||
+    window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+    (window.Ma7alakSupabaseBootstrap&&window.Ma7alakSupabaseBootstrap.client);
+  if(shared)return shared;
+  if(window.__MA7ALAK_HOME_FEED_FALLBACK_SUPABASE__)return window.__MA7ALAK_HOME_FEED_FALLBACK_SUPABASE__;
+  if(window.supabase&&typeof window.supabase.createClient==="function"){
+    try{
+      window.__MA7ALAK_HOME_FEED_FALLBACK_SUPABASE__=window.supabase.createClient(M7_HOME_FEED_SB_URL,M7_HOME_FEED_SB_KEY);
+      return window.__MA7ALAK_HOME_FEED_FALLBACK_SUPABASE__;
+    }catch(err){
+      console.warn("SHOUFHON home feed: Supabase client creation delayed",err);
+    }
+  }
+  return null;
+}
+
+function m7StartHomeFeedData(){
+  if(m7HomeFeedDataStarted||window.__MA7ALAK_HOME_FEED_DATA_STARTED__)return true;
+  const sb=m7ResolveHomeFeedClient();
+  if(!sb)return false;
+  m7HomeFeedDataStarted=true;
+  window.__MA7ALAK_HOME_FEED_DATA_STARTED__=1;
+  if(m7HomeFeedStartTimer){
+    clearTimeout(m7HomeFeedStartTimer);
+    m7HomeFeedStartTimer=null;
+  }
+
+(function(sb){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 /* LIVE OFFERS */
 const liveRoot=document.getElementById("m7-live-home"),liveCards=document.getElementById("m7-live-cards"),liveSub=document.getElementById("m7-live-sub"),liveCount=document.getElementById("m7-live-count");let livePosts=[],liveSignature="";const LIVE_TIME_ZONE="Asia/Beirut";
@@ -576,7 +606,13 @@ const liveMeta=t=>({offer:"🏷️ OFFER",happening:"🟢 HAPPENING NOW",arrival
 function liveMedia(x){if(!x.media_url)return"";return x.media_type==="video"?`<video class="m7-live-media" data-src="${esc(x.media_url)}" muted loop playsinline preload="none"></video>`:`<img class="m7-live-media" src="${esc(x.media_url)}" alt="" loading="lazy" decoding="async">`}
 function liveAvatar(x){let name=String(x.shop_name||x.shop_slug||"Shop"),letter=esc(name.charAt(0).toUpperCase());return`<div class="m7-shop-avatar">${x.profile_image_url?`<img src="${esc(x.profile_image_url)}" alt="${esc(name)}" onerror="this.outerHTML='<span class=&quot;m7-avatar-fallback&quot;>${letter}</span>'">`:`<span class="m7-avatar-fallback">${letter}</span>`}</div>`}
 function renderLive(){let n=livePosts.length;liveRoot.classList.toggle("m7-live-active",n>0);liveCount.textContent=`${n} ${n===1?"UPDATE":"UPDATES"}`;if(!n){liveSub.textContent="Offers, events & special things happening now";liveCards.innerHTML='<div class="m7-live-empty"><b>Nothing live right now</b><small>New updates will appear here automatically.</small></div>';return}liveSub.textContent=n===1?"1 update happening now":`${n} updates — swipe to see more`;liveCards.innerHTML=livePosts.map(x=>{let price=x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7-live-price">${x.original_price!=null?`<span class="m7-live-old">$${esc(x.original_price)}</span>`:""}${x.offer_price!=null?`$${esc(x.offer_price)}`:""}</div>`:"";return`<article class="m7-live-card" data-live-id="${esc(x.id)}">${liveMedia(x)}<div class="m7-live-copy"><span class="m7-live-badge">${liveMeta(x.post_type)}</span><div class="m7-live-title">${esc(x.title)}</div><div class="m7-shop-line">${liveAvatar(x)}<div class="m7-shop-info"><div class="m7-shop-name">${esc(x.shop_name||x.shop_slug)}</div><div class="m7-shop-now">● LIVE NOW</div></div></div>${price}<div class="m7-live-times"><div class="m7-live-schedule" data-start="${esc(x.starts_at)}" data-end="${esc(x.ends_at)}"></div></div></div></article>`}).join("");liveCards.querySelectorAll("[data-live-id]").forEach(c=>c.onclick=()=>window.postMessage({type:"MA7ALAK_LIVE_OFFERS_VIEW",id:c.dataset.liveId},"*"));updateLiveTimers()}
-addEventListener("message",e=>{let d=e.data||{};if((d.type==="MA7ALAK_LIVE_OFFERS_STATE"&&!d.shopSlug)||d.type==="MA7ALAK_LIVE_OFFERS_UPDATED"){let next=Array.isArray(d.items)?d.items:[],signature=getLiveSignature(next);livePosts=next;if(signature!==liveSignature){liveSignature=signature;renderLive()}else updateLiveTimers()}if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel()});function requestLive(){window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}requestLive();setTimeout(requestLive,300);setTimeout(requestLive,1000);setInterval(updateLiveTimers,1000);
+let liveStateReceived=false;
+const liveRequestTimers=[];
+function stopLiveRequests(){while(liveRequestTimers.length)clearTimeout(liveRequestTimers.pop())}
+addEventListener("message",e=>{let d=e.data||{};if((d.type==="MA7ALAK_LIVE_OFFERS_STATE"&&!d.shopSlug)||d.type==="MA7ALAK_LIVE_OFFERS_UPDATED"){liveStateReceived=true;stopLiveRequests();let next=Array.isArray(d.items)?d.items:[],signature=getLiveSignature(next);livePosts=next;if(signature!==liveSignature){liveSignature=signature;renderLive()}else updateLiveTimers()}if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel()});
+function requestLive(){if(!liveStateReceived)window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}
+[0,250,750,1500,3000,5000,8000,12000].forEach(ms=>liveRequestTimers.push(setTimeout(requestLive,ms)));
+setInterval(updateLiveTimers,1000);
 const liveMediaObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
  const v=entry.target;
  if(entry.isIntersecting&&!document.hidden){
@@ -725,13 +761,38 @@ function reelsData(){return refreshReels().map(r=>({id:r.dataset.reelId,shop:r.d
 function sendReelsState(){let data=reelsData();if(!data.length)return;window.postMessage({type:"MA7ALAK_REELS_STATE",source:"ma7alak-reels-embed",sentAt:Date.now(),reelIds:data.map(x=>[x.id,x.video,x.shopUrl].join("::")),reels:data},"*")}
 function openRandomReel(){let a=refreshReels();if(!a.length)return;let candidates=a.length>1&&lastRandom?a.filter(r=>r.dataset.reelId!==lastRandom):a,reel=candidates[Math.floor(Math.random()*candidates.length)];lastRandom=reel.dataset.reelId;openViewer(reel)}
 loadReels();syncFavorites();channel=sb.channel("ma7alak-combined-reels").on("postgres_changes",{event:"*",schema:"public",table:"shop_reels"},loadReels).subscribe();setInterval(()=>{if(!document.hidden)sendReelsState()},10000);document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadReels();syncFavorites()}});
-})();
+})(sb);
 
- const client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||(window.Ma7alakSupabaseBootstrap&&window.Ma7alakSupabaseBootstrap.client);
+ const client=sb;
  if(client){
    client.from("homepage_layout_settings").select("*").eq("key","live_offers_reels").maybeSingle().then(r=>{if(r.data){cfg.enabled=r.data.enabled!==false;place();}});
    client.channel("m7-original-home-layout").on("postgres_changes",{event:"*",schema:"public",table:"homepage_layout_settings",filter:"key=eq.live_offers_reels"},p=>{if(p.new){cfg.enabled=p.new.enabled!==false;place();}}).subscribe();
  }
+ return true;
+}
+
+function m7ScheduleHomeFeedDataStart(){
+  if(m7StartHomeFeedData()){
+    m7HomeFeedStartIndex=0;
+    return;
+  }
+  if(m7HomeFeedStartTimer)return;
+  if(m7HomeFeedStartIndex>=M7_HOME_FEED_START_DELAYS.length){
+    m7HomeFeedStartIndex=0;
+    console.warn("SHOUFHON home feed: Supabase still unavailable; will retry on next page wake.");
+    return;
+  }
+  const delay=M7_HOME_FEED_START_DELAYS[m7HomeFeedStartIndex++];
+  m7HomeFeedStartTimer=setTimeout(()=>{
+    m7HomeFeedStartTimer=null;
+    m7ScheduleHomeFeedDataStart();
+  },delay);
+}
+
+m7ScheduleHomeFeedDataStart();
+window.addEventListener("pageshow",()=>{if(!m7HomeFeedDataStarted)m7ScheduleHomeFeedDataStart()});
+window.addEventListener("focus",()=>{if(!m7HomeFeedDataStarted)m7ScheduleHomeFeedDataStart()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!m7HomeFeedDataStarted)m7ScheduleHomeFeedDataStart()});
 
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",m7Mount,{once:true});else m7Mount();
