@@ -25,6 +25,46 @@ function resolveClient(){
 }
 const meta=t=>({offer:["🏷️","OFFER"],happening:["🟢","HAPPENING NOW"],arrival:["✨","NEW ARRIVAL"],event:["📅","EVENT"]}[t]||["⚡","LIVE"]),money=v=>v==null||v===""?"":`${Number(v).toFixed(Number(v)%1?2:0)}`;
 
+
+const LIVE_CACHE_KEY="ma7alak-live-public-cache-v1";
+function activeCachedItems(value){
+  const now=Date.now();
+  return (Array.isArray(value)?value:[]).filter(x=>{
+    if(!x||String(x.status||"active")!=="active")return false;
+    const end=new Date(x.ends_at).getTime();
+    return Number.isFinite(end)&&end>now;
+  });
+}
+function readLiveCache(){
+  try{
+    const raw=localStorage.getItem(LIVE_CACHE_KEY);
+    if(!raw)return[];
+    const parsed=JSON.parse(raw);
+    const cached=activeCachedItems(parsed&&parsed.items);
+    if(!cached.length&&Array.isArray(parsed&&parsed.items)&&(parsed.items||[]).length){
+      localStorage.removeItem(LIVE_CACHE_KEY);
+    }
+    return cached;
+  }catch(_){
+    return[];
+  }
+}
+function writeLiveCache(list){
+  try{
+    const active=activeCachedItems(list);
+    if(active.length){
+      localStorage.setItem(LIVE_CACHE_KEY,JSON.stringify({items:active,saved_at:Date.now()}));
+    }else{
+      localStorage.removeItem(LIVE_CACHE_KEY);
+    }
+  }catch(_){}
+}
+function hydrateLiveCache(){
+  const cached=readLiveCache();
+  if(!cached.length)return false;
+  items=cached;
+  return true;
+}
 function m7loFontStack(mode){
   return({
     system:'"Segoe UI",Arial,Helvetica,sans-serif',
@@ -82,7 +122,74 @@ async function ready(){
   return false;
 }
 async function identity(){session=window.Ma7alakAccount?.session||null;ownerSlug="";ent=null;if(!c||!session?.user)return;let o=await c.from("shop_owners").select("shop_slug").eq("user_id",session.user.id).limit(1).maybeSingle();if(!o.error&&o.data?.shop_slug)ownerSlug=String(o.data.shop_slug).toLowerCase();if(ownerSlug){let e=await c.from("shop_live_entitlements").select("*").eq("shop_slug",ownerSlug).maybeSingle();if(!e.error)ent=e.data||null}}
-async function load(){if(!c||refreshing)return;refreshing=true;try{let n=new Date().toISOString(),r=await c.from("shop_live_posts").select("*").eq("status","active").gt("ends_at",n).order("starts_at",{ascending:false}).limit(80);items=r.error?[]:(r.data||[]);ownerItems=[];if(ownerSlug){let q=await c.from("shop_live_posts").select("*").eq("shop_slug",ownerSlug).eq("status","active").gt("ends_at",n).order("starts_at",{ascending:false});ownerItems=q.error?[]:(q.data||[])}let all=[...items,...ownerItems],slugs=[...new Set([...all.map(x=>String(x.shop_slug||"").trim().toLowerCase()),ownerSlug].filter(Boolean))],ids=[...new Set(all.map(x=>Number(x.id)).filter(Boolean))],profiles=new Map(),mediaByPost=new Map();if(slugs.length){let p=await c.from("shop_profiles").select("shop_slug,profile_image_url,shop_url,directory_options").in("shop_slug",slugs);(p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug||"").toLowerCase(),x));profileOptions=profiles}if(ids.length){let m=await c.from("shop_live_post_media").select("id,post_id,shop_slug,media_url,storage_path,media_type,sort_order,is_cover,created_at").in("post_id",ids).order("sort_order",{ascending:true}).order("id",{ascending:true});(m.error?[]:(m.data||[])).forEach(row=>{let a=mediaByPost.get(String(row.post_id))||[];a.push(row);mediaByPost.set(String(row.post_id),a)})}let decorate=x=>{let profile=profiles.get(String(x.shop_slug||"").toLowerCase())||{},gallery=mediaByPost.get(String(x.id))||[];if(!gallery.length&&x.media_url)gallery=[{id:`legacy-${x.id}`,post_id:x.id,shop_slug:x.shop_slug,media_url:x.media_url,storage_path:null,media_type:x.media_type||"image",sort_order:0,is_cover:true}];gallery.sort((a,b)=>(b.is_cover-a.is_cover)||(a.sort_order-b.sort_order));let cover=gallery[0]||{};return{...x,profile_image_url:profile.profile_image_url||null,shop_url:profile.shop_url||null,directory_options:profile.directory_options||{},media:gallery,media_url:cover.media_url||x.media_url||null,media_type:cover.media_type||x.media_type||null}};items=items.map(decorate);ownerItems=ownerItems.map(decorate);let signature=JSON.stringify({ownerSlug,ent,items,ownerItems});if(signature!==lastRenderSignature){lastRenderSignature=signature;render()}broadcast()}finally{refreshing=false}}
+async function load(){
+  if(!c||refreshing)return;
+  refreshing=true;
+  try{
+    const n=new Date().toISOString();
+    const r=await c.from("shop_live_posts").select("*").eq("status","active").gt("ends_at",n).order("starts_at",{ascending:false}).limit(80);
+
+    if(r.error){
+      console.warn("SHOUFHON Live & Offers: public refresh failed; keeping last valid Live state",r.error);
+      items=activeCachedItems(items);
+      if(!items.length)items=readLiveCache();
+      broadcast();
+      return;
+    }
+
+    items=r.data||[];
+    ownerItems=[];
+
+    if(ownerSlug){
+      const q=await c.from("shop_live_posts").select("*").eq("shop_slug",ownerSlug).eq("status","active").gt("ends_at",n).order("starts_at",{ascending:false});
+      if(!q.error)ownerItems=q.data||[];
+    }
+
+    const all=[...items,...ownerItems];
+    const slugs=[...new Set([...all.map(x=>String(x.shop_slug||"").trim().toLowerCase()),ownerSlug].filter(Boolean))];
+    const ids=[...new Set(all.map(x=>Number(x.id)).filter(Boolean))];
+    const profiles=new Map(),mediaByPost=new Map();
+
+    if(slugs.length){
+      const p=await c.from("shop_profiles").select("shop_slug,profile_image_url,shop_url,directory_options").in("shop_slug",slugs);
+      (p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug||"").toLowerCase(),x));
+      profileOptions=profiles;
+    }
+
+    if(ids.length){
+      const m=await c.from("shop_live_post_media").select("id,post_id,shop_slug,media_url,storage_path,media_type,sort_order,is_cover,created_at").in("post_id",ids).order("sort_order",{ascending:true}).order("id",{ascending:true});
+      (m.error?[]:(m.data||[])).forEach(row=>{
+        const a=mediaByPost.get(String(row.post_id))||[];
+        a.push(row);
+        mediaByPost.set(String(row.post_id),a);
+      });
+    }
+
+    const decorate=x=>{
+      const profile=profiles.get(String(x.shop_slug||"").toLowerCase())||{};
+      const gallery=(mediaByPost.get(String(x.id))||[]).slice();
+      if(!gallery.length&&x.media_url){
+        gallery.push({id:"legacy-"+x.id,post_id:x.id,shop_slug:x.shop_slug,media_url:x.media_url,storage_path:null,media_type:x.media_type||"image",sort_order:0,is_cover:true});
+      }
+      gallery.sort((a,b)=>(b.is_cover-a.is_cover)||(a.sort_order-b.sort_order));
+      const cover=gallery[0]||{};
+      return {...x,profile_image_url:profile.profile_image_url||null,shop_url:profile.shop_url||null,directory_options:profile.directory_options||{},media:gallery,media_url:cover.media_url||x.media_url||null,media_type:cover.media_type||x.media_type||null};
+    };
+
+    items=items.map(decorate);
+    ownerItems=ownerItems.map(decorate);
+    writeLiveCache(items);
+
+    const signature=JSON.stringify({ownerSlug,ent,items,ownerItems});
+    if(signature!==lastRenderSignature){
+      lastRenderSignature=signature;
+      render();
+    }
+    broadcast();
+  }finally{
+    refreshing=false;
+  }
+}
 function media(x,cl="m7lo-media"){if(!x.media_url)return"";return x.media_type==="video"?`<video class="${cl}" src="${esc(x.media_url)}" muted autoplay loop playsinline preload="metadata"></video>`:`<img class="${cl}" src="${esc(x.media_url)}" alt="">`}
 function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length;return`<article class="m7lo-card" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count">▣ View all ${count}</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
 function section(list,shopMode,manage){let has=list.length;return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div><div class="m7lo-sub">${has?(has===1?"1 update happening now":`${has} updates — swipe to see more`):"Nothing live right now — new updates will appear here"}</div></div>${has?`<div class="m7lo-grid">${list.map(x=>card(x,manage)).join("")}</div>`:`<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`}</div>`}
@@ -164,6 +271,49 @@ function send(win,type,shop){try{win?.postMessage({type,shopSlug:shop||"",items:
 function broadcast(){try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:publicData("")},"*")}catch(_){}document.querySelectorAll("iframe").forEach(f=>{try{send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");if(ownerSlug)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",ownerSlug)}catch(_){}})}
 function bridge(){addEventListener("message",e=>{let d=e.data||{},s=String(d.shopSlug||"").toLowerCase();if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);if(c&&!refreshing)load();return}if(d.type==="MA7ALAK_LIVE_OFFERS_VIEW")return view(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_OPEN_SHOP")return openShopPanel(s);if(d.type==="MA7ALAK_LIVE_OFFERS_CREATE"&&s===ownerSlug)return creator();if(d.type==="MA7ALAK_LIVE_OFFERS_END"&&s===ownerSlug)return endPost(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_EDIT"&&s===ownerSlug)return editor(d.id)})}
 async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},()=>{load()}).subscribe()}
-async function init(){css();galleryCss();motionCss();bridge();while(!await ready())await sleep(1000);await identity();await load();await realtime();setInterval(timers,1000);setInterval(()=>{if(!document.hidden)load()},4000);addEventListener("ma7alak:account-change",async()=>{c=resolveClient()||c;lastRenderSignature="";await identity();await load()});addEventListener("ma7alak:owner-auth-change",async()=>{c=resolveClient()||c;lastRenderSignature="";await identity();await load()});window.Ma7alakLiveOffers={refresh:load,open:view,create:creator,edit:editor,media:mediaManager,get items(){return items.slice()},get ownerSlug(){return ownerSlug}}}
+async function init(){
+  css();
+  galleryCss();
+  motionCss();
+  bridge();
+
+  if(hydrateLiveCache()){
+    lastRenderSignature="";
+    render();
+    broadcast();
+  }
+
+  window.Ma7alakLiveOffers={
+    refresh:load,
+    open:view,
+    create:creator,
+    edit:editor,
+    media:mediaManager,
+    get items(){return items.slice()},
+    get ownerSlug(){return ownerSlug}
+  };
+
+  while(!await ready())await sleep(1000);
+  await identity();
+  await load();
+  await realtime();
+
+  setInterval(timers,1000);
+  setInterval(()=>{if(!document.hidden)load()},4000);
+
+  addEventListener("ma7alak:account-change",async()=>{
+    c=resolveClient()||c;
+    lastRenderSignature="";
+    await identity();
+    await load();
+  });
+
+  addEventListener("ma7alak:owner-auth-change",async()=>{
+    c=resolveClient()||c;
+    lastRenderSignature="";
+    await identity();
+    await load();
+  });
+}
 init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
 })();
