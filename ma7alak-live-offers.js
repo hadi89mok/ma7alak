@@ -106,6 +106,110 @@ function m7loApplyTypography(root,options){
     el.style.setProperty("font-size",(base*scale).toFixed(2)+"px","important");
   })
 }
+function m7loSafeHex(value){
+  let raw=String(value||"").trim();
+  return /^#[0-9a-f]{6}$/i.test(raw)?raw:""
+}
+function m7loNum(value,min,max,fallback){
+  let n=Number(value);
+  return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback
+}
+function m7loBool(value,fallback=true){
+  if(value===undefined||value===null||value==="")return fallback;
+  return value===true||String(value).toLowerCase()==="true"
+}
+function m7loApplyDesign(root,options){
+  if(!root)return;
+  options=options&&typeof options==="object"?options:{};
+
+  let universal=m7loSafeHex(options.story_color||options.card_color);
+  let useUniversal=options.page_use_universal_accent===undefined?true:m7loBool(options.page_use_universal_accent,true);
+  let accent=useUniversal?universal:m7loSafeHex(options.live_accent_color||universal);
+  if(!accent)accent="#e4aa4f";
+
+  const panelBg=m7loSafeHex(options.live_panel_bg_color);
+  const panelBorder=m7loSafeHex(options.live_panel_border_color)||accent;
+  const title=m7loSafeHex(options.live_title_color);
+  const subtitle=m7loSafeHex(options.live_subtitle_color);
+  const icon=m7loSafeHex(options.live_icon_color)||accent;
+  const status=m7loSafeHex(options.live_status_color);
+  const emptyBg=m7loSafeHex(options.live_empty_bg_color);
+  const emptyText=m7loSafeHex(options.live_empty_text_color);
+  const cardBg=m7loSafeHex(options.live_card_bg_color);
+  const cardBorder=m7loSafeHex(options.live_card_border_color);
+  const cardTitle=m7loSafeHex(options.live_card_title_color);
+  const cardText=m7loSafeHex(options.live_card_text_color);
+  const price=m7loSafeHex(options.live_price_color);
+  const countdown=m7loSafeHex(options.live_countdown_color);
+  const buttonBg=m7loSafeHex(options.live_button_bg_color);
+  const buttonText=m7loSafeHex(options.live_button_text_color);
+  const panelRadius=m7loNum(options.live_panel_radius,0,42,NaN);
+  const cardRadius=m7loNum(options.live_card_radius,0,32,NaN);
+  const shadow=m7loNum(options.live_panel_shadow,0,100,NaN);
+  const glow=m7loNum(options.live_panel_glow,0,100,NaN);
+  const pulse=m7loBool(options.live_live_pulse,true);
+
+  if(panelBg)root.style.setProperty("background",panelBg,"important");
+  if(panelBorder)root.style.setProperty("border-color",panelBorder,"important");
+  if(Number.isFinite(panelRadius))root.style.setProperty("border-radius",panelRadius+"px","important");
+
+  if(
+    panelBg||
+    options.live_panel_border_color||
+    Number.isFinite(panelRadius)||
+    Number.isFinite(shadow)||
+    Number.isFinite(glow)
+  ){
+    root.style.setProperty("border-style","solid","important");
+    root.style.setProperty("border-width","1px","important");
+    root.style.setProperty("padding","14px","important");
+  }
+
+  if(Number.isFinite(shadow)||Number.isFinite(glow)){
+    let sh=Number.isFinite(shadow)?shadow:35;
+    let gl=Number.isFinite(glow)?glow:15;
+    root.style.setProperty(
+      "box-shadow",
+      "0 14px "+(18+sh*.36).toFixed(0)+"px rgba(0,0,0,"+(0.12+sh*.0048).toFixed(3)+"),"+
+      "0 0 "+(4+gl*.24).toFixed(0)+"px color-mix(in srgb,"+accent+" "+Math.min(75,12+gl*.58).toFixed(0)+"%,transparent)",
+      "important"
+    );
+  }
+
+  $all(".m7lo-title",root).forEach(el=>{if(title)el.style.setProperty("color",title,"important")});
+  $all(".m7lo-sub,.m7lo-desc",root).forEach(el=>{if(subtitle||cardText)el.style.setProperty("color",cardText||subtitle,"important")});
+  $all(".m7lo-kicker",root).forEach(el=>el.style.setProperty("color",icon,"important"));
+  $all(".m7lo-dot,.m7lo-view-dot",root).forEach(el=>{
+    if(status)el.style.setProperty("background",status,"important");
+    if(!pulse){
+      el.style.setProperty("animation","none","important");
+      el.style.setProperty("-webkit-animation","none","important");
+    }else{
+      el.style.removeProperty("animation");
+      el.style.removeProperty("-webkit-animation");
+    }
+  });
+  $all(".m7lo-live-label",root).forEach(el=>{if(status)el.style.setProperty("color",status,"important")});
+  $all(".m7lo-empty",root).forEach(el=>{
+    if(emptyBg)el.style.setProperty("background",emptyBg,"important");
+    if(emptyText)el.style.setProperty("color",emptyText,"important");
+  });
+  $all(".m7lo-card,.m7lo-center-card",root).forEach(el=>{
+    if(cardBg)el.style.setProperty("background",cardBg,"important");
+    if(cardBorder)el.style.setProperty("border-color",cardBorder,"important");
+    if(Number.isFinite(cardRadius))el.style.setProperty("border-radius",cardRadius+"px","important");
+  });
+  $all(".m7lo-card h3,.m7lo-center-card h2",root).forEach(el=>{if(cardTitle)el.style.setProperty("color",cardTitle,"important")});
+  $all(".m7lo-card .m7lo-shop,.m7lo-center-card .m7lo-shop",root).forEach(el=>el.style.setProperty("color",accent,"important"));
+  $all(".m7lo-price",root).forEach(el=>{if(price)el.style.setProperty("color",price,"important")});
+  $all(".m7lo-times",root).forEach(el=>{if(countdown)el.style.setProperty("color",countdown,"important")});
+  $all(".m7lo-btn,.m7lo-visit",root).forEach(el=>{
+    if(buttonBg)el.style.setProperty("background",buttonBg,"important");
+    if(buttonText)el.style.setProperty("color",buttonText,"important");
+  });
+
+  m7loApplyTypography(root,options);
+}
 function remain(end){let s=Math.max(0,Math.floor((new Date(end)-Date.now())/1000)),d=Math.floor(s/86400);s%=86400;let h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),q=s%60;return d?`${d}d ${h}h ${m}m`:`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`}
 function startText(x){let t=new Date(x.starts_at).getTime(),n=Date.now();if(t>n)return`Starts in ${remain(x.starts_at)}`;let s=Math.max(0,Math.floor((n-t)/1000));if(s<60)return`Started ${s}s ago`;let m=Math.floor(s/60);if(m<60)return`Started ${m}m ago`;let h=Math.floor(m/60);return h<24?`Started ${h}h ${m%60}m ago`:`Started ${Math.floor(h/24)}d ago`}
 function dateLabel(v){let d=new Date(v);return d.toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}
@@ -213,7 +317,7 @@ function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).lengt
 function section(list,shopMode,manage){let has=list.length;return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div><div class="m7lo-sub">${has?(has===1?"1 update happening now":`${has} updates — swipe to see more`):"Nothing live right now — new updates will appear here"}</div></div>${has?`<div class="m7lo-grid">${list.map(x=>card(x,manage)).join("")}</div>`:`<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`}</div>`}
 function ownerBar(list){let lim=Math.max(0,Number(ent?.active_limit||0)),used=list.length,pct=lim?Math.min(100,used/lim*100):0,en=!!ent?.enabled;return`<div class="m7lo-owner"><div><strong>⚡ Live & Offers</strong><small>${en?`${used} / ${lim} active slots · tap EDIT or END below`:`مش مفعّل لهالمحل`}</small><div class="m7lo-slots"><i style="width:${pct}%"></i></div></div><button class="m7lo-btn" data-m7-create ${!en||used>=lim?"disabled":""}>${en&&used>=lim?"Slots Full":"＋ Add"}</button></div>`}
 function bind(root){$all('[data-m7-id]',root).forEach(el=>el.onclick=e=>{if(!e.target.closest('[data-m7-edit],[data-m7-end],[data-m7-media]'))view(el.dataset.m7Id)});$all('[data-m7-end]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();endPost(b.dataset.m7End)});$all('[data-m7-edit]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();editor(b.dataset.m7Edit)});$all('[data-m7-media]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();mediaManager(b.dataset.m7Media)});$("[data-m7-create]",root)?.addEventListener("click",creator)}
-function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false);bind(r)});$('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list;r.style.display=(!list.length&&!own)?"none":"";r.innerHTML=(own?ownerBar(management):"")+section(list,true,own);bind(r);m7loApplyTypography(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
+function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false);bind(r)});$('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list;r.style.display=(!list.length&&!own)?"none":"";r.innerHTML=(own?ownerBar(management):"")+section(list,true,own);bind(r);m7loApplyDesign(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
 function timers(){$all('[data-m7-start]').forEach(e=>{let x=[...items,...ownerItems].find(q=>String(q.id)===e.dataset.m7Start);if(x)e.textContent=startText(x)});$all('[data-m7-endtime]').forEach(e=>e.textContent="Ends in "+remain(e.dataset.m7Endtime));if(items.some(x=>new Date(x.ends_at)<=new Date()))load()}
 function lock(){if(document.documentElement.classList.contains("m7lo-locked"))return;lockedY=scrollY;document.documentElement.classList.add("m7lo-locked");Object.assign(document.body.style,{position:"fixed",top:`-${lockedY}px`,left:"0",right:"0",width:"100%"})}
 function unlock(){document.documentElement.classList.remove("m7lo-locked");["position","top","left","right","width"].forEach(k=>document.body.style[k]="");scrollTo(0,lockedY)}
@@ -221,7 +325,7 @@ function close(){let o=$("#m7lo-overlay");if(o)o.remove();viewId=null;unlock()}
 function navList(){return items.filter(x=>new Date(x.ends_at)>new Date())}
 function avatarHtml(x){let name=String(x.shop_name||x.shop_slug||"Shop"),letter=esc(name.charAt(0).toUpperCase());return`<div class="m7lo-avatar">${x.profile_image_url?`<img src="${esc(x.profile_image_url)}" alt="${esc(name)}">`:`<span>${letter}</span>`}</div>`}
 function heroHtml(x){let cover=(x.media||[])[0]||{media_url:x.media_url,media_type:x.media_type},count=(x.media||[]).length||(+!!x.media_url);if(!cover?.media_url)return`<div class="m7lo-hero"></div>`;let visual=cover.media_type==="video"?`<video class="m7lo-view-media" src="${esc(cover.media_url)}" muted loop playsinline preload="metadata"></video>`:`<img class="m7lo-view-media" src="${esc(cover.media_url)}" alt="">`;return`<div class="m7lo-hero"><div class="m7lo-media-progress">${Array.from({length:Math.max(1,count)},(_,i)=>`<i class="${i===0?"on":""}"></i>`).join("")}</div>${visual}${cover.media_type==="video"?'<button class="m7lo-play" type="button">▶<small>Play with sound</small></button>':""}${count>1?`<button class="m7lo-gallery-pill" type="button">▣ View all ${count} ›</button>`:""}</div>`}
-function view(id,direction){let x=items.find(q=>String(q.id)===String(id))||ownerItems.find(q=>String(q.id)===String(id));if(!x)return;let old=$("#m7lo-overlay");if(old)old.remove();else lock();viewId=x.id;let [ic,lab]=meta(x.post_type),own=String(x.shop_slug).toLowerCase()===ownerSlug,d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel" class="m7lo-view ${direction?`m7lo-swipe-in-${direction}`:""}"><button class="m7lo-close">×</button>${own?`<div class="m7lo-owner-tools"><button data-view-edit="${esc(x.id)}">✎ Edit</button><button data-view-media="${esc(x.id)}">▣ Manage media</button></div>`:""}${heroHtml(x)}<div class="m7lo-center-card">${avatarHtml(x)}<div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div><div class="m7lo-live-label">● LIVE NOW</div><span class="m7lo-badge">${ic} ${lab}</span><h2>${esc(x.title)}</h2>${x.description?`<p class="m7lo-desc">${esc(x.description)}</p>`:""}${x.location_text?`<p class="m7lo-desc">📍 ${esc(x.location_text)}</p>`:""}${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}<div class="m7lo-schedule">${timing(x)}</div><a class="m7lo-visit" href="${esc(x.shop_url||`/${encodeURIComponent(x.shop_slug)}`)}">Visit Shop →</a><div class="m7lo-dots">${navList().map(q=>`<i class="${String(q.id)===String(x.id)?"on":""}"></i>`).join("")}</div></div></div>`;document.body.appendChild(d);$(".m7lo-close",d).onclick=close;$("[data-view-edit]",d)?.addEventListener("click",()=>editor(x.id));$("[data-view-media]",d)?.addEventListener("click",()=>mediaManager(x.id));$(".m7lo-gallery-pill",d)?.addEventListener("click",()=>openGallery(x.id,0));let play=$(".m7lo-play",d),video=$(".m7lo-view-media",d);if(play&&video)play.onclick=()=>{video.muted=false;video.controls=true;video.play().catch(()=>{});play.remove()};let sx=0,sy=0,st=0;d.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});d.addEventListener("touchend",e=>{let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-st<750&&Math.abs(dy)>65&&Math.abs(dy)>Math.abs(dx)*1.15)navigate(dy<0?1:-1)},{passive:true});d.onclick=e=>{if(e.target===d)close()}}
+function view(id,direction){let x=items.find(q=>String(q.id)===String(id))||ownerItems.find(q=>String(q.id)===String(id));if(!x)return;let old=$("#m7lo-overlay");if(old)old.remove();else lock();viewId=x.id;let [ic,lab]=meta(x.post_type),own=String(x.shop_slug).toLowerCase()===ownerSlug,d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel" class="m7lo-view ${direction?`m7lo-swipe-in-${direction}`:""}"><button class="m7lo-close">×</button>${own?`<div class="m7lo-owner-tools"><button data-view-edit="${esc(x.id)}">✎ Edit</button><button data-view-media="${esc(x.id)}">▣ Manage media</button></div>`:""}${heroHtml(x)}<div class="m7lo-center-card">${avatarHtml(x)}<div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div><div class="m7lo-live-label">● LIVE NOW</div><span class="m7lo-badge">${ic} ${lab}</span><h2>${esc(x.title)}</h2>${x.description?`<p class="m7lo-desc">${esc(x.description)}</p>`:""}${x.location_text?`<p class="m7lo-desc">📍 ${esc(x.location_text)}</p>`:""}${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}<div class="m7lo-schedule">${timing(x)}</div><a class="m7lo-visit" href="${esc(x.shop_url||`/${encodeURIComponent(x.shop_slug)}`)}">Visit Shop →</a><div class="m7lo-dots">${navList().map(q=>`<i class="${String(q.id)===String(x.id)?"on":""}"></i>`).join("")}</div></div></div>`;document.body.appendChild(d);m7loApplyDesign(d.querySelector("#m7lo-panel")||d,x.directory_options||((profileOptions.get(String(x.shop_slug||"").toLowerCase())||{}).directory_options||{}));$(".m7lo-close",d).onclick=close;$("[data-view-edit]",d)?.addEventListener("click",()=>editor(x.id));$("[data-view-media]",d)?.addEventListener("click",()=>mediaManager(x.id));$(".m7lo-gallery-pill",d)?.addEventListener("click",()=>openGallery(x.id,0));let play=$(".m7lo-play",d),video=$(".m7lo-view-media",d);if(play&&video)play.onclick=()=>{video.muted=false;video.controls=true;video.play().catch(()=>{});play.remove()};let sx=0,sy=0,st=0;d.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});d.addEventListener("touchend",e=>{let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-st<750&&Math.abs(dy)>65&&Math.abs(dy)>Math.abs(dx)*1.15)navigate(dy<0?1:-1)},{passive:true});d.onclick=e=>{if(e.target===d)close()}}
 function navigate(dir){let a=navList(),panel=$("#m7lo-panel");if(a.length<2||panel?.dataset.m7Moving==="1")return;let i=a.findIndex(x=>String(x.id)===String(viewId));if(i<0)i=0;let next=a[(i+dir+a.length)%a.length];if(!panel)return view(next.id,dir>0?"next":"prev");panel.dataset.m7Moving="1";panel.classList.add(dir>0?"m7lo-swipe-out-up":"m7lo-swipe-out-down");setTimeout(()=>view(next.id,dir>0?"next":"prev"),220)}
 function openGallery(postId,index=0){let x=items.find(q=>String(q.id)===String(postId))||ownerItems.find(q=>String(q.id)===String(postId)),a=x?.media||[];if(!a.length)return;index=(index+a.length)%a.length;let old=$("#m7lo-overlay");if(old)old.remove();let row=a[index],d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel" class="m7lo-gallery"><button class="m7lo-close m7lo-gallery-close">×</button><div class="m7lo-media-progress">${a.map((_,i)=>`<i class="${i===index?"on":""}"></i>`).join("")}</div><div class="m7lo-gallery-stage">${row.media_type==="video"?`<video src="${esc(row.media_url)}" controls autoplay playsinline></video>`:`<img src="${esc(row.media_url)}" alt="">`}${a.length>1?'<button class="m7lo-gallery-nav m7lo-gallery-prev">‹</button><button class="m7lo-gallery-nav m7lo-gallery-next">›</button>':""}</div><div class="m7lo-gallery-caption">${index+1} / ${a.length} · ${esc(x.title)}</div></div>`;document.body.appendChild(d);$(".m7lo-close",d).onclick=()=>view(postId);$(".m7lo-gallery-prev",d)?.addEventListener("click",()=>openGallery(postId,index-1));$(".m7lo-gallery-next",d)?.addEventListener("click",()=>openGallery(postId,index+1));let sx=0;d.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});d.addEventListener("touchend",e=>{let dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)openGallery(postId,index+(dx<0?1:-1))},{passive:true})}
 function openShopPanel(slug){
@@ -239,6 +343,10 @@ function openShopPanel(slug){
   $(".m7lo-close",d).onclick=close;
   d.onclick=e=>{if(e.target===d)close()};
   bind(d);
+  m7loApplyDesign(
+    d.querySelector(".m7lo")||d.querySelector("#m7lo-panel")||d,
+    (profileOptions.get(shopSlug)||{}).directory_options||{}
+  );
   timers();
 }
 function managerRow(m,i,total){let preview=m.media_type==="video"?`<video class="m7lo-media-thumb" src="${esc(m.media_url)}" muted playsinline preload="metadata"></video>`:`<img class="m7lo-media-thumb" src="${esc(m.media_url)}" alt="">`;return`<div class="m7lo-media-row" data-manager-id="${esc(m.id)}">${preview}<div><strong>${m.is_cover?"COVER":"Media "+(i+1)}</strong><div class="m7lo-sub">${m.media_type}</div><button class="m7lo-small-btn" data-move="up" ${i===0?"disabled":""}>↑</button><button class="m7lo-small-btn" data-move="down" ${i===total-1?"disabled":""}>↓</button></div><button class="m7lo-small-btn m7lo-cover" data-cover ${m.is_cover?"disabled":""}>${m.is_cover?"Cover":"Set cover"}</button><button class="m7lo-small-btn m7lo-danger" data-delete>Delete</button></div>`}
@@ -320,6 +428,24 @@ function removeLocalPost(id){
   commitLocalLiveState();
 }
 function publicData(shop){let list=shop?items.filter(x=>String(x.shop_slug).toLowerCase()===String(shop).toLowerCase()):items;return list.map(x=>({...x}))}
+async function ensureProfileOptions(shopSlug){
+  let s=String(shopSlug||"").trim().toLowerCase();
+  if(!s)return{};
+  let cached=profileOptions.get(s);
+  if(cached&&cached.directory_options)return cached.directory_options;
+  c=resolveClient()||c;
+  if(!c)return{};
+  try{
+    let r=await c.from("shop_profiles").select("shop_slug,profile_image_url,shop_url,directory_options").eq("shop_slug",s).maybeSingle();
+    if(!r.error&&r.data){
+      profileOptions.set(s,r.data);
+      return r.data.directory_options&&typeof r.data.directory_options==="object"?r.data.directory_options:{};
+    }
+  }catch(err){
+    console.warn("SHOUFHON Live profile design:",err);
+  }
+  return{};
+}
 function currentOwnerSlug(){
   return String(window.Ma7alakOwnerAuth?.owner?.shop_slug||ownerSlug||"").trim().toLowerCase();
 }
@@ -334,7 +460,8 @@ function send(win,type,shop){
       items:publicData(s),
       owner:own,
       entitlement:own?ent:null,
-      ownerActive:own?ownerItems.filter(x=>String(x.shop_slug||"").toLowerCase()===s).length:0
+      ownerActive:own?ownerItems.filter(x=>String(x.shop_slug||"").toLowerCase()===s).length:0,
+      directoryOptions:s?((profileOptions.get(s)||{}).directory_options||{}):{}
     },"*");
   }catch(_){}
 }
@@ -397,8 +524,27 @@ function bridge(){
       send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
       (async()=>{
         await ensureFreshLiveState();
+        if(s)await ensureProfileOptions(s);
         send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
       })().catch(err=>console.warn("SHOUFHON Live state refresh:",err));
+      return;
+    }
+
+    if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
+      const previewSlug=String(d.shop_slug||d.shopSlug||"").trim().toLowerCase();
+      if(!previewSlug)return;
+      const old=profileOptions.get(previewSlug)||{shop_slug:previewSlug};
+      profileOptions.set(previewSlug,{
+        ...old,
+        ...(d.profile&&typeof d.profile==="object"?d.profile:{}),
+        shop_slug:previewSlug,
+        directory_options:{
+          ...(old.directory_options&&typeof old.directory_options==="object"?old.directory_options:{}),
+          ...(d.directory_options&&typeof d.directory_options==="object"?d.directory_options:{})
+        }
+      });
+      lastRenderSignature="";
+      render();
       return;
     }
 
@@ -428,7 +574,7 @@ function bridge(){
     }
   });
 }
-async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},()=>{load()}).subscribe()}
+async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},payload=>{let s=String(payload?.new?.shop_slug||payload?.old?.shop_slug||"").trim().toLowerCase();(async()=>{if(s){profileOptions.delete(s);await ensureProfileOptions(s)}await load();broadcast()})().catch(()=>load())}).subscribe()}
 async function init(){
   css();
   galleryCss();
