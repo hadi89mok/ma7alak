@@ -81,8 +81,17 @@ async function boot(){
   await refresh(false);
   startLiveOwnership();
   addEventListener("ma7alak:account-change",()=>setTimeout(async()=>{await refresh(false);startLiveOwnership();syncCircle()},0));
-  addEventListener("focus",()=>refresh(true).catch(()=>{}));
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(true).catch(()=>{})});
+  let ownerWakeAt=0;
+  const refreshOwnerOnWake=()=>{
+    const now=Date.now();
+    if(document.hidden||now-ownerWakeAt<900)return;
+    ownerWakeAt=now;
+    refresh(true).catch(()=>{});
+  };
+  addEventListener("ma7alak:page-wake",refreshOwnerOnWake);
+  addEventListener("pageshow",refreshOwnerOnWake);
+  addEventListener("focus",refreshOwnerOnWake);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshOwnerOnWake()});
   document.addEventListener("load",event=>{
     const frame=event.target;
     if(frame&&frame.tagName==="IFRAME")sendOwnerState(frame.contentWindow);
