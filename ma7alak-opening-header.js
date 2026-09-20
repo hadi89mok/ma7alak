@@ -90,6 +90,55 @@
 
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
+  const HOME_BLOCK_ID = "shoufhon-homepage-content-block";
+  let homepageBlock = null;
+
+  function ensureHomepageBlock(){
+    const body=document.body;
+    if(!body)return null;
+
+    if(!homepageBlock){
+      homepageBlock=document.getElementById(HOME_BLOCK_ID)||document.createElement("div");
+      homepageBlock.id=HOME_BLOCK_ID;
+      Object.assign(homepageBlock.style,{
+        display:"block",
+        width:"100%",
+        maxWidth:"100%",
+        margin:"0",
+        padding:"0",
+        position:"relative",
+        background:"transparent",
+        backgroundColor:"transparent",
+        boxSizing:"border-box"
+      });
+    }
+
+    /* One permanent owner for Opening Header + Live Offers + Reels.
+       Never mount any of these inside the footer or scan for a background. */
+    const host=document.querySelector("main");
+    if(host){
+      if(homepageBlock.parentNode!==host||host.firstElementChild!==homepageBlock){
+        host.insertBefore(homepageBlock,host.firstElementChild);
+      }
+    }else if(homepageBlock.parentNode!==body){
+      const firstReal=Array.from(body.children).find(el=>
+        el!==homepageBlock &&
+        el.id!=="ma7alak-social-header" &&
+        el.id!=="ma7alak-header-theme-backdrop" &&
+        el.tagName!=="SCRIPT" &&
+        el.tagName!=="STYLE"
+      );
+      if(firstReal)body.insertBefore(homepageBlock,firstReal);
+      else body.prepend(homepageBlock);
+    }
+
+    return homepageBlock;
+  }
+
+  window.Ma7alakHomepageBlock={
+    id:HOME_BLOCK_ID,
+    ensure:ensureHomepageBlock
+  };
 
   /* =========================================================
      FULL-WIDTH USER BACKGROUND
@@ -159,33 +208,13 @@
   }
 
   function placeRoot(root) {
-    /*
-       FIX:
-       #ma7alak-social-header is position:fixed and is appended near the
-       end of BODY. Inserting the hero after that DOM node sends it to
-       the bottom of the website.
+    const block=ensureHomepageBlock();
+    if(!block)return false;
 
-       The Premium Header code already adds top padding to BODY.
-       Therefore the correct visual location is the FIRST real item in
-       the normal page flow. This puts the hero directly beneath the
-       fixed Premium Header on screen.
-    */
-    if (!document.body) return false;
-
-    const firstRealPageNode = Array.from(document.body.children).find(function(el){
-      return (
-        el !== root &&
-        el.id !== "ma7alak-social-header" &&
-        el.id !== "ma7alak-header-theme-backdrop" &&
-        el.tagName !== "SCRIPT" &&
-        el.tagName !== "STYLE"
-      );
-    });
-
-    if (firstRealPageNode) {
-      document.body.insertBefore(root, firstRealPageNode);
-    } else {
-      document.body.prepend(root);
+    /* Header is always the first child of the permanent homepage block.
+       Live/Reels is mounted immediately after it by the bundled feed module. */
+    if(root.parentNode!==block||block.firstElementChild!==root){
+      block.insertBefore(root,block.firstElementChild);
     }
 
     return true;
@@ -260,6 +289,17 @@
 
     window.addEventListener("resize", syncWidth, {passive:true});
     window.addEventListener("orientationchange", syncWidth, {passive:true});
+
+    if(!window.__SHOUFHON_HOME_BLOCK_KEEPER__){
+      window.__SHOUFHON_HOME_BLOCK_KEEPER__=setInterval(()=>{
+        if(!document.hidden)ensureHomepageBlock();
+      },1200);
+      window.addEventListener("pageshow",ensureHomepageBlock);
+      window.addEventListener("focus",ensureHomepageBlock);
+      document.addEventListener("visibilitychange",()=>{
+        if(document.visibilityState==="visible")ensureHomepageBlock();
+      });
+    }
 
     if ("ResizeObserver" in window) {
       const premium = findPremiumPanel();
@@ -396,95 +436,45 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
  const shell=document.createElement("div"); shell.id="m7-global-home-feed-shell"; shell.innerHTML=`<div id="m7-home-feed">\n  <section id="m7-live-home">\n    <div class="m7-live-head">\n      <div class="m7-live-top"><span class="m7-live-status"><i></i> LIVE</span><span id="m7-live-count">0 UPDATES</span></div>\n      <h2>🔥 Happening Today</h2>\n      <p id="m7-live-sub">Offers, events &amp; special things happening now</p>\n    </div>\n    <div id="m7-live-cards" class="m7-live-cards"><div class="m7-live-empty"><b>Loading live updates...</b></div></div>\n  </section>\n\n  <section class="ma7alak-reels-wrapper">\n    <div class="ma7alak-reels-title"><span>🎬</span><span>Reels</span></div>\n    <div class="ma7alak-reels"><div class="ma7alak-reel coming-soon-reel"><div class="coming-soon"><span>🎥</span><strong>New video coming soon</strong></div></div></div>\n    <div class="ma7alak-favorites-corner"><button id="ma7alakFavoritesButton" class="ma7alak-favorites-button" type="button"><span>⭐</span><span>Favorites</span><b id="ma7alakFavoritesCount">0</b></button></div>\n  </section>\n</div>\n\n<div id="ma7alakReelViewer" class="ma7alak-reel-viewer" aria-hidden="true">\n  <button id="ma7alakReelViewerShop" class="ma7alak-reel-viewer-shop" type="button"><img id="ma7alakReelViewerShopIcon" src="" alt="Shop"><span><strong id="ma7alakReelViewerShopName">Shop</strong><small>View shop</small></span><em>→</em></button>\n  <button id="ma7alakReelViewerClose" class="ma7alak-reel-viewer-close" type="button">×</button>\n  <button id="ma7alakViewerFavorite" class="ma7alak-viewer-favorite" type="button" aria-label="Add to favorites">☆</button>\n  <video id="ma7alakReelViewerVideo" class="ma7alak-reel-viewer-video" playsinline webkit-playsinline loop preload="none"></video>\n  <div class="ma7alak-swipe-hint">↑ &nbsp; Swipe &nbsp; ↓</div>\n</div>`;
  const cfg={enabled:true};
 
- function m7HasVisibleBackground(el){
-   if(!el||el===shell)return false;
-   try{
-     const cs=getComputedStyle(el);
-     const img=String(cs.backgroundImage||"");
-     const col=String(cs.backgroundColor||"");
-     const hasImage=img&&img!=="none";
-     const m=col.match(/rgba?\(([^)]+)\)/i);
-     let alpha=1;
-     if(m){
-       const parts=m[1].split(",").map(v=>v.trim());
-       if(parts.length>3)alpha=Number(parts[3]);
-     }
-     const r=el.getBoundingClientRect();
-     return (hasImage||alpha>.02)&&r.width>=Math.min(innerWidth*.72,680)&&r.height>70;
-   }catch(_){return false}
- }
-
- function m7FindHostingerBackgroundHost(hero){
-   /* The Opening Header is injected BEFORE Hostinger's original page root.
-      We must put the feed INSIDE Hostinger's real section/background,
-      not beside it on BODY (which exposes the site's black body canvas). */
-   let original=hero?.nextElementSibling||null;
-   while(original===shell)original=original?.nextElementSibling||null;
-   if(!original)return null;
-
-   if(m7HasVisibleBackground(original))return original;
-
-   const candidates=[...original.querySelectorAll("section,div")];
-   for(const el of candidates){
-     if(el.closest("#m7-global-home-feed-shell"))continue;
-     if(m7HasVisibleBackground(el))return el;
-   }
-
-   /* Fallback: use the first real Hostinger content container.
-      Even when Hostinger draws its background via a pseudo-element,
-      descendants inherit that visual canvas because the feed is now
-      physically inside the section instead of sitting on BODY. */
-   return original.matches("main,section,div")?original:
-          original.querySelector?.("main,section,div")||original;
+ function homepageBlock(){
+   return window.Ma7alakHomepageBlock?.ensure?.()||
+          document.getElementById("shoufhon-homepage-content-block");
  }
 
  function place(){
    shell.style.display=cfg.enabled===false?"none":"block";
    shell.style.setProperty("width","100%","important");
    shell.style.setProperty("max-width","100%","important");
-   shell.style.setProperty("margin-top","12px","important");
 
+   const block=homepageBlock();
    const hero=document.getElementById("ma7alak-opening-header-root");
-   if(hero&&hero.parentNode){
-     const host=m7FindHostingerBackgroundHost(hero);
-     if(host){
-       if(shell.parentNode!==host||host.firstElementChild!==shell){
-         host.insertBefore(shell,host.firstElementChild);
-       }
-       return;
+
+   if(block&&hero){
+     /* Permanent order: Opening Header -> separator -> Live/Reels.
+        No footer detection, no Hostinger-child scanning, no background guessing. */
+     if(hero.parentNode!==block){
+       block.insertBefore(hero,block.firstElementChild);
      }
-   }
-
-   const main=document.querySelector("main");
-   if(main){
-     if(shell.parentNode!==main||main.firstElementChild!==shell)main.insertBefore(shell,main.firstElementChild);
-   }else if(!shell.isConnected){
-     document.body.appendChild(shell);
-   }
- }
-
- /* Hostinger can hydrate/rebuild the page after Custom Code first renders.
-    Reinsert the SAME feed node if its Hostinger section gets replaced.
-    Reusing the same node preserves all Reel/Live click handlers, observers,
-    realtime subscriptions and mobile video behavior. */
- let m7PlacementTimer=null;
- function keepFeedMounted(){
-   if(document.hidden)return;
-   if(!style.isConnected&&document.head)document.head.appendChild(style);
-   if(!shell.isConnected){
-     place();
+     if(shell.parentNode!==block||hero.nextElementSibling!==shell){
+       hero.insertAdjacentElement("afterend",shell);
+     }
      return;
    }
 
-   const hero=document.getElementById("ma7alak-opening-header-root");
-   const wanted=hero?m7FindHostingerBackgroundHost(hero):null;
-   if(wanted&&shell.parentNode!==wanted)place();
+   if(block&&shell.parentNode!==block){
+     block.appendChild(shell);
+   }
+ }
+
+ function keepFeedMounted(){
+   if(document.hidden)return;
+   if(!style.isConnected&&document.head)document.head.appendChild(style);
+   place();
  }
 
  place();
  [80,300,800,1600,3000].forEach(ms=>setTimeout(place,ms));
- clearInterval(m7PlacementTimer);
- m7PlacementTimer=setInterval(keepFeedMounted,1200);
+ const m7PlacementTimer=setInterval(keepFeedMounted,1200);
  window.addEventListener("pageshow",keepFeedMounted);
  window.addEventListener("focus",keepFeedMounted);
  window.addEventListener("popstate",keepFeedMounted);
@@ -495,7 +485,6 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
      setTimeout(keepFeedMounted,600);
    }
  });
-
 (function(){"use strict";
 const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
 const sb=(window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||(window.Ma7alakSupabaseBootstrap&&window.Ma7alakSupabaseBootstrap.client)||(window.supabase&&window.supabase.createClient?window.supabase.createClient(SB_URL,SB_KEY):null));
