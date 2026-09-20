@@ -5970,6 +5970,10 @@ function decorateAll(){
     hours_font_style:"inherit",
     hours_font_size:"100",
 
+    media_font_style:"inherit",
+    media_font_size:"100",
+
+    /* Legacy separate Gallery/Video typography kept for old pages only. */
     gallery_font_style:"inherit",
     gallery_font_size:"100",
 
@@ -7014,16 +7018,10 @@ function decorateAll(){
           ${fontSizeField(prefix,"hours","Hours")}
         </div>
 
-        <div class="m7ds-section-title">Gallery</div>
+        <div class="m7ds-section-title">Media — Photos & Videos</div>
         <div class="m7ds-grid">
-          ${fontField(prefix,"gallery","Gallery")}
-          ${fontSizeField(prefix,"gallery","Gallery")}
-        </div>
-
-        <div class="m7ds-section-title">Videos</div>
-        <div class="m7ds-grid">
-          ${fontField(prefix,"video","Videos")}
-          ${fontSizeField(prefix,"video","Videos")}
+          ${fontField(prefix,"media","Media")}
+          ${fontSizeField(prefix,"media","Media")}
         </div>
 
         <div class="m7ds-section-title">Follow / Message</div>
@@ -15430,6 +15428,10 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     hours_font_style:"inherit",
     hours_font_size:"100",
 
+    media_font_style:"inherit",
+    media_font_size:"100",
+
+    /* Legacy separate Gallery/Video typography kept for old pages only. */
     gallery_font_style:"inherit",
     gallery_font_size:"100",
 
