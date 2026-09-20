@@ -76,11 +76,7 @@ function motionCss(){if($("#m7lo-motion-css"))return;let s=document.createElemen
 async function ready(){
   for(let i=0;i<240;i++){
     c=resolveClient();
-    if(c){
-      try{await window.Ma7alakAccount?.ready?.()}catch(_){}
-      c=window.Ma7alakAccount?.client||c;
-      return true;
-    }
+    if(c)return true;
     await sleep(250);
   }
   return false;
