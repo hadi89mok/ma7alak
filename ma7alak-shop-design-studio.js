@@ -76,7 +76,7 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:sticky!important;top:137px!important;width:100%!important;max-width:none!important;max-height:calc(100dvh - 155px)!important;overflow:auto!important;border:1px solid rgba(218,170,82,.25)!important;border-radius:18px!important;background:#0b0d0e!important;box-shadow:0 18px 50px rgba(0,0,0,.46)!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-head{position:sticky!important;top:0!important;z-index:4!important;background:rgba(11,13,14,.97)!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-stage,#ma-admin-edit-card.m7studio-fullscreen .m7pv-note{display:none!important}
-      .m7studio-real-preview{padding:12px 12px 14px}.m7studio-phone{position:relative;width:min(100%,386px);height:min(720px,calc(100dvh - 235px));min-height:500px;margin:0 auto;overflow:hidden;border:2px solid #342716;border-radius:32px;background:#000;box-shadow:0 20px 55px rgba(0,0,0,.58),0 0 28px rgba(218,170,82,.09),inset 0 0 0 4px #080808}.m7studio-phone:before{content:"";position:absolute;z-index:3;top:8px;left:50%;width:94px;height:20px;transform:translateX(-50%);border-radius:999px;background:#030303;border:1px solid rgba(255,255,255,.055);pointer-events:none}.m7studio-phone iframe{width:100%;height:100%;display:block;border:0;background:#050505}.m7studio-preview-note{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;color:#82796d;font-size:8px;line-height:1.4;text-align:center}.m7studio-preview-note i{width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 9px rgba(70,220,136,.55)}
+      .m7studio-real-preview{padding:12px 12px 14px}.m7studio-phone{position:relative;width:min(100%,386px);height:min(720px,calc(100dvh - 235px));min-height:500px;margin:0 auto;overflow:hidden;border:2px solid #342716;border-radius:32px;background:#050606;box-shadow:0 20px 55px rgba(0,0,0,.58),0 0 28px rgba(218,170,82,.09),inset 0 0 0 4px #080808}.m7studio-phone:before{content:"";position:absolute;z-index:8;top:8px;left:50%;width:94px;height:20px;transform:translateX(-50%);border-radius:999px;background:#030303;border:1px solid rgba(255,255,255,.055);pointer-events:none}.m7studio-phone-scroll{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain;padding:42px 12px 24px;box-sizing:border-box;background:radial-gradient(circle at 50% 0%,rgba(217,164,65,.055),transparent 34%),linear-gradient(180deg,#090a0b,#050606 58%,#040505);scrollbar-width:thin}.m7studio-phone-content{min-height:100%;display:flex;flex-direction:column;justify-content:flex-start;gap:12px}.m7studio-phone-content>.m7ds-profile-shell-demo,.m7studio-phone-content>.m7ds-live-offers-demo,.m7studio-phone-content>.m7ds-gallery-frame-sample{width:100%!important;max-width:none!important;margin:0 auto!important;box-sizing:border-box!important}.m7studio-phone-content .m7ds-profile-shell-demo{transform:none!important}.m7studio-phone-content .m7ds-profile-shell-logo{flex:0 0 auto}.m7studio-phone-content .m7ds-profile-shell-logo img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}.m7studio-phone-content .m7v4-preview-phone{width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}.m7studio-phone-content .m7v4-preview-stage{display:block!important}.m7studio-preview-empty{min-height:390px;display:grid;place-items:center;text-align:center;padding:24px;color:#918675;font-size:10px;line-height:1.55}.m7studio-preview-empty b{display:block;margin-bottom:6px;color:#ebc774;font-size:13px}.m7studio-preview-note{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;color:#82796d;font-size:8px;line-height:1.4;text-align:center}.m7studio-preview-note i{width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 9px rgba(70,220,136,.55)}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-section-banner{display:flex;align-items:flex-start;gap:10px;margin:0 0 12px;padding:13px 14px;border:1px solid rgba(218,170,82,.15);border-radius:14px;background:radial-gradient(circle at 0 0,rgba(218,170,82,.075),transparent 42%),rgba(255,255,255,.014)}.m7studio-section-banner i{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid rgba(218,170,82,.16);border-radius:10px;background:rgba(218,170,82,.06);color:#edc979;font-style:normal;font-size:14px}.m7studio-section-banner b{display:block;color:#efd49a;font-size:13px}.m7studio-section-banner small{display:block;margin-top:3px;color:#81776a;font-size:8px;line-height:1.45}
       .m7studio-profile-image-card{display:grid!important;grid-template-columns:minmax(170px,1fr) 132px minmax(170px,.85fr);gap:18px;align-items:center;margin:0 0 12px!important;padding:16px!important;border:1px solid rgba(218,170,82,.14)!important;border-radius:16px!important;background:radial-gradient(circle at 14% 0%,rgba(218,170,82,.06),transparent 45%),rgba(17,19,20,.88)!important;box-sizing:border-box}.m7studio-profile-image-copy small{display:block;color:#907f64;font-size:7px;font-weight:950;letter-spacing:.9px}.m7studio-profile-image-copy b{display:block;margin-top:5px;color:#efd49a;font-size:15px}.m7studio-profile-image-copy span{display:block;margin-top:5px;color:#847a6d;font-size:8px;line-height:1.5}.m7studio-profile-image-preview{width:112px;height:112px;margin:auto;display:grid;place-items:center;overflow:hidden;border:3px solid #d9aa58;border-radius:50%;background:#0a0b0c;color:#e3bc6c;font-size:30px;font-weight:950;box-shadow:0 0 24px rgba(217,170,88,.18)}.m7studio-profile-image-preview img{width:100%;height:100%;display:block;object-fit:cover}.m7studio-profile-image-actions{display:grid;gap:8px}.m7studio-profile-image-actions button,.m7studio-image-upload{position:relative;min-height:38px;display:flex;align-items:center;justify-content:center;padding:0 11px;border:1px solid rgba(218,170,82,.20);border-radius:10px;background:rgba(218,170,82,.045);color:#e7c57d;font-size:9px;font-weight:900;cursor:pointer;box-sizing:border-box}.m7studio-profile-image-actions button{border-color:rgba(255,91,91,.22);background:rgba(255,91,91,.045);color:#ff9c94}.m7studio-image-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.m7studio-profile-image-actions small{min-height:15px;color:#78dca0;font-size:7px;line-height:1.4}.m7studio-profile-core{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
       .m7v4-actions-studio{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important}.m7v4-actions-studio [data-m7v4-action="design"]{border-color:rgba(217,170,88,.35)!important;background:radial-gradient(circle at 15% 0%,rgba(217,170,88,.11),transparent 50%),rgba(217,170,88,.035)!important}
@@ -341,267 +341,140 @@
     return slug?"https://shoufhon.com/"+encodeURIComponent(slug):"";
   }
 
-  /*
-     The phone preview must stay on the exact same origin as /admin.
-     Some shops still have an older absolute Shop Page URL saved (for example
-     ma7alak.com), and www/non-www redirects can also turn the iframe into a
-     cross-origin frame. Hostinger/browser frame protection then shows a broken
-     document instead of the shop page. Keep the saved public URL for "Open
-     site", but mirror its path onto the current Admin origin for the iframe.
-  */
-  function studioPreviewUrl(){
-    const slug=String(document.getElementById("ma-edit-original-slug")?.value||document.getElementById("ma-edit-slug")?.value||"").trim();
-    const publicUrl=studioPublicUrl();
+  let previewRefreshTimer=0;
 
-    if(publicUrl){
-      try{
-        const target=new URL(publicUrl,window.location.href);
-        const path=(target.pathname&&target.pathname!=="/")
-          ?target.pathname
-          :(slug?"/"+encodeURIComponent(slug):"/");
-        return window.location.origin+path+target.search+target.hash;
-      }catch(_){}
+  function studioPreviewSource(){
+    const form=document.getElementById("ma-admin-edit-form");
+    const panel=document.getElementById("ma-admin-edit-card");
+    if(!form||!panel)return null;
+
+    if(activeTab==="profile"||activeTab==="story"){
+      return form.querySelector("[data-m7-profile-shell-preview]");
     }
 
-    return slug?window.location.origin+"/"+encodeURIComponent(slug):"";
+    if(activeTab==="live"){
+      return form.querySelector("[data-m7-live-offers-preview]");
+    }
+
+    if(activeTab==="media"){
+      return form.querySelector("[data-m7-gallery-frame-preview]");
+    }
+
+    return panel.querySelector("[data-m7v4-preview-body]");
   }
 
-  let previewLoadToken=0;
+  function hydrateProfilePreview(clone){
+    if(!clone)return;
 
-  function studioPreviewSlug(){
-    return String(
-      document.getElementById("ma-edit-original-slug")?.value||
-      document.getElementById("ma-edit-slug")?.value||
+    const name=String(
+      document.getElementById("ma-edit-name")?.value||
+      "Shop Name"
+    ).trim()||"Shop Name";
+
+    const arabic=String(
+      document.getElementById("ma-edit-arabic")?.value||
       ""
-    ).trim().toLowerCase();
-  }
+    ).trim();
 
-  function previewBootstrap(slug){
-    const safeSlug=JSON.stringify(String(slug||""));
-    return `
-<script>
-(function(){
-  "use strict";
+    const image=profileImageUrl();
 
-  var SHOP_SLUG=${safeSlug};
-  var TYPE_SET="SHOUFHON_SHOP_CONTEXT_SET";
-  var TYPE_GET="SHOUFHON_SHOP_CONTEXT_GET";
-  var TYPE_STATE="SHOUFHON_SHOP_CONTEXT_STATE";
-  var TYPE_ACK="SHOUFHON_SHOP_CONTEXT_ACK";
-  var DESIGN_TYPE="MA7ALAK_DESIGN_PREVIEW";
-  var DESIGN_CHANNEL="ma7alak-design-live-v1";
-  var STORAGE_PREFIX="ma7alak_design_live_v1:";
+    const nameNode=clone.querySelector(".m7ds-profile-shell-name");
+    if(nameNode)nameNode.textContent=name;
 
-  window.__SHOUFHON_SHOP_CONTEXT_CLIENT_V1__=true;
-
-  function normalize(value){
-    var next=String(value||"").trim().toLowerCase();
-    try{next=decodeURIComponent(next)}catch(_){}
-    next=next.replace(/^\\/+|\\/+$/g,"");
-    return next;
-  }
-
-  function contextPayload(type){
-    return {
-      type:type,
-      shopSlug:SHOP_SLUG,
-      shop_slug:SHOP_SLUG,
-      revision:1,
-      sentAt:Date.now()
-    };
-  }
-
-  function post(target,payload){
-    try{target&&target.postMessage(payload,"*")}catch(_){}
-  }
-
-  function emitContext(source){
-    try{
-      window.dispatchEvent(new CustomEvent("shoufhon:shop-context",{
-        detail:{
-          shopSlug:SHOP_SLUG,
-          shop_slug:SHOP_SLUG,
-          source:source||"studio-preview"
-        }
-      }));
-    }catch(_){}
-  }
-
-  function relayDesign(message,source){
-    if(!message||message.type!==DESIGN_TYPE)return;
-    var incoming=normalize(message.shop_slug||message.shopSlug||"");
-    if(!incoming||incoming!==SHOP_SLUG)return;
-
-    var payload=Object.assign({},message,{
-      shop_slug:SHOP_SLUG,
-      shopSlug:SHOP_SLUG,
-      source:source||message.source||"studio-preview"
-    });
-
-    try{window.postMessage(payload,"*")}catch(_){}
-    try{
-      window.dispatchEvent(new CustomEvent("shoufhon:design-preview",{
-        detail:payload
-      }));
-    }catch(_){}
-
-    document.querySelectorAll("iframe").forEach(function(child){
-      try{post(child.contentWindow,payload)}catch(_){}
-    });
-  }
-
-  window.addEventListener("message",function(event){
-    var data=event.data||{};
-
-    if(data.type===TYPE_GET){
-      post(event.source,contextPayload(TYPE_STATE));
-      return;
+    const arabicNode=clone.querySelector(".m7ds-profile-shell-arabic");
+    if(arabicNode){
+      arabicNode.textContent=arabic||"اسم المحل";
+      arabicNode.hidden=!arabic;
     }
 
-    if(data.type===TYPE_SET){
-      var requested=normalize(data.shopSlug||data.shop_slug||"");
-      if(requested===SHOP_SLUG){
-        post(event.source,contextPayload(TYPE_ACK));
+    const logo=clone.querySelector(".m7ds-profile-shell-logo");
+    if(logo){
+      if(/^https?:\/\//i.test(image)){
+        logo.innerHTML='<img src="'+esc(image)+'" alt="">';
       }
-      return;
-    }
-
-    if(data.type===DESIGN_TYPE){
-      relayDesign(data,"post-message");
-    }
-  });
-
-  try{
-    if("BroadcastChannel" in window){
-      var channel=new BroadcastChannel(DESIGN_CHANNEL);
-      channel.onmessage=function(event){
-        relayDesign(event.data,"broadcast-channel");
-      };
-      window.addEventListener("pagehide",function(){
-        try{channel.close()}catch(_){}
-      },{once:true});
-    }
-  }catch(_){}
-
-  window.addEventListener("storage",function(event){
-    if(event.key!==STORAGE_PREFIX+SHOP_SLUG||!event.newValue)return;
-    try{relayDesign(JSON.parse(event.newValue),"storage")}catch(_){}
-  });
-
-  window.ShoufHonShopContext={
-    get slug(){return SHOP_SLUG},
-    set:function(value){
-      return normalize(value)===SHOP_SLUG;
-    },
-    refresh:function(){
-      emitContext("studio-preview-refresh");
-    }
-  };
-
-  window.ShoufHonShopContextClient={
-    get slug(){return SHOP_SLUG},
-    request:function(){emitContext("studio-preview-request")},
-    resolve:function(){return Promise.resolve(SHOP_SLUG)},
-    setPage:function(value){
-      return Promise.resolve(normalize(value)===SHOP_SLUG);
-    },
-    detectPageSlug:function(){return SHOP_SLUG},
-    normalize:normalize
-  };
-
-  emitContext("studio-preview-boot");
-})();
-<\/script>`;
-  }
-
-  function buildPreviewDocument(html,url,slug){
-    let source=String(html||"");
-    const baseTag='<base href="'+esc(url)+'">';
-    const bootstrap=previewBootstrap(slug);
-
-    /* Headers such as X-Frame-Options/frame-ancestors belong to the fetched
-       response, not this srcdoc document. A page-level CSP meta can still
-       interfere, so remove only frame-embedding meta policy from the replica. */
-    source=source.replace(
-      /<meta\\s+[^>]*http-equiv=[\"']?Content-Security-Policy[\"']?[^>]*>/ig,
-      ""
-    );
-
-    if(/<head(?:\\s[^>]*)?>/i.test(source)){
-      return source.replace(
-        /<head(?:\\s[^>]*)?>/i,
-        match=>match+baseTag+bootstrap
-      );
-    }
-
-    return '<!doctype html><html><head>'+baseTag+bootstrap+'</head><body>'+source+'</body></html>';
-  }
-
-  function previewErrorDocument(message){
-    return '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#070808;color:#e7d7b5;font-family:Arial,sans-serif}body{display:grid;place-items:center;padding:24px;box-sizing:border-box;text-align:center}.box{max-width:290px}.icon{font-size:34px}.title{margin-top:10px;color:#efc76f;font-size:15px;font-weight:800}.copy{margin-top:7px;color:#998d79;font-size:11px;line-height:1.5}</style></head><body><div class="box"><div class="icon">⚠</div><div class="title">Preview could not load</div><div class="copy">'+esc(message||"The shop page could not be copied into the Studio preview.")+'</div></div></body></html>';
-  }
-
-  async function loadRealPreview(frame){
-    if(!frame)return;
-
-    const url=studioPreviewUrl();
-    const slug=studioPreviewSlug();
-    if(!url||!slug)return;
-
-    const requestKey=url+"|"+slug;
-    if(frame.dataset.currentUrl===requestKey&&frame.dataset.previewReady==="1")return;
-
-    frame.dataset.currentUrl=requestKey;
-    frame.dataset.previewReady="0";
-    const token=++previewLoadToken;
-    frame.removeAttribute("src");
-    frame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#070808;color:#a99a7e;font-family:Arial,sans-serif}body{display:grid;place-items:center;font-size:12px}.dot{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#e0ae4d;box-shadow:0 0 12px rgba(224,174,77,.6)}</style></head><body><div><span class="dot"></span>Loading real shop page…</div></body></html>';
-
-    try{
-      const response=await fetch(url,{
-        method:"GET",
-        credentials:"include",
-        cache:"no-cache",
-        headers:{"Accept":"text/html,application/xhtml+xml"}
-      });
-
-      if(!response.ok){
-        throw new Error("Shop page returned HTTP "+response.status+".");
+      else{
+        const letters=name
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0,2)
+          .map(part=>part.charAt(0).toUpperCase())
+          .join("")||"LOGO";
+        logo.textContent=letters;
       }
-
-      const html=await response.text();
-      if(token!==previewLoadToken||frame.dataset.currentUrl!==requestKey)return;
-
-      frame.dataset.m7studioShopSlug=slug;
-      frame.srcdoc=buildPreviewDocument(html,url,slug);
-      frame.dataset.previewReady="1";
-
-      /* The live bridge may have published while the replica was loading. */
-      setTimeout(()=>{
-        try{window.dispatchEvent(new CustomEvent("ma7alak:design-preview-request"))}catch(_){}
-      },120);
-    }catch(error){
-      if(token!==previewLoadToken||frame.dataset.currentUrl!==requestKey)return;
-      frame.dataset.previewReady="0";
-      frame.srcdoc=previewErrorDocument(error&&error.message);
     }
+
+    const labelText=String(
+      document.querySelector(".m7labelbox input[type='text']")?.value||
+      clone.querySelector(".m7ds-profile-shell-pill")?.textContent||
+      "SHOP LABEL"
+    ).trim();
+
+    const label=clone.querySelector(".m7ds-profile-shell-pill");
+    if(label&&labelText)label.textContent=labelText;
   }
 
-  function ensureRealPreview(panel){
+  function renderStudioPreview(panel){
+    if(!panel||!panel.classList.contains("m7studio-fullscreen"))return;
+
     const dock=panel.querySelector(".m7v4-edit-preview");
     if(!dock)return;
+
     let real=dock.querySelector(".m7studio-real-preview");
     if(!real){
       real=document.createElement("div");
       real.className="m7studio-real-preview";
-      real.innerHTML='<div class="m7studio-phone"><iframe data-m7studio-frame title="Live shop preview" loading="eager"></iframe></div><div class="m7studio-preview-note"><i></i><span>Real shop page · unsaved edits sync here live</span></div>';
+      real.innerHTML='<div class="m7studio-phone"><div class="m7studio-phone-scroll"><div class="m7studio-phone-content" data-m7studio-phone-content></div></div></div><div class="m7studio-preview-note"><i></i><span>Instant Studio preview · Open site to verify the real shop page</span></div>';
       dock.appendChild(real);
     }
-    const frame=real.querySelector("[data-m7studio-frame]");
-    loadRealPreview(frame);
-    const title=dock.querySelector("[data-m7v4-preview-title]");if(title)title.textContent="Live Preview · Real shop page";
-    const copy=dock.querySelector(".m7v4-preview-head-copy small");if(copy)copy.textContent="Scroll the phone and watch unsaved changes instantly";
-    const live=dock.querySelector(".m7v4-preview-live");if(live)live.textContent="SYNCED";
+
+    const host=real.querySelector("[data-m7studio-phone-content]");
+    if(!host)return;
+
+    const source=studioPreviewSource();
+    host.innerHTML="";
+
+    if(source){
+      const clone=source.cloneNode(true);
+      clone.removeAttribute("id");
+
+      if(activeTab==="profile"||activeTab==="story"){
+        hydrateProfilePreview(clone);
+      }
+
+      if(source.matches&&source.matches("[data-m7v4-preview-body]")){
+        clone.classList.add("m7studio-base-preview");
+      }
+
+      host.appendChild(clone);
+    }
+    else{
+      host.innerHTML='<div class="m7studio-preview-empty"><div><b>Preview unavailable</b>This section has no local preview surface yet. The controls and Save Changes still use the real Admin form.</div></div>';
+    }
+
+    const row=TABS.find(item=>item[0]===activeTab)||TABS[0];
+    const title=dock.querySelector("[data-m7v4-preview-title]");
+    if(title)title.textContent="Studio Preview · "+row[2];
+
+    const copy=dock.querySelector(".m7v4-preview-head-copy small");
+    if(copy)copy.textContent="Unsaved controls update this preview immediately";
+
+    const live=dock.querySelector(".m7v4-preview-live");
+    if(live)live.textContent="DRAFT";
+  }
+
+  function scheduleStudioPreview(panel){
+    clearTimeout(previewRefreshTimer);
+    previewRefreshTimer=setTimeout(
+      ()=>renderStudioPreview(
+        panel||document.getElementById("ma-admin-edit-card")
+      ),
+      0
+    );
+  }
+
+  function ensureStudioPreview(panel){
+    panel?.querySelector(".m7studio-real-preview")?.remove();
+    renderStudioPreview(panel);
   }
 
   function ensureChrome(panel){
@@ -609,7 +482,7 @@
     if(!top){
       top=document.createElement("div");
       top.className="m7studio-topbar";
-      top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Synced to shop page</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>▣ Preview on Mobile</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
+      top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Studio preview ready</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>▣ Preview on Mobile</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
       panel.prepend(top);
       top.querySelector("[data-m7studio-save]")?.addEventListener("click",()=>document.getElementById("ma-admin-save-edit")?.click());
       top.querySelector("[data-m7studio-open]")?.addEventListener("click",()=>{const url=studioPublicUrl();if(url)window.open(url,"_blank","noopener")});
@@ -810,10 +683,11 @@
     }
 
     ensureChrome(panel);
-    ensureRealPreview(panel);
+    ensureStudioPreview(panel);
     panel.querySelectorAll("[data-m7studio-tab]").forEach(button=>button.classList.toggle("active",button.dataset.m7studioTab===key));
     const nudge=form.querySelector("input:not([type='file']),select,textarea");
     if(nudge){try{nudge.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}}
+    scheduleStudioPreview(panel);
     panel.scrollTop=0;
   }
 
@@ -831,7 +705,7 @@
     panel.classList.add("m7studio-fullscreen");
     document.body.classList.add("m7studio-body-open");
     ensureChrome(panel);
-    ensureRealPreview(panel);
+    ensureStudioPreview(panel);
     activateTab(activeTab);
     openingWanted=false;
     return true;
@@ -873,18 +747,12 @@
   document.addEventListener("input",event=>{
     if(!document.body.classList.contains("m7studio-body-open"))return;
     if(event.target?.id==="ma-edit-name")ensureChrome(document.getElementById("ma-admin-edit-card"));
+    scheduleStudioPreview();
   },true);
 
   document.addEventListener("change",event=>{
     if(!document.body.classList.contains("m7studio-body-open"))return;
-    if(event.target?.id==="ma-edit-url"||event.target?.id==="ma-edit-slug"){
-      const frame=document.querySelector("#ma-admin-edit-card .m7studio-real-preview iframe");
-      if(frame){
-        frame.dataset.currentUrl="";
-        frame.dataset.previewReady="0";
-        loadRealPreview(frame);
-      }
-    }
+    scheduleStudioPreview();
   },true);
 
   document.addEventListener("keydown",event=>{
