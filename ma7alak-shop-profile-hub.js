@@ -4895,6 +4895,30 @@ async function start(){
   ){
     window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(load);
   }
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__==="function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+      function(message){
+        apply({
+          ...(
+            message &&
+            message.profile &&
+            typeof message.profile==="object"
+              ? message.profile
+              : {}
+          ),
+          directory_options:
+            message &&
+            message.directory_options &&
+            typeof message.directory_options==="object"
+              ? message.directory_options
+              : {}
+        });
+      }
+    );
+  }
 }
 
 start().catch(error=>
