@@ -1,5 +1,5 @@
 /* =========================================================
-   MA7ALAK SUBSCRIPTIONS V1
+   SHOUFHON SUBSCRIPTIONS V1
    Public mobile-first plans + shop request form for /add-shop-
    Content is managed from subscription_page_settings in /admin.
 ========================================================= */
@@ -9,26 +9,26 @@
   if(path!=="/add-shop-"||window.__MA7ALAK_SUBSCRIPTIONS_V1__)return;
   window.__MA7ALAK_SUBSCRIPTIONS_V1__=true;
 
-  const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/3d5e9803-9a46-49c5-bf62-c7bbf7b5bc84.png";
+  const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
   const defaults={
-    eyebrow:"MA7ALAK FOR BUSINESS",
+    eyebrow:"SHOUFHON FOR BUSINESS",
     title:"Your shop deserves to be seen.",
-    subtitle:"Choose the plan that fits your business and turn your Ma7alak page into a place customers follow, revisit and remember.",
+    subtitle:"Choose the plan that fits your business and turn your ShoufHon page into a place customers follow, revisit and remember.",
     plans_title:"Choose your plan",
     plans_subtitle:"Simple plans. Real local visibility.",
     note:"Cancel anytime • Secure payment • Support when you need it",
-    form_title:"Ready to put your shop on Ma7alak?",
+    form_title:"Ready to put your shop on ShoufHon?",
     form_subtitle:"Send us your details. We will contact you, confirm the right plan and prepare your shop page.",
     form_button:"Send my shop request",
     success_message:"Request received! We will contact you soon.",
     signature:"Built for Lebanon. Made to be discovered.",
     logo_url:LOGO,
     show_logo:true,
-    hero_arabic:"خلّي محلك ينشاف أكتر",hero_english:"Choose Your Plan",hero_support:"باقات اشتراك مرنة تناسب كل الأعمال",support_left:"Lebanon Stronger Together",support_right:"Support Local Business",benefit_1_title:"More Customers",benefit_1_sub:"Get noticed locally",benefit_2_title:"Grow Faster",benefit_2_sub:"Boost your visibility",benefit_3_title:"Local Community",benefit_3_sub:"Real people. Real support",benefit_4_title:"Stronger Together",benefit_4_sub:"Support local business",quote:"A stronger Lebanon with stronger local businesses.",quote_signature:"— MA7ALAK",footer_tagline:"Local Shops. Real People. A Stronger Community.",
+    hero_arabic:"خلّي محلك ينشاف أكتر",hero_english:"Choose Your Plan",hero_support:"باقات اشتراك مرنة تناسب كل الأعمال",support_left:"Lebanon Stronger Together",support_right:"Support Local Business",benefit_1_title:"More Customers",benefit_1_sub:"Get noticed locally",benefit_2_title:"Grow Faster",benefit_2_sub:"Boost your visibility",benefit_3_title:"Local Community",benefit_3_sub:"Real people. Real support",benefit_4_title:"Stronger Together",benefit_4_sub:"Support local business",quote:"A stronger Lebanon with stronger local businesses.",quote_signature:"— SHOUFHON",footer_tagline:"Local Shops. Real People. A Stronger Community.",
     plans:[
       {id:"basic",name:"BASIC",price:"10",currency:"$",period:"month",description:"Everything needed for a clean, trusted local presence.",icon:"◇",badge:"",featured:false,active:true,cta_label:"Choose Basic",cta_url:"#ma7alak-shop-request",accent:"#d5a44d",features:[{icon:"✓",text:"Shop profile"},{icon:"✓",text:"Photos & gallery"},{icon:"✓",text:"Stories"},{icon:"✓",text:"Opening hours"},{icon:"✓",text:"Customer messages"}]},
       {id:"premium",name:"PREMIUM",price:"20",currency:"$",period:"month",description:"More reach, more movement and more ways to bring people back.",icon:"◆",badge:"MOST POPULAR",featured:true,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"gold-flow",animation_strength:"strong",icon_animation:"float",text_animation:"glow",price_animation:"pulse",button_animation:"shine",badge_animation:"pulse",cta_label:"Choose Premium",cta_url:"#ma7alak-shop-request",accent:"#efbd62",features:[{icon:"✓",text:"Everything in Basic"},{icon:"✓",text:"Homepage reels"},{icon:"✓",text:"Featured placement"},{icon:"✓",text:"Offers & promotions"},{icon:"✓",text:"Follower insights"},{icon:"✓",text:"Priority visibility"}]},
-      {id:"vip",name:"VIP",price:"35",currency:"$",period:"month",description:"A signature Ma7alak presence shaped around your brand.",icon:"♛",badge:"",featured:false,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"vip-luxury",animation_strength:"extreme",icon_animation:"orbit",text_animation:"neon",price_animation:"glow",button_animation:"energy",badge_animation:"bounce",cta_label:"Choose VIP",cta_url:"#ma7alak-shop-request",accent:"#f4d68a",features:[{icon:"✓",text:"Everything in Premium"},{icon:"✓",text:"Custom shop design"},{icon:"✓",text:"Animated media"},{icon:"✓",text:"Top search priority"},{icon:"✓",text:"Advanced analytics"},{icon:"✓",text:"Priority support"}]}
+      {id:"vip",name:"VIP",price:"35",currency:"$",period:"month",description:"A signature ShoufHon presence shaped around your brand.",icon:"♛",badge:"",featured:false,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"vip-luxury",animation_strength:"extreme",icon_animation:"orbit",text_animation:"neon",price_animation:"glow",button_animation:"energy",badge_animation:"bounce",cta_label:"Choose VIP",cta_url:"#ma7alak-shop-request",accent:"#f4d68a",features:[{icon:"✓",text:"Everything in Premium"},{icon:"✓",text:"Custom shop design"},{icon:"✓",text:"Animated media"},{icon:"✓",text:"Top search priority"},{icon:"✓",text:"Advanced analytics"},{icon:"✓",text:"Priority support"}]}
     ]
   };
   let db=null,settings=structuredClone(defaults),channel=null;
@@ -149,7 +149,7 @@ html,body{background:#060607!important}body.m7-subscription-page{margin:0;color:
 `;document.head.appendChild(s);
   }
   function planHtml(p){
-    const features=(Array.isArray(p.features)?p.features:[]).filter(x=>x&&x.text),waText=encodeURIComponent(`Hi Ma7alak, I am interested in the ${p.name||p.id||"subscription"} plan.`),href=`https://wa.me/96178841878?text=${waText}`;
+    const features=(Array.isArray(p.features)?p.features:[]).filter(x=>x&&x.text),waText=encodeURIComponent(`Hi ShoufHon, I am interested in the ${p.name||p.id||"subscription"} plan.`),href=`https://wa.me/96178841878?text=${waText}`;
     const legacyEnabled=p.animation_enabled===true||String(p.animation_enabled).toLowerCase()==="true";
     const frameEnabled=p.frame_animation_enabled===undefined
       ? legacyEnabled
@@ -177,7 +177,7 @@ html,body{background:#060607!important}body.m7-subscription-page{margin:0;color:
     if(canvas&&canvas.getBoundingClientRect().height>200){canvas.dataset.m7SubscriptionCanvas="hidden";canvas.style.setProperty("display","none","important")}
     let root=document.getElementById("ma7alak-subscription-page");if(!root){root=document.createElement("main");root.id="ma7alak-subscription-page";document.body.appendChild(root)}root.className="m7sp";
     const active=(settings.plans||[]).filter(p=>p&&p.active!==false);
-    root.innerHTML=`<div class="m7sp-shell"><header class="m7sp-hero" data-left-note="${esc(settings.support_left||"")}" data-right-note="${esc(settings.support_right||"")}">${settings.show_logo!==false&&settings.logo_url?`<img class="m7sp-eye" src="${esc(settings.logo_url)}" alt="Ma7alak">`:""}<div class="m7sp-eyebrow">${esc(settings.eyebrow)}</div><div class="m7sp-hero-ar" dir="rtl">${esc(settings.hero_arabic||settings.title)}</div><div class="m7sp-hero-en">${esc(settings.hero_english||settings.plans_title)}</div><div class="m7sp-hero-support" dir="rtl">${esc(settings.hero_support||settings.subtitle)}</div></header><section aria-labelledby="m7sp-plans-title"><div class="m7sp-plans">${active.map(planHtml).join("")}</div><div class="m7sp-note">${esc(settings.note)}</div></section><section class="m7sp-benefits"><div class="m7sp-benefit"><div class="m7sp-benefit-icon">⚡</div><div><b>${esc(settings.benefit_1_title)}</b><span>${esc(settings.benefit_1_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">▥</div><div><b>${esc(settings.benefit_2_title)}</b><span>${esc(settings.benefit_2_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">👥</div><div><b>${esc(settings.benefit_3_title)}</b><span>${esc(settings.benefit_3_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">♥</div><div><b>${esc(settings.benefit_4_title)}</b><span>${esc(settings.benefit_4_sub)}</span></div></div></section><footer class="m7sp-mini-footer"><div class="m7sp-mini-brand">MA7ALAK<small>${esc(settings.footer_tagline)}</small></div><div class="m7sp-mini-links">About Us　·　Contact　·　Privacy　·　Terms</div><div class="m7sp-mini-proud">Proudly Lebanese</div></footer></div>`
+    root.innerHTML=`<div class="m7sp-shell"><header class="m7sp-hero" data-left-note="${esc(settings.support_left||"")}" data-right-note="${esc(settings.support_right||"")}">${settings.show_logo!==false&&settings.logo_url?`<img class="m7sp-eye" src="${esc(settings.logo_url)}" alt="ShoufHon">`:""}<div class="m7sp-eyebrow">${esc(settings.eyebrow)}</div><div class="m7sp-hero-ar" dir="rtl">${esc(settings.hero_arabic||settings.title)}</div><div class="m7sp-hero-en">${esc(settings.hero_english||settings.plans_title)}</div><div class="m7sp-hero-support" dir="rtl">${esc(settings.hero_support||settings.subtitle)}</div></header><section aria-labelledby="m7sp-plans-title"><div class="m7sp-plans">${active.map(planHtml).join("")}</div><div class="m7sp-note">${esc(settings.note)}</div></section><section class="m7sp-benefits"><div class="m7sp-benefit"><div class="m7sp-benefit-icon">⚡</div><div><b>${esc(settings.benefit_1_title)}</b><span>${esc(settings.benefit_1_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">▥</div><div><b>${esc(settings.benefit_2_title)}</b><span>${esc(settings.benefit_2_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">👥</div><div><b>${esc(settings.benefit_3_title)}</b><span>${esc(settings.benefit_3_sub)}</span></div></div><div class="m7sp-benefit"><div class="m7sp-benefit-icon">♥</div><div><b>${esc(settings.benefit_4_title)}</b><span>${esc(settings.benefit_4_sub)}</span></div></div></section><footer class="m7sp-mini-footer"><div class="m7sp-mini-brand">SHOUFHON<small>${esc(settings.footer_tagline)}</small></div><div class="m7sp-mini-links">About Us　·　Contact　·　Privacy　·　Terms</div><div class="m7sp-mini-proud">Proudly Lebanese</div></footer></div>`
   }
   async function load(){const r=await db.from("subscription_page_settings").select("settings").eq("id","main").maybeSingle();settings=merge(defaults,!r.error&&r.data?r.data.settings:null);mount()}
   async function boot(){db=await getClient();await load();try{channel=db.channel("ma7alak-subscriptions-live").on("postgres_changes",{event:"*",schema:"public",table:"subscription_page_settings",filter:"id=eq.main"},()=>load()).subscribe()}catch(_){}}

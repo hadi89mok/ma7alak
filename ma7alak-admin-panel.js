@@ -1,5 +1,5 @@
 /* =========================================================
-   MA7ALAK — PRIVATE ADMIN PANEL
+   SHOUFHON — PRIVATE ADMIN PANEL
    GITHUB / HOSTINGER SCRIPT VERSION — REELS DEVICE UPLOAD
 
    Upload this file to GitHub as:
@@ -155,7 +155,7 @@
     }
     catch (error) {
       console.error(
-        "MA7ALAK ADMIN: Supabase load failed:",
+        "SHOUFHON ADMIN: Supabase load failed:",
         error
       );
 
@@ -258,7 +258,7 @@
   if(loginForm && !loginForm.querySelector(".ma-admin-google-note")){
     const note = document.createElement("p");
     note.className = "ma-admin-google-note";
-    note.textContent = "Sign in with the authorized Ma7alak admin Google account.";
+    note.textContent = "Sign in with the authorized ShoufHon admin Google account.";
     note.style.cssText = "color:rgba(255,255,255,.68);font-size:12px;line-height:1.5;margin:0 0 12px";
     loginButton.parentNode.insertBefore(note, loginButton);
   }
@@ -673,7 +673,7 @@
       );
 
     if(error){
-      console.error("MA7ALAK ADMIN: is_site_admin check failed:", error);
+      console.error("SHOUFHON ADMIN: is_site_admin check failed:", error);
 
       showLogin();
 
@@ -691,7 +691,7 @@
 
       setStatus(
         loginStatus,
-        "This account is not a Ma7alak site admin.",
+        "This account is not a ShoufHon site admin.",
         "error"
       );
 
@@ -2201,7 +2201,7 @@
       const shopUrl =
         normalizedText(
           shop.shop_url ||
-          ("https://ma7alak.com/" + encodeURIComponent(slug))
+          ("https://shoufhon.com/" + encodeURIComponent(slug))
         );
 
       const shopIcon =
@@ -2605,7 +2605,7 @@
         window.Ma7alakDirectoryAdmin.fill(shop);
       }
     }catch(error){
-      console.error("MA7ALAK Edit Shop extra controls failed:", error);
+      console.error("SHOUFHON Edit Shop extra controls failed:", error);
       setStatus(
         editStatus,
         "Edit panel opened, but one extra control failed to load. Refresh once if a field is missing.",
@@ -2689,7 +2689,7 @@
       shopUrl.dataset.auto === "true"
     ){
       shopUrl.value =
-        "https://ma7alak.com/" + slug;
+        "https://shoufhon.com/" + slug;
 
       shopUrl.dataset.auto = "true";
     }
@@ -3064,7 +3064,7 @@
             shopUrl.value
           ) ||
           (
-            "https://ma7alak.com/" +
+            "https://shoufhon.com/" +
             slug
           );
 
@@ -3294,7 +3294,7 @@
     }
 
     if(action === "view"){
-      const target = normalizedText(shop.shop_url) || ("https://ma7alak.com/" + encodeURIComponent(slug));
+      const target = normalizedText(shop.shop_url) || ("https://shoufhon.com/" + encodeURIComponent(slug));
       window.open(target, "_blank", "noopener");
       return;
     }
@@ -3681,7 +3681,7 @@
         shop_name: name,
         arabic_name: normalizedText(editArabic.value) || null,
         profile_image_url: normalizedText(editImage.value) || null,
-        shop_url: normalizedText(editUrl.value) || ("https://ma7alak.com/" + slug),
+        shop_url: normalizedText(editUrl.value) || ("https://shoufhon.com/" + slug),
         city: normalizedText(editCitySmart && editCitySmart.value) || null,
         area: area || null,
         category: category,
@@ -3990,7 +3990,7 @@
 
       const confirmed =
         window.confirm(
-          "Delete this live Reel?\\n\\nIt will disappear from Ma7alak immediately."
+          "Delete this live Reel?\\n\\nIt will disappear from ShoufHon immediately."
         );
 
       if(!confirmed){
@@ -4047,7 +4047,7 @@
 
 
   /* =========================================================
-     MA7ALAK ADMIN V2 — LIVE DIRECTORY CONTROL CENTER
+     SHOUFHON ADMIN V2 — LIVE DIRECTORY CONTROL CENTER
      SAFE ADD-ON:
      - Does NOT alter Gallery / Videos / Live Reels logic.
      - Categories, Cities/Regions and Areas are Supabase-driven.
@@ -4276,7 +4276,7 @@
       hub.className = "ma-admin-card";
       hub.innerHTML = `
         <div class="ma-v2-hero">
-          <div class="ma-v2-title"><div><h2>Directory Control</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Categories, cities/regions and areas — live across Ma7alak.</div></div><span class="ma-v2-live">● LIVE</span></div>
+          <div class="ma-v2-title"><div><h2>Directory Control</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Categories, cities/regions and areas — live across ShoufHon.</div></div><span class="ma-v2-live">● LIVE</span></div>
           <div class="ma-v2-tabs">
             <button class="ma-v2-tab active" data-v2-tab="categories">🏷️ Categories</button>
             <button class="ma-v2-tab" data-v2-tab="cities">📍 Cities / Regions</button>
@@ -4661,7 +4661,7 @@
 
     async function bootV2(){
       installV2Styles(); installHub(); installSmartShopFields(); bindV2Forms(); bindAreaMode(); bindActivityToggle();
-      try{ await loadV2Taxonomy(); installRealtime(); }catch(err){ console.warn("MA7ALAK Admin V2 taxonomy setup needed:",err); }
+      try{ await loadV2Taxonomy(); installRealtime(); }catch(err){ console.warn("SHOUFHON Admin V2 taxonomy setup needed:",err); }
       if(window.__MA7ALAK_ADMIN_WORKSPACE_V4_BUNDLE__ !== true){
         manageShopList.addEventListener("click",()=>setTimeout(syncEditSmartFields,80));
       }
@@ -4673,7 +4673,7 @@
 })();
 
 /* =========================================================
-   MA7ALAK ADMIN — STORY STATUS, TIMED FEATURES & PANEL CONTROL
+   SHOUFHON ADMIN — STORY STATUS, TIMED FEATURES & PANEL CONTROL
 ========================================================= */
 (function(){
 "use strict";
@@ -4801,8 +4801,8 @@ ready().catch(console.error);
 if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin"||window.__M7_SUBSCRIPTION_ADMIN_V1__)return;
 window.__M7_SUBSCRIPTION_ADMIN_V1__=true;
 const $=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/3d5e9803-9a46-49c5-bf62-c7bbf7b5bc84.png";
-const fallback={eyebrow:"MA7ALAK FOR BUSINESS",title:"Your shop deserves to be seen.",subtitle:"Choose the plan that fits your business and turn your Ma7alak page into a place customers follow, revisit and remember.",plans_title:"Choose your plan",plans_subtitle:"Simple plans. Real local visibility.",note:"Cancel anytime • Secure payment • Support when you need it",form_title:"Ready to put your shop on Ma7alak?",form_subtitle:"Send us your details. We will contact you, confirm the right plan and prepare your shop page.",form_button:"Send my shop request",success_message:"Request received! We will contact you soon.",signature:"Built for Lebanon. Made to be discovered.",logo_url:LOGO,show_logo:true,hero_arabic:"خلّي محلك ينشاف أكتر",hero_english:"Choose Your Plan",hero_support:"باقات اشتراك مرنة تناسب كل الأعمال",support_left:"Lebanon Stronger Together",support_right:"Support Local Business",benefit_1_title:"More Customers",benefit_1_sub:"Get noticed locally",benefit_2_title:"Grow Faster",benefit_2_sub:"Boost your visibility",benefit_3_title:"Local Community",benefit_3_sub:"Real people. Real support",benefit_4_title:"Stronger Together",benefit_4_sub:"Support local business",quote:"A stronger Lebanon with stronger local businesses.",quote_signature:"— MA7ALAK",footer_tagline:"Local Shops. Real People. A Stronger Community.",plans:[{id:"basic",name:"BASIC",price:"10",currency:"$",period:"month",description:"Everything needed for a clean, trusted local presence.",icon:"◇",badge:"",featured:false,active:true,cta_label:"Choose Basic",cta_url:"#ma7alak-shop-request",accent:"#d5a44d",card_background_color:"#15151a",card_background_color_2:"#09090c",card_background_image_url:"",card_background_overlay:"12",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Shop profile"},{icon:"✓",text:"Photos & gallery"},{icon:"✓",text:"Stories"},{icon:"✓",text:"Opening hours"},{icon:"✓",text:"Customer messages"}]},{id:"premium",name:"PREMIUM",price:"20",currency:"$",period:"month",description:"More reach, more movement and more ways to bring people back.",icon:"◆",badge:"MOST POPULAR",featured:true,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"gold-flow",animation_strength:"strong",frame_top_color:"#ffb21f",frame_bottom_color:"#ff8a00",title_color:"#ffc13d",description_color:"#d8c8a8",features_color:"#f2e8d5",feature_icon_color:"#ffb21f",price_color:"#fff2ce",period_color:"#e6b758",button_color:"#ffb21f",button_text_color:"#1b1105",icon_animation:"float",text_animation:"glow",features_animation:"wave",price_animation:"pulse",button_animation:"shine",badge_animation:"pulse",cta_label:"Choose Premium",cta_url:"#ma7alak-shop-request",accent:"#efbd62",card_background_color:"#17120b",card_background_color_2:"#090807",card_background_image_url:"",card_background_overlay:"10",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Everything in Basic"},{icon:"✓",text:"Homepage reels"},{icon:"✓",text:"Featured placement"},{icon:"✓",text:"Offers & promotions"},{icon:"✓",text:"Follower insights"},{icon:"✓",text:"Priority visibility"}]},{id:"vip",name:"VIP",price:"35",currency:"$",period:"month",description:"A signature Ma7alak presence shaped around your brand.",icon:"♛",badge:"",featured:false,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"vip-luxury",animation_strength:"extreme",frame_top_color:"#ffb21f",frame_bottom_color:"#8a2cff",vip_split_frame:true,vip_extra_icons_enabled:true,vip_extra_icons:["💎","👑","🚀","⭐","⚡","👑","✦","★"],vip_extra_icons_animation:"orbit",vip_icon_color:"#ffd04d",title_color:"#ffbd35",description_color:"#c87cff",features_color:"#f7edf9",feature_icon_color:"#ffb21f",price_color:"#ffffff",period_color:"#d9a5ff",button_color:"#9d28ff",button_text_color:"#ffffff",icon_animation:"orbit",text_animation:"neon",features_animation:"glow",price_animation:"glow",button_animation:"energy",badge_animation:"bounce",cta_label:"Choose VIP",cta_url:"#ma7alak-shop-request",accent:"#f4d68a",card_background_color:"#130d12",card_background_color_2:"#07070b",card_background_image_url:"",card_background_overlay:"10",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Everything in Premium"},{icon:"✓",text:"Custom shop design"},{icon:"✓",text:"Animated media"},{icon:"✓",text:"Top search priority"},{icon:"✓",text:"Advanced analytics"},{icon:"✓",text:"Priority support"}]}]};
+const LOGO="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
+const fallback={eyebrow:"SHOUFHON FOR BUSINESS",title:"Your shop deserves to be seen.",subtitle:"Choose the plan that fits your business and turn your ShoufHon page into a place customers follow, revisit and remember.",plans_title:"Choose your plan",plans_subtitle:"Simple plans. Real local visibility.",note:"Cancel anytime • Secure payment • Support when you need it",form_title:"Ready to put your shop on ShoufHon?",form_subtitle:"Send us your details. We will contact you, confirm the right plan and prepare your shop page.",form_button:"Send my shop request",success_message:"Request received! We will contact you soon.",signature:"Built for Lebanon. Made to be discovered.",logo_url:LOGO,show_logo:true,hero_arabic:"خلّي محلك ينشاف أكتر",hero_english:"Choose Your Plan",hero_support:"باقات اشتراك مرنة تناسب كل الأعمال",support_left:"Lebanon Stronger Together",support_right:"Support Local Business",benefit_1_title:"More Customers",benefit_1_sub:"Get noticed locally",benefit_2_title:"Grow Faster",benefit_2_sub:"Boost your visibility",benefit_3_title:"Local Community",benefit_3_sub:"Real people. Real support",benefit_4_title:"Stronger Together",benefit_4_sub:"Support local business",quote:"A stronger Lebanon with stronger local businesses.",quote_signature:"— SHOUFHON",footer_tagline:"Local Shops. Real People. A Stronger Community.",plans:[{id:"basic",name:"BASIC",price:"10",currency:"$",period:"month",description:"Everything needed for a clean, trusted local presence.",icon:"◇",badge:"",featured:false,active:true,cta_label:"Choose Basic",cta_url:"#ma7alak-shop-request",accent:"#d5a44d",card_background_color:"#15151a",card_background_color_2:"#09090c",card_background_image_url:"",card_background_overlay:"12",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Shop profile"},{icon:"✓",text:"Photos & gallery"},{icon:"✓",text:"Stories"},{icon:"✓",text:"Opening hours"},{icon:"✓",text:"Customer messages"}]},{id:"premium",name:"PREMIUM",price:"20",currency:"$",period:"month",description:"More reach, more movement and more ways to bring people back.",icon:"◆",badge:"MOST POPULAR",featured:true,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"gold-flow",animation_strength:"strong",frame_top_color:"#ffb21f",frame_bottom_color:"#ff8a00",title_color:"#ffc13d",description_color:"#d8c8a8",features_color:"#f2e8d5",feature_icon_color:"#ffb21f",price_color:"#fff2ce",period_color:"#e6b758",button_color:"#ffb21f",button_text_color:"#1b1105",icon_animation:"float",text_animation:"glow",features_animation:"wave",price_animation:"pulse",button_animation:"shine",badge_animation:"pulse",cta_label:"Choose Premium",cta_url:"#ma7alak-shop-request",accent:"#efbd62",card_background_color:"#17120b",card_background_color_2:"#090807",card_background_image_url:"",card_background_overlay:"10",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Everything in Basic"},{icon:"✓",text:"Homepage reels"},{icon:"✓",text:"Featured placement"},{icon:"✓",text:"Offers & promotions"},{icon:"✓",text:"Follower insights"},{icon:"✓",text:"Priority visibility"}]},{id:"vip",name:"VIP",price:"35",currency:"$",period:"month",description:"A signature ShoufHon presence shaped around your brand.",icon:"♛",badge:"",featured:false,active:true,animation_enabled:true,frame_animation_enabled:true,animation_style:"vip-luxury",animation_strength:"extreme",frame_top_color:"#ffb21f",frame_bottom_color:"#8a2cff",vip_split_frame:true,vip_extra_icons_enabled:true,vip_extra_icons:["💎","👑","🚀","⭐","⚡","👑","✦","★"],vip_extra_icons_animation:"orbit",vip_icon_color:"#ffd04d",title_color:"#ffbd35",description_color:"#c87cff",features_color:"#f7edf9",feature_icon_color:"#ffb21f",price_color:"#ffffff",period_color:"#d9a5ff",button_color:"#9d28ff",button_text_color:"#ffffff",icon_animation:"orbit",text_animation:"neon",features_animation:"glow",price_animation:"glow",button_animation:"energy",badge_animation:"bounce",cta_label:"Choose VIP",cta_url:"#ma7alak-shop-request",accent:"#f4d68a",card_background_color:"#130d12",card_background_color_2:"#07070b",card_background_image_url:"",card_background_overlay:"10",card_background_position:"center",card_background_size:"cover",features:[{icon:"✓",text:"Everything in Premium"},{icon:"✓",text:"Custom shop design"},{icon:"✓",text:"Animated media"},{icon:"✓",text:"Top search priority"},{icon:"✓",text:"Advanced analytics"},{icon:"✓",text:"Priority support"}]}]};
 let client=null,settings=structuredClone(fallback),section=null;
 function style(){if($("m7-sub-admin-css"))return;const s=document.createElement("style");s.id="m7-sub-admin-css";s.textContent=`
 #m7-sub-admin{margin:18px 0;padding:18px;border:1px solid #e3b65b55;border-radius:23px;background:radial-gradient(circle at 100% 0,#d99a4524,transparent 30%),linear-gradient(145deg,#1a1510,#0d0c0a);color:#fff}.m7sa-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.m7sa-head h2{margin:0;color:#f2c36f}.m7sa-head p{margin:4px 0 0;color:#ffffff75;font-size:11px}.m7sa-preview{border:1px solid #e0b45e66;border-radius:10px;padding:9px 11px;color:#efc776;text-decoration:none;font-size:11px;font-weight:900}.m7sa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.m7sa-field{display:grid;gap:5px;color:#d8c9b2;font-size:11px}.m7sa-field.full{grid-column:1/-1}.m7sa-field input,.m7sa-field textarea,.m7sa-field select{width:100%;box-sizing:border-box;min-height:44px;padding:10px 11px;border:1px solid #ffffff18;border-radius:11px;background:#0c0b09;color:#fff;outline:0}.m7sa-field textarea{min-height:80px;resize:vertical}.m7sa-check{display:flex;align-items:center;gap:8px;margin:12px 0;color:#e9d3aa}.m7sa-check input{width:19px;height:19px;accent-color:#dca74c}.m7sa-divider{height:1px;margin:18px 0;background:linear-gradient(90deg,transparent,#dca74c66,transparent)}.m7sa-plans{display:grid;gap:12px}.m7sa-plan{padding:14px;border:1px solid #ffffff15;border-radius:18px;background:#ffffff06}.m7sa-plan-head{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:11px}.m7sa-plan-head strong{color:#f0c671}.m7sa-actions{display:flex;gap:5px;flex-wrap:wrap}.m7sa-btn{min-height:36px;padding:7px 10px;border:1px solid #d9a64d55;border-radius:9px;background:#251b10;color:#efc36f;font-weight:850;cursor:pointer}.m7sa-btn.danger{border-color:#d75e5e66;background:#321414;color:#ff9999}.m7sa-btn.primary{width:100%;min-height:49px;margin-top:14px;border:0;background:linear-gradient(110deg,#f6d68b,#d59838);color:#211408;font-size:13px}.m7sa-features{display:grid;gap:7px;margin-top:12px}.m7sa-feature{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:6px;align-items:center}.m7sa-feature input{min-width:0;height:40px;border:1px solid #ffffff16;border-radius:9px;background:#0b0a08;color:#fff;padding:8px}.m7sa-feature-actions{display:flex;gap:4px}.m7sa-feature-actions button{width:31px;height:31px;padding:0}.m7sa-status{min-height:20px;margin-top:9px;text-align:center;color:#efc36f;font-size:11px}@media(max-width:680px){#m7-sub-admin{padding:14px}.m7sa-head{align-items:flex-start}.m7sa-grid{grid-template-columns:1fr}.m7sa-field.full{grid-column:auto}.m7sa-feature{grid-template-columns:55px minmax(0,1fr)}.m7sa-feature-actions{grid-column:1/-1;justify-content:flex-end}}`;(document.head||document.documentElement).appendChild(s)}
@@ -4813,7 +4813,7 @@ function vipIconField(p){return `<label class="m7sa-field full"><span>VIP outsid
 function featureHtml(f,j){return `<div class="m7sa-feature" data-feature="${j}"><input data-f-icon value="${esc(f.icon||"")}" placeholder="Icon (optional)" aria-label="Feature icon"><input data-f-text value="${esc(f.text||"")}" aria-label="Feature text"><div class="m7sa-feature-actions"><button class="m7sa-btn" type="button" data-f-up title="Move up">↑</button><button class="m7sa-btn" type="button" data-f-down title="Move down">↓</button><button class="m7sa-btn danger" type="button" data-f-remove title="Remove">×</button></div></div>`}
 function planHtml(p,i){return `<article class="m7sa-plan" data-plan-index="${i}"><div class="m7sa-plan-head"><strong>Plan ${i+1} · ${esc(p.name||"Untitled")}</strong><div class="m7sa-actions"><button class="m7sa-btn" type="button" data-plan-up>↑</button><button class="m7sa-btn" type="button" data-plan-down>↓</button><button class="m7sa-btn danger" type="button" data-plan-remove>Delete</button></div></div><div class="m7sa-grid">${field("", "Plan ID",p.id).replace('id=""','data-p="id"')}${field("","Name",p.name).replace('id=""','data-p="name"')}${field("","Price",p.price).replace('id=""','data-p="price"')}${field("","Currency",p.currency||"$").replace('id=""','data-p="currency"')}${field("","Billing period",p.period||"month").replace('id=""','data-p="period"')}${field("","Plan icon — emoji or image URL",p.icon||"").replace('id=""','data-p="icon"')}${String(p.id).toLowerCase()==="premium"?"":field("","Badge text",p.badge||"").replace('id=""','data-p="badge"')}${field("","Accent color",p.accent||"#e5b75f","color").replace('id=""','data-p="accent"')}${field("","Button label",p.cta_label||"").replace('id=""','data-p="cta_label"')}${field("","Description",p.description||"","textarea",true).replace('id=""','data-p="description"')}${colorField("Card background color — top","card_background_color",p.card_background_color,"#15151a")}${colorField("Card background color — bottom","card_background_color_2",p.card_background_color_2,"#09090c")}${field("","Card background image URL — shows INSIDE card",p.card_background_image_url||"").replace('id=""','data-p="card_background_image_url"')}${field("","Background darkness overlay % (0–90)",p.card_background_overlay??"12","number").replace('id=""','data-p="card_background_overlay" min="0" max="90"')}${selectField("Background image position","card_background_position",p.card_background_position||"center",[["center","Center"],["top","Top"],["bottom","Bottom"],["left","Left"],["right","Right"]])}${selectField("Background image fit","card_background_size",p.card_background_size||"cover",[["cover","Cover"],["contain","Contain"],["auto","Original size"]])}${selectField("OUTER frame animation","animation_style",p.animation_style||"gold-flow",[["gold-flow","Gold moving frame"],["breathe","Breathing outer glow"],["snake","Snake light frame"],["comet","Comet frame"],["neon","Neon frame"],["electric","Electric frame"],["fire","Fire / amber frame"],["diamond","Diamond sparkle"],["rainbow-flow","Rainbow flow"],["aurora","Aurora frame"],["shimmer","Shimmer frame"],["vip-luxury","VIP Luxury"],["vip-energy","VIP Energy"]])}${selectField("Glow / animation strength","animation_strength",p.animation_strength||"strong",[["low","Low"],["medium","Medium"],["strong","Strong"],["very-strong","Even stronger"],["extreme","MAX / Extreme"]])}${colorField("Top frame color","frame_top_color",p.frame_top_color,p.accent||"#e5b75f")}${colorField("Bottom frame color","frame_bottom_color",p.frame_bottom_color,p.accent||"#e5b75f")}${colorField("Plan title color","title_color",p.title_color,p.accent||"#e5b75f")}${selectField("Plan title animation","text_animation",p.text_animation||"none",[["none","Off"],["glow","Glow"],["neon","Neon"],["float","Float"],["shimmer","Shimmer"],["pulse","Pulse"]])}${colorField("Description color","description_color",p.description_color,"#aaa39a")}${colorField("Benefits text color","features_color",p.features_color,"#ece6dc")}${colorField("Benefit icon/check color","feature_icon_color",p.feature_icon_color,p.accent||"#e5b75f")}${selectField("Benefits list animation","features_animation",p.features_animation||"none",[["none","Off"],["glow","Glow"],["wave","Wave through every line"],["pulse","Pulse"],["shimmer","Shimmer / brighten"]])}${colorField("Price color","price_color",p.price_color,"#fff2ce")}${selectField("Price animation","price_animation",p.price_animation||"none",[["none","Off"],["glow","Glow"],["pulse","Pulse"],["shimmer","Shimmer"]])}${colorField("Billing period color","period_color",p.period_color,"#bdb5aa")}${selectField("Main icon animation","icon_animation",p.icon_animation||"none",[["none","Off"],["float","Float"],["pulse","Pulse"],["spin","Spin"],["orbit","Orbit"],["bounce","Bounce"],["glow","Glow"]])}${colorField("Button color","button_color",p.button_color,p.accent||"#e5b75f")}${colorField("Button text color","button_text_color",p.button_text_color,"#ffffff")}${selectField("Button animation","button_animation",p.button_animation||"none",[["none","Off"],["shine","Light sweep"],["energy","Energy glow"],["pulse","Pulse"],["glow","Glow"]])}${selectField("Badge animation","badge_animation",p.badge_animation||"none",[["none","Off"],["pulse","Pulse"],["bounce","Bounce"],["glow","Glow"],["shimmer","Shimmer"]])}${String(p.id).toLowerCase()==="vip"?`<label class="m7sa-check"><input type="checkbox" data-p="vip_split_frame" ${p.vip_split_frame!==false?"checked":""}> VIP two-color frame (top + bottom)</label><label class="m7sa-check"><input type="checkbox" data-p="vip_extra_icons_enabled" ${p.vip_extra_icons_enabled!==false?"checked":""}> Show custom icons OUTSIDE VIP card</label>${colorField("VIP outside icon color","vip_icon_color",p.vip_icon_color,p.frame_top_color||p.accent||"#ffd04d")}${selectField("VIP outside icon animation","vip_extra_icons_animation",p.vip_extra_icons_animation||"orbit",[["none","Off"],["float","Float"],["orbit","Orbit"],["pulse","Pulse"],["bounce","Bounce"]])}${vipIconField(p)}`:""}</div><label class="m7sa-check"><input type="checkbox" data-p="active" ${p.active!==false?"checked":""}> Show this plan</label><label class="m7sa-check"><input type="checkbox" data-p="featured" ${p.featured?"checked":""}> Highlight as recommended</label><label class="m7sa-check"><input type="checkbox" data-p="frame_animation_enabled" ${(p.frame_animation_enabled===undefined?p.animation_enabled:p.frame_animation_enabled)?"checked":""}> OUTER FRAME animation ON / OFF</label><div class="m7sa-features">${(p.features||[]).map(featureHtml).join("")}</div><button class="m7sa-btn" type="button" data-feature-add>＋ Add benefit</button></article>`}
 function renderPlans(){const box=section.querySelector("[data-plans]");box.innerHTML=(settings.plans||[]).map(planHtml).join("")||'<p>No plans yet. Add one below.</p>'}
-function mount(){const dash=$("ma-admin-dashboard");if(!dash)return false;style();if($("m7-sub-admin")){section=$("m7-sub-admin");return true}section=document.createElement("section");section.id="m7-sub-admin";section.innerHTML=`<div class="m7sa-head"><div><h2>Subscriptions · /add-shop-</h2><p>Edit every plan, price, icon, benefit and page message from here. Subscribe buttons open WhatsApp: +961 78 841 878.</p></div><a class="m7sa-preview" href="/add-shop-" target="_blank">Open page ↗</a></div><form><div class="m7sa-grid" data-page-fields></div><label class="m7sa-check"><input id="m7sa-show-logo" type="checkbox"> Show Ma7alak eye logo and signature mark</label><div class="m7sa-divider"></div><div class="m7sa-plans" data-plans></div><button class="m7sa-btn" type="button" data-plan-add>＋ Add subscription plan</button><button class="m7sa-btn primary" type="submit">Save & publish subscription page</button><div class="m7sa-status" role="status"></div></form>`;dash.appendChild(section);section.addEventListener("click",handle);section.querySelector("form").addEventListener("submit",save);const nav=$("m7-shop-control")?.querySelector(".m7sc-nav");if(nav&&!nav.querySelector('[data-target="m7-sub-admin"]'))nav.insertAdjacentHTML("beforeend",'<button data-target="m7-sub-admin">💳 Subscriptions</button>');return true}
+function mount(){const dash=$("ma-admin-dashboard");if(!dash)return false;style();if($("m7-sub-admin")){section=$("m7-sub-admin");return true}section=document.createElement("section");section.id="m7-sub-admin";section.innerHTML=`<div class="m7sa-head"><div><h2>Subscriptions · /add-shop-</h2><p>Edit every plan, price, icon, benefit and page message from here. Subscribe buttons open WhatsApp: +961 78 841 878.</p></div><a class="m7sa-preview" href="/add-shop-" target="_blank">Open page ↗</a></div><form><div class="m7sa-grid" data-page-fields></div><label class="m7sa-check"><input id="m7sa-show-logo" type="checkbox"> Show ShoufHon eye logo and signature mark</label><div class="m7sa-divider"></div><div class="m7sa-plans" data-plans></div><button class="m7sa-btn" type="button" data-plan-add>＋ Add subscription plan</button><button class="m7sa-btn primary" type="submit">Save & publish subscription page</button><div class="m7sa-status" role="status"></div></form>`;dash.appendChild(section);section.addEventListener("click",handle);section.querySelector("form").addEventListener("submit",save);const nav=$("m7-shop-control")?.querySelector(".m7sc-nav");if(nav&&!nav.querySelector('[data-target="m7-sub-admin"]'))nav.insertAdjacentHTML("beforeend",'<button data-target="m7-sub-admin">💳 Subscriptions</button>');return true}
 const pageFields=[["eyebrow","Eyebrow"],["hero_arabic","Hero Arabic headline"],["hero_english","Hero English headline"],["hero_support","Hero Arabic subtitle"],["support_left","Hero left handwritten note"],["support_right","Hero right handwritten note"],["title","Legacy main heading"],["subtitle","Legacy introduction","textarea"],["plans_title","Legacy plans heading"],["plans_subtitle","Legacy plans subtitle"],["note","Payment / trust note"],["benefit_1_title","Benefit 1 title"],["benefit_1_sub","Benefit 1 subtitle"],["benefit_2_title","Benefit 2 title"],["benefit_2_sub","Benefit 2 subtitle"],["benefit_3_title","Benefit 3 title"],["benefit_3_sub","Benefit 3 subtitle"],["benefit_4_title","Benefit 4 title"],["benefit_4_sub","Benefit 4 subtitle"],["success_message","Success message"],["footer_tagline","Footer tagline"],["logo_url","Eye logo URL"]]
 function render(){const box=section.querySelector("[data-page-fields]");box.innerHTML=pageFields.map(([k,l,t])=>field("m7sa-"+k,l,settings[k]||"",t||"text",t==="textarea")).join("");$("m7sa-show-logo").checked=settings.show_logo!==false;renderPlans()}
 function read(){pageFields.forEach(([k])=>{settings[k]=$("m7sa-"+k)?.value.trim()||""});settings.show_logo=$("m7sa-show-logo").checked;settings.plans=[...section.querySelectorAll("[data-plan-index]")].map(card=>{const p={};card.querySelectorAll("[data-p]").forEach(el=>{p[el.dataset.p]=el.type==="checkbox"?el.checked:el.value.trim()});p.features=[...card.querySelectorAll("[data-feature]")].map(row=>({icon:row.querySelector("[data-f-icon]").value.trim(),text:row.querySelector("[data-f-text]").value.trim()})).filter(f=>f.text);if(p.vip_extra_icons_text!==undefined){p.vip_extra_icons=String(p.vip_extra_icons_text).split(/\\n/).map(x=>x.trim()).filter(Boolean).slice(0,8);delete p.vip_extra_icons_text}return p});return settings}
@@ -4841,7 +4841,7 @@ window.addEventListener("ma7alak:admin-ready",()=>boot().catch(console.error),{o
 })();
 
 /* =========================================================
-   MA7ALAK ADMIN — VIEWER USERS + CHAT REPORTS + ANALYTICS V3
+   SHOUFHON ADMIN — VIEWER USERS + CHAT REPORTS + ANALYTICS V3
    2026-09: full email, live browsing status, search,
    persistent report history, unified Google owner manager,
    collapsible admin sections and live website analytics.
@@ -4915,23 +4915,23 @@ function mount(){css();document.getElementById("m7adm-mod")?.remove();if(documen
   <button class="m7adm-tab" type="button" role="tab" aria-selected="false" data-target="m7adm-history">🕘 Activity History</button>
 </div>
 <div class="m7adm-hub-content">
-  <div id="m7adm-analytics" class="m7adm-body hidden" hidden><div class="m7adm-analytics"><div id="m7adm-online-total" class="m7adm-big">0</div><div class="m7adm-sub">visitors browsing Ma7alak right now</div></div></div>
+  <div id="m7adm-analytics" class="m7adm-body hidden" hidden><div class="m7adm-analytics"><div id="m7adm-online-total" class="m7adm-big">0</div><div class="m7adm-sub">visitors browsing ShoufHon right now</div></div></div>
   <div id="m7adm-users" class="m7adm-body hidden" hidden><div class="m7adm-tools"><input id="m7adm-user-search" class="m7adm-search" type="search" placeholder="Search name, full email or status…" autocomplete="off"></div><div id="m7adm-user-list"><div class="m7adm-empty">Loading users...</div></div></div>
   <div id="m7adm-owner" class="m7adm-body hidden" hidden><div class="m7adm-ownerbox"><select id="m7adm-owner-shop" class="m7adm-select"><option value="">Select shop…</option></select><input id="m7adm-owner-email" class="m7adm-input" type="email" placeholder="Google account email"><button id="m7adm-owner-assign" class="m7adm-btn view" type="button">Assign Owner</button><div id="m7adm-owner-state" class="m7adm-ownerstate bad">❌ Select a shop to check its owner.</div><div class="m7adm-danger"><strong>Owner access</strong><div style="color:#bbb;font-size:12px;margin-bottom:10px">Removing owner access keeps the normal Google viewer account and the shop itself.</div><button id="m7adm-owner-delete" class="m7adm-btn del" type="button">Remove Owner Access</button></div></div></div>
   <div id="m7adm-reports" class="m7adm-body hidden" hidden><div class="m7adm-empty">Loading reports...</div></div>
   <div id="m7adm-history" class="m7adm-body hidden" hidden><div data-m7adm-history-host><div class="m7adm-empty">Activity history is loading…</div></div></div>
 </div>`;host.appendChild(x);x.dataset.m7GlobalFooter="1";x.querySelectorAll(".m7adm-tab").forEach(b=>b.onclick=()=>selectAdminTool(b.dataset.target));document.getElementById("m7adm-user-search").oninput=renderUsers;document.getElementById("m7adm-owner-shop").onchange=loadOwnerState;document.getElementById("m7adm-owner-assign").onclick=assignOwner;document.getElementById("m7adm-owner-delete").onclick=removeOwner;installCollapsers();let legacy=document.getElementById("ma-admin-owner-card");if(legacy)legacy.remove();let post=document.getElementById("ma-admin-post-add-owner");if(post)post.remove();return true}
 async function loadPresence(){let r=await sb.rpc("ma7alak_admin_user_presence");presenceMap.clear();if(!r.error)(r.data||[]).forEach(p=>presenceMap.set(String(p.user_id),p));}
-function renderUsers(){let box=document.getElementById("m7adm-user-list");if(!box)return;let q=(document.getElementById("m7adm-user-search")?.value||"").trim().toLowerCase();let rows=userRows.filter(u=>!q||[u.display_name,u.username,u.email,u.account_status].some(v=>String(v||"").toLowerCase().includes(q)));box.innerHTML=rows.length?rows.map(u=>{let p=presenceMap.get(String(u.user_id)),on=!!p?.is_online;return `<div class="m7adm-user ${u.account_status!=="active"?"m7adm-banned":""}" data-user-row="${esc(u.user_id)}">${u.avatar_url?`<img class="m7adm-avatar" src="${esc(u.avatar_url)}">`:'<div class="m7adm-avatar"></div>'}<div class="m7adm-copy"><strong>${esc(u.display_name||u.username||"Google User")}</strong><small class="m7adm-email">${esc(u.email||"Email unavailable")}</small><small><span class="m7adm-presence"><i class="m7adm-dot ${on?"on":"off"}"></i>${on?"Browsing now":"Offline"}</span> · Account: ${esc(u.account_status||"active")}</small><small>Created: ${esc(u.created_at?new Date(u.created_at).toLocaleString():"")}</small>${u.banned_reason?`<small>Reason: ${esc(u.banned_reason)}</small>`:""}</div><div class="m7adm-actions">${u.account_status==="banned"?`<button class="m7adm-btn ok" data-act="active" data-id="${esc(u.user_id)}">Unban</button>`:`<button class="m7adm-btn ban" data-act="banned" data-id="${esc(u.user_id)}">Ban</button>`}<button class="m7adm-btn del" data-act="deleted" data-id="${esc(u.user_id)}">Delete permanently</button></div></div>`}).join(""):'<div class="m7adm-empty">No matching viewer users.</div>';box.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const action=b.dataset.act,id=b.dataset.id;if(action==="deleted"){if(!confirm("Permanently delete this Google user and all linked Ma7alak account data? This cannot be undone."))return;b.disabled=true;b.textContent="Deleting…";const r=await sb.functions.invoke("delete-ma7alak-user",{body:{user_id:id}});if(r.error||r.data?.success===false){b.disabled=false;b.textContent="Delete permanently";alert(r.data?.error||r.error?.message||"Could not delete user.");return}userRows=userRows.filter(u=>String(u.user_id)!==String(id));document.querySelector(`[data-user-row="${CSS.escape(id)}"]`)?.remove();await Promise.all([loadUsers(),loadOwnerState()]);return}let reason=action==="banned"?prompt("Ban reason:","Chat abuse"):null;let r=await sb.rpc("ma7alak_admin_set_user_status",{p_user_id:id,p_status:action,p_reason:reason});if(r.error)alert(r.error.message);else loadUsers()})}
+function renderUsers(){let box=document.getElementById("m7adm-user-list");if(!box)return;let q=(document.getElementById("m7adm-user-search")?.value||"").trim().toLowerCase();let rows=userRows.filter(u=>!q||[u.display_name,u.username,u.email,u.account_status].some(v=>String(v||"").toLowerCase().includes(q)));box.innerHTML=rows.length?rows.map(u=>{let p=presenceMap.get(String(u.user_id)),on=!!p?.is_online;return `<div class="m7adm-user ${u.account_status!=="active"?"m7adm-banned":""}" data-user-row="${esc(u.user_id)}">${u.avatar_url?`<img class="m7adm-avatar" src="${esc(u.avatar_url)}">`:'<div class="m7adm-avatar"></div>'}<div class="m7adm-copy"><strong>${esc(u.display_name||u.username||"Google User")}</strong><small class="m7adm-email">${esc(u.email||"Email unavailable")}</small><small><span class="m7adm-presence"><i class="m7adm-dot ${on?"on":"off"}"></i>${on?"Browsing now":"Offline"}</span> · Account: ${esc(u.account_status||"active")}</small><small>Created: ${esc(u.created_at?new Date(u.created_at).toLocaleString():"")}</small>${u.banned_reason?`<small>Reason: ${esc(u.banned_reason)}</small>`:""}</div><div class="m7adm-actions">${u.account_status==="banned"?`<button class="m7adm-btn ok" data-act="active" data-id="${esc(u.user_id)}">Unban</button>`:`<button class="m7adm-btn ban" data-act="banned" data-id="${esc(u.user_id)}">Ban</button>`}<button class="m7adm-btn del" data-act="deleted" data-id="${esc(u.user_id)}">Delete permanently</button></div></div>`}).join(""):'<div class="m7adm-empty">No matching viewer users.</div>';box.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const action=b.dataset.act,id=b.dataset.id;if(action==="deleted"){if(!confirm("Permanently delete this Google user and all linked ShoufHon account data? This cannot be undone."))return;b.disabled=true;b.textContent="Deleting…";const r=await sb.functions.invoke("delete-ma7alak-user",{body:{user_id:id}});if(r.error||r.data?.success===false){b.disabled=false;b.textContent="Delete permanently";alert(r.data?.error||r.error?.message||"Could not delete user.");return}userRows=userRows.filter(u=>String(u.user_id)!==String(id));document.querySelector(`[data-user-row="${CSS.escape(id)}"]`)?.remove();await Promise.all([loadUsers(),loadOwnerState()]);return}let reason=action==="banned"?prompt("Ban reason:","Chat abuse"):null;let r=await sb.rpc("ma7alak_admin_set_user_status",{p_user_id:id,p_status:action,p_reason:reason});if(r.error)alert(r.error.message);else loadUsers()})}
 async function loadUsers(){try{let [u]=await Promise.all([sb.rpc("ma7alak_admin_list_users"),loadPresence()]);if(u.error)throw u.error;userRows=u.data||[];renderUsers()}catch(e){let b=document.getElementById("m7adm-user-list");if(b)b.innerHTML=`<div class="m7adm-empty">${esc(e.message||"Could not load users.")}</div>`}}
 async function loadAnalytics(){let out=document.getElementById("m7adm-online-total");if(!out)return;try{let r=await sb.rpc("get_website_stats");if(r.error)throw r.error;let d=Array.isArray(r.data)?r.data[0]||{}:r.data||{};out.textContent=Number(d.online??d.online_count??d.visitors_online??0)||0}catch(e){out.textContent="—"}}
 async function loadReports(){let box=document.getElementById("m7adm-reports");if(!box)return;try{let r=await sb.rpc("ma7alak_admin_reports");if(r.error)throw r.error;box.innerHTML=(r.data||[]).length?(r.data||[]).map(x=>`<div class="m7adm-report"><div class="m7adm-copy"><strong>🚩 ${esc(x.reason)}</strong><small>Shop: ${esc(x.shop_slug)} · ${esc(x.created_at?new Date(x.created_at).toLocaleString():"")}</small><small>${esc(x.details||"")}</small><div id="hist-${esc(x.report_id)}"></div></div><button class="m7adm-btn view" data-conv="${esc(x.conversation_id)}" data-out="hist-${esc(x.report_id)}">View chat</button></div>`).join(""):'<div class="m7adm-empty">No reports.</div>';box.querySelectorAll("[data-conv]").forEach(b=>b.onclick=async()=>{let o=document.getElementById(b.dataset.out);o.innerHTML='<div class="m7adm-chat">Loading...</div>';let r2=await sb.rpc("ma7alak_admin_report_history",{p_conversation_id:b.dataset.conv});if(r2.error){o.innerHTML=`<div class="m7adm-chat">${esc(r2.error.message)}</div>`;return}o.innerHTML=`<div class="m7adm-chat">${(r2.data||[]).map(m=>`<div class="m7adm-msg"><b>${esc(m.sender_id||"Unknown")}</b><br>${esc(m.body||"")}<br><small>${esc(m.created_at?new Date(m.created_at).toLocaleString():"")}${m.deleted_at?" · deleted by user":""}</small></div>`).join("")||"No messages saved."}</div>`})}catch(e){box.innerHTML=`<div class="m7adm-empty">${esc(e.message||"Could not load reports.")}</div>`}}
 async function loadOwnerShops(){let sel=document.getElementById("m7adm-owner-shop");if(!sel)return;let r=await sb.from("shop_profiles").select("shop_slug,shop_name").order("shop_name");if(r.error){document.getElementById("m7adm-owner-state").textContent=r.error.message;return}sel.innerHTML='<option value="">Select shop…</option>'+(r.data||[]).map(x=>`<option value="${esc(x.shop_slug)}">${esc(x.shop_name||x.shop_slug)} — /${esc(x.shop_slug)}</option>`).join("")}
 async function loadOwnerState(){let slug=document.getElementById("m7adm-owner-shop")?.value,state=document.getElementById("m7adm-owner-state"),email=document.getElementById("m7adm-owner-email");currentOwnerUserId=null;if(!slug){state.className="m7adm-ownerstate bad";state.textContent="❌ Select a shop to check its owner.";email.value="";return}state.className="m7adm-ownerstate";state.textContent="Checking account…";let r=await sb.rpc("ma7alak_admin_owner_for_shop",{p_shop_slug:slug});if(r.error){state.className="m7adm-ownerstate bad";state.textContent="❌ "+r.error.message;return}let d=Array.isArray(r.data)?r.data[0]:r.data;if(d&&(d.email||d.user_email||d.user_id)){currentOwnerUserId=d.user_id||null;let e=d.email||d.user_email||"Assigned Google account";email.value=e.includes("@")?e:"";state.className="m7adm-ownerstate good";state.textContent="✅ Account found and assigned: "+e}else{email.value="";state.className="m7adm-ownerstate bad";state.textContent="❌ No email assigned to this shop yet."}}
-async function assignOwner(){let slug=document.getElementById("m7adm-owner-shop")?.value,email=document.getElementById("m7adm-owner-email")?.value.trim(),state=document.getElementById("m7adm-owner-state");if(!slug||!email){state.className="m7adm-ownerstate bad";state.textContent="❌ Select a shop and enter the existing Google account email.";return}state.className="m7adm-ownerstate";state.textContent="Finding existing account…";if(!userRows.length)await loadUsers();let user=userRows.find(row=>String(row.email||"").trim().toLowerCase()===email.toLowerCase());if(!user?.user_id){state.className="m7adm-ownerstate bad";state.textContent="❌ No existing Ma7alak account uses that exact email. Ask the owner to sign in once first.";return}state.textContent="Assigning…";let r=await sb.rpc("ma7alak_admin_assign_shop_owner",{p_shop_slug:slug,p_user_id:user.user_id});if(r.error){state.className="m7adm-ownerstate bad";state.textContent="❌ "+r.error.message;return}await loadOwnerState()}
+async function assignOwner(){let slug=document.getElementById("m7adm-owner-shop")?.value,email=document.getElementById("m7adm-owner-email")?.value.trim(),state=document.getElementById("m7adm-owner-state");if(!slug||!email){state.className="m7adm-ownerstate bad";state.textContent="❌ Select a shop and enter the existing Google account email.";return}state.className="m7adm-ownerstate";state.textContent="Finding existing account…";if(!userRows.length)await loadUsers();let user=userRows.find(row=>String(row.email||"").trim().toLowerCase()===email.toLowerCase());if(!user?.user_id){state.className="m7adm-ownerstate bad";state.textContent="❌ No existing ShoufHon account uses that exact email. Ask the owner to sign in once first.";return}state.textContent="Assigning…";let r=await sb.rpc("ma7alak_admin_assign_shop_owner",{p_shop_slug:slug,p_user_id:user.user_id});if(r.error){state.className="m7adm-ownerstate bad";state.textContent="❌ "+r.error.message;return}await loadOwnerState()}
 async function removeOwner(){let slug=document.getElementById("m7adm-owner-shop")?.value;if(!slug)return alert("Select a shop first.");if(!currentOwnerUserId){await loadOwnerState();if(!currentOwnerUserId)return alert("This shop has no assigned owner account.")}if(!confirm("Remove this owner's access from the selected shop? The normal Google account and shop will remain."))return;let r=await sb.rpc("ma7alak_admin_remove_shop_owner",{p_user_id:currentOwnerUserId});if(r.error)alert(r.error.message);else loadOwnerState()}
 async function loadAll(){sb=window.Ma7alakAdminClient;if(!sb||!mount())return;await Promise.all([loadUsers(),loadReports(),loadAnalytics(),loadOwnerShops()]);stopAdminToolPolling();if(adminRealtime)try{await sb.removeChannel(adminRealtime)}catch(_){}adminRealtime=sb.channel("ma7alak-admin-users-owners-live").on("postgres_changes",{event:"*",schema:"public",table:"viewer_profiles"},()=>loadUsers()).on("postgres_changes",{event:"*",schema:"public",table:"shop_owners"},()=>{loadOwnerState();loadOwnerShops();window.dispatchEvent(new CustomEvent("ma7alak:owner-assignment-changed"))}).subscribe()}
-async function ready(){for(let i=0;i<150&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));sb=window.Ma7alakAdminClient;if(!sb)return console.error("MA7ALAK ADMIN V3: shared admin client unavailable");for(let i=0;i<150&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,100));window.addEventListener("ma7alak:admin-tool-visibility",e=>{const target=String(e.detail?.target||""),open=e.detail?.open===true;setActiveAdminTool(target,open);if(!open)return;if(target==="m7adm-users")loadUsers().catch(()=>{});else if(target==="m7adm-reports")loadReports().catch(()=>{});else if(target==="m7adm-owner")Promise.all([loadUsers(),loadOwnerShops(),loadOwnerState()]).catch(()=>{});else if(target==="m7adm-analytics")loadAnalytics().catch(()=>{})});window.addEventListener("ma7alak:admin-ready",()=>loadAll().catch(console.error));let d=document.getElementById("ma-admin-dashboard");if(d&&!d.hidden)await loadAll()}
+async function ready(){for(let i=0;i<150&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));sb=window.Ma7alakAdminClient;if(!sb)return console.error("SHOUFHON ADMIN V3: shared admin client unavailable");for(let i=0;i<150&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,100));window.addEventListener("ma7alak:admin-tool-visibility",e=>{const target=String(e.detail?.target||""),open=e.detail?.open===true;setActiveAdminTool(target,open);if(!open)return;if(target==="m7adm-users")loadUsers().catch(()=>{});else if(target==="m7adm-reports")loadReports().catch(()=>{});else if(target==="m7adm-owner")Promise.all([loadUsers(),loadOwnerShops(),loadOwnerState()]).catch(()=>{});else if(target==="m7adm-analytics")loadAnalytics().catch(()=>{})});window.addEventListener("ma7alak:admin-ready",()=>loadAll().catch(console.error));let d=document.getElementById("ma-admin-dashboard");if(d&&!d.hidden)await loadAll()}
 ready().catch(console.error);
 })();
 
@@ -4950,7 +4950,7 @@ start().catch(()=>{});
 })();
 
 /* =========================================================
-   MA7ALAK ADMIN — LIVE & OFFERS ACCESS
+   SHOUFHON ADMIN — LIVE & OFFERS ACCESS
    Adds per-shop On/Off and active-slot limits inside Manage Shops.
    Uses the existing admin-only Supabase entitlement RPCs.
 ========================================================= */
@@ -5146,7 +5146,7 @@ function decorate(){
 async function ready(){
   for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));
   sb=window.Ma7alakAdminClient;
-  if(!sb)return console.error("MA7ALAK Live/Offers admin: shared admin client unavailable");
+  if(!sb)return console.error("SHOUFHON Live/Offers admin: shared admin client unavailable");
   inject();
   window.Ma7alakDisableLegacyLiveDecorator?.();
 }
@@ -5198,13 +5198,13 @@ function target(id){if(id==='m7-admin-add-shop'){const section=$('ma-admin-shop-
 function mergeAddIntoManage(){const add=target('m7-admin-add-shop'),manage=$('ma-manage-shops-card');if(!add||!manage||add.closest('.m7sc-add-drawer'))return;const drawer=document.createElement('details');drawer.className='m7sc-add-drawer';drawer.innerHTML='<summary>Add a new shop</summary>';const list=manage.querySelector('#ma-admin-shop-list');manage.insertBefore(drawer,list?.parentNode===manage?list:null);drawer.append(add)}
 function openSection(id){const section=target(id);if(!section)return;const drawer=section.closest('.m7sc-add-drawer');if(drawer)drawer.open=true;const manage=section.closest('#ma-manage-shops-card');if(manage){manage.hidden=false;manage.classList.remove('m7-admin-collapsed')}section.hidden=false;section.classList.remove('m7-admin-collapsed');section.querySelectorAll('.m7-collapsed-body,.hidden').forEach(el=>{if(el.classList.contains('m7adm-body')||el.classList.contains('m7-collapsed-body'))el.classList.remove('hidden','m7-collapsed-body')});section.querySelectorAll('.m7-collapse-btn,.m7-panel-toggle').forEach(b=>b.textContent='Hide');section.classList.remove('m7sc-flash');void section.offsetWidth;section.classList.add('m7sc-flash');section.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>section.classList.remove('m7sc-flash'),1000)}
 async function loadStats(){if(!client)return;const queries=[client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}),client.from('shop_profiles').select('shop_slug',{count:'exact',head:true}).eq('is_active',true),client.from('shop_categories').select('category_key',{count:'exact',head:true}).eq('is_active',true),client.from('shop_areas').select('area_key',{count:'exact',head:true}).eq('is_active',true)];const rows=await Promise.all(queries);['all','active','categories','areas'].forEach((key,i)=>{const el=$('m7sc-'+key);if(el)el.textContent=rows[i].error?'—':String(rows[i].count||0)})}
-function mount(){const dash=$('ma-admin-dashboard');if(!dash||$('m7-shop-control'))return false;css();target('m7-admin-add-shop');mergeAddIntoManage();const center=document.createElement('section');center.id='m7-shop-control';center.innerHTML=`<div class="m7sc-eyebrow">MA7ALAK DIRECTORY CONTROL</div><div class="m7sc-title-row"><div><h2>Shop Control Center</h2><p>Every shop, owner, badge, category, area and media tool in one flow.</p></div><span class="m7sc-live"><i></i> LIVE SYNC</span></div><div class="m7sc-stats"><div class="m7sc-stat"><b id="m7sc-all">—</b><span>ALL SHOPS</span></div><div class="m7sc-stat"><b id="m7sc-active">—</b><span>VISIBLE</span></div><div class="m7sc-stat"><b id="m7sc-categories">—</b><span>CATEGORIES</span></div><div class="m7sc-stat"><b id="m7sc-areas">—</b><span>AREAS</span></div></div><nav class="m7sc-nav" aria-label="Shop administration"><button data-target="ma-manage-shops-card">🏪 Manage shops</button><button data-target="m7-admin-add-shop">＋ Add shop</button><button data-target="ma-admin-v2-hub">🗂 Categories & areas</button><button data-target="m7da-settings">🎨 Directory design</button><button data-target="m7adm-v3">👥 Accounts & reports</button></nav>`;dash.prepend(center);center.onclick=e=>{const b=e.target.closest('[data-target]');if(b)openSection(b.dataset.target)};return true}
+function mount(){const dash=$('ma-admin-dashboard');if(!dash||$('m7-shop-control'))return false;css();target('m7-admin-add-shop');mergeAddIntoManage();const center=document.createElement('section');center.id='m7-shop-control';center.innerHTML=`<div class="m7sc-eyebrow">SHOUFHON DIRECTORY CONTROL</div><div class="m7sc-title-row"><div><h2>Shop Control Center</h2><p>Every shop, owner, badge, category, area and media tool in one flow.</p></div><span class="m7sc-live"><i></i> LIVE SYNC</span></div><div class="m7sc-stats"><div class="m7sc-stat"><b id="m7sc-all">—</b><span>ALL SHOPS</span></div><div class="m7sc-stat"><b id="m7sc-active">—</b><span>VISIBLE</span></div><div class="m7sc-stat"><b id="m7sc-categories">—</b><span>CATEGORIES</span></div><div class="m7sc-stat"><b id="m7sc-areas">—</b><span>AREAS</span></div></div><nav class="m7sc-nav" aria-label="Shop administration"><button data-target="ma-manage-shops-card">🏪 Manage shops</button><button data-target="m7-admin-add-shop">＋ Add shop</button><button data-target="ma-admin-v2-hub">🗂 Categories & areas</button><button data-target="m7da-settings">🎨 Directory design</button><button data-target="m7adm-v3">👥 Accounts & reports</button></nav>`;dash.prepend(center);center.onclick=e=>{const b=e.target.closest('[data-target]');if(b)openSection(b.dataset.target)};return true}
 async function ready(){await Promise.resolve();if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));client=window.Ma7alakAdminClient;if(!client)return;if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;for(let i=0;i<180&&!mount();i++)await new Promise(r=>setTimeout(r,100));await loadStats();if(window.__MA7ALAK_ADMIN_WORKSPACE_V4__)return;statsChannel=client.channel('ma7alak-admin-control-center').on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_categories'},loadStats).on('postgres_changes',{event:'*',schema:'public',table:'shop_areas'},loadStats).subscribe();window.addEventListener('ma7alak:admin-ready',loadStats)}
 ready().catch(console.error);
 })();
 
 
-/* MA7ALAK ABOUT SERVICES ADMIN — SLUG DRIVEN */
+/* SHOUFHON ABOUT SERVICES ADMIN — SLUG DRIVEN */
 (function(){
 "use strict";
 
@@ -5477,7 +5477,7 @@ install().catch(console.error);
 
 
 /* =========================================================
-   MA7ALAK ADMIN CONTROL DECK V2
+   SHOUFHON ADMIN CONTROL DECK V2
    Safe UX layer. Existing Admin IDs, handlers, forms and logic stay intact.
 ========================================================= */
 (function(){
@@ -5614,7 +5614,7 @@ function toolbar(){
   if(document.getElementById("m7deck"))return;
   const d=document.getElementById("ma-admin-dashboard");if(!d)return;
   const x=document.createElement("div");x.id="m7deck";
-  x.innerHTML='<div class="m7dt"><div class="m7brand"><b>Ma7alak Control Deck</b><small>Open only what you need</small></div><button class="m7db main" data-panels>Panels</button><button class="m7db" data-manage>Manage Shops</button><button class="m7db danger" data-hideall>Hide all</button></div><div class="m7quick"></div>';
+  x.innerHTML='<div class="m7dt"><div class="m7brand"><b>ShoufHon Control Deck</b><small>Open only what you need</small></div><button class="m7db main" data-panels>Panels</button><button class="m7db" data-manage>Manage Shops</button><button class="m7db danger" data-hideall>Hide all</button></div><div class="m7quick"></div>';
   d.insertBefore(x,d.firstChild);
   x.querySelector("[data-panels]").onclick=openDrawer;
   x.querySelector("[data-manage]").onclick=()=>focus("manage");
@@ -5792,13 +5792,13 @@ function decorateAll(){
   for(let i=0;i<200&&!document.getElementById("ma-admin-dashboard");i++)await new Promise(r=>setTimeout(r,50));
   decorateAll();
   window.addEventListener("ma7alak:admin-ready",decorateAll);
-})().catch(e=>console.error("MA7ALAK Admin Control Deck:",e));
+})().catch(e=>console.error("SHOUFHON Admin Control Deck:",e));
 })();
 
 
 
 /* =========================================================
-   MA7ALAK ADMIN — PAGE DESIGN STUDIO
+   SHOUFHON ADMIN — PAGE DESIGN STUDIO
    Full visual control stored in directory_options.
 
    Safe additive layer:
@@ -8696,7 +8696,7 @@ function decorateAll(){
 
 
 /* =========================================================
-   MA7ALAK PAGE DESIGN STUDIO V2 — ADDON LOADER
+   SHOUFHON PAGE DESIGN STUDIO V2 — ADDON LOADER
 ========================================================= */
 (function(){
   "use strict";
@@ -8737,7 +8737,7 @@ function decorateAll(){
 
 
 /* =========================================================
-   MA7ALAK — SHOP OPENING SCHEDULE ADMIN V1
+   SHOUFHON — SHOP OPENING SCHEDULE ADMIN V1
    ---------------------------------------------------------
    Stores per-shop opening hours inside:
    shop_profiles.directory_options.hours_schedule
@@ -9230,7 +9230,7 @@ install().catch(console.error);
 
 
 /* =========================================================
-   MA7ALAK — MULTI AVAILABILITY ROWS ADMIN V1
+   SHOUFHON — MULTI AVAILABILITY ROWS ADMIN V1
    ---------------------------------------------------------
    Keeps the existing primary:
      availability_days + availability_time
@@ -9624,7 +9624,7 @@ install().catch(console.error);
 
 
 /* =========================================================
-   MA7ALAK ADMIN — DIRECTORY CARD DESIGNER V1
+   SHOUFHON ADMIN — DIRECTORY CARD DESIGNER V1
    ---------------------------------------------------------
    Per-shop card shape / edge / color / shadow / motion.
    Stored in shop_profiles.directory_options.
@@ -10212,12 +10212,12 @@ async function install(){
   */
 }
 
-install().catch(error=>console.error("MA7ALAK Card Designer:",error));
+install().catch(error=>console.error("SHOUFHON Card Designer:",error));
 })();
 
 
 /* =========================================================
-   MA7ALAK ADMIN — ABOUT INDIVIDUAL TEXT STYLES V1
+   SHOUFHON ADMIN — ABOUT INDIVIDUAL TEXT STYLES V1
    ---------------------------------------------------------
    Each About text can have its own color, font and size.
 ========================================================= */
@@ -10518,12 +10518,12 @@ async function install(){
   */
 }
 
-install().catch(error=>console.error("MA7ALAK About individual text:",error));
+install().catch(error=>console.error("SHOUFHON About individual text:",error));
 })();
 
 
 /* =========================================================
-   MA7ALAK ADMIN WORKSPACE V4
+   SHOUFHON ADMIN WORKSPACE V4
    ---------------------------------------------------------
    Shop-first admin UX.
    The old functional forms/managers remain underneath and are reused.
@@ -12401,7 +12401,7 @@ function ensureEditContext(form){
   box.className="m7v4-edit-context";
   box.innerHTML=
     '<div class="m7v4-edit-context-copy">'+
-      '<small>MA7ALAK EDITOR</small>'+
+      '<small>SHOUFHON EDITOR</small>'+
       '<b data-m7v4-context-title>Editing</b>'+
       '<span data-m7v4-context-help></span>'+
     '</div>';
@@ -14062,7 +14062,7 @@ function mountEditPreview(panel,mode,shop){
                 current.shop_url||
                 (
                   current.shop_slug
-                    ? "https://ma7alak.com/"+encodeURIComponent(current.shop_slug)
+                    ? "https://shoufhon.com/"+encodeURIComponent(current.shop_slug)
                     : ""
                 )
               )||
@@ -14390,7 +14390,7 @@ async function handleAction(key){
   if(!shop)return;
 
   if(key==="view"){
-    const target=String(shop.shop_url||"").trim()||("https://ma7alak.com/"+encodeURIComponent(shop.shop_slug));
+    const target=String(shop.shop_url||"").trim()||("https://shoufhon.com/"+encodeURIComponent(shop.shop_slug));
     window.open(target,"_blank","noopener");
     return;
   }
@@ -14657,7 +14657,7 @@ function mount(){
       <header class="m7v4-top">
         <div class="m7v4-logo">M7</div>
         <div class="m7v4-top-copy">
-          <b>Ma7alak Admin</b>
+          <b>ShoufHon Admin</b>
           <small>Choose a shop first. Every function for that shop is inside one workspace.</small>
         </div>
         <span class="m7v4-live">LIVE SYNC</span>
@@ -14735,7 +14735,7 @@ function mount(){
       try{
         await handleAction(actionButton.dataset.m7v4Action);
       }catch(error){
-        console.error("MA7ALAK Admin V4 action:",error);
+        console.error("SHOUFHON Admin V4 action:",error);
         window.alert(error?.message||"This admin tool could not open.");
       }finally{
         actionButton.disabled=false;
@@ -14766,7 +14766,7 @@ function mount(){
           );
         }catch(error){
           console.error(
-            "MA7ALAK Admin Tools:",
+            "SHOUFHON Admin Tools:",
             error
           );
           window.alert(
@@ -14841,19 +14841,19 @@ async function ready(){
   }
 }
 
-ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
+ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
 })();
 
 
 
 
 /* =========================================================
-   MA7ALAK DESIGN STUDIO V2 — MERGED INTO MAIN ADMIN
+   SHOUFHON DESIGN STUDIO V2 — MERGED INTO MAIN ADMIN
    The standalone ma7alak-admin-design-studio-v2.js is no longer required
    when ma7alak-admin-panel.js is loaded.
 ========================================================= */
 /* =========================================================
-   MA7ALAK ADMIN — PAGE DESIGN STUDIO V2
+   SHOUFHON ADMIN — PAGE DESIGN STUDIO V2
 
    Single source of truth for Design Studio interaction:
    ✓ Identity/About colors stay independently editable
@@ -15883,7 +15883,7 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
   start().catch(
     error=>
       console.error(
-        "MA7ALAK Design Studio V2:",
+        "SHOUFHON Design Studio V2:",
         error
       )
   );
@@ -15892,7 +15892,7 @@ ready().catch(error=>console.error("MA7ALAK Admin Workspace V4:",error));
 
 
 /* =========================================================
-   MA7ALAK DESIGN LIVE BRIDGE V1
+   SHOUFHON DESIGN LIVE BRIDGE V1
    - Main-admin only; no extra Hostinger script required.
    - Broadcasts unsaved Design Studio changes to open shop pages.
    - Uses browser BroadcastChannel/localStorage/postMessage only:

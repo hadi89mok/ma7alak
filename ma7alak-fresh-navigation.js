@@ -1,9 +1,9 @@
 /* =========================================================
-   MA7ALAK FRESH NAVIGATION
+   SHOUFHON FRESH NAVIGATION
    ---------------------------------------------------------
    PURPOSE:
    - Prevent stale Hostinger/browser pages on internal navigation.
-   - Force fresh document navigation for ALL internal Ma7alak links.
+   - Force fresh document navigation for ALL internal ShoufHon links.
    - Remove the temporary ?fresh=... parameter after load.
    - Refresh pages restored from browser back/forward cache.
 
@@ -36,8 +36,8 @@
       const host = parsed.hostname.toLowerCase();
 
       return (
-        host === "ma7alak.com" ||
-        host === "www.ma7alak.com"
+        host === "shoufhon.com" ||
+        host === "www.shoufhon.com"
       );
     } catch (e) {
       return false;
@@ -151,7 +151,7 @@
       );
     } catch (e) {
       console.warn(
-        "MA7ALAK fresh-navigation: could not clean URL.",
+        "SHOUFHON fresh-navigation: could not clean URL.",
         e
       );
     }

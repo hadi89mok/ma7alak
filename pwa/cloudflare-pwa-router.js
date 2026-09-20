@@ -1,5 +1,5 @@
 /*
-  MA7ALAK PWA — CLOUDFLARE ROUTER
+  SHOUFHON PWA — CLOUDFLARE ROUTER
   Deploy this Worker only on the PWA asset routes.
 
   IMPORTANT:
@@ -7,7 +7,7 @@
     /manifest.webmanifest?icon=192
     /manifest.webmanifest?icon=512
 
-  This keeps the PWA icons SAME-ORIGIN with ma7alak.com and avoids
+  This keeps the PWA icons SAME-ORIGIN with shoufhon.com and avoids
   Hostinger/CSP/installability issues with separate icon routes.
 */
 
@@ -60,7 +60,7 @@ export default {
       SOURCE_BASE + file + "?v=" + Date.now(),
       {
         headers: {
-          "User-Agent": "Ma7alak-PWA-Worker/1.2"
+          "User-Agent": "ShoufHon-PWA-Worker/1.2"
         },
         cf: {
           cacheEverything: false,
@@ -70,7 +70,7 @@ export default {
     );
 
     if (!upstream.ok) {
-      return new Response("Ma7alak PWA asset unavailable", {
+      return new Response("ShoufHon PWA asset unavailable", {
         status: 502,
         headers: {
           "Content-Type": "text/plain; charset=utf-8",

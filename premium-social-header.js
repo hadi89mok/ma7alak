@@ -8,7 +8,7 @@
 ========================================================= */
 
 /* =========================================================
-   MA7ALAK PREMIUM SOCIAL HEADER — GITHUB READY
+   SHOUFHON PREMIUM SOCIAL HEADER — GITHUB READY
    Converted from the exact Hostinger Custom Code version.
    Load this file with a normal <script src="..."></script> tag.
    ========================================================= */
@@ -25,7 +25,7 @@
   }
 
   /* =========================================================
-     MA7ALAK PREMIUM SOCIAL HEADER
+     SHOUFHON PREMIUM SOCIAL HEADER
      HOSTINGER GLOBAL CUSTOM CODE SAFE VERSION
 
      This version uses JavaScript to inject the header into
@@ -1215,7 +1215,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   to{--m7-panel-glow-angle:360deg;}
 }
 
-/* PHONE-FIRST: enlarge the left Ma7alak/eye mark and move it closer to the left
+/* PHONE-FIRST: enlarge the left ShoufHon/eye mark and move it closer to the left
    edge while keeping a safe gap from the rounded panel corner. */
 @media(max-width:900px){
   .ma7alak-header-brand{
@@ -1231,7 +1231,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
     max-width:96px!important;
   }
 
-  /* Shop/owner circle stays clearly smaller than the left Ma7alak circle. */
+  /* Shop/owner circle stays clearly smaller than the left ShoufHon circle. */
   #ma7alak-header-owner.visible{
     width:51px!important;
     flex-basis:51px!important;
@@ -1483,11 +1483,11 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
     holder.innerHTML = `
 <header id="ma7alak-social-header">
-  <a class="ma7alak-header-brand" href="https://ma7alak.com/" aria-label="Ma7alak Home">
+  <a class="ma7alak-header-brand" href="https://shoufhon.com/" aria-label="ShoufHon Home">
     <img
       class="ma7alak-header-logo"
-      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/3d5e9803-9a46-49c5-bf62-c7bbf7b5bc84.png"
-      alt="Ma7alak"
+      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif"
+      alt="ShoufHon"
       width="264"
       height="88"
       decoding="async"
@@ -1500,7 +1500,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/>
       <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
     </svg>
-    <input id="ma7alak-header-search" type="search" autocomplete="off" placeholder="Search shops, categories, or locations..." aria-label="Search Ma7alak">
+    <input id="ma7alak-header-search" type="search" autocomplete="off" placeholder="Search shops, categories, or locations..." aria-label="Search ShoufHon">
     <div class="ma7alak-header-search-kbd">⌘ K</div>
   </div>
 
@@ -1591,7 +1591,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       <a
         class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/add-shop-"
+        href="https://shoufhon.com/add-shop-"
       >
         <span class="ma7alak-header-menu-icon">＋</span>
         <span class="ma7alak-header-menu-text">
@@ -1602,7 +1602,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       <a
         class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/shwf-almhlat-"
+        href="https://shoufhon.com/shwf-almhlat-"
       >
         <span class="ma7alak-header-menu-icon">⌕</span>
         <span class="ma7alak-header-menu-text">
@@ -1613,7 +1613,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       <a
         class="ma7alak-header-menu-link"
-        href="https://ma7alak.com/login"
+        href="https://shoufhon.com/login"
       >
         <span class="ma7alak-header-menu-icon">↪</span>
         <span class="ma7alak-header-menu-text">
@@ -1634,7 +1634,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
           <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/>
           <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
         </svg>
-        <input id="ma7alak-overlay-search-input" type="search" autocomplete="off" placeholder="Search Ma7alak shops..." aria-label="Search shops">
+        <input id="ma7alak-overlay-search-input" type="search" autocomplete="off" placeholder="Search ShoufHon shops..." aria-label="Search shops">
         <button id="ma7alak-search-clear" type="button" aria-label="Clear search">×</button>
       </div>
       <button id="ma7alak-search-close" type="button" aria-label="Close search">×</button>
@@ -1665,7 +1665,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
             <button id="ma7alak-following-close" type="button" aria-label="Close Following">×</button>
           </div>
           <div id="ma7alak-following-list"></div>
-          <div class="ma7alak-following-foot"><strong>Ma7alak</strong> · Stay connected with your favorite local shops</div>
+          <div class="ma7alak-following-foot"><strong>ShoufHon</strong> · Stay connected with your favorite local shops</div>
         </section>`;
       document.body.appendChild(followingOverlay);
     }
@@ -1682,7 +1682,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
     catch(error){
       console.error(
-        "MA7ALAK header Supabase loader:",
+        "SHOUFHON header Supabase loader:",
         error
       );
     }
@@ -1990,7 +1990,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       activeFollowingStorySlugs=next;
       if(changed||followingPanelOpen){renderFollowingPanel();}
     }catch(error){
-      console.warn("MA7ALAK Following story rings:",error);
+      console.warn("SHOUFHON Following story rings:",error);
     }
   }
 
@@ -2015,7 +2015,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       if(changed||followingPanelOpen){renderFollowingPanel();}
       await refreshFollowingStoryState();
     }catch(error){
-      console.error("MA7ALAK header Following:",error);
+      console.error("SHOUFHON header Following:",error);
     }finally{
       followingRefreshInFlight=false;
       if(followingRefreshQueued){
@@ -2150,7 +2150,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       renderOwnerProfile();
     }
     catch(error){
-      console.error("MA7ALAK header owner profile:",error);
+      console.error("SHOUFHON header owner profile:",error);
       hideOwnerProfile();
     }
   }
@@ -2211,7 +2211,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       return shopProfiles;
     }
     catch(error){
-      console.error("MA7ALAK header shop search:",error);
+      console.error("SHOUFHON header shop search:",error);
       shopProfiles=[];
       return [];
     }
@@ -2284,7 +2284,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
           ${mediaHTML}
           <div class="ma7alak-search-result-copy">
             <div class="ma7alak-search-result-name">${escapeHTML(name)}</div>
-            <div class="ma7alak-search-result-meta">View shop on Ma7alak</div>
+            <div class="ma7alak-search-result-meta">View shop on ShoufHon</div>
           </div>
           <div class="ma7alak-search-result-arrow">→</div>
         </a>`;
@@ -2358,11 +2358,11 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
      a notification automatically.
   */
   const REELS_BASELINE_V2 = [
-    "masaya-cafe-2::https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4::https://ma7alak.com/masaya-cafe",
-    "zee-tattoo-1::https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4::https://ma7alak.com/Zee-Tattoo&-Piercing",
-    "masaya-cafe-1::https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4::https://ma7alak.com/masaya-cafe",
-    "doze-3ale-1::https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4::https://ma7alak.com/doze-3ale",
-    "doze-3ale-2::https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4::https://ma7alak.com/doze-3ale"
+    "masaya-cafe-2::https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4::https://shoufhon.com/masaya-cafe",
+    "zee-tattoo-1::https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4::https://shoufhon.com/Zee-Tattoo&-Piercing",
+    "masaya-cafe-1::https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4::https://shoufhon.com/masaya-cafe",
+    "doze-3ale-1::https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4::https://shoufhon.com/doze-3ale",
+    "doze-3ale-2::https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4::https://shoufhon.com/doze-3ale"
   ];
 
   let currentReelIds = [];
@@ -3094,7 +3094,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
      catalog used by the working Reels V5 section.
   ========================================================= */
 
-  let MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://ma7alak.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://ma7alak.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://ma7alak.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
+  let MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://shoufhon.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://shoufhon.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://shoufhon.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://shoufhon.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://shoufhon.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
 
   let ma7alakGlobalReelIndex = 0;
   let ma7alakGlobalTouchStartY = 0;
@@ -3661,7 +3661,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     setupGlobalReelViewer();
     setupReelsButton();
 
-    /* Phone push deep link: https://ma7alak.com/?reel=REEL_ID
+    /* Phone push deep link: https://shoufhon.com/?reel=REEL_ID
        Store it until the live Supabase Reel catalog arrives. */
     try{
       const reelFromURL =
@@ -3746,12 +3746,12 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
      WHAT CHANGED — V24 PHONE HEADER POLISH
      =========================================================
      1. Based directly on confirmed-working V23. Reel opening/video logic was not changed.
-     2. Enlarged the left Ma7alak/eye mark slightly and moved it farther left while keeping safe space from the rounded panel corner.
-     3. Reduced the owner/shop profile circle so it is visibly smaller than the left Ma7alak circle.
+     2. Enlarged the left ShoufHon/eye mark slightly and moved it farther left while keeping safe space from the rounded panel corner.
+     3. Reduced the owner/shop profile circle so it is visibly smaller than the left ShoufHon circle.
      4. Story Likes/heart is now hidden by default and appears only after a real shop owner is confirmed from shop_owners.
      5. Made the Reels glyph slightly larger so it visually matches the other phone navigation icons.
      6. Swapped the Reels and Notifications positions in the header. Their existing functionality was not rewritten.
-     7. Added a very light gold/burgundy moving glow around the complete header panel border, matching the existing Ma7alak theme.
+     7. Added a very light gold/burgundy moving glow around the complete header panel border, matching the existing ShoufHon theme.
      8. Kept V23 owner-circle rotation, direct random Reels viewer, Reel badge, search, notifications, menu and Supabase logic intact.
 ========================================================= */
 
@@ -3778,7 +3778,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    WHAT CHANGED — V25 FOLLOWING SYSTEM
    1. Added a Following icon to the existing premium header.
    2. Badge shows the live number of shops followed by this visitor.
-   3. Clicking Following opens a premium dark/gold panel matching Ma7alak.
+   3. Clicking Following opens a premium dark/gold panel matching ShoufHon.
    4. Every followed shop shows its real shop icon/name and “You are following this shop ✓”.
    5. Clicking the shop row/circle opens that shop page.
    6. Uses the existing get_visitor_followed_shops RPC and ma7alak_visitor_id — no second follow system.
@@ -3788,7 +3788,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    10. Owner heart placeholder is now white outline so it matches the real owner-only heart instead of flashing filled red.
 ========================================================= */
 
-/* V27: fit only the far-left Ma7alak eye inside the phone header.
+/* V27: fit only the far-left ShoufHon eye inside the phone header.
    The right profile-circle is intentionally not selected here. */
 (function(){
   if(document.getElementById("ma7alak-left-eye-fit-v27"))return;

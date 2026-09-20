@@ -70,7 +70,7 @@ async function loadShopProfiles(){
     if(error){
 
       console.error(
-        "Ma7alak shop profiles:",
+        "ShoufHon shop profiles:",
         error
       );
 
@@ -126,7 +126,7 @@ async function loadShopProfiles(){
   catch(error){
 
     console.error(
-      "Ma7alak shop profile loading failed:",
+      "ShoufHon shop profile loading failed:",
       error
     );
 
@@ -2683,7 +2683,7 @@ async function getFollowedShopSlugSet(client){
     if(error){
 
       console.error(
-        "Ma7alak followed shops:",
+        "ShoufHon followed shops:",
         error
       );
 
@@ -2731,7 +2731,7 @@ async function getFollowedShopSlugSet(client){
   catch(error){
 
     console.error(
-      "Ma7alak followed shops failed:",
+      "ShoufHon followed shops failed:",
       error
     );
 
@@ -2816,7 +2816,7 @@ async function loadNotifications(){
     if(storiesError){
 
       console.error(
-        "Ma7alak notifications stories:",
+        "ShoufHon notifications stories:",
         storiesError
       );
 
@@ -2926,7 +2926,7 @@ async function loadNotifications(){
       if(seenError){
 
         console.error(
-          "Ma7alak notification views:",
+          "ShoufHon notification views:",
           seenError
         );
 
@@ -3028,7 +3028,7 @@ async function loadNotifications(){
               shopUrl:String(
                 row.shop_url ||
                 (row.shop_slug
-                  ? ("https://ma7alak.com/" + row.shop_slug)
+                  ? ("https://shoufhon.com/" + row.shop_slug)
                   : "")
               ).trim(),
               icon:String(row.shop_icon || "").trim(),
@@ -3069,7 +3069,7 @@ async function loadNotifications(){
     }
     else{
       console.error(
-        "Ma7alak notifications direct reels:",
+        "ShoufHon notifications direct reels:",
         directReelsError
       );
     }
@@ -3134,7 +3134,7 @@ async function loadNotifications(){
         };
       });
     }else{
-      console.error("Ma7alak notifications live:",directLivePostsError);
+      console.error("ShoufHon notifications live:",directLivePostsError);
     }
 
     /* -------------------------------------------------------
@@ -3237,7 +3237,7 @@ async function loadNotifications(){
   catch(error){
 
     console.error(
-      "Ma7alak notifications error:",
+      "ShoufHon notifications error:",
       error
     );
 
@@ -4042,7 +4042,7 @@ async function markSingleStoryAsSeen(
   catch(error){
 
     console.error(
-      "Ma7alak mark notification:",
+      "ShoufHon mark notification:",
       error
     );
 
@@ -4132,7 +4132,7 @@ async function markAllCurrentNotificationsAsSeen(){
       if(error){
 
         console.error(
-          "Ma7alak mark all story notifications:",
+          "ShoufHon mark all story notifications:",
           error
         );
 
@@ -4165,7 +4165,7 @@ async function markAllCurrentNotificationsAsSeen(){
   catch(error){
 
     console.error(
-      "Ma7alak mark all notifications:",
+      "ShoufHon mark all notifications:",
       error
     );
 
@@ -4288,7 +4288,7 @@ function registerRealtimeReelNotification(row){
   const liveReel = {
     id:reelId,
     shop:String(row.shop_name || row.shop_slug || "Shop").trim(),
-    shopUrl:String(row.shop_url || (row.shop_slug ? ("https://ma7alak.com/" + row.shop_slug) : "")).trim(),
+    shopUrl:String(row.shop_url || (row.shop_slug ? ("https://shoufhon.com/" + row.shop_slug) : "")).trim(),
     icon:String(row.shop_icon || "").trim(),
     video:String(row.video_url || "").trim()
   };
@@ -4479,7 +4479,7 @@ async function setupRealtime(){
   catch(error){
 
     console.error(
-      "Ma7alak realtime notification error:",
+      "ShoufHon realtime notification error:",
       error
     );
 
@@ -4696,7 +4696,7 @@ async function startMa7alakNotifications(){
   catch(error){
 
     console.error(
-      "Ma7alak notification startup:",
+      "ShoufHon notification startup:",
       error
     );
 

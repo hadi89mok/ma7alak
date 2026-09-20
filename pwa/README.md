@@ -1,28 +1,28 @@
-# Ma7alak PWA deployment
+# ShoufHon PWA deployment
 
-This folder contains the production PWA layer for ma7alak.com.
+This folder contains the production PWA layer for shoufhon.com.
 
 ## Live-data safety
 
-The service worker does not cache Supabase REST/Auth/Storage/Realtime traffic, videos/audio, or navigated HTML pages as stale copies. It only pre-caches the PWA shell and caches immutable commit-pinned Ma7alak JS/CSS from jsDelivr.
+The service worker does not cache Supabase REST/Auth/Storage/Realtime traffic, videos/audio, or navigated HTML pages as stale copies. It only pre-caches the PWA shell and caches immutable commit-pinned ShoufHon JS/CSS from jsDelivr.
 
 ## Cloudflare setup
 
 Hostinger Website Builder does not expose the normal root file system needed for a root-scoped service worker. Keep Hostinger as the origin and use a Cloudflare Worker only for the PWA root files.
 
-1. Add ma7alak.com to Cloudflare and keep the existing Hostinger DNS records.
+1. Add shoufhon.com to Cloudflare and keep the existing Hostinger DNS records.
 2. Proxy the web A/CNAME records through Cloudflare (orange cloud).
 3. Create a Cloudflare Worker and paste pwa/cloudflare-pwa-router.js.
 4. Add these Worker routes:
 
-    ma7alak.com/manifest.webmanifest*
-    ma7alak.com/sw.js*
-    ma7alak.com/pwa-icon-*
-    ma7alak.com/pwa-offline*
+    shoufhon.com/manifest.webmanifest*
+    shoufhon.com/sw.js*
+    shoufhon.com/pwa-icon-*
+    shoufhon.com/pwa-offline*
 
-If www.ma7alak.com directly serves the website, add the same four routes for www.
+If www.shoufhon.com directly serves the website, add the same four routes for www.
 
-Do not route ma7alak.com/* to this Worker. Normal pages should continue to Hostinger.
+Do not route shoufhon.com/* to this Worker. Normal pages should continue to Hostinger.
 
 ## Hostinger global Custom Code
 
@@ -34,9 +34,9 @@ The client injects the manifest/meta tags, registers /sw.js, shows the install c
 
 Open these URLs after the Cloudflare Worker routes are active:
 
-    https://ma7alak.com/manifest.webmanifest
-    https://ma7alak.com/sw.js
-    https://ma7alak.com/pwa-icon-192.svg
-    https://ma7alak.com/pwa-offline
+    https://shoufhon.com/manifest.webmanifest
+    https://shoufhon.com/sw.js
+    https://shoufhon.com/pwa-icon-192.svg
+    https://shoufhon.com/pwa-offline
 
-Then open ma7alak.com in Chrome on Android and test installation plus Stories, Reels, messages, Live Offers, Admin design updates, and owner uploads.
+Then open shoufhon.com in Chrome on Android and test installation plus Stories, Reels, messages, Live Offers, Admin design updates, and owner uploads.

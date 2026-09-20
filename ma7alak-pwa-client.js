@@ -40,7 +40,7 @@
     meta("mobile-web-app-capable","yes");
     meta("apple-mobile-web-app-capable","yes");
     meta("apple-mobile-web-app-status-bar-style","black-translucent");
-    meta("apple-mobile-web-app-title","Ma7alak");
+    meta("apple-mobile-web-app-title","ShoufHon");
 
     let icon=document.querySelector('link[rel="apple-touch-icon"]');
     if(!icon){
@@ -72,7 +72,7 @@
         detail:{registration,standalone:isStandalone(),version:VERSION}
       }));
     }catch(error){
-      console.warn("[Ma7alak PWA] Service worker registration failed:",error);
+      console.warn("[ShoufHon PWA] Service worker registration failed:",error);
     }
   }
 
@@ -125,10 +125,10 @@
       card=document.createElement("div");
       card.id="m7-pwa-install-card";
       card.setAttribute("role","dialog");
-      card.setAttribute("aria-label","Install Ma7alak");
+      card.setAttribute("aria-label","Install ShoufHon");
       card.innerHTML=`
         <span class="m7p-icon" aria-hidden="true"><img src="/manifest.webmanifest?icon=192&v=${VERSION}" alt=""></span>
-        <span class="m7p-copy"><b>Install Ma7alak</b><span>Faster access · opens like an app</span></span>
+        <span class="m7p-copy"><b>Install ShoufHon</b><span>Faster access · opens like an app</span></span>
         <span class="m7p-actions">
           <button class="m7p-install" type="button">Install</button>
           <button class="m7p-close" type="button" aria-label="Not now">×</button>
@@ -146,7 +146,7 @@
           const choice=await prompt.userChoice;
           window.dispatchEvent(new CustomEvent("ma7alak:pwa-install-choice",{detail:choice}));
         }catch(error){
-          console.warn("[Ma7alak PWA] Install prompt:",error);
+          console.warn("[ShoufHon PWA] Install prompt:",error);
         }
       });
 
