@@ -344,7 +344,6 @@ function broadcast(){
   const activeOwner=currentOwnerSlug();
   document.querySelectorAll("iframe").forEach(f=>{
     try{
-      f.contentWindow?.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:allItems},"*");
       send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");
       if(activeOwner)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",activeOwner);
     }catch(_){}
