@@ -446,6 +446,149 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
 
 
 /* =========================================================
+   LIVE ADMIN DRAFT PREVIEW BUS
+   The top-level Shop Context bridge relays one authoritative
+   MA7ALAK_DESIGN_PREVIEW message into this Hostinger iframe.
+========================================================= */
+const MA7ALAK_HUB_PREVIEWERS = [];
+let MA7ALAK_HUB_LAST_PREVIEW = null;
+let MA7ALAK_HUB_LAST_PREVIEW_STAMP = 0;
+
+window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ =
+  function(callback){
+    if(
+      typeof callback !== "function" ||
+      MA7ALAK_HUB_PREVIEWERS.includes(callback)
+    ){
+      return;
+    }
+
+    MA7ALAK_HUB_PREVIEWERS.push(callback);
+
+    if(MA7ALAK_HUB_LAST_PREVIEW){
+      try{
+        callback(MA7ALAK_HUB_LAST_PREVIEW);
+      }catch(_){}
+    }
+  };
+
+window.__MA7ALAK_PROFILE_HUB_PREVIEW__ =
+  function(message){
+    if(
+      !message ||
+      message.type !== "MA7ALAK_DESIGN_PREVIEW"
+    ){
+      return;
+    }
+
+    const slug =
+      String(
+        message.shop_slug ||
+        message.shopSlug ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const activeSlug =
+      String(
+        window.__MA7ALAK_EXACT_HUB_SLUG__ ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if(
+      !slug ||
+      !activeSlug ||
+      slug !== activeSlug
+    ){
+      return;
+    }
+
+    const stamp =
+      Number(message.sent_at) ||
+      Date.now();
+
+    if(stamp < MA7ALAK_HUB_LAST_PREVIEW_STAMP){
+      return;
+    }
+
+    MA7ALAK_HUB_LAST_PREVIEW_STAMP = stamp;
+    MA7ALAK_HUB_LAST_PREVIEW = message;
+
+    MA7ALAK_HUB_PREVIEWERS
+      .slice()
+      .forEach(function(callback){
+        try{
+          callback(message);
+        }catch(error){
+          console.warn(
+            "[ShoufHon Hub] preview:",
+            error
+          );
+        }
+      });
+  };
+
+window.addEventListener(
+  "message",
+  function(event){
+    window.__MA7ALAK_PROFILE_HUB_PREVIEW__(
+      event && event.data
+    );
+  }
+);
+
+try{
+  if("BroadcastChannel" in window){
+    const channel =
+      new BroadcastChannel(
+        "ma7alak-design-live-v1"
+      );
+
+    channel.onmessage =
+      function(event){
+        window.__MA7ALAK_PROFILE_HUB_PREVIEW__(
+          event && event.data
+        );
+      };
+
+    window.__MA7ALAK_PROFILE_HUB_PREVIEW_BC__ =
+      channel;
+  }
+}catch(_){}
+
+window.addEventListener(
+  "storage",
+  function(event){
+    const slug =
+      String(
+        window.__MA7ALAK_EXACT_HUB_SLUG__ ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if(
+      !slug ||
+      event.key !==
+        "ma7alak_design_live_v1:" + slug ||
+      !event.newValue
+    ){
+      return;
+    }
+
+    try{
+      window.__MA7ALAK_PROFILE_HUB_PREVIEW__(
+        JSON.parse(event.newValue)
+      );
+    }catch(_){}
+  }
+);
+
+
+/* =========================================================
    PAGE DESIGN STUDIO — HUB TYPOGRAPHY
    About keeps its own typography control.
    Social / Location / Stats / Map use the Hub typography control.
