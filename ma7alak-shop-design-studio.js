@@ -78,6 +78,7 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-stage,#ma-admin-edit-card.m7studio-fullscreen .m7pv-note{display:none!important}
       .m7studio-real-preview{padding:12px 12px 14px}.m7studio-phone{position:relative;width:min(100%,386px);height:min(720px,calc(100dvh - 235px));min-height:500px;margin:0 auto;overflow:hidden;border:2px solid #342716;border-radius:32px;background:#000;box-shadow:0 20px 55px rgba(0,0,0,.58),0 0 28px rgba(218,170,82,.09),inset 0 0 0 4px #080808}.m7studio-phone:before{content:"";position:absolute;z-index:3;top:8px;left:50%;width:94px;height:20px;transform:translateX(-50%);border-radius:999px;background:#030303;border:1px solid rgba(255,255,255,.055);pointer-events:none}.m7studio-phone iframe{width:100%;height:100%;display:block;border:0;background:#050505}.m7studio-preview-note{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;color:#82796d;font-size:8px;line-height:1.4;text-align:center}.m7studio-preview-note i{width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 9px rgba(70,220,136,.55)}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-section-banner{display:flex;align-items:flex-start;gap:10px;margin:0 0 12px;padding:13px 14px;border:1px solid rgba(218,170,82,.15);border-radius:14px;background:radial-gradient(circle at 0 0,rgba(218,170,82,.075),transparent 42%),rgba(255,255,255,.014)}.m7studio-section-banner i{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid rgba(218,170,82,.16);border-radius:10px;background:rgba(218,170,82,.06);color:#edc979;font-style:normal;font-size:14px}.m7studio-section-banner b{display:block;color:#efd49a;font-size:13px}.m7studio-section-banner small{display:block;margin-top:3px;color:#81776a;font-size:8px;line-height:1.45}
+      .m7studio-profile-image-card{display:grid!important;grid-template-columns:minmax(170px,1fr) 132px minmax(170px,.85fr);gap:18px;align-items:center;margin:0 0 12px!important;padding:16px!important;border:1px solid rgba(218,170,82,.14)!important;border-radius:16px!important;background:radial-gradient(circle at 14% 0%,rgba(218,170,82,.06),transparent 45%),rgba(17,19,20,.88)!important;box-sizing:border-box}.m7studio-profile-image-copy small{display:block;color:#907f64;font-size:7px;font-weight:950;letter-spacing:.9px}.m7studio-profile-image-copy b{display:block;margin-top:5px;color:#efd49a;font-size:15px}.m7studio-profile-image-copy span{display:block;margin-top:5px;color:#847a6d;font-size:8px;line-height:1.5}.m7studio-profile-image-preview{width:112px;height:112px;margin:auto;display:grid;place-items:center;overflow:hidden;border:3px solid #d9aa58;border-radius:50%;background:#0a0b0c;color:#e3bc6c;font-size:30px;font-weight:950;box-shadow:0 0 24px rgba(217,170,88,.18)}.m7studio-profile-image-preview img{width:100%;height:100%;display:block;object-fit:cover}.m7studio-profile-image-actions{display:grid;gap:8px}.m7studio-profile-image-actions button,.m7studio-image-upload{position:relative;min-height:38px;display:flex;align-items:center;justify-content:center;padding:0 11px;border:1px solid rgba(218,170,82,.20);border-radius:10px;background:rgba(218,170,82,.045);color:#e7c57d;font-size:9px;font-weight:900;cursor:pointer;box-sizing:border-box}.m7studio-profile-image-actions button{border-color:rgba(255,91,91,.22);background:rgba(255,91,91,.045);color:#ff9c94}.m7studio-image-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.m7studio-profile-image-actions small{min-height:15px;color:#78dca0;font-size:7px;line-height:1.4}.m7studio-profile-core{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
       .m7v4-actions-studio{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important}.m7v4-actions-studio [data-m7v4-action="design"]{border-color:rgba(217,170,88,.35)!important;background:radial-gradient(circle at 15% 0%,rgba(217,170,88,.11),transparent 50%),rgba(217,170,88,.035)!important}
       @media(max-width:1100px){#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:minmax(0,1fr) 350px!important;width:calc(100vw - 24px)!important;gap:12px!important}#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
       @media(max-width:820px){.m7studio-topbar{flex-wrap:wrap;min-height:auto;padding:9px 10px}.m7studio-title{flex:1 1 180px}.m7studio-sync{display:none}.m7studio-top-btn{min-height:37px;padding:0 10px}.m7studio-tabs{top:103px;padding:8px 10px}#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:1fr!important;width:calc(100vw - 18px)!important;margin:10px auto 22px!important}#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:relative!important;top:auto!important;order:-1!important;max-height:none!important}.m7studio-phone{height:590px}}
@@ -105,6 +106,7 @@
 
   function resetView(form){
     form.classList.remove("m7studio-colors-mode");
+    form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
     form.querySelectorAll(".m7studio-field-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden"));
     const design=form.querySelector(".m7-design-studio");
@@ -155,6 +157,181 @@
     scope.querySelectorAll(".m7ds-field,.m7da-field,.m7cd-field,.m7ats-row").forEach(wrap=>{
       if(!wrap.querySelector('input[type="color"]'))wrap.classList.add("m7studio-field-hidden");
     });
+  }
+
+  function profileImageUrl(){
+    return String(
+      document.getElementById("ma-edit-image")?.value||
+      ""
+    ).trim();
+  }
+
+  function profileImageSlug(){
+    return String(
+      document.getElementById("ma-edit-original-slug")?.value||
+      document.getElementById("ma-edit-slug")?.value||
+      ""
+    )
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9._&-]+/g,"-")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"");
+  }
+
+  async function uploadProfileImage(file,status){
+    if(!file)return;
+
+    if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type||"")){
+      throw new Error("Profile image must be JPG, PNG, WEBP or GIF.");
+    }
+
+    if(file.size>12*1024*1024){
+      throw new Error("Profile image must be smaller than 12 MB.");
+    }
+
+    const client=window.Ma7alakAdminClient;
+    const slug=profileImageSlug();
+
+    if(!client||!client.storage){
+      throw new Error("Admin storage is still loading. Try again.");
+    }
+
+    if(!slug){
+      throw new Error("Shop slug is missing.");
+    }
+
+    if(status)status.textContent="Uploading profile image…";
+
+    const check=await client.rpc("is_site_admin");
+    if(check.error||check.data!==true){
+      throw new Error("Admin session is no longer valid. Login again.");
+    }
+
+    const ext=(
+      String(file.name||"")
+        .split(".")
+        .pop()||
+      "jpg"
+    )
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g,"")||
+      "jpg";
+
+    const path=
+      "profiles/"+
+      slug+
+      "/"+
+      Date.now()+
+      "-"+
+      Math.random().toString(36).slice(2,8)+
+      "."+
+      ext;
+
+    const upload=await client
+      .storage
+      .from("shop-gallery")
+      .upload(
+        path,
+        file,
+        {
+          cacheControl:"31536000",
+          upsert:false,
+          contentType:file.type||undefined
+        }
+      );
+
+    if(upload.error)throw upload.error;
+
+    const data=client
+      .storage
+      .from("shop-gallery")
+      .getPublicUrl(path);
+
+    const url=
+      data&&data.data&&data.data.publicUrl
+        ?data.data.publicUrl
+        :"";
+
+    if(!url){
+      throw new Error("Could not create the public profile image URL.");
+    }
+
+    const target=document.getElementById("ma-edit-image");
+    if(target){
+      target.value=url;
+      target.dispatchEvent(new Event("input",{bubbles:true}));
+      target.dispatchEvent(new Event("change",{bubbles:true}));
+    }
+
+    if(status){
+      status.textContent="Uploaded — Save Changes to publish.";
+    }
+  }
+
+  function ensureProfileImageCard(form){
+    form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
+
+    const card=document.createElement("section");
+    card.className="m7studio-profile-image-card";
+
+    const current=profileImageUrl();
+    const name=String(
+      document.getElementById("ma-edit-name")?.value||
+      "Shop"
+    ).trim()||"Shop";
+
+    card.innerHTML=
+      '<div class="m7studio-profile-image-copy">'+
+        '<small>PROFILE IMAGE</small>'+
+        '<b>'+esc(name)+'</b>'+
+        '<span>A circular image works best. Uploading updates the live preview immediately; Save Changes publishes it.</span>'+
+      '</div>'+
+      '<div class="m7studio-profile-image-preview">'+
+        (
+          current
+            ?'<img src="'+esc(current)+'" alt="">'
+            :'<span>'+esc(name.charAt(0).toUpperCase())+'</span>'
+        )+
+      '</div>'+
+      '<div class="m7studio-profile-image-actions">'+
+        '<label class="m7studio-image-upload">▧ Change Image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-m7studio-profile-file></label>'+
+        '<button type="button" data-m7studio-profile-remove>⌫ Remove</button>'+
+        '<small data-m7studio-profile-status></small>'+
+      '</div>';
+
+    const banner=form.querySelector(":scope > .m7studio-section-banner");
+    banner?.after(card);
+
+    const file=card.querySelector("[data-m7studio-profile-file]");
+    const status=card.querySelector("[data-m7studio-profile-status]");
+
+    file?.addEventListener("change",async()=>{
+      const picked=file.files&&file.files[0];
+      if(!picked)return;
+      file.disabled=true;
+      try{
+        await uploadProfileImage(picked,status);
+        ensureProfileImageCard(form);
+      }catch(error){
+        if(status)status.textContent=error?.message||"Profile image upload failed.";
+      }finally{
+        file.disabled=false;
+        file.value="";
+      }
+    });
+
+    card.querySelector("[data-m7studio-profile-remove]")?.addEventListener("click",()=>{
+      const target=document.getElementById("ma-edit-image");
+      if(target){
+        target.value="";
+        target.dispatchEvent(new Event("input",{bubbles:true}));
+        target.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+      ensureProfileImageCard(form);
+    });
+
+    return card;
   }
 
   function studioUrl(){
@@ -235,13 +412,37 @@
     const markExtras=function(mode){if(!extras)return;["details","card","design","about","hours"].forEach(name=>extras.classList.remove("m7v4-extras-"+name));if(mode)extras.classList.add("m7v4-extras-"+mode)};
 
     if(key==="profile"){
-      const roots=showRoots(form,[".m7labelbox",".m7-design-studio"]);
+      const roots=showRoots(form,[
+        "#ma-edit-name",
+        "#ma-edit-arabic",
+        "#ma-edit-image",
+        ".m7labelbox",
+        ".m7-design-studio"
+      ]);
       showPanes(form,["identity","follow"]);
       markExtras("");
+
+      /*
+         Keep core identity fields real, not cloned. If the base Admin groups
+         them in one fieldset, hide unrelated fields inside that same root.
+      */
+      rootsFor(form,["#ma-edit-name","#ma-edit-arabic","#ma-edit-image"]).forEach(root=>{
+        root.classList.add("m7studio-profile-core");
+        filterFields(root,id=>
+          id==="ma-edit-name"||
+          id==="ma-edit-arabic"||
+          id==="ma-edit-image"
+        );
+      });
+
+      const imageField=document.getElementById("ma-edit-image");
+      fieldWrapper(imageField)?.classList.add("m7studio-field-hidden");
+
       filterFields(design?.querySelector('[data-m7ds-pane="identity"]'),id=>!id.includes("story_"));
       design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       hideFormRoots(form,roots);
+      ensureProfileImageCard(form);
     }else if(key==="story"){
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["identity"]);
@@ -318,6 +519,12 @@
     const form=document.getElementById("ma-admin-edit-form");
     if(!panel||!form||panel.hidden||!panel.classList.contains("m7v4-show")||!panel.classList.contains("m7v4-mode-design"))return false;
     css();
+
+    if(form.__m7v4SectionObserver){
+      try{form.__m7v4SectionObserver.disconnect()}catch(_){}
+      form.__m7studioDisconnectedObserver=true;
+    }
+
     panel.classList.add("m7studio-fullscreen");
     document.body.classList.add("m7studio-body-open");
     ensureChrome(panel);
@@ -330,6 +537,14 @@
   function closeStudio(){
     clearTimeout(openTimer);
     openingWanted=false;
+
+    const form=document.getElementById("ma-admin-edit-form");
+    if(form&&form.__m7studioDisconnectedObserver){
+      try{form.__m7v4SectionObserver?.disconnect?.()}catch(_){}
+      form.__m7v4SectionObserver=null;
+      form.__m7studioDisconnectedObserver=false;
+    }
+
     document.getElementById("ma-admin-edit-card")?.classList.remove("m7studio-fullscreen");
     document.body.classList.remove("m7studio-body-open");
   }
@@ -376,4 +591,17 @@
 
   window.Ma7alakShopDesignStudio={open:function(){openingWanted=true;waitAndOpen()},close:closeStudio,tab:activateTab};
   css();
+
+  setTimeout(()=>{
+    const panel=document.getElementById("ma-admin-edit-card");
+    if(
+      panel &&
+      !panel.hidden &&
+      panel.classList.contains("m7v4-show") &&
+      panel.classList.contains("m7v4-mode-design")
+    ){
+      openingWanted=true;
+      waitAndOpen();
+    }
+  },0);
 })();
