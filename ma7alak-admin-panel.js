@@ -9105,44 +9105,11 @@ function decorateAll(){
 
 
 /* =========================================================
-   SHOUFHON PAGE DESIGN STUDIO V2 — ADDON LOADER
+   PAGE DESIGN STUDIO V2
+   The active V2 implementation is merged below in this Admin bundle.
+   Do not auto-load the obsolete standalone copy: it shares the same
+   guard and can win the startup race before the newer merged controls.
 ========================================================= */
-(function(){
-  "use strict";
-
-  if(window.__MA7ALAK_ADMIN_DS_V2_LOADER__){
-    return;
-  }
-
-  window.__MA7ALAK_ADMIN_DS_V2_LOADER__ = true;
-
-  const current = document.currentScript;
-
-  if(
-    !current ||
-    !current.src
-  ){
-    return;
-  }
-
-  const base =
-    current.src.slice(
-      0,
-      current.src.lastIndexOf("/") + 1
-    );
-
-  const script =
-    document.createElement("script");
-
-  script.src =
-    base +
-    "ma7alak-admin-design-studio-v2.js";
-
-  script.async = false;
-
-  document.head.appendChild(script);
-
-})();
 
 
 /* =========================================================
