@@ -31,6 +31,12 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
   background-image:none!important;
   box-shadow:none!important;
 }
+/* Never paint a replacement canvas behind the panels. */
+#m7-global-home-feed-shell,
+#m7-global-home-feed-shell #m7-home-feed,
+#m7-global-home-feed-shell .ma7alak-reels-wrapper{
+  --m7-feed-host-background:transparent;
+}
 #m7-global-home-feed-shell{
   border:0!important;
   border-radius:0!important;
@@ -69,25 +75,75 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
 \n`; document.head.appendChild(style);
  const shell=document.createElement("div"); shell.id="m7-global-home-feed-shell"; shell.innerHTML=`<div id="m7-home-feed">\n  <section id="m7-live-home">\n    <div class="m7-live-head">\n      <div class="m7-live-top"><span class="m7-live-status"><i></i> LIVE</span><span id="m7-live-count">0 UPDATES</span></div>\n      <h2>🔥 Happening Today</h2>\n      <p id="m7-live-sub">Offers, events &amp; special things happening now</p>\n    </div>\n    <div id="m7-live-cards" class="m7-live-cards"><div class="m7-live-empty"><b>Loading live updates...</b></div></div>\n  </section>\n\n  <section class="ma7alak-reels-wrapper">\n    <div class="ma7alak-reels-title"><span>🎬</span><span>Reels</span></div>\n    <div class="ma7alak-reels"><div class="ma7alak-reel coming-soon-reel"><div class="coming-soon"><span>🎥</span><strong>New video coming soon</strong></div></div></div>\n    <div class="ma7alak-favorites-corner"><button id="ma7alakFavoritesButton" class="ma7alak-favorites-button" type="button"><span>⭐</span><span>Favorites</span><b id="ma7alakFavoritesCount">0</b></button></div>\n  </section>\n</div>\n\n<div id="ma7alakReelViewer" class="ma7alak-reel-viewer" aria-hidden="true">\n  <button id="ma7alakReelViewerShop" class="ma7alak-reel-viewer-shop" type="button"><img id="ma7alakReelViewerShopIcon" src="" alt="Shop"><span><strong id="ma7alakReelViewerShopName">Shop</strong><small>View shop</small></span><em>→</em></button>\n  <button id="ma7alakReelViewerClose" class="ma7alak-reel-viewer-close" type="button">×</button>\n  <button id="ma7alakViewerFavorite" class="ma7alak-viewer-favorite" type="button" aria-label="Add to favorites">☆</button>\n  <video id="ma7alakReelViewerVideo" class="ma7alak-reel-viewer-video" playsinline webkit-playsinline loop preload="none"></video>\n  <div class="ma7alak-swipe-hint">↑ &nbsp; Swipe &nbsp; ↓</div>\n</div>`;
  const cfg={enabled:true};
+
+ function m7HasVisibleBackground(el){
+   if(!el||el===shell)return false;
+   try{
+     const cs=getComputedStyle(el);
+     const img=String(cs.backgroundImage||"");
+     const col=String(cs.backgroundColor||"");
+     const hasImage=img&&img!=="none";
+     const m=col.match(/rgba?\(([^)]+)\)/i);
+     let alpha=1;
+     if(m){
+       const parts=m[1].split(",").map(v=>v.trim());
+       if(parts.length>3)alpha=Number(parts[3]);
+     }
+     const r=el.getBoundingClientRect();
+     return (hasImage||alpha>.02)&&r.width>=Math.min(innerWidth*.72,680)&&r.height>70;
+   }catch(_){return false}
+ }
+
+ function m7FindHostingerBackgroundHost(hero){
+   /* The Opening Header is injected BEFORE Hostinger's original page root.
+      We must put the feed INSIDE Hostinger's real section/background,
+      not beside it on BODY (which exposes the site's black body canvas). */
+   let original=hero?.nextElementSibling||null;
+   while(original===shell)original=original?.nextElementSibling||null;
+   if(!original)return null;
+
+   if(m7HasVisibleBackground(original))return original;
+
+   const candidates=[...original.querySelectorAll("section,div")];
+   for(const el of candidates){
+     if(el.closest("#m7-global-home-feed-shell"))continue;
+     if(m7HasVisibleBackground(el))return el;
+   }
+
+   /* Fallback: use the first real Hostinger content container.
+      Even when Hostinger draws its background via a pseudo-element,
+      descendants inherit that visual canvas because the feed is now
+      physically inside the section instead of sitting on BODY. */
+   return original.matches("main,section,div")?original:
+          original.querySelector?.("main,section,div")||original;
+ }
+
  function place(){
    shell.style.display=cfg.enabled===false?"none":"block";
    shell.style.setProperty("width","100%","important");
    shell.style.setProperty("max-width","100%","important");
    shell.style.setProperty("margin-top","12px","important");
+
    const hero=document.getElementById("ma7alak-opening-header-root");
    if(hero&&hero.parentNode){
-     if(hero.nextElementSibling!==shell)hero.insertAdjacentElement("afterend",shell);
-     return;
+     const host=m7FindHostingerBackgroundHost(hero);
+     if(host){
+       if(shell.parentNode!==host||host.firstElementChild!==shell){
+         host.insertBefore(shell,host.firstElementChild);
+       }
+       return;
+     }
    }
+
    const main=document.querySelector("main");
    if(main){
-     if(main.firstElementChild!==shell)main.insertBefore(shell,main.firstChild);
+     if(shell.parentNode!==main||main.firstElementChild!==shell)main.insertBefore(shell,main.firstElementChild);
    }else if(!shell.isConnected){
      document.body.appendChild(shell);
    }
  }
  place();
- [80,300,800,1600].forEach(ms=>setTimeout(place,ms));
+ [80,300,800,1600,3000].forEach(ms=>setTimeout(place,ms));
 
 (function(){"use strict";
 const SB_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SB_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
