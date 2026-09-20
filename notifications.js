@@ -423,6 +423,18 @@ visitorId =
 
 function loadMa7alakSupabase(){
 
+  const sharedClient =
+    window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+    window.Ma7alakSupabase?.client ||
+    window.Ma7alakSupabaseBootstrap?.client ||
+    window.Ma7alakAccount?.client ||
+    null;
+
+  if(sharedClient){
+    ma7alakSupabase = sharedClient;
+    return Promise.resolve(ma7alakSupabase);
+  }
+
   if(
     window.supabase &&
     typeof window.supabase.createClient ===
