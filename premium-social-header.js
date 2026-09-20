@@ -1486,7 +1486,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   <a class="ma7alak-header-brand" href="https://shoufhon.com/" aria-label="ShoufHon Home">
     <img
       class="ma7alak-header-logo"
-      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif"
+      src="https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png"
       alt="ShoufHon"
       width="264"
       height="88"
