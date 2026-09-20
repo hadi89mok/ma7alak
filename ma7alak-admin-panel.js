@@ -7489,11 +7489,29 @@ function decorateAll(){
       const padding=
         number("profile_shell_padding",0,28,14);
 
+      const bannerEnabled=
+        !!get("profile_banner_enabled")?.checked;
+
       const bannerHeight=
         number("profile_banner_height",80,260,150);
 
       const bannerOverlay=
         number("profile_banner_overlay",0,85,30)/100;
+
+      const bannerPosition=
+        number("profile_banner_position_y",0,100,50);
+
+      const bannerImage=
+        String(
+          get("profile_banner_image_url")?.value ||
+          ""
+        ).trim();
+
+      const bannerStyle=
+        String(
+          get("profile_banner_style")?.value ||
+          DEFAULTS.profile_banner_style
+        ).trim().toLowerCase();
 
       const bannerColor=
         safeHex(
@@ -7579,8 +7597,17 @@ function decorateAll(){
           DEFAULTS.profile_message_btn_text_color
         );
 
+      const actionStyle=
+        String(
+          get("profile_action_style")?.value ||
+          DEFAULTS.profile_action_style
+        ).trim().toLowerCase();
+
       preview.dataset.layout=layout;
+      preview.dataset.actionStyle=actionStyle;
+      preview.dataset.bannerStyle=bannerStyle;
       preview.classList.toggle("off",!enabled);
+      preview.classList.toggle("has-banner",bannerEnabled);
       preview.style.backgroundColor=hexToRgba(bg,opacity);
       preview.style.backgroundImage=
         /^https?:\/\//i.test(shellBgImage)
@@ -7609,13 +7636,39 @@ function decorateAll(){
         );
 
       if(banner){
+        banner.style.display=
+          bannerEnabled
+            ? "grid"
+            : "none";
+
         banner.style.height=
           Math.max(62,bannerHeight*.55)+"px";
         banner.style.border=
           bannerFrameWidth+"px solid "+bannerFrame;
-        banner.style.background=
-          "linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+")),"+
+        banner.style.backgroundColor=
           bannerColor;
+        banner.style.backgroundImage=
+          /^https?:\/\//i.test(bannerImage)
+            ? "linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+")),url(\""+
+              bannerImage.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")+
+              "\")"
+            : "linear-gradient(rgba(0,0,0,"+bannerOverlay+"),rgba(0,0,0,"+bannerOverlay+"))";
+        banner.style.backgroundSize="cover";
+        banner.style.backgroundPosition=
+          "center "+bannerPosition+"%";
+        banner.style.backgroundRepeat="no-repeat";
+        banner.style.webkitMaskImage="";
+        banner.style.maskImage="";
+
+        if(
+          bannerStyle==="fade" ||
+          bannerStyle==="rounded-fade"
+        ){
+          const mask=
+            "linear-gradient(to bottom,#000 0 72%,rgba(0,0,0,.82) 84%,transparent 100%)";
+          banner.style.webkitMaskImage=mask;
+          banner.style.maskImage=mask;
+        }
       }
 
       const storyEffect=
@@ -7652,11 +7705,13 @@ function decorateAll(){
 
       if(logo){
         const scaled=
-          Math.max(74,Math.min(118,logoSize*.48));
+          Math.max(74,Math.min(130,logoSize*.48));
         logo.style.width=scaled+"px";
         logo.style.height=scaled+"px";
         logo.style.marginTop=
-          (-Math.min(72,overlap*.56))+"px";
+          bannerEnabled
+            ? (-Math.min(78,overlap*.56))+"px"
+            : "8px";
         logo.style.borderColor=border;
       }
 
@@ -7666,9 +7721,9 @@ function decorateAll(){
         );
 
       if(stats){
-        stats.style.background="transparent";
-        stats.style.border="0";
-        stats.style.borderRadius="0";
+        stats.style.background=statsBg;
+        stats.style.border="1px solid "+statsBorder;
+        stats.style.borderRadius=statsRadius+"px";
         stats.style.setProperty("--m7ds-stats-separator",statsBorder);
         stats.querySelectorAll("b").forEach(
           el=>el.style.color=statsNumber
@@ -7684,9 +7739,30 @@ function decorateAll(){
         );
 
       if(follow){
-        follow.style.background=followBg;
         follow.style.borderColor=followBorder;
         follow.style.color=followText;
+        follow.style.backdropFilter="";
+        follow.style.webkitBackdropFilter="";
+        follow.style.boxShadow="";
+
+        if(actionStyle==="outline"){
+          follow.style.background="transparent";
+          follow.style.boxShadow="none";
+        }
+        else if(actionStyle==="glass"){
+          follow.style.background="rgba(12,12,13,.52)";
+          follow.style.backdropFilter="blur(12px)";
+          follow.style.webkitBackdropFilter="blur(12px)";
+        }
+        else if(actionStyle==="premium"){
+          follow.style.background=
+            "linear-gradient(135deg,"+
+            followBg+","+
+            hexToRgba(followBg,.72)+")";
+        }
+        else{
+          follow.style.background=followBg;
+        }
       }
 
       const message=
@@ -7695,9 +7771,30 @@ function decorateAll(){
         );
 
       if(message){
-        message.style.background=messageBg;
         message.style.borderColor=messageBorder;
         message.style.color=messageText;
+        message.style.backdropFilter="";
+        message.style.webkitBackdropFilter="";
+        message.style.boxShadow="";
+
+        if(actionStyle==="outline"){
+          message.style.background="transparent";
+          message.style.boxShadow="none";
+        }
+        else if(actionStyle==="glass"){
+          message.style.background="rgba(12,12,13,.52)";
+          message.style.backdropFilter="blur(12px)";
+          message.style.webkitBackdropFilter="blur(12px)";
+        }
+        else if(actionStyle==="premium"){
+          message.style.background=
+            "linear-gradient(145deg,"+
+            hexToRgba(messageBg,.96)+
+            ",rgba(5,5,6,.92))";
+        }
+        else{
+          message.style.background=messageBg;
+        }
       }
     }
 
