@@ -3805,11 +3805,11 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
 @media(max-width:900px){
   #ma7alak-social-header .ma7alak-header-brand{width:76px!important;min-width:76px!important;height:54px!important;margin-left:0!important;padding:5px 5px 5px 8px!important;overflow:hidden!important;box-sizing:border-box!important}
-  #ma7alak-social-header .ma7alak-header-logo{width:63px!important;max-width:63px!important;height:44px!important;object-fit:contain!important;object-position:center!important;transform:translateY(5px) scale(3.65)!important;transform-origin:center!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:63px!important;max-width:63px!important;height:44px!important;object-fit:contain!important;object-position:center!important;transform:translateY(11px) scale(3.65)!important;transform-origin:center!important}
 }
 @media(max-width:390px){
   #ma7alak-social-header .ma7alak-header-brand{width:70px!important;min-width:70px!important;padding-left:7px!important;padding-right:4px!important}
-  #ma7alak-social-header .ma7alak-header-logo{width:58px!important;max-width:58px!important;height:41px!important;transform:translateY(5px) scale(3.65)!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:58px!important;max-width:58px!important;height:41px!important;transform:translateY(11px) scale(3.65)!important}
 }`;
   (document.head||document.documentElement).appendChild(style);
 })();
