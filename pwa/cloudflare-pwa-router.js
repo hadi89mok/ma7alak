@@ -15,7 +15,7 @@ const SOURCE_BASE =
   "https://raw.githubusercontent.com/hadi89mok/ma7alak/main/pwa/";
 
 const BRAND_ICON =
-  "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
+  "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png";
 
 export default {
   async fetch(request) {
@@ -68,7 +68,7 @@ export default {
       upstreamUrl,
       {
         headers: {
-          "User-Agent": "ShoufHon-PWA-Worker/1.2"
+          "User-Agent": "ShoufHon-PWA-Worker/1.3"
         },
         cf: {
           cacheEverything: false,
