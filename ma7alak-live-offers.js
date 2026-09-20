@@ -121,7 +121,25 @@ async function ready(){
   }
   return false;
 }
-async function identity(){session=window.Ma7alakAccount?.session||null;ownerSlug="";ent=null;if(!c||!session?.user)return;let o=await c.from("shop_owners").select("shop_slug").eq("user_id",session.user.id).limit(1).maybeSingle();if(!o.error&&o.data?.shop_slug)ownerSlug=String(o.data.shop_slug).toLowerCase();if(ownerSlug){let e=await c.from("shop_live_entitlements").select("*").eq("shop_slug",ownerSlug).maybeSingle();if(!e.error)ent=e.data||null}}
+async function identity(){
+  session=window.Ma7alakAccount?.session||null;
+  ownerSlug="";
+  ent=null;
+  if(!c)return;
+
+  const bridgedSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim().toLowerCase();
+  if(bridgedSlug)ownerSlug=bridgedSlug;
+
+  if(!ownerSlug&&session?.user){
+    const o=await c.from("shop_owners").select("shop_slug").eq("user_id",session.user.id).limit(1).maybeSingle();
+    if(!o.error&&o.data?.shop_slug)ownerSlug=String(o.data.shop_slug).toLowerCase();
+  }
+
+  if(ownerSlug){
+    const e=await c.from("shop_live_entitlements").select("*").eq("shop_slug",ownerSlug).maybeSingle();
+    if(!e.error)ent=e.data||null;
+  }
+}
 async function load(){
   if(!c||refreshing)return;
   refreshing=true;
@@ -313,6 +331,26 @@ async function init(){
     lastRenderSignature="";
     await identity();
     await load();
+  });
+
+  let wakeSyncing=false;
+  const wakeSync=async()=>{
+    if(wakeSyncing||document.hidden)return;
+    wakeSyncing=true;
+    try{
+      c=resolveClient()||c;
+      lastRenderSignature="";
+      await identity();
+      await load();
+    }finally{
+      wakeSyncing=false;
+    }
+  };
+
+  addEventListener("pageshow",wakeSync);
+  addEventListener("focus",wakeSync);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible")wakeSync();
   });
 }
 init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
