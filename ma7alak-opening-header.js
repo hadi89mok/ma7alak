@@ -608,6 +608,34 @@ function liveAvatar(x){let name=String(x.shop_name||x.shop_slug||"Shop"),letter=
 function renderLive(){let n=livePosts.length;liveRoot.classList.toggle("m7-live-active",n>0);liveCount.textContent=`${n} ${n===1?"UPDATE":"UPDATES"}`;if(!n){liveSub.textContent="Offers, events & special things happening now";liveCards.innerHTML='<div class="m7-live-empty"><b>Nothing live right now</b><small>New updates will appear here automatically.</small></div>';return}liveSub.textContent=n===1?"1 update happening now":`${n} updates — swipe to see more`;liveCards.innerHTML=livePosts.map(x=>{let price=x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7-live-price">${x.original_price!=null?`<span class="m7-live-old">$${esc(x.original_price)}</span>`:""}${x.offer_price!=null?`$${esc(x.offer_price)}`:""}</div>`:"";return`<article class="m7-live-card" data-live-id="${esc(x.id)}">${liveMedia(x)}<div class="m7-live-copy"><span class="m7-live-badge">${liveMeta(x.post_type)}</span><div class="m7-live-title">${esc(x.title)}</div><div class="m7-shop-line">${liveAvatar(x)}<div class="m7-shop-info"><div class="m7-shop-name">${esc(x.shop_name||x.shop_slug)}</div><div class="m7-shop-now">● LIVE NOW</div></div></div>${price}<div class="m7-live-times"><div class="m7-live-schedule" data-start="${esc(x.starts_at)}" data-end="${esc(x.ends_at)}"></div></div></div></article>`}).join("");liveCards.querySelectorAll("[data-live-id]").forEach(c=>c.onclick=()=>window.postMessage({type:"MA7ALAK_LIVE_OFFERS_VIEW",id:c.dataset.liveId},"*"));updateLiveTimers()}
 let liveStateReceived=false;
 const liveRequestTimers=[];
+const M7_LIVE_CACHE_KEY="ma7alak-live-public-cache-v1";
+function readHomepageLiveCache(){
+  try{
+    const raw=localStorage.getItem(M7_LIVE_CACHE_KEY);
+    if(!raw)return[];
+    const parsed=JSON.parse(raw);
+    const now=Date.now();
+    const cached=(Array.isArray(parsed&&parsed.items)?parsed.items:[]).filter(x=>{
+      if(!x||String(x.status||"active")!=="active")return false;
+      const end=new Date(x.ends_at).getTime();
+      return Number.isFinite(end)&&end>now;
+    });
+    if(!cached.length&&Array.isArray(parsed&&parsed.items)&&(parsed.items||[]).length){
+      localStorage.removeItem(M7_LIVE_CACHE_KEY);
+    }
+    return cached;
+  }catch(_){
+    return[];
+  }
+}
+function hydrateHomepageLiveCache(){
+  const cached=readHomepageLiveCache();
+  if(!cached.length)return;
+  const signature=getLiveSignature(cached);
+  livePosts=cached;
+  liveSignature=signature;
+  renderLive();
+}
 function stopLiveRequests(){while(liveRequestTimers.length)clearTimeout(liveRequestTimers.pop())}
 function applyLiveState(next){
   next=Array.isArray(next)?next:[];
@@ -639,6 +667,7 @@ addEventListener("message",e=>{
   if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel();
 });
 function requestLive(){if(!liveStateReceived)window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}
+hydrateHomepageLiveCache();
 [0,250,750,1500,3000,5000,8000,12000].forEach(ms=>liveRequestTimers.push(setTimeout(requestLive,ms)));
 const liveProviderCacheTimer=setInterval(syncLiveFromProviderCache,4000);
 window.addEventListener("focus",syncLiveFromProviderCache);
