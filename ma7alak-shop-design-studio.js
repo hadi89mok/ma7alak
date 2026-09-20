@@ -438,7 +438,23 @@
       const imageField=document.getElementById("ma-edit-image");
       fieldWrapper(imageField)?.classList.add("m7studio-field-hidden");
 
-      filterFields(design?.querySelector('[data-m7ds-pane="identity"]'),id=>!id.includes("story_"));
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="identity"]'),
+        (id,input)=>
+          !id.includes("story_") &&
+          input.type!=="color" &&
+          !/_color(?:$|_)/.test(id) &&
+          !/_font_(?:style|size)$/.test(id) &&
+          !/_animation$/.test(id)
+      );
+
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="follow"]'),
+        (id,input)=>
+          input.type!=="color" &&
+          !/_color(?:$|_)/.test(id) &&
+          !/_font_(?:style|size)$/.test(id)
+      );
       design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       hideFormRoots(form,roots);
@@ -453,27 +469,66 @@
     }else if(key==="live"){
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["modules"]);
-      filterFields(design?.querySelector('[data-m7ds-pane="modules"]'),id=>id.includes("live_"));
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="modules"]'),
+        (id,input)=>
+          id.includes("live_") &&
+          input.type!=="color" &&
+          !/_color(?:$|_)/.test(id) &&
+          !/_font_(?:style|size)$/.test(id)
+      );
       design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       hideFormRoots(form,roots);
     }else if(key==="media"){
       const roots=showRoots(form,[".m7-design-studio"]);
       showPanes(form,["modules"]);
-      filterFields(design?.querySelector('[data-m7ds-pane="modules"]'),id=>/gallery_|media_|video_/.test(id));
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="modules"]'),
+        (id,input)=>
+          /gallery_|media_|video_/.test(id) &&
+          input.type!=="color" &&
+          !/_color(?:$|_)/.test(id) &&
+          !/_font_(?:style|size)$/.test(id) &&
+          !/_animation(?:_|$)/.test(id)
+      );
       design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       hideFormRoots(form,roots);
     }else if(key==="about"){
-      const roots=showRoots(form,[".m7-about-services-fields",".m7-about-text-style-box",".m7da-sectioned-extras",".m7-design-studio"]);
-      showPanes(form,["about"]);
+      const roots=showRoots(form,[
+        ".m7-about-services-fields",
+        ".m7da-sectioned-extras"
+      ]);
       markExtras("about");
-      design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
-      design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
+
+      if(extras){
+        filterFields(
+          extras,
+          (id,input)=>
+            input.type!=="color" &&
+            !/_color(?:$|_)/.test(id)
+        );
+      }
+
       hideFormRoots(form,roots);
     }else if(key==="hours"){
-      const roots=showRoots(form,[".m7-hours-schedule-box",".m7-availability-extra-box",".m7da-sectioned-extras"]);
+      const roots=showRoots(form,[
+        ".m7-hours-schedule-box",
+        ".m7-availability-extra-box",
+        ".m7da-sectioned-extras"
+      ]);
       markExtras("hours");
+
+      if(extras){
+        filterFields(
+          extras,
+          (id,input)=>
+            input.type!=="color" &&
+            !/_color(?:$|_)/.test(id)
+        );
+      }
+
       hideFormRoots(form,roots);
     }else if(key==="colors"){
       form.classList.add("m7studio-colors-mode");
@@ -494,7 +549,10 @@
     }else if(key==="animations"){
       const roots=showRoots(form,[".m7-design-studio",".m7-card-designer-box"]);
       showPanes(form,["identity","motion","about","modules"]);
-      const matcher=id=>/animation|motion|effect|pulse|glow|shimmer|intensity|speed|float|sparkle|bounce|sway|flicker/.test(id);
+      const matcher=id=>
+        /animation|motion|effect|pulse|glow|shimmer|intensity|speed|float|sparkle|bounce|sway|flicker/.test(id) &&
+        !id.includes("story_") &&
+        !id.includes("live_");
       roots.forEach(root=>filterFields(root,matcher));
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
       design?.querySelector(":scope > .m7ds-intro")?.classList.add("m7studio-field-hidden");
