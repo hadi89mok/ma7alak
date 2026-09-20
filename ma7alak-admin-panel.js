@@ -16399,9 +16399,10 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     ).trim();
   }
 
-  function currentOptions(){
+  function currentDraft(){
     const form=document.getElementById("ma-admin-edit-form");
     let options={};
+    let collected={};
 
     try{
       const existing=JSON.parse(form?.dataset?.directoryOptions||"{}");
@@ -16410,18 +16411,97 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       }
     }catch(_){}
 
-    DESIGN_KEYS.forEach(key=>{
-      const el=document.getElementById("m7de-"+key);
-      if(!el)return;
-      options[key]=valueOf(el);
-    });
+    /*
+       IMPORTANT:
+       Use the same authoritative wrapped collector that Save Changes uses.
+       Label/Card/About/Hours/Design Studio modules all extend this collector,
+       so live preview can no longer fall out of sync with saved behavior.
+    */
+    try{
+      const api=window.Ma7alakDirectoryAdmin;
+      if(api&&typeof api.collect==="function"){
+        collected=api.collect(true)||{};
+        if(
+          collected.directory_options &&
+          typeof collected.directory_options==="object" &&
+          !Array.isArray(collected.directory_options)
+        ){
+          options={
+            ...options,
+            ...collected.directory_options
+          };
+        }
+      }
+    }catch(_){
+      /*
+         While the admin is midway through typing an invalid URL/number,
+         collect() may correctly reject the draft. Keep preview alive by
+         reading mounted controls directly until the value becomes valid.
+      */
+      document
+        .querySelectorAll(
+          "#ma-admin-edit-form [id^='m7de-']"
+        )
+        .forEach(el=>{
+          const key=String(el.id||"").slice(5);
+          if(!key)return;
+          options[key]=valueOf(el);
+        });
+    }
 
-    ["story_color","card_color"].forEach(key=>{
-      const el=document.getElementById("m7de-"+key);
-      if(el)options[key]=valueOf(el);
-    });
+    const profile={
+      ...(collected&&typeof collected==="object"?collected:{}),
+      shop_slug:String(
+        document.getElementById("ma-edit-slug")?.value||
+        selectedSlug()||
+        ""
+      ).trim(),
+      original_shop_slug:selectedSlug(),
+      shop_name:String(
+        document.getElementById("ma-edit-name")?.value||
+        ""
+      ).trim(),
+      arabic_name:String(
+        document.getElementById("ma-edit-arabic")?.value||
+        ""
+      ).trim(),
+      profile_image_url:String(
+        document.getElementById("ma-edit-image")?.value||
+        ""
+      ).trim(),
+      shop_url:String(
+        document.getElementById("ma-edit-url")?.value||
+        ""
+      ).trim(),
+      area:String(
+        document.getElementById("ma-edit-area")?.value||
+        ""
+      ).trim(),
+      location:String(
+        document.getElementById("ma-edit-location")?.value||
+        ""
+      ).trim(),
+      category:String(
+        document.getElementById("ma-edit-category")?.value||
+        ""
+      ).trim(),
+      category_name:String(
+        document.getElementById("ma-edit-category-name")?.value||
+        ""
+      ).trim()
+    };
 
-    return options;
+    delete profile.directory_options;
+    profile.directory_options=options;
+
+    return {
+      profile,
+      directory_options:options
+    };
+  }
+
+  function currentOptions(){
+    return currentDraft().directory_options;
   }
 
   function ensureRealtimePreview(slug){
@@ -16525,11 +16605,15 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     const slug=selectedSlug();
     if(!slug)return;
 
+    const draft=currentDraft();
+
     const message={
       type:"MA7ALAK_DESIGN_PREVIEW",
-      version:1,
+      version:2,
       shop_slug:slug,
-      directory_options:currentOptions(),
+      shopSlug:slug,
+      profile:draft.profile,
+      directory_options:draft.directory_options,
       sent_at:Date.now()
     };
 
@@ -16557,20 +16641,26 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     timer=setTimeout(publish,55);
   }
 
-  function fromDesignStudio(target){
-    if(!target||!target.id||!target.id.startsWith("m7de-"))return false;
-    if(target.closest?.(".m7-design-studio"))return true;
-    return DESIGN_KEYS.some(key=>target.id==="m7de-"+key)||
-      target.id==="m7de-story_color"||
-      target.id==="m7de-card_color";
+  function fromEditForm(target){
+    if(!target||typeof target.closest!=="function")return false;
+    return !!target.closest("#ma-admin-edit-form");
   }
 
   document.addEventListener("input",event=>{
-    if(fromDesignStudio(event.target))schedule();
+    if(fromEditForm(event.target))schedule();
   },true);
 
   document.addEventListener("change",event=>{
-    if(fromDesignStudio(event.target))schedule();
+    if(fromEditForm(event.target))schedule();
+  },true);
+
+  /*
+     Custom uploaders often set hidden URL fields programmatically.
+     A click/keyup follow-up makes their preview deterministic even when
+     the legacy uploader forgot to dispatch an input event.
+  */
+  document.addEventListener("keyup",event=>{
+    if(fromEditForm(event.target))schedule();
   },true);
 
   window.addEventListener("ma7alak:design-preview-request",schedule);
@@ -16597,7 +16687,8 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   window.Ma7alakDesignLiveBridge={
     publish,
     schedule,
-    currentOptions
+    currentOptions,
+    currentDraft
   };
 })();
 
