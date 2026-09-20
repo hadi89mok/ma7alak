@@ -413,8 +413,37 @@
     if(label&&labelText)label.textContent=labelText;
   }
 
+  function refreshStudioPreviewSource(){
+    const form=document.getElementById("ma-admin-edit-form");
+    const design=form?.querySelector(".m7-design-studio");
+    if(!design)return;
+
+    /*
+       Do not rely on event ordering. The fullscreen phone is a view of the
+       real Admin preview surfaces, so recompute those surfaces directly from
+       the current controls before cloning them.
+    */
+    try{
+      if(activeTab==="profile"||activeTab==="story"){
+        design.__m7ProfileShellRefresh?.();
+        design.__m7BannerRefresh?.();
+      }
+      else if(activeTab==="live"){
+        design.__m7LiveOffersRefresh?.();
+      }
+      else if(activeTab==="media"){
+        design.__m7GalleryFrameRefresh?.();
+      }
+      else{
+        design.__m7dsRefresh?.();
+      }
+    }catch(_){}
+  }
+
   function renderStudioPreview(panel){
     if(!panel||!panel.classList.contains("m7studio-fullscreen"))return;
+
+    refreshStudioPreviewSource();
 
     const dock=panel.querySelector(".m7v4-edit-preview");
     if(!dock)return;
@@ -468,7 +497,7 @@
       ()=>renderStudioPreview(
         panel||document.getElementById("ma-admin-edit-card")
       ),
-      0
+      16
     );
   }
 
