@@ -3795,13 +3795,21 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   const style=document.createElement("style");
   style.id="ma7alak-left-eye-fit-v27";
   style.textContent=`
+/* New ShoufHon PNG has more transparent breathing room than the previous artwork.
+   Scale only the artwork inside the existing header slot so the header layout,
+   owner circle and phone navigation spacing stay unchanged. */
+#ma7alak-social-header .ma7alak-header-logo{
+  transform:scale(1.20)!important;
+  transform-origin:center!important;
+}
+
 @media(max-width:900px){
   #ma7alak-social-header .ma7alak-header-brand{width:76px!important;min-width:76px!important;height:54px!important;margin-left:0!important;padding:5px 5px 5px 8px!important;overflow:hidden!important;box-sizing:border-box!important}
-  #ma7alak-social-header .ma7alak-header-logo{width:63px!important;max-width:63px!important;height:44px!important;object-fit:contain!important;object-position:center!important;transform:none!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:63px!important;max-width:63px!important;height:44px!important;object-fit:contain!important;object-position:center!important;transform:scale(1.32)!important;transform-origin:center!important}
 }
 @media(max-width:390px){
   #ma7alak-social-header .ma7alak-header-brand{width:70px!important;min-width:70px!important;padding-left:7px!important;padding-right:4px!important}
-  #ma7alak-social-header .ma7alak-header-logo{width:58px!important;max-width:58px!important;height:41px!important}
+  #ma7alak-social-header .ma7alak-header-logo{width:58px!important;max-width:58px!important;height:41px!important;transform:scale(1.32)!important}
 }`;
   (document.head||document.documentElement).appendChild(style);
 })();
