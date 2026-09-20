@@ -794,7 +794,7 @@
       );
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
-        id=>/(?:gallery|video)_font_(?:style|size)$/.test(id)
+        id=>/media_font_(?:style|size)$/.test(id)
       );
 
       hideDesignChrome();
