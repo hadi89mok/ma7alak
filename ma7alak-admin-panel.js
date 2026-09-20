@@ -14662,13 +14662,9 @@ function renderWorkspace(){
     '</div>'+
 
     '<div class="m7v4-group-title">Shop profile & design</div>'+
-    '<div class="m7v4-actions">'+
-      action("details","✏️","Shop details","Name, slug, location, category and profile details")+
-      action("label","⌂","Shop label","Label text, icon and custom symbol only")+
-      action("card","▰","Directory card","Card edges, colors, depth and animation only")+
-      action("design","✦","Profile design","Edit one profile-design section at a time")+
-      action("about","Aa","About Me","Description, services and About text style only")+
-      action("hours","◷","Hours & availability","Weekly schedule and availability only")+
+    '<div class="m7v4-actions m7v4-actions-studio">'+
+      action("details","✏️","Shop details","Core identity, slug, location, category and links")+
+      action("design","🎨","Shop Design Studio","All visual design in one full-screen editor with real live shop preview")+
     '</div>'+
 
     '<div class="m7v4-group-title">Media & live content</div>'+
@@ -16992,3 +16988,80 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
 
+
+
+/* =========================================================
+   SHOUFHON — SHOP DESIGN STUDIO LOADER
+   Loads the admin-only Studio module from the SAME pinned
+   GitHub/jsDelivr commit as this Admin Panel script.
+========================================================= */
+(function(){
+  "use strict";
+
+  if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin")return;
+  if(window.__M7_SHOP_DESIGN_STUDIO_LOADER__)return;
+  window.__M7_SHOP_DESIGN_STUDIO_LOADER__=true;
+
+  function findAdminScript(){
+    if(
+      document.currentScript &&
+      /ma7alak-admin-panel\.js(?:[?#].*)?$/i.test(
+        document.currentScript.src||""
+      )
+    ){
+      return document.currentScript;
+    }
+
+    const scripts=[...document.scripts].reverse();
+    return scripts.find(script=>
+      /ma7alak-admin-panel\.js(?:[?#].*)?$/i.test(
+        script.src||""
+      )
+    )||null;
+  }
+
+  const source=findAdminScript();
+  if(!source||!source.src){
+    console.warn(
+      "SHOUFHON Shop Design Studio: Admin script URL not found."
+    );
+    return;
+  }
+
+  try{
+    const url=new URL(source.src,location.href);
+    url.pathname=url.pathname.replace(
+      /ma7alak-admin-panel\.js$/i,
+      "ma7alak-shop-design-studio.js"
+    );
+    url.search="";
+    url.hash="";
+
+    if(
+      document.querySelector(
+        'script[data-m7-shop-design-studio="1"]'
+      )
+    ){
+      return;
+    }
+
+    const script=document.createElement("script");
+    script.src=url.href;
+    script.async=true;
+    script.dataset.m7ShopDesignStudio="1";
+    script.onerror=function(){
+      console.error(
+        "SHOUFHON Shop Design Studio failed to load:",
+        url.href
+      );
+    };
+
+    (document.head||document.documentElement)
+      .appendChild(script);
+  }catch(error){
+    console.error(
+      "SHOUFHON Shop Design Studio loader:",
+      error
+    );
+  }
+})();
