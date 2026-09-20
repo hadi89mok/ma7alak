@@ -6856,9 +6856,7 @@ function decorateAll(){
 
         <div class="m7ds-section-title">Social Stats</div>
         <div class="m7ds-grid">
-          ${colorField(prefix,"profile_stats_bg_color","Stats background")}
-          ${colorField(prefix,"profile_stats_border_color","Stats border")}
-          ${effectNumberField(prefix,"profile_stats_radius","Stats corner radius",0,32,1,"px")}
+          ${colorField(prefix,"profile_stats_border_color","Stats separators")}
           ${colorField(prefix,"profile_stats_number_color","Stats numbers")}
           ${colorField(prefix,"profile_stats_label_color","Stats labels")}
         </div>
@@ -7668,9 +7666,10 @@ function decorateAll(){
         );
 
       if(stats){
-        stats.style.background=statsBg;
-        stats.style.borderColor=statsBorder;
-        stats.style.borderRadius=statsRadius+"px";
+        stats.style.background="transparent";
+        stats.style.border="0";
+        stats.style.borderRadius="0";
+        stats.style.setProperty("--m7ds-stats-separator",statsBorder);
         stats.querySelectorAll("b").forEach(
           el=>el.style.color=statsNumber
         );
