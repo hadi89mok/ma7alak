@@ -21,9 +21,7 @@ Deno.serve(async (req) => {
 
   const allowedOrigins = new Set([
     "https://shoufhon.com",
-    "https://www.shoufhon.com",
-    "https://ma7alak.com",
-    "https://www.ma7alak.com"
+    "https://www.shoufhon.com"
   ]);
 
   const requestOrigin = req.headers.get("origin") || "";
