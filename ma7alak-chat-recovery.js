@@ -1,4 +1,4 @@
-/* MA7ALAK CHAT RECOVERY
+/* SHOUFHON CHAT RECOVERY
    Safe companion for ma7alak-chat.js.
    Prevents the Messages panel from remaining on Loading forever and retries
    the correct viewer/owner inbox after auth has finished initializing.

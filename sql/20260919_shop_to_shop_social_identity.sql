@@ -1,4 +1,4 @@
--- Ma7alak shop-to-shop social identity + messaging
+-- ShoufHon shop-to-shop social identity + messaging
 -- Applied to production on 2026-09-19.
 --
 -- 1) Shop owners may message other shops, but never their own shop.

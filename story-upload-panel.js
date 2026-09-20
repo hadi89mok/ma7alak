@@ -4,7 +4,7 @@
 
   /*
   =========================================================
-  MA7ALAK
+  SHOUFHON
   GLOBAL PAGE-LEVEL STORY UPLOADER
 
   IMPORTANT:
@@ -179,7 +179,7 @@
     style.textContent = `
 
 /* =========================================================
-   MA7ALAK PAGE STORY UPLOADER
+   SHOUFHON PAGE STORY UPLOADER
 ========================================================= */
 
 #ma7alak-page-story-uploader{
@@ -1471,7 +1471,7 @@
     catch(error){
 
       console.error(
-        "MA7ALAK uploader open error:",
+        "SHOUFHON uploader open error:",
         error
       );
 
@@ -1935,7 +1935,7 @@
         catch(error){
 
           console.log(
-            "MA7ALAK upload message error:",
+            "SHOUFHON upload message error:",
             error
           );
 
@@ -1988,7 +1988,7 @@
     catch(error){
 
       console.error(
-        "MA7ALAK page uploader error:",
+        "SHOUFHON page uploader error:",
         error
       );
 
@@ -2183,7 +2183,7 @@
 
 
 /* =========================================================
-   MA7ALAK — OWNER + MENU (STORY OR HOMEPAGE REEL)
+   SHOUFHON — OWNER + MENU (STORY OR HOMEPAGE REEL)
    Companion for story-upload-panel.js baseline:
    b2126297f74e3d3a1b35224e5cc59b4e71d55a88
 
@@ -2250,7 +2250,7 @@
     document.getElementById("ma7alak-owner-add-reel").addEventListener("click",function(){
       close();
       if(window.Ma7alakOwnerReels && typeof window.Ma7alakOwnerReels.open==="function"){
-        window.Ma7alakOwnerReels.open(activeSlug).catch(function(error){console.error("MA7ALAK Reel uploader:",error);});
+        window.Ma7alakOwnerReels.open(activeSlug).catch(function(error){console.error("SHOUFHON Reel uploader:",error);});
       }else{
         window.postMessage({type:"MA7ALAK_OPEN_REEL_UPLOADER",shopSlug:activeSlug},"*");
       }
@@ -2294,7 +2294,7 @@
 })();
 
 /* =========================================================
-   MA7ALAK — OWNER HOMEPAGE REEL UPLOADER
+   SHOUFHON — OWNER HOMEPAGE REEL UPLOADER
    Separate from Stories. Does NOT modify the Story uploader.
 
    Load on the existing owner dashboard/page after login.
@@ -2616,7 +2616,7 @@
         });
       });
     }catch(error){
-      console.error("MA7ALAK owner Reel uploader:",error);
+      console.error("SHOUFHON owner Reel uploader:",error);
     }
   }
 

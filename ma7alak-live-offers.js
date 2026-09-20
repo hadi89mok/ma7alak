@@ -1,4 +1,4 @@
-/* MA7ALAK LIVE & OFFERS V5 — multi-media galleries + video sound + owner media manager */
+/* SHOUFHON LIVE & OFFERS V5 — multi-media galleries + video sound + owner media manager */
 (function(){
 "use strict";if(window.__M7_LIVE_V5__)return;window.__M7_LIVE_V5__=1;
 const BUCKET="live-offers";let c,session,ownerSlug="",ent=null,items=[],ownerItems=[],channel,refreshing=false,viewId=null,lockedY=0,lastRenderSignature="",profileOptions=new Map();
@@ -138,5 +138,5 @@ function broadcast(){try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",
 function bridge(){addEventListener("message",e=>{let d=e.data||{},s=String(d.shopSlug||"").toLowerCase();if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);if(c&&!refreshing)load();return}if(d.type==="MA7ALAK_LIVE_OFFERS_VIEW")return view(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_OPEN_SHOP")return openShopPanel(s);if(d.type==="MA7ALAK_LIVE_OFFERS_CREATE"&&s===ownerSlug)return creator();if(d.type==="MA7ALAK_LIVE_OFFERS_END"&&s===ownerSlug)return endPost(d.id);if(d.type==="MA7ALAK_LIVE_OFFERS_EDIT"&&s===ownerSlug)return editor(d.id)})}
 async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},()=>{load()}).subscribe()}
 async function init(){css();galleryCss();motionCss();bridge();while(!await ready())await sleep(1000);await identity();await load();await realtime();setInterval(timers,1000);setInterval(()=>{if(!document.hidden)load()},4000);addEventListener("ma7alak:account-change",async()=>{c=window.Ma7alakAccount?.client||c;lastRenderSignature="";await identity();await load()});addEventListener("ma7alak:owner-auth-change",async()=>{c=window.Ma7alakAccount?.client||c;lastRenderSignature="";await identity();await load()});window.Ma7alakLiveOffers={refresh:load,open:view,create:creator,edit:editor,media:mediaManager,get items(){return items.slice()},get ownerSlug(){return ownerSlug}}}
-init().catch(e=>console.error("MA7ALAK Live & Offers:",e));
+init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
 })();

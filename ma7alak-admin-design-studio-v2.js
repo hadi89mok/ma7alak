@@ -1,5 +1,5 @@
 /* =========================================================
-   MA7ALAK ADMIN — PAGE DESIGN STUDIO V2
+   SHOUFHON ADMIN — PAGE DESIGN STUDIO V2
 
    Single source of truth for Design Studio interaction:
    ✓ Identity/About colors stay independently editable
@@ -983,7 +983,7 @@
   start().catch(
     error=>
       console.error(
-        "MA7ALAK Design Studio V2:",
+        "SHOUFHON Design Studio V2:",
         error
       )
   );

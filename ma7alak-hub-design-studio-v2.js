@@ -1,6 +1,6 @@
 
 /* =========================================================
-   MA7ALAK PROFILE HUB — PAGE DESIGN STUDIO LIVE RUNTIME
+   SHOUFHON PROFILE HUB — PAGE DESIGN STUDIO LIVE RUNTIME
    Uses directory_options saved from Admin.
 
    Controls About + shared Hub accent for:
@@ -1895,7 +1895,7 @@
 
   start().catch(error=>
     console.warn(
-      "[Ma7alak Hub] Design Studio:",
+      "[ShoufHon Hub] Design Studio:",
       error
     )
   );

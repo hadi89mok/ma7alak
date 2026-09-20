@@ -1,5 +1,5 @@
--- MA7ALAK UNIVERSAL SHOP DESIGN CONFIGURATION
--- Additive only. Run after the existing Ma7alak directory/auth SQL.
+-- SHOUFHON UNIVERSAL SHOP DESIGN CONFIGURATION
+-- Additive only. Run after the existing ShoufHon directory/auth SQL.
 
 create table if not exists public.shop_page_design (
   shop_slug text primary key references public.shop_profiles(shop_slug) on update cascade on delete cascade,

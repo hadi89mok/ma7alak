@@ -1,5 +1,5 @@
 /* =========================================================
- MA7ALAK FOLLOWING NOTIFICATION FILTER V6 — CACHED / LOCAL APPLY
+ SHOUFHON FOLLOWING NOTIFICATION FILTER V6 — CACHED / LOCAL APPLY
  - top-level page only
  - reuses shared Following state from premium header
  - falls back to the existing Follow RPC only when shared state is unavailable
@@ -192,7 +192,7 @@ async function loadState(force){
 
   }catch(error){
     console.warn(
-      "MA7ALAK follow notification filter:",
+      "SHOUFHON follow notification filter:",
       error
     );
   }finally{

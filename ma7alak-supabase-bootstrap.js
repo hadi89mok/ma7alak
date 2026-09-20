@@ -1,7 +1,7 @@
 /* =========================================================
-   MA7ALAK SUPABASE BOOTSTRAP V1
+   SHOUFHON SUPABASE BOOTSTRAP V1
    One Supabase library load + one shared project client.
-   Load BEFORE viewer-account.js and all Ma7alak modules.
+   Load BEFORE viewer-account.js and all ShoufHon modules.
 ========================================================= */
 (function(){
   "use strict";
@@ -83,7 +83,7 @@
 
     const shared = window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
 
-    /* Compatibility bridge for older Ma7alak modules.
+    /* Compatibility bridge for older ShoufHon modules.
        Calls using this exact project/key and no custom options reuse the
        shared client instead of constructing another GoTrue/Realtime client. */
     if(!lib.__ma7alakSharedCreateClientBridge){
@@ -102,7 +102,7 @@
 
   const readyPromise = init();
   readyPromise.catch(function(error){
-    console.error("MA7ALAK Supabase bootstrap:",error);
+    console.error("SHOUFHON Supabase bootstrap:",error);
   });
 
   window.Ma7alakSupabaseBootstrap = {

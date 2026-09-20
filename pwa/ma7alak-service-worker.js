@@ -1,9 +1,9 @@
-/* MA7ALAK PWA SERVICE WORKER
+/* SHOUFHON PWA SERVICE WORKER
    Live-first strategy:
    - never intercept page navigations
    - never cache Supabase/API traffic
    - never cache video/audio
-   - only cache immutable commit-pinned Ma7alak JS/CSS
+   - only cache immutable commit-pinned ShoufHon JS/CSS
 */
 "use strict";
 

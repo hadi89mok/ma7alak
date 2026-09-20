@@ -1,4 +1,4 @@
--- Ma7alak /add-shop- subscription page settings.
+-- ShoufHon /add-shop- subscription page settings.
 -- Public visitors may read the published page; only site admins may edit it.
 
 create table if not exists public.subscription_page_settings (

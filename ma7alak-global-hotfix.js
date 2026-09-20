@@ -1,5 +1,5 @@
 /* =========================================================
- MA7ALAK GLOBAL HOTFIX V6.4 — MOBILE PERFORMANCE SAFE
+ SHOUFHON GLOBAL HOTFIX V6.4 — MOBILE PERFORMANCE SAFE
  - replaces old show-shops-stability-fix.js
  - mobile Following Unfollow actions fixed
  - Unfollow never opens the shop page
@@ -8,7 +8,7 @@
  - directory kept at top content position WITHOUT changing visitor scroll
  - homepage opening hero gets extra mobile height so text/buttons clear the eye artwork
  - no document-wide MutationObserver
- - reuses the shared Ma7alak Supabase client
+ - reuses the shared ShoufHon Supabase client
 ========================================================= */
 (function(){
 "use strict";
@@ -39,7 +39,7 @@ function decorateFollowing(){document.querySelectorAll("#ma7alak-following-list 
 function watchFollowingList(){const list=document.getElementById("ma7alak-following-list");if(!list)return;if(followingObserver?.__target===list){decorateFollowing();return}try{followingObserver?.disconnect()}catch(_){}followingObserver=new MutationObserver(()=>requestAnimationFrame(decorateFollowing));followingObserver.__target=list;followingObserver.observe(list,{childList:true});decorateFollowing()}
 function unfollowButtonFromEvent(e){return e.target?.closest?.("#ma7alak-following-list .m7-following-unfollow")||null}
 function stopUnfollowEvent(e){const btn=unfollowButtonFromEvent(e);if(!btn)return null;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();return btn}
-async function performUnfollow(btn){if(!btn||btn.dataset.m7Busy==="1")return;const slug=String(btn.dataset.shopSlug||"").trim(),row=btn.closest(".ma7alak-following-row");if(!slug)return;let c=client();try{if(window.Ma7alakSupabase?.ready)await window.Ma7alakSupabase.ready();else if(window.Ma7alakAccount?.ready)await window.Ma7alakAccount.ready();c=client()}catch(_){}if(!c)return;btn.dataset.m7Busy="1";btn.disabled=true;const r=await c.rpc("unfollow_shop",{p_shop_slug:slug,p_visitor_id:visitorId()});if(r.error){btn.dataset.m7Busy="0";btn.disabled=false;console.warn("MA7ALAK unfollow:",r.error);return}row?.remove();window.postMessage({type:"MA7ALAK_FOLLOW_CHANGED",shopSlug:slug,following:false},"*");dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));dispatchEvent(new CustomEvent("ma7alak:follow-changed",{detail:{shopSlug:slug,following:false}}))}
+async function performUnfollow(btn){if(!btn||btn.dataset.m7Busy==="1")return;const slug=String(btn.dataset.shopSlug||"").trim(),row=btn.closest(".ma7alak-following-row");if(!slug)return;let c=client();try{if(window.Ma7alakSupabase?.ready)await window.Ma7alakSupabase.ready();else if(window.Ma7alakAccount?.ready)await window.Ma7alakAccount.ready();c=client()}catch(_){}if(!c)return;btn.dataset.m7Busy="1";btn.disabled=true;const r=await c.rpc("unfollow_shop",{p_shop_slug:slug,p_visitor_id:visitorId()});if(r.error){btn.dataset.m7Busy="0";btn.disabled=false;console.warn("SHOUFHON unfollow:",r.error);return}row?.remove();window.postMessage({type:"MA7ALAK_FOLLOW_CHANGED",shopSlug:slug,following:false},"*");dispatchEvent(new CustomEvent("ma7alak:follow-change",{detail:{shop_slug:slug,following:false}}));dispatchEvent(new CustomEvent("ma7alak:follow-changed",{detail:{shopSlug:slug,following:false}}))}
 function onUnfollowPointerDown(e){stopUnfollowEvent(e)}
 function onUnfollowTouchEnd(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
 function onUnfollowClick(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}

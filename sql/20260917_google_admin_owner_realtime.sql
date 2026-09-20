@@ -1,4 +1,4 @@
--- Google-only Ma7alak administration and instant owner-assignment refresh.
+-- Google-only ShoufHon administration and instant owner-assignment refresh.
 -- The Edge Function still performs permanent Auth-user deletion because the
 -- service-role key must never be exposed to browser JavaScript.
 
