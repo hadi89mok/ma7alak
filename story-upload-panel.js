@@ -2067,6 +2067,144 @@
 
 
   /* =========================================================
+     AUTHENTICATED STORY DELETE BRIDGE
+     ---------------------------------------------------------
+     Story UI may live inside a Hostinger iframe. Always perform owner
+     Story deletion with this top-level authenticated client so Storage
+     and table RLS evaluate the same owner session as Header / Live.
+  ========================================================= */
+
+  function isKnownStoryEmbedWindow(sourceWindow){
+    if(!sourceWindow)return false;
+    return Array.from(document.querySelectorAll("iframe")).some(function(frame){
+      try{return frame.contentWindow===sourceWindow}catch(_){return false}
+    });
+  }
+
+  function replyStoryDelete(sourceWindow,requestId,ok,error){
+    try{
+      sourceWindow?.postMessage(
+        {
+          type:"MA7ALAK_DELETE_STORY_RESULT",
+          requestId:String(requestId||""),
+          ok:!!ok,
+          error:error?String(error):""
+        },
+        "*"
+      );
+    }
+    catch(_){}
+  }
+
+  async function deleteStoryForOwnerRequest(event){
+
+    const data=event.data||{};
+    const sourceWindow=event.source||null;
+    const requestId=String(data.requestId||"");
+    const shopSlug=String(data.shopSlug||"").trim().toLowerCase();
+    const storyId=Number(data.storyId);
+
+    if(
+      !requestId ||
+      !shopSlug ||
+      !Number.isFinite(storyId) ||
+      !isKnownStoryEmbedWindow(sourceWindow)
+    ){
+      return;
+    }
+
+    try{
+
+      const client=await loadSupabase();
+
+      const userResult=await client.auth.getUser();
+      const user=userResult?.data?.user||null;
+
+      if(!user){
+        throw new Error("You need to be signed in.");
+      }
+
+      const ownerResult=await client
+        .from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id",user.id)
+        .eq("shop_slug",shopSlug)
+        .maybeSingle();
+
+      if(ownerResult.error)throw ownerResult.error;
+      if(!ownerResult.data){
+        throw new Error("You no longer have permission to manage this shop.");
+      }
+
+      const storyResult=await client
+        .from("shop_stories")
+        .select("id,storage_path")
+        .eq("id",storyId)
+        .eq("shop_slug",shopSlug)
+        .maybeSingle();
+
+      if(storyResult.error)throw storyResult.error;
+
+      /*
+         If Realtime already deleted this Story, treat the request as done.
+      */
+      if(!storyResult.data){
+        replyStoryDelete(sourceWindow,requestId,true,"");
+        return;
+      }
+
+      const databaseResult=await client
+        .from("shop_stories")
+        .delete()
+        .eq("id",storyId)
+        .eq("shop_slug",shopSlug);
+
+      if(databaseResult.error)throw databaseResult.error;
+
+      /*
+         The Story is already removed from the database at this point.
+         Storage cleanup is best-effort so a temporary Storage problem never
+         makes the deleted Story reappear to the owner.
+      */
+      const storagePath=String(storyResult.data.storage_path||"").trim();
+
+      if(storagePath){
+        const storageResult=await client
+          .storage
+          .from("shop-stories")
+          .remove([storagePath]);
+
+        if(storageResult.error){
+          console.warn(
+            "SHOUFHON Story storage cleanup:",
+            storageResult.error
+          );
+        }
+      }
+
+      replyStoryDelete(sourceWindow,requestId,true,"");
+
+    }
+    catch(error){
+
+      console.error(
+        "SHOUFHON Story delete bridge:",
+        error
+      );
+
+      replyStoryDelete(
+        sourceWindow,
+        requestId,
+        false,
+        error?.message||"Could not delete Story."
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
      MESSAGE FROM STORY EMBED
   ========================================================= */
 
@@ -2078,6 +2216,17 @@
         !event.data
       ){
 
+        return;
+
+      }
+
+
+      if(
+        event.data.type ===
+        "MA7ALAK_DELETE_STORY_REQUEST"
+      ){
+
+        deleteStoryForOwnerRequest(event);
         return;
 
       }
