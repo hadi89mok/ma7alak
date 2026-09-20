@@ -2028,6 +2028,42 @@ window.addEventListener(
   }
 
 
+  function applySocialDraft(message){
+    const draft =
+      message &&
+      message.profile &&
+      typeof message.profile === "object"
+        ? message.profile
+        : {};
+
+    const options =
+      message &&
+      message.directory_options &&
+      typeof message.directory_options === "object"
+        ? message.directory_options
+        : {};
+
+    const profile = {
+      ...draft,
+      shop_slug:SHOP_SLUG,
+      directory_options:options
+    };
+
+    const accent =
+      m7AccentFromProfile(
+        profile
+      );
+
+    if(accent){
+      m7ApplyAccent(accent);
+    }
+
+    renderSocials(
+      profile
+    );
+  }
+
+
   loadSocialPanel();
 
   if(
@@ -2036,6 +2072,15 @@ window.addEventListener(
   ){
     window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(
       loadSocialPanel
+    );
+  }
+
+  if(
+    typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__ ===
+      "function"
+  ){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(
+      applySocialDraft
     );
   }
 
