@@ -810,7 +810,7 @@
         ".m7-design-studio"
       ]);
 
-      showPanes(form,["about","typography"]);
+      showPanes(form,["about","typography","modules"]);
       markExtras("about");
 
       filterFields(
@@ -818,9 +818,19 @@
         id=>/about_font_(?:style|size)$/.test(id)
       );
 
+      /*
+         Profile Hub powers About / Social / Location / Stats on the current
+         shop pages, so keep its working accent beside the About controls.
+      */
+      filterFields(
+        design?.querySelector('[data-m7ds-pane="modules"]'),
+        id=>id.includes("hub_")
+      );
+
       hideDesignChrome();
       tidyPane(design?.querySelector('[data-m7ds-pane="about"]'));
       tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
+      tidyPane(design?.querySelector('[data-m7ds-pane="modules"]'));
       hideFormRoots(form,roots);
     }
     else if(key==="hours"){
@@ -851,7 +861,8 @@
       ]);
 
       showPanes(form,["motion","typography"]);
-      markExtras("card");
+      /* story_color is the real saved Universal Accent field. */
+      markExtras("design");
 
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
