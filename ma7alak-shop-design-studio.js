@@ -366,6 +366,227 @@
     return slug?window.location.origin+"/"+encodeURIComponent(slug):"";
   }
 
+  let previewLoadToken=0;
+
+  function studioPreviewSlug(){
+    return String(
+      document.getElementById("ma-edit-original-slug")?.value||
+      document.getElementById("ma-edit-slug")?.value||
+      ""
+    ).trim().toLowerCase();
+  }
+
+  function previewBootstrap(slug){
+    const safeSlug=JSON.stringify(String(slug||""));
+    return `
+<script>
+(function(){
+  "use strict";
+
+  var SHOP_SLUG=${safeSlug};
+  var TYPE_SET="SHOUFHON_SHOP_CONTEXT_SET";
+  var TYPE_GET="SHOUFHON_SHOP_CONTEXT_GET";
+  var TYPE_STATE="SHOUFHON_SHOP_CONTEXT_STATE";
+  var TYPE_ACK="SHOUFHON_SHOP_CONTEXT_ACK";
+  var DESIGN_TYPE="MA7ALAK_DESIGN_PREVIEW";
+  var DESIGN_CHANNEL="ma7alak-design-live-v1";
+  var STORAGE_PREFIX="ma7alak_design_live_v1:";
+
+  window.__SHOUFHON_SHOP_CONTEXT_CLIENT_V1__=true;
+
+  function normalize(value){
+    var next=String(value||"").trim().toLowerCase();
+    try{next=decodeURIComponent(next)}catch(_){}
+    next=next.replace(/^\\/+|\\/+$/g,"");
+    return next;
+  }
+
+  function contextPayload(type){
+    return {
+      type:type,
+      shopSlug:SHOP_SLUG,
+      shop_slug:SHOP_SLUG,
+      revision:1,
+      sentAt:Date.now()
+    };
+  }
+
+  function post(target,payload){
+    try{target&&target.postMessage(payload,"*")}catch(_){}
+  }
+
+  function emitContext(source){
+    try{
+      window.dispatchEvent(new CustomEvent("shoufhon:shop-context",{
+        detail:{
+          shopSlug:SHOP_SLUG,
+          shop_slug:SHOP_SLUG,
+          source:source||"studio-preview"
+        }
+      }));
+    }catch(_){}
+  }
+
+  function relayDesign(message,source){
+    if(!message||message.type!==DESIGN_TYPE)return;
+    var incoming=normalize(message.shop_slug||message.shopSlug||"");
+    if(!incoming||incoming!==SHOP_SLUG)return;
+
+    var payload=Object.assign({},message,{
+      shop_slug:SHOP_SLUG,
+      shopSlug:SHOP_SLUG,
+      source:source||message.source||"studio-preview"
+    });
+
+    try{window.postMessage(payload,"*")}catch(_){}
+    try{
+      window.dispatchEvent(new CustomEvent("shoufhon:design-preview",{
+        detail:payload
+      }));
+    }catch(_){}
+
+    document.querySelectorAll("iframe").forEach(function(child){
+      try{post(child.contentWindow,payload)}catch(_){}
+    });
+  }
+
+  window.addEventListener("message",function(event){
+    var data=event.data||{};
+
+    if(data.type===TYPE_GET){
+      post(event.source,contextPayload(TYPE_STATE));
+      return;
+    }
+
+    if(data.type===TYPE_SET){
+      var requested=normalize(data.shopSlug||data.shop_slug||"");
+      if(requested===SHOP_SLUG){
+        post(event.source,contextPayload(TYPE_ACK));
+      }
+      return;
+    }
+
+    if(data.type===DESIGN_TYPE){
+      relayDesign(data,"post-message");
+    }
+  });
+
+  try{
+    if("BroadcastChannel" in window){
+      var channel=new BroadcastChannel(DESIGN_CHANNEL);
+      channel.onmessage=function(event){
+        relayDesign(event.data,"broadcast-channel");
+      };
+      window.addEventListener("pagehide",function(){
+        try{channel.close()}catch(_){}
+      },{once:true});
+    }
+  }catch(_){}
+
+  window.addEventListener("storage",function(event){
+    if(event.key!==STORAGE_PREFIX+SHOP_SLUG||!event.newValue)return;
+    try{relayDesign(JSON.parse(event.newValue),"storage")}catch(_){}
+  });
+
+  window.ShoufHonShopContext={
+    get slug(){return SHOP_SLUG},
+    set:function(value){
+      return normalize(value)===SHOP_SLUG;
+    },
+    refresh:function(){
+      emitContext("studio-preview-refresh");
+    }
+  };
+
+  window.ShoufHonShopContextClient={
+    get slug(){return SHOP_SLUG},
+    request:function(){emitContext("studio-preview-request")},
+    resolve:function(){return Promise.resolve(SHOP_SLUG)},
+    setPage:function(value){
+      return Promise.resolve(normalize(value)===SHOP_SLUG);
+    },
+    detectPageSlug:function(){return SHOP_SLUG},
+    normalize:normalize
+  };
+
+  emitContext("studio-preview-boot");
+})();
+<\/script>`;
+  }
+
+  function buildPreviewDocument(html,url,slug){
+    let source=String(html||"");
+    const baseTag='<base href="'+esc(url)+'">';
+    const bootstrap=previewBootstrap(slug);
+
+    /* Headers such as X-Frame-Options/frame-ancestors belong to the fetched
+       response, not this srcdoc document. A page-level CSP meta can still
+       interfere, so remove only frame-embedding meta policy from the replica. */
+    source=source.replace(
+      /<meta\\s+[^>]*http-equiv=[\"']?Content-Security-Policy[\"']?[^>]*>/ig,
+      ""
+    );
+
+    if(/<head(?:\\s[^>]*)?>/i.test(source)){
+      return source.replace(
+        /<head(?:\\s[^>]*)?>/i,
+        match=>match+baseTag+bootstrap
+      );
+    }
+
+    return '<!doctype html><html><head>'+baseTag+bootstrap+'</head><body>'+source+'</body></html>';
+  }
+
+  function previewErrorDocument(message){
+    return '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#070808;color:#e7d7b5;font-family:Arial,sans-serif}body{display:grid;place-items:center;padding:24px;box-sizing:border-box;text-align:center}.box{max-width:290px}.icon{font-size:34px}.title{margin-top:10px;color:#efc76f;font-size:15px;font-weight:800}.copy{margin-top:7px;color:#998d79;font-size:11px;line-height:1.5}</style></head><body><div class="box"><div class="icon">⚠</div><div class="title">Preview could not load</div><div class="copy">'+esc(message||"The shop page could not be copied into the Studio preview.")+'</div></div></body></html>';
+  }
+
+  async function loadRealPreview(frame){
+    if(!frame)return;
+
+    const url=studioPreviewUrl();
+    const slug=studioPreviewSlug();
+    if(!url||!slug)return;
+
+    const requestKey=url+"|"+slug;
+    if(frame.dataset.currentUrl===requestKey&&frame.dataset.previewReady==="1")return;
+
+    frame.dataset.currentUrl=requestKey;
+    frame.dataset.previewReady="0";
+    const token=++previewLoadToken;
+    frame.removeAttribute("src");
+    frame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#070808;color:#a99a7e;font-family:Arial,sans-serif}body{display:grid;place-items:center;font-size:12px}.dot{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#e0ae4d;box-shadow:0 0 12px rgba(224,174,77,.6)}</style></head><body><div><span class="dot"></span>Loading real shop page…</div></body></html>';
+
+    try{
+      const response=await fetch(url,{
+        method:"GET",
+        credentials:"include",
+        cache:"no-cache",
+        headers:{"Accept":"text/html,application/xhtml+xml"}
+      });
+
+      if(!response.ok){
+        throw new Error("Shop page returned HTTP "+response.status+".");
+      }
+
+      const html=await response.text();
+      if(token!==previewLoadToken||frame.dataset.currentUrl!==requestKey)return;
+
+      frame.dataset.m7studioShopSlug=slug;
+      frame.srcdoc=buildPreviewDocument(html,url,slug);
+      frame.dataset.previewReady="1";
+
+      /* The live bridge may have published while the replica was loading. */
+      setTimeout(()=>{
+        try{window.dispatchEvent(new CustomEvent("ma7alak:design-preview-request"))}catch(_){}
+      },120);
+    }catch(error){
+      if(token!==previewLoadToken||frame.dataset.currentUrl!==requestKey)return;
+      frame.dataset.previewReady="0";
+      frame.srcdoc=previewErrorDocument(error&&error.message);
+    }
+  }
+
   function ensureRealPreview(panel){
     const dock=panel.querySelector(".m7v4-edit-preview");
     if(!dock)return;
@@ -377,8 +598,7 @@
       dock.appendChild(real);
     }
     const frame=real.querySelector("[data-m7studio-frame]");
-    const url=studioPreviewUrl();
-    if(frame&&url&&String(frame.dataset.currentUrl||"")!==url){frame.dataset.currentUrl=url;frame.src=url}
+    loadRealPreview(frame);
     const title=dock.querySelector("[data-m7v4-preview-title]");if(title)title.textContent="Live Preview · Real shop page";
     const copy=dock.querySelector(".m7v4-preview-head-copy small");if(copy)copy.textContent="Scroll the phone and watch unsaved changes instantly";
     const live=dock.querySelector(".m7v4-preview-live");if(live)live.textContent="SYNCED";
@@ -659,8 +879,11 @@
     if(!document.body.classList.contains("m7studio-body-open"))return;
     if(event.target?.id==="ma-edit-url"||event.target?.id==="ma-edit-slug"){
       const frame=document.querySelector("#ma-admin-edit-card .m7studio-real-preview iframe");
-      const url=studioPreviewUrl();
-      if(frame&&url){frame.dataset.currentUrl=url;frame.src=url}
+      if(frame){
+        frame.dataset.currentUrl="";
+        frame.dataset.previewReady="0";
+        loadRealPreview(frame);
+      }
     }
   },true);
 
