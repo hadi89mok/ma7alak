@@ -1,0 +1,39 @@
+name: Build PWA 512 icon
+
+on:
+  push:
+    paths:
+      - "pwa/icon-192.png"
+
+permissions:
+  contents: write
+
+jobs:
+  build-icon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pillow
+        run: python3 -m pip install --quiet pillow
+
+      - name: Build 512 icon
+        run: |
+          python3 - <<'PY'
+          from PIL import Image
+          src = Image.open("pwa/icon-192.png").convert("RGBA")
+          out = src.resize((512, 512), Image.Resampling.LANCZOS)
+          out.save("pwa/icon-512.png", optimize=True)
+          PY
+
+      - name: Commit generated icon
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pwa/icon-512.png
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Generate 512px PWA icon [skip ci]"
+          git push
