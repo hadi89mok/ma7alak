@@ -521,10 +521,24 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     storyScrollState=null;
   }
 
+  function exitDirectoryStoryFullscreen(){
+    try{
+      const fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(fs===storyViewer||storyViewer?.contains?.(fs)){
+        const exit=document.exitFullscreen||document.webkitExitFullscreen;
+        if(typeof exit==="function"){
+          const result=exit.call(document);
+          if(result&&typeof result.catch==="function")result.catch(()=>{});
+        }
+      }
+    }catch(_){}
+  }
+
   function closeDirectoryStory(fromHistory=false){
     if(!storyViewerOpen)return;
     storyViewerOpen=false;
     clearStoryPlayback();
+    exitDirectoryStoryFullscreen();
     storyViewer?.classList.remove("open","ready");
     storyViewer?.setAttribute("aria-hidden","true");
     restoreStoryScroll();
@@ -560,6 +574,21 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
 
     storyViewer.classList.add("open");
     storyViewer.setAttribute("aria-hidden","false");
+
+    /*
+       Request real fullscreen directly from the user's profile-circle tap.
+       This is required on Android/Chrome/Brave to hide browser chrome.
+       If a browser does not support element fullscreen, the fixed viewer
+       remains as the fallback.
+    */
+    try{
+      const request=storyViewer.requestFullscreen||storyViewer.webkitRequestFullscreen;
+      if(typeof request==="function"){
+        const result=request.call(storyViewer,{navigationUI:"hide"});
+        if(result&&typeof result.catch==="function")result.catch(()=>{});
+      }
+    }catch(_){}
+
     renderDirectoryStory(storyViewerIndex);
 
     if(!storyHistoryArmed){
@@ -601,7 +630,16 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
     storyViewer.addEventListener('touchstart',e=>{if(!storyViewerOpen||!e.touches?.[0])return;storyTouchStartX=e.touches[0].clientX;storyTouchStartY=e.touches[0].clientY;storyTouchX=storyTouchStartX;storyTouchY=storyTouchStartY},{passive:true});
     storyViewer.addEventListener('touchmove',e=>{if(!storyViewerOpen||!e.touches?.[0])return;storyTouchX=e.touches[0].clientX;storyTouchY=e.touches[0].clientY;const dx=storyTouchX-storyTouchStartX,dy=storyTouchY-storyTouchStartY;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.08&&e.cancelable)e.preventDefault()},{passive:false});
     storyViewer.addEventListener('touchend',()=>{if(!storyViewerOpen)return;const dx=storyTouchX-storyTouchStartX,dy=storyTouchY-storyTouchStartY;if(Math.abs(dx)<48||Math.abs(dx)<=Math.abs(dy)*1.05)return;dx<0?nextDirectoryStory():previousDirectoryStory()},{passive:true});
-    window.addEventListener('popstate',()=>{if(storyViewerOpen)closeDirectoryStory(true)});root.addEventListener('error',e=>{if(e.target.tagName==='IMG')e.target.style.visibility='hidden'},true);root.onclick=handle;root.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-story-circle]')){e.preventDefault();openDirectoryStory(e.target.dataset.storyCircle,0);return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-shop-card]')){e.preventDefault();navigateShop(e.target.dataset.shopCard)}};dialog.onclick=e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}else handle(e)};dialog.addEventListener('change',e=>{if(e.target.matches('[data-sort]'))sort=e.target.value;if(e.target.matches('[data-live]'))liveOnly=e.target.checked;if(e.target.matches('[data-followed-only]'))followedOnly=e.target.checked});dialog.addEventListener('cancel',e=>{e.preventDefault();close()});dialog.addEventListener('play',e=>{dialog.querySelectorAll('video').forEach(v=>{if(v!==e.target)v.pause()})},true);root.querySelector('input').oninput=e=>{q=e.target.value;limit=24;renderCards()};const anchor=root.querySelector('[data-category-anchor]'),returnButton=root.querySelector('[data-action=return-categories]');if('IntersectionObserver'in window){returnObserver=new IntersectionObserver(entries=>returnButton.classList.toggle('visible',!entries[0].isIntersecting&&window.scrollY>320),{threshold:.05});returnObserver.observe(anchor)}render();root.querySelector('[data-grid]').innerHTML='<div class="m7d-empty">Loading local shops…</div>';
+    window.addEventListener('popstate',()=>{if(storyViewerOpen)closeDirectoryStory(true)});
+    const onStoryFullscreenChange=()=>{
+      const fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(storyViewerOpen&&!fs){
+        /* Keep the same-page viewer open as fallback; browser Back/history still closes it. */
+        storyViewer?.classList.add('open');
+      }
+    };
+    document.addEventListener('fullscreenchange',onStoryFullscreenChange);
+    document.addEventListener('webkitfullscreenchange',onStoryFullscreenChange);root.addEventListener('error',e=>{if(e.target.tagName==='IMG')e.target.style.visibility='hidden'},true);root.onclick=handle;root.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-story-circle]')){e.preventDefault();openDirectoryStory(e.target.dataset.storyCircle,0);return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-shop-card]')){e.preventDefault();navigateShop(e.target.dataset.shopCard)}};dialog.onclick=e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}else handle(e)};dialog.addEventListener('change',e=>{if(e.target.matches('[data-sort]'))sort=e.target.value;if(e.target.matches('[data-live]'))liveOnly=e.target.checked;if(e.target.matches('[data-followed-only]'))followedOnly=e.target.checked});dialog.addEventListener('cancel',e=>{e.preventDefault();close()});dialog.addEventListener('play',e=>{dialog.querySelectorAll('video').forEach(v=>{if(v!==e.target)v.pause()})},true);root.querySelector('input').oninput=e=>{q=e.target.value;limit=24;renderCards()};const anchor=root.querySelector('[data-category-anchor]'),returnButton=root.querySelector('[data-action=return-categories]');if('IntersectionObserver'in window){returnObserver=new IntersectionObserver(entries=>returnButton.classList.toggle('visible',!entries[0].isIntersecting&&window.scrollY>320),{threshold:.05});returnObserver.observe(anchor)}render();root.querySelector('[data-grid]').innerHTML='<div class="m7d-empty">Loading local shops…</div>';
     try{if(!window.supabase?.createClient){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.onload=resolve;s.onerror=reject;document.head.append(s)})}client=window.Ma7alakSupabase?.client||window.supabase.createClient('https://wdtaiuwtqdepzdamgsrs.supabase.co','sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});await loadOwner().catch(e=>console.warn('Directory owner:',e));await Promise.all([refresh(),loadFollowed().catch(e=>console.warn('Directory follows:',e))]);let channel=client.channel('directory-v4');['shop_profiles','shop_categories','shop_cities','shop_areas','directory_settings','shop_stories','shop_live_posts','shop_media','shop_reels','shop_follows'].forEach(table=>{channel=channel.on('postgres_changes',{event:'*',schema:'public',table},()=>{clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{refresh();if(shopOpen&&['gallery','reels'].includes(tab))showShop(shopOpen,tab)},40)})});channel.subscribe();startDirectoryDesignPreview();client.auth.onAuthStateChange(()=>setTimeout(async()=>{await loadOwner().catch(()=>{});await loadFollowed().catch(()=>{});renderCards()},0));setInterval(()=>{if(!document.hidden){refresh();loadFollowed().catch(()=>{})}},15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();loadOwner().then(loadFollowed).catch(()=>{});if(storyViewerOpen){const v=storyViewer?.querySelector('video.active');if(v)v.play().catch(()=>{})}}else{dialog.querySelectorAll('video').forEach(v=>v.pause());storyViewer?.querySelectorAll('video').forEach(v=>v.pause())}});window.addEventListener('message',e=>{if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED'].includes(e.data?.type))loadFollowed().catch(()=>{})});window.addEventListener('ma7alak:follow-change',()=>loadFollowed().catch(()=>{}));window.addEventListener('ma7alak:follow-changed',()=>loadFollowed().catch(()=>{}));window.Ma7alakDirectory={refresh,openShop:navigateShop,openDetails:showShop,openStories:showStories,version:6}}catch(e){feedback('Connection unavailable. Reload the page to retry.');console.warn(e)}
   }
   function directoryBootFailed(error){
