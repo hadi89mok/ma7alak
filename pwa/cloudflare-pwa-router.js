@@ -1,106 +1,195 @@
 /*
   SHOUFHON PWA — CLOUDFLARE ROUTER
-  Deploy this Worker only on the PWA asset routes.
 
-  IMPORTANT:
-  The manifest route also serves the PNG app icons through:
-    /manifest.webmanifest?icon=192
-    /manifest.webmanifest?icon=512
+  Route only the PWA root assets through this Worker:
+    /manifest.webmanifest*
+    /sw.js*
+    /pwa-icon-*
+    /pwa-offline*
 
-  This keeps the PWA icons SAME-ORIGIN with shoufhon.com and avoids
-  Hostinger/CSP/installability issues with separate icon routes.
+  Normal ShoufHon pages stay on Hostinger.
 */
 
-const SOURCE_BASE =
+const VERSION="20260921-1";
+
+const SOURCE_BASE=
   "https://raw.githubusercontent.com/hadi89mok/ma7alak/main/pwa/";
 
-const BRAND_ICON =
+const BRAND_ICON=
   "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/hadi%20new.png";
 
-export default {
-  async fetch(request) {
-    const url = new URL(request.url);
+function iconUrl(size){
+  return (
+    BRAND_ICON+
+    "?w="+size+
+    "&h="+size+
+    "&fit=crop"+
+    "&fm=png"+
+    "&auto=compress"+
+    "&v="+VERSION
+  );
+}
 
-    let file = null;
-    let upstreamUrl = null;
-    let contentType = null;
-    let cacheControl = "no-cache, max-age=0";
-
-    if (url.pathname === "/manifest.webmanifest") {
-      const icon = url.searchParams.get("icon");
-
-      if (icon === "192") {
-        upstreamUrl = BRAND_ICON + "?w=192&h=192&fit=crop&fm=png&auto=compress";
-        contentType = "image/png";
-        cacheControl = "public, max-age=86400";
-      } else if (icon === "512") {
-        upstreamUrl = BRAND_ICON + "?w=512&h=512&fit=crop&fm=png&auto=compress";
-        contentType = "image/png";
-        cacheControl = "public, max-age=86400";
-      } else {
-        file = "manifest.webmanifest";
-        contentType = "application/manifest+json; charset=utf-8";
+async function fetchUpstream(url,userAgent){
+  return fetch(
+    url,
+    {
+      headers:{
+        "User-Agent":userAgent||"ShoufHon-PWA-Worker/2.0"
+      },
+      cf:{
+        cacheEverything:false,
+        cacheTtl:0
       }
-    } else if (url.pathname === "/sw.js") {
-      file = "ma7alak-service-worker.js";
-      contentType = "text/javascript; charset=utf-8";
-      cacheControl = "no-cache, no-store, must-revalidate";
-    } else if (url.pathname === "/pwa-offline") {
-      file = "offline.html";
-      contentType = "text/html; charset=utf-8";
-    } else if (url.pathname === "/pwa-icon-192.png") {
-      upstreamUrl = BRAND_ICON + "?w=192&h=192&fit=crop&fm=png&auto=compress";
-      contentType = "image/png";
-      cacheControl = "public, max-age=86400";
-    } else if (url.pathname === "/pwa-icon-512.png") {
-      upstreamUrl = BRAND_ICON + "?w=512&h=512&fit=crop&fm=png&auto=compress";
-      contentType = "image/png";
-      cacheControl = "public, max-age=86400";
-    } else {
+    }
+  );
+}
+
+function responseHeaders(contentType,cacheControl){
+  const headers=new Headers();
+  headers.set("Content-Type",contentType);
+  headers.set("Cache-Control",cacheControl);
+  headers.set("X-Content-Type-Options","nosniff");
+  headers.set("Access-Control-Allow-Origin","*");
+  return headers;
+}
+
+async function serveIcon(size){
+  const upstream=
+    await fetchUpstream(
+      iconUrl(size),
+      "ShoufHon-PWA-Worker/2.0"
+    );
+
+  if(!upstream.ok){
+    return new Response(
+      "ShoufHon PWA icon unavailable",
+      {
+        status:502,
+        headers:responseHeaders(
+          "text/plain; charset=utf-8",
+          "no-store"
+        )
+      }
+    );
+  }
+
+  return new Response(
+    upstream.body,
+    {
+      status:200,
+      headers:responseHeaders(
+        "image/png",
+        "public, max-age=3600"
+      )
+    }
+  );
+}
+
+async function serveRepoFile(file,contentType,cacheControl){
+  const upstream=
+    await fetchUpstream(
+      SOURCE_BASE+
+      file+
+      "?v="+
+      VERSION
+    );
+
+  if(!upstream.ok){
+    return new Response(
+      "ShoufHon PWA asset unavailable",
+      {
+        status:502,
+        headers:responseHeaders(
+          "text/plain; charset=utf-8",
+          "no-store"
+        )
+      }
+    );
+  }
+
+  return new Response(
+    upstream.body,
+    {
+      status:200,
+      headers:responseHeaders(
+        contentType,
+        cacheControl
+      )
+    }
+  );
+}
+
+export default {
+  async fetch(request){
+    const url=new URL(request.url);
+
+    if(
+      request.method!=="GET" &&
+      request.method!=="HEAD"
+    ){
       return fetch(request);
     }
 
-    if (!upstreamUrl) {
-      upstreamUrl = SOURCE_BASE + file + "?v=" + Date.now();
-    }
+    /*
+      Backward compatibility:
+      older ShoufHon manifests used
+      /manifest.webmanifest?icon=192|512.
+      Keep those URLs valid while browsers clear old manifest caches.
+    */
+    if(url.pathname==="/manifest.webmanifest"){
+      const legacyIcon=url.searchParams.get("icon");
 
-    const upstream = await fetch(
-      upstreamUrl,
-      {
-        headers: {
-          "User-Agent": "ShoufHon-PWA-Worker/1.3"
-        },
-        cf: {
-          cacheEverything: false,
-          cacheTtl: 0
-        }
+      if(legacyIcon==="192"){
+        return serveIcon(192);
       }
-    );
 
-    if (!upstream.ok) {
-      return new Response("ShoufHon PWA asset unavailable", {
-        status: 502,
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          "Cache-Control": "no-store"
-        }
-      });
+      if(legacyIcon==="512"){
+        return serveIcon(512);
+      }
+
+      const response=
+        await serveRepoFile(
+          "manifest.webmanifest",
+          "application/manifest+json; charset=utf-8",
+          "no-cache, no-store, must-revalidate"
+        );
+
+      return response;
     }
 
-    const headers = new Headers();
+    if(url.pathname==="/sw.js"){
+      const response=
+        await serveRepoFile(
+          "ma7alak-service-worker.js",
+          "text/javascript; charset=utf-8",
+          "no-cache, no-store, must-revalidate"
+        );
 
-    headers.set("Content-Type", contentType);
-    headers.set("Cache-Control", cacheControl);
-    headers.set("X-Content-Type-Options", "nosniff");
-    headers.set("Access-Control-Allow-Origin", "*");
+      response.headers.set(
+        "Service-Worker-Allowed",
+        "/"
+      );
 
-    if (url.pathname === "/sw.js") {
-      headers.set("Service-Worker-Allowed", "/");
+      return response;
     }
 
-    return new Response(upstream.body, {
-      status: 200,
-      headers
-    });
+    if(url.pathname==="/pwa-icon-192.png"){
+      return serveIcon(192);
+    }
+
+    if(url.pathname==="/pwa-icon-512.png"){
+      return serveIcon(512);
+    }
+
+    if(url.pathname==="/pwa-offline"){
+      return serveRepoFile(
+        "offline.html",
+        "text/html; charset=utf-8",
+        "no-cache, max-age=0"
+      );
+    }
+
+    return fetch(request);
   }
 };
