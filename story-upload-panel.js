@@ -3412,6 +3412,7 @@
 
   const activeFrames=new Map();
   let savedPageOverflow=null;
+  let suppressNextViewerPop=false;
 
   function ensureStyle(){
     if(document.getElementById("shoufhon-embed-viewer-portal-css")){
@@ -3567,7 +3568,7 @@
     })||null;
   }
 
-  function openFrame(source){
+  function openFrame(source,data){
     const frame=frameForSource(source);
 
     if(!frame||activeFrames.has(frame)){
@@ -3599,12 +3600,18 @@
       node=node.parentElement;
     }
 
-    activeFrames.set(frame,{
+    const state={
+      source:source,
       host:host,
       hostHadClass:host.classList.contains("shoufhon-embed-viewer-host"),
       frameHadClass:frame.classList.contains("shoufhon-embed-viewer-frame"),
-      ancestors:ancestors
-    });
+      ancestors:ancestors,
+      viewerKind:String(data&&data.viewerKind||""),
+      shopSlug:String(data&&data.shopSlug||""),
+      historyArmed:false
+    };
+
+    activeFrames.set(frame,state);
 
     if(savedPageOverflow===null){
       const htmlOverflow=document.documentElement.style.overflow;
@@ -3636,10 +3643,29 @@
     frame.classList.add("shoufhon-embed-viewer-frame");
     document.documentElement.classList.add("shoufhon-embed-viewer-open");
     document.body.classList.add("shoufhon-embed-viewer-open");
+
+    if(state.viewerKind==="owner-media-editor"){
+      try{
+        const base=
+          history.state &&
+          typeof history.state==="object"
+            ? history.state
+            : {};
+
+        history.pushState(
+          {...base,__shoufhonEmbedViewer:"owner-media-editor"},
+          "",
+          location.href
+        );
+
+        state.historyArmed=true;
+      }catch(_){}
+    }
   }
 
-  function closeFrame(source){
+  function closeFrame(source,options={}){
     const frame=frameForSource(source);
+    const fromPopstate=options.fromPopstate===true;
 
     if(!frame){
       if(activeFrames.size===0){
@@ -3673,6 +3699,12 @@
     }
 
     activeFrames.delete(frame);
+
+    if(state.historyArmed&&!fromPopstate){
+      state.historyArmed=false;
+      suppressNextViewerPop=true;
+      try{history.back()}catch(_){suppressNextViewerPop=false}
+    }
 
     if(!state.frameHadClass){
       frame.classList.remove("shoufhon-embed-viewer-frame");
@@ -3733,13 +3765,51 @@
     }
 
     if(data.type==="SHOUFHON_EMBED_VIEWER_OPEN"){
-      openFrame(event.source);
+      openFrame(event.source,data);
       return;
     }
 
     if(data.type==="SHOUFHON_EMBED_VIEWER_CLOSE"){
       closeFrame(event.source);
     }
+  });
+
+  window.addEventListener("popstate",function(){
+    if(suppressNextViewerPop){
+      suppressNextViewerPop=false;
+      return;
+    }
+
+    let targetFrame=null;
+    let targetState=null;
+
+    for(const [frame,state] of activeFrames.entries()){
+      if(
+        state &&
+        state.historyArmed &&
+        state.viewerKind==="owner-media-editor"
+      ){
+        targetFrame=frame;
+        targetState=state;
+        break;
+      }
+    }
+
+    if(!targetFrame||!targetState){
+      return;
+    }
+
+    targetState.historyArmed=false;
+
+    try{
+      targetState.source?.postMessage({
+        type:"SHOUFHON_EMBED_VIEWER_BACK",
+        viewerKind:targetState.viewerKind,
+        shopSlug:targetState.shopSlug
+      },"*");
+    }catch(_){}
+
+    closeFrame(targetState.source,{fromPopstate:true});
   });
 })();
 
