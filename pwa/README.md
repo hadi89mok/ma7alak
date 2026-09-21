@@ -4,39 +4,66 @@ This folder contains the production PWA layer for shoufhon.com.
 
 ## Live-data safety
 
-The service worker does not cache Supabase REST/Auth/Storage/Realtime traffic, videos/audio, or navigated HTML pages as stale copies. It only pre-caches the PWA shell and caches immutable commit-pinned ShoufHon JS/CSS from jsDelivr.
+The service worker does not cache Supabase REST/Auth/Storage/Realtime traffic, videos/audio, or navigated HTML pages as stale copies. It only caches immutable commit-pinned ShoufHon JS/CSS from jsDelivr.
 
 ## Cloudflare setup
 
-Hostinger Website Builder does not expose the normal root file system needed for a root-scoped service worker. Keep Hostinger as the origin and use a Cloudflare Worker only for the PWA root files.
+Hostinger Website Builder does not expose the root file system needed for a root-scoped service worker. Keep Hostinger as the website origin and use a Cloudflare Worker only for the PWA root files.
 
-1. Add shoufhon.com to Cloudflare and keep the existing Hostinger DNS records.
-2. Proxy the web A/CNAME records through Cloudflare (orange cloud).
-3. Create a Cloudflare Worker and paste pwa/cloudflare-pwa-router.js.
-4. Add these Worker routes:
+Deploy the current `pwa/cloudflare-pwa-router.js` Worker and add these routes:
 
     shoufhon.com/manifest.webmanifest*
     shoufhon.com/sw.js*
     shoufhon.com/pwa-icon-*
     shoufhon.com/pwa-offline*
 
-If www.shoufhon.com directly serves the website, add the same four routes for www.
+If `www.shoufhon.com` directly serves the site, add the same four routes for `www`.
 
-Do not route shoufhon.com/* to this Worker. Normal pages should continue to Hostinger.
+Do not route `shoufhon.com/*` to this Worker. Normal pages must continue to Hostinger.
 
 ## Hostinger global Custom Code
 
-Load ma7alak-pwa-client.js globally on the top-level site using a commit-pinned jsDelivr URL.
+Load `ma7alak-pwa-client.js` once globally on the top-level site using a commit-pinned jsDelivr URL.
 
-The client injects the manifest/meta tags, registers /sw.js, shows the install card only when the browser says installation is available, and never runs inside Hostinger embed iframes.
+Do not add a duplicate copy.
 
-## Verify
+The client:
+- injects the Web App Manifest and Apple PWA meta tags
+- registers `/sw.js`
+- shows the native Android/Chromium install button when `beforeinstallprompt` is available
+- shows a simple iPhone/iPad "Share → Add to Home Screen" flow
+- falls back to browser-menu installation instructions when the PWA assets are valid but a native prompt is not supplied
+- exposes `window.Ma7alakPWA.checkInstallAssets()` for diagnostics
 
-Open these URLs after the Cloudflare Worker routes are active:
+## Required PWA URLs
+
+These four URLs must return the correct content from the ShoufHon origin:
 
     https://shoufhon.com/manifest.webmanifest
     https://shoufhon.com/sw.js
-    https://shoufhon.com/pwa-icon-192.svg
-    https://shoufhon.com/pwa-offline
+    https://shoufhon.com/pwa-icon-192.png
+    https://shoufhon.com/pwa-icon-512.png
 
-Then open shoufhon.com in Chrome on Android and test installation plus Stories, Reels, messages, Live Offers, Admin design updates, and owner uploads.
+Expected content types:
+- manifest: `application/manifest+json` or JSON
+- service worker: JavaScript
+- both icon endpoints: `image/png`
+
+The 192 icon must be 192×192 and the 512 icon must be 512×512.
+
+Older cached manifests that still request:
+
+    /manifest.webmanifest?icon=192
+    /manifest.webmanifest?icon=512
+
+remain supported by the Worker during the transition.
+
+## Testing
+
+After deploying the Worker and updating the Hostinger PWA client script:
+
+1. Open the four required URLs above.
+2. In Chrome/Brave Android, refresh ShoufHon and wait for the install card.
+3. Tap Install.
+4. On iPhone/iPad Safari, use the ShoufHon install card and follow Share → Add to Home Screen.
+5. Verify the installed app opens in standalone mode and that Stories, Reels, messages, Live Offers, Admin updates, and owner uploads still use live data.
