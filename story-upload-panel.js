@@ -2424,9 +2424,12 @@
 
 
 /* =========================================================
-   SHOUFHON — OWNER + MENU / PROFILE STUDIO V2
-   Existing Story/Reel chooser extended with Admin-controlled
-   Profile Photo + Banner replacement.
+   SHOUFHON — OWNER + MENU / PROFILE MEDIA STUDIO V3
+   ---------------------------------------------------------
+   One simple owner panel for:
+   - Profile photo
+   - Profile banner
+   Both can be replaced or removed, then saved together.
 ========================================================= */
 (function(){
   "use strict";
@@ -2444,12 +2447,16 @@
   let activeProfile=null;
   let profileEditAllowed=false;
   const ownerProfileCache=new Map();
-  let profileMode="profile";
-  let pendingFile=null;
-  let pendingObjectUrl="";
+
+  const mediaDraft={
+    profile:{file:null,objectUrl:"",remove:false,dirty:false},
+    banner:{file:null,objectUrl:"",remove:false,dirty:false}
+  };
 
   function bool(value){
-    return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
+    return value===true||
+      String(value||"").toLowerCase()==="true"||
+      String(value||"")==="1";
   }
 
   function esc(value){
@@ -2475,7 +2482,9 @@
 
     if(!window.supabase?.createClient){
       await new Promise((resolve,reject)=>{
-        const existing=document.querySelector('script[src*="@supabase/supabase-js"]');
+        const existing=
+          document.querySelector('script[src*="@supabase/supabase-js"]');
+
         if(existing){
           const started=Date.now();
           const timer=setInterval(()=>{
@@ -2489,6 +2498,7 @@
           },80);
           return;
         }
+
         const script=document.createElement("script");
         script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
         script.async=true;
@@ -2501,14 +2511,21 @@
     client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     window.__MA7ALAK_SHARED_SUPABASE_CLIENT__=
       window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||client;
+
     return client;
   }
 
   function imageExtension(file){
-    const fromName=String(file?.name||"").split(".").pop().toLowerCase();
+    const fromName=
+      String(file?.name||"")
+        .split(".")
+        .pop()
+        .toLowerCase();
+
     if(["jpg","jpeg","png","webp","gif"].includes(fromName)){
       return fromName==="jpeg"?"jpg":fromName;
     }
+
     const mime=String(file?.type||"").toLowerCase();
     if(mime==="image/png")return"png";
     if(mime==="image/webp")return"webp";
@@ -2518,9 +2535,11 @@
 
   function validateImage(file){
     if(!file)throw new Error("Choose an image first.");
+
     if(!/^image\/(jpeg|png|webp|gif)$/i.test(String(file.type||""))){
       throw new Error("Use JPG, PNG, WEBP or GIF.");
     }
+
     if(file.size>MAX_IMAGE_BYTES){
       throw new Error("Image must be smaller than 12 MB.");
     }
@@ -2531,8 +2550,11 @@
     const marker="/storage/v1/object/public/"+IMAGE_BUCKET+"/";
     const at=value.indexOf(marker);
     if(at<0)return"";
+
     try{
-      return decodeURIComponent(value.slice(at+marker.length).split("?")[0]);
+      return decodeURIComponent(
+        value.slice(at+marker.length).split("?")[0]
+      );
     }catch(_){
       return value.slice(at+marker.length).split("?")[0];
     }
@@ -2541,18 +2563,40 @@
   function ownedCleanupPath(path,slug){
     const parts=String(path||"").split("/").filter(Boolean);
     if(parts.length<2)return false;
-    const roots=new Set(["owner-profile","owner-banner","profiles","profile-banners"]);
+
+    const roots=
+      new Set([
+        "owner-profile",
+        "owner-banner",
+        "profiles",
+        "profile-banners"
+      ]);
+
     return roots.has(parts[0])&&parts[1]===slug;
   }
 
   async function cleanupOldImage(url,slug){
     const path=publicStoragePath(url);
     if(!ownedCleanupPath(path,slug))return;
+
     try{
-      const result=await (await getClient()).storage.from(IMAGE_BUCKET).remove([path]);
-      if(result.error)console.warn("SHOUFHON old profile media cleanup:",result.error);
+      const result=
+        await (await getClient())
+          .storage
+          .from(IMAGE_BUCKET)
+          .remove([path]);
+
+      if(result.error){
+        console.warn(
+          "SHOUFHON old profile media cleanup:",
+          result.error
+        );
+      }
     }catch(error){
-      console.warn("SHOUFHON old profile media cleanup:",error);
+      console.warn(
+        "SHOUFHON old profile media cleanup:",
+        error
+      );
     }
   }
 
@@ -2560,111 +2604,567 @@
     const c=await getClient();
     const session=await c.auth.getUser();
     const user=session.data?.user;
-    if(!user)throw new Error("Owner login required.");
 
-    const owner=await c
-      .from("shop_owners")
-      .select("shop_slug")
-      .eq("user_id",user.id)
-      .eq("shop_slug",slug)
-      .maybeSingle();
+    if(!user){
+      throw new Error("Owner login required.");
+    }
+
+    const owner=
+      await c
+        .from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id",user.id)
+        .eq("shop_slug",slug)
+        .maybeSingle();
 
     if(owner.error)throw owner.error;
-    if(!owner.data)throw new Error("This account does not own this shop.");
+    if(!owner.data){
+      throw new Error("This account does not own this shop.");
+    }
 
-    const profile=await c
-      .from("shop_profiles")
-      .select("shop_slug,shop_name,profile_image_url,story_logo_url,directory_options")
-      .eq("shop_slug",slug)
-      .maybeSingle();
+    const profile=
+      await c
+        .from("shop_profiles")
+        .select(
+          "shop_slug,shop_name,profile_image_url,story_logo_url,directory_options"
+        )
+        .eq("shop_slug",slug)
+        .maybeSingle();
 
     if(profile.error)throw profile.error;
-    if(!profile.data)throw new Error("Shop profile was not found.");
+    if(!profile.data){
+      throw new Error("Shop profile was not found.");
+    }
 
     activeProfile=profile.data;
-    profileEditAllowed=bool(profile.data.directory_options?.owner_profile_edit_enabled);
-    ownerProfileCache.set(String(slug||"").trim().toLowerCase(),profile.data);
+    profileEditAllowed=
+      bool(profile.data.directory_options?.owner_profile_edit_enabled);
+
+    ownerProfileCache.set(
+      String(slug||"").trim().toLowerCase(),
+      profile.data
+    );
+
     return profile.data;
   }
 
-  function revokePreview(){
-    if(pendingObjectUrl){
-      try{URL.revokeObjectURL(pendingObjectUrl)}catch(_){}
-      pendingObjectUrl="";
+  function draftFor(kind){
+    return mediaDraft[kind==="banner"?"banner":"profile"];
+  }
+
+  function revokeDraft(kind){
+    const draft=draftFor(kind);
+
+    if(draft.objectUrl){
+      try{URL.revokeObjectURL(draft.objectUrl)}catch(_){}
     }
-    pendingFile=null;
+
+    draft.objectUrl="";
+    draft.file=null;
+  }
+
+  function resetDraft(){
+    ["profile","banner"].forEach(kind=>{
+      const draft=draftFor(kind);
+      revokeDraft(kind);
+      draft.remove=false;
+      draft.dirty=false;
+    });
+  }
+
+  function currentMediaUrl(kind){
+    if(!activeProfile)return"";
+
+    if(kind==="banner"){
+      return String(
+        activeProfile.directory_options?.profile_banner_image_url||
+        ""
+      ).trim();
+    }
+
+    return String(
+      activeProfile.profile_image_url||
+      activeProfile.story_logo_url||
+      ""
+    ).trim();
+  }
+
+  function effectiveMediaUrl(kind){
+    const draft=draftFor(kind);
+
+    if(draft.dirty){
+      if(draft.remove)return"";
+      if(draft.objectUrl)return draft.objectUrl;
+    }
+
+    return currentMediaUrl(kind);
+  }
+
+  function renderMediaSlot(kind){
+    const preview=
+      document.getElementById(
+        kind==="banner"
+          ?"m7-owner-banner-preview"
+          :"m7-owner-profile-preview"
+      );
+
+    if(!preview)return;
+
+    const url=effectiveMediaUrl(kind);
+    preview.innerHTML="";
+
+    if(url){
+      const image=document.createElement("img");
+      image.src=url;
+      image.alt=
+        kind==="banner"
+          ?"Banner preview"
+          :"Profile preview";
+      preview.appendChild(image);
+      preview.classList.add("has-image");
+    }else{
+      const placeholder=document.createElement("span");
+      placeholder.textContent=
+        kind==="banner"
+          ?"Default banner"
+          :"Default profile";
+      preview.appendChild(placeholder);
+      preview.classList.remove("has-image");
+    }
+
+    const remove=
+      document.getElementById(
+        kind==="banner"
+          ?"m7-owner-banner-remove"
+          :"m7-owner-profile-remove"
+      );
+
+    if(remove){
+      remove.disabled=
+        !url &&
+        !draftFor(kind).dirty;
+    }
+  }
+
+  function renderAllMedia(){
+    renderMediaSlot("profile");
+    renderMediaSlot("banner");
+  }
+
+  function updateSaveState(){
+    const save=
+      document.getElementById("m7-owner-profile-save");
+
+    if(save){
+      save.disabled=
+        !mediaDraft.profile.dirty &&
+        !mediaDraft.banner.dirty;
+    }
+  }
+
+  function markFile(kind,file){
+    validateImage(file);
+
+    const draft=draftFor(kind);
+    revokeDraft(kind);
+
+    draft.file=file;
+    draft.objectUrl=URL.createObjectURL(file);
+    draft.remove=false;
+    draft.dirty=true;
+
+    renderMediaSlot(kind);
+    updateSaveState();
+  }
+
+  function markRemove(kind){
+    const draft=draftFor(kind);
+    revokeDraft(kind);
+
+    draft.remove=true;
+    draft.dirty=true;
+
+    renderMediaSlot(kind);
+    updateSaveState();
+
+    const status=
+      document.getElementById("m7-owner-profile-status");
+
+    if(status){
+      status.textContent=
+        kind==="banner"
+          ?"Banner will return to default after Save."
+          :"Profile photo will return to default after Save.";
+      status.className="";
+    }
+  }
+
+  function closeStudio(){
+    resetDraft();
+
+    const studio=
+      document.getElementById("m7-owner-profile-studio");
+
+    studio?.classList.remove("active");
+
+    const status=
+      document.getElementById("m7-owner-profile-status");
+
+    if(status){
+      status.textContent="";
+      status.className="";
+    }
+
+    const profileInput=
+      document.getElementById("m7-owner-profile-file");
+    const bannerInput=
+      document.getElementById("m7-owner-banner-file");
+
+    if(profileInput)profileInput.value="";
+    if(bannerInput)bannerInput.value="";
+
+    updateSaveState();
   }
 
   function injectChooser(){
-    if(document.getElementById("ma7alak-owner-add-chooser"))return;
+    if(document.getElementById("ma7alak-owner-add-chooser")){
+      return;
+    }
 
     const style=document.createElement("style");
     style.id="ma7alak-owner-add-chooser-style";
     style.textContent=`
-      #ma7alak-owner-add-chooser,#m7-owner-profile-studio{
-        position:fixed!important;inset:0!important;z-index:2147483647!important;
-        display:none!important;align-items:center!important;justify-content:center!important;
-        width:100vw!important;height:100vh!important;height:100dvh!important;
+      #ma7alak-owner-add-chooser,
+      #m7-owner-profile-studio{
+        position:fixed!important;
+        inset:0!important;
+        z-index:2147483647!important;
+        display:none!important;
+        align-items:center!important;
+        justify-content:center!important;
+        width:100vw!important;
+        height:100vh!important;
+        height:100dvh!important;
         padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;
-        box-sizing:border-box!important;background:rgba(3,4,5,.91)!important;
-        backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
-        font-family:Arial,"Segoe UI",sans-serif!important;overflow:auto!important;
-        -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+        box-sizing:border-box!important;
+        background:rgba(3,4,5,.91)!important;
+        backdrop-filter:blur(14px)!important;
+        -webkit-backdrop-filter:blur(14px)!important;
+        font-family:Arial,"Segoe UI",sans-serif!important;
+        overflow:auto!important;
+        -webkit-overflow-scrolling:touch!important;
+        overscroll-behavior:contain!important
       }
-      #ma7alak-owner-add-chooser.active,#m7-owner-profile-studio.active{display:flex!important}
-      #ma7alak-owner-add-panel,#m7-owner-profile-card{
-        position:relative!important;width:min(460px,100%)!important;box-sizing:border-box!important;
-        border:1px solid rgba(217,164,65,.30)!important;border-radius:26px!important;
-        background:radial-gradient(circle at 15% 0,rgba(217,164,65,.10),transparent 36%),linear-gradient(180deg,#191613,#0d0d0e)!important;
-        box-shadow:0 28px 90px rgba(0,0,0,.72)!important;color:#fff!important;
+
+      #ma7alak-owner-add-chooser.active,
+      #m7-owner-profile-studio.active{
+        display:flex!important
       }
-      #ma7alak-owner-add-panel{padding:27px 18px 19px!important;text-align:center!important}
-      #ma7alak-owner-add-close,#m7-owner-profile-close{
-        position:absolute!important;right:12px!important;top:11px!important;width:40px!important;height:40px!important;
-        border:1px solid rgba(255,255,255,.10)!important;border-radius:50%!important;
-        background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:25px!important;
-        line-height:36px!important;padding:0!important;z-index:4!important;touch-action:manipulation!important;
+
+      #ma7alak-owner-add-panel,
+      #m7-owner-profile-card{
+        position:relative!important;
+        width:min(470px,100%)!important;
+        box-sizing:border-box!important;
+        border:1px solid rgba(217,164,65,.30)!important;
+        border-radius:24px!important;
+        background:
+          radial-gradient(circle at 15% 0,rgba(217,164,65,.10),transparent 36%),
+          linear-gradient(180deg,#191613,#0d0d0e)!important;
+        box-shadow:0 28px 90px rgba(0,0,0,.72)!important;
+        color:#fff!important
       }
-      .ma7alak-owner-add-title{font-size:22px!important;font-weight:900!important;margin:3px 42px 4px!important}
-      .ma7alak-owner-add-sub{font-size:12px!important;color:rgba(255,255,255,.52)!important;margin:0 0 18px!important;line-height:1.45!important}
-      .ma7alak-owner-add-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important}
+
+      #ma7alak-owner-add-panel{
+        padding:27px 18px 19px!important;
+        text-align:center!important
+      }
+
+      #ma7alak-owner-add-close,
+      #m7-owner-profile-close{
+        position:absolute!important;
+        right:12px!important;
+        top:11px!important;
+        width:40px!important;
+        height:40px!important;
+        border:1px solid rgba(255,255,255,.10)!important;
+        border-radius:50%!important;
+        background:rgba(255,255,255,.06)!important;
+        color:#fff!important;
+        font-size:25px!important;
+        line-height:36px!important;
+        padding:0!important;
+        z-index:4!important;
+        touch-action:manipulation!important
+      }
+
+      .ma7alak-owner-add-title{
+        font-size:22px!important;
+        font-weight:900!important;
+        margin:3px 42px 4px!important
+      }
+
+      .ma7alak-owner-add-sub{
+        font-size:12px!important;
+        color:rgba(255,255,255,.52)!important;
+        margin:0 0 18px!important;
+        line-height:1.45!important
+      }
+
+      .ma7alak-owner-add-grid{
+        display:grid!important;
+        grid-template-columns:1fr 1fr!important;
+        gap:11px!important
+      }
+
       .ma7alak-owner-add-choice{
-        min-height:126px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:20px!important;
-        background:rgba(255,255,255,.045)!important;color:#fff!important;padding:15px 10px!important;
-        font:inherit!important;font-weight:900!important;cursor:pointer!important;
-        -webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;
+        min-height:122px!important;
+        border:1px solid rgba(255,255,255,.09)!important;
+        border-radius:19px!important;
+        background:rgba(255,255,255,.045)!important;
+        color:#fff!important;
+        padding:15px 10px!important;
+        font:inherit!important;
+        font-weight:900!important;
+        cursor:pointer!important;
+        -webkit-tap-highlight-color:transparent!important;
+        touch-action:manipulation!important
       }
-      .ma7alak-owner-add-choice.profile-tool{border-color:rgba(217,164,65,.24)!important;background:rgba(217,164,65,.055)!important}
-      .ma7alak-owner-add-choice[hidden]{display:none!important}
-      .ma7alak-owner-add-choice:active{transform:scale(.97)!important}
-      .ma7alak-owner-add-icon{display:block!important;font-size:30px!important;margin-bottom:8px!important}
-      .ma7alak-owner-add-choice small{display:block!important;margin-top:7px!important;color:rgba(255,255,255,.46)!important;font-size:10px!important;font-weight:600!important;line-height:1.4!important}
-      #m7-owner-add-permission{min-height:16px;margin:11px 2px 0;color:#8f816d;font-size:9px;line-height:1.4}
-      #m7-owner-profile-card{padding:18px!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
-      .m7ops-head{padding:3px 48px 14px 0}.m7ops-head b{display:block;font-size:19px}.m7ops-head small{display:block;margin-top:4px;color:#948773;font-size:10px;line-height:1.45}
-      .m7ops-mode{display:flex;gap:7px;margin:5px 0 14px}
-      .m7ops-mode button{flex:1;min-height:40px;border:1px solid rgba(217,164,65,.17);border-radius:12px;background:#11100e;color:#bbaa8e;font-size:10px;font-weight:900;touch-action:manipulation}
-      .m7ops-mode button.active{border-color:#d9a441;background:rgba(217,164,65,.13);color:#f2ce87}
-      .m7ops-preview{position:relative;display:grid;place-items:center;min-height:210px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#080706;overflow:hidden}
-      .m7ops-preview.banner{min-height:170px}
-      .m7ops-preview img{display:block;max-width:100%;max-height:290px;object-fit:cover;background:#111}
-      .m7ops-preview.profile img{width:150px;height:150px;border-radius:50%;border:3px solid #d9a441;box-shadow:0 0 22px rgba(217,164,65,.28)}
-      .m7ops-preview.banner img{width:100%;height:170px;border-radius:0;object-fit:cover}
-      .m7ops-preview span{padding:20px;color:#746b5e;font-size:10px;text-align:center}
-      .m7ops-pick,.m7ops-save{
-        width:100%;min-height:48px;border-radius:14px;font-size:12px;font-weight:950;touch-action:manipulation;cursor:pointer;
+
+      .ma7alak-owner-add-choice.profile-tool{
+        grid-column:1/-1!important;
+        min-height:96px!important;
+        border-color:rgba(217,164,65,.30)!important;
+        background:rgba(217,164,65,.07)!important
       }
-      .m7ops-pick{display:grid;place-items:center;border:1px solid rgba(217,164,65,.28);background:rgba(217,164,65,.08);color:#edcb85}
-      .m7ops-save{margin-top:9px;border:0;background:linear-gradient(135deg,#f1cf83,#c58b31);color:#211507}
-      .m7ops-save:disabled{opacity:.45;pointer-events:none}
-      #m7-owner-profile-file{position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0}
-      #m7-owner-profile-status{min-height:20px;margin:9px 2px 0;color:#a99d8a;font-size:10px;line-height:1.45}
-      #m7-owner-profile-status.ok{color:#80dda5}#m7-owner-profile-status.err{color:#ff9999}
+
+      .ma7alak-owner-add-choice[hidden]{
+        display:none!important
+      }
+
+      .ma7alak-owner-add-choice:active{
+        transform:scale(.97)!important
+      }
+
+      .ma7alak-owner-add-icon{
+        display:block!important;
+        font-size:29px!important;
+        margin-bottom:7px!important
+      }
+
+      .ma7alak-owner-add-choice small{
+        display:block!important;
+        margin-top:7px!important;
+        color:rgba(255,255,255,.46)!important;
+        font-size:10px!important;
+        font-weight:600!important;
+        line-height:1.4!important
+      }
+
+      #m7-owner-add-permission{
+        min-height:16px;
+        margin:11px 2px 0;
+        color:#8f816d;
+        font-size:9px;
+        line-height:1.4
+      }
+
+      #m7-owner-profile-card{
+        padding:18px!important;
+        max-height:calc(100dvh - 28px)!important;
+        overflow:auto!important;
+        -webkit-overflow-scrolling:touch!important
+      }
+
+      .m7ops-head{
+        padding:3px 48px 13px 0
+      }
+
+      .m7ops-head b{
+        display:block;
+        font-size:19px
+      }
+
+      .m7ops-head small{
+        display:block;
+        margin-top:4px;
+        color:#948773;
+        font-size:10px;
+        line-height:1.45
+      }
+
+      .m7ops-media-grid{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:10px
+      }
+
+      .m7ops-media-card{
+        padding:12px;
+        border:1px solid rgba(255,255,255,.08);
+        border-radius:17px;
+        background:rgba(255,255,255,.025)
+      }
+
+      .m7ops-media-title{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin-bottom:9px
+      }
+
+      .m7ops-media-title b{
+        color:#f0d39a;
+        font-size:11px
+      }
+
+      .m7ops-media-title small{
+        color:#756b5d;
+        font-size:8px
+      }
+
+      .m7ops-preview{
+        display:grid;
+        place-items:center;
+        overflow:hidden;
+        background:#080706;
+        color:#746b5e;
+        font-size:10px;
+        text-align:center
+      }
+
+      .m7ops-preview.profile{
+        width:116px;
+        height:116px;
+        margin:0 auto 10px;
+        border:3px solid rgba(217,164,65,.75);
+        border-radius:50%;
+        box-shadow:0 0 20px rgba(217,164,65,.14)
+      }
+
+      .m7ops-preview.profile img{
+        width:100%;
+        height:100%;
+        object-fit:cover
+      }
+
+      .m7ops-preview.banner{
+        width:100%;
+        height:118px;
+        margin-bottom:10px;
+        border:1px solid rgba(217,164,65,.18);
+        border-radius:14px
+      }
+
+      .m7ops-preview.banner img{
+        width:100%;
+        height:100%;
+        object-fit:cover
+      }
+
+      .m7ops-actions{
+        display:grid;
+        grid-template-columns:1fr auto;
+        gap:7px
+      }
+
+      .m7ops-pick,
+      .m7ops-remove,
+      .m7ops-save{
+        min-height:42px;
+        border-radius:12px;
+        font-size:10px;
+        font-weight:950;
+        touch-action:manipulation;
+        cursor:pointer
+      }
+
+      .m7ops-pick{
+        border:1px solid rgba(217,164,65,.28);
+        background:rgba(217,164,65,.08);
+        color:#edcb85
+      }
+
+      .m7ops-remove{
+        min-width:88px;
+        border:1px solid rgba(255,120,120,.18);
+        background:rgba(255,90,90,.06);
+        color:#ffb1b1
+      }
+
+      .m7ops-remove:disabled{
+        opacity:.38;
+        pointer-events:none
+      }
+
+      .m7ops-save{
+        width:100%;
+        min-height:48px;
+        margin-top:11px;
+        border:0;
+        background:linear-gradient(135deg,#f1cf83,#c58b31);
+        color:#211507;
+        font-size:12px
+      }
+
+      .m7ops-save:disabled{
+        opacity:.45;
+        pointer-events:none
+      }
+
+      #m7-owner-profile-file,
+      #m7-owner-banner-file{
+        position:fixed;
+        left:-9999px;
+        top:-9999px;
+        width:1px;
+        height:1px;
+        opacity:0
+      }
+
+      #m7-owner-profile-status{
+        min-height:20px;
+        margin:9px 2px 0;
+        color:#a99d8a;
+        font-size:10px;
+        line-height:1.45
+      }
+
+      #m7-owner-profile-status.ok{
+        color:#80dda5
+      }
+
+      #m7-owner-profile-status.err{
+        color:#ff9999
+      }
+
       @media(max-width:390px){
-        .ma7alak-owner-add-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
-        .ma7alak-owner-add-choice{min-height:112px!important;padding:12px 8px!important}
-        .ma7alak-owner-add-icon{font-size:26px!important}
-        #m7-owner-profile-card{padding:14px!important}
+        .ma7alak-owner-add-grid{
+          grid-template-columns:1fr 1fr!important;
+          gap:8px!important
+        }
+
+        .ma7alak-owner-add-choice{
+          min-height:108px!important;
+          padding:12px 8px!important
+        }
+
+        .ma7alak-owner-add-choice.profile-tool{
+          min-height:88px!important
+        }
+
+        .ma7alak-owner-add-icon{
+          font-size:25px!important
+        }
+
+        #m7-owner-profile-card{
+          padding:14px!important
+        }
+
+        .m7ops-preview.banner{
+          height:104px
+        }
       }
     `;
     document.head.appendChild(style);
@@ -2675,12 +3175,27 @@
       <button id="ma7alak-owner-add-close" type="button" aria-label="Close">×</button>
       <div class="ma7alak-owner-add-title">Create & manage</div>
       <div class="ma7alak-owner-add-sub">Choose what you want to update for this shop.</div>
+
       <div class="ma7alak-owner-add-grid">
-        <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">📸</span>Add Story<small>Disappears automatically after 24 hours</small></button>
-        <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">🔥</span>Add Homepage Reel<small>Appears in Reels on the homepage</small></button>
-        <button id="m7-owner-change-profile" class="ma7alak-owner-add-choice profile-tool" type="button" hidden><span class="ma7alak-owner-add-icon">◉</span>Profile Photo<small>Updates this circle and Show Shops</small></button>
-        <button id="m7-owner-change-banner" class="ma7alak-owner-add-choice profile-tool" type="button" hidden><span class="ma7alak-owner-add-icon">▭</span>Profile Banner<small>Replace the banner above your profile</small></button>
+        <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button">
+          <span class="ma7alak-owner-add-icon">📸</span>
+          Add Story
+          <small>Disappears automatically after 24 hours</small>
+        </button>
+
+        <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button">
+          <span class="ma7alak-owner-add-icon">🔥</span>
+          Add Homepage Reel
+          <small>Appears in Reels on the homepage</small>
+        </button>
+
+        <button id="m7-owner-change-profile" class="ma7alak-owner-add-choice profile-tool" type="button" hidden>
+          <span class="ma7alak-owner-add-icon">◉ ▭</span>
+          Profile & Banner
+          <small>Change or remove both from one place</small>
+        </button>
       </div>
+
       <div id="m7-owner-add-permission" aria-live="polite"></div>
     </div>`;
     document.body.appendChild(overlay);
@@ -2689,319 +3204,628 @@
     studio.id="m7-owner-profile-studio";
     studio.innerHTML=`<section id="m7-owner-profile-card">
       <button id="m7-owner-profile-close" type="button" aria-label="Close">×</button>
-      <div class="m7ops-head"><b id="m7-owner-profile-title">Change profile photo</b><small>Choose an image from your phone. The previous stored image is removed after the new one is saved.</small></div>
-      <div class="m7ops-mode">
-        <button type="button" data-m7ops-mode="profile">Profile photo</button>
-        <button type="button" data-m7ops-mode="banner">Banner</button>
+
+      <div class="m7ops-head">
+        <b>Profile & Banner</b>
+        <small>Change either image, remove it to return to the default, then save once.</small>
       </div>
-      <div id="m7-owner-profile-preview" class="m7ops-preview profile"><span>Choose an image to preview it.</span></div>
-      <button id="m7-owner-profile-pick" class="m7ops-pick" type="button">📱 Choose image from device</button>
-      <input id="m7-owner-profile-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-      <button id="m7-owner-profile-save" class="m7ops-save" type="button" disabled>Save replacement</button>
+
+      <div class="m7ops-media-grid">
+        <div class="m7ops-media-card">
+          <div class="m7ops-media-title">
+            <b>Profile photo</b>
+            <small>Profile + Show Shops</small>
+          </div>
+
+          <div id="m7-owner-profile-preview" class="m7ops-preview profile">
+            <span>Default profile</span>
+          </div>
+
+          <div class="m7ops-actions">
+            <button id="m7-owner-profile-pick" class="m7ops-pick" type="button">Choose photo</button>
+            <button id="m7-owner-profile-remove" class="m7ops-remove" type="button">Remove</button>
+          </div>
+
+          <input id="m7-owner-profile-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        </div>
+
+        <div class="m7ops-media-card">
+          <div class="m7ops-media-title">
+            <b>Profile banner</b>
+            <small>Profile + Show Shops</small>
+          </div>
+
+          <div id="m7-owner-banner-preview" class="m7ops-preview banner">
+            <span>Default banner</span>
+          </div>
+
+          <div class="m7ops-actions">
+            <button id="m7-owner-banner-pick" class="m7ops-pick" type="button">Choose banner</button>
+            <button id="m7-owner-banner-remove" class="m7ops-remove" type="button">Remove</button>
+          </div>
+
+          <input id="m7-owner-banner-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        </div>
+      </div>
+
+      <button id="m7-owner-profile-save" class="m7ops-save" type="button" disabled>Save changes</button>
       <div id="m7-owner-profile-status" aria-live="polite"></div>
     </section>`;
     document.body.appendChild(studio);
 
-    const closeChooser=()=>overlay.classList.remove("active");
-    const closeStudio=()=>{
-      revokePreview();
-      studio.classList.remove("active");
-      document.getElementById("m7-owner-profile-status").textContent="";
-      document.getElementById("m7-owner-profile-save").disabled=true;
-      document.getElementById("m7-owner-profile-file").value="";
+    const closeChooser=()=>{
+      overlay.classList.remove("active");
     };
 
-    document.getElementById("ma7alak-owner-add-close").addEventListener("click",closeChooser);
-    overlay.addEventListener("click",event=>{if(event.target===overlay)closeChooser();});
-    document.getElementById("m7-owner-profile-close").addEventListener("click",closeStudio);
-    studio.addEventListener("click",event=>{if(event.target===studio)closeStudio();});
+    document
+      .getElementById("ma7alak-owner-add-close")
+      .addEventListener("click",closeChooser);
 
-    document.getElementById("ma7alak-owner-add-story").addEventListener("click",()=>{
-      closeChooser();
-      window.postMessage({
-        type:"MA7ALAK_OPEN_STORY_UPLOADER",
-        shopSlug:activeSlug,
-        __ma7alakOpenStoryNow:true
-      },"*");
+    overlay.addEventListener("click",event=>{
+      if(event.target===overlay)closeChooser();
     });
 
-    document.getElementById("ma7alak-owner-add-reel").addEventListener("click",()=>{
-      closeChooser();
-      if(window.Ma7alakOwnerReels&&typeof window.Ma7alakOwnerReels.open==="function"){
-        window.Ma7alakOwnerReels.open(activeSlug).catch(error=>console.error("SHOUFHON Reel uploader:",error));
-      }else{
-        window.postMessage({type:"MA7ALAK_OPEN_REEL_UPLOADER",shopSlug:activeSlug},"*");
-      }
+    document
+      .getElementById("m7-owner-profile-close")
+      .addEventListener("click",closeStudio);
+
+    studio.addEventListener("click",event=>{
+      if(event.target===studio)closeStudio();
     });
 
-    document.getElementById("m7-owner-change-profile").addEventListener("click",()=>{
-      closeChooser();
-      openProfileStudio("profile");
-    });
-    document.getElementById("m7-owner-change-banner").addEventListener("click",()=>{
-      closeChooser();
-      openProfileStudio("banner");
-    });
+    document
+      .getElementById("ma7alak-owner-add-story")
+      .addEventListener("click",()=>{
+        closeChooser();
 
-    studio.querySelectorAll("[data-m7ops-mode]").forEach(button=>{
-      button.addEventListener("click",()=>openProfileStudio(button.dataset.m7opsMode));
-    });
+        window.postMessage({
+          type:"MA7ALAK_OPEN_STORY_UPLOADER",
+          shopSlug:activeSlug,
+          __ma7alakOpenStoryNow:true
+        },"*");
+      });
 
-    document.getElementById("m7-owner-profile-pick").addEventListener("click",()=>{
-      document.getElementById("m7-owner-profile-file").click();
-    });
+    document
+      .getElementById("ma7alak-owner-add-reel")
+      .addEventListener("click",()=>{
+        closeChooser();
 
-    document.getElementById("m7-owner-profile-file").addEventListener("change",event=>{
-      const file=event.target.files?.[0]||null;
-      const status=document.getElementById("m7-owner-profile-status");
-      try{
-        validateImage(file);
-        revokePreview();
-        pendingFile=file;
-        pendingObjectUrl=URL.createObjectURL(file);
-        renderProfilePreview(pendingObjectUrl);
-        document.getElementById("m7-owner-profile-save").disabled=false;
-        status.textContent="Ready to save.";
-        status.className="";
-      }catch(error){
-        revokePreview();
-        event.target.value="";
-        document.getElementById("m7-owner-profile-save").disabled=true;
-        status.textContent=error.message||"Invalid image.";
-        status.className="err";
-      }
-    });
+        if(
+          window.Ma7alakOwnerReels &&
+          typeof window.Ma7alakOwnerReels.open==="function"
+        ){
+          window.Ma7alakOwnerReels
+            .open(activeSlug)
+            .catch(error=>
+              console.error(
+                "SHOUFHON Reel uploader:",
+                error
+              )
+            );
+        }else{
+          window.postMessage({
+            type:"MA7ALAK_OPEN_REEL_UPLOADER",
+            shopSlug:activeSlug
+          },"*");
+        }
+      });
 
-    document.getElementById("m7-owner-profile-save").addEventListener("click",saveProfileReplacement);
+    document
+      .getElementById("m7-owner-change-profile")
+      .addEventListener("click",()=>{
+        closeChooser();
+        openProfileStudio();
+      });
+
+    document
+      .getElementById("m7-owner-profile-pick")
+      .addEventListener("click",()=>{
+        document
+          .getElementById("m7-owner-profile-file")
+          .click();
+      });
+
+    document
+      .getElementById("m7-owner-banner-pick")
+      .addEventListener("click",()=>{
+        document
+          .getElementById("m7-owner-banner-file")
+          .click();
+      });
+
+    document
+      .getElementById("m7-owner-profile-remove")
+      .addEventListener("click",()=>markRemove("profile"));
+
+    document
+      .getElementById("m7-owner-banner-remove")
+      .addEventListener("click",()=>markRemove("banner"));
+
+    document
+      .getElementById("m7-owner-profile-file")
+      .addEventListener("change",event=>{
+        const status=
+          document.getElementById("m7-owner-profile-status");
+
+        try{
+          markFile(
+            "profile",
+            event.target.files?.[0]||null
+          );
+
+          status.textContent=
+            "Profile photo ready. Press Save changes.";
+          status.className="";
+        }catch(error){
+          event.target.value="";
+          status.textContent=
+            error.message||"Invalid profile image.";
+          status.className="err";
+        }
+      });
+
+    document
+      .getElementById("m7-owner-banner-file")
+      .addEventListener("change",event=>{
+        const status=
+          document.getElementById("m7-owner-profile-status");
+
+        try{
+          markFile(
+            "banner",
+            event.target.files?.[0]||null
+          );
+
+          status.textContent=
+            "Banner ready. Press Save changes.";
+          status.className="";
+        }catch(error){
+          event.target.value="";
+          status.textContent=
+            error.message||"Invalid banner image.";
+          status.className="err";
+        }
+      });
+
+    document
+      .getElementById("m7-owner-profile-save")
+      .addEventListener("click",saveProfileMedia);
   }
 
-  function renderProfilePreview(url){
-    const preview=document.getElementById("m7-owner-profile-preview");
-    if(!preview)return;
-    preview.className="m7ops-preview "+profileMode;
-    preview.innerHTML=url
-      ? '<img src="'+esc(url)+'" alt="Preview">'
-      : "<span>Choose an image to preview it.</span>";
-  }
-
-  function currentModeUrl(){
-    if(!activeProfile)return"";
-    if(profileMode==="banner"){
-      return String(activeProfile.directory_options?.profile_banner_image_url||"").trim();
-    }
-    return String(activeProfile.story_logo_url||activeProfile.profile_image_url||"").trim();
-  }
-
-  function openProfileStudio(mode){
+  function openProfileStudio(){
     injectChooser();
-    profileMode=mode==="banner"?"banner":"profile";
-    revokePreview();
+    resetDraft();
+    renderAllMedia();
+    updateSaveState();
 
-    const studio=document.getElementById("m7-owner-profile-studio");
-    const title=document.getElementById("m7-owner-profile-title");
-    title.textContent=profileMode==="banner"?"Change profile banner":"Change profile photo";
+    const status=
+      document.getElementById("m7-owner-profile-status");
 
-    studio.querySelectorAll("[data-m7ops-mode]").forEach(button=>{
-      button.classList.toggle("active",button.dataset.m7opsMode===profileMode);
-    });
+    if(status){
+      status.textContent="";
+      status.className="";
+    }
 
-    renderProfilePreview(currentModeUrl());
-    document.getElementById("m7-owner-profile-save").disabled=true;
-    document.getElementById("m7-owner-profile-file").value="";
-    const status=document.getElementById("m7-owner-profile-status");
-    status.textContent="";
-    status.className="";
-    studio.classList.add("active");
+    document
+      .getElementById("m7-owner-profile-studio")
+      ?.classList
+      .add("active");
   }
 
-  async function uploadReplacement(file,mode){
+  async function uploadReplacement(file,kind){
     validateImage(file);
+
     const c=await getClient();
     const ext=imageExtension(file);
-    const folder=mode==="banner"?"owner-banner":"owner-profile";
-    const path=
-      folder+"/"+activeSlug+"/"+
-      Date.now()+"-"+Math.random().toString(36).slice(2,10)+"."+ext;
+    const folder=
+      kind==="banner"
+        ?"owner-banner"
+        :"owner-profile";
 
-    const upload=await c.storage.from(IMAGE_BUCKET).upload(path,file,{
-      cacheControl:"0",
-      upsert:false,
-      contentType:file.type||undefined
-    });
+    const path=
+      folder+"/"+
+      activeSlug+"/"+
+      Date.now()+"-"+
+      Math.random().toString(36).slice(2,10)+
+      "."+ext;
+
+    const upload=
+      await c
+        .storage
+        .from(IMAGE_BUCKET)
+        .upload(
+          path,
+          file,
+          {
+            cacheControl:"31536000",
+            upsert:false,
+            contentType:file.type||undefined
+          }
+        );
+
     if(upload.error)throw upload.error;
 
-    const publicResult=c.storage.from(IMAGE_BUCKET).getPublicUrl(path);
-    const publicUrl=publicResult.data?.publicUrl||"";
+    const publicResult=
+      c
+        .storage
+        .from(IMAGE_BUCKET)
+        .getPublicUrl(path);
+
+    const publicUrl=
+      publicResult.data?.publicUrl||"";
+
     if(!publicUrl){
-      await c.storage.from(IMAGE_BUCKET).remove([path]).catch(()=>{});
-      throw new Error("Could not create the new image URL.");
+      await c
+        .storage
+        .from(IMAGE_BUCKET)
+        .remove([path])
+        .catch(()=>{});
+
+      throw new Error(
+        "Could not create the new image URL."
+      );
     }
 
     return{path,publicUrl};
   }
 
-  async function saveProfileReplacement(){
-    const save=document.getElementById("m7-owner-profile-save");
-    const status=document.getElementById("m7-owner-profile-status");
-    if(!pendingFile||!activeSlug)return;
+  async function saveProfileMedia(){
+    const save=
+      document.getElementById("m7-owner-profile-save");
+
+    const status=
+      document.getElementById("m7-owner-profile-status");
+
+    const profileChanged=mediaDraft.profile.dirty;
+    const bannerChanged=mediaDraft.banner.dirty;
+
+    if(
+      !activeSlug ||
+      (!profileChanged&&!bannerChanged)
+    ){
+      return;
+    }
 
     save.disabled=true;
     save.textContent="Saving…";
-    status.textContent="Uploading replacement…";
+    status.textContent="Saving profile…";
     status.className="";
 
-    let uploaded=null;
+    let uploadedProfile=null;
+    let uploadedBanner=null;
+
     try{
       const c=await getClient();
+
       await loadOwnerProfile(activeSlug);
-      if(!profileEditAllowed)throw new Error("Profile editing is disabled for this shop.");
 
-      const oldProfile=String(activeProfile.profile_image_url||"").trim();
-      const oldStoryLogo=String(activeProfile.story_logo_url||"").trim();
-      const oldBanner=String(activeProfile.directory_options?.profile_banner_image_url||"").trim();
+      if(!profileEditAllowed){
+        throw new Error(
+          "Profile editing is disabled for this shop."
+        );
+      }
 
-      uploaded=await uploadReplacement(pendingFile,profileMode);
+      const oldProfile=
+        String(
+          activeProfile.profile_image_url||
+          ""
+        ).trim();
 
-      const rpc=await c.rpc("owner_update_profile_media",{
-        p_shop_slug:activeSlug,
-        p_profile_image_url:profileMode==="profile"?uploaded.publicUrl:null,
-        p_banner_image_url:profileMode==="banner"?uploaded.publicUrl:null,
-        p_update_profile:profileMode==="profile",
-        p_update_banner:profileMode==="banner"
-      });
+      const oldStoryLogo=
+        String(
+          activeProfile.story_logo_url||
+          ""
+        ).trim();
+
+      const oldBanner=
+        String(
+          activeProfile.directory_options
+            ?.profile_banner_image_url||
+          ""
+        ).trim();
+
+      if(
+        profileChanged &&
+        !mediaDraft.profile.remove &&
+        mediaDraft.profile.file
+      ){
+        status.textContent=
+          "Uploading profile photo…";
+
+        uploadedProfile=
+          await uploadReplacement(
+            mediaDraft.profile.file,
+            "profile"
+          );
+      }
+
+      if(
+        bannerChanged &&
+        !mediaDraft.banner.remove &&
+        mediaDraft.banner.file
+      ){
+        status.textContent=
+          "Uploading banner…";
+
+        uploadedBanner=
+          await uploadReplacement(
+            mediaDraft.banner.file,
+            "banner"
+          );
+      }
+
+      const profileValue=
+        profileChanged
+          ?(
+              mediaDraft.profile.remove
+                ?""
+                :uploadedProfile?.publicUrl||""
+            )
+          :null;
+
+      const bannerValue=
+        bannerChanged
+          ?(
+              mediaDraft.banner.remove
+                ?""
+                :uploadedBanner?.publicUrl||""
+            )
+          :null;
+
+      const rpc=
+        await c.rpc(
+          "owner_update_profile_media",
+          {
+            p_shop_slug:activeSlug,
+            p_profile_image_url:profileValue,
+            p_banner_image_url:bannerValue,
+            p_update_profile:profileChanged,
+            p_update_banner:bannerChanged
+          }
+        );
 
       if(rpc.error)throw rpc.error;
 
-      if(profileMode==="profile"){
-        await cleanupOldImage(oldProfile,activeSlug);
-        if(oldStoryLogo&&oldStoryLogo!==oldProfile){
-          await cleanupOldImage(oldStoryLogo,activeSlug);
+      if(profileChanged){
+        await cleanupOldImage(
+          oldProfile,
+          activeSlug
+        );
+
+        if(
+          oldStoryLogo &&
+          oldStoryLogo!==oldProfile
+        ){
+          await cleanupOldImage(
+            oldStoryLogo,
+            activeSlug
+          );
         }
-      }else{
-        await cleanupOldImage(oldBanner,activeSlug);
+      }
+
+      if(bannerChanged){
+        await cleanupOldImage(
+          oldBanner,
+          activeSlug
+        );
       }
 
       await loadOwnerProfile(activeSlug);
-      ownerProfileCache.set(activeSlug.toLowerCase(),activeProfile);
-      status.textContent=profileMode==="banner"
-        ?"Banner updated."
-        :"Profile photo updated everywhere.";
+
+      ownerProfileCache.set(
+        activeSlug.toLowerCase(),
+        activeProfile
+      );
+
+      resetDraft();
+      renderAllMedia();
+      updateSaveState();
+
+      status.textContent=
+        "Profile saved.";
       status.className="ok";
-      renderProfilePreview(currentModeUrl());
-      revokePreview();
 
       try{
         originalSource?.postMessage({
           type:"MA7ALAK_OWNER_PROFILE_UPDATED",
           shopSlug:activeSlug,
-          mode:profileMode
+          mode:"profile-media",
+          profileChanged,
+          bannerChanged
         },"*");
       }catch(_){}
 
       try{
-        window.Ma7alakDirectory?.refresh?.();
+        window.Ma7alakDirectory
+          ?.refresh?.();
       }catch(_){}
 
       setTimeout(()=>{
-        document.getElementById("m7-owner-profile-studio")?.classList.remove("active");
-      },750);
+        document
+          .getElementById("m7-owner-profile-studio")
+          ?.classList
+          .remove("active");
+      },650);
     }catch(error){
-      if(uploaded?.path){
-        try{await (await getClient()).storage.from(IMAGE_BUCKET).remove([uploaded.path])}catch(_){}
+      if(uploadedProfile?.path){
+        try{
+          await (await getClient())
+            .storage
+            .from(IMAGE_BUCKET)
+            .remove([uploadedProfile.path]);
+        }catch(_){}
       }
-      status.textContent=error?.message||"Could not update the image.";
+
+      if(uploadedBanner?.path){
+        try{
+          await (await getClient())
+            .storage
+            .from(IMAGE_BUCKET)
+            .remove([uploadedBanner.path]);
+        }catch(_){}
+      }
+
+      status.textContent=
+        error?.message||
+        "Could not update profile media.";
       status.className="err";
       save.disabled=false;
     }finally{
-      save.textContent="Save replacement";
+      save.textContent="Save changes";
     }
   }
 
   async function showChooser(slug,source){
-    activeSlug=String(slug||"").trim();
+    activeSlug=
+      String(slug||"").trim();
+
     originalSource=source||null;
+
     if(!activeSlug)return;
+
     injectChooser();
 
-    const overlay=document.getElementById("ma7alak-owner-add-chooser");
-    const profileButton=document.getElementById("m7-owner-change-profile");
-    const bannerButton=document.getElementById("m7-owner-change-banner");
-    const permission=document.getElementById("m7-owner-add-permission");
+    const overlay=
+      document.getElementById(
+        "ma7alak-owner-add-chooser"
+      );
 
-    /*
-       If owner-header-auth already broadcast the current shop profile,
-       show Profile/Banner immediately. Then refresh silently in background.
-       This removes the visible ~1 second permission delay on phone.
-    */
-    const cacheKey=activeSlug.toLowerCase();
-    const cached=ownerProfileCache.get(cacheKey)||null;
+    const profileButton=
+      document.getElementById(
+        "m7-owner-change-profile"
+      );
+
+    const permission=
+      document.getElementById(
+        "m7-owner-add-permission"
+      );
+
+    const cacheKey=
+      activeSlug.toLowerCase();
+
+    const cached=
+      ownerProfileCache.get(cacheKey)||
+      null;
 
     if(cached){
       activeProfile=cached;
-      profileEditAllowed=bool(cached.directory_options?.owner_profile_edit_enabled);
-      profileButton.hidden=!profileEditAllowed;
-      bannerButton.hidden=!profileEditAllowed;
-      permission.textContent=profileEditAllowed
-        ?"Profile editing is enabled by Admin."
-        :"Profile/banner editing is currently locked by Admin.";
+
+      profileEditAllowed=
+        bool(
+          cached.directory_options
+            ?.owner_profile_edit_enabled
+        );
+
+      profileButton.hidden=
+        !profileEditAllowed;
+
+      permission.textContent=
+        profileEditAllowed
+          ?"Profile editing is enabled by Admin."
+          :"Profile/banner editing is currently locked by Admin.";
     }else{
       profileButton.hidden=true;
-      bannerButton.hidden=true;
-      permission.textContent="Checking your shop permissions…";
+      permission.textContent=
+        "Checking your shop permissions…";
     }
 
     overlay.classList.add("active");
 
     try{
       await loadOwnerProfile(activeSlug);
-      profileButton.hidden=!profileEditAllowed;
-      bannerButton.hidden=!profileEditAllowed;
-      permission.textContent=profileEditAllowed
-        ?"Profile editing is enabled by Admin."
-        :"Profile/banner editing is currently locked by Admin.";
+
+      profileButton.hidden=
+        !profileEditAllowed;
+
+      permission.textContent=
+        profileEditAllowed
+          ?"Profile editing is enabled by Admin."
+          :"Profile/banner editing is currently locked by Admin.";
     }catch(error){
       if(!cached){
         profileEditAllowed=false;
-        permission.textContent=error?.message||"Could not check profile editing permission.";
+
+        permission.textContent=
+          error?.message||
+          "Could not check profile editing permission.";
       }
     }
   }
 
-  window.addEventListener("message",event=>{
-    const data=event.data||{};
+  window.addEventListener(
+    "message",
+    event=>{
+      const data=event.data||{};
 
-    if(data.type==="MA7ALAK_OWNER_STATE"){
-      const ownerSlug=String(data.shopSlug||"").trim().toLowerCase();
-      if(data.isOwner&&ownerSlug&&data.shop){
-        ownerProfileCache.set(ownerSlug,data.shop);
+      if(data.type==="MA7ALAK_OWNER_STATE"){
+        const ownerSlug=
+          String(data.shopSlug||"")
+            .trim()
+            .toLowerCase();
+
+        if(
+          data.isOwner &&
+          ownerSlug &&
+          data.shop
+        ){
+          ownerProfileCache.set(
+            ownerSlug,
+            data.shop
+          );
+        }
+
+        return;
       }
-      return;
+
+      if(
+        data.type!==
+        "MA7ALAK_OPEN_STORY_UPLOADER"
+      ){
+        return;
+      }
+
+      if(
+        data.__ma7alakOpenStoryNow===true &&
+        (!event.source||event.source===window)
+      ){
+        return;
+      }
+
+      const slug=
+        String(data.shopSlug||"").trim();
+
+      if(!slug)return;
+
+      event.stopImmediatePropagation();
+
+      showChooser(
+        slug,
+        event.source
+      );
+    },
+    true
+  );
+
+  document.addEventListener(
+    "keydown",
+    event=>{
+      if(event.key!=="Escape")return;
+
+      document
+        .getElementById("ma7alak-owner-add-chooser")
+        ?.classList
+        .remove("active");
+
+      if(
+        document
+          .getElementById("m7-owner-profile-studio")
+          ?.classList
+          .contains("active")
+      ){
+        closeStudio();
+      }
     }
-
-    if(data.type!=="MA7ALAK_OPEN_STORY_UPLOADER")return;
-
-    if(
-      data.__ma7alakOpenStoryNow===true &&
-      (!event.source||event.source===window)
-    ){
-      return;
-    }
-
-    const slug=String(data.shopSlug||"").trim();
-    if(!slug)return;
-
-    event.stopImmediatePropagation();
-    showChooser(slug,event.source);
-  },true);
-
-  document.addEventListener("keydown",event=>{
-    if(event.key!=="Escape")return;
-    document.getElementById("ma7alak-owner-add-chooser")?.classList.remove("active");
-    if(document.getElementById("m7-owner-profile-studio")?.classList.contains("active")){
-      revokePreview();
-      document.getElementById("m7-owner-profile-studio").classList.remove("active");
-    }
-  });
+  );
 })();
 
 /* =========================================================
