@@ -397,6 +397,47 @@
   const postAddOwnerTitle = document.getElementById("ma-admin-post-add-owner-title");
   const postAddOwnerButton = document.getElementById("ma-admin-post-add-owner-btn");
 
+  function configureGoogleOnlyOwnerUI(){
+    const passwordLabel = ownerPassword && ownerPassword.closest("label");
+    if(passwordLabel) passwordLabel.hidden = true;
+    if(ownerPassword){
+      ownerPassword.required = false;
+      ownerPassword.removeAttribute("required");
+      ownerPassword.value = "";
+    }
+
+    const resetPasswordLabel = ownerResetPassword && ownerResetPassword.closest("label");
+    if(resetPasswordLabel) resetPasswordLabel.hidden = true;
+    if(ownerResetPassword){
+      ownerResetPassword.required = false;
+      ownerResetPassword.removeAttribute("required");
+      ownerResetPassword.value = "";
+    }
+    if(resetOwnerPasswordButton) resetOwnerPasswordButton.hidden = true;
+
+    const subtitle = document.getElementById("ma-admin-owner-subtitle");
+    if(subtitle){
+      subtitle.textContent =
+        "Assign an existing ShoufHon Google user to this shop. The user must sign in with Google once before assignment.";
+    }
+
+    const emptyTitle = ownerForm && ownerForm.querySelector(".ma-owner-state-empty strong");
+    const emptyText = ownerForm && ownerForm.querySelector(".ma-owner-state-empty span");
+    if(emptyTitle) emptyTitle.textContent = "No Google owner assigned";
+    if(emptyText) emptyText.textContent = "Enter the Google email of an existing ShoufHon user.";
+
+    const emailTitle = ownerEmail && ownerEmail.closest("label") &&
+      ownerEmail.closest("label").querySelector("span");
+    if(emailTitle) emailTitle.textContent = "Owner Google Email *";
+
+    if(createOwnerButton) createOwnerButton.textContent = "Assign Google Owner";
+    if(deleteOwnerButton) deleteOwnerButton.textContent = "Remove Owner Access";
+    if(postAddOwnerTitle) postAddOwnerTitle.textContent = "Shop added — assign a Google owner when ready";
+    if(postAddOwnerButton) postAddOwnerButton.textContent = "👤 Assign Google Owner";
+  }
+
+  configureGoogleOnlyOwnerUI();
+
   const activityList = document.getElementById("ma-admin-activity-list");
   const activityStatus = document.getElementById("ma-admin-activity-status");
   const refreshActivityButton = document.getElementById("ma-admin-refresh-activity");
@@ -3405,7 +3446,6 @@
 
     const shopSlugValue = normalizedText(ownerShopSlug.value);
     const email = normalizedText(ownerEmail.value).toLowerCase();
-    const password = String(ownerPassword.value || "");
 
     if(!shopSlugValue){
       setStatus(ownerStatus, "No shop selected.", "error");
@@ -3413,33 +3453,27 @@
     }
 
     if(!email){
-      setStatus(ownerStatus, "Enter the owner's email.", "error");
-      return;
-    }
-
-    if(password.length < 8){
-      setStatus(ownerStatus, "Password must be at least 8 characters.", "error");
+      setStatus(ownerStatus, "Enter the owner's Google email.", "error");
       return;
     }
 
     createOwnerButton.disabled = true;
-    createOwnerButton.textContent = "Creating owner…";
+    createOwnerButton.textContent = "Assigning owner…";
 
     try{
       const data = await invokeOwnerManager({
-        action: "create",
+        action: "assign",
         email: email,
-        password: password,
         shop_slug: shopSlugValue
       });
 
-      ownerPassword.value = "";
+      if(ownerPassword) ownerPassword.value = "";
 
       setStatus(
         ownerStatus,
-        'Owner account created for "' +
+        'Google owner assigned to "' +
           (data.shop_name || shopSlugValue) +
-          '". Login email: ' + email,
+          '". Account: ' + email,
         "success"
       );
 
@@ -3475,13 +3509,13 @@
         ownerStatus,
         error && error.message
           ? error.message
-          : "Could not create owner account.",
+          : "Could not assign Google owner.",
         "error"
       );
 
     }finally{
       createOwnerButton.disabled = false;
-      createOwnerButton.textContent = "Create Owner Account";
+      createOwnerButton.textContent = "Assign Google Owner";
     }
   });
 
@@ -3548,10 +3582,10 @@
     const email = ownerCurrentEmail.textContent || "this owner";
 
     const confirmed = window.confirm(
-      'Delete owner account "' + email + '"?\n\n' +
-      'This removes the Supabase login and disconnects it from /' +
+      'Remove owner access for "' + email + '"?\n\n' +
+      'This only disconnects the Google user from /' +
       shopSlugValue + '.\n\n' +
-      'The shop profile and Stories are NOT deleted.'
+      'Their ShoufHon/Google account, profile, shop profile and Stories are NOT deleted.'
     );
 
     if(!confirmed) return;
@@ -3567,7 +3601,7 @@
 
       setStatus(
         ownerStatus,
-        "Owner account deleted. This shop can now be assigned a new owner.",
+        "Owner access removed. The Google/ShoufHon user account was kept.",
         "success"
       );
 
