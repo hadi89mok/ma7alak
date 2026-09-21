@@ -6159,6 +6159,8 @@ function decorateAll(){
     about_service_bg_color:"#151215",
     about_service_icon_color:"#f2caed",
     about_signature_color:"#f2caed",
+    about_edit_button_bg_color:"#080809",
+    about_edit_button_frame_color:"#f2caed",
 
     gallery_accent_color:"#f2caed",
 
@@ -6177,6 +6179,8 @@ function decorateAll(){
     media_button_active_text_color:"#ffffff",
     media_button_active_frame_color:"#f2caed",
     media_button_active_bg_color:"#2b2029",
+    media_edit_button_bg_color:"#17130f",
+    media_edit_button_frame_color:"#f2caed",
 
     gallery_frame_style:"current",
     gallery_frame_shape:"rounded",
@@ -6205,6 +6209,34 @@ function decorateAll(){
     gallery_frame_shadow:"38",
     gallery_frame_animation:"none",
     gallery_frame_animation_speed:"3.2",
+
+    video_frame_style:"current",
+    video_frame_shape:"rounded",
+    video_frame_color_1:"#e2a6b8",
+    video_frame_color_2:"#f2d18d",
+    video_frame_color_3:"#c88f45",
+    video_frame_color_4:"#e7aa5b",
+    video_frame_width:"3",
+    video_frame_radius:"18",
+    video_frame_glow:"22",
+    video_frame_angle:"315",
+
+    video_frame_layer_1_enabled:true,
+    video_frame_layer_1_width:"2",
+    video_frame_layer_1_gap:"0",
+    video_frame_layer_2_enabled:true,
+    video_frame_layer_2_width:"2",
+    video_frame_layer_2_gap:"1",
+    video_frame_layer_3_enabled:true,
+    video_frame_layer_3_width:"2",
+    video_frame_layer_3_gap:"1",
+    video_frame_layer_4_enabled:false,
+    video_frame_layer_4_width:"2",
+    video_frame_layer_4_gap:"1",
+    video_frame_gradient_layer:"0",
+    video_frame_shadow:"38",
+    video_frame_animation:"none",
+    video_frame_animation_speed:"3.2",
 
     video_accent_color:"#f2caed",
     follow_accent_color:"#f2caed",
@@ -6429,6 +6461,34 @@ function decorateAll(){
           ${opts(
             GALLERY_FRAME_SHAPES,
             DEFAULTS.gallery_frame_shape
+          )}
+        </select>
+      </label>
+    `;
+  }
+
+  function videoFrameStyleField(prefix){
+    return `
+      <label class="m7ds-field">
+        <span>Frame color design</span>
+        <select id="${prefix}video_frame_style">
+          ${opts(
+            GALLERY_FRAME_STYLES,
+            DEFAULTS.video_frame_style
+          )}
+        </select>
+      </label>
+    `;
+  }
+
+  function videoFrameShapeField(prefix){
+    return `
+      <label class="m7ds-field">
+        <span>Frame shape</span>
+        <select id="${prefix}video_frame_shape">
+          ${opts(
+            GALLERY_FRAME_SHAPES,
+            DEFAULTS.video_frame_shape
           )}
         </select>
       </label>
@@ -6934,6 +6994,12 @@ function decorateAll(){
           ${colorField(prefix,"about_service_icon_color","Service icon")}
           ${colorField(prefix,"about_signature_color","Signature")}
         </div>
+
+        <div class="m7ds-section-title">Owner Edit About Button</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"about_edit_button_bg_color","Edit button color")}
+          ${colorField(prefix,"about_edit_button_frame_color","Edit button frame")}
+        </div>
       </div>
 
       <div class="m7ds-pane" data-m7ds-pane="follow">
@@ -7300,6 +7366,12 @@ function decorateAll(){
           ${colorField(prefix,"media_button_active_bg_color","Selected inside")}
         </div>
 
+        <div class="m7ds-section-title">Owner Edit Media Button</div>
+        <div class="m7ds-grid">
+          ${colorField(prefix,"media_edit_button_bg_color","Edit button color")}
+          ${colorField(prefix,"media_edit_button_frame_color","Edit button frame")}
+        </div>
+
         <div class="m7ds-section-title">Gallery Multi-Color Frame</div>
 
         <div class="m7ds-grid">
@@ -7374,6 +7446,75 @@ function decorateAll(){
         <p class="m7ds-help">
           If “Use Universal Accent everywhere” is checked, normal module accents follow the universal accent.
           Gallery frame colors stay independent so multi-color frames keep their custom look.
+        </p>
+
+        <div class="m7ds-section-title">Video Multi-Color Frame</div>
+
+        <div class="m7ds-grid">
+          ${videoFrameStyleField(prefix)}
+          ${videoFrameShapeField(prefix)}
+          ${effectNumberField(prefix,"video_frame_radius","Rounded corner radius",0,44,1,"px")}
+          ${effectNumberField(prefix,"video_frame_glow","Frame glow",0,100,5,"%")}
+          ${effectNumberField(prefix,"video_frame_shadow","Shadow strength",0,100,5,"%")}
+          ${effectNumberField(prefix,"video_frame_angle","Gradient / color angle",0,360,5,"°")}
+          ${effectNumberField(prefix,"video_frame_width","Legacy split-frame thickness",0,10,0.5,"px")}
+
+          <label class="m7ds-field">
+            <span>Gradient layer</span>
+            <select id="${prefix}video_frame_gradient_layer">
+              <option value="0">None — solid layers</option>
+              <option value="1">Layer 1</option>
+              <option value="2">Layer 2</option>
+              <option value="3">Layer 3</option>
+              <option value="4">Layer 4</option>
+            </select>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Video frame animation</span>
+            <select id="${prefix}video_frame_animation">
+              <option value="none">Static</option>
+              <option value="pulse">Glow pulse</option>
+              <option value="wave">Layer wave</option>
+              <option value="glow">Deep glow</option>
+              <option value="shimmer">Shimmer</option>
+              <option value="breathe">Soft breathe</option>
+              <option value="flicker">Neon flicker</option>
+            </select>
+          </label>
+
+          ${effectNumberField(prefix,"video_frame_animation_speed","Frame animation speed",1.2,8,0.1,"seconds")}
+        </div>
+
+        <div class="m7ds-layer-grid">
+          ${[1,2,3,4].map(layer=>`
+            <div class="m7ds-layer-card">
+              <label class="m7ds-check compact">
+                <input id="${prefix}video_frame_layer_${layer}_enabled" type="checkbox" ${DEFAULTS["video_frame_layer_"+layer+"_enabled"]?"checked":""}>
+                <span><b>Layer ${layer}</b><small>${layer===1?"Closest to video":"Outer layer"}</small></span>
+              </label>
+              ${colorField(prefix,"video_frame_color_"+layer,"Layer "+layer+" color")}
+              ${effectNumberField(prefix,"video_frame_layer_"+layer+"_width","Thickness",0,6,0.5,"px")}
+              ${effectNumberField(prefix,"video_frame_layer_"+layer+"_gap","Spacing before layer",0,4,0.5,"px")}
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="m7ds-gallery-frame-demo">
+          <div class="m7ds-gallery-frame-sample" data-m7-video-frame-preview>
+            <i class="m7ds-gallery-frame-layer" data-m7-video-layer="1" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-video-layer="2" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-video-layer="3" aria-hidden="true"></i>
+            <i class="m7ds-gallery-frame-layer" data-m7-video-layer="4" aria-hidden="true"></i>
+            <div class="m7ds-gallery-frame-inner">
+              <span>VIDEO</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="m7ds-help">
+          Video frames are independent from photo frames. Pick the same premium,
+          layered, split, gradient, glow and animation options without changing Gallery photos.
         </p>
       </div>
     `;
@@ -8689,8 +8830,479 @@ function decorateAll(){
       }
     }
 
+    function refreshVideoFramePreview(){
+      const preview=
+        box.querySelector(
+          "[data-m7-video-frame-preview]"
+        );
+
+      if(!preview){
+        return;
+      }
+
+      const get=id=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+id)
+        );
+
+      const style=
+        String(
+          get("video_frame_style")?.value ||
+          DEFAULTS.video_frame_style
+        )
+          .trim()
+          .toLowerCase();
+
+      const accent=
+        safeHex(
+          get("video_accent_color")?.value,
+          DEFAULTS.video_accent_color
+        );
+
+      const c1=
+        safeHex(
+          get("video_frame_color_1")?.value,
+          DEFAULTS.video_frame_color_1
+        );
+
+      const c2=
+        safeHex(
+          get("video_frame_color_2")?.value,
+          DEFAULTS.video_frame_color_2
+        );
+
+      const c3=
+        safeHex(
+          get("video_frame_color_3")?.value,
+          DEFAULTS.video_frame_color_3
+        );
+
+      const c4=
+        safeHex(
+          get("video_frame_color_4")?.value,
+          DEFAULTS.video_frame_color_4
+        );
+
+      const number=(key,min,max,fallback)=>{
+        const raw=Number(get(key)?.value);
+        return Number.isFinite(raw)
+          ? Math.max(min,Math.min(max,raw))
+          : fallback;
+      };
+
+      const globalFontStyle=
+        String(
+          get("global_font_style")?.value ||
+          DEFAULTS.global_font_style
+        ).trim().toLowerCase();
+
+      const mediaFontStyleRaw=
+        String(
+          get("media_font_style")?.value ||
+          DEFAULTS.media_font_style
+        ).trim().toLowerCase();
+
+      const mediaFontStyle=
+        mediaFontStyleRaw==="inherit"
+          ? globalFontStyle
+          : mediaFontStyleRaw;
+
+      const fontStacks={
+        inherit:"inherit",
+        current:"inherit",
+        system:'Arial,"Segoe UI",sans-serif',
+        modern:'"Trebuchet MS","Segoe UI",Arial,sans-serif',
+        elegant:'Georgia,"Times New Roman",serif',
+        classic:'"Times New Roman",Georgia,serif',
+        mono:'"Courier New",Courier,monospace'
+      };
+
+      const mediaFontScale=
+        (
+          number("global_font_size",70,150,100) *
+          number("media_font_size",70,150,100)
+        ) / 10000;
+
+      const width=
+        number(
+          "video_frame_width",
+          0,
+          10,
+          3
+        );
+
+      const radius=
+        number(
+          "video_frame_radius",
+          0,
+          44,
+          18
+        );
+
+      const shape=
+        String(
+          get("video_frame_shape")?.value ||
+          DEFAULTS.video_frame_shape
+        )
+          .trim()
+          .toLowerCase();
+
+      const effectiveRadius=
+        shape==="square"
+          ? 0
+          : shape==="soft"
+            ? Math.min(radius,10)
+            : shape==="pill"
+              ? 999
+              : radius;
+
+      const glow=
+        number(
+          "video_frame_glow",
+          0,
+          100,
+          22
+        );
+
+      const angle=
+        number(
+          "video_frame_angle",
+          0,
+          360,
+          315
+        );
+
+      const shadow=
+        number(
+          "video_frame_shadow",
+          0,
+          100,
+          38
+        );
+
+      const gradientLayer=
+        String(
+          get("video_frame_gradient_layer")?.value ||
+          "0"
+        );
+
+      const frameAnimation=
+        String(
+          get("video_frame_animation")?.value ||
+          "none"
+        )
+          .trim()
+          .toLowerCase();
+
+      const frameAnimationSpeed=
+        number(
+          "video_frame_animation_speed",
+          1.2,
+          8,
+          3.2
+        );
+
+      const layerColors=[c1,c2,c3,c4];
+      const layerData=[1,2,3,4].map((layer,index)=>({
+        layer,
+        color:layerColors[index],
+        enabled:!!get("video_frame_layer_"+layer+"_enabled")?.checked,
+        width:number("video_frame_layer_"+layer+"_width",0,6,2),
+        gap:number("video_frame_layer_"+layer+"_gap",0,4,layer===1?0:1)
+      }));
+
+      let background=accent;
+
+      if(style==="dual"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 50%,"+
+          c3+
+          " 50% 100%)";
+      }
+      else if(style==="triple"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 33.333%,"+
+          c2+
+          " 33.333% 66.666%,"+
+          c3+
+          " 66.666% 100%)";
+      }
+      else if(style==="quad"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          " 0 25%,"+
+          c2+
+          " 25% 50%,"+
+          c3+
+          " 50% 75%,"+
+          c4+
+          " 75% 100%)";
+      }
+      else if(style==="blend"){
+        background=
+          "conic-gradient(from "+
+          angle+
+          "deg,"+
+          c1+
+          ","+
+          c2+
+          ","+
+          c3+
+          ","+
+          c4+
+          ","+
+          c1+
+          ")";
+      }
+      else if(style==="none"){
+        background="transparent";
+      }
+
+      const layered=
+        style==="layers";
+
+      const activeWidth=
+        style==="none" || layered
+          ? 0
+          : width;
+
+      preview.style.padding=
+        activeWidth+"px";
+
+      preview.style.borderRadius=
+        effectiveRadius+"px";
+
+      preview.style.background=
+        layered
+          ? "transparent"
+          : background;
+
+      let extent=0;
+      let lastEnabledColor=c1;
+
+      preview
+        .querySelectorAll(
+          "[data-m7-video-layer]"
+        )
+        .forEach((layerEl,index)=>{
+          const data=layerData[index];
+          const show=layered&&data.enabled&&data.width>0;
+
+          layerEl.style.display=
+            show
+              ? "block"
+              : "none";
+
+          layerEl.classList.remove(
+            "gradient"
+          );
+
+          if(!show){
+            return;
+          }
+
+          extent+=
+            data.gap+
+            data.width;
+
+          const nextColor=
+            layerData[
+              Math.min(
+                layerData.length-1,
+                index+1
+              )
+            ].color;
+
+          layerEl.style.inset=
+            (-extent)+"px";
+
+          layerEl.style.borderRadius=
+            (
+              effectiveRadius>=999
+                ? 999
+                : effectiveRadius+extent
+            )+"px";
+
+          layerEl.style.borderWidth=
+            data.width+"px";
+
+          layerEl.style.borderStyle=
+            "solid";
+
+          layerEl.style.borderColor=
+            data.color;
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-width",
+            data.width+"px"
+          );
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-color",
+            data.color
+          );
+
+          layerEl.style.setProperty(
+            "--m7ds-layer-gradient",
+            "linear-gradient("+
+              angle+
+              "deg,"+
+              data.color+
+              ","+
+              nextColor+
+            ")"
+          );
+
+          layerEl.style.animationDelay=
+            (index*.16)+"s";
+
+          if(
+            gradientLayer===
+              String(data.layer)
+          ){
+            layerEl.classList.add(
+              "gradient"
+            );
+          }
+
+          lastEnabledColor=
+            data.color;
+        });
+
+      preview.style.margin=
+        layered
+          ? extent+"px"
+          : "0";
+
+      const previewAnimations=[
+        "pulse",
+        "wave",
+        "glow",
+        "shimmer",
+        "breathe",
+        "flicker"
+      ];
+
+      preview.classList.remove(
+        ...previewAnimations.map(name=>"frame-anim-"+name)
+      );
+
+      if(
+        style!=="none" &&
+        previewAnimations.includes(frameAnimation)
+      ){
+        preview.classList.add(
+          "frame-anim-"+frameAnimation
+        );
+      }
+
+      preview.style.setProperty(
+        "--m7ds-frame-speed",
+        frameAnimationSpeed+"s"
+      );
+
+      const glowPx=
+        glow<=0
+          ? 0
+          : 4+glow*.20;
+
+      const shadowAlpha=
+        Math.min(
+          .72,
+          shadow/100*.62
+        );
+
+      const shadows=[];
+
+      if(shadow>0){
+        shadows.push(
+          "0 12px 28px rgba(0,0,0,"+
+          shadowAlpha.toFixed(3)+
+          ")"
+        );
+      }
+
+      if(glow>0){
+        shadows.push(
+          "0 0 "+
+          glowPx.toFixed(1)+
+          "px color-mix(in srgb,"+
+          c1+
+          " "+
+          Math.min(82,25+glow*.55).toFixed(0)+
+          "%,transparent)"
+        );
+
+        shadows.push(
+          "0 0 "+
+          (glowPx*1.45).toFixed(1)+
+          "px color-mix(in srgb,"+
+          (layered?lastEnabledColor:c3)+
+          " "+
+          Math.min(68,15+glow*.45).toFixed(0)+
+          "%,transparent)"
+        );
+      }
+
+      preview.style.boxShadow=
+        shadows.length
+          ? shadows.join(",")
+          : "none";
+
+      const inner=
+        preview.querySelector(
+          ".m7ds-gallery-frame-inner"
+        );
+
+      if(inner){
+        inner.style.borderRadius=
+          layered
+            ? (
+                effectiveRadius>=999
+                  ? "999px"
+                  : effectiveRadius+"px"
+              )
+            : (
+                effectiveRadius>=999
+                  ? "999px"
+                  : (
+                      Math.max(
+                        0,
+                        effectiveRadius-activeWidth
+                      )+"px"
+                    )
+              );
+
+        /*
+           Always clip the sample itself to the selected inner shape.
+           This removes the square/empty corner wedges that could appear
+           when the frame radius and inner preview radius drifted apart.
+        */
+        inner.style.overflow="hidden";
+        inner.style.fontFamily=
+          fontStacks[mediaFontStyle] ||
+          fontStacks.current;
+        inner.style.fontSize=
+          (10*mediaFontScale).toFixed(1)+"px";
+      }
+    }
+
     box.__m7GalleryFrameRefresh =
       refreshGalleryFramePreview;
+
+    box.__m7VideoFrameRefresh =
+      refreshVideoFramePreview;
 
     [
       bannerEnabled,
@@ -9003,6 +9615,57 @@ function decorateAll(){
         );
       });
 
+    [
+      "video_frame_style",
+      "video_frame_shape",
+      "video_frame_color_1",
+      "video_frame_color_2",
+      "video_frame_color_3",
+      "video_frame_color_4",
+      "video_frame_width",
+      "video_frame_radius",
+      "video_frame_glow",
+      "video_frame_shadow",
+      "video_frame_angle",
+      "video_frame_gradient_layer",
+      "video_frame_animation",
+      "video_frame_animation_speed",
+      "video_frame_layer_1_enabled",
+      "video_frame_layer_1_width",
+      "video_frame_layer_1_gap",
+      "video_frame_layer_2_enabled",
+      "video_frame_layer_2_width",
+      "video_frame_layer_2_gap",
+      "video_frame_layer_3_enabled",
+      "video_frame_layer_3_width",
+      "video_frame_layer_3_gap",
+      "video_frame_layer_4_enabled",
+      "video_frame_layer_4_width",
+      "video_frame_layer_4_gap",
+      "video_accent_color",
+      "media_font_style",
+      "media_font_size",
+      "global_font_style",
+      "global_font_size"
+    ]
+      .map(key=>
+        box.querySelector(
+          "#"+CSS.escape(prefix+key)
+        )
+      )
+      .filter(Boolean)
+      .forEach(el=>{
+        el.addEventListener(
+          "input",
+          refreshVideoFramePreview
+        );
+
+        el.addEventListener(
+          "change",
+          refreshVideoFramePreview
+        );
+      });
+
     bannerClear?.addEventListener(
       "click",
       function(){
@@ -9051,6 +9714,7 @@ function decorateAll(){
     refreshProfileShellPreview();
     refreshLiveOffersPreview();
     refreshGalleryFramePreview();
+    refreshVideoFramePreview();
 
     box.__m7dsRefresh = function(){
       box.querySelectorAll('input[type="color"]').forEach(input=>{
@@ -9063,6 +9727,7 @@ function decorateAll(){
       refreshProfileShellPreview();
       refreshLiveOffersPreview();
       refreshGalleryFramePreview();
+    refreshVideoFramePreview();
     };
   }
 
@@ -16263,6 +16928,8 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     about_service_bg_color:"#151215",
     about_service_icon_color:"$ACCENT",
     about_signature_color:"$ACCENT",
+    about_edit_button_bg_color:"#080809",
+    about_edit_button_frame_color:"$ACCENT",
 
     gallery_accent_color:"$ACCENT",
 
@@ -16281,6 +16948,8 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     media_button_active_text_color:"#ffffff",
     media_button_active_frame_color:"$ACCENT",
     media_button_active_bg_color:"#2b2029",
+    media_edit_button_bg_color:"#17130f",
+    media_edit_button_frame_color:"#f2caed",
 
     gallery_frame_style:"current",
     gallery_frame_shape:"rounded",
@@ -16309,6 +16978,34 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     gallery_frame_shadow:"38",
     gallery_frame_animation:"none",
     gallery_frame_animation_speed:"3.2",
+
+    video_frame_style:"current",
+    video_frame_shape:"rounded",
+    video_frame_color_1:"#e2a6b8",
+    video_frame_color_2:"#f2d18d",
+    video_frame_color_3:"#c88f45",
+    video_frame_color_4:"#e7aa5b",
+    video_frame_width:"3",
+    video_frame_radius:"18",
+    video_frame_glow:"22",
+    video_frame_angle:"315",
+
+    video_frame_layer_1_enabled:true,
+    video_frame_layer_1_width:"2",
+    video_frame_layer_1_gap:"0",
+    video_frame_layer_2_enabled:true,
+    video_frame_layer_2_width:"2",
+    video_frame_layer_2_gap:"1",
+    video_frame_layer_3_enabled:true,
+    video_frame_layer_3_width:"2",
+    video_frame_layer_3_gap:"1",
+    video_frame_layer_4_enabled:false,
+    video_frame_layer_4_width:"2",
+    video_frame_layer_4_gap:"1",
+    video_frame_gradient_layer:"0",
+    video_frame_shadow:"38",
+    video_frame_animation:"none",
+    video_frame_animation_speed:"3.2",
 
     video_accent_color:"$ACCENT",
     follow_accent_color:"$ACCENT",
@@ -17286,6 +17983,10 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "media_button_active_text_color",
     "media_button_active_frame_color",
     "media_button_active_bg_color",
+    "media_edit_button_bg_color",
+    "media_edit_button_frame_color",
+    "about_edit_button_bg_color",
+    "about_edit_button_frame_color",
     "gallery_frame_style",
     "gallery_frame_color_1",
     "gallery_frame_color_2",
@@ -17311,6 +18012,32 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "gallery_frame_gradient_layer",
     "gallery_frame_animation",
     "gallery_frame_animation_speed",
+    "video_frame_style",
+    "video_frame_shape",
+    "video_frame_color_1",
+    "video_frame_color_2",
+    "video_frame_color_3",
+    "video_frame_color_4",
+    "video_frame_width",
+    "video_frame_radius",
+    "video_frame_glow",
+    "video_frame_shadow",
+    "video_frame_angle",
+    "video_frame_layer_1_enabled",
+    "video_frame_layer_1_width",
+    "video_frame_layer_1_gap",
+    "video_frame_layer_2_enabled",
+    "video_frame_layer_2_width",
+    "video_frame_layer_2_gap",
+    "video_frame_layer_3_enabled",
+    "video_frame_layer_3_width",
+    "video_frame_layer_3_gap",
+    "video_frame_layer_4_enabled",
+    "video_frame_layer_4_width",
+    "video_frame_layer_4_gap",
+    "video_frame_gradient_layer",
+    "video_frame_animation",
+    "video_frame_animation_speed",
     "gallery_font_style",
     "gallery_font_size"
   ];
