@@ -5,9 +5,9 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.22.1";
+  const VERSION="2026.09.22.2";
   const CONTENT_PROTECTION_URL=
-    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@38a17c4f43780d05715f445b629ac4492cc3be57/shoufhon-content-protection.js";
+    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@56a7a66e1c4f69f4036f59b0b7c2b486a0130d2e/shoufhon-content-protection.js";
   const DISMISS_KEY="shoufhon_pwa_install_dismissed_session";
 
   let deferredPrompt=null;
