@@ -4110,6 +4110,33 @@ window.addEventListener(
         -webkit-animation:m7AdminAboutTitleBreathe 2.6s ease-in-out infinite!important;
       `;
     }
+    else if(mode === "pulse"){
+      modeCss = `
+        background:none!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
+        animation:m7AdminAboutTitlePulse 1.8s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitlePulse 1.8s ease-in-out infinite!important;
+      `;
+    }
+    else if(mode === "float"){
+      modeCss = `
+        background:none!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
+        animation:m7AdminAboutTitleFloat 2.5s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitleFloat 2.5s ease-in-out infinite!important;
+      `;
+    }
+    else if(mode === "sway"){
+      modeCss = `
+        background:none!important;
+        color:${color}!important;
+        -webkit-text-fill-color:${color}!important;
+        animation:m7AdminAboutTitleSway 2.8s ease-in-out infinite!important;
+        -webkit-animation:m7AdminAboutTitleSway 2.8s ease-in-out infinite!important;
+      `;
+    }
     else if(mode === "none"){
       modeCss = `
         background:none!important;
@@ -4167,6 +4194,36 @@ window.addEventListener(
       @-webkit-keyframes m7AdminAboutTitleBreathe{
         0%,100%{-webkit-transform:scale(1);opacity:.94}
         50%{-webkit-transform:scale(1.035);opacity:1}
+      }
+
+      @keyframes m7AdminAboutTitlePulse{
+        0%,100%{transform:scale(1)}
+        50%{transform:scale(1.075)}
+      }
+
+      @-webkit-keyframes m7AdminAboutTitlePulse{
+        0%,100%{-webkit-transform:scale(1)}
+        50%{-webkit-transform:scale(1.075)}
+      }
+
+      @keyframes m7AdminAboutTitleFloat{
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-4px)}
+      }
+
+      @-webkit-keyframes m7AdminAboutTitleFloat{
+        0%,100%{-webkit-transform:translateY(0)}
+        50%{-webkit-transform:translateY(-4px)}
+      }
+
+      @keyframes m7AdminAboutTitleSway{
+        0%,100%{transform:rotate(-1.4deg)}
+        50%{transform:rotate(1.4deg)}
+      }
+
+      @-webkit-keyframes m7AdminAboutTitleSway{
+        0%,100%{-webkit-transform:rotate(-1.4deg)}
+        50%{-webkit-transform:rotate(1.4deg)}
       }
 
       html body .zee-about-card #ma7alak-about-title{
