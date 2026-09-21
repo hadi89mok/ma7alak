@@ -13197,6 +13197,7 @@ function hideDuplicateDesignControls(form){
   */
   [
     "m7de-about_title_color",
+    "m7de-about_title_animation",
     "m7de-about_kicker_color",
     "m7de-about_text_color",
     "m7de-about_signature_color"
@@ -14096,8 +14097,34 @@ function previewIdentityHtml(shop,mode){
 
   const titleColor=
     previewColor(
-      "m7de-about_title_color",
-      accent
+      "m7de-about-title-color-direct",
+      previewColor(
+        "m7de-about_title_color",
+        accent
+      )
+    );
+
+  const aboutTitleText=
+    previewVal(
+      "m7de-about-title-text",
+      ""
+    ) ||
+    ("About " + name);
+
+  const aboutArabicText=
+    previewVal(
+      "m7de-about-arabic-text",
+      ""
+    ) ||
+    arabic;
+
+  const aboutArabicColor=
+    previewColor(
+      "m7de-about-arabic-color-direct",
+      previewColor(
+        "m7de-arabic_name_color",
+        "#ffffff"
+      )
     );
 
   const textColor=
@@ -14195,11 +14222,33 @@ function previewIdentityHtml(shop,mode){
       ""
     );
 
-  const titleStyle=
-    previewAboutStyle(
-      "title",
-      titleColor
+  const titleFont=
+    previewVal(
+      "m7de-about-title-font-direct",
+      "inherit"
     );
+
+  const titleStyle={
+    color:titleColor,
+    size:Math.max(
+      60,
+      Math.min(
+        200,
+        Number(
+          previewVal(
+            "m7de-about-title-size-direct",
+            "100"
+          )
+        )||100
+      )
+    ),
+    family:
+      ["inherit","current"].includes(
+        String(titleFont).toLowerCase()
+      )
+        ? aboutTypography.family
+        : previewFontFamily(titleFont)
+  };
 
   const bodyStyle=
     previewAboutStyle(
@@ -14212,6 +14261,34 @@ function previewIdentityHtml(shop,mode){
       "arabic",
       arabicColor
     );
+
+  const aboutArabicFont=
+    previewVal(
+      "m7de-about-arabic-font-direct",
+      "inherit"
+    );
+
+  const aboutArabicStyle={
+    color:aboutArabicColor,
+    size:Math.max(
+      60,
+      Math.min(
+        200,
+        Number(
+          previewVal(
+            "m7de-about-arabic-size-direct",
+            "100"
+          )
+        )||100
+      )
+    ),
+    family:
+      ["inherit","current"].includes(
+        String(aboutArabicFont).toLowerCase()
+      )
+        ? aboutTypography.family
+        : previewFontFamily(aboutArabicFont)
+  };
 
   const kickerStyle=
     previewAboutStyle(
@@ -14239,8 +14316,17 @@ function previewIdentityHtml(shop,mode){
 
   const aboutTitleAnimation=
     previewVal(
-      "m7de-about_title_animation",
-      "current"
+      "m7de-about-title-animation-direct",
+      previewVal(
+        "m7de-about_title_animation",
+        "current"
+      )
+    );
+
+  const aboutArabicAnimation=
+    previewVal(
+      "m7de-about-arabic-animation-direct",
+      "none"
     );
 
   const labelLineStyle=
@@ -14317,7 +14403,12 @@ function previewIdentityHtml(shop,mode){
     '<div class="m7pv-actions" style="--pv-accent:'+esc(previewColor("m7de-follow_accent_color",accent))+';font-family:'+esc(followTypography.family)+';font-size:'+followTypography.size+'%;"><span>＋ Follow</span><span>✉ Message</span></div>'+
     '<div class="m7pv-block" style="--pv-title:'+esc(titleColor)+';--pv-text:'+esc(textColor)+';--pv-panel-bg:'+esc(panelBg)+';--pv-panel-border:'+esc(panelBorder)+';--pv-service-text:'+esc(serviceText)+';--pv-service-border:'+esc(serviceBorder)+';--pv-service-bg:'+esc(serviceBg)+';--pv-signature:'+esc(signatureColor)+';">'+
       '<div style="margin-bottom:3px;color:'+esc(kickerStyle.color)+';font-family:'+esc(kickerStyle.family==='inherit'?aboutTypography.family:kickerStyle.family)+';font-size:calc(7px * '+(aboutTypography.size/100)+' * '+(kickerStyle.size/100)+');font-weight:900;text-transform:uppercase;letter-spacing:.6px;">About</div>'+
-      '<h4 class="'+previewAnimClass(aboutTitleAnimation).trim()+'" style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family==='inherit'?aboutTypography.family:titleStyle.family)+';font-size:calc(11px * '+(aboutTypography.size/100)+' * '+(titleStyle.size/100)+');'+esc(previewAnimStyle(titleStyle.color))+'">About Me</h4>'+
+      '<h4 class="'+previewAnimClass(aboutTitleAnimation).trim()+'" style="color:'+esc(titleStyle.color)+';font-family:'+esc(titleStyle.family)+';font-size:calc(11px * '+(aboutTypography.size/100)+' * '+(titleStyle.size/100)+');'+esc(previewAnimStyle(titleStyle.color))+'">'+esc(aboutTitleText)+'</h4>'+
+      (
+        aboutArabicText
+          ? '<div class="'+previewAnimClass(aboutArabicAnimation).trim()+'" dir="auto" style="margin:2px 0 6px;color:'+esc(aboutArabicStyle.color)+';font-family:'+esc(aboutArabicStyle.family)+';font-size:calc(9px * '+(aboutTypography.size/100)+' * '+(aboutArabicStyle.size/100)+');line-height:1.35;'+esc(previewAnimStyle(aboutArabicStyle.color))+'">'+esc(aboutArabicText)+'</div>'
+          : ''
+      )+
       '<p style="color:'+esc(bodyStyle.color)+';font-family:'+esc(bodyStyle.family==='inherit'?aboutTypography.family:bodyStyle.family)+';font-size:calc(8px * '+(aboutTypography.size/100)+' * '+(bodyStyle.size/100)+');">'+esc(about)+'</p>'+
       (
         services.length
@@ -17262,7 +17353,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     const s={...settings};
     Object.assign(s,{enabled:checked("m7hfa-enabled"),show_flag:checked("m7hfa-show-flag"),title:val("m7hfa-title"),subtitle:val("m7hfa-subtitle"),copyright_text:val("m7hfa-copyright"),bottom_text:val("m7hfa-bottom-text")||"Made with Love",cedar_enabled:checked("m7hfa-cedar"),side_note_enabled:checked("m7hfa-side-note-enabled"),side_note_text:val("m7hfa-side-note"),accent_color:val("m7hfa-accent"),accent_color_2:val("m7hfa-accent2"),title_color:val("m7hfa-title-color"),title_size:num("m7hfa-title-size",31),subtitle_color:val("m7hfa-subtitle-color"),subtitle_size:num("m7hfa-subtitle-size",17),nav_color:val("m7hfa-nav-color"),social_icon_color:val("m7hfa-social-color"),social_glow_color:val("m7hfa-social-glow"),social_size:num("m7hfa-social-size",46),copyright_color:val("m7hfa-copy-color"),copyright_size:num("m7hfa-copy-size",13),bottom_color:val("m7hfa-bottom-color"),bottom_size:num("m7hfa-bottom-size",14),side_note_color:val("m7hfa-side-color"),top_line_color:val("m7hfa-line-color"),logo_url:val("m7hfa-logo-url"),logo_size:num("m7hfa-logo-size",150),background_url:val("m7hfa-bg-url"),background_color:val("m7hfa-bg-color"),background_overlay:num("m7hfa-bg-overlay",72),background_zoom:num("m7hfa-bg-zoom",115),background_position:val("m7hfa-bg-pos")||"center 54%",overall_animation:val("m7hfa-overall"),animation_speed:num("m7hfa-speed",100),animation_intensity:num("m7hfa-intensity",65),logo_animation:val("m7hfa-logo-anim"),title_animation:val("m7hfa-title-anim"),subtitle_animation:val("m7hfa-subtitle-anim"),nav_animation:val("m7hfa-nav-anim"),social_animation:val("m7hfa-social-anim"),copyright_animation:val("m7hfa-copy-anim"),bottom_animation:val("m7hfa-bottom-anim"),top_line_enabled:checked("m7hfa-line-enabled"),top_line_animation:val("m7hfa-line-anim"),footer_min_height:num("m7hfa-height",360),top_radius:num("m7hfa-radius",34),content_max_width:num("m7hfa-content-width",760)});
     s.navigation=$$("[data-nav-row]",overlay).map(row=>({enabled:$("[data-k=enabled]",row).checked,label:$("[data-k=label]",row).value.trim(),url:$("[data-k=url]",row).value.trim()}));
-    s.socials=$("[data-social-row]",overlay).map(row=>({enabled:$("[data-k=enabled]",row).checked,type:$("[data-k=type]",row).value,label:$("[data-k=label]",row).value.trim(),url:$("[data-k=url]",row).value.trim(),custom_icon_url:$("[data-k=custom_icon_url]",row)?.value.trim()||""}));
+    s.socials=$$("[data-social-row]",overlay).map(row=>({enabled:$("[data-k=enabled]",row).checked,type:$("[data-k=type]",row).value,label:$("[data-k=label]",row).value.trim(),url:$("[data-k=url]",row).value.trim(),custom_icon_url:$("[data-k=custom_icon_url]",row)?.value.trim()||""}));
     settings=merged(s);return settings;
   }
 
