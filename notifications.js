@@ -4683,7 +4683,7 @@ function startNotificationRefresh(){
 
   /*
      REALTIME is the primary path.
-     This 30 second refresh is only a recovery safety net in case Hostinger
+     This 2 minute refresh is only a recovery safety net in case Hostinger
      or the browser misses a realtime/message event. Hidden tabs do no work.
   */
   refreshTimer =
@@ -4699,9 +4699,7 @@ function startNotificationRefresh(){
         loadNotifications()
           .catch(function(){});
 
-      },
-      30000
-    );
+      }, 120000 );
 
 }
 
