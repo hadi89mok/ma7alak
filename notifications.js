@@ -1261,6 +1261,90 @@ function injectNotificationCSS(){
 }
 
 
+/*
+   LIVE notifications use a larger green activity dot.
+   Explicit WebKit keyframes keep the pulse visible on iOS/Safari as well
+   as Android and desktop browsers.
+*/
+.ma7alak-notification-item[data-notification-type="live"]
+.ma7alak-notification-unread-dot{
+
+  width:11px;
+
+  height:11px;
+
+  background:#39d978;
+
+  box-shadow:
+    0 0 0 3px rgba(57,217,120,.12),
+    0 0 12px rgba(57,217,120,.56);
+
+  animation:
+    ma7alakLiveNotificationDotPulse
+    1.25s
+    ease-in-out
+    infinite;
+
+  -webkit-animation:
+    ma7alakLiveNotificationDotPulse
+    1.25s
+    ease-in-out
+    infinite;
+
+  transform-origin:center;
+  -webkit-transform-origin:center;
+
+  animation-play-state:running;
+  -webkit-animation-play-state:running;
+
+  will-change:transform,box-shadow,opacity;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+}
+
+
+@keyframes ma7alakLiveNotificationDotPulse{
+
+  0%,100%{
+    transform:scale(.88);
+    opacity:.78;
+    box-shadow:
+      0 0 0 2px rgba(57,217,120,.10),
+      0 0 8px rgba(57,217,120,.42);
+  }
+
+  50%{
+    transform:scale(1.20);
+    opacity:1;
+    box-shadow:
+      0 0 0 6px rgba(57,217,120,.10),
+      0 0 18px rgba(57,217,120,.82);
+  }
+
+}
+
+
+@-webkit-keyframes ma7alakLiveNotificationDotPulse{
+
+  0%,100%{
+    -webkit-transform:scale(.88);
+    opacity:.78;
+    box-shadow:
+      0 0 0 2px rgba(57,217,120,.10),
+      0 0 8px rgba(57,217,120,.42);
+  }
+
+  50%{
+    -webkit-transform:scale(1.20);
+    opacity:1;
+    box-shadow:
+      0 0 0 6px rgba(57,217,120,.10),
+      0 0 18px rgba(57,217,120,.82);
+  }
+
+}
+
+
 .ma7alak-notification-item:not(.highlighted)
 .ma7alak-notification-unread-dot{
 
