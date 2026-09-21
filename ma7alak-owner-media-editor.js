@@ -16,6 +16,9 @@
   let allowed=false;
   let busy=false;
   let changed=false;
+  let historyArmed=false;
+  let nativeFullscreenEntered=false;
+  let closingEditor=false;
   let snapshot={photos:[],videos:[],photoLimit:0,videoLimit:0};
   let pending=new Map();
 
@@ -45,7 +48,75 @@
 
   function portal(open){
     try{
-      pageTarget()?.postMessage({type:open?"SHOUFHON_EMBED_VIEWER_OPEN":"SHOUFHON_EMBED_VIEWER_CLOSE"},"*");
+      pageTarget()?.postMessage({
+        type:open?"SHOUFHON_EMBED_VIEWER_OPEN":"SHOUFHON_EMBED_VIEWER_CLOSE",
+        viewerKind:"owner-media-editor",
+        shopSlug:slug
+      },"*");
+    }catch(_){}
+  }
+
+  function editorSheet(){
+    return document.getElementById("m7-owner-media-sheet");
+  }
+
+  function editorOpen(){
+    return !!editorSheet()?.classList.contains("open");
+  }
+
+  function armHistory(){
+    if(historyArmed)return;
+    try{
+      const base=
+        history.state &&
+        typeof history.state==="object"
+          ? history.state
+          : {};
+
+      history.pushState(
+        {...base,__shoufhonOwnerMediaEditor:true},
+        "",
+        location.href
+      );
+      historyArmed=true;
+    }catch(_){}
+  }
+
+  function requestNativeFullscreen(sheet){
+    if(!sheet)return;
+
+    try{
+      if(typeof sheet.requestFullscreen==="function"){
+        const result=sheet.requestFullscreen({navigationUI:"hide"});
+        Promise.resolve(result).catch(()=>{});
+        return;
+      }
+
+      if(typeof sheet.webkitRequestFullscreen==="function"){
+        const result=sheet.webkitRequestFullscreen();
+        Promise.resolve(result).catch(()=>{});
+      }
+    }catch(_){}
+  }
+
+  function exitNativeFullscreen(){
+    try{
+      const current=
+        document.fullscreenElement ||
+        document.webkitFullscreenElement;
+
+      if(!current)return;
+
+      if(typeof document.exitFullscreen==="function"){
+        const result=document.exitFullscreen();
+        Promise.resolve(result).catch(()=>{});
+        return;
+      }
+
+      if(typeof document.webkitExitFullscreen==="function"){
+        const result=document.webkitExitFullscreen();
+        Promise.resolve(result).catch(()=>{});
+      }
     }catch(_){}
   }
 
@@ -123,12 +194,28 @@
 
   async function openEditor(){
     if(!owner)return;
+
+    const sheet=editorSheet();
+    if(!sheet)return;
+
+    /*
+       Open immediately while the tap is still a user gesture:
+       - the top-page portal can promote the Hostinger iframe
+       - browsers that allow iframe fullscreen can hide browser chrome
+       - loading happens after the editor is already visible
+    */
+    sheet.classList.add("open");
+    portal(true);
+    armHistory();
+    requestNativeFullscreen(sheet);
     status("Loading Media…");
+
     try{
       const data=await request({op:"load"});
-      snapshot=data||snapshot;allowed=true;render();
-      document.getElementById("m7-owner-media-sheet")?.classList.add("open");
-      portal(true);status("");
+      snapshot=data||snapshot;
+      allowed=true;
+      render();
+      status("");
     }catch(error){
       allowed=false;
       document.getElementById("m7-owner-media-edit")?.classList.remove("visible");
@@ -136,14 +223,44 @@
     }
   }
 
-  function closeEditor(){
-    if(busy)return;
-    document.getElementById("m7-owner-media-sheet")?.classList.remove("open");
-    portal(false);
-    if(changed){
-      changed=false;
-      setTimeout(()=>location.reload(),120);
+  function closeEditor(options={}){
+    if(closingEditor)return;
+
+    const fromHistory=options.fromHistory===true;
+    const force=options.force===true;
+
+    if(busy&&!force){
+      if(fromHistory){
+        historyArmed=false;
+        armHistory();
+      }
+      return;
     }
+
+    closingEditor=true;
+
+    editorSheet()?.classList.remove("open");
+    portal(false);
+
+    if(nativeFullscreenEntered){
+      nativeFullscreenEntered=false;
+      exitNativeFullscreen();
+    }
+
+    if(!fromHistory&&historyArmed){
+      historyArmed=false;
+      try{history.back()}catch(_){}
+    }else{
+      historyArmed=false;
+    }
+
+    const shouldReload=changed;
+    changed=false;
+
+    setTimeout(()=>{
+      closingEditor=false;
+      if(shouldReload)location.reload();
+    },shouldReload?180:40);
   }
 
   function choose(mode,type,id=""){
@@ -174,11 +291,12 @@
     style.textContent=`
       #m7-owner-media-edit{display:none;min-height:34px;padding:0 10px;border:1px solid rgba(217,164,65,.42);border-radius:999px;background:rgba(217,164,65,.10);color:#f0ca6b;font:900 9px/1 Arial,"Segoe UI",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       #m7-owner-media-edit.visible{display:inline-flex;align-items:center;gap:5px}
-      #m7-owner-media-sheet{position:fixed!important;inset:0!important;z-index:2147483646!important;display:none!important;background:rgba(4,4,5,.98);color:#fff;overflow:auto;-webkit-overflow-scrolling:touch;padding:max(16px,env(safe-area-inset-top)) 12px max(24px,env(safe-area-inset-bottom));font-family:Arial,"Segoe UI",sans-serif}
+      #m7-owner-media-sheet{position:fixed!important;inset:0!important;width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(58px,calc(env(safe-area-inset-top) + 46px)) 12px max(24px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
+      #m7-owner-media-sheet:fullscreen,#m7-owner-media-sheet:-webkit-full-screen{width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;background:#050506!important}
       .m7om-card{width:min(100%,640px);margin:0 auto;padding:15px;border:1px solid rgba(217,164,65,.30);border-radius:22px;background:linear-gradient(155deg,#15120f,#080809 72%);box-shadow:0 24px 70px rgba(0,0,0,.62)}
-      .m7om-head{display:flex;gap:10px;align-items:flex-start;position:relative;padding-right:44px}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
-      .m7om-close{position:absolute;right:0;top:-4px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.09);background:#111;color:#fff;font-size:23px;touch-action:manipulation}
+      .m7om-head{display:flex;gap:10px;align-items:flex-start;position:relative;padding-right:4px}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
+      .m7om-close{position:fixed!important;right:max(12px,env(safe-area-inset-right))!important;top:max(10px,env(safe-area-inset-top))!important;z-index:2147483647!important;width:42px!important;height:42px!important;border-radius:50%!important;border:1px solid rgba(217,164,65,.38)!important;background:rgba(10,10,11,.94)!important;color:#fff!important;font-size:27px!important;line-height:1!important;display:grid!important;place-items:center!important;box-shadow:0 8px 24px rgba(0,0,0,.48)!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
       #m7-owner-media-quota{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}#m7-owner-media-quota span{padding:7px 9px;border:1px solid rgba(217,164,65,.20);border-radius:999px;background:rgba(217,164,65,.065);color:#aa9e8a;font-size:8px}#m7-owner-media-quota b{color:#f0ca6b;font-size:10px}
       .m7om-add{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}.m7om-add button{min-height:46px;border:1px solid rgba(217,164,65,.34);border-radius:14px;background:rgba(217,164,65,.10);color:#f0ca6b;font-weight:900;font-size:10px;touch-action:manipulation}
       #m7-owner-media-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
@@ -188,7 +306,7 @@
       .m7om-actions{display:grid;gap:5px}.m7om-actions button{min-height:31px;padding:0 8px;border-radius:9px;border:1px solid rgba(255,255,255,.08);background:#111;color:#ddd;font-size:8px;font-weight:900;touch-action:manipulation}.m7om-actions [data-delete]{color:#ff9696;border-color:rgba(255,80,80,.16)}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
       #m7-owner-media-status{min-height:20px;margin-top:10px;text-align:center;color:#a99b87;font-size:9px}#m7-owner-media-status[data-type="ok"]{color:#7ee3a0}#m7-owner-media-status[data-type="error"]{color:#ff8f8f}
-      @media(max-width:600px){.m7om-card{border-radius:19px}.m7om-item{grid-template-columns:64px minmax(0,1fr)}.m7om-thumb{width:64px;height:62px}.m7om-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.m7om-actions button{min-height:40px}.m7om-add{grid-template-columns:1fr}.m7om-add button{min-height:50px}}
+      @media(max-width:600px){#m7-owner-media-sheet{padding-left:10px!important;padding-right:10px!important}.m7om-card{border-radius:19px}.m7om-item{grid-template-columns:64px minmax(0,1fr)}.m7om-thumb{width:64px;height:62px}.m7om-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.m7om-actions button{min-height:40px}.m7om-add{grid-template-columns:1fr}.m7om-add button{min-height:50px}}
     `;
     document.head.appendChild(style);
 
@@ -204,8 +322,35 @@
     sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add, replace or delete Gallery photos and videos. Your Admin-set photo/video limits are enforced.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">＋ Add photos</button><button type="button" data-add="video">▶ Add videos</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div>';
     document.body.appendChild(sheet);
 
-    sheet.querySelector(".m7om-close").addEventListener("click",closeEditor);
+    sheet.querySelector(".m7om-close").addEventListener("click",()=>closeEditor());
     sheet.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>choose("add",b.dataset.add)));
+
+    window.addEventListener("popstate",()=>{
+      if(!editorOpen())return;
+      historyArmed=false;
+      closeEditor({fromHistory:true});
+    });
+
+    const onFullscreenChange=()=>{
+      const current=
+        document.fullscreenElement ||
+        document.webkitFullscreenElement;
+
+      if(current===sheet){
+        nativeFullscreenEntered=true;
+        return;
+      }
+
+      if(nativeFullscreenEntered){
+        nativeFullscreenEntered=false;
+        if(editorOpen()&&!closingEditor){
+          closeEditor();
+        }
+      }
+    };
+
+    document.addEventListener("fullscreenchange",onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange",onFullscreenChange);
 
     const input=sheet.querySelector("#m7-owner-media-file");
     input.addEventListener("change",async()=>{
