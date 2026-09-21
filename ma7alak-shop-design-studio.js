@@ -11,10 +11,15 @@
   window.__SHOUFHON_FULLSCREEN_SHOP_STUDIO_V1__=true;
 
   const TABS=[
-    ["profile","♙","Profile","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
+    ["details","✎","Details","Shop name, Arabic name, category, area, location and page link"],
+    ["profile","♙","Profile & Banner","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
     ["story","◉","Story","Story motion, upload burst, glow color/strength, speed, sparkles and logo pulse"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
+    ["uploads","↑","Uploads","Manage photos and videos here. Media actions save immediately."],
+    ["reels","▶","Reels","Upload and manage homepage reels and owner limits. Actions save immediately."],
+    ["offers","⚡","Offers","Owner access, offer limits and existing offers. Actions save immediately."],
+    ["publishing","✓","Access & Visibility","Owner editing permissions, media quotas, visibility and badges. Actions save immediately."],
     ["about","●","About / Hub","ABOUT + HUB: description, services, social links, location, colors, typography and effects"],
     ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
     ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
@@ -93,8 +98,65 @@
       .m7studio-profile-image-card{display:grid!important;grid-template-columns:minmax(170px,1fr) 132px minmax(170px,.85fr);gap:18px;align-items:center;margin:0 0 12px!important;padding:16px!important;border:1px solid rgba(218,170,82,.14)!important;border-radius:16px!important;background:radial-gradient(circle at 14% 0%,rgba(218,170,82,.06),transparent 45%),rgba(17,19,20,.88)!important;box-sizing:border-box}.m7studio-profile-image-copy small{display:block;color:#907f64;font-size:7px;font-weight:950;letter-spacing:.9px}.m7studio-profile-image-copy b{display:block;margin-top:5px;color:#efd49a;font-size:15px}.m7studio-profile-image-copy span{display:block;margin-top:5px;color:#847a6d;font-size:8px;line-height:1.5}.m7studio-profile-image-preview{width:112px;height:112px;margin:auto;display:grid;place-items:center;overflow:hidden;border:3px solid #d9aa58;border-radius:50%;background:#0a0b0c;color:#e3bc6c;font-size:30px;font-weight:950;box-shadow:0 0 24px rgba(217,170,88,.18)}.m7studio-profile-image-preview img{width:100%;height:100%;display:block;object-fit:cover}.m7studio-profile-image-actions{display:grid;gap:8px}.m7studio-profile-image-actions button,.m7studio-image-upload{position:relative;min-height:38px;display:flex;align-items:center;justify-content:center;padding:0 11px;border:1px solid rgba(218,170,82,.20);border-radius:10px;background:rgba(218,170,82,.045);color:#e7c57d;font-size:9px;font-weight:900;cursor:pointer;box-sizing:border-box}.m7studio-profile-image-actions button{border-color:rgba(255,91,91,.22);background:rgba(255,91,91,.045);color:#ff9c94}.m7studio-image-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.m7studio-profile-image-actions small{min-height:15px;color:#78dca0;font-size:7px;line-height:1.4}.m7studio-profile-core{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
       .m7v4-actions-studio{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important}.m7v4-actions-studio [data-m7v4-action="design"]{border-color:rgba(217,170,88,.35)!important;background:radial-gradient(circle at 15% 0%,rgba(217,170,88,.11),transparent 50%),rgba(217,170,88,.035)!important}
       @media(max-width:1100px){#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:minmax(0,1fr) 350px!important;width:calc(100vw - 24px)!important;gap:12px!important}#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-      @media(max-width:820px){#ma-admin-edit-card.m7studio-fullscreen{display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}.m7studio-topbar{position:sticky;top:0;flex-wrap:wrap;min-height:auto;padding:9px 10px}.m7studio-title{flex:1 1 180px}.m7studio-sync{display:none}.m7studio-top-btn{min-height:37px;padding:0 10px}.m7studio-tabs{position:relative;top:auto;padding:8px 10px}#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:1fr!important;width:calc(100vw - 18px)!important;height:auto!important;min-height:0!important;margin:10px auto 28px!important;padding:0!important;overflow:visible!important}#ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{height:auto!important;min-height:0!important;padding:0 0 48px!important;overflow:visible!important;touch-action:auto!important}#ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{position:relative!important;top:auto!important;order:-1!important;height:auto!important;max-height:none!important;overflow:visible!important}.m7studio-phone{height:590px}}
-      @media(max-width:560px){.m7studio-brand-icon{display:none}.m7studio-title b{font-size:16px}.m7studio-title small{font-size:8px}.m7studio-top-btn.preview{display:none}.m7studio-tabs{top:94px}#ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:1fr!important}.m7v4-actions-studio{grid-template-columns:1fr!important}}
+      #ma-admin-edit-card.m7studio-fullscreen{box-sizing:border-box!important;height:100vh!important;height:100dvh!important}
+      #ma-admin-edit-card.m7studio-fullscreen *{box-sizing:border-box;min-width:0}
+      #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:minmax(0,1fr) minmax(300px,390px)!important}
+      #ma-admin-edit-card.m7studio-fullscreen label,#ma-admin-edit-card.m7studio-fullscreen .m7ds-field>span{font-size:13px!important;line-height:1.5!important}
+      #ma-admin-edit-card.m7studio-fullscreen small,#ma-admin-edit-card.m7studio-fullscreen .m7ds-help{font-size:12px!important;line-height:1.5!important;color:#b8b1a6!important}
+      #ma-admin-edit-card.m7studio-fullscreen button{min-height:44px;font-size:13px}
+      #ma-admin-edit-card.m7studio-fullscreen input:not([type=checkbox]):not([type=radio]),#ma-admin-edit-card.m7studio-fullscreen select,#ma-admin-edit-card.m7studio-fullscreen textarea{font-size:16px!important;max-width:100%!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-tabs{scrollbar-width:thin}
+      #ma-admin-edit-card[data-studio-tab="profile"] #ma-admin-edit-form{display:flex!important;flex-direction:column}
+      #ma-admin-edit-card[data-studio-tab="profile"] .m7studio-section-banner{order:0;flex-shrink:0}
+      #ma-admin-edit-card[data-studio-tab="profile"] .m7-design-studio{order:1;flex-shrink:0}
+      #ma-admin-edit-card[data-studio-tab="profile"] .m7labelbox{order:2;flex-shrink:0}
+      .m7studio-section-picker{display:none}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-banner-status{font-size:12px!important;line-height:1.4!important;overflow-wrap:anywhere}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-banner-actions{flex-wrap:wrap}
+      .m7studio-save-status{flex-basis:100%;font-size:12px;color:#dfc68c}
+      .m7studio-save-status:empty{display:none}
+      .m7studio-topbar{flex-wrap:wrap;padding-top:max(10px,env(safe-area-inset-top))}
+      .m7studio-top-btn[data-m7studio-preview]{display:none}
+      #ma-admin-edit-card .m7studio-topbar [hidden]{display:none!important}
+      .m7studio-manager-dock{display:none;min-height:0;overflow:auto;padding:0 4px 24px}
+      #ma-admin-edit-card.m7studio-manager-mode .m7studio-manager-dock{display:block!important;grid-column:1/-1}
+      #ma-admin-edit-card.m7studio-manager-mode #ma-admin-edit-form,#ma-admin-edit-card.m7studio-manager-mode .m7v4-edit-preview{display:none!important}
+      #ma-admin-edit-card .m7studio-manager-dock section{max-width:100%!important;margin:0 0 16px!important}
+      #ma-admin-edit-card .m7studio-manager-dock .m7v4-legacy-panel{display:block!important}
+      #ma-admin-edit-card .m7studio-manager-dock .m7v4-panel-close,#ma-admin-edit-card .m7studio-manager-dock #ma-gallery-close,#ma-admin-edit-card .m7studio-manager-dock #ma-video-close,#ma-admin-edit-card .m7studio-manager-dock #ma-reels-close,#ma-admin-edit-card .m7studio-manager-dock #m7-live-admin-close{display:none!important}
+      #ma-admin-edit-card .m7studio-manager-dock #m7-live-admin-panel{width:100%!important;max-height:none!important;overflow:visible!important}
+      .m7studio-manager-dock .m7v4-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      .m7studio-upload-tabs{display:flex;gap:8px;margin-bottom:14px}
+      .m7studio-upload-tabs button{padding:10px 16px;background:#211b12;color:#f0cc84;border:1px solid #6b542d;border-radius:12px}
+      .m7studio-upload-tabs button[aria-pressed=true]{background:#e5b85e;color:#17120a}
+      #ma-admin-edit-card .m7studio-global-extras .m7da-field:not(.m7studio-field-hidden){display:flex!important}
+      #ma-admin-edit-card .m7studio-global-extras .m7studio-field-hidden{display:none!important}
+      .m7v4-actions-studio{grid-template-columns:1fr!important}
+      @media(max-width:820px){
+        #ma-admin-edit-card.m7studio-fullscreen{display:flex!important;overflow:hidden!important}
+        .m7studio-topbar{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;gap:8px;padding:10px;padding-top:max(10px,env(safe-area-inset-top))}
+        .m7studio-title{grid-column:1/3;grid-row:1}
+        .m7studio-top-btn.close{grid-column:3;grid-row:1}
+        .m7studio-top-btn.primary{grid-column:1;grid-row:2}
+        .m7studio-top-btn[data-m7studio-preview]{grid-column:2/4;grid-row:2;display:block}
+        .m7studio-save-status{grid-column:1/-1}
+        .m7studio-brand-icon,.m7studio-sync,.m7studio-top-btn.preview{display:none}
+        .m7studio-title b{font-size:16px}.m7studio-title small{font-size:12px}
+        .m7studio-top-btn{padding:0 10px}.m7studio-top-btn.primary{min-width:80px}
+        .m7studio-tabs{position:relative;top:auto;padding:8px 10px;min-height:62px}
+        .m7studio-tab{display:none}.m7studio-section-picker{display:block;width:100%;padding:10px;color:#efd49a;border:1px solid #6b542d;background:#111315;border-radius:10px}
+        #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{display:flex!important;flex-direction:column!important;width:100%!important;margin:0!important;padding:10px 10px max(10px,env(safe-area-inset-bottom))!important;gap:0!important;overflow:hidden!important}
+        #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{flex:1;height:100%!important;overflow-y:auto!important;padding:0 0 30px!important;scrollbar-gutter:auto!important}
+        #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{display:none!important}
+        #ma-admin-edit-card.m7studio-preview-open #ma-admin-edit-form{display:none!important}
+        #ma-admin-edit-card.m7studio-preview-open .m7v4-edit-preview{display:block!important}
+        #ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7da-grid,#ma-admin-edit-card.m7studio-fullscreen .m7studio-profile-core{grid-template-columns:minmax(0,1fr)!important}
+        #ma-admin-edit-card.m7studio-fullscreen fieldset{min-inline-size:0!important;padding:12px!important}
+        #ma-admin-edit-card.m7studio-fullscreen .m7ds-layer-grid{grid-template-columns:minmax(0,1fr)!important}
+        .m7studio-manager-dock{flex:1;width:100%;overscroll-behavior:contain}
+        .m7studio-manager-dock .m7v4-actions{grid-template-columns:1fr}
+        .m7studio-phone{width:100%;min-height:420px;height:calc(100dvh - 260px)}
+      }
     `;
     document.head.appendChild(style);
   }
@@ -120,7 +182,7 @@
     form.classList.remove("m7studio-colors-mode");
     form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
     form.querySelector(":scope > .m7studio-hub-note")?.remove();
-    form.querySelector(".m7da-sectioned-extras")?.classList.remove("m7studio-hub-extras");
+    form.querySelector(".m7da-sectioned-extras")?.classList.remove("m7studio-hub-extras","m7studio-global-extras");
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
     form.querySelectorAll(".m7studio-field-hidden,.m7studio-group-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden","m7studio-group-hidden"));
     const design=form.querySelector(".m7-design-studio");
@@ -340,74 +402,6 @@
     }
   }
 
-  function ensureProfileImageCard(form){
-    form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
-
-    const card=document.createElement("section");
-    card.className="m7studio-profile-image-card";
-
-    const current=profileImageUrl();
-    const name=String(
-      document.getElementById("ma-edit-name")?.value||
-      "Shop"
-    ).trim()||"Shop";
-
-    card.innerHTML=
-      '<div class="m7studio-profile-image-copy">'+
-        '<small>PROFILE IMAGE</small>'+
-        '<b>'+esc(name)+'</b>'+
-        '<span>A circular image works best. Uploading updates the live preview immediately; Save Changes publishes it.</span>'+
-      '</div>'+
-      '<div class="m7studio-profile-image-preview">'+
-        (
-          current
-            ?'<img src="'+esc(current)+'" alt="">'
-            :'<span>'+esc(name.charAt(0).toUpperCase())+'</span>'
-        )+
-      '</div>'+
-      '<div class="m7studio-profile-image-actions">'+
-        '<label class="m7studio-image-upload">▧ Change Image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-m7studio-profile-file></label>'+
-        '<button type="button" data-m7studio-profile-remove>⌫ Remove</button>'+
-        '<small data-m7studio-profile-status></small>'+
-      '</div>';
-
-    const banner=form.querySelector(":scope > .m7studio-section-banner");
-    banner?.after(card);
-
-    const file=card.querySelector("[data-m7studio-profile-file]");
-    const status=card.querySelector("[data-m7studio-profile-status]");
-
-    file?.addEventListener("change",async()=>{
-      const picked=file.files&&file.files[0];
-      if(!picked)return;
-      file.disabled=true;
-      try{
-        await uploadProfileImage(picked,status);
-        ensureProfileImageCard(form);
-        scheduleStudioPreview();
-      }catch(error){
-        if(status)status.textContent=error?.message||"Profile image upload failed.";
-      }finally{
-        file.disabled=false;
-        file.value="";
-      }
-    });
-
-    card.querySelector("[data-m7studio-profile-remove]")?.addEventListener("click",()=>{
-      const target=document.getElementById("ma-edit-image");
-      if(target){
-        target.value="";
-        target.dispatchEvent(new Event("input",{bubbles:true}));
-        target.dispatchEvent(new Event("change",{bubbles:true}));
-      }
-      ensureProfileImageCard(form);
-      scheduleStudioPreview();
-    });
-
-    syncProfileImageCardAccent();
-    return card;
-  }
-
   function studioPublicUrl(){
     const explicit=String(document.getElementById("ma-edit-url")?.value||"").trim();
     if(/^https?:\/\//i.test(explicit))return explicit;
@@ -464,11 +458,18 @@
 
     const nameNode=clone.querySelector(".m7ds-profile-shell-name");
     if(nameNode)nameNode.textContent=name;
+    const styleText=(node,key)=>{
+      const style=window.Ma7alakAdminStudioBridge?.textStyle(key);if(!node||!style)return;
+      node.style.cssText+=';'+style.css;node.style.color=style.color;node.style.fontFamily=style.typography.family;
+      node.style.fontSize=(key==="shop_name"?20:14)*style.typography.size/100+"px";
+      if(style.classes)node.classList.add(...style.classes.trim().split(/\s+/));
+    };
+    styleText(nameNode,"shop_name");
 
     const arabicNode=clone.querySelector(".m7ds-profile-shell-arabic");
     if(arabicNode){
       arabicNode.textContent=arabic||"اسم المحل";
-      arabicNode.hidden=!arabic;
+      arabicNode.hidden=!arabic;styleText(arabicNode,"arabic_name");
     }
 
     /*
@@ -570,7 +571,7 @@
     }
 
     const labelText=String(
-      document.querySelector(".m7labelbox input[type='text']")?.value||
+      document.querySelector("#ma-admin-edit-form .m7labelbox input[type='text']")?.value||
       clone.querySelector(".m7ds-profile-shell-pill")?.textContent||
       "SHOP LABEL"
     ).trim();
@@ -609,6 +610,7 @@
   function renderStudioPreview(panel){
     if(!panel||!panel.classList.contains("m7studio-fullscreen"))return;
 
+    window.Ma7alakAdminStudioBridge?.preview(activeTab);
     refreshStudioPreviewSource();
 
     const dock=panel.querySelector(".m7v4-edit-preview");
@@ -631,6 +633,7 @@
     if(source){
       const clone=source.cloneNode(true);
       clone.removeAttribute("id");
+      clone.querySelectorAll("[id]").forEach(el=>el.removeAttribute("id"));
 
       if(activeTab==="profile"||activeTab==="story"){
         hydrateProfilePreview(clone);
@@ -677,9 +680,24 @@
     if(!top){
       top=document.createElement("div");
       top.className="m7studio-topbar";
-      top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Studio preview ready</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>▣ Preview on Mobile</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
+      top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Studio preview ready</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>Open shop ↗</button><button type="button" class="m7studio-top-btn" data-m7studio-preview>Preview</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
       panel.prepend(top);
-      top.querySelector("[data-m7studio-save]")?.addEventListener("click",()=>document.getElementById("ma-admin-save-edit")?.click());
+      top.querySelector("[data-m7studio-save]")?.addEventListener("click",()=>{
+        const form=document.getElementById("ma-admin-edit-form");
+        const invalid=[...form.elements].find(el=>el.willValidate&&!el.validity.valid);
+        if(invalid){
+          const id=invalid.id;
+          activateTab(id.startsWith("ma-edit-")?"details":id.includes("hours")?"hours":id.includes("about")?"about":id.includes("profile")?"profile":"advanced");
+          invalid.scrollIntoView({block:"center"});invalid.reportValidity();return;
+        }
+        document.getElementById("ma-admin-save-edit")?.click();
+      });
+      top.querySelector("[data-m7studio-preview]")?.addEventListener("click",()=>{
+        panel.classList.toggle("m7studio-preview-open");
+        top.querySelector("[data-m7studio-preview]").textContent=panel.classList.contains("m7studio-preview-open")?"Edit":"Preview";
+        scheduleStudioPreview(panel);
+      });
+      const status=document.createElement("span");status.className="m7studio-save-status";status.setAttribute("role","status");status.dataset.m7studioSaveStatus="";top.append(status);
       top.querySelector("[data-m7studio-open]")?.addEventListener("click",()=>{const url=studioPublicUrl();if(url)window.open(url,"_blank","noopener")});
       top.querySelector("[data-m7studio-close]")?.addEventListener("click",()=>{closeStudio();document.getElementById("ma-admin-cancel-edit")?.click()});
     }
@@ -689,6 +707,9 @@
       nav.className="m7studio-tabs";
       nav.setAttribute("aria-label","Shop Design Studio sections");
       nav.innerHTML=TABS.map(([key,icon,label])=>'<button type="button" class="m7studio-tab" data-m7studio-tab="'+esc(key)+'"><i>'+esc(icon)+'</i><span>'+esc(label)+'</span></button>').join("");
+      const picker=document.createElement("select");picker.className="m7studio-section-picker";picker.setAttribute("aria-label","Studio section");
+      picker.innerHTML=TABS.map(([key,icon,label])=>'<option value="'+esc(key)+'">'+esc(label)+'</option>').join("");
+      picker.addEventListener("change",()=>activateTab(picker.value));nav.prepend(picker);
       top.after(nav);
 
       /*
@@ -711,8 +732,9 @@
         },true);
       });
     }
+    const picker=nav.querySelector(".m7studio-section-picker");if(picker)picker.value=activeTab;
     const name=String(document.getElementById("ma-edit-name")?.value||document.getElementById("ma-edit-original-slug")?.value||"Shop").trim();
-    const subtitle=top.querySelector("[data-m7studio-subtitle]");if(subtitle)subtitle.textContent="Editing "+name+" · real controls, real Save, live shop sync.";
+    const subtitle=top.querySelector("[data-m7studio-subtitle]");if(subtitle)subtitle.textContent="Editing "+name;
     nav.querySelectorAll("[data-m7studio-tab]").forEach(button=>button.classList.toggle("active",button.dataset.m7studioTab===activeTab));
   }
 
@@ -731,13 +753,124 @@
     return roots;
   }
 
+  const managerHomes=new Map();
+  let managerRequest=0;
+  function rememberManager(node){
+    if(node&&!managerHomes.has(node)){const marker=document.createComment("Studio manager home");node.before(marker);managerHomes.set(node,marker)}
+    return node;
+  }
+  function restoreManagers(){
+    managerRequest++;
+    for(const [node,marker] of managerHomes){if(marker.parentNode)marker.replaceWith(node);if(node.id!=="m7-live-admin-panel")node.hidden=true}
+    managerHomes.clear();document.getElementById("m7-live-admin-overlay")?.classList.remove("active");
+  }
+  function hideManagerDock(panel){
+    restoreManagers();panel.classList.remove("m7studio-manager-mode");panel.querySelector(".m7studio-manager-dock")?.replaceChildren();
+    for(const selector of ["[data-m7studio-save]","[data-m7studio-preview]"]){const el=panel.querySelector(selector);if(el)el.hidden=false}
+  }
+  async function mountManager(host,key){
+    restoreManagers();const request=++managerRequest;
+    const shop=window.Ma7alakAdminStudioBridge?.shop();if(!shop)return;
+    const rows={gallery:["ma-admin-gallery-card",window.Ma7alakAdminOpenGalleryManager],video:["ma-admin-video-card",window.Ma7alakAdminOpenVideoManager],reels:["ma-admin-reels-card",window.Ma7alakAdminOpenReelsManager]};
+    host.textContent="Loading…";
+    try{
+      if(key==="offers"){
+        const pending=window.Ma7alakAdminOpenLiveOffers(shop.shop_slug,shop.shop_name);
+        document.getElementById("m7-live-admin-overlay")?.classList.remove("active");
+        const node=rememberManager(document.getElementById("m7-live-admin-panel"));if(node)host.replaceChildren(node);
+        await pending;
+      }else{
+        const [id,open]=rows[key];if(typeof open!=="function")throw Error("This manager is still loading. Try again.");
+        const node=rememberManager(document.getElementById(id));if(!node)throw Error("This manager is unavailable.");
+        host.replaceChildren(node);await open(shop);
+        if(request===managerRequest){node.hidden=false;node.classList.add("m7v4-show")}
+      }
+    }catch(error){if(request===managerRequest)host.textContent=error.message||"Could not load this manager."}
+  }
+  function showManagerDock(panel,key){
+    panel.classList.add("m7studio-manager-mode");
+    let dock=panel.querySelector(".m7studio-manager-dock");
+    if(!dock){dock=document.createElement("div");dock.className="m7studio-manager-dock";panel.querySelector(".m7v4-preview-grid").append(dock)}
+    for(const selector of ["[data-m7studio-save]","[data-m7studio-preview]"]){const el=panel.querySelector(selector);if(el)el.hidden=true}
+    const note=document.createElement("p");note.textContent="Changes in this section save immediately. Your unsaved design edits stay in the Studio.";dock.append(note);
+    const host=document.createElement("div");
+    if(key==="publishing"){
+      dock.append(host);const render=()=>{host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first."};render();
+      host.addEventListener("click",async event=>{
+        const button=event.target.closest("[data-m7v4-action],[data-m7v4-save-owner-media-limits]");if(!button)return;
+        button.disabled=true;
+        try{
+          const bridge=window.Ma7alakAdminStudioBridge;
+          if(button.hasAttribute("data-m7v4-save-owner-media-limits")){
+            const value=selector=>{const n=Number(host.querySelector(selector).value);if(!Number.isInteger(n)||n<0||n>100)throw Error("Media limits must be whole numbers from 0 to 100.");return n};
+            const photos=value("[data-m7v4-owner-photo-limit]"),videos=value("[data-m7v4-owner-video-limit]");
+            await bridge.limits(photos,videos);
+            const form=document.getElementById("ma-admin-edit-form");form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos});
+          }else await bridge.action(button.dataset.m7v4Action);
+          render();note.textContent="Saved. Your unsaved design edits are still here.";
+        }catch(error){note.textContent=error.message||"Could not save."}finally{button.disabled=false}
+      });return;
+    }
+    if(key==="uploads"){
+      const nav=document.createElement("div");nav.className="m7studio-upload-tabs";nav.innerHTML='<button type="button" data-manager="gallery" aria-pressed="true">Photos</button><button type="button" data-manager="video" aria-pressed="false">Videos</button>';
+      nav.addEventListener("click",event=>{const button=event.target.closest("[data-manager]");if(!button)return;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));mountManager(host,button.dataset.manager)});
+      dock.append(nav,host);mountManager(host,"gallery");
+    }else{dock.append(host);mountManager(host,key)}
+  }
+  function ensureProfileUpload(form){
+    const pane=form.querySelector('[data-m7ds-pane="profile"]');if(!pane||pane.querySelector("[data-m7studio-profile-file]"))return;
+    const label=document.createElement("label");label.className="m7studio-image-upload";label.innerHTML='Upload profile image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-m7studio-profile-file>';
+    const status=pane.querySelector("[data-m7-profile-image-status]");pane.querySelector(".m7ds-profile-image-preview")?.before(label);
+    label.querySelector("input").addEventListener("change",async event=>{
+      const input=event.target,file=input.files[0];if(!file)return;input.disabled=true;
+      try{await uploadProfileImage(file,status);form.querySelector(".m7-design-studio")?.__m7ProfileImageSync?.();scheduleStudioPreview()}
+      catch(error){if(status)status.textContent=error.message||"Upload failed."}finally{input.disabled=false;input.value=""}
+    });
+  }
+  function bindSaveFeedback(panel){
+    if(panel.__studioSaveFeedback)return;panel.__studioSaveFeedback=true;
+    const status=panel.querySelector("[data-m7studio-save-status]"),source=document.getElementById("ma-admin-edit-status");
+    if(source)new MutationObserver(()=>{status.textContent=source.textContent}).observe(source,{childList:true,characterData:true,subtree:true});
+    window.addEventListener("ma7alak:studio-save-state",event=>{
+      const button=panel.querySelector("[data-m7studio-save]");button.disabled=event.detail.state==="saving";button.textContent=button.disabled?"Saving…":"Save Changes";
+      status.textContent=event.detail.state==="saved"?"Saved successfully.":event.detail.message||"Saving…";
+    });
+  }
+  function simplifyAddShop(){
+    const form=document.getElementById("ma-admin-shop-form");if(!form)return;form.classList.add("m7studio-simple-add");
+    const allowed=new Set(["ma-shop-name","ma-shop-arabic","ma-shop-slug","ma-shop-image","ma-shop-image-file","ma-shop-url","ma-shop-area","ma-shop-location","ma-shop-category","ma-shop-category-name","ma-shop-city-v2","ma-shop-v2-area-smart","ma-shop-v2-category-smart"]);
+    for(const child of form.children){
+      const keep=child.classList.contains("m7-design-studio")||child.id==="ma-admin-add-shop-btn"||child.id==="ma-image-preview-wrap"||[...child.querySelectorAll("input,select,textarea")].some(el=>allowed.has(el.id));
+      child.classList.toggle("m7studio-add-hidden",!keep);
+    }
+    const card=form.closest("section");
+    card?.querySelectorAll(".m7-collapse-btn").forEach(button=>button.remove());
+    card?.querySelectorAll(".m7-collapsed-body").forEach(node=>node.classList.remove("m7-collapsed-body"));
+    const design=form.querySelector(".m7-design-studio");
+    if(design){
+      document.getElementById("ma-image-preview-wrap")?.after(design);
+      const submit=document.getElementById("ma-admin-add-shop-btn");if(submit)form.append(submit);
+      for(const child of design.children){child.classList.toggle("m7studio-add-hidden",child.dataset.m7dsPane!=="profile");if(child.dataset.m7dsPane)child.classList.toggle("active",child.dataset.m7dsPane==="profile")}
+      const pane=design.querySelector('[data-m7ds-pane="profile"]');
+      if(pane){
+        for(const child of pane.children){const keep=child.querySelector("#m7da-profile_banner_enabled,[data-m7-banner-upload],[data-m7-banner-clear]")||child.hasAttribute("data-m7-banner-preview")||child.id==="m7da-profile_banner_image_url";child.classList.toggle("m7studio-add-hidden",!keep)}
+        pane.querySelectorAll(".m7ds-banner-grid > *").forEach(el=>el.classList.toggle("m7studio-add-hidden",!el.querySelector("[data-m7-banner-upload]")));
+      }
+    }
+    if(!document.getElementById("m7studio-add-css")){
+      const style=document.createElement("style");style.id="m7studio-add-css";
+      style.textContent='#ma-admin-shop-form.m7studio-simple-add .m7studio-add-hidden{display:none!important}#ma-admin-shop-form.m7studio-simple-add{max-width:760px;margin:auto}#ma-admin-shop-form.m7studio-simple-add input,#ma-admin-shop-form.m7studio-simple-add select{font-size:16px!important}#ma-admin-shop-form.m7studio-simple-add .m7-design-studio{display:block!important}#ma-admin-shop-form.m7studio-simple-add .m7ds-pane.active:not(.m7studio-add-hidden){display:block!important}#ma-admin-shop-form.m7studio-simple-add .m7ds-banner-grid{grid-template-columns:1fr!important}';document.head.append(style);
+    }
+  }
+  document.addEventListener("click",event=>{if(event.target.closest("[data-m7v4-add]"))setTimeout(simplifyAddShop,0)});
+
   function activateTab(key){
     const panel=document.getElementById("ma-admin-edit-card");
     const form=document.getElementById("ma-admin-edit-form");
     if(!panel||!form||!panel.classList.contains("m7studio-fullscreen"))return;
     if(!TABS.some(row=>row[0]===key))key="profile";
 
-    activeTab=key;
+    activeTab=key;panel.dataset.studioTab=key;
     resetView(form);
     sectionBanner(form,key);
 
@@ -754,28 +887,22 @@
       design?.querySelector(":scope > .m7ds-top-grid")?.classList.add("m7studio-field-hidden");
     };
 
-    if(key==="profile"){
+    hideManagerDock(panel);
+    if(["uploads","reels","offers","publishing"].includes(key)){
+      hideFormRoots(form,[]);showManagerDock(panel,key);
+    }
+    else if(key==="details"){
+      const roots=showRoots(form,["#ma-edit-name","#ma-edit-arabic","#ma-edit-slug","#ma-edit-url","#ma-edit-location","#ma-edit-area","#ma-edit-category","#ma-edit-category-name","#ma-edit-city-v2","#ma-edit-v2-area-smart","#ma-edit-v2-category-smart"]);
+      roots.forEach(root=>root.classList.remove("m7studio-profile-core"));
+    }
+    else if(key==="profile"){
       const roots=showRoots(form,[
-        "#ma-edit-name",
-        "#ma-edit-arabic",
-        "#ma-edit-image",
         ".m7labelbox",
         ".m7-design-studio"
       ]);
 
-      showPanes(form,["identity","lines","follow","typography"]);
+      showPanes(form,["profile","identity","lines","follow","typography"]);
       markExtras("");
-
-      rootsFor(form,["#ma-edit-name","#ma-edit-arabic","#ma-edit-image"]).forEach(root=>{
-        root.classList.add("m7studio-profile-core");
-        filterFields(root,id=>
-          id==="ma-edit-name"||
-          id==="ma-edit-arabic"||
-          id==="ma-edit-image"
-        );
-      });
-
-      fieldWrapper(document.getElementById("ma-edit-image"))?.classList.add("m7studio-field-hidden");
 
       const identity=design?.querySelector('[data-m7ds-pane="identity"]');
       const identityTitle=identity?.querySelector(":scope > .m7ds-section-title");
@@ -792,8 +919,7 @@
       );
 
       hideFormRoots(form,roots);
-      ensureProfileImageCard(form);
-      syncProfileImageCardAccent();
+      ensureProfileUpload(form);
     }
     else if(key==="story"){
       const roots=showRoots(form,[".m7-design-studio"]);
@@ -931,12 +1057,14 @@
       const roots=showRoots(form,[
         ".m7-design-studio",
         ".m7-card-designer-box",
+        ".m7da-home-fields",
         ".m7da-sectioned-extras"
       ]);
 
       showPanes(form,["motion","typography"]);
       /* story_color is the real saved Universal Accent field. */
-      markExtras("design");
+      markExtras("");
+      if(extras){extras.classList.add("m7studio-global-extras");filterFields(extras,id=>/m7de-(story_color|cover|price|order|latitude|longitude|rating|review_count)$/.test(id))}
 
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
@@ -959,14 +1087,10 @@
       button.classList.toggle("active",button.dataset.m7studioTab===key)
     );
 
-    const nudge=form.querySelector("input:not([type='file']),select,textarea");
-    if(nudge){
-      try{nudge.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}
-    }
-
     scheduleStudioPreview(panel);
-    form.scrollTop=0;
-    panel.scrollTop=0;
+    form.scrollTop=0;panel.scrollTop=0;
+    panel.classList.remove("m7studio-preview-open");
+    const previewToggle=panel.querySelector("[data-m7studio-preview]");if(previewToggle)previewToggle.textContent="Preview";
   }
 
   function openStudio(){
@@ -982,8 +1106,7 @@
 
     panel.classList.add("m7studio-fullscreen");
     document.body.classList.add("m7studio-body-open");
-    ensureChrome(panel);
-    ensureStudioPreview(panel);
+    ensureChrome(panel);bindSaveFeedback(panel);
     activateTab(activeTab);
     openingWanted=false;
     return true;
@@ -1000,7 +1123,12 @@
       form.__m7studioDisconnectedObserver=false;
     }
 
-    document.getElementById("ma-admin-edit-card")?.classList.remove("m7studio-fullscreen");
+    const panel=document.getElementById("ma-admin-edit-card");
+    restoreManagers();if(form)resetView(form);
+    panel?.classList.remove("m7studio-fullscreen","m7studio-preview-open","m7studio-manager-mode","m7v4-show");
+    if(panel)panel.hidden=true;
+    document.getElementById("m7savebar")?.classList.remove("on");
+    clearTimeout(previewRefreshTimer);
     document.body.classList.remove("m7studio-body-open");
   }
 
@@ -1019,7 +1147,7 @@
   document.addEventListener("click",event=>{
     const designButton=event.target.closest('[data-m7v4-action="design"]');
     if(designButton){activeTab="profile";openingWanted=true;waitAndOpen();return}
-    if(event.target.closest("#ma-admin-cancel-edit")||event.target.closest(".m7v4-panel-close"))closeStudio();
+    if(event.target.closest("#ma-admin-cancel-edit")||event.target.closest("#ma-admin-edit-card > .m7v4-panel-close"))closeStudio();
   },true);
 
   document.addEventListener("input",event=>{
