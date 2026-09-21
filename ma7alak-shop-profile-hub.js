@@ -5313,8 +5313,8 @@ start().catch(error=>
     var style=document.createElement("style");
     style.id="m7-owner-about-edit-style";
     style.textContent=
-      "#m7-owner-about-edit{position:absolute!important;top:22px!important;right:12px!important;z-index:180!important;min-height:34px!important;padding:0 10px!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.34)!important;border-radius:999px!important;background:rgba(8,8,9,.76)!important;color:var(--m7-shop-accent-light,#f0cc83)!important;font:900 9px/1 Arial,Segoe UI,sans-serif!important;letter-spacing:.4px!important;display:none!important;align-items:center!important;gap:6px!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important}"+
-      "#m7-owner-about-edit.visible{display:inline-flex!important}"+
+      "#m7-owner-about-edit{position:relative!important;top:auto!important;right:auto!important;left:auto!important;z-index:180!important;width:max-content!important;min-height:34px!important;margin:-4px 2px 12px auto!important;padding:0 11px!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.34)!important;border-radius:999px!important;background:rgba(8,8,9,.76)!important;color:var(--m7-shop-accent-light,#f0cc83)!important;font:900 9px/1 Arial,Segoe UI,sans-serif!important;letter-spacing:.4px!important;display:none!important;align-items:center!important;justify-content:center!important;gap:6px!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important}"+
+      "#m7-owner-about-edit.visible{display:flex!important}"+
       "#m7-owner-about-sheet{position:absolute!important;inset:7px!important;z-index:220!important;display:none!important;padding:14px!important;box-sizing:border-box!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.38)!important;border-radius:20px!important;background:linear-gradient(160deg,rgba(19,17,15,.985),rgba(7,7,8,.995))!important;box-shadow:0 18px 55px rgba(0,0,0,.65)!important;color:#fff!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}"+
       "#m7-owner-about-sheet.open{display:block!important}.m7oa-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-right:42px}.m7oa-head b{display:block;font-size:15px;color:#fff}.m7oa-head small{display:block;margin-top:4px;color:#968a79;font-size:9px;line-height:1.45}"+
       "#m7-owner-about-close{position:absolute;right:10px;top:9px;width:36px;height:36px;border:1px solid rgba(255,255,255,.09);border-radius:50%;background:rgba(255,255,255,.055);color:#fff;font-size:23px;line-height:30px;touch-action:manipulation}"+
@@ -5322,7 +5322,7 @@ start().catch(error=>
       "#m7-owner-about-textarea:focus{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.54)!important}.m7oa-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:8px}#m7-owner-about-count{color:#817665;font-size:8px}"+
       "#m7-owner-about-save{min-width:120px;min-height:42px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--m7-shop-accent-light,#f0cf86),var(--m7-shop-accent,#c99442));color:#211507;font-size:10px;font-weight:950;touch-action:manipulation}#m7-owner-about-save:disabled{opacity:.45}"+
       "#m7-owner-about-status{min-height:16px;margin-top:7px;color:#918574;font-size:9px}#m7-owner-about-status.ok{color:#7fe0a4}#m7-owner-about-status.err{color:#ff9999}"+
-      "@media(max-width:480px){#m7-owner-about-edit{top:18px!important;right:9px!important;min-height:32px!important;padding:0 8px!important}#m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}#m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}}";
+      "@media(max-width:480px){#m7-owner-about-edit{top:auto!important;right:auto!important;min-height:32px!important;margin:-3px 1px 11px auto!important;padding:0 9px!important}#m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}#m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}}";
     document.head.appendChild(style);
 
     var edit=document.createElement("button");
@@ -5334,7 +5334,14 @@ start().catch(error=>
     sheet.id="m7-owner-about-sheet";
     sheet.innerHTML='<button id="m7-owner-about-close" type="button" aria-label="Close">×</button><div class="m7oa-head"><div><b>Edit About</b><small>Update the text visitors see in this About box.</small></div></div><textarea id="m7-owner-about-textarea" maxlength="4000" dir="auto" placeholder="Tell visitors about your shop…"></textarea><div class="m7oa-foot"><span id="m7-owner-about-count">0 / 4000</span><button id="m7-owner-about-save" type="button">Save About</button></div><div id="m7-owner-about-status" aria-live="polite"></div>';
 
-    card.append(edit,sheet);
+    var heading=card.querySelector(".zee-about-heading");
+    if(heading){
+      heading.after(edit);
+      card.append(sheet);
+    }else{
+      card.prepend(edit);
+      card.append(sheet);
+    }
 
     var textarea=sheet.querySelector("#m7-owner-about-textarea");
     var count=sheet.querySelector("#m7-owner-about-count");
