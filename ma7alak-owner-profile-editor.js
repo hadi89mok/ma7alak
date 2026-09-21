@@ -272,7 +272,7 @@
     let uploaded=false;
 
     try{
-      const up=await client.storage.from(BUCKET).upload(path,selectedFile,{cacheControl:"0",upsert:false,contentType:selectedFile.type||undefined});
+      const up=await client.storage.from(BUCKET).upload(path,selectedFile,{cacheControl:"31536000",upsert:false,contentType:selectedFile.type||undefined});
       if(up.error)throw up.error;uploaded=true;
       const publicUrl=client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
       if(!publicUrl)throw new Error("Could not create image URL.");
