@@ -33,19 +33,25 @@
     return slug;
   }
 
+  function pageTarget(){
+    try{
+      if(window.top&&window.top!==window)return window.top;
+    }catch(_){}
+    try{
+      if(window.parent&&window.parent!==window)return window.parent;
+    }catch(_){}
+    return null;
+  }
+
   function portal(open){
     try{
-      if(window.parent&&window.parent!==window){
-        window.parent.postMessage({type:open?"SHOUFHON_EMBED_VIEWER_OPEN":"SHOUFHON_EMBED_VIEWER_CLOSE"},"*");
-      }
+      pageTarget()?.postMessage({type:open?"SHOUFHON_EMBED_VIEWER_OPEN":"SHOUFHON_EMBED_VIEWER_CLOSE"},"*");
     }catch(_){}
   }
 
   function ownerStateRequest(){
     try{
-      if(window.parent&&window.parent!==window){
-        window.parent.postMessage({type:"MA7ALAK_OWNER_STATE_GET",shopSlug:slug},"*");
-      }
+      pageTarget()?.postMessage({type:"MA7ALAK_OWNER_STATE_GET",shopSlug:slug},"*");
     }catch(_){}
   }
 
@@ -58,7 +64,9 @@
       },45000);
       pending.set(requestId,{resolve,reject,timer});
       try{
-        window.parent.postMessage({type:"SHOUFHON_OWNER_MEDIA_REQUEST",requestId,shopSlug:slug,...payload},"*");
+        const target=pageTarget();
+        if(!target)throw new Error("Owner page bridge is unavailable.");
+        target.postMessage({type:"SHOUFHON_OWNER_MEDIA_REQUEST",requestId,shopSlug:slug,...payload},"*");
       }catch(error){
         clearTimeout(timer);pending.delete(requestId);reject(error);
       }
@@ -152,7 +160,11 @@
   }
 
   function inject(){
-    if(mounted)return;
+    const existing=document.getElementById("m7-owner-media-edit");
+    if(existing){
+      mounted=true;
+      return;
+    }
     const heading=document.querySelector(".m7-media-heading-row");
     if(!heading)return;
     mounted=true;
