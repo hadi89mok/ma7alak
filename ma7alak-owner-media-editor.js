@@ -259,7 +259,7 @@
     const style=document.createElement("style");
     style.id="m7-owner-media-editor-style";
     style.textContent=`
-      #m7-owner-media-edit{display:none;min-height:34px;padding:0 10px;border:1px solid rgba(217,164,65,.42);border-radius:999px;background:rgba(217,164,65,.10);color:#f0ca6b;font:900 9px/1 Arial,"Segoe UI",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      #m7-owner-media-edit{display:none;min-height:34px;padding:0 10px;border:1px solid var(--m7-media-edit-frame,#d9a441);border-radius:999px;background:var(--m7-media-edit-bg,#17130f);color:var(--m7-media-edit-frame,#f0ca6b);font:900 9px/1 Arial,"Segoe UI",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       #m7-owner-media-edit.visible{display:inline-flex;align-items:center;gap:5px}
       #m7-owner-media-sheet{position:fixed!important;inset:0!important;width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(58px,calc(env(safe-area-inset-top) + 46px)) 12px max(24px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
