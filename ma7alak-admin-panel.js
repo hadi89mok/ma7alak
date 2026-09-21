@@ -6055,6 +6055,9 @@ function decorateAll(){
     profile_shell_radius:"30",
     profile_shell_shadow:"42",
     profile_shell_glow:"18",
+    profile_shell_animation:"none",
+    profile_shell_animation_speed:"2.8",
+    profile_shell_animation_intensity:"60",
     profile_shell_blur:"10",
     profile_shell_inner_highlight:true,
     profile_shell_padding:"14",
@@ -6946,6 +6949,9 @@ function decorateAll(){
           ${effectNumberField(prefix,"profile_shell_radius","Corner radius",0,48,1,"px")}
           ${effectNumberField(prefix,"profile_shell_shadow","Shadow strength",0,100,5,"%")}
           ${effectNumberField(prefix,"profile_shell_glow","Glow strength",0,100,5,"%")}
+          ${animField(prefix,"profile_shell_animation","Outer frame animation")}
+          ${effectNumberField(prefix,"profile_shell_animation_speed","Frame animation speed",0.8,8,0.1,"s")}
+          ${effectNumberField(prefix,"profile_shell_animation_intensity","Frame animation intensity",0,100,5,"%")}
           ${effectNumberField(prefix,"profile_shell_blur","Glass blur",0,30,1,"px")}
           ${effectNumberField(prefix,"profile_shell_padding","Inner padding",0,28,1,"px")}
           ${effectNumberField(prefix,"profile_shell_top_gap","Top spacing",0,40,1,"px")}
@@ -7644,6 +7650,18 @@ function decorateAll(){
       const glow=
         number("profile_shell_glow",0,100,18);
 
+      const frameAnimation=
+        String(
+          get("profile_shell_animation")?.value ||
+          DEFAULTS.profile_shell_animation
+        ).trim().toLowerCase();
+
+      const frameAnimationSpeed=
+        number("profile_shell_animation_speed",0.8,8,2.8);
+
+      const frameAnimationIntensity=
+        number("profile_shell_animation_intensity",0,100,60);
+
       const blur=
         number("profile_shell_blur",0,30,10);
 
@@ -7767,6 +7785,9 @@ function decorateAll(){
       preview.dataset.layout=layout;
       preview.dataset.actionStyle=actionStyle;
       preview.dataset.bannerStyle=bannerStyle;
+      preview.dataset.frameAnimation=frameAnimation;
+      preview.style.setProperty("--m7ds-shell-frame-speed",frameAnimationSpeed+"s");
+      preview.style.setProperty("--m7ds-shell-frame-intensity",String(frameAnimationIntensity/100));
       preview.classList.toggle("off",!enabled);
       preview.classList.toggle("has-banner",bannerEnabled);
       preview.style.backgroundColor=hexToRgba(bg,opacity);
@@ -8711,6 +8732,9 @@ function decorateAll(){
       "profile_shell_radius",
       "profile_shell_shadow",
       "profile_shell_glow",
+      "profile_shell_animation",
+      "profile_shell_animation_speed",
+      "profile_shell_animation_intensity",
       "profile_shell_blur",
       "profile_shell_inner_highlight",
       "profile_shell_padding",
@@ -11799,6 +11823,10 @@ function ensureCss(){
       background:rgba(87,183,255,.065);
       color:#83c9ff;
     }
+.m7v4-tag.vip{color:#1a1202!important;border-color:#ffd76c!important;background:linear-gradient(135deg,#fff0a8,#d99d27)!important;box-shadow:0 0 16px #f5bd4266!important}
+.m7v4-state-action.tone-vip.is-on{border-color:#ffd76c88!important;background:radial-gradient(circle at 20% 0,#ffdf6b26,transparent 46%),#171109!important;box-shadow:inset 0 0 0 1px #ffd76c24,0 0 20px #d99d2730!important}
+.m7v4-state-action.tone-vip.is-on .m7v4-state-icon{filter:drop-shadow(0 0 8px #ffd76c)}
+
 
     .m7v4-tag.featured{
       border-color:rgba(239,84,108,.34);
@@ -14948,6 +14976,10 @@ function newBadgeOn(shop){
   )==="new";
 }
 
+function vipCrownOn(shop){
+  return shop?.directory_options?.vip_crown_enabled===true;
+}
+
 function featureState(shop){
   const options=
     shop?.directory_options &&
@@ -15064,6 +15096,7 @@ function renderList(){
           '<span class="m7v4-tag '+(shop.is_active?"on":"")+'">'+(shop.is_active?"VISIBLE":"HIDDEN")+'</span>'+
           '<span class="m7v4-tag '+(shop.verified?"verified":"")+'">'+(shop.verified?"VERIFIED":"UNVERIFIED")+'</span>'+
           (newBadgeOn(shop)?'<span class="m7v4-tag new">NEW</span>':"")+
+          (vipCrownOn(shop)?'<span class="m7v4-tag vip">♛ VIP</span>':"")+
           (featureState(shop).on?'<span class="m7v4-tag featured">FEATURED</span>':"")+
         '</div>'+
       '</div>'+
@@ -15109,6 +15142,7 @@ function renderWorkspace(){
       stateAction("visibility","◐","Shop visibility",shop.is_active===true,shop.is_active===true?"Visible to visitors":"Hidden from visitors","visibility")+
       stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
       stateAction("new","NEW","NEW badge",newBadgeOn(shop),newBadgeOn(shop)?"NEW badge is showing":"NEW badge is hidden","new")+
+      stateAction("vip","♛","VIP crown",vipCrownOn(shop),vipCrownOn(shop)?"Animated crown is attached to the profile circle":"VIP crown is hidden","vip")+
       stateAction("feature","★","Featured",featureState(shop).on,featureState(shop).on?(featureState(shop).days?("Featured · "+featureState(shop).days+"d left"):"Featured is active"):"Featured is off","feature")+
     '</div>'+
 
@@ -15324,6 +15358,45 @@ async function handleAction(key){
       nextOn
         ? "shop_marked_new"
         : "shop_new_removed",
+      shop
+    );
+
+    await loadShops();
+    return;
+  }
+
+  if(key==="vip"){
+    const current=
+      shop.directory_options &&
+      typeof shop.directory_options==="object"
+        ? shop.directory_options
+        : {};
+
+    const nextOn=
+      !vipCrownOn(shop);
+
+    const nextOptions={
+      ...current,
+      vip_crown_enabled:nextOn
+    };
+
+    const result=
+      await client
+        .from("shop_profiles")
+        .update({
+          directory_options:nextOptions
+        })
+        .eq(
+          "shop_slug",
+          shop.shop_slug
+        );
+
+    if(result.error)throw result.error;
+
+    await logV4Activity(
+      nextOn
+        ? "shop_vip_crown_enabled"
+        : "shop_vip_crown_disabled",
       shop
     );
 
@@ -16709,6 +16782,9 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "profile_shell_radius",
     "profile_shell_shadow",
     "profile_shell_glow",
+    "profile_shell_animation",
+    "profile_shell_animation_speed",
+    "profile_shell_animation_intensity",
     "profile_shell_blur",
     "profile_shell_inner_highlight",
     "profile_shell_padding",
