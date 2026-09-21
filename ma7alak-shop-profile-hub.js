@@ -5221,3 +5221,251 @@ start().catch(error=>
     window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(preview);
   }
 })();
+
+
+/* =========================================================
+   SHOUFHON PROFILE HUB — OWNER ABOUT EDITOR V1
+   - Admin controlled: directory_options.owner_about_edit_enabled
+   - Same existing about_text field; no duplicate content system
+   - Phone-first inline sheet inside the About card
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__M7_OWNER_ABOUT_EDITOR_V1__)return;
+  window.__M7_OWNER_ABOUT_EDITOR_V1__=true;
+
+  const SLUG=String(
+    window.__MA7ALAK_EXACT_HUB_SLUG__||
+    document.getElementById("ma7alak-shop-profile-hub-mount")?.getAttribute("data-shop-slug")||
+    ""
+  ).trim().toLowerCase();
+
+  let client=null;
+  let currentAbout="";
+  let allowed=false;
+
+  function bool(value){
+    return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
+  }
+
+  function getClient(){
+    if(client)return client;
+    client=
+      window.Ma7alakAccount?.client||
+      window.__MA7ALAK_EXACT_HUB_REST_CLIENT__||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      null;
+    if(client)return client;
+
+    if(window.supabase?.createClient){
+      client=window.supabase.createClient(
+        "https://wdtaiuwtqdepzdamgsrs.supabase.co",
+        "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl"
+      );
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__=
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||client;
+    }
+    return client;
+  }
+
+  function inject(){
+    const card=document.querySelector(".zee-about-card");
+    if(!card||document.getElementById("m7-owner-about-edit"))return;
+
+    const style=document.createElement("style");
+    style.id="m7-owner-about-edit-style";
+    style.textContent=`
+      #m7-owner-about-edit{
+        position:absolute!important;top:12px!important;right:12px!important;z-index:180!important;
+        min-height:34px!important;padding:0 10px!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.34)!important;
+        border-radius:999px!important;background:rgba(8,8,9,.76)!important;color:var(--m7-shop-accent-light,#f0cc83)!important;
+        font:900 9px/1 Arial,"Segoe UI",sans-serif!important;letter-spacing:.4px!important;
+        display:none!important;align-items:center!important;gap:6px!important;
+        backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;
+        -webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;
+      }
+      #m7-owner-about-edit.visible{display:inline-flex!important}
+      #m7-owner-about-sheet{
+        position:absolute!important;inset:7px!important;z-index:220!important;display:none!important;
+        padding:14px!important;box-sizing:border-box!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.38)!important;
+        border-radius:20px!important;background:linear-gradient(160deg,rgba(19,17,15,.985),rgba(7,7,8,.995))!important;
+        box-shadow:0 18px 55px rgba(0,0,0,.65)!important;color:#fff!important;
+        overflow:auto!important;-webkit-overflow-scrolling:touch!important;
+      }
+      #m7-owner-about-sheet.open{display:block!important}
+      .m7oa-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-right:42px}
+      .m7oa-head b{display:block;font-size:15px;color:#fff}.m7oa-head small{display:block;margin-top:4px;color:#968a79;font-size:9px;line-height:1.45}
+      #m7-owner-about-close{
+        position:absolute;right:10px;top:9px;width:36px;height:36px;border:1px solid rgba(255,255,255,.09);
+        border-radius:50%;background:rgba(255,255,255,.055);color:#fff;font-size:23px;line-height:30px;touch-action:manipulation;
+      }
+      #m7-owner-about-textarea{
+        width:100%!important;min-height:190px!important;resize:vertical!important;box-sizing:border-box!important;
+        padding:13px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:15px!important;
+        background:#080708!important;color:#fff!important;font:600 14px/1.65 Arial,"Segoe UI",sans-serif!important;
+        outline:none!important;direction:auto!important;-webkit-appearance:none!important;
+      }
+      #m7-owner-about-textarea:focus{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.54)!important}
+      .m7oa-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:8px}
+      #m7-owner-about-count{color:#817665;font-size:8px}
+      #m7-owner-about-save{
+        min-width:120px;min-height:42px;border:0;border-radius:12px;
+        background:linear-gradient(135deg,var(--m7-shop-accent-light,#f0cf86),var(--m7-shop-accent,#c99442));
+        color:#211507;font-size:10px;font-weight:950;touch-action:manipulation;
+      }
+      #m7-owner-about-save:disabled{opacity:.45}
+      #m7-owner-about-status{min-height:16px;margin-top:7px;color:#918574;font-size:9px}
+      #m7-owner-about-status.ok{color:#7fe0a4}#m7-owner-about-status.err{color:#ff9999}
+      @media(max-width:480px){
+        #m7-owner-about-edit{top:9px!important;right:9px!important;min-height:32px!important;padding:0 8px!important}
+        #m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}
+        #m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}
+      }
+    `;
+    document.head.appendChild(style);
+
+    const edit=document.createElement("button");
+    edit.id="m7-owner-about-edit";
+    edit.type="button";
+    edit.innerHTML="✎ <span>Edit About</span>";
+    edit.setAttribute("aria-label","Edit About text");
+
+    const sheet=document.createElement("div");
+    sheet.id="m7-owner-about-sheet";
+    sheet.innerHTML=`
+      <button id="m7-owner-about-close" type="button" aria-label="Close">×</button>
+      <div class="m7oa-head"><div><b>Edit About</b><small>Update the text visitors see in this About box.</small></div></div>
+      <textarea id="m7-owner-about-textarea" maxlength="4000" dir="auto" placeholder="Tell visitors about your shop…"></textarea>
+      <div class="m7oa-foot"><span id="m7-owner-about-count">0 / 4000</span><button id="m7-owner-about-save" type="button">Save About</button></div>
+      <div id="m7-owner-about-status" aria-live="polite"></div>
+    `;
+
+    card.append(edit,sheet);
+
+    const textarea=sheet.querySelector("#m7-owner-about-textarea");
+    const count=sheet.querySelector("#m7-owner-about-count");
+    const status=sheet.querySelector("#m7-owner-about-status");
+    const save=sheet.querySelector("#m7-owner-about-save");
+
+    const syncCount=()=>{count.textContent=textarea.value.length+" / 4000";};
+    textarea.addEventListener("input",syncCount);
+
+    edit.addEventListener("click",()=>{
+      textarea.value=currentAbout;
+      syncCount();
+      status.textContent="";
+      status.className="";
+      sheet.classList.add("open");
+      setTimeout(()=>textarea.focus({preventScroll:true}),80);
+    });
+
+    sheet.querySelector("#m7-owner-about-close").addEventListener("click",()=>{
+      sheet.classList.remove("open");
+    });
+
+    save.addEventListener("click",async()=>{
+      if(!allowed)return;
+      const c=getClient();
+      if(!c)return;
+
+      save.disabled=true;
+      save.textContent="Saving…";
+      status.textContent="Saving your About text…";
+      status.className="";
+
+      try{
+        const value=textarea.value.trim();
+        const result=await c.rpc("owner_update_about_text",{
+          p_shop_slug:SLUG,
+          p_about_text:value
+        });
+        if(result.error)throw result.error;
+
+        currentAbout=value;
+        const text=document.getElementById("ma7alak-about-text");
+        if(text){
+          text.textContent=value||"About information coming soon.";
+        }
+        status.textContent="About updated.";
+        status.className="ok";
+        setTimeout(()=>sheet.classList.remove("open"),600);
+      }catch(error){
+        status.textContent=error?.message||"Could not update About.";
+        status.className="err";
+      }finally{
+        save.disabled=false;
+        save.textContent="Save About";
+      }
+    });
+  }
+
+  async function refreshOwnerAbout(){
+    inject();
+    const edit=document.getElementById("m7-owner-about-edit");
+    if(!edit||!SLUG)return;
+
+    const c=getClient();
+    if(!c){
+      setTimeout(refreshOwnerAbout,300);
+      return;
+    }
+
+    try{
+      const userResult=await c.auth.getUser();
+      const user=userResult.data?.user;
+      if(!user){
+        allowed=false;
+        edit.classList.remove("visible");
+        return;
+      }
+
+      const owner=await c
+        .from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id",user.id)
+        .eq("shop_slug",SLUG)
+        .maybeSingle();
+
+      if(owner.error)throw owner.error;
+      if(!owner.data){
+        allowed=false;
+        edit.classList.remove("visible");
+        return;
+      }
+
+      const profile=await c
+        .from("shop_profiles")
+        .select("about_text,directory_options")
+        .eq("shop_slug",SLUG)
+        .maybeSingle();
+
+      if(profile.error)throw profile.error;
+      if(!profile.data)return;
+
+      currentAbout=String(profile.data.about_text||"");
+      allowed=bool(profile.data.directory_options?.owner_about_edit_enabled);
+      edit.classList.toggle("visible",allowed);
+    }catch(error){
+      allowed=false;
+      edit.classList.remove("visible");
+      console.warn("[ShoufHon Hub] owner About editor:",error);
+    }
+  }
+
+  async function start(){
+    for(let i=0;i<160&&!document.querySelector(".zee-about-card");i++){
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    inject();
+    await refreshOwnerAbout();
+
+    if(typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__==="function"){
+      window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(refreshOwnerAbout);
+    }
+
+    const c=getClient();
+    c?.auth?.onAuthStateChange?.(()=>setTimeout(refreshOwnerAbout,0));
+  }
+
+  start().catch(error=>console.warn("[ShoufHon Hub] owner About editor:",error));
+})();
