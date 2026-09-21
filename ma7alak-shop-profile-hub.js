@@ -3230,6 +3230,60 @@ window.addEventListener(
     }
 
 
+    function consumeUniversalStatsMessage(event){
+      const message =
+        event && event.data;
+
+      if(
+        !message ||
+        message.type !== "MA7ALAK_LIVE_STATS" ||
+        !message.shop
+      ){
+        return;
+      }
+
+      const shop =
+        message.shop;
+
+      if(
+        String(shop.slug || "").trim().toLowerCase() !==
+        String(SHOP_SLUG || "").trim().toLowerCase()
+      ){
+        return;
+      }
+
+      delegatedToUniversal = true;
+      clearTimers();
+
+      renderStats({
+        total_views: Number(shop.total || 0),
+        weekly_views: Number(shop.week || 0),
+        today_visitors: Number(shop.today || 0),
+        online: Number(shop.online || 0)
+      });
+    }
+
+
+    window.addEventListener(
+      "message",
+      consumeUniversalStatsMessage
+    );
+
+
+    try{
+      if(
+        window.top &&
+        window.top !== window
+      ){
+        window.top.postMessage(
+          {type:"MA7ALAK_STATS_EMBED_READY"},
+          "*"
+        );
+      }
+    }
+    catch(_){}
+
+
     async function refreshStats(){
 
       if(
