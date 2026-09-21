@@ -2867,17 +2867,18 @@
 
 
 /* =========================================================
-   SHOUFHON — EMBED VIEWER PORTAL V1
-   Keeps Story / Media viewers visually full-screen without using
+   SHOUFHON — EMBED VIEWER PORTAL V2
+   Keeps Story / Media iframe viewers visually full-screen without using
    the browser Fullscreen API (which shows Android/iOS system UI).
+   The iframe is never reparented, so its browsing context is not reloaded.
 ========================================================= */
 (function(){
   "use strict";
 
-  if(window.__SHOUFHON_EMBED_VIEWER_PORTAL_V1__){
+  if(window.__SHOUFHON_EMBED_VIEWER_PORTAL_V2__){
     return;
   }
-  window.__SHOUFHON_EMBED_VIEWER_PORTAL_V1__ = true;
+  window.__SHOUFHON_EMBED_VIEWER_PORTAL_V2__ = true;
 
   const activeFrames = new Map();
   let savedPageOverflow = null;
@@ -2916,6 +2917,27 @@
         opacity:1!important;
         visibility:visible!important;
       }
+
+      .shoufhon-embed-viewer-ancestor{
+        overflow:visible!important;
+        transform:none!important;
+        -webkit-transform:none!important;
+        filter:none!important;
+        -webkit-filter:none!important;
+        perspective:none!important;
+        contain:none!important;
+        clip-path:none!important;
+        -webkit-clip-path:none!important;
+        mask:none!important;
+        -webkit-mask:none!important;
+        isolation:auto!important;
+      }
+
+      .shoufhon-embed-viewer-layer{
+        position:relative!important;
+        z-index:2147483645!important;
+      }
+
       html.shoufhon-embed-viewer-open,
       body.shoufhon-embed-viewer-open{
         overflow:hidden!important;
@@ -2949,19 +2971,30 @@
 
     ensureStyle();
 
-    const placeholder=document.createComment("shoufhon-embed-viewer-placeholder");
-    const parent=frame.parentNode;
+    const ancestorStates=[];
+    let node=frame.parentElement;
 
-    if(!parent){
-      return;
+    while(
+      node &&
+      node!==document.body &&
+      node!==document.documentElement
+    ){
+      ancestorStates.push({
+        node:node,
+        style:node.getAttribute("style"),
+        hadAncestorClass:node.classList.contains("shoufhon-embed-viewer-ancestor"),
+        hadLayerClass:node.classList.contains("shoufhon-embed-viewer-layer")
+      });
+
+      node.classList.add("shoufhon-embed-viewer-ancestor");
+      node.classList.add("shoufhon-embed-viewer-layer");
+      node=node.parentElement;
     }
 
-    parent.insertBefore(placeholder,frame);
-
     activeFrames.set(frame,{
-      placeholder:placeholder,
       inlineStyle:frame.getAttribute("style"),
-      hadPortalClass:frame.classList.contains("shoufhon-embed-viewer-frame")
+      hadPortalClass:frame.classList.contains("shoufhon-embed-viewer-frame"),
+      ancestorStates:ancestorStates
     });
 
     if(savedPageOverflow===null){
@@ -2971,7 +3004,6 @@
       };
     }
 
-    document.body.appendChild(frame);
     frame.classList.add("shoufhon-embed-viewer-frame");
     document.documentElement.classList.add("shoufhon-embed-viewer-open");
     document.body.classList.add("shoufhon-embed-viewer-open");
@@ -2992,11 +3024,6 @@
 
     activeFrames.delete(frame);
 
-    if(state.placeholder && state.placeholder.parentNode){
-      state.placeholder.parentNode.insertBefore(frame,state.placeholder);
-      state.placeholder.remove();
-    }
-
     if(!state.hadPortalClass){
       frame.classList.remove("shoufhon-embed-viewer-frame");
     }
@@ -3007,6 +3034,27 @@
     else{
       frame.setAttribute("style",state.inlineStyle);
     }
+
+    (state.ancestorStates||[]).forEach(function(item){
+      const node=item && item.node;
+      if(!node){
+        return;
+      }
+
+      if(!item.hadAncestorClass){
+        node.classList.remove("shoufhon-embed-viewer-ancestor");
+      }
+      if(!item.hadLayerClass){
+        node.classList.remove("shoufhon-embed-viewer-layer");
+      }
+
+      if(item.style===null){
+        node.removeAttribute("style");
+      }
+      else{
+        node.setAttribute("style",item.style);
+      }
+    });
 
     if(activeFrames.size===0){
       document.documentElement.classList.remove("shoufhon-embed-viewer-open");
@@ -3038,3 +3086,4 @@
     }
   });
 })();
+
