@@ -310,11 +310,121 @@ function loadViewer(reel,direction){
 
   if(viewerVideo.readyState>=2)startPlayback();
 }
-function openViewer(reel){refreshReels();stopCards();loadViewer(reel)}
-function moveViewer(step){refreshReels();if(!reels.length)return;viewerIndex=(viewerIndex+step+reels.length)%reels.length;stopCards();loadViewer(reels[viewerIndex],step>0?"next":"prev")}
-function closeViewer(){document.documentElement.classList.remove("m7-reel-open");document.body.classList.remove("m7-reel-open");viewerVideo.pause();viewerVideo.muted=true;viewerVideo.removeAttribute("src");viewerVideo.load();viewer.classList.remove("open");viewer.setAttribute("aria-hidden","true");let card=reels[viewerIndex],v=card?.querySelector("video");if(card&&v){let r=card.getBoundingClientRect();if(r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth){ensureCardVideo(v);v.muted=true;v.play().catch(()=>{})}}}
-viewerClose.onclick=e=>{e.stopPropagation();closeViewer()};viewerShop.onclick=e=>{e.stopPropagation();if(viewerShop.dataset.shopUrl)window.top.location.href=viewerShop.dataset.shopUrl};viewerFav.onclick=async e=>{e.stopPropagation();let reel=reels[viewerIndex],id=reel?.dataset.reelId;if(!id)return;viewerFav.disabled=true;if(favoriteIds.has(id)){let r=await sb.from("ma7alak_favorites").delete().eq("visitor_id",visitorId).eq("reel_id",id);if(!r.error)favoriteIds.delete(id)}else{let r=await sb.from("ma7alak_favorites").insert({visitor_id:visitorId,reel_id:id,shop_name:reel.dataset.shopName});if(!r.error)favoriteIds.add(id)}viewerFav.disabled=false;updateViewerFav();await syncFavorites()};
-let tx=0,ty=0,tt=0;viewer.addEventListener("touchstart",e=>{tx=e.changedTouches[0].clientX;ty=e.changedTouches[0].clientY;tt=Date.now()},{passive:true});viewer.addEventListener("touchend",e=>{let t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(Date.now()-tt<700&&Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx))moveViewer(dy<0?1:-1)},{passive:true});document.addEventListener("keydown",e=>{if(!viewer.classList.contains("open"))return;if(e.key==="Escape")closeViewer();if(e.key==="ArrowUp")moveViewer(1);if(e.key==="ArrowDown")moveViewer(-1)});/* CSS fixed viewer only: no browser-native fullscreen, so Android/iOS show no fullscreen system banner. */
+let reelNativeFullscreenOwned=false;
+
+function reelFullscreenElement(){
+  return document.fullscreenElement||document.webkitFullscreenElement||null;
+}
+
+function requestReelNativeFullscreen(){
+  if(!viewer||reelFullscreenElement())return;
+
+  try{
+    const request=
+      viewer.requestFullscreen||
+      viewer.webkitRequestFullscreen;
+
+    if(typeof request!=="function")return;
+
+    reelNativeFullscreenOwned=true;
+
+    const result=request.call(viewer);
+    if(result&&typeof result.catch==="function"){
+      result.catch(()=>{
+        reelNativeFullscreenOwned=false;
+      });
+    }
+  }catch(_){
+    reelNativeFullscreenOwned=false;
+  }
+}
+
+function exitReelNativeFullscreen(){
+  if(!reelNativeFullscreenOwned)return;
+  reelNativeFullscreenOwned=false;
+
+  try{
+    if(document.fullscreenElement&&document.exitFullscreen){
+      const result=document.exitFullscreen();
+      if(result&&typeof result.catch==="function")result.catch(()=>{});
+    }else if(document.webkitFullscreenElement&&document.webkitExitFullscreen){
+      document.webkitExitFullscreen();
+    }
+  }catch(_){}
+}
+
+function openViewer(reel){
+  refreshReels();
+  stopCards();
+
+  if(!reel?.dataset.videoUrl)return;
+
+  if(viewer.parentNode!==document.body){
+    document.body.appendChild(viewer);
+  }
+
+  /* Must happen directly inside the user's tap. This is what lets
+     Chrome/Brave hide their browser chrome instead of only showing
+     a CSS overlay below the address bar. */
+  viewer.classList.add("open");
+  viewer.setAttribute("aria-hidden","false");
+  requestReelNativeFullscreen();
+
+  loadViewer(reel);
+}
+
+function moveViewer(step){
+  refreshReels();
+  if(!reels.length)return;
+  viewerIndex=(viewerIndex+step+reels.length)%reels.length;
+  stopCards();
+  loadViewer(reels[viewerIndex],step>0?"next":"prev");
+}
+
+function closeViewer(){
+  document.documentElement.classList.remove("m7-reel-open");
+  document.body.classList.remove("m7-reel-open");
+  viewerVideo.pause();
+  viewerVideo.muted=true;
+  viewerVideo.removeAttribute("src");
+  viewerVideo.load();
+  viewer.classList.remove("open");
+  viewer.setAttribute("aria-hidden","true");
+  exitReelNativeFullscreen();
+
+  let card=reels[viewerIndex],v=card?.querySelector("video");
+  if(card&&v){
+    let r=card.getBoundingClientRect();
+    if(r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth){
+      ensureCardVideo(v);
+      v.muted=true;
+      v.play().catch(()=>{});
+    }
+  }
+}
+
+viewerClose.onclick=e=>{e.stopPropagation();closeViewer()};
+viewerShop.onclick=e=>{e.stopPropagation();if(viewerShop.dataset.shopUrl)window.top.location.href=viewerShop.dataset.shopUrl};
+viewerFav.onclick=async e=>{e.stopPropagation();let reel=reels[viewerIndex],id=reel?.dataset.reelId;if(!id)return;viewerFav.disabled=true;if(favoriteIds.has(id)){let r=await sb.from("ma7alak_favorites").delete().eq("visitor_id",visitorId).eq("reel_id",id);if(!r.error)favoriteIds.delete(id)}else{let r=await sb.from("ma7alak_favorites").insert({visitor_id:visitorId,reel_id:id,shop_name:reel.dataset.shopName});if(!r.error)favoriteIds.add(id)}viewerFav.disabled=false;updateViewerFav();await syncFavorites()};
+
+let tx=0,ty=0,tt=0;
+viewer.addEventListener("touchstart",e=>{tx=e.changedTouches[0].clientX;ty=e.changedTouches[0].clientY;tt=Date.now()},{passive:true});
+viewer.addEventListener("touchend",e=>{let t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(Date.now()-tt<700&&Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx))moveViewer(dy<0?1:-1)},{passive:true});
+document.addEventListener("keydown",e=>{if(!viewer.classList.contains("open"))return;if(e.key==="Escape")closeViewer();if(e.key==="ArrowUp")moveViewer(1);if(e.key==="ArrowDown")moveViewer(-1)});
+
+function onReelFullscreenChange(){
+  if(
+    reelNativeFullscreenOwned &&
+    !reelFullscreenElement() &&
+    viewer.classList.contains("open")
+  ){
+    reelNativeFullscreenOwned=false;
+    closeViewer();
+  }
+}
+
+document.addEventListener("fullscreenchange",onReelFullscreenChange);
+document.addEventListener("webkitfullscreenchange",onReelFullscreenChange);
 const observer=new IntersectionObserver(es=>es.forEach(e=>{let v=e.target;if(e.isIntersecting&&!viewer.classList.contains("open")&&!document.hidden){ensureCardVideo(v);v.muted=true;v.play().catch(()=>{})}else{v.pause();v.muted=true}}),{rootMargin:"80px 80px",threshold:.05});
 async function syncFavorites(){let r=await sb.from("ma7alak_favorites").select("reel_id").eq("visitor_id",visitorId);if(!r.error){favoriteIds=new Set((r.data||[]).map(x=>String(x.reel_id)));favCount.textContent=favoriteIds.size;updateViewerFav()}}
 document.getElementById("ma7alakFavoritesButton").onclick=e=>{e.preventDefault();let msg={type:"ma7alak-scroll-favorites"};try{window.postMessage(msg,"*")}catch(_){}try{let bc=new BroadcastChannel("ma7alak-favorites-navigation");bc.postMessage(msg);bc.close()}catch(_){}};
