@@ -675,7 +675,7 @@ async function init(){
   await realtime();
 
   setInterval(timers,1000);
-  setInterval(()=>{if(!document.hidden)load()},4000);
+  setInterval(()=>{if(!document.hidden)load()},60000);
 
   addEventListener("ma7alak:account-change",async()=>{
     c=resolveClient()||c;
