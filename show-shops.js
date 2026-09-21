@@ -358,7 +358,221 @@ html.ma7alak-shops-page-active,html.ma7alak-shops-page-active body{background:#0
   async function near(){if(!navigator.geolocation){feedback('Location is unavailable. Choose an area instead.');return}feedback('Finding shops near you…');navigator.geolocation.getCurrentPosition(p=>{coords=p.coords;area='';limit=24;render();feedback(filtered().length?'Sorted by distance from you.':'No shops with a mapped location within '+state.settings.radius+' km. Choose an area to browse all shops.');if(dialog.open&& !shopOpen)close()},()=>feedback('Location wasn’t available. You can choose an area instead.'),{timeout:10000,maximumAge:60000})}
   function detailHead(s){return `${img(s.directory_options?.cover||s.main_image_url||s.profile_image_url,'m7d-detail-cover')}<div class="m7d-detail-head">${img(s.profile_image_url)}<div><h3>${esc(s.shop_name)}</h3><p>${esc(s.category_name||'')} · ${esc(s.location||s.area||s.city||'')}</p></div></div>`}
   async function showShop(slug,nextTab='about'){const s=state.shops.find(x=>x.shop_slug===slug);if(!s)return;shopOpen=slug;tab=nextTab;const token=setPanel(s.shop_name,detailHead(s)+`<div class="m7d-tabs">${['about','gallery','reels','offers','stories','location'].map(t=>`<button class="m7d-pill" data-tab="${t}" aria-pressed="${tab===t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="m7d-tab-body" aria-live="polite">Loading…</div>`);const body=panel.querySelector('.m7d-tab-body');try{let html='';if(tab==='about'){const hours=s.opening_hours;html=`<p>${esc(s.about_text||'More details from this shop are coming soon.')}</p><p>${esc(s.address_text||s.location||'')}</p>${hours?'<h4>Opening hours</h4><p>'+esc(typeof hours==='string'?hours:Object.entries(hours).map(([day,v])=>day+': '+(typeof v==='object'?v.closed?'Closed':[v.open,v.close].filter(Boolean).join(' – '):v)).join('\n'))+'</p>':''}${s.menu_image_url?'<h4>Menu</h4>'+img(s.menu_image_url,'m7d-media-full','Menu'):''}<button class="m7d-pill" data-save="${esc(slug)}" aria-pressed="${saved.has(slug)}">${saved.has(slug)?'♥ Saved':'♡ Save shop'}</button>`}else if(tab==='location'){let map=url(s.map_embed_url);if(map&&!/^https:\/\/(www\.)?google\.(com|[a-z.]+)\/maps\//.test(map))map='';html=`<p>${esc(s.address_text||s.location||s.area||'Location details coming soon.')}</p>${map?`<iframe class="m7d-map" src="${esc(map)}" title="Map for ${esc(s.shop_name)}" loading="lazy" referrerpolicy="no-referrer"></iframe>`:'<p class="m7d-muted">The shop has not added an embedded map yet.</p>'}`}else if(tab==='stories'){const list=stories(s);html=list.length?`<button class="m7d-gold" data-story="${esc(slug)}">Watch ${list.length} ${list.length===1?'story':'stories'}</button>`:'No stories right now.'}else if(tab==='offers'){const list=state.live.filter(p=>p.shop_slug===slug&&new Date(p.ends_at)>new Date());html=list.map(p=>`<article class="m7d-offer">${p.media_type==='video'?`<video controls playsinline preload="metadata" src="${esc(url(p.media_url))}"></video>`:img(p.media_url)}<h3>${esc(p.title)}</h3><p>${esc(p.description)}</p>${p.offer_price!=null?`<strong>$${esc(p.offer_price)}</strong>`:''}<p class="m7d-muted">Starts ${esc(new Date(p.starts_at).toLocaleString())}<br>Ends ${esc(new Date(p.ends_at).toLocaleString())}</p><button class="m7d-pill" data-offer="${esc(p.id)}">View offer & media</button></article>`).join('')||'Nothing live right now.'}else{const result=tab==='reels'?await client.from('shop_reels').select('reel_id,video_url,caption').eq('shop_slug',slug).eq('active',true).order('created_at',{ascending:false}):await client.from('shop_media').select('id,media_type,media_url,poster_url,source_type').eq('shop_slug',slug).eq('is_active',true).order('sort_order');if(result.error)throw result.error;html='<div class="m7d-gallery">'+(result.data||[]).map(m=>tab==='reels'||m.media_type==='video'?`<div><video controls playsinline preload="none" ${m.poster_url?`poster="${esc(url(m.poster_url))}"`:''} src="${esc(url(m.video_url||m.media_url))}"></video>${m.caption?`<p>${esc(m.caption)}</p>`:''}</div>`:`<button data-photo="${esc(url(m.media_url))}" aria-label="Enlarge photo">${img(m.media_url)}</button>`).join('')+'</div>';if(!result.data?.length)html='No '+tab+' yet.'}if(token===loadToken&&dialog.open)body.innerHTML=html}catch(e){if(token===loadToken)body.textContent='Could not load this section. Please try again.';console.warn('Directory detail:',e)}}
-  async function showStories(slug,index=0){const s=state.shops.find(x=>x.shop_slug===slug),list=s?stories(s):[];if(!list.length){showShop(slug,'stories');return}markStoriesSeen(s);index=(index+list.length)%list.length;const item=list[index];shopOpen=slug;const token=setPanel(s.shop_name+' · Story '+(index+1)+' of '+list.length,'Loading story…');let src=url(item.storage_path);if(!src){src=client.storage.from('shop-stories').getPublicUrl(item.storage_path).data.publicUrl}if(token!==loadToken)return;panel.innerHTML=(item.media_type==='video'?`<video class="m7d-media-full" controls autoplay playsinline src="${esc(url(src))}"></video>`:img(src,'m7d-media-full'))+`<div class="m7d-story-nav"><button class="m7d-pill" data-story="${esc(slug)}" data-index="${index-1}">← Previous</button><button class="m7d-pill" data-shop="${esc(slug)}">Shop details</button><button class="m7d-pill" data-story="${esc(slug)}" data-index="${index+1}">Next →</button></div>`}
+  function storyPublicUrl(item){
+    const direct=url(item?.storage_path||item?.media_url||item?.url||"");
+    if(direct)return direct;
+    const path=String(item?.storage_path||"").trim();
+    if(!path||!client)return "";
+    try{return client.storage.from("shop-stories").getPublicUrl(path).data.publicUrl||""}catch{return ""}
+  }
+
+  function storyTimeAgo(value){
+    const time=new Date(value||0).getTime();
+    if(!time)return "";
+    const seconds=Math.max(0,Math.floor((Date.now()-time)/1000));
+    if(seconds<60)return seconds+"s ago";
+    const minutes=Math.floor(seconds/60);
+    if(minutes<60)return minutes+"m ago";
+    const hours=Math.floor(minutes/60);
+    if(hours<24)return hours+"h ago";
+    return Math.floor(hours/24)+"d ago";
+  }
+
+  function clearStoryPlayback(){
+    clearTimeout(storyViewerTimer);
+    storyViewerTimer=0;
+    cancelAnimationFrame(storyViewerRaf);
+    storyViewerRaf=0;
+    if(!storyViewerMedia)return;
+    storyViewerMedia.querySelectorAll("video").forEach(video=>{
+      try{video.pause()}catch(_){}
+      video.removeAttribute("src");
+      try{video.load()}catch(_){}
+    });
+    storyViewerMedia.innerHTML="";
+  }
+
+  function setStoryProgress(value){
+    if(!storyViewerProgress)return;
+    const bars=[...storyViewerProgress.querySelectorAll("i>b")];
+    bars.forEach((bar,i)=>{
+      bar.style.width=i<storyViewerIndex?"100%":i>storyViewerIndex?"0%":Math.max(0,Math.min(100,value))+"%";
+    });
+  }
+
+  function nextDirectoryStory(){
+    if(!storyViewerOpen)return;
+    if(storyViewerIndex>=storyViewerList.length-1){
+      closeDirectoryStory();
+      return;
+    }
+    renderDirectoryStory(storyViewerIndex+1);
+  }
+
+  function previousDirectoryStory(){
+    if(!storyViewerOpen)return;
+    if(storyViewerIndex<=0){
+      renderDirectoryStory(0);
+      return;
+    }
+    renderDirectoryStory(storyViewerIndex-1);
+  }
+
+  function startImageStoryTimer(){
+    const duration=5200;
+    const started=performance.now();
+    const tick=now=>{
+      if(!storyViewerOpen)return;
+      const progress=Math.min(100,((now-started)/duration)*100);
+      setStoryProgress(progress);
+      if(progress>=100){
+        nextDirectoryStory();
+        return;
+      }
+      storyViewerRaf=requestAnimationFrame(tick);
+    };
+    storyViewerRaf=requestAnimationFrame(tick);
+  }
+
+  function startVideoStoryProgress(video){
+    const update=()=>{
+      if(!storyViewerOpen||!video.isConnected)return;
+      const duration=Number(video.duration);
+      const current=Number(video.currentTime);
+      if(Number.isFinite(duration)&&duration>0&&Number.isFinite(current)){
+        setStoryProgress((current/duration)*100);
+      }
+      storyViewerRaf=requestAnimationFrame(update);
+    };
+    storyViewerRaf=requestAnimationFrame(update);
+    video.addEventListener("ended",nextDirectoryStory,{once:true});
+    const play=video.play();
+    if(play&&typeof play.catch==="function"){
+      play.catch(()=>{video.muted=true;video.play().catch(()=>{})});
+    }
+  }
+
+  function renderDirectoryStory(index){
+    if(!storyViewerOpen||!storyViewerList.length)return;
+    clearStoryPlayback();
+    storyViewerIndex=Math.max(0,Math.min(storyViewerList.length-1,Number(index)||0));
+    const item=storyViewerList[storyViewerIndex];
+    const shop=state.shops.find(x=>x.shop_slug===storyViewerSlug);
+    const src=storyPublicUrl(item);
+
+    storyViewer.classList.remove("ready");
+    storyViewerProgress.innerHTML=storyViewerList.map(()=>"<i><b></b></i>").join("");
+    setStoryProgress(0);
+
+    const avatar=url(shop?.profile_image_url);
+    storyViewerShop.innerHTML=(avatar?`<img src="${esc(avatar)}" alt="">`:"")+`<span><strong>${esc(shop?.shop_name||"Shop")}</strong><small>${esc(storyTimeAgo(item?.created_at))}</small></span>`;
+
+    const isVideo=String(item?.media_type||"").toLowerCase()==="video"||/\.(mp4|webm|mov|m4v)(?:$|\?)/i.test(src);
+    if(isVideo){
+      const video=document.createElement("video");
+      video.className="m7d-story-media active";
+      video.playsInline=true;
+      video.setAttribute("playsinline","");
+      video.setAttribute("webkit-playsinline","");
+      video.preload="auto";
+      video.autoplay=true;
+      video.muted=false;
+      video.src=src;
+      storyViewerMedia.appendChild(video);
+      video.addEventListener("loadedmetadata",()=>{
+        storyViewer.classList.add("ready");
+        startVideoStoryProgress(video);
+      },{once:true});
+      video.addEventListener("canplay",()=>storyViewer.classList.add("ready"),{once:true});
+      video.addEventListener("error",()=>{storyViewer.classList.add("ready");storyViewerTimer=setTimeout(nextDirectoryStory,1800)},{once:true});
+      requestAnimationFrame(()=>{
+        const play=video.play();
+        if(play&&typeof play.catch==="function"){
+          play.catch(()=>{video.muted=true;video.play().catch(()=>{})});
+        }
+      });
+    }else{
+      const image=document.createElement("img");
+      image.className="m7d-story-media active";
+      image.alt="";
+      image.decoding="async";
+      image.src=src;
+      storyViewerMedia.appendChild(image);
+      const ready=()=>{
+        storyViewer.classList.add("ready");
+        startImageStoryTimer();
+      };
+      if(image.complete)ready();
+      else{
+        image.addEventListener("load",ready,{once:true});
+        image.addEventListener("error",()=>{storyViewer.classList.add("ready");storyViewerTimer=setTimeout(nextDirectoryStory,1800)},{once:true});
+      }
+    }
+  }
+
+  function restoreStoryScroll(){
+    if(!storyScrollState)return;
+    const restore=(node,value,priority)=>{
+      if(value)node.style.setProperty("overflow",value,priority||"");
+      else node.style.removeProperty("overflow");
+    };
+    restore(document.documentElement,storyScrollState.html,storyScrollState.htmlPriority);
+    restore(document.body,storyScrollState.body,storyScrollState.bodyPriority);
+    storyScrollState=null;
+  }
+
+  function closeDirectoryStory(fromHistory=false){
+    if(!storyViewerOpen)return;
+    storyViewerOpen=false;
+    clearStoryPlayback();
+    storyViewer?.classList.remove("open","ready");
+    storyViewer?.setAttribute("aria-hidden","true");
+    restoreStoryScroll();
+    if(storyHistoryArmed){
+      storyHistoryArmed=false;
+      if(!fromHistory&&history.state?.m7DirectoryStory){
+        history.back();
+      }
+    }
+  }
+
+  function openDirectoryStory(slug,index=0){
+    const shop=state.shops.find(x=>x.shop_slug===slug);
+    const list=shop?stories(shop):[];
+    if(!shop||!list.length)return;
+
+    markStoriesSeen(shop);
+    storyViewerSlug=slug;
+    storyViewerList=list;
+    storyViewerIndex=Math.max(0,Math.min(list.length-1,Number(index)||0));
+    storyViewerOpen=true;
+
+    if(dialog?.open)dialog.querySelectorAll("video").forEach(v=>v.pause());
+
+    storyScrollState={
+      html:document.documentElement.style.overflow,
+      body:document.body.style.overflow,
+      htmlPriority:document.documentElement.style.getPropertyPriority("overflow"),
+      bodyPriority:document.body.style.getPropertyPriority("overflow")
+    };
+    document.documentElement.style.setProperty("overflow","hidden","important");
+    document.body.style.setProperty("overflow","hidden","important");
+
+    storyViewer.classList.add("open");
+    storyViewer.setAttribute("aria-hidden","false");
+    renderDirectoryStory(storyViewerIndex);
+
+    if(!storyHistoryArmed){
+      try{
+        history.pushState({...history.state,m7DirectoryStory:true},"");
+        storyHistoryArmed=true;
+      }catch(_){}
+    }
+  }
+
+  async function showStories(slug,index=0){
+    openDirectoryStory(slug,index);
+  }
   async function showOffer(id){const offer=state.live.find(x=>String(x.id)===String(id));if(!offer)return;const token=setPanel(offer.title,'Loading offer media…');try{const r=await client.from('shop_live_post_media').select('media_url,media_type').eq('post_id',id).order('sort_order');if(r.error)throw r.error;if(token!==loadToken)return;const media=r.data?.length?r.data:[offer];panel.innerHTML=`<p>${esc(offer.description)}</p>${media.map(m=>m.media_type==='video'?`<video class="m7d-media-full" controls playsinline preload="metadata" src="${esc(url(m.media_url))}"></video>`:img(m.media_url,'m7d-media-full')).join('')}<p class="m7d-muted">Starts ${esc(new Date(offer.starts_at).toLocaleString())}<br>Ends ${esc(new Date(offer.ends_at).toLocaleString())}</p><button class="m7d-gold" data-shop="${esc(offer.shop_slug)}">Back to shop</button>`}catch{if(token===loadToken)panel.innerHTML='<p>Could not load the media. Please try again.</p>'+`<button class="m7d-pill" data-offer="${esc(id)}">Retry</button>`}}
   function addShop(){const target='https://shoufhon.com/add-shop-';try{window.top.location.href=target}catch{window.location.href=target}}
   function shopUrl(slug){const s=state.shops.find(x=>x.shop_slug===slug);return url(s?.shop_url)||url('https://shoufhon.com/'+encodeURIComponent(slug))}
