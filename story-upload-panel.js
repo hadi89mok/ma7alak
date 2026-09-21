@@ -3044,9 +3044,28 @@
     });
 
     if(savedPageOverflow===null){
+      const htmlOverflow=document.documentElement.style.overflow;
+      const bodyOverflow=document.body.style.overflow;
+      const htmlPriority=document.documentElement.style.getPropertyPriority("overflow");
+      const bodyPriority=document.body.style.getPropertyPriority("overflow");
+
+      /*
+         Older Story embeds could promote the iframe directly BEFORE this
+         portal opened, temporarily setting both parent overflow values to
+         hidden!important. Never save that temporary lock as the page's
+         original scroll state.
+      */
+      const looksLikePrePromotedLock=
+        htmlOverflow==="hidden" &&
+        bodyOverflow==="hidden" &&
+        htmlPriority==="important" &&
+        bodyPriority==="important";
+
       savedPageOverflow={
-        html:document.documentElement.style.overflow,
-        body:document.body.style.overflow
+        html:looksLikePrePromotedLock?"":htmlOverflow,
+        body:looksLikePrePromotedLock?"":bodyOverflow,
+        htmlPriority:looksLikePrePromotedLock?"":htmlPriority,
+        bodyPriority:looksLikePrePromotedLock?"":bodyPriority
       };
     }
 
@@ -3060,12 +3079,33 @@
     const frame=frameForSource(source);
 
     if(!frame){
+      if(activeFrames.size===0){
+        document.documentElement.classList.remove("shoufhon-embed-viewer-open");
+        document.body.classList.remove("shoufhon-embed-viewer-open");
+        if(savedPageOverflow){
+          const restoreOverflow=function(node,value,priority){
+            if(value)node.style.setProperty("overflow",value,priority||"");
+            else node.style.removeProperty("overflow");
+          };
+          restoreOverflow(document.documentElement,savedPageOverflow.html,savedPageOverflow.htmlPriority);
+          restoreOverflow(document.body,savedPageOverflow.body,savedPageOverflow.bodyPriority);
+          savedPageOverflow=null;
+        }else{
+          document.documentElement.style.removeProperty("overflow");
+          document.body.style.removeProperty("overflow");
+        }
+      }
       return;
     }
 
     const state=activeFrames.get(frame);
 
     if(!state){
+      frame.classList.remove("shoufhon-embed-viewer-frame");
+      if(activeFrames.size===0){
+        document.documentElement.classList.remove("shoufhon-embed-viewer-open");
+        document.body.classList.remove("shoufhon-embed-viewer-open");
+      }
       return;
     }
 
@@ -3090,8 +3130,32 @@
       document.body.classList.remove("shoufhon-embed-viewer-open");
 
       if(savedPageOverflow){
-        document.documentElement.style.overflow=savedPageOverflow.html;
-        document.body.style.overflow=savedPageOverflow.body;
+        const restoreOverflow=function(node,value,priority){
+          if(value){
+            node.style.setProperty("overflow",value,priority||"");
+          }else{
+            node.style.removeProperty("overflow");
+          }
+        };
+
+        restoreOverflow(
+          document.documentElement,
+          savedPageOverflow.html,
+          savedPageOverflow.htmlPriority
+        );
+        restoreOverflow(
+          document.body,
+          savedPageOverflow.body,
+          savedPageOverflow.bodyPriority
+        );
+      }else{
+        /*
+           Safety cleanup: if a CLOSE message arrives after an iframe/host was
+           rebuilt, make sure the Story portal itself cannot leave scrolling
+           disabled.
+        */
+        document.documentElement.style.removeProperty("overflow");
+        document.body.style.removeProperty("overflow");
       }
 
       savedPageOverflow=null;
