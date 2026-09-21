@@ -2085,7 +2085,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       try{
         followingRealtimeChannel=supabaseClient
           .channel("ma7alak-header-following-live-"+Math.random().toString(36).slice(2))
-          .on("postgres_changes",{event:"*",schema:"public",table:"shop_follows"},function(){refreshFollowingState();})
+          .on("postgres_changes",{event:"*",schema:"public",table:"shop_follows",filter:"visitor_id=eq."+getFollowVisitorId()},function(){refreshFollowingState();})
           .subscribe();
       }catch(error){}
     }
