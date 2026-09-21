@@ -3522,9 +3522,44 @@
       return null;
     }
 
+    /*
+       Hostinger may nest Custom Embed iframes. event.source can therefore be
+       a descendant WindowProxy instead of the direct iframe mounted on the
+       page. Walk the WindowProxy parent chain until we reach the top page,
+       then match that direct child against the real Hostinger iframe.
+    */
+    let directChild=source;
+
+    try{
+      let cursor=source;
+
+      for(let hop=0;hop<12;hop+=1){
+        if(!cursor||cursor===window){
+          break;
+        }
+
+        const parentWindow=cursor.parent;
+
+        if(!parentWindow||parentWindow===cursor){
+          break;
+        }
+
+        if(parentWindow===window){
+          directChild=cursor;
+          break;
+        }
+
+        cursor=parentWindow;
+      }
+    }
+    catch(_){}
+
     return Array.from(document.querySelectorAll("iframe")).find(function(frame){
       try{
-        return frame.contentWindow===source;
+        return (
+          frame.contentWindow===source ||
+          frame.contentWindow===directChild
+        );
       }
       catch(_){
         return false;
