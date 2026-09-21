@@ -2446,7 +2446,7 @@
     if(document.getElementById("ma7alak-owner-add-chooser")) return;
     const style=document.createElement("style");
     style.textContent=`
-      #ma7alak-owner-add-chooser{position:fixed!important;inset:0!important;z-index:2147483646!important;display:none!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:rgba(3,4,5,.90)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;font-family:Arial,"Segoe UI",sans-serif!important}
+      #ma7alak-owner-add-chooser{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:rgba(3,4,5,.90)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;font-family:Arial,"Segoe UI",sans-serif!important}
       #ma7alak-owner-add-chooser.active{display:flex!important}
       #ma7alak-owner-add-panel{position:relative!important;width:min(430px,100%)!important;padding:27px 18px 19px!important;box-sizing:border-box!important;border:1px solid rgba(217,164,65,.28)!important;border-radius:26px!important;background:linear-gradient(180deg,#191613,#0d0d0e)!important;box-shadow:0 28px 90px rgba(0,0,0,.7)!important;color:#fff!important;text-align:center!important}
       #ma7alak-owner-add-close{position:absolute!important;right:12px!important;top:11px!important;width:37px!important;height:37px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:50%!important;background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:24px!important;line-height:32px!important;padding:0!important}
@@ -2867,7 +2867,7 @@
 
 
 /* =========================================================
-   SHOUFHON — EMBED VIEWER PORTAL V3
+   SHOUFHON — EMBED VIEWER PORTAL V4
    Hostinger-safe viewport promotion.
    The immediate Custom Embed wrapper becomes the fixed viewport host;
    the iframe itself fills that host. Ancestors are only unclipped.
@@ -2877,10 +2877,10 @@
 (function(){
   "use strict";
 
-  if(window.__SHOUFHON_EMBED_VIEWER_PORTAL_V3__){
+  if(window.__SHOUFHON_EMBED_VIEWER_PORTAL_V4__){
     return;
   }
-  window.__SHOUFHON_EMBED_VIEWER_PORTAL_V3__ = true;
+  window.__SHOUFHON_EMBED_VIEWER_PORTAL_V4__ = true;
 
   const activeFrames=new Map();
   let savedPageOverflow=null;
@@ -2975,6 +2975,14 @@
         overflow:hidden!important;
         overscroll-behavior:none!important;
         touch-action:none!important;
+        transform:none!important;
+        -webkit-transform:none!important;
+        filter:none!important;
+        -webkit-filter:none!important;
+        perspective:none!important;
+        contain:none!important;
+        clip-path:none!important;
+        -webkit-clip-path:none!important;
       }
     `;
 
