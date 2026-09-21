@@ -1107,6 +1107,7 @@
           id="ma7alak-page-story-image-input"
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
           style="display:none!important;"
         />
 
@@ -1115,6 +1116,7 @@
           id="ma7alak-page-story-video-input"
           type="file"
           accept="video/mp4,video/webm,video/quicktime"
+          multiple
           style="display:none!important;"
         />
 
@@ -1138,7 +1140,7 @@
         <div
           id="ma7alak-page-story-note"
         >
-          Stories disappear automatically after 24 hours
+          Select up to 10 photos or videos at once · Stories disappear after 24 hours
         </div>
 
       </div>
@@ -1219,11 +1221,11 @@
 
           if(
             this.files &&
-            this.files[0]
+            this.files.length
           ){
 
-            uploadStory(
-              this.files[0],
+            uploadStories(
+              this.files,
               "image"
             );
 
@@ -1243,11 +1245,11 @@
 
           if(
             this.files &&
-            this.files[0]
+            this.files.length
           ){
 
-            uploadStory(
-              this.files[0],
+            uploadStories(
+              this.files,
               "video"
             );
 
@@ -1573,419 +1575,472 @@
 
 
   /* =========================================================
-     UPLOAD STORY
+     MULTI-STORY UPLOAD
+     ---------------------------------------------------------
+     - Select up to 10 images OR 10 videos at once.
+     - Files upload sequentially so phones do not upload many large files
+       concurrently and overheat / exhaust memory.
+     - Owner/session verification happens once per batch.
+     - The Story embed is refreshed once after the whole batch, not once
+       per file.
   ========================================================= */
 
-  async function uploadStory(
+  const MAX_STORY_BATCH_FILES = 10;
+  const MAX_STORY_FILE_SIZE = 50 * 1024 * 1024;
+
+
+  function storyUploadProgress(
+    completedFiles,
+    totalFiles,
+    fileFraction
+  ){
+
+    const bar =
+      document.getElementById(
+        "ma7alak-page-story-progress-bar"
+      );
+
+    if(!bar || !totalFiles){
+      return;
+    }
+
+    const fraction =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          (
+            Number(completedFiles || 0) +
+            Math.max(0,Math.min(1,Number(fileFraction || 0)))
+          ) /
+          totalFiles
+        )
+      );
+
+    bar.style.width =
+      Math.round(
+        8 + fraction * 92
+      ) + "%";
+
+  }
+
+
+  async function getStoryUploadContext(){
+
+    const client =
+      await loadSupabase();
+
+
+    const sessionResult =
+      await client.auth.getSession();
+
+
+    const session =
+      sessionResult &&
+      sessionResult.data &&
+      sessionResult.data.session;
+
+
+    if(!session){
+      throw new Error(
+        "NO_SESSION"
+      );
+    }
+
+
+    const user =
+      session.user;
+
+
+    const ownerResult =
+      await client
+        .from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id", user.id)
+        .eq("shop_slug", activeShopSlug)
+        .maybeSingle();
+
+
+    if(
+      ownerResult.error ||
+      !ownerResult.data
+    ){
+      throw new Error(
+        "NOT_OWNER"
+      );
+    }
+
+
+    return {
+      client,
+      user
+    };
+
+  }
+
+
+  function storyExtension(
     file,
+    type
+  ){
+
+    if(type === "video"){
+
+      if(file.type === "video/webm"){
+        return "webm";
+      }
+
+      if(file.type === "video/quicktime"){
+        return "mov";
+      }
+
+      return "mp4";
+
+    }
+
+
+    if(file.type === "image/png"){
+      return "png";
+    }
+
+    if(file.type === "image/webp"){
+      return "webp";
+    }
+
+    if(file.type === "image/gif"){
+      return "gif";
+    }
+
+    return "jpg";
+
+  }
+
+
+  async function publishStoryFile(
+    file,
+    type,
+    context,
+    completedFiles,
+    totalFiles
+  ){
+
+    const client =
+      context.client;
+
+    const user =
+      context.user;
+
+
+    const uniqueId =
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        :
+        (
+          Date.now() +
+          "_" +
+          Math.random()
+            .toString(36)
+            .slice(2)
+        );
+
+
+    const storagePath =
+      activeShopSlug +
+      "/" +
+      uniqueId +
+      "." +
+      storyExtension(
+        file,
+        type
+      );
+
+
+    storyUploadProgress(
+      completedFiles,
+      totalFiles,
+      .18
+    );
+
+
+    const uploadResult =
+      await client
+        .storage
+        .from("shop-stories")
+        .upload(
+          storagePath,
+          file,
+          {
+            cacheControl:"86400",
+            upsert:false,
+            contentType:file.type
+          }
+        );
+
+
+    if(uploadResult.error){
+      throw uploadResult.error;
+    }
+
+
+    storyUploadProgress(
+      completedFiles,
+      totalFiles,
+      .68
+    );
+
+
+    const expiresAt =
+      new Date(
+        Date.now() +
+        24 * 60 * 60 * 1000
+      ).toISOString();
+
+
+    const insertResult =
+      await client
+        .from("shop_stories")
+        .insert({
+          user_id:user.id,
+          shop_slug:activeShopSlug,
+          media_type:type,
+          storage_path:storagePath,
+          expires_at:expiresAt
+        })
+        .select()
+        .single();
+
+
+    if(insertResult.error){
+
+      await client
+        .storage
+        .from("shop-stories")
+        .remove([
+          storagePath
+        ]);
+
+      throw insertResult.error;
+
+    }
+
+
+    storyUploadProgress(
+      completedFiles + 1,
+      totalFiles,
+      0
+    );
+
+
+    return insertResult.data;
+
+  }
+
+
+  function broadcastStoriesUploaded(){
+
+    const message = {
+      type:"MA7ALAK_STORY_UPLOADED",
+      shopSlug:activeShopSlug
+    };
+
+
+    if(uploadSourceWindow){
+
+      try{
+        uploadSourceWindow.postMessage(
+          message,
+          "*"
+        );
+      }
+      catch(error){
+        console.log(
+          "SHOUFHON upload message error:",
+          error
+        );
+      }
+
+    }
+
+
+    try{
+      window.postMessage(
+        message,
+        "*"
+      );
+    }
+    catch(error){}
+
+  }
+
+
+  async function uploadStories(
+    fileList,
     type
   ){
 
     if(
       isUploading ||
       !activeShopSlug ||
-      !file
+      !fileList
     ){
-
       return;
-
     }
 
 
-    const maxSize =
-      50 * 1024 * 1024;
+    const files =
+      Array.from(
+        fileList
+      );
+
+
+    if(!files.length){
+      return;
+    }
 
 
     if(
-      file.size >
-      maxSize
+      files.length >
+      MAX_STORY_BATCH_FILES
     ){
 
       alert(
-        "File is too large. Maximum size is 50 MB."
+        "Choose up to " +
+        MAX_STORY_BATCH_FILES +
+        " Stories at once."
       );
 
       return;
 
     }
+
+
+    const tooLarge =
+      files.find(
+        function(file){
+          return (
+            file &&
+            file.size >
+              MAX_STORY_FILE_SIZE
+          );
+        }
+      );
+
+
+    if(tooLarge){
+
+      alert(
+        "Each Story must be 50 MB or smaller. " +
+        (tooLarge.name || "One selected file") +
+        " is too large."
+      );
+
+      return;
+
+    }
+
+
+    isUploading =
+      true;
+
+
+    const progress =
+      document.getElementById(
+        "ma7alak-page-story-progress"
+      );
+
+
+    if(progress){
+      progress.classList.add(
+        "visible"
+      );
+    }
+
+
+    storyUploadProgress(
+      0,
+      files.length,
+      0
+    );
+
+
+    let uploaded =
+      0;
 
 
     try{
 
-      isUploading =
-        true;
-
-
-      const progress =
-        document.getElementById(
-          "ma7alak-page-story-progress"
-        );
-
-
-      const bar =
-        document.getElementById(
-          "ma7alak-page-story-progress-bar"
-        );
-
-
-      if(progress){
-
-        progress.classList.add(
-          "visible"
-        );
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "10%";
-
-      }
-
-
       showStatus(
-        "Uploading Story…"
+        files.length === 1
+          ? "Uploading Story…"
+          : "Preparing " +
+            files.length +
+            " Stories…"
       );
 
 
-      const client =
-        await loadSupabase();
+      const context =
+        await getStoryUploadContext();
 
 
-      /* -----------------------------------------
-         SESSION
-      ----------------------------------------- */
+      for(
+        let index = 0;
+        index < files.length;
+        index++
+      ){
 
-      const sessionResult =
-        await client.auth.getSession();
-
-
-      const session =
-        sessionResult &&
-        sessionResult.data &&
-        sessionResult.data.session;
-
-
-      if(!session){
-
-        throw new Error(
-          "NO_SESSION"
+        showStatus(
+          "Uploading " +
+          (index + 1) +
+          " of " +
+          files.length +
+          "…"
         );
 
-      }
 
-
-      const user =
-        session.user;
-
-
-      /* -----------------------------------------
-         OWNER CHECK
-      ----------------------------------------- */
-
-      const ownerResult =
-        await client
-          .from("shop_owners")
-          .select("shop_slug")
-          .eq("user_id", user.id)
-          .eq("shop_slug", activeShopSlug)
-          .maybeSingle();
-
-
-      if(
-        ownerResult.error ||
-        !ownerResult.data
-      ){
-
-        throw new Error(
-          "NOT_OWNER"
+        await publishStoryFile(
+          files[index],
+          type,
+          context,
+          index,
+          files.length
         );
 
-      }
 
-
-      /* -----------------------------------------
-         EXTENSION
-      ----------------------------------------- */
-
-      let extension =
-        "jpg";
-
-
-      if(
-        type === "video"
-      ){
-
-        if(
-          file.type === "video/webm"
-        ){
-
-          extension =
-            "webm";
-
-        }
-
-        else if(
-          file.type === "video/quicktime"
-        ){
-
-          extension =
-            "mov";
-
-        }
-
-        else{
-
-          extension =
-            "mp4";
-
-        }
-
-      }
-
-      else{
-
-        if(
-          file.type === "image/png"
-        ){
-
-          extension =
-            "png";
-
-        }
-
-        else if(
-          file.type === "image/webp"
-        ){
-
-          extension =
-            "webp";
-
-        }
-
-        else if(
-          file.type === "image/gif"
-        ){
-
-          extension =
-            "gif";
-
-        }
+        uploaded =
+          index + 1;
 
       }
 
 
-      /* -----------------------------------------
-         UNIQUE ID
-      ----------------------------------------- */
-
-      const uniqueId =
-        crypto.randomUUID
-          ? crypto.randomUUID()
-          :
-          (
-            Date.now() +
-            "_" +
-            Math.random()
-              .toString(36)
-              .slice(2)
-          );
-
-
-      const storagePath =
-        activeShopSlug +
-        "/" +
-        uniqueId +
-        "." +
-        extension;
-
-
-      if(bar){
-
-        bar.style.width =
-          "25%";
-
-      }
-
-
-      /* -----------------------------------------
-         STORAGE
-      ----------------------------------------- */
-
-      const uploadResult =
-        await client
-          .storage
-          .from("shop-stories")
-          .upload(
-            storagePath,
-            file,
-            {
-
-              cacheControl:"86400",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-      if(
-        uploadResult.error
-      ){
-
-        throw uploadResult.error;
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "70%";
-
-      }
-
-
-      /* -----------------------------------------
-         24 HOURS
-      ----------------------------------------- */
-
-      const expiresAt =
-        new Date(
-          Date.now() +
-          24 * 60 * 60 * 1000
-        ).toISOString();
-
-
-      /* -----------------------------------------
-         DATABASE
-      ----------------------------------------- */
-
-      const insertResult =
-        await client
-          .from("shop_stories")
-          .insert({
-
-            user_id:
-              user.id,
-
-            shop_slug:
-              activeShopSlug,
-
-            media_type:
-              type,
-
-            storage_path:
-              storagePath,
-
-            expires_at:
-              expiresAt
-
-          })
-          .select()
-          .single();
-
-
-      if(
-        insertResult.error
-      ){
-
-        await client
-          .storage
-          .from("shop-stories")
-          .remove([
-            storagePath
-          ]);
-
-        throw insertResult.error;
-
-      }
-
-
-      if(bar){
-
-        bar.style.width =
-          "100%";
-
-      }
+      broadcastStoriesUploaded();
 
 
       showStatus(
-        "✓ Story published!"
+        uploaded === 1
+          ? "✓ Story published!"
+          : "✓ " +
+            uploaded +
+            " Stories published!"
       );
 
 
-      /* -----------------------------------------
-         TELL STORY EMBED
-      ----------------------------------------- */
-
-      if(
-        uploadSourceWindow
-      ){
-
-        try{
-
-          uploadSourceWindow.postMessage(
-
-            {
-
-              type:
-                "MA7ALAK_STORY_UPLOADED",
-
-              shopSlug:
-                activeShopSlug
-
-            },
-
-            "*"
-
-          );
-
-        }
-
-        catch(error){
-
-          console.log(
-            "SHOUFHON upload message error:",
-            error
-          );
-
-        }
-
-      }
-
-
-      /* -----------------------------------------
-         ALSO TELL PAGE
-      ----------------------------------------- */
-
-      try{
-
-        window.postMessage(
-
-          {
-
-            type:
-              "MA7ALAK_STORY_UPLOADED",
-
-            shopSlug:
-              activeShopSlug
-
-          },
-
-          "*"
-
+      const imageInput =
+        document.getElementById(
+          "ma7alak-page-story-image-input"
         );
 
+      const videoInput =
+        document.getElementById(
+          "ma7alak-page-story-video-input"
+        );
+
+      if(imageInput){
+        imageInput.value = "";
       }
 
-      catch(error){}
+      if(videoInput){
+        videoInput.value = "";
+      }
 
 
       setTimeout(
@@ -1997,10 +2052,11 @@
           closeUploader();
 
         },
-        850
+        900
       );
 
     }
+
 
     catch(error){
 
@@ -2017,7 +2073,7 @@
       if(
         error &&
         error.message ===
-        "NO_SESSION"
+          "NO_SESSION"
       ){
 
         showStatus(
@@ -2029,11 +2085,28 @@
       else if(
         error &&
         error.message ===
-        "NOT_OWNER"
+          "NOT_OWNER"
       ){
 
         showStatus(
           "You don’t have permission for this shop."
+        );
+
+      }
+
+      else if(uploaded > 0){
+
+        /*
+           Earlier files are already valid Stories. Refresh once so the shop
+           sees those successful uploads, then leave the panel open so the
+           owner can retry the remaining files.
+        */
+        broadcastStoriesUploaded();
+
+        showStatus(
+          "✓ " +
+          uploaded +
+          " uploaded · next file failed. Try the remaining files again."
         );
 
       }
@@ -2047,18 +2120,10 @@
       }
 
 
-      const progress =
-        document.getElementById(
-          "ma7alak-page-story-progress"
-        );
-
-
       if(progress){
-
         progress.classList.remove(
           "visible"
         );
-
       }
 
     }
