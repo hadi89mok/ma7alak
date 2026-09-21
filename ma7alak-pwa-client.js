@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.21.1";
+  const VERSION="2026.09.21.2";
   const DISMISS_KEY="shoufhon_pwa_install_dismissed_session";
 
   let deferredPrompt=null;
