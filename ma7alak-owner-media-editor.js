@@ -16,7 +16,6 @@
   let allowed=false;
   let busy=false;
   let changed=false;
-  let historyArmed=false;
   let nativeFullscreenEntered=false;
   let closingEditor=false;
   let snapshot={photos:[],videos:[],photoLimit:0,videoLimit:0};
@@ -62,24 +61,6 @@
 
   function editorOpen(){
     return !!editorSheet()?.classList.contains("open");
-  }
-
-  function armHistory(){
-    if(historyArmed)return;
-    try{
-      const base=
-        history.state &&
-        typeof history.state==="object"
-          ? history.state
-          : {};
-
-      history.pushState(
-        {...base,__shoufhonOwnerMediaEditor:true},
-        "",
-        location.href
-      );
-      historyArmed=true;
-    }catch(_){}
   }
 
   function requestNativeFullscreen(sheet){
@@ -206,7 +187,6 @@
     */
     sheet.classList.add("open");
     portal(true);
-    armHistory();
     requestNativeFullscreen(sheet);
     status("Loading Media…");
 
@@ -226,32 +206,22 @@
   function closeEditor(options={}){
     if(closingEditor)return;
 
-    const fromHistory=options.fromHistory===true;
+    const fromPortalBack=options.fromPortalBack===true;
     const force=options.force===true;
 
-    if(busy&&!force){
-      if(fromHistory){
-        historyArmed=false;
-        armHistory();
-      }
-      return;
-    }
+    if(busy&&!force)return;
 
     closingEditor=true;
 
     editorSheet()?.classList.remove("open");
-    portal(false);
+
+    if(!fromPortalBack){
+      portal(false);
+    }
 
     if(nativeFullscreenEntered){
       nativeFullscreenEntered=false;
       exitNativeFullscreen();
-    }
-
-    if(!fromHistory&&historyArmed){
-      historyArmed=false;
-      try{history.back()}catch(_){}
-    }else{
-      historyArmed=false;
     }
 
     const shouldReload=changed;
@@ -325,10 +295,14 @@
     sheet.querySelector(".m7om-close").addEventListener("click",()=>closeEditor());
     sheet.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>choose("add",b.dataset.add)));
 
-    window.addEventListener("popstate",()=>{
-      if(!editorOpen())return;
-      historyArmed=false;
-      closeEditor({fromHistory:true});
+    window.addEventListener("message",event=>{
+      const data=event&&event.data||{};
+      if(
+        data.type!=="SHOUFHON_EMBED_VIEWER_BACK" ||
+        data.viewerKind!=="owner-media-editor"
+      )return;
+      if(data.shopSlug&&slug&&String(data.shopSlug)!==String(slug))return;
+      if(editorOpen())closeEditor({fromPortalBack:true,force:true});
     });
 
     const onFullscreenChange=()=>{
