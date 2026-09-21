@@ -879,6 +879,20 @@
         id=>/(?:about|hub)_font_(?:style|size)$/.test(id)
       );
 
+      /*
+         Main About title + Arabic subtitle now live together inside the
+         About / Hub heading editor. Hide the older duplicate title
+         color/animation controls from the legacy About pane.
+      */
+      const aboutDesignPane=design?.querySelector('[data-m7ds-pane="about"]');
+      filterFields(
+        aboutDesignPane,
+        id=>![
+          "m7de-about_title_color",
+          "m7de-about_title_animation"
+        ].includes(id)
+      );
+
       const hubModules=design?.querySelector('[data-m7ds-pane="modules"]');
       filterFields(
         hubModules,
