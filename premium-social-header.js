@@ -3108,6 +3108,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let ma7alakGlobalTouchStartX = 0;
   let ma7alakGlobalTouchStartTime = 0;
   let ma7alakGlobalFavoriteIds = new Set();
+  let ma7alakGlobalFullscreenOwned = false;
 
   function getGlobalReelElements(){
     return {
@@ -3243,6 +3244,84 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     catch(error){}
   }
 
+  function globalReelFullscreenElement(){
+    return (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      null
+    );
+  }
+
+  function requestGlobalReelNativeFullscreen(){
+    const el=getGlobalReelElements();
+
+    if(
+      !el.viewer ||
+      globalReelFullscreenElement()
+    ){
+      return;
+    }
+
+    try{
+      const request=
+        el.viewer.requestFullscreen ||
+        el.viewer.webkitRequestFullscreen;
+
+      if(typeof request!=="function"){
+        return;
+      }
+
+      ma7alakGlobalFullscreenOwned=true;
+
+      const result=
+        request.call(el.viewer);
+
+      if(
+        result &&
+        typeof result.catch==="function"
+      ){
+        result.catch(function(){
+          ma7alakGlobalFullscreenOwned=false;
+        });
+      }
+    }
+    catch(error){
+      ma7alakGlobalFullscreenOwned=false;
+    }
+  }
+
+  function exitGlobalReelNativeFullscreen(){
+    if(!ma7alakGlobalFullscreenOwned){
+      return;
+    }
+
+    ma7alakGlobalFullscreenOwned=false;
+
+    try{
+      if(
+        document.fullscreenElement &&
+        document.exitFullscreen
+      ){
+        const result=
+          document.exitFullscreen();
+
+        if(
+          result &&
+          typeof result.catch==="function"
+        ){
+          result.catch(function(){});
+        }
+      }
+      else if(
+        document.webkitFullscreenElement &&
+        document.webkitExitFullscreen
+      ){
+        document.webkitExitFullscreen();
+      }
+    }
+    catch(error){}
+  }
+
   function loadGlobalReel(index,direction){
     if(!MA7ALAK_GLOBAL_REELS.length){return;}
 
@@ -3364,8 +3443,12 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       null
     );
 
-    /* The fixed viewer already fills the viewport. Avoid native fullscreen so
-       mobile browsers do not display their intrusive exit instructions. */
+    /*
+      Request native fullscreen while the header tap still owns user
+      activation. CSS fixed-position alone cannot hide Chrome/Brave's
+      browser chrome.
+    */
+    requestGlobalReelNativeFullscreen();
 
     loadGlobalFavoriteIds();
   }
@@ -3401,18 +3484,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
 
-    try{
-      if(document.fullscreenElement){
-        const req = document.exitFullscreen();
-        if(req && typeof req.catch === "function"){
-          req.catch(function(){});
-        }
-      }
-      else if(document.webkitFullscreenElement && document.webkitExitFullscreen){
-        document.webkitExitFullscreen();
-      }
-    }
-    catch(error){}
+    exitGlobalReelNativeFullscreen();
   }
 
   function setupGlobalReelViewer(){
@@ -3576,22 +3648,25 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       }
     );
 
+    const onGlobalReelFullscreenChange=function(){
+      if(
+        ma7alakGlobalFullscreenOwned &&
+        !globalReelFullscreenElement() &&
+        el.viewer.classList.contains("open")
+      ){
+        ma7alakGlobalFullscreenOwned=false;
+        closeGlobalReel();
+      }
+    };
+
     document.addEventListener(
       "fullscreenchange",
-      function(){
-        if(
-          !document.fullscreenElement &&
-          el.viewer.classList.contains(
-            "open"
-          )
-        ){
-          /*
-            Do NOT automatically close here. Some browsers reject or
-            exit native fullscreen while the fixed overlay should stay
-            open exactly like a normal Reel viewer.
-          */
-        }
-      }
+      onGlobalReelFullscreenChange
+    );
+
+    document.addEventListener(
+      "webkitfullscreenchange",
+      onGlobalReelFullscreenChange
     );
   }
 
