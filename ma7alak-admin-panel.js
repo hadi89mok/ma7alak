@@ -5822,6 +5822,7 @@ function decorateAll(){
 
   const COLORS = [
     ["profile_ring_color","Story / profile ring"],
+    ["story_glow_color","Story glow"],
     ["profile_banner_color","Profile banner"],
     ["profile_shell_bg_color","Profile shell background"],
     ["profile_shell_border_color","Profile shell border"],
@@ -5909,6 +5910,8 @@ function decorateAll(){
     story_upload_effect:"spark-burst",
     story_new_speed:"2.2",
     story_new_intensity:"72",
+    story_glow_color:"#f2caed",
+    story_glow_power:"72",
     story_new_image_pulse:true,
     story_new_sparkle_count:"2",
 
@@ -5993,6 +5996,9 @@ function decorateAll(){
     shop_label_border_color:"#f2caed",
     shop_label_bg_color:"#171217",
     shop_label_icon_color:"#f2caed",
+    shop_label_icon_animation:"current",
+    shop_label_icon_speed:"2.2",
+    shop_label_icon_glow:"55",
     shop_label_line_color:"#f2caed",
     shop_label_line_style:"fade",
     shop_label_symbol:"diamond",
@@ -6676,6 +6682,8 @@ function decorateAll(){
 
           ${effectNumberField(prefix,"story_new_speed","Story animation speed",1,6,0.1,"seconds")}
           ${effectNumberField(prefix,"story_new_intensity","Story effect intensity",0,100,5,"%")}
+          ${colorField(prefix,"story_glow_color","Story glow color")}
+          ${effectNumberField(prefix,"story_glow_power","Story glow strength",0,100,5,"%")}
 
           <label class="m7ds-field">
             <span>Orbit sparkles</span>
@@ -6698,6 +6706,9 @@ function decorateAll(){
           ${colorField(prefix,"shop_label_border_color","Shop Label border color")}
           ${colorField(prefix,"shop_label_bg_color","Shop Label background")}
           ${colorField(prefix,"shop_label_icon_color","Shop Label icon color")}
+          ${animField(prefix,"shop_label_icon_animation","Shop Label icon animation")}
+          ${effectNumberField(prefix,"shop_label_icon_speed","Shop Label icon speed",0.6,8,0.1,"seconds")}
+          ${effectNumberField(prefix,"shop_label_icon_glow","Shop Label icon glow",0,100,5,"%")}
           ${colorField(prefix,"shop_name_color","Shop name color")}
           ${animField(prefix,"shop_name_animation","Shop name animation")}
           ${colorField(prefix,"arabic_name_color","Arabic name color")}
@@ -15450,6 +15461,8 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     story_upload_effect:"spark-burst",
     story_new_speed:"2.2",
     story_new_intensity:"72",
+    story_glow_color:"$ACCENT",
+    story_glow_power:"72",
     story_new_image_pulse:true,
     story_new_sparkle_count:"2",
 
@@ -15493,6 +15506,9 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     shop_label_border_color:"$ACCENT",
     shop_label_bg_color:"#171217",
     shop_label_icon_color:"$ACCENT",
+    shop_label_icon_animation:"current",
+    shop_label_icon_speed:"2.2",
+    shop_label_icon_glow:"55",
     shop_label_line_color:"$ACCENT",
     shop_label_line_style:"fade",
     shop_label_symbol:"diamond",
