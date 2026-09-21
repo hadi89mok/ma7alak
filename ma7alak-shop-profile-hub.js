@@ -1501,16 +1501,27 @@ window.addEventListener(
 
       if(title){
         title.textContent =
-          "About " + shopName;
+          String(
+            options.about_title_text ||
+            ""
+          ).trim() ||
+          ("About " + shopName);
       }
 
 
       if(arabic){
-        arabic.textContent =
+        const aboutArabicText =
+          String(
+            options.about_arabic_text ||
+            ""
+          ).trim() ||
           arabicName;
 
+        arabic.textContent =
+          aboutArabicText;
+
         arabic.hidden =
-          !arabicName;
+          !aboutArabicText;
       }
 
 
@@ -1638,15 +1649,26 @@ window.addEventListener(
 
     if(title){
       title.textContent =
-        "About " + shopName;
+          String(
+            options.about_title_text ||
+            ""
+          ).trim() ||
+          ("About " + shopName);
     }
 
     if(arabic){
-      arabic.textContent =
-        arabicName;
+      const aboutArabicText =
+          String(
+            options.about_arabic_text ||
+            ""
+          ).trim() ||
+          arabicName;
 
-      arabic.hidden =
-        !arabicName;
+        arabic.textContent =
+          aboutArabicText;
+
+        arabic.hidden =
+          !aboutArabicText;
     }
 
     if(text){
@@ -4807,7 +4829,11 @@ function styleText(el,options,key,colorKey,fallbackColor){
       A solid inline -webkit-text-fill-color would kill Shimmer on mobile.
     */
     const arabicMode=
-      String(options.arabic_name_animation||"none")
+      String(
+        options.about_arabic_animation ||
+        options.arabic_name_animation ||
+        "none"
+      )
         .trim()
         .toLowerCase();
 
@@ -4989,3 +5015,152 @@ start().catch(error=>
 })();
 
 
+
+
+/* =========================================================
+   SHOUFHON PROFILE HUB — ABOUT ARABIC SUBTITLE V1
+   Independent text/color/font/size are handled by the existing
+   About text-style bridge. This runtime owns ONLY its animation,
+   so the Arabic subtitle no longer depends on profile-name motion.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__M7_ABOUT_ARABIC_ANIMATION_V1__)return;
+  window.__M7_ABOUT_ARABIC_ANIMATION_V1__=true;
+
+  function safeHex(value,fallback){
+    const raw=String(value||"").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+  }
+
+  function rgb(hex){
+    const raw=safeHex(hex,"#ffffff").slice(1);
+    return [
+      parseInt(raw.slice(0,2),16),
+      parseInt(raw.slice(2,4),16),
+      parseInt(raw.slice(4,6),16)
+    ].join(",");
+  }
+
+  function applyOptions(options){
+    const el=document.getElementById("ma7alak-about-arabic-name");
+    if(!el)return;
+
+    const o=options&&typeof options==="object"?options:{};
+    const mode=String(o.about_arabic_animation||"none").trim().toLowerCase();
+    const color=safeHex(o.about_arabic_color,o.arabic_name_color||"#ffffff");
+    const colorRgb=rgb(color);
+
+    let style=document.getElementById("m7-about-arabic-animation-style");
+    if(!style){
+      style=document.createElement("style");
+      style.id="m7-about-arabic-animation-style";
+      document.head.appendChild(style);
+    }
+
+    const base=`
+      html body #ma7alak-about-arabic-name{
+        transform-origin:center!important;
+        -webkit-transform-origin:center!important;
+        will-change:transform,filter,opacity,background-position!important;
+        backface-visibility:hidden!important;
+        -webkit-backface-visibility:hidden!important;
+      }
+    `;
+
+    const keyframes=`
+      @keyframes m7AboutArabicGlow{
+        0%,100%{text-shadow:0 0 3px rgba(${colorRgb},.22),0 2px 8px rgba(0,0,0,.38)}
+        50%{text-shadow:0 0 11px rgba(${colorRgb},.90),0 0 22px rgba(${colorRgb},.44),0 2px 8px rgba(0,0,0,.38)}
+      }
+      @-webkit-keyframes m7AboutArabicGlow{
+        0%,100%{text-shadow:0 0 3px rgba(${colorRgb},.22),0 2px 8px rgba(0,0,0,.38)}
+        50%{text-shadow:0 0 11px rgba(${colorRgb},.90),0 0 22px rgba(${colorRgb},.44),0 2px 8px rgba(0,0,0,.38)}
+      }
+      @keyframes m7AboutArabicBreathe{0%,100%{transform:scale(.985);opacity:.84}50%{transform:scale(1.045);opacity:1}}
+      @-webkit-keyframes m7AboutArabicBreathe{0%,100%{-webkit-transform:scale(.985);opacity:.84}50%{-webkit-transform:scale(1.045);opacity:1}}
+      @keyframes m7AboutArabicPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.075)}}
+      @-webkit-keyframes m7AboutArabicPulse{0%,100%{-webkit-transform:scale(1)}50%{-webkit-transform:scale(1.075)}}
+      @keyframes m7AboutArabicFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+      @-webkit-keyframes m7AboutArabicFloat{0%,100%{-webkit-transform:translateY(0)}50%{-webkit-transform:translateY(-4px)}}
+      @keyframes m7AboutArabicSway{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.4deg)}}
+      @-webkit-keyframes m7AboutArabicSway{0%,100%{-webkit-transform:rotate(-1.4deg)}50%{-webkit-transform:rotate(1.4deg)}}
+      @keyframes m7AboutArabicShimmer{from{background-position:120% 50%}to{background-position:-120% 50%}}
+      @-webkit-keyframes m7AboutArabicShimmer{from{background-position:120% 50%}to{background-position:-120% 50%}}
+    `;
+
+    let css="";
+    if(mode==="glow"){
+      css=`animation:m7AboutArabicGlow 2.1s ease-in-out infinite!important;-webkit-animation:m7AboutArabicGlow 2.1s ease-in-out infinite!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }else if(mode==="breathe"){
+      css=`animation:m7AboutArabicBreathe 2.6s ease-in-out infinite!important;-webkit-animation:m7AboutArabicBreathe 2.6s ease-in-out infinite!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }else if(mode==="pulse"){
+      css=`animation:m7AboutArabicPulse 1.8s ease-in-out infinite!important;-webkit-animation:m7AboutArabicPulse 1.8s ease-in-out infinite!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }else if(mode==="float"){
+      css=`animation:m7AboutArabicFloat 2.5s ease-in-out infinite!important;-webkit-animation:m7AboutArabicFloat 2.5s ease-in-out infinite!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }else if(mode==="sway"){
+      css=`animation:m7AboutArabicSway 2.8s ease-in-out infinite!important;-webkit-animation:m7AboutArabicSway 2.8s ease-in-out infinite!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }else if(mode==="shimmer"){
+      css=`
+        background:linear-gradient(105deg,${color} 0%,#ffffff 35%,${color} 64%,#fff5d4 78%,${color} 100%)!important;
+        background-size:280% 100%!important;
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+        color:transparent!important;
+        -webkit-text-fill-color:transparent!important;
+        animation:m7AboutArabicShimmer 3.2s ease-in-out infinite!important;
+        -webkit-animation:m7AboutArabicShimmer 3.2s ease-in-out infinite!important;
+      `;
+    }else{
+      css=`animation:none!important;-webkit-animation:none!important;color:${color}!important;-webkit-text-fill-color:${color}!important;background:none!important;`;
+    }
+
+    style.textContent=base+keyframes+`
+      html body #ma7alak-about-arabic-name{${css}}
+    `;
+  }
+
+  async function load(){
+    const slug=String(
+      window.__MA7ALAK_EXACT_HUB_SLUG__||
+      document.getElementById("ma7alak-shop-profile-hub-mount")?.getAttribute("data-shop-slug")||
+      ""
+    ).trim().toLowerCase();
+
+    const client=window.__MA7ALAK_EXACT_HUB_REST_CLIENT__;
+    if(!slug||!client)return;
+
+    const result=await client
+      .from("shop_profiles")
+      .select("shop_slug,directory_options")
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+    if(!result.error&&result.data){
+      applyOptions(result.data.directory_options||{});
+    }
+  }
+
+  function preview(message){
+    applyOptions(
+      message&&message.directory_options&&typeof message.directory_options==="object"
+        ? message.directory_options
+        : {}
+    );
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",load,{once:true});
+  }else{
+    load().catch(()=>{});
+  }
+
+  if(typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__==="function"){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(load);
+  }
+
+  if(typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__==="function"){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(preview);
+  }
+})();
