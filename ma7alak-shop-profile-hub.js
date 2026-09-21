@@ -2979,6 +2979,31 @@ window.addEventListener(
     let statsRunning =
       false;
 
+    let delegatedToUniversal =
+      false;
+
+    function universalHandlesShop(){
+      const engine =
+        window.MA7ALAK_LIVE_ENGINE;
+
+      return !!(
+        engine &&
+        engine.active &&
+        String(engine.shopSlug || "").trim().toLowerCase() ===
+          String(SHOP_SLUG || "").trim().toLowerCase()
+      );
+    }
+
+    function delegateToUniversal(){
+      if(!universalHandlesShop()){
+        return false;
+      }
+
+      delegatedToUniversal = true;
+      clearTimers();
+      return true;
+    }
+
 
     async function loadShopTheme(){
 
@@ -3029,6 +3054,13 @@ window.addEventListener(
 
     async function recordPageView(){
 
+      if(
+        delegatedToUniversal ||
+        delegateToUniversal()
+      ){
+        return;
+      }
+
       const { error } =
         await client.rpc(
           "record_shop_view",
@@ -3057,6 +3089,8 @@ window.addEventListener(
     async function updatePresence(){
 
       if(
+        delegatedToUniversal ||
+        delegateToUniversal() ||
         document.visibilityState === "hidden" ||
         presenceRunning
       ){
@@ -3199,6 +3233,8 @@ window.addEventListener(
     async function refreshStats(){
 
       if(
+        delegatedToUniversal ||
+        delegateToUniversal() ||
         document.visibilityState === "hidden" ||
         statsRunning
       ){
@@ -3285,9 +3321,19 @@ window.addEventListener(
     }
 
 
+    window.addEventListener(
+      "MA7ALAK_LIVE_ENGINE_READY",
+      function(){
+        delegateToUniversal();
+      }
+    );
+
+
     function schedulePresence(){
 
       if(
+        delegatedToUniversal ||
+        delegateToUniversal() ||
         document.visibilityState === "hidden"
       ){
         return;
@@ -3312,6 +3358,8 @@ window.addEventListener(
     function scheduleStats(){
 
       if(
+        delegatedToUniversal ||
+        delegateToUniversal() ||
         document.visibilityState === "hidden"
       ){
         return;
@@ -3339,6 +3387,8 @@ window.addEventListener(
 
 
       if(
+        delegatedToUniversal ||
+        delegateToUniversal() ||
         document.visibilityState === "hidden"
       ){
         return;
@@ -3388,6 +3438,10 @@ window.addEventListener(
        Then start the optimized live loops.
     */
     await loadShopTheme();
+
+    if(delegateToUniversal()){
+      return;
+    }
 
     await recordPageView();
 
