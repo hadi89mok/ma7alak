@@ -2582,7 +2582,7 @@
     editSlug.value = shop.shop_slug || "";
     editName.value = shop.shop_name || "";
     editArabic.value = shop.arabic_name || "";
-    editImage.value = shop.profile_image_url || "";
+    editImage.value = shop.profile_image_url || shop.story_logo_url || "";
     editUrl.value = shop.shop_url || "";
     editArea.value = shop.area || "";
     editLocation.value = shop.location || "";
@@ -3681,6 +3681,7 @@
         shop_name: name,
         arabic_name: normalizedText(editArabic.value) || null,
         profile_image_url: normalizedText(editImage.value) || null,
+        story_logo_url: normalizedText(editImage.value) || null,
         shop_url: normalizedText(editUrl.value) || ("https://shoufhon.com/" + slug),
         city: normalizedText(editCitySmart && editCitySmart.value) || null,
         area: area || null,
@@ -15302,7 +15303,7 @@ async function loadShops(){
 
   const result=await client
     .from("shop_profiles")
-    .select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url,location,area,category,category_name,is_active,verified,featured,directory_options")
+    .select("shop_slug,shop_name,arabic_name,profile_image_url,story_logo_url,shop_url,location,area,category,category_name,is_active,verified,featured,directory_options")
     .order("shop_name",{ascending:true});
 
   if(result.error)throw result.error;
