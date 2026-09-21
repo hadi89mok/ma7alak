@@ -5242,6 +5242,33 @@ const EFFECTS=[
   ["about_fx_ornament_shine","Top ornament animation","Animate the top lines and center diamond",true]
 ];
 
+const ABOUT_HEADING_FONTS=[
+  ["inherit","Use About / global font"],
+  ["current","Current design font"],
+  ["system","Clean system"],
+  ["modern","Modern sans"],
+  ["elegant","Elegant serif"],
+  ["classic","Classic serif"],
+  ["mono","Monospace"]
+];
+
+const ABOUT_HEADING_ANIMS=[
+  ["none","None"],
+  ["current","Current design"],
+  ["shimmer","Shimmer"],
+  ["glow","Glow"],
+  ["breathe","Breathe"],
+  ["pulse","Pulse"],
+  ["float","Float"],
+  ["sway","Sway"]
+];
+
+function optionList(list,selected){
+  return list.map(([value,label])=>
+    '<option value="'+esc(value)+'" '+(value===selected?'selected':'')+'>'+esc(label)+'</option>'
+  ).join("");
+}
+
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
 }[c]));
@@ -5266,9 +5293,19 @@ function ensureStyles(){
     .m7-about-services-fields{margin:16px 0!important;padding:16px!important;border:1px solid #d6ac6244!important;border-radius:16px!important;background:#17130f!important;color:#e9d6b3!important}
     .m7-about-services-fields{legend{padding:0 9px;color:#f2c574;font-weight:900}
     .m7-about-services-fields>p{margin:5px 0 14px;color:#b9ab97;font-size:12px;line-height:1.45}
+    .m7-about-heading-editor{margin:10px 0 15px;padding:12px;border:1px solid #f0bc6250;border-radius:14px;background:linear-gradient(145deg,#12100d,#0b0a09)}
+    .m7-about-heading-editor>h4{margin:0 0 9px;color:#ffd77e;font-size:12px;font-weight:950;letter-spacing:.45px}
+    .m7-about-heading-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .m7-about-heading-card{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:7px;padding:10px;border:1px solid #ffffff0d;border-radius:12px;background:#0a0908}
+    .m7-about-heading-card>strong{grid-column:1/-1;color:#f5d28b;font-size:10px;text-transform:uppercase;letter-spacing:.55px}
+    .m7-about-heading-card label{display:grid;gap:5px;color:#cbbda5;font-size:9px}
+    .m7-about-heading-card label.full{grid-column:1/-1}
+    .m7-about-heading-card input,.m7-about-heading-card select{width:100%;min-width:0;min-height:39px;padding:7px 8px;box-sizing:border-box;border:1px solid #d6ac6238;border-radius:9px;background:#070707;color:#fff}
+    .m7-about-heading-card input[type="color"]{padding:3px}
     .m7-about-description-slot{margin:8px 0 16px}
     .m7-about-description-slot label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:800}
-    .m7-about-description-slot textarea{width:100%xaimportant;min-height:150px!important;resize:vertical!important;box-sizing:border-box!important;padding:12px!important;border-radius:12px!important;border:1px solid #d6ac6244!important;background:#0e0c0a!important;color:#fff!important;font:inherit!important;line-height:1.6!important}
+    .m7-about-description-slot textarea{width:100%!important;min-height:150px!important;resize:vertical!important;box-sizing:border-box!important;padding:12px!important;border-radius:12px!important;border:1px solid #d6ac6244!important;background:#0e0c0a!important;color:#fff!important;font:inherit!important;line-height:1.6!important}
+    @media(max-width:680px){.m7-about-heading-grid{grid-template-columns:1fr}}
     .m7-about-signature{display:flex;flex-direction:column;gap:6px;margin:16px 0;font-size:12px;font-weight:800}
     .m7-about-signature input{width:100%;min-height:46px;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #d6ac6244;background:#0e0c0a;color:#fff;font:inherit}
     .m7-about-service-title,.m7-about-effects-title{margin:16px 0 8px;color:#f2c574;font-size:12px;font-weight:950;letter-spacing:.7px;text-transform:uppercase}
@@ -5296,8 +5333,29 @@ function ensureForm(form,prefix){
     fs=document.createElement("fieldset");
     fs.className="m7-about-services-fields";
     fs.innerHTML=
-      '<legend>About Me</legend>'+
-      '<p>Write the shop description, choose the bottom labels/icons, edit the signature, and switch visual effects on or off for this shop.</p>'+
+      '<legend>About / Hub</legend>'+
+      '<p>Edit the About heading, Arabic subtitle, description, services and effects from one place.</p>'+
+      '<div class="m7-about-heading-editor">'+
+        '<h4>ABOUT HEADING</h4>'+
+        '<div class="m7-about-heading-grid">'+
+          '<div class="m7-about-heading-card">'+
+            '<strong>Main title</strong>'+
+            '<label class="full"><span>Text</span><input id="'+prefix+'about-title-text" type="text" placeholder="Blank = About + shop name"></label>'+
+            '<label><span>Color</span><input id="'+prefix+'about-title-color-direct" type="color" value="#f2caed"></label>'+
+            '<label><span>Size %</span><input id="'+prefix+'about-title-size-direct" type="number" min="60" max="200" step="5" value="100"></label>'+
+            '<label><span>Font</span><select id="'+prefix+'about-title-font-direct">'+optionList(ABOUT_HEADING_FONTS,"inherit")+'</select></label>'+
+            '<label><span>Animation</span><select id="'+prefix+'about-title-animation-direct">'+optionList(ABOUT_HEADING_ANIMS,"current")+'</select></label>'+
+          '</div>'+
+          '<div class="m7-about-heading-card">'+
+            '<strong>Arabic subtitle</strong>'+
+            '<label class="full"><span>Text</span><input id="'+prefix+'about-arabic-text" type="text" dir="auto" placeholder="Blank = shop Arabic name"></label>'+
+            '<label><span>Color</span><input id="'+prefix+'about-arabic-color-direct" type="color" value="#ffffff"></label>'+
+            '<label><span>Size %</span><input id="'+prefix+'about-arabic-size-direct" type="number" min="60" max="200" step="5" value="100"></label>'+
+            '<label><span>Font</span><select id="'+prefix+'about-arabic-font-direct">'+optionList(ABOUT_HEADING_FONTS,"inherit")+'</select></label>'+
+            '<label><span>Animation</span><select id="'+prefix+'about-arabic-animation-direct">'+optionList(ABOUT_HEADING_ANIMS,"none")+'</select></label>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
       '<div class="m7-about-description-slot"></div>'+
       '<div class="m7-about-service-title">Bottom items</div>'+
       [1,2,3,4].map(i=>
@@ -5345,6 +5403,29 @@ function fillControls(prefix,options){
   const o=options && typeof options==="object" ? options : {};
   const services=Array.isArray(o.about_services) ? o.about_services : [];
 
+  const setValue=(id,value)=>{
+    const input=document.getElementById(prefix+id);
+    if(input)input.value=String(value??"");
+  };
+
+  setValue("about-title-text",o.about_title_text||"");
+  setValue("about-title-color-direct",o.about_title_color||"#f2caed");
+  setValue("about-title-size-direct",o.about_title_font_size||"100");
+  setValue("about-title-font-direct",o.about_title_font_style||"inherit");
+  setValue("about-title-animation-direct",o.about_title_animation||"current");
+
+  setValue("about-arabic-text",o.about_arabic_text||"");
+  setValue("about-arabic-color-direct",o.about_arabic_color||o.arabic_name_color||"#ffffff");
+  setValue("about-arabic-size-direct",o.about_arabic_font_size||"100");
+  setValue("about-arabic-font-direct",o.about_arabic_font_style||"inherit");
+  setValue("about-arabic-animation-direct",o.about_arabic_animation||"none");
+
+  const legacyTitleColor=document.getElementById(prefix+"about_title_color");
+  if(legacyTitleColor)legacyTitleColor.value=String(o.about_title_color||"#f2caed");
+
+  const legacyTitleAnimation=document.getElementById(prefix+"about_title_animation");
+  if(legacyTitleAnimation)legacyTitleAnimation.value=String(o.about_title_animation||"current");
+
   const signature=document.getElementById(prefix+"about-signature");
   if(signature){
     signature.value=String(
@@ -5389,6 +5470,48 @@ function collectServices(prefix){
 
 function collectControls(prefix,result){
   result.directory_options=result.directory_options||{};
+
+  const read=(id,fallback="")=>
+    String(document.getElementById(prefix+id)?.value??fallback).trim();
+
+  const pct=(id,fallback=100)=>
+    Math.max(60,Math.min(200,Number(document.getElementById(prefix+id)?.value)||fallback));
+
+  result.directory_options.about_title_text=
+    read("about-title-text","");
+
+  result.directory_options.about_title_color=
+    read("about-title-color-direct","#f2caed")||"#f2caed";
+
+  result.directory_options.about_title_font_style=
+    read("about-title-font-direct","inherit")||"inherit";
+
+  result.directory_options.about_title_font_size=
+    pct("about-title-size-direct",100);
+
+  result.directory_options.about_title_animation=
+    read("about-title-animation-direct","current")||"current";
+
+  result.directory_options.about_arabic_text=
+    read("about-arabic-text","");
+
+  result.directory_options.about_arabic_color=
+    read("about-arabic-color-direct","#ffffff")||"#ffffff";
+
+  result.directory_options.about_arabic_font_style=
+    read("about-arabic-font-direct","inherit")||"inherit";
+
+  result.directory_options.about_arabic_font_size=
+    pct("about-arabic-size-direct",100);
+
+  result.directory_options.about_arabic_animation=
+    read("about-arabic-animation-direct","none")||"none";
+
+  const legacyTitleColor=document.getElementById(prefix+"about_title_color");
+  if(legacyTitleColor)legacyTitleColor.value=result.directory_options.about_title_color;
+
+  const legacyTitleAnimation=document.getElementById(prefix+"about_title_animation");
+  if(legacyTitleAnimation)legacyTitleAnimation.value=result.directory_options.about_title_animation;
 
   result.directory_options.about_services=
     collectServices(prefix);
@@ -10766,8 +10889,6 @@ const FONTS=[
 
 const ROWS=[
   ["kicker","Kicker / category","about_kicker_color","#f2caed"],
-  ["title","About title","about_title_color","#f2caed"],
-  ["arabic","Arabic name","about_arabic_color","#ffffff"],
   ["body","About description","about_text_color","#ffffff"],
   ["signature","Bottom signature","about_signature_color","#f2caed"],
   ["service_1","Service text 1","about_service_1_color","#ffffff"],
