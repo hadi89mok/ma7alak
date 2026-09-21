@@ -3,7 +3,7 @@
 "use strict";
 if(window.self!==window.top)return;
 if(window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__)return;window.__MA7ALAK_UNIVERSAL_LIVE_ENGINE__=true;
-const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",LIVE_TICK_MS=2000;
+const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",LIVE_TICK_MS=10000;
 let client=null,detectedShopSlug="",stopped=false,liveTickTimer=null,domObserver=null,paintQueued=false,liveTickInFlight=false,presenceRefreshInFlight=false,statsRefreshInFlight=false;
 let latestWebsiteStats={online:0,total:0,shopsOnline:0},latestShopStats={online:0,week:0,today:0,total:0};
 const text=v=>String(v==null?"":v).trim(),numberValue=v=>{const n=Number(v||0);return Number.isFinite(n)?n:0};
