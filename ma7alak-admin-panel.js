@@ -6770,12 +6770,33 @@ function decorateAll(){
 
       <div class="m7ds-tabs" role="tablist">
         <button type="button" class="active" data-m7ds-tab="identity">Identity</button>
+        <button type="button" data-m7ds-tab="profile">Profile</button>
         <button type="button" data-m7ds-tab="motion">Motion FX</button>
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
-        <button type="button" data-m7ds-tab="follow">Follow / Banner</button>
+        <button type="button" data-m7ds-tab="follow">Follow / Shell</button>
         <button type="button" data-m7ds-tab="typography">Aa Typography</button>
         <button type="button" data-m7ds-tab="modules">Gallery / Video / Hub</button>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="profile">
+        <div class="m7ds-section-title">Profile Media</div>
+        <div class="m7ds-grid">
+          <label class="m7ds-field">
+            <span>Profile image URL</span>
+            <input type="url" data-m7-profile-image-proxy placeholder="https://…">
+          </label>
+        </div>
+        <div class="m7ds-profile-image-preview" data-m7-profile-image-preview>
+          <span>Profile image preview</span>
+        </div>
+        <div class="m7ds-banner-actions">
+          <button type="button" class="m7ds-banner-clear" data-m7-profile-image-clear>Remove profile image</button>
+          <span class="m7ds-banner-status" data-m7-profile-image-status aria-live="polite"></span>
+        </div>
+        <p class="m7ds-help">
+          One source for the profile image. Saving updates both the profile image and the Story/profile logo.
+        </p>
       </div>
 
       <div class="m7ds-pane active" data-m7ds-pane="identity">
@@ -7357,6 +7378,44 @@ function decorateAll(){
       </div>
     `;
 
+    const profilePane=
+      box.querySelector('[data-m7ds-pane="profile"]');
+
+    const followPane=
+      box.querySelector('[data-m7ds-pane="follow"]');
+
+    if(profilePane&&followPane){
+      const findSection=text=>
+        [...followPane.querySelectorAll(":scope > .m7ds-section-title")]
+          .find(node=>String(node.textContent||"").trim()===text);
+
+      const moveSection=text=>{
+        const title=findSection(text);
+        if(!title)return;
+        profilePane.appendChild(title);
+
+        let node=title.nextElementSibling;
+        while(node&&!node.classList.contains("m7ds-section-title")){
+          const next=node.nextElementSibling;
+          profilePane.appendChild(node);
+          node=next;
+        }
+      };
+
+      moveSection("Banner Placement");
+      moveSection("Profile Logo Placement");
+
+      const topBanner=findSection("Top Profile Banner");
+      if(topBanner){
+        let node=topBanner;
+        while(node){
+          const next=node.nextElementSibling;
+          profilePane.appendChild(node);
+          node=next;
+        }
+      }
+    }
+
     const titleBox =
       form.querySelector(".m7-title-style-box");
 
@@ -7437,6 +7496,85 @@ function decorateAll(){
       box.querySelector(
         "[data-m7-banner-status]"
       );
+
+    const profileImageSource=
+      document.getElementById(
+        prefix==="m7de-"
+          ? "ma-edit-image"
+          : "ma-shop-image"
+      );
+
+    const profileImageProxy=
+      box.querySelector("[data-m7-profile-image-proxy]");
+
+    const profileImagePreview=
+      box.querySelector("[data-m7-profile-image-preview]");
+
+    const profileImageClear=
+      box.querySelector("[data-m7-profile-image-clear]");
+
+    const profileImageStatus=
+      box.querySelector("[data-m7-profile-image-status]");
+
+    function refreshProfileImagePreview(){
+      const url=String(profileImageProxy?.value||"").trim();
+      const safe=/^https?:\/\//i.test(url)
+        ?url.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")
+        :"";
+
+      if(profileImagePreview){
+        profileImagePreview.style.backgroundImage=
+          safe
+            ?'url("'+safe+'")'
+            :"radial-gradient(circle at 32% 28%,#332116,#0a0807 72%)";
+        profileImagePreview.classList.toggle("has-image",!!safe);
+      }
+    }
+
+    function syncProfileImageFromSource(){
+      if(!profileImageProxy||!profileImageSource)return;
+      const value=String(profileImageSource.value||"").trim();
+      if(profileImageProxy.value!==value)profileImageProxy.value=value;
+      refreshProfileImagePreview();
+    }
+
+    function pushProfileImageToSource(){
+      if(!profileImageProxy||!profileImageSource)return;
+      const value=String(profileImageProxy.value||"").trim();
+      if(profileImageSource.value!==value)profileImageSource.value=value;
+
+      profileImageSource.dispatchEvent(new Event("input",{bubbles:true}));
+      profileImageSource.dispatchEvent(new Event("change",{bubbles:true}));
+
+      if(profileImageStatus){
+        profileImageStatus.textContent=
+          value
+            ?"Profile image changed — press Save Changes."
+            :"Profile image removed — press Save Changes.";
+      }
+
+      refreshProfileImagePreview();
+    }
+
+    box.__m7ProfileImageSync=syncProfileImageFromSource;
+
+    profileImageProxy?.addEventListener("input",pushProfileImageToSource);
+    profileImageProxy?.addEventListener("change",pushProfileImageToSource);
+
+    profileImageClear?.addEventListener("click",()=>{
+      if(!profileImageProxy)return;
+      profileImageProxy.value="";
+      pushProfileImageToSource();
+    });
+
+    if(prefix==="m7de-"&&profileImageSource){
+      const wrapper=
+        profileImageSource.closest("label,.ma-admin-field,.m7da-field,.ma-field")||
+        profileImageSource.parentElement;
+      wrapper?.classList.add("m7-profile-media-source-hidden");
+    }
+
+    syncProfileImageFromSource();
 
     const shellBgUrl=
       box.querySelector(
@@ -9087,6 +9225,10 @@ function decorateAll(){
         "m7de-",
         options
       );
+
+      document
+        .querySelector("#ma-admin-edit-form .m7-design-studio")
+        ?.__m7ProfileImageSync?.();
     };
 
     api.collect = function(edit){
@@ -9169,6 +9311,9 @@ function decorateAll(){
       .m7ds-banner-actions{display:flex;align-items:center;gap:8px;min-height:30px;margin-top:7px}
       .m7ds-banner-clear{min-height:29px;padding:0 9px;border:1px solid rgba(216,170,88,.18);border-radius:8px;background:rgba(255,255,255,.02);color:#d7c4a5;font-size:8px;font-weight:850;cursor:pointer}
       .m7ds-banner-status{flex:1;min-width:0;color:#8fd7aa;font-size:8px;line-height:1.35}
+      .m7ds-profile-image-preview{width:124px;height:124px;margin:12px auto 8px;display:grid;place-items:center;overflow:hidden;border:3px solid rgba(217,170,88,.62);border-radius:50%;background:radial-gradient(circle at 32% 28%,#332116,#0a0807 72%);background-size:cover;background-position:center;color:#d7c4a5;text-align:center;font-size:8px;font-weight:900;box-shadow:0 10px 28px rgba(0,0,0,.34),0 0 16px rgba(217,170,88,.10)}
+      .m7ds-profile-image-preview.has-image span{display:none}
+      .m7-profile-media-source-hidden{display:none!important}
 
       .m7ds-profile-shell-demo{
         position:relative;
@@ -10792,11 +10937,6 @@ function ensureBox(form,prefix){
       ${field(prefix,"card_surface_color","Card surface","color")}
     </div>
 
-    <div class="m7cd-section">Card & profile media</div>
-    <div class="m7cd-grid">
-      ${field(prefix,"profile_banner_image_url","Profile banner / directory cover URL","url",'placeholder="https://…"')}
-    </div>
-
     <div class="m7cd-section">Depth & animation</div>
     <div class="m7cd-grid">
       ${field(prefix,"card_shadow_strength","Shadow strength %","number",'min="0" max="100" step="5"')}
@@ -10946,7 +11086,15 @@ function refreshPreview(box){
   preview.style.setProperty("--p-button-bg",safeHex(input(box,"card_button_bg_color")?.value,DEFAULTS.card_button_bg_color));
 
   const cover=preview.querySelector(".m7cd-preview-cover");
-  const banner=String(input(box,"profile_banner_image_url")?.value||"").trim();
+  const form=box.closest("form");
+  const profilePrefix=
+    form?.id==="ma-admin-edit-form"
+      ?"m7de-"
+      :"m7da-";
+  const banner=String(
+    document.getElementById(profilePrefix+"profile_banner_image_url")?.value||
+    ""
+  ).trim();
   if(cover){
     const safeBanner=/^https?:\/\//i.test(banner)
       ? banner.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")
@@ -12929,6 +13077,7 @@ function closeV4Panel(panel){
   panel.classList.remove(
     "m7v4-show",
     "m7v4-mode-details",
+    "m7v4-mode-profile",
     "m7v4-mode-about",
     "m7v4-mode-hours",
     "m7v4-mode-label",
@@ -13203,7 +13352,11 @@ function editorModeMeta(mode,shop){
   const map={
     details:[
       "Shop Details",
-      "Basic identity, location, category and profile information."
+      "Basic identity, location, category and links."
+    ],
+    profile:[
+      "Profile",
+      "Profile image and banner in one place."
     ],
     label:[
       "Shop Label",
@@ -13546,6 +13699,9 @@ function applyEditSectionVisibility(panel,mode,shop){
         ".m7-card-designer-box",
         ".m7da-sectioned-extras"
       ],
+      profile:[
+        ".m7-design-studio"
+      ],
       design:[
         ".m7-design-studio",
         ".m7da-sectioned-extras"
@@ -13590,8 +13746,9 @@ function applyEditSectionVisibility(panel,mode,shop){
   /*
     Profile Design already has real tabs.
     Keep exactly one pane active instead of showing the whole studio.
+    Profile mode always opens the one consolidated Profile pane.
   */
-  if(mode==="design"){
+  if(mode==="design"||mode==="profile"){
     const design=
       form.querySelector(
         ".m7-design-studio"
@@ -13624,8 +13781,12 @@ function applyEditSectionVisibility(panel,mode,shop){
       }
 
       const key=
-        active?.dataset.m7dsTab||
-        "identity";
+        mode==="profile"
+          ?"profile"
+          :(
+              active?.dataset.m7dsTab||
+              "identity"
+            );
 
       tabs.forEach(button=>{
         button.classList.toggle(
@@ -13731,6 +13892,7 @@ async function openEditMode(slug,mode){
     about:".m7-about-services-fields",
     hours:".m7-hours-schedule-box",
     design:".m7-design-studio",
+    profile:".m7-design-studio",
     details:".m7v4-edit-context"
   };
 
@@ -15326,6 +15488,7 @@ function renderWorkspace(){
     '<div class="m7v4-group-title">Shop profile & design</div>'+
     '<div class="m7v4-actions m7v4-actions-studio">'+
       action("details","✏️","Shop details","Core identity, slug, location, category and links")+
+      action("profile","◉","Profile","Profile image and banner — one place")+
       action("design","🎨","Shop Design Studio","All visual design in one full-screen editor with real live shop preview")+
     '</div>'+
 
@@ -15391,7 +15554,7 @@ async function handleAction(key){
     return;
   }
 
-  if(["details","label","card","about","hours","design"].includes(key)){
+  if(["details","profile","label","card","about","hours","design"].includes(key)){
     await openEditMode(shop.shop_slug,key);
     return;
   }
