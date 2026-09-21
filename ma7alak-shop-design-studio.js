@@ -12,10 +12,10 @@
 
   const TABS=[
     ["profile","♙","Profile","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
-    ["story","◉","Story","New-Story effects, upload effects, speed, sparkle and pulse"],
+    ["story","◉","Story","Story motion, upload burst, glow color/strength, speed, sparkles and logo pulse"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
-    ["about","●","About / Hub","About text, services, social links, location, Hub colors and typography"],
+    ["about","●","About / Hub","ABOUT + HUB: description, services, social links, location, colors, typography and effects"],
     ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
     ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
   ];
@@ -690,12 +690,25 @@
       nav.setAttribute("aria-label","Shop Design Studio sections");
       nav.innerHTML=TABS.map(([key,icon,label])=>'<button type="button" class="m7studio-tab" data-m7studio-tab="'+esc(key)+'"><i>'+esc(icon)+'</i><span>'+esc(label)+'</span></button>').join("");
       top.after(nav);
-      nav.addEventListener("click",event=>{
-        const button=event.target.closest("[data-m7studio-tab]");
-        if(!button)return;
-        event.preventDefault();
-        event.stopPropagation();
-        activateTab(button.dataset.m7studioTab);
+
+      /*
+         The legacy Admin has several delegated click handlers. Bind Studio
+         tabs directly and stop the event at the button so About / Hub can
+         never fall through to an old Homepage/About navigation action.
+      */
+      nav.querySelectorAll("[data-m7studio-tab]").forEach(button=>{
+        ["pointerdown","mousedown","touchstart"].forEach(type=>{
+          button.addEventListener(type,event=>{
+            event.stopPropagation();
+          },{capture:true,passive:true});
+        });
+
+        button.addEventListener("click",event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          activateTab(button.dataset.m7studioTab);
+        },true);
       });
     }
     const name=String(document.getElementById("ma-edit-name")?.value||document.getElementById("ma-edit-original-slug")?.value||"Shop").trim();
