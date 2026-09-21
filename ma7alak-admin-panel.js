@@ -7264,12 +7264,6 @@ function decorateAll(){
           ${colorField(prefix,"media_symbol_bg_color","Symbol inside")}
         </div>
 
-        <div class="m7ds-section-title">Filter Bar</div>
-        <div class="m7ds-grid">
-          ${colorField(prefix,"media_filter_bar_bg_color","Filter bar inside")}
-          ${colorField(prefix,"media_filter_bar_frame_color","Filter bar frame")}
-        </div>
-
         <div class="m7ds-section-title">Filter Buttons — Normal</div>
         <div class="m7ds-grid">
           ${colorField(prefix,"media_button_text_color","Button text")}
@@ -7307,11 +7301,15 @@ function decorateAll(){
           </label>
 
           <label class="m7ds-field">
-            <span>Layered frame animation</span>
+            <span>Gallery frame animation</span>
             <select id="${prefix}gallery_frame_animation">
               <option value="none">Static</option>
               <option value="pulse">Glow pulse</option>
               <option value="wave">Layer wave</option>
+              <option value="glow">Deep glow</option>
+              <option value="shimmer">Shimmer</option>
+              <option value="breathe">Soft breathe</option>
+              <option value="flicker">Neon flicker</option>
             </select>
           </label>
 
@@ -7347,8 +7345,8 @@ function decorateAll(){
         <p class="m7ds-help">
           Choose <b>Stacked color layers</b> for the screenshot-style frame:
           each layer can be enabled separately with its own color, thickness and spacing.
-          You can also turn one layer into a gradient, tune glow/shadow, and animate the stack.
-          The older 2/3/4-color split modes remain available and unchanged.
+          You can also turn one layer into a gradient and tune glow/shadow.
+          Frame animations work across the Gallery frame styles; stacked mode also animates the individual layers.
         </p>
 
         <p class="m7ds-help">
@@ -8438,17 +8436,22 @@ function decorateAll(){
           ? extent+"px"
           : "0";
 
+      const previewAnimations=[
+        "pulse",
+        "wave",
+        "glow",
+        "shimmer",
+        "breathe",
+        "flicker"
+      ];
+
       preview.classList.remove(
-        "frame-anim-pulse",
-        "frame-anim-wave"
+        ...previewAnimations.map(name=>"frame-anim-"+name)
       );
 
       if(
-        layered &&
-        (
-          frameAnimation==="pulse" ||
-          frameAnimation==="wave"
-        )
+        style!=="none" &&
+        previewAnimations.includes(frameAnimation)
       ){
         preview.classList.add(
           "frame-anim-"+frameAnimation
@@ -9298,23 +9301,72 @@ function decorateAll(){
       }
 
       @keyframes m7dsFramePulse{
-        0%,100%{filter:brightness(1);opacity:.82}
-        50%{filter:brightness(1.28);opacity:1}
+        0%,100%{filter:brightness(1);opacity:.72}
+        50%{filter:brightness(1.32);opacity:1}
       }
 
       @keyframes m7dsFrameWave{
-        0%,100%{filter:brightness(.92);opacity:.70}
-        45%,60%{filter:brightness(1.42);opacity:1}
+        0%,100%{filter:brightness(.90);opacity:.62}
+        45%,60%{filter:brightness(1.45);opacity:1}
       }
 
-      .m7ds-gallery-frame-sample.frame-anim-pulse
-      .m7ds-gallery-frame-layer{
+      @keyframes m7dsFrameGlow{
+        0%,100%{filter:brightness(1);box-shadow:0 0 5px rgba(226,166,184,.20)}
+        50%{filter:brightness(1.2);box-shadow:0 0 22px rgba(226,166,184,.68)}
+      }
+
+      @keyframes m7dsFrameShimmer{
+        0%,100%{filter:brightness(.96)}
+        34%{filter:brightness(1.48)}
+        68%{filter:brightness(1.10)}
+      }
+
+      @keyframes m7dsFrameBreathe{
+        0%,100%{box-shadow:0 0 6px rgba(226,166,184,.20)}
+        50%{box-shadow:0 0 16px rgba(226,166,184,.56)}
+      }
+
+      @keyframes m7dsFrameFlicker{
+        0%,18%,22%,25%,53%,57%,100%{filter:brightness(1.12);opacity:.92}
+        20%,24%,55%{filter:brightness(.78);opacity:.38}
+      }
+
+      .m7ds-gallery-frame-sample.frame-anim-pulse{
         animation:m7dsFramePulse var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
       }
-
-      .m7ds-gallery-frame-sample.frame-anim-wave
-      .m7ds-gallery-frame-layer{
+      .m7ds-gallery-frame-sample.frame-anim-wave{
         animation:m7dsFrameWave var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-glow{
+        animation:m7dsFrameGlow var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-shimmer{
+        animation:m7dsFrameShimmer var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-breathe{
+        animation:m7dsFrameBreathe var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-flicker{
+        animation:m7dsFrameFlicker var(--m7ds-frame-speed,3.2s) linear infinite;
+      }
+
+      .m7ds-gallery-frame-sample.frame-anim-pulse .m7ds-gallery-frame-layer{
+        animation:m7dsFramePulse var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-wave .m7ds-gallery-frame-layer{
+        animation:m7dsFrameWave var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-glow .m7ds-gallery-frame-layer{
+        animation:m7dsFrameGlow var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-shimmer .m7ds-gallery-frame-layer{
+        animation:m7dsFrameShimmer var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-breathe .m7ds-gallery-frame-layer{
+        animation:m7dsFrameBreathe var(--m7ds-frame-speed,3.2s) ease-in-out infinite;
+      }
+      .m7ds-gallery-frame-sample.frame-anim-flicker .m7ds-gallery-frame-layer{
+        animation:m7dsFrameFlicker var(--m7ds-frame-speed,3.2s) linear infinite;
       }
 
       .m7ds-gallery-frame-inner{
