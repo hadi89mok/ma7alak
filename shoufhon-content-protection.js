@@ -5,23 +5,29 @@
   window.__SHOUFHON_CONTENT_PROTECTION__ = true;
 
   var STYLE_ID = "shoufhon-content-protection-style";
+  var DOC_FLAG = "__SHOUFHON_CONTENT_PROTECTION_DOC__";
+  var FRAME_FLAG = "__SHOUFHON_CONTENT_PROTECTION_FRAME__";
   var EDITABLE_SELECTOR =
     'input, textarea, [contenteditable="true"], [contenteditable=""], ' +
     '[data-shoufhon-allow-copy], .shoufhon-allow-copy';
 
   function isEditable(target) {
-    return !!(
-      target &&
-      target.nodeType === 1 &&
-      typeof target.closest === "function" &&
-      target.closest(EDITABLE_SELECTOR)
-    );
+    try {
+      return !!(
+        target &&
+        target.nodeType === 1 &&
+        typeof target.closest === "function" &&
+        target.closest(EDITABLE_SELECTOR)
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
-  function installStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  function installStyles(doc) {
+    if (!doc || doc.getElementById(STYLE_ID)) return;
 
-    var style = document.createElement("style");
+    var style = doc.createElement("style");
     style.id = STYLE_ID;
     style.textContent =
       "html,body,body *{" +
@@ -40,7 +46,9 @@
       "user-select:text!important;" +
       "}";
 
-    (document.head || document.documentElement).appendChild(style);
+    try {
+      (doc.head || doc.documentElement).appendChild(style);
+    } catch (_) {}
   }
 
   function protectImage(img) {
@@ -67,17 +75,32 @@
     } catch (_) {}
 
     try {
+      video.setAttribute("controlslist", "nodownload noremoteplayback noplaybackrate");
       if (video.controlsList && typeof video.controlsList.add === "function") {
         video.controlsList.add("nodownload");
         video.controlsList.add("noremoteplayback");
-      } else {
-        video.setAttribute("controlslist", "nodownload noremoteplayback");
+        video.controlsList.add("noplaybackrate");
       }
-    } catch (_) {
-      try {
-        video.setAttribute("controlslist", "nodownload noremoteplayback");
-      } catch (__) {}
-    }
+    } catch (_) {}
+
+    try {
+      video.addEventListener(
+        "enterpictureinpicture",
+        function () {
+          try {
+            var doc = video.ownerDocument;
+            if (
+              doc &&
+              doc.pictureInPictureElement &&
+              typeof doc.exitPictureInPicture === "function"
+            ) {
+              doc.exitPictureInPicture().catch(function () {});
+            }
+          } catch (_) {}
+        },
+        true
+      );
+    } catch (_) {}
   }
 
   function protectAudio(audio) {
@@ -87,17 +110,13 @@
     } catch (_) {}
 
     try {
+      audio.setAttribute("controlslist", "nodownload noremoteplayback noplaybackrate");
       if (audio.controlsList && typeof audio.controlsList.add === "function") {
         audio.controlsList.add("nodownload");
         audio.controlsList.add("noremoteplayback");
-      } else {
-        audio.setAttribute("controlslist", "nodownload noremoteplayback");
+        audio.controlsList.add("noplaybackrate");
       }
-    } catch (_) {
-      try {
-        audio.setAttribute("controlslist", "nodownload noremoteplayback");
-      } catch (__) {}
-    }
+    } catch (_) {}
   }
 
   function protectAnchor(anchor) {
@@ -117,103 +136,178 @@
     else if (tag === "video") protectVideo(el);
     else if (tag === "audio") protectAudio(el);
     else if (tag === "a") protectAnchor(el);
+    else if (tag === "iframe") protectFrame(el);
   }
 
   function protectTree(root) {
     if (!root) return;
 
-    if (root.nodeType === 1) protectElement(root);
+    if (root.nodeType === 1) {
+      protectElement(root);
+    }
 
     if (typeof root.querySelectorAll !== "function") return;
 
-    var nodes = root.querySelectorAll("img,video,audio,a[download]");
+    var nodes = root.querySelectorAll(
+      "img,video,audio,a[download],iframe"
+    );
+
     for (var i = 0; i < nodes.length; i++) {
       protectElement(nodes[i]);
+    }
+  }
+
+  function protectFrame(frame) {
+    if (!frame || frame.nodeType !== 1) return;
+
+    try {
+      if (!frame[FRAME_FLAG]) {
+        frame[FRAME_FLAG] = true;
+
+        frame.addEventListener(
+          "load",
+          function () {
+            try {
+              if (frame.contentDocument) {
+                installInDocument(frame.contentDocument);
+              }
+            } catch (_) {}
+          },
+          true
+        );
+      }
+    } catch (_) {}
+
+    try {
+      if (frame.contentDocument) {
+        installInDocument(frame.contentDocument);
+      }
+    } catch (_) {
+      // Cross-origin iframe: browser security prevents us from entering it.
     }
   }
 
   function blockOutsideEditable(event) {
     if (isEditable(event.target)) return;
     event.preventDefault();
+    try {
+      event.stopPropagation();
+    } catch (_) {}
   }
 
-  installStyles();
-  protectTree(document);
+  function installInDocument(doc) {
+    if (!doc) return;
 
-  // Blocks browser long-press/right-click menus such as:
-  // Download image/video, Copy image/frame, Save image, and similar options.
-  document.addEventListener("contextmenu", blockOutsideEditable, true);
-
-  // Stops dragging media/content out of the page.
-  document.addEventListener("dragstart", blockOutsideEditable, true);
-
-  // Stops selecting/copying normal on-screen content.
-  document.addEventListener("selectstart", blockOutsideEditable, true);
-  document.addEventListener("copy", blockOutsideEditable, true);
-  document.addEventListener("cut", blockOutsideEditable, true);
-
-  // Blocks common desktop browser shortcuts for copying/saving/printing page content.
-  document.addEventListener(
-    "keydown",
-    function (event) {
-      if (isEditable(event.target)) return;
-
-      var key = String(event.key || "").toLowerCase();
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        (key === "c" ||
-          key === "x" ||
-          key === "s" ||
-          key === "u" ||
-          key === "p")
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
+    try {
+      if (doc[DOC_FLAG]) {
+        protectTree(doc);
+        return;
       }
-    },
-    true
-  );
 
-  // If a browser still attempts Picture-in-Picture, immediately leave it.
-  document.addEventListener(
-    "enterpictureinpicture",
-    function () {
-      try {
+      doc[DOC_FLAG] = true;
+    } catch (_) {
+      return;
+    }
+
+    installStyles(doc);
+    protectTree(doc);
+
+    // Block the native long-press/right-click menu inside this document.
+    doc.addEventListener("contextmenu", blockOutsideEditable, true);
+
+    // Stop dragging media/content out of the page.
+    doc.addEventListener("dragstart", blockOutsideEditable, true);
+
+    // Stop selecting/copying normal on-screen content.
+    doc.addEventListener("selectstart", blockOutsideEditable, true);
+    doc.addEventListener("copy", blockOutsideEditable, true);
+    doc.addEventListener("cut", blockOutsideEditable, true);
+
+    // Block common desktop save/copy/print/view-source shortcuts.
+    doc.addEventListener(
+      "keydown",
+      function (event) {
+        if (isEditable(event.target)) return;
+
+        var key = String(event.key || "").toLowerCase();
+
         if (
-          document.pictureInPictureElement &&
-          typeof document.exitPictureInPicture === "function"
+          (event.ctrlKey || event.metaKey) &&
+          (key === "c" ||
+            key === "x" ||
+            key === "s" ||
+            key === "u" ||
+            key === "p")
         ) {
-          document.exitPictureInPicture().catch(function () {});
+          event.preventDefault();
+          event.stopPropagation();
         }
-      } catch (_) {}
-    },
-    true
-  );
+      },
+      true
+    );
 
-  // Re-apply protection to reels, stories, galleries, icons and other
-  // media inserted dynamically after the initial page load.
-  if (typeof MutationObserver === "function") {
-    var observer = new MutationObserver(function (mutations) {
-      for (var i = 0; i < mutations.length; i++) {
-        var added = mutations[i].addedNodes;
-        for (var j = 0; j < added.length; j++) {
-          protectTree(added[j]);
-        }
+    // Exit Picture-in-Picture if a browser still tries to enter it.
+    doc.addEventListener(
+      "enterpictureinpicture",
+      function () {
+        try {
+          if (
+            doc.pictureInPictureElement &&
+            typeof doc.exitPictureInPicture === "function"
+          ) {
+            doc.exitPictureInPicture().catch(function () {});
+          }
+        } catch (_) {}
+      },
+      true
+    );
+
+    // Protect media and Hostinger Custom Embed iframes added later.
+    try {
+      var ViewMutationObserver =
+        (doc.defaultView && doc.defaultView.MutationObserver) ||
+        window.MutationObserver;
+
+      if (typeof ViewMutationObserver === "function") {
+        var observer = new ViewMutationObserver(function (mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            var added = mutations[i].addedNodes;
+
+            for (var j = 0; j < added.length; j++) {
+              protectTree(added[j]);
+            }
+          }
+        });
+
+        var observeTarget = doc.documentElement || doc;
+
+        observer.observe(observeTarget, {
+          childList: true,
+          subtree: true
+        });
       }
-    });
+    } catch (_) {}
 
-    var observeTarget = document.documentElement || document;
-    observer.observe(observeTarget, {
-      childList: true,
-      subtree: true
-    });
+    // One extra pass after the embed has had time to build dynamic viewers.
+    try {
+      var view = doc.defaultView || window;
+      view.setTimeout(function () {
+        protectTree(doc);
+      }, 250);
+
+      view.setTimeout(function () {
+        protectTree(doc);
+      }, 1200);
+    } catch (_) {}
   }
 
-  // A small public hook for rare fields/elements where copying must remain
-  // available: add class="shoufhon-allow-copy" or data-shoufhon-allow-copy.
+  installInDocument(document);
+
+  // Public refresh hook. It now refreshes the main page and accessible
+  // Hostinger Custom Embed iframes as well.
   window.ShoufHonContentProtection = {
     refresh: function () {
-      installStyles();
+      installInDocument(document);
       protectTree(document);
     }
   };
