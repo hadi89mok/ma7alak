@@ -2443,6 +2443,7 @@
   let client=null;
   let activeProfile=null;
   let profileEditAllowed=false;
+  const ownerProfileCache=new Map();
   let profileMode="profile";
   let pendingFile=null;
   let pendingObjectUrl="";
@@ -2582,6 +2583,7 @@
 
     activeProfile=profile.data;
     profileEditAllowed=bool(profile.data.directory_options?.owner_profile_edit_enabled);
+    ownerProfileCache.set(String(slug||"").trim().toLowerCase(),profile.data);
     return profile.data;
   }
 
@@ -2880,6 +2882,7 @@
       }
 
       await loadOwnerProfile(activeSlug);
+      ownerProfileCache.set(activeSlug.toLowerCase(),activeProfile);
       status.textContent=profileMode==="banner"
         ?"Banner updated."
         :"Profile photo updated everywhere.";
@@ -2925,9 +2928,28 @@
     const bannerButton=document.getElementById("m7-owner-change-banner");
     const permission=document.getElementById("m7-owner-add-permission");
 
-    profileButton.hidden=true;
-    bannerButton.hidden=true;
-    permission.textContent="Checking your shop permissions…";
+    /*
+       If owner-header-auth already broadcast the current shop profile,
+       show Profile/Banner immediately. Then refresh silently in background.
+       This removes the visible ~1 second permission delay on phone.
+    */
+    const cacheKey=activeSlug.toLowerCase();
+    const cached=ownerProfileCache.get(cacheKey)||null;
+
+    if(cached){
+      activeProfile=cached;
+      profileEditAllowed=bool(cached.directory_options?.owner_profile_edit_enabled);
+      profileButton.hidden=!profileEditAllowed;
+      bannerButton.hidden=!profileEditAllowed;
+      permission.textContent=profileEditAllowed
+        ?"Profile editing is enabled by Admin."
+        :"Profile/banner editing is currently locked by Admin.";
+    }else{
+      profileButton.hidden=true;
+      bannerButton.hidden=true;
+      permission.textContent="Checking your shop permissions…";
+    }
+
     overlay.classList.add("active");
 
     try{
@@ -2938,22 +2960,34 @@
         ?"Profile editing is enabled by Admin."
         :"Profile/banner editing is currently locked by Admin.";
     }catch(error){
-      profileEditAllowed=false;
-      permission.textContent=error?.message||"Could not check profile editing permission.";
+      if(!cached){
+        profileEditAllowed=false;
+        permission.textContent=error?.message||"Could not check profile editing permission.";
+      }
     }
   }
 
   window.addEventListener("message",event=>{
-    if(!event.data||event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER")return;
+    const data=event.data||{};
+
+    if(data.type==="MA7ALAK_OWNER_STATE"){
+      const ownerSlug=String(data.shopSlug||"").trim().toLowerCase();
+      if(data.isOwner&&ownerSlug&&data.shop){
+        ownerProfileCache.set(ownerSlug,data.shop);
+      }
+      return;
+    }
+
+    if(data.type!=="MA7ALAK_OPEN_STORY_UPLOADER")return;
 
     if(
-      event.data.__ma7alakOpenStoryNow===true &&
+      data.__ma7alakOpenStoryNow===true &&
       (!event.source||event.source===window)
     ){
       return;
     }
 
-    const slug=String(event.data.shopSlug||"").trim();
+    const slug=String(data.shopSlug||"").trim();
     if(!slug)return;
 
     event.stopImmediatePropagation();
@@ -2989,6 +3023,7 @@
   const MAX_FILE_MB = 100;
 
   let client = null;
+  let clientReadyPromise = null;
   let ownerInfo = null;
   let pendingPath = "";
 
@@ -3020,6 +3055,46 @@
     if(!el) return;
     el.textContent=message || "";
     el.className="ma-owner-reel-status"+(type ? " is-"+type : "");
+  }
+
+  async function ensureReelClient(){
+    if(client)return client;
+    if(clientReadyPromise)return clientReadyPromise;
+
+    clientReadyPromise=(async function(){
+      try{
+        if(window.Ma7alakAccount?.ready)await window.Ma7alakAccount.ready();
+      }catch(_){}
+      try{
+        if(window.Ma7alakSupabaseBootstrap?.ready)await window.Ma7alakSupabaseBootstrap.ready();
+      }catch(_){}
+
+      client=
+        window.Ma7alakAccount?.client||
+        window.Ma7alakOwnerAuth?.client||
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+        null;
+
+      if(client)return client;
+
+      await ensureSupabase();
+      client=
+        window.Ma7alakAccount?.client||
+        window.Ma7alakOwnerAuth?.client||
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+        window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__=
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||client;
+
+      return client;
+    })();
+
+    try{
+      return await clientReadyPromise;
+    }finally{
+      clientReadyPromise=null;
+    }
   }
 
   function ensureSupabase(){
@@ -3242,58 +3317,75 @@
   }
 
   async function openPanel(requestedSlug){
-    if(!client) throw new Error("Reel uploader is still loading. Try again.");
-    const {data:{user}}=await client.auth.getUser();
-    if(!user) throw new Error("You must be signed in.");
-    await quota();
-    if(requestedSlug && ownerInfo && String(ownerInfo.shop_slug)!==String(requestedSlug)){
-      throw new Error("This owner account is not linked to this shop.");
-    }
-    await list();
+    /*
+       Open the panel immediately on the user's tap so mobile never looks dead.
+       Owner/client/quota loading continues with visible status feedback.
+    */
     lockPageScroll();
     document.getElementById("ma-owner-reels-backdrop").hidden=false;
     document.getElementById("ma-owner-reels-card").hidden=false;
+    status("Loading Reel uploader…");
+
+    try{
+      client=await ensureReelClient();
+      const {data:{user}}=await client.auth.getUser();
+      if(!user) throw new Error("You must be signed in.");
+      await quota();
+      if(requestedSlug && ownerInfo && String(ownerInfo.shop_slug)!==String(requestedSlug)){
+        throw new Error("This owner account is not linked to this shop.");
+      }
+      await list();
+      status("");
+    }catch(error){
+      status(error?.message||"Could not open Reel uploader.","error");
+      throw error;
+    }
   }
 
   async function start(){
     inject();
+
+    /*
+       Bind UI + public API BEFORE any network/auth preload.
+       Add Reel must always react immediately to a phone tap.
+    */
+    window.Ma7alakOwnerReels={open:openPanel,close:closePanel};
+
+    document.getElementById("ma-or-close").addEventListener("click",closePanel);
+    document.getElementById("ma-owner-reels-backdrop").addEventListener("click",closePanel);
+    document.getElementById("ma-or-upload-label").addEventListener("click",function(){
+      if(this.disabled || this.classList.contains("is-disabled")) return;
+      const input=document.getElementById("ma-or-file");
+      if(input) input.click();
+    });
+    document.getElementById("ma-or-file").addEventListener("change",async function(){
+      const file=this.files&&this.files[0]; if(!file) return;
+      try{await upload(file);}catch(error){status(error.message||"Upload failed.","error");this.value="";}
+    });
+    document.getElementById("ma-or-publish").addEventListener("click",async function(){
+      try{await publish();}catch(error){status(error.message||"Could not publish Reel.","error"); try{await quota();}catch(_){} }
+    });
+    document.getElementById("ma-or-list").addEventListener("click",function(e){
+      const btn=e.target.closest(".ma-or-delete"); if(!btn) return;
+      const row=btn.closest("[data-id]"); if(row) removeReel(row.dataset.id,btn);
+    });
+
+    window.addEventListener("message",function(event){
+      if(!event.data || event.data.type!=="MA7ALAK_OPEN_REEL_UPLOADER") return;
+      openPanel(String(event.data.shopSlug||"").trim()).catch(function(error){
+        console.error("SHOUFHON Reel uploader:",error);
+      });
+    });
+
     try{
-      await ensureSupabase();
-      client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+      client=await ensureReelClient();
       const {data:{user}}=await client.auth.getUser();
-      if(user){ await quota(); await list(); }
-
-      document.getElementById("ma-or-close").addEventListener("click",closePanel);
-      document.getElementById("ma-owner-reels-backdrop").addEventListener("click",closePanel);
-      document.getElementById("ma-or-upload-label").addEventListener("click",function(){
-        if(this.disabled || this.classList.contains("is-disabled")) return;
-        const input=document.getElementById("ma-or-file");
-        if(input) input.click();
-      });
-      document.getElementById("ma-or-file").addEventListener("change",async function(){
-        const file=this.files&&this.files[0]; if(!file) return;
-        try{await upload(file);}catch(error){status(error.message||"Upload failed.","error");this.value="";}
-      });
-      document.getElementById("ma-or-publish").addEventListener("click",async function(){
-        try{await publish();}catch(error){status(error.message||"Could not publish Reel.","error"); try{await quota();}catch(_){} }
-      });
-      document.getElementById("ma-or-list").addEventListener("click",function(e){
-        const btn=e.target.closest(".ma-or-delete"); if(!btn) return;
-        const row=btn.closest("[data-id]"); if(row) removeReel(row.dataset.id,btn);
-      });
-
-      window.Ma7alakOwnerReels={open:openPanel,close:closePanel};
-      window.addEventListener("message",function(event){
-        if(!event.data || event.data.type!=="MA7ALAK_OPEN_REEL_UPLOADER") return;
-        openPanel(String(event.data.shopSlug||"").trim()).catch(function(error){
-          lockPageScroll();
-          document.getElementById("ma-owner-reels-backdrop").hidden=false;
-          document.getElementById("ma-owner-reels-card").hidden=false;
-          status(error.message||"Could not open Reel uploader.","error");
-        });
-      });
+      if(user){
+        await quota();
+        await list();
+      }
     }catch(error){
-      console.error("SHOUFHON owner Reel uploader:",error);
+      console.warn("SHOUFHON owner Reel preload:",error);
     }
   }
 
@@ -3640,11 +3732,14 @@
     return Number.isFinite(n)?Math.max(0,Math.min(100,Math.round(n))):fallback;
   }
 
-  function sourceIsIframe(source){
-    if(!source)return false;
-    return Array.from(document.querySelectorAll("iframe")).some(function(frame){
-      try{return frame.contentWindow===source}catch(_){return false}
-    });
+  function sourceCanReply(source){
+    /*
+       Hostinger can nest Custom Embed frames. event.source may therefore be
+       a descendant window that is not one of document.querySelectorAll("iframe")
+       on the top page. Ownership + capability checks below are the real security
+       boundary, so accept any WindowProxy that can receive a reply.
+    */
+    return !!source&&typeof source.postMessage==="function";
   }
 
   async function ownerClient(){
@@ -3803,7 +3898,7 @@
     var slug=String(data.shopSlug||"").trim().toLowerCase();
     var op=String(data.op||"");
 
-    if(!requestId||!slug||!sourceIsIframe(source))return;
+    if(!requestId||!slug||!sourceCanReply(source))return;
 
     try{
       var context=await requireOwner(slug,"owner_media_edit_enabled");
@@ -3930,7 +4025,7 @@
     var requestId=String(data.requestId||"");
     var slug=String(data.shopSlug||"").trim().toLowerCase();
 
-    if(!requestId||!slug||!sourceIsIframe(source))return;
+    if(!requestId||!slug||!sourceCanReply(source))return;
 
     try{
       var context=await requireOwner(slug,"owner_about_edit_enabled");
