@@ -7,6 +7,8 @@
   var STYLE_ID = "shoufhon-content-protection-style";
   var DOC_FLAG = "__SHOUFHON_CONTENT_PROTECTION_DOC__";
   var FRAME_FLAG = "__SHOUFHON_CONTENT_PROTECTION_FRAME__";
+  var VIDEO_FLAG = "__SHOUFHON_CONTENT_PROTECTION_VIDEO__";
+  var REEL_GUARD_CLASS = "shoufhon-reel-media-guard";
   var EDITABLE_SELECTOR =
     'input, textarea, [contenteditable="true"], [contenteditable=""], ' +
     '[data-shoufhon-allow-copy], .shoufhon-allow-copy';
@@ -39,6 +41,23 @@
       "-webkit-user-drag:none!important;" +
       "user-drag:none!important;" +
       "}" +
+      ".shoufhon-reel-media-guard{" +
+      "position:absolute!important;" +
+      "inset:0!important;" +
+      "z-index:5!important;" +
+      "background:transparent!important;" +
+      "-webkit-touch-callout:none!important;" +
+      "-webkit-user-select:none!important;" +
+      "user-select:none!important;" +
+      "touch-action:pan-x pan-y!important;" +
+      "}" +
+      ".ma7alak-reel-viewer>.shoufhon-reel-media-guard{" +
+      "z-index:2147483644!important;" +
+      "touch-action:none!important;" +
+      "}" +
+      "#ma7alakReelViewerVideo,.ma7alak-reel-viewer-video{" +
+      "pointer-events:none!important;" +
+      "}" +
       "input,textarea,[contenteditable='true'],[contenteditable='']," +
       "[data-shoufhon-allow-copy],.shoufhon-allow-copy{" +
       "-webkit-touch-callout:default!important;" +
@@ -58,10 +77,108 @@
     } catch (_) {}
   }
 
+  function isReelVideo(video) {
+    try {
+      return !!(
+        video &&
+        (
+          video.id === "ma7alakReelViewerVideo" ||
+          video.classList.contains("ma7alak-video") ||
+          video.classList.contains("ma7alak-reel-viewer-video") ||
+          video.closest(".ma7alak-reel") ||
+          video.closest(".ma7alak-reel-viewer")
+        )
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function ensureReelGuard(video) {
+    if (!isReelVideo(video)) return;
+
+    var card = null;
+    var viewer = null;
+
+    try {
+      card = video.closest(".ma7alak-reel");
+      viewer = video.closest(".ma7alak-reel-viewer");
+    } catch (_) {}
+
+    var host = viewer || card;
+    if (!host) return;
+
+    try {
+      var existing = host.querySelector(":scope > ." + REEL_GUARD_CLASS);
+      if (existing) return;
+    } catch (_) {
+      try {
+        if (host.querySelector("." + REEL_GUARD_CLASS)) return;
+      } catch (__) {}
+    }
+
+    try {
+      var doc = video.ownerDocument || document;
+      var guard = doc.createElement("span");
+      guard.className = REEL_GUARD_CLASS;
+      guard.setAttribute("aria-hidden", "true");
+
+      guard.addEventListener(
+        "contextmenu",
+        function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true
+      );
+
+      guard.addEventListener(
+        "dragstart",
+        function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true
+      );
+
+      // Homepage reel cards originally open from the <video> click handler.
+      // Forward a normal tap from the transparent guard to that handler.
+      if (card) {
+        guard.addEventListener(
+          "click",
+          function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            try {
+              video.dispatchEvent(
+                new MouseEvent("click", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: doc.defaultView || window
+                })
+              );
+            } catch (_) {
+              try {
+                video.click();
+              } catch (__) {}
+            }
+          },
+          true
+        );
+      }
+
+      host.appendChild(guard);
+    } catch (_) {}
+  }
+
   function protectVideo(video) {
     try {
       video.draggable = false;
       video.setAttribute("draggable", "false");
+      video.style.setProperty("-webkit-touch-callout", "none", "important");
+      video.style.setProperty("-webkit-user-select", "none", "important");
+      video.style.setProperty("user-select", "none", "important");
     } catch (_) {}
 
     try {
@@ -84,23 +201,47 @@
     } catch (_) {}
 
     try {
-      video.addEventListener(
-        "enterpictureinpicture",
-        function () {
-          try {
-            var doc = video.ownerDocument;
-            if (
-              doc &&
-              doc.pictureInPictureElement &&
-              typeof doc.exitPictureInPicture === "function"
-            ) {
-              doc.exitPictureInPicture().catch(function () {});
-            }
-          } catch (_) {}
-        },
-        true
-      );
+      if (!video[VIDEO_FLAG]) {
+        video[VIDEO_FLAG] = true;
+
+        video.addEventListener(
+          "contextmenu",
+          function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+          true
+        );
+
+        video.addEventListener(
+          "dragstart",
+          function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+          true
+        );
+
+        video.addEventListener(
+          "enterpictureinpicture",
+          function () {
+            try {
+              var doc = video.ownerDocument;
+              if (
+                doc &&
+                doc.pictureInPictureElement &&
+                typeof doc.exitPictureInPicture === "function"
+              ) {
+                doc.exitPictureInPicture().catch(function () {});
+              }
+            } catch (_) {}
+          },
+          true
+        );
+      }
     } catch (_) {}
+
+    ensureReelGuard(video);
   }
 
   function protectAudio(audio) {
