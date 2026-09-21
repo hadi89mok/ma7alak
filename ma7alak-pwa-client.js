@@ -5,7 +5,9 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.21.2";
+  const VERSION="2026.09.22.1";
+  const CONTENT_PROTECTION_URL=
+    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@38a17c4f43780d05715f445b629ac4492cc3be57/shoufhon-content-protection.js";
   const DISMISS_KEY="shoufhon_pwa_install_dismissed_session";
 
   let deferredPrompt=null;
@@ -43,6 +45,48 @@
     try{
       sessionStorage.setItem(DISMISS_KEY,"1");
     }catch(_){}
+  }
+
+  function ensureStandaloneContentProtection(){
+    if(!isStandalone())return;
+    if(window.__SHOUFHON_CONTENT_PROTECTION__)return;
+
+    const existing=
+      document.querySelector(
+        'script[data-shoufhon-pwa-content-protection="1"]'
+      );
+
+    if(existing)return;
+
+    const script=document.createElement("script");
+    script.src=CONTENT_PROTECTION_URL;
+    script.async=false;
+    script.dataset.shoufhonPwaContentProtection="1";
+
+    script.addEventListener(
+      "load",
+      ()=>{
+        try{
+          window.ShoufHonContentProtection?.refresh?.();
+        }catch(_){}
+      },
+      {once:true}
+    );
+
+    script.addEventListener(
+      "error",
+      ()=>{
+        console.warn(
+          "[ShoufHon PWA] Content protection failed to load."
+        );
+      },
+      {once:true}
+    );
+
+    (
+      document.head ||
+      document.documentElement
+    ).appendChild(script);
   }
 
   function injectHead(){
@@ -711,6 +755,7 @@
     }
   );
 
+  ensureStandaloneContentProtection();
   injectHead();
 
   const start=async()=>{
