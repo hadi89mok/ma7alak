@@ -10140,6 +10140,30 @@ function rowHtml(index,row){
   `;
 }
 
+function syncBannerToProfileControls(box){
+  if(!box)return;
+  const bannerInput=input(box,"profile_banner_image_url");
+  const prefix=String(bannerInput?.dataset?.m7cdPrefix||"");
+  const banner=String(bannerInput?.value||"").trim();
+  if(!prefix)return;
+
+  const designBanner=document.getElementById(prefix+"profile_banner_image_url");
+  if(designBanner&&designBanner!==bannerInput&&designBanner.value!==banner){
+    designBanner.value=banner;
+    designBanner.dispatchEvent(new Event("input",{bubbles:true}));
+    designBanner.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+
+  if(banner){
+    const enabled=document.getElementById(prefix+"profile_banner_enabled");
+    if(enabled&&!enabled.checked){
+      enabled.checked=true;
+      enabled.dispatchEvent(new Event("input",{bubbles:true}));
+      enabled.dispatchEvent(new Event("change",{bubbles:true}));
+    }
+  }
+}
+
 function ensureBox(form,prefix){
   if(!form)return null;
 
@@ -10396,6 +10420,7 @@ const DEFAULTS={
   card_animation_intensity:"55",
   card_shimmer_strength:"70",
   card_cover_height:"126",
+  profile_banner_image_url:"",
   card_name_color:"#ffffff",
   card_meta_color:"#c8c0b2",
   card_button_color:"#ead49e",
@@ -10577,6 +10602,9 @@ function ensureCss(){
       background:
         linear-gradient(135deg,rgba(var(--p-rgb),.17),transparent 40%),
         linear-gradient(160deg,#29251d,#0c0b09);
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
     }
 
     .m7cd-preview-body{
@@ -10764,6 +10792,11 @@ function ensureBox(form,prefix){
       ${field(prefix,"card_surface_color","Card surface","color")}
     </div>
 
+    <div class="m7cd-section">Card & profile media</div>
+    <div class="m7cd-grid">
+      ${field(prefix,"profile_banner_image_url","Profile banner / directory cover URL","url",'placeholder="https://…"')}
+    </div>
+
     <div class="m7cd-section">Depth & animation</div>
     <div class="m7cd-grid">
       ${field(prefix,"card_shadow_strength","Shadow strength %","number",'min="0" max="100" step="5"')}
@@ -10799,8 +10832,18 @@ function ensureBox(form,prefix){
   if(design)design.before(box);
   else form.appendChild(box);
 
-  box.addEventListener("input",()=>refreshPreview(box));
-  box.addEventListener("change",()=>refreshPreview(box));
+  box.addEventListener("input",event=>{
+    refreshPreview(box);
+    if(event.target?.dataset?.m7cdKey==="profile_banner_image_url"){
+      syncBannerToProfileControls(box);
+    }
+  });
+  box.addEventListener("change",event=>{
+    refreshPreview(box);
+    if(event.target?.dataset?.m7cdKey==="profile_banner_image_url"){
+      syncBannerToProfileControls(box);
+    }
+  });
 
   return box;
 }
@@ -10818,6 +10861,12 @@ function fillBox(box,options){
     if(!el)return;
 
     let value=o[key];
+    if(
+      key==="profile_banner_image_url" &&
+      (value===undefined||value===null||value==="")
+    ){
+      value=o.cover||"";
+    }
     if(value===undefined||value===null||value==="")value=DEFAULTS[key];
 
     if(el.type==="color"){
@@ -10846,6 +10895,11 @@ function collectBox(box,result){
       result.directory_options[key]=String(el.value||"").trim();
     }
   });
+
+  const banner=String(result.directory_options.profile_banner_image_url||"").trim();
+  if(banner){
+    result.directory_options.profile_banner_enabled=true;
+  }
 
   return result;
 }
@@ -10890,6 +10944,17 @@ function refreshPreview(box){
   preview.style.setProperty("--p-meta",safeHex(input(box,"card_meta_color")?.value,DEFAULTS.card_meta_color));
   preview.style.setProperty("--p-button",safeHex(input(box,"card_button_color")?.value,DEFAULTS.card_button_color));
   preview.style.setProperty("--p-button-bg",safeHex(input(box,"card_button_bg_color")?.value,DEFAULTS.card_button_bg_color));
+
+  const cover=preview.querySelector(".m7cd-preview-cover");
+  const banner=String(input(box,"profile_banner_image_url")?.value||"").trim();
+  if(cover){
+    const safeBanner=/^https?:\/\//i.test(banner)
+      ? banner.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")
+      : "";
+    cover.style.backgroundImage=safeBanner
+      ? 'linear-gradient(135deg,rgba('+r+','+g+','+b+',.13),rgba(0,0,0,.22)),url("'+safeBanner+'")'
+      : 'linear-gradient(135deg,rgba('+r+','+g+','+b+',.17),transparent 40%),linear-gradient(160deg,#29251d,#0c0b09)';
+  }
 
   [...preview.classList].forEach(cls=>{
     if(cls.startsWith("edge-")||cls.startsWith("anim-"))preview.classList.remove(cls);
