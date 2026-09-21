@@ -4795,7 +4795,7 @@
 
     try{
       var upload=await client.storage.from(bucket).upload(path,file,{
-        cacheControl:"0",
+        cacheControl:"31536000",
         upsert:false,
         contentType:file.type||undefined
       });
@@ -4879,7 +4879,7 @@
         var uploaded=false;
         try{
           var up=await client.storage.from(replaceBucket).upload(newPath,file,{
-            cacheControl:"0",
+            cacheControl:"31536000",
             upsert:false,
             contentType:file.type||undefined
           });
