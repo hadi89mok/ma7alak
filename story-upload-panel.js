@@ -3616,3 +3616,344 @@
   });
 })();
 
+
+
+/* =========================================================
+   SHOUFHON — OWNER EMBED ACTION BRIDGE V1
+   Authenticated top-level bridge for Hostinger Custom Embeds.
+   Media + About actions execute here using the real owner session.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__SHOUFHON_OWNER_EMBED_ACTION_BRIDGE_V1__)return;
+  window.__SHOUFHON_OWNER_EMBED_ACTION_BRIDGE_V1__=true;
+
+  var PHOTO_BUCKET="shop-gallery";
+  var VIDEO_BUCKET="shop-videos";
+
+  function truthy(v){
+    return v===true||["true","1","yes","on"].indexOf(String(v||"").trim().toLowerCase())>=0;
+  }
+
+  function numberLimit(v,fallback){
+    var n=Number(v);
+    return Number.isFinite(n)?Math.max(0,Math.min(100,Math.round(n))):fallback;
+  }
+
+  function sourceIsIframe(source){
+    if(!source)return false;
+    return Array.from(document.querySelectorAll("iframe")).some(function(frame){
+      try{return frame.contentWindow===source}catch(_){return false}
+    });
+  }
+
+  async function ownerClient(){
+    try{
+      if(window.Ma7alakAccount&&typeof window.Ma7alakAccount.ready==="function"){
+        await window.Ma7alakAccount.ready();
+      }
+    }catch(_){}
+    try{
+      if(window.Ma7alakSupabaseBootstrap&&typeof window.Ma7alakSupabaseBootstrap.ready==="function"){
+        await window.Ma7alakSupabaseBootstrap.ready();
+      }
+    }catch(_){}
+    return (window.Ma7alakAccount&&window.Ma7alakAccount.client)||
+      (window.Ma7alakOwnerAuth&&window.Ma7alakOwnerAuth.client)||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      null;
+  }
+
+  async function requireOwner(slug,capability){
+    var client=await ownerClient();
+    if(!client)throw new Error("Owner account is still loading.");
+
+    var userResult=await client.auth.getUser();
+    var user=userResult&&userResult.data&&userResult.data.user;
+    if(!user)throw new Error("Owner login required.");
+
+    var ownerResult=await client
+      .from("shop_owners")
+      .select("shop_slug")
+      .eq("user_id",user.id)
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+    if(ownerResult.error)throw ownerResult.error;
+    if(!ownerResult.data)throw new Error("This account does not own this shop.");
+
+    var profileResult=await client
+      .from("shop_profiles")
+      .select("shop_slug,shop_name,profile_image_url,about_text,directory_options")
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+    if(profileResult.error)throw profileResult.error;
+    if(!profileResult.data)throw new Error("Shop profile was not found.");
+
+    if(capability&&!truthy((profileResult.data.directory_options||{})[capability])){
+      throw new Error("This editing ability is disabled by Admin.");
+    }
+
+    return{
+      client:client,
+      user:user,
+      profile:profileResult.data
+    };
+  }
+
+  function reply(source,type,requestId,ok,data,error){
+    try{
+      source&&source.postMessage({
+        type:type,
+        requestId:String(requestId||""),
+        ok:!!ok,
+        data:data||null,
+        error:error?String(error):""
+      },"*");
+    }catch(_){}
+  }
+
+  function extension(file,type){
+    var ext=String(file&&file.name||"").split(".").pop().toLowerCase().replace(/[^a-z0-9]/g,"");
+    if(ext&&ext.length<=8)return ext;
+    var mime=String(file&&file.type||"").toLowerCase();
+    if(type==="video"){
+      if(mime.indexOf("webm")>=0)return"webm";
+      if(mime.indexOf("quicktime")>=0)return"mov";
+      return"mp4";
+    }
+    if(mime.indexOf("png")>=0)return"png";
+    if(mime.indexOf("webp")>=0)return"webp";
+    if(mime.indexOf("gif")>=0)return"gif";
+    return"jpg";
+  }
+
+  function newMediaPath(slug,type,file){
+    var id=(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+"-"+Date.now();
+    return(type==="video"?"owner-media/":"owner-gallery/")+slug+"/"+id+"."+extension(file,type);
+  }
+
+  async function removeStorage(client,bucket,path){
+    path=String(path||"").trim();
+    if(!path)return;
+    var result=await client.storage.from(bucket).remove([path]);
+    if(result.error)throw result.error;
+  }
+
+  async function mediaSnapshot(client,slug,profile){
+    var results=await Promise.all([
+      client.from("shop_gallery").select("id,image_url,storage_path,sort_order,is_featured,created_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("created_at",{ascending:true}),
+      client.from("shop_videos").select("id,video_url,storage_path,sort_order,created_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("created_at",{ascending:true})
+    ]);
+    if(results[0].error)throw results[0].error;
+    if(results[1].error)throw results[1].error;
+    var options=profile.directory_options||{};
+    return{
+      photos:results[0].data||[],
+      videos:results[1].data||[],
+      photoLimit:numberLimit(options.owner_media_photo_limit,6),
+      videoLimit:numberLimit(options.owner_media_video_limit,2)
+    };
+  }
+
+  async function uploadMediaFile(client,slug,type,file,sortOrder){
+    var video=type==="video";
+    if(!file)throw new Error("No file selected.");
+    if(video&&String(file.type||"").indexOf("video/")!==0)throw new Error("Choose video files only.");
+    if(!video&&String(file.type||"").indexOf("image/")!==0)throw new Error("Choose image files only.");
+    var max=(video?100:12)*1024*1024;
+    if(Number(file.size||0)>max)throw new Error(String(file.name||"File")+" is too large.");
+
+    var bucket=video?VIDEO_BUCKET:PHOTO_BUCKET;
+    var path=newMediaPath(slug,type,file);
+    var uploaded=false;
+
+    try{
+      var upload=await client.storage.from(bucket).upload(path,file,{
+        cacheControl:"0",
+        upsert:false,
+        contentType:file.type||undefined
+      });
+      if(upload.error)throw upload.error;
+      uploaded=true;
+
+      var publicUrl=client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+      if(!publicUrl)throw new Error("Could not create Media URL.");
+
+      var payload=video
+        ?{shop_slug:slug,video_url:publicUrl,storage_path:path,sort_order:sortOrder}
+        :{shop_slug:slug,image_url:publicUrl,storage_path:path,sort_order:sortOrder,is_featured:false};
+
+      var insert=await client.from(video?"shop_videos":"shop_gallery").insert(payload);
+      if(insert.error)throw insert.error;
+      return{path:path,url:publicUrl};
+    }catch(error){
+      if(uploaded){
+        try{await removeStorage(client,bucket,path)}catch(_){}
+      }
+      throw error;
+    }
+  }
+
+  async function handleMediaRequest(event){
+    var data=event.data||{};
+    var source=event.source||null;
+    var requestId=String(data.requestId||"");
+    var slug=String(data.shopSlug||"").trim().toLowerCase();
+    var op=String(data.op||"");
+
+    if(!requestId||!slug||!sourceIsIframe(source))return;
+
+    try{
+      var context=await requireOwner(slug,"owner_media_edit_enabled");
+      var client=context.client;
+      var snapshot=await mediaSnapshot(client,slug,context.profile);
+
+      if(op==="load"){
+        reply(source,"SHOUFHON_OWNER_MEDIA_RESULT",requestId,true,snapshot,"");
+        return;
+      }
+
+      if(op==="add"){
+        var type=data.mediaType==="video"?"video":"photo";
+        var files=Array.isArray(data.files)?data.files:[];
+        if(!files.length)throw new Error("Choose at least one file.");
+
+        var current=type==="video"?snapshot.videos.length:snapshot.photos.length;
+        var max=type==="video"?snapshot.videoLimit:snapshot.photoLimit;
+        if(current+files.length>max){
+          throw new Error("Admin limit: "+max+" "+(type==="video"?"videos":"photos")+". Current: "+current+".");
+        }
+
+        var rows=type==="video"?snapshot.videos:snapshot.photos;
+        var order=Math.max.apply(Math,[-1].concat(rows.map(function(row){return Number(row.sort_order)||0})))+1;
+
+        for(var i=0;i<files.length;i++){
+          await uploadMediaFile(client,slug,type,files[i],order+i);
+        }
+      }
+      else if(op==="replace"){
+        var replaceType=data.mediaType==="video"?"video":"photo";
+        var replaceVideo=replaceType==="video";
+        var replaceTable=replaceVideo?"shop_videos":"shop_gallery";
+        var replaceBucket=replaceVideo?VIDEO_BUCKET:PHOTO_BUCKET;
+        var replaceId=Number(data.id);
+        var file=data.file;
+        if(!Number.isFinite(replaceId)||!file)throw new Error("Replacement is incomplete.");
+
+        var oldResult=await client
+          .from(replaceTable)
+          .select(replaceVideo?"id,video_url,storage_path,sort_order":"id,image_url,storage_path,sort_order,is_featured")
+          .eq("id",replaceId)
+          .eq("shop_slug",slug)
+          .maybeSingle();
+        if(oldResult.error)throw oldResult.error;
+        if(!oldResult.data)throw new Error("Media item was not found.");
+
+        var newPath=newMediaPath(slug,replaceType,file);
+        var uploaded=false;
+        try{
+          var up=await client.storage.from(replaceBucket).upload(newPath,file,{
+            cacheControl:"0",
+            upsert:false,
+            contentType:file.type||undefined
+          });
+          if(up.error)throw up.error;
+          uploaded=true;
+          var newUrl=client.storage.from(replaceBucket).getPublicUrl(newPath).data.publicUrl;
+          if(!newUrl)throw new Error("Could not create Media URL.");
+
+          var patch=replaceVideo
+            ?{video_url:newUrl,storage_path:newPath}
+            :{image_url:newUrl,storage_path:newPath};
+
+          var update=await client.from(replaceTable).update(patch).eq("id",replaceId).eq("shop_slug",slug);
+          if(update.error)throw update.error;
+
+          if(oldResult.data.storage_path&&oldResult.data.storage_path!==newPath){
+            try{await removeStorage(client,replaceBucket,oldResult.data.storage_path)}
+            catch(cleanupError){console.warn("SHOUFHON old Media cleanup:",cleanupError)}
+          }
+        }catch(error){
+          if(uploaded){
+            try{await removeStorage(client,replaceBucket,newPath)}catch(_){}
+          }
+          throw error;
+        }
+      }
+      else if(op==="delete"){
+        var deleteType=data.mediaType==="video"?"video":"photo";
+        var deleteVideo=deleteType==="video";
+        var deleteTable=deleteVideo?"shop_videos":"shop_gallery";
+        var deleteBucket=deleteVideo?VIDEO_BUCKET:PHOTO_BUCKET;
+        var deleteId=Number(data.id);
+        if(!Number.isFinite(deleteId))throw new Error("Media item was not found.");
+
+        var old=await client
+          .from(deleteTable)
+          .select("id,storage_path")
+          .eq("id",deleteId)
+          .eq("shop_slug",slug)
+          .maybeSingle();
+        if(old.error)throw old.error;
+        if(!old.data)throw new Error("Media item was not found.");
+
+        var deleted=await client.from(deleteTable).delete().eq("id",deleteId).eq("shop_slug",slug);
+        if(deleted.error)throw deleted.error;
+
+        if(old.data.storage_path){
+          try{await removeStorage(client,deleteBucket,old.data.storage_path)}
+          catch(cleanupError){console.warn("SHOUFHON deleted Media cleanup:",cleanupError)}
+        }
+      }
+      else{
+        throw new Error("Unknown Media action.");
+      }
+
+      var freshProfile=await client
+        .from("shop_profiles")
+        .select("directory_options")
+        .eq("shop_slug",slug)
+        .maybeSingle();
+      if(freshProfile.error)throw freshProfile.error;
+      var fresh=await mediaSnapshot(client,slug,{directory_options:freshProfile.data&&freshProfile.data.directory_options||{}});
+      reply(source,"SHOUFHON_OWNER_MEDIA_RESULT",requestId,true,fresh,"");
+    }catch(error){
+      reply(source,"SHOUFHON_OWNER_MEDIA_RESULT",requestId,false,null,error&&error.message||"Could not update Media.");
+    }
+  }
+
+  async function handleAboutRequest(event){
+    var data=event.data||{};
+    var source=event.source||null;
+    var requestId=String(data.requestId||"");
+    var slug=String(data.shopSlug||"").trim().toLowerCase();
+
+    if(!requestId||!slug||!sourceIsIframe(source))return;
+
+    try{
+      var context=await requireOwner(slug,"owner_about_edit_enabled");
+      var result=await context.client.rpc("owner_update_about_text",{
+        p_shop_slug:slug,
+        p_about_text:String(data.aboutText||"")
+      });
+      if(result.error)throw result.error;
+
+      reply(source,"SHOUFHON_OWNER_ABOUT_RESULT",requestId,true,{aboutText:String(result.data||"")},"");
+    }catch(error){
+      reply(source,"SHOUFHON_OWNER_ABOUT_RESULT",requestId,false,null,error&&error.message||"Could not update About.");
+    }
+  }
+
+  window.addEventListener("message",function(event){
+    var data=event&&event.data||{};
+    if(data.type==="SHOUFHON_OWNER_MEDIA_REQUEST"){
+      handleMediaRequest(event);
+      return;
+    }
+    if(data.type==="SHOUFHON_OWNER_ABOUT_REQUEST"){
+      handleAboutRequest(event);
+    }
+  });
+})();
