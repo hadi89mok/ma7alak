@@ -2078,7 +2078,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       if(!document.hidden){
         refreshFollowingState();
       }
-    },30000);
+    },120000);
 
     const supabaseClient=getClient();
     if(supabaseClient&&typeof supabaseClient.channel==="function"){
