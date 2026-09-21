@@ -11870,6 +11870,41 @@ function ensureCss(){
       box-shadow:0 0 10px rgba(239,84,108,.52);
     }
 
+    .m7v4-state-action.tone-owner-access.is-on{
+      border-color:rgba(217,170,88,.34);
+      background:linear-gradient(135deg,rgba(217,170,88,.08),rgba(255,255,255,.018));
+    }
+    .m7v4-state-action.tone-owner-access.is-on .m7v4-state-label{color:#f1c86f}
+    .m7v4-state-action.tone-owner-access.is-on .m7v4-switch{border-color:rgba(217,170,88,.42);background:#4b3514}
+    .m7v4-state-action.tone-owner-access.is-on .m7v4-switch:after{background:#f0c864;box-shadow:0 0 10px rgba(217,170,88,.5)}
+
+    .m7v4-owner-quota{
+      margin-top:9px;
+      padding:12px;
+      border:1px solid rgba(217,170,88,.16);
+      border-radius:15px;
+      background:radial-gradient(circle at 10% 0,rgba(217,170,88,.065),transparent 38%),rgba(255,255,255,.016);
+    }
+    .m7v4-owner-quota-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .m7v4-owner-quota-head b{display:block;color:#f0dfbf;font-size:10px}
+    .m7v4-owner-quota-head small{display:block;margin-top:3px;color:#817663;font-size:8px;line-height:1.35}
+    .m7v4-owner-quota-head>span{padding:5px 7px;border:1px solid rgba(217,170,88,.16);border-radius:999px;color:#cfad69;font-size:7px;font-weight:950}
+    .m7v4-owner-quota-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .m7v4-owner-quota-grid label{display:block;color:#9e8f77;font-size:8px;font-weight:900}
+    .m7v4-owner-quota-grid label span{display:block;margin-bottom:5px}
+    .m7v4-owner-quota-grid input{
+      width:100%;min-height:40px;padding:0 10px;border:1px solid rgba(217,170,88,.16);border-radius:10px;
+      background:#090807;color:#fff;font-size:13px;font-weight:900;box-sizing:border-box;color-scheme:dark;
+    }
+    .m7v4-owner-quota>button{
+      width:100%;min-height:38px;margin-top:9px;border:1px solid rgba(217,170,88,.28);border-radius:11px;
+      background:linear-gradient(135deg,rgba(217,170,88,.16),rgba(217,170,88,.06));color:#efcd88;font-size:8px;font-weight:950;cursor:pointer;
+    }
+    @media(max-width:620px){
+      .m7v4-owner-quota-grid{grid-template-columns:1fr 1fr}
+      .m7v4-owner-quota{padding:10px}
+    }
+
     .m7v4-tag.new{
       border-color:rgba(87,183,255,.28);
       background:rgba(87,183,255,.065);
@@ -15032,6 +15067,53 @@ function vipCrownOn(shop){
   return shop?.directory_options?.vip_crown_enabled===true;
 }
 
+function ownerCapabilityOn(shop,key){
+  const value=shop?.directory_options?.[key];
+  return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
+}
+
+function ownerMediaLimit(shop,key,fallback){
+  const raw=Number(shop?.directory_options?.[key]);
+  if(Number.isFinite(raw))return Math.max(0,Math.min(100,Math.round(raw)));
+  return fallback;
+}
+
+async function saveOwnerCapabilityPatch(shop,patch,activity){
+  const current=
+    shop?.directory_options &&
+    typeof shop.directory_options==="object"
+      ? shop.directory_options
+      : {};
+
+  const nextOptions={
+    ...current,
+    ...patch
+  };
+
+  const result=await client
+    .from("shop_profiles")
+    .update({directory_options:nextOptions})
+    .eq("shop_slug",shop.shop_slug);
+
+  if(result.error)throw result.error;
+
+  await logV4Activity(activity,shop,patch);
+  await loadShops();
+}
+
+function ownerMediaQuotaHtml(shop){
+  const photos=ownerMediaLimit(shop,"owner_media_photo_limit",6);
+  const videos=ownerMediaLimit(shop,"owner_media_video_limit",2);
+  return '<div class="m7v4-owner-quota">'+
+    '<div class="m7v4-owner-quota-head"><div><b>Owner Media limits</b><small>Separate upload limits for the shop owner.</small></div><span>PHOTOS / VIDEOS</span></div>'+
+    '<div class="m7v4-owner-quota-grid">'+
+      '<label><span>Photo limit</span><input type="number" min="0" max="100" step="1" value="'+esc(photos)+'" data-m7v4-owner-photo-limit inputmode="numeric"></label>'+
+      '<label><span>Video limit</span><input type="number" min="0" max="100" step="1" value="'+esc(videos)+'" data-m7v4-owner-video-limit inputmode="numeric"></label>'+
+    '</div>'+
+    '<button type="button" data-m7v4-save-owner-media-limits>Save media limits</button>'+
+  '</div>';
+}
+
 function featureState(shop){
   const options=
     shop?.directory_options &&
@@ -15195,8 +15277,12 @@ function renderWorkspace(){
       stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
       stateAction("new","NEW","NEW badge",newBadgeOn(shop),newBadgeOn(shop)?"NEW badge is showing":"NEW badge is hidden","new")+
       stateAction("vip","♛","VIP crown",vipCrownOn(shop),vipCrownOn(shop)?"Animated crown is attached to the profile circle":"VIP crown is hidden","vip")+
+      stateAction("owner-profile-edit","◉","Owner profile / banner editing",ownerCapabilityOn(shop,"owner_profile_edit_enabled"),ownerCapabilityOn(shop,"owner_profile_edit_enabled")?"Owner can replace profile photo and banner":"Profile/banner editing is locked","owner-access")+
+      stateAction("owner-media-edit","▧","Owner Media editing",ownerCapabilityOn(shop,"owner_media_edit_enabled"),ownerCapabilityOn(shop,"owner_media_edit_enabled")?"Owner can add, replace and delete Media":"Owner Media editing is locked","owner-access")+
+      stateAction("owner-about-edit","✎","Owner About editing",ownerCapabilityOn(shop,"owner_about_edit_enabled"),ownerCapabilityOn(shop,"owner_about_edit_enabled")?"Owner can edit About text":"Owner About editing is locked","owner-access")+
       stateAction("feature","★","Featured",featureState(shop).on,featureState(shop).on?(featureState(shop).days?("Featured · "+featureState(shop).days+"d left"):"Featured is active"):"Featured is off","feature")+
     '</div>'+
+    ownerMediaQuotaHtml(shop)+
 
     '<div class="m7v4-group-title">System tools</div>'+
     '<div class="m7v4-system">'+
@@ -15456,6 +15542,41 @@ async function handleAction(key){
     return;
   }
 
+  if(key==="owner-profile-edit"){
+    const next=!ownerCapabilityOn(shop,"owner_profile_edit_enabled");
+    await saveOwnerCapabilityPatch(
+      shop,
+      {owner_profile_edit_enabled:next},
+      next?"owner_profile_edit_enabled":"owner_profile_edit_disabled"
+    );
+    return;
+  }
+
+  if(key==="owner-media-edit"){
+    const next=!ownerCapabilityOn(shop,"owner_media_edit_enabled");
+    const patch={owner_media_edit_enabled:next};
+    if(next){
+      if(!Number.isFinite(Number(shop?.directory_options?.owner_media_photo_limit)))patch.owner_media_photo_limit=6;
+      if(!Number.isFinite(Number(shop?.directory_options?.owner_media_video_limit)))patch.owner_media_video_limit=2;
+    }
+    await saveOwnerCapabilityPatch(
+      shop,
+      patch,
+      next?"owner_media_edit_enabled":"owner_media_edit_disabled"
+    );
+    return;
+  }
+
+  if(key==="owner-about-edit"){
+    const next=!ownerCapabilityOn(shop,"owner_about_edit_enabled");
+    await saveOwnerCapabilityPatch(
+      shop,
+      {owner_about_edit_enabled:next},
+      next?"owner_about_edit_enabled":"owner_about_edit_disabled"
+    );
+    return;
+  }
+
   if(key==="feature"){
     const state=
       featureState(shop);
@@ -15620,6 +15741,39 @@ function mount(){
         section.hidden=false;
         section.style.removeProperty("display");
         setTimeout(()=>section.scrollIntoView({behavior:"smooth",block:"start"}),60);
+      }
+      return;
+    }
+
+    const saveOwnerLimits=event.target.closest("[data-m7v4-save-owner-media-limits]");
+    if(saveOwnerLimits){
+      const shop=selectedShop();
+      if(!shop)return;
+
+      const workspace=root.querySelector("[data-m7v4-shop-workspace]");
+      const photoInput=workspace?.querySelector("[data-m7v4-owner-photo-limit]");
+      const videoInput=workspace?.querySelector("[data-m7v4-owner-video-limit]");
+      const photos=Math.max(0,Math.min(100,Math.round(Number(photoInput?.value)||0)));
+      const videos=Math.max(0,Math.min(100,Math.round(Number(videoInput?.value)||0)));
+
+      saveOwnerLimits.disabled=true;
+      saveOwnerLimits.textContent="Saving…";
+
+      try{
+        await saveOwnerCapabilityPatch(
+          shop,
+          {
+            owner_media_photo_limit:photos,
+            owner_media_video_limit:videos
+          },
+          "owner_media_limits_updated"
+        );
+      }catch(error){
+        console.error("SHOUFHON owner media limits:",error);
+        window.alert(error?.message||"Could not save owner media limits.");
+      }finally{
+        saveOwnerLimits.disabled=false;
+        saveOwnerLimits.textContent="Save media limits";
       }
       return;
     }
