@@ -3161,6 +3161,9 @@
         postAddOwner.hidden = false;
 
         shopForm.reset();
+        shopForm.dataset.directoryOptions="{}";
+        const newBanner=document.getElementById("m7da-profile_banner_image_url");if(newBanner)newBanner.value="";
+        shopForm.querySelector(".m7-design-studio")?.__m7dsRefresh?.();
 
         shopActive.checked = true;
 
@@ -3626,6 +3629,7 @@
   editForm.addEventListener("submit", async function(event){
 
     event.preventDefault();
+    if(saveEditButton.disabled)return;
     setStatus(editStatus, "");
 
     const slug = normalizedText(editOriginalSlug.value);
@@ -3673,6 +3677,7 @@
 
     saveEditButton.disabled = true;
     saveEditButton.textContent = "Saving…";
+    window.dispatchEvent(new CustomEvent("ma7alak:studio-save-state",{detail:{state:"saving"}}));
 
     try{
 
@@ -3696,6 +3701,17 @@
          while saving profile, card or design edits.
       */
 
+      // Publishing and owner access save independently inside the Studio.
+      // A design draft must not restore stale badges, feature dates or quotas.
+      const latest = await supabaseClient.from("shop_profiles")
+        .select("directory_options").eq("shop_slug",slug).maybeSingle();
+      if(latest.error)throw latest.error;
+      if(!latest.data)throw new Error("This shop no longer exists. Reopen the shop list.");
+      for(const key of ["badge","vip_crown_enabled","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+        if(Object.prototype.hasOwnProperty.call(latest.data.directory_options||{},key))payload.directory_options[key]=latest.data.directory_options[key];
+        else delete payload.directory_options[key];
+      }
+
       const { error } = await supabaseClient
         .from("shop_profiles")
         .update(payload)
@@ -3718,12 +3734,14 @@
       loadAdminActivity();
 
       setStatus(editStatus, "Changes saved successfully.", "success");
+      window.dispatchEvent(new CustomEvent("ma7alak:studio-save-state",{detail:{state:"saved"}}));
 
       await loadManagedShops();
       await loadExistingDirectoryValues();
 
     }catch(error){
       setStatus(editStatus, error.message || "Could not save changes.", "error");
+      window.dispatchEvent(new CustomEvent("ma7alak:studio-save-state",{detail:{state:"error",message:error.message||"Could not save changes."}}));
     }finally{
       saveEditButton.disabled = false;
       saveEditButton.textContent = "Save Changes";
@@ -4472,7 +4490,7 @@
     function refreshSmartFields(){
       ["ma-shop-city-v2","ma-edit-city-v2"].forEach(id=>{
         const sel=byId(id); if(!sel)return;
-        sel.required=true;
+        sel.required=id==="ma-shop-city-v2";
         const old=sel.value;
         sel.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
         if(old) sel.value=old;
@@ -5292,7 +5310,7 @@ function ensureStyles(){
   st.id="m7-about-services-admin-css";
   st.textContent=`
     .m7-about-services-fields{margin:16px 0!important;padding:16px!important;border:1px solid #d6ac6244!important;border-radius:16px!important;background:#17130f!important;color:#e9d6b3!important}
-    .m7-about-services-fields{legend{padding:0 9px;color:#f2c574;font-weight:900}
+    .m7-about-services-fields legend{padding:0 9px;color:#f2c574;font-weight:900}
     .m7-about-services-fields>p{margin:5px 0 14px;color:#b9ab97;font-size:12px;line-height:1.45}
     .m7-about-heading-editor{margin:10px 0 15px;padding:12px;border:1px solid #f0bc6250;border-radius:14px;background:linear-gradient(145deg,#12100d,#0b0a09)}
     .m7-about-heading-editor>h4{margin:0 0 9px;color:#ffd77e;font-size:12px;font-weight:950;letter-spacing:.45px}
@@ -5343,7 +5361,7 @@ function ensureForm(form,prefix){
             '<strong>Main title</strong>'+
             '<label class="full"><span>Text</span><input id="'+prefix+'about-title-text" type="text" placeholder="Blank = About + shop name"></label>'+
             '<label><span>Color</span><input id="'+prefix+'about-title-color-direct" type="color" value="#f2caed"></label>'+
-            '<label><span>Size %</span><input id="'+prefix+'about-title-size-direct" type="number" min="60" max="200" step="5" value="100"></label>'+
+            '<label><span>Size %</span><input id="'+prefix+'about-title-size-direct" type="number" min="60" max="200" step="1" value="100"></label>'+
             '<label><span>Font</span><select id="'+prefix+'about-title-font-direct">'+optionList(ABOUT_HEADING_FONTS,"inherit")+'</select></label>'+
             '<label><span>Animation</span><select id="'+prefix+'about-title-animation-direct">'+optionList(ABOUT_HEADING_ANIMS,"current")+'</select></label>'+
           '</div>'+
@@ -5351,7 +5369,7 @@ function ensureForm(form,prefix){
             '<strong>Arabic subtitle</strong>'+
             '<label class="full"><span>Text</span><input id="'+prefix+'about-arabic-text" type="text" dir="auto" placeholder="Blank = shop Arabic name"></label>'+
             '<label><span>Color</span><input id="'+prefix+'about-arabic-color-direct" type="color" value="#ffffff"></label>'+
-            '<label><span>Size %</span><input id="'+prefix+'about-arabic-size-direct" type="number" min="60" max="200" step="5" value="100"></label>'+
+            '<label><span>Size %</span><input id="'+prefix+'about-arabic-size-direct" type="number" min="60" max="200" step="1" value="100"></label>'+
             '<label><span>Font</span><select id="'+prefix+'about-arabic-font-direct">'+optionList(ABOUT_HEADING_FONTS,"inherit")+'</select></label>'+
             '<label><span>Animation</span><select id="'+prefix+'about-arabic-animation-direct">'+optionList(ABOUT_HEADING_ANIMS,"none")+'</select></label>'+
           '</div>'+
@@ -6430,7 +6448,7 @@ function decorateAll(){
             type="number"
             min="${esc(min)}"
             max="${esc(max)}"
-            step="${esc(step)}"
+            step="${esc(Math.min(1,Number(step)||1))}"
             value="${esc(DEFAULTS[key])}"
           >
           <small>${esc(suffix||"")}</small>
@@ -6526,7 +6544,7 @@ function decorateAll(){
           type="number"
           min="70"
           max="150"
-          step="5"
+          step="1"
           value="${esc(DEFAULTS[key+"_font_size"])}"
         >
       </label>
@@ -7533,9 +7551,8 @@ function decorateAll(){
       const moveSection=text=>{
         const title=findSection(text);
         if(!title)return;
-        profilePane.appendChild(title);
-
         let node=title.nextElementSibling;
+        profilePane.appendChild(title);
         while(node&&!node.classList.contains("m7ds-section-title")){
           const next=node.nextElementSibling;
           profilePane.appendChild(node);
@@ -11605,12 +11622,12 @@ function ensureBox(form,prefix){
 
     <div class="m7cd-section">Depth & animation</div>
     <div class="m7cd-grid">
-      ${field(prefix,"card_shadow_strength","Shadow strength %","number",'min="0" max="100" step="5"')}
-      ${field(prefix,"card_glow_strength","Accent glow %","number",'min="0" max="100" step="5"')}
+      ${field(prefix,"card_shadow_strength","Shadow strength %","number",'min="0" max="100" step="1"')}
+      ${field(prefix,"card_glow_strength","Accent glow %","number",'min="0" max="100" step="1"')}
       ${field(prefix,"card_animation","Animation","select",opts(ANIMS,DEFAULTS.card_animation))}
       ${field(prefix,"card_animation_speed","Animation speed (seconds)","number",'min=".8" max="8" step=".1"')}
-      ${field(prefix,"card_animation_intensity","Movement intensity %","number",'min="0" max="100" step="5"')}
-      ${field(prefix,"card_shimmer_strength","Shimmer brightness %","number",'min="0" max="100" step="5"')}
+      ${field(prefix,"card_animation_intensity","Movement intensity %","number",'min="0" max="100" step="1"')}
+      ${field(prefix,"card_shimmer_strength","Shimmer brightness %","number",'min="0" max="100" step="1"')}
     </div>
 
     <div class="m7cd-section">Text & button</div>
@@ -11701,11 +11718,6 @@ function collectBox(box,result){
       result.directory_options[key]=String(el.value||"").trim();
     }
   });
-
-  const banner=String(result.directory_options.profile_banner_image_url||"").trim();
-  if(banner){
-    result.directory_options.profile_banner_enabled=true;
-  }
 
   return result;
 }
@@ -12020,7 +12032,7 @@ function ensureBox(form,prefix){
           '<div class="m7ats-name">'+esc(label)+'</div>'+
           '<input type="color" data-m7ats-color data-color-key="'+esc(colorKey)+'" value="'+esc(fallback)+'" aria-label="'+esc(label)+' color">'+
           '<select class="m7ats-font" data-m7ats-font>'+opts("inherit")+'</select>'+
-          '<input class="m7ats-size" type="number" min="60" max="200" step="5" value="100" data-m7ats-size aria-label="'+esc(label)+' size percentage">'+
+          '<input class="m7ats-size" type="number" min="60" max="200" step="1" value="100" data-m7ats-size aria-label="'+esc(label)+' size percentage">'+
         '</div>'
       ).join("")+
     '</div>';
@@ -14564,7 +14576,7 @@ async function openEditMode(slug,mode){
 
   const target=panel.querySelector(targets[mode]||".m7v4-edit-context");
   if(target){
-    setTimeout(()=>target.scrollIntoView({behavior:"smooth",block:"center"}),120);
+    setTimeout(()=>{if(!panel.classList.contains("m7studio-fullscreen"))target.scrollIntoView({behavior:"smooth",block:"start"})},120);
   }
 
   setTimeout(()=>refreshEditPreview(panel),80);
@@ -16128,7 +16140,7 @@ function renderList(){
           (featureState(shop).on?'<span class="m7v4-tag featured">FEATURED</span>':"")+
         '</div>'+
       '</div>'+
-      '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Manage →</button>'+
+      '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Open Studio →</button>'+
     '</article>';
   }).join("");
 }
@@ -16151,22 +16163,23 @@ function renderWorkspace(){
       '<button class="m7v4-view" type="button" data-m7v4-action="view">View shop ↗</button>'+
     '</div>'+
 
-    '<div class="m7v4-group-title">Shop profile & design</div>'+
     '<div class="m7v4-actions m7v4-actions-studio">'+
-      action("details","✏️","Shop details","Core identity, slug, location, category and links")+
-      action("profile","◉","Profile","Profile image and banner — one place")+
-      action("design","🎨","Shop Design Studio","All visual design in one full-screen editor with real live shop preview")+
+      action("design","🎨","Open Shop Studio","Details, profile, banner, design, media and owner permissions — all in one place")+
     '</div>'+
 
-    '<div class="m7v4-group-title">Media & live content</div>'+
-    '<div class="m7v4-actions">'+
-      action("gallery","▧","Photos","Gallery images and featured photo")+
-      action("video","▶","Videos","Shop video gallery")+
-      action("reels","◉","Reels","Homepage owner reels and limits")+
-      action("live","⚡","Live / Offers","Access, active offers and limits")+
-    '</div>'+
+    '<div class="m7v4-group-title">System tools</div>'+
+    '<div class="m7v4-system">'+
+      '<button type="button" data-m7v4-system="ma-admin-v2-hub">Categories & areas</button>'+
+      '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
+      '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
+      '<button type="button" data-m7v4-system="m7adm-history">Activity history</button>'+
+    '</div>';
+}
 
-    '<div class="m7v4-group-title">Account & publishing</div>'+
+function studioPublishingMarkup(){
+  const shop=selectedShop();
+  if(!shop)return "";
+  return '<div class="m7v4-group-title">Account & publishing</div>'+
     '<div class="m7v4-actions">'+
       stateAction("visibility","◐","Shop visibility",shop.is_active===true,shop.is_active===true?"Visible to visitors":"Hidden from visitors","visibility")+
       stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
@@ -16177,16 +16190,37 @@ function renderWorkspace(){
       stateAction("owner-about-edit","✎","Owner About editing",ownerCapabilityOn(shop,"owner_about_edit_enabled"),ownerCapabilityOn(shop,"owner_about_edit_enabled")?"Owner can edit About text":"Owner About editing is locked","owner-access")+
       stateAction("feature","★","Featured",featureState(shop).on,featureState(shop).on?(featureState(shop).days?("Featured · "+featureState(shop).days+"d left"):"Featured is active"):"Featured is off","feature")+
     '</div>'+
-    ownerMediaQuotaHtml(shop)+
-
-    '<div class="m7v4-group-title">System tools</div>'+
-    '<div class="m7v4-system">'+
-      '<button type="button" data-m7v4-system="ma-admin-v2-hub">Categories & areas</button>'+
-      '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
-      '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
-      '<button type="button" data-m7v4-system="m7adm-history">Activity history</button>'+
-    '</div>';
+    ownerMediaQuotaHtml(shop);
 }
+window.Ma7alakAdminStudioBridge={
+  shop:selectedShop,
+  publishing:studioPublishingMarkup,
+  preview(tab){
+    const panel=document.getElementById("ma-admin-edit-card");if(!panel)return;
+    const old=panel.dataset.m7v4PreviewMode;
+    panel.dataset.m7v4PreviewMode=({hours:"hours",advanced:"card",details:"details",about:"about"})[tab]||"design";
+    refreshEditPreview(panel);panel.dataset.m7v4PreviewMode=old;
+  },
+  textStyle(key){
+    const color=previewColor("m7de-"+key+"_color","#ffffff");
+    const mode=previewVal("m7de-page_motion_mode","preset");
+    const preset=previewVal("m7de-page_design_preset","premium");
+    const motion=mode!=="off"&&(mode!=="preset"||!["basic","minimal"].includes(preset));
+    return {color,typography:previewModuleTypography("profile"),classes:motion?previewAnimClass(previewVal("m7de-"+key+"_animation","current")):"",css:previewAnimStyle(color)};
+  },
+  async action(key){
+    await handleAction(key);
+    const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
+    if(form&&shop){
+      const options=JSON.parse(form.dataset.directoryOptions||"{}");
+      for(const k of ["badge","vip_crown_enabled","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+        if(Object.prototype.hasOwnProperty.call(shop.directory_options||{},k))options[k]=shop.directory_options[k];else delete options[k];
+      }
+      form.dataset.directoryOptions=JSON.stringify(options);
+    }
+  },
+  async limits(photos,videos){await saveOwnerCapabilityPatch(selectedShop(),{owner_media_photo_limit:photos,owner_media_video_limit:videos},"owner_media_limits_updated")}
+};
 
 function action(key,icon,title,copy){
   return '<button type="button" class="m7v4-action" data-m7v4-action="'+esc(key)+'"><i>'+icon+'</i><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></button>';
@@ -16604,7 +16638,8 @@ function mount(){
       selectedSlug=manage.dataset.m7v4Manage||"";
       clearLegacy();
       renderWorkspace();
-      root.scrollIntoView({behavior:"smooth",block:"start"});
+      try{await openEditMode(selectedSlug,"design");window.Ma7alakShopDesignStudio?.open()}
+      catch(error){window.alert(error.message||"Could not open Studio.")}
       return;
     }
 
@@ -18551,7 +18586,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
           <div class="m7hfa-pane" data-pane="navigation"><div class="m7hfa-card"><h3>Navigation Links</h3><div class="m7hfa-list" data-nav-list></div><button class="m7hfa-btn" type="button" data-add-nav>＋ Add Navigation Link</button></div></div>
           <div class="m7hfa-pane" data-pane="socials"><div class="m7hfa-card"><h3>Social Icons</h3><p style="margin:0 0 10px;color:#ffffff6b;font-size:10px">Add/remove icons. For WhatsApp you can paste a full link or just the phone number.</p><div class="m7hfa-list" data-social-list></div><button class="m7hfa-btn" type="button" data-add-social>＋ Add Social Icon</button></div></div>
           <div class="m7hfa-pane" data-pane="animations">
-            <div class="m7hfa-card"><h3>Animate Anything</h3><div class="m7hfa-grid">${selectField("Overall motion","m7hfa-overall",["off","subtle","full"])}${field("Animation speed %","m7hfa-speed","range",'min="40" max="220" step="5"')}${field("Animation intensity %","m7hfa-intensity","range",'min="0" max="100" step="5"')}${selectField("Logo animation","m7hfa-logo-anim",ANIMS)}${selectField("Title animation","m7hfa-title-anim",ANIMS)}${selectField("Subtitle animation","m7hfa-subtitle-anim",ANIMS)}${selectField("Navigation animation","m7hfa-nav-anim",ANIMS)}${selectField("Social animation","m7hfa-social-anim",ANIMS)}${selectField("Copyright animation","m7hfa-copy-anim",ANIMS)}${selectField("Bottom text animation","m7hfa-bottom-anim",ANIMS)}${check("Animated top separator","m7hfa-line-enabled")}${selectField("Top line animation","m7hfa-line-anim",["none","travel"])}</div><p style="margin:11px 0 0;color:#72d89b;font-size:10px">Mobile-safe: animations use transform / opacity / filter and include WebKit animation paths.</p></div>
+            <div class="m7hfa-card"><h3>Animate Anything</h3><div class="m7hfa-grid">${selectField("Overall motion","m7hfa-overall",["off","subtle","full"])}${field("Animation speed %","m7hfa-speed","range",'min="40" max="220" step="1"')}${field("Animation intensity %","m7hfa-intensity","range",'min="0" max="100" step="1"')}${selectField("Logo animation","m7hfa-logo-anim",ANIMS)}${selectField("Title animation","m7hfa-title-anim",ANIMS)}${selectField("Subtitle animation","m7hfa-subtitle-anim",ANIMS)}${selectField("Navigation animation","m7hfa-nav-anim",ANIMS)}${selectField("Social animation","m7hfa-social-anim",ANIMS)}${selectField("Copyright animation","m7hfa-copy-anim",ANIMS)}${selectField("Bottom text animation","m7hfa-bottom-anim",ANIMS)}${check("Animated top separator","m7hfa-line-enabled")}${selectField("Top line animation","m7hfa-line-anim",["none","travel"])}</div><p style="margin:11px 0 0;color:#72d89b;font-size:10px">Mobile-safe: animations use transform / opacity / filter and include WebKit animation paths.</p></div>
           </div>
           <div class="m7hfa-pane" data-pane="advanced"><div class="m7hfa-card"><h3>Layout</h3><div class="m7hfa-grid">${field("Footer minimum height","m7hfa-height","range",'min="260" max="700" step="10"')}${field("Top corner radius","m7hfa-radius","range",'min="0" max="70" step="1"')}${field("Content max width","m7hfa-content-width","range",'min="320" max="1000" step="10"')}</div></div><div class="m7hfa-card"><h3>Reset</h3><button class="m7hfa-btn danger" type="button" data-reset>Reset editor to ShoufHon defaults</button></div></div>
         </div>
