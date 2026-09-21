@@ -2424,37 +2424,246 @@
 
 
 /* =========================================================
-   SHOUFHON — OWNER + MENU (STORY OR HOMEPAGE REEL)
-   Companion for story-upload-panel.js baseline:
-   b2126297f74e3d3a1b35224e5cc59b4e71d55a88
-
-   IMPORTANT:
-   - Does NOT replace or rewrite the working Story uploader.
-   - Intercepts the existing owner + request.
-   - Story continues into the existing b212 Story uploader.
-   - Reel opens the Owner Homepage Reel uploader below.
-   ========================================================= */
+   SHOUFHON — OWNER + MENU / PROFILE STUDIO V2
+   Existing Story/Reel chooser extended with Admin-controlled
+   Profile Photo + Banner replacement.
+========================================================= */
 (function(){
   "use strict";
-  if(window.__MA7ALAK_OWNER_ADD_CHOOSER__) return;
+  if(window.__MA7ALAK_OWNER_ADD_CHOOSER__)return;
   window.__MA7ALAK_OWNER_ADD_CHOOSER__=true;
+
+  const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
+  const SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+  const IMAGE_BUCKET="shop-gallery";
+  const MAX_IMAGE_BYTES=12*1024*1024;
 
   let activeSlug="";
   let originalSource=null;
+  let client=null;
+  let activeProfile=null;
+  let profileEditAllowed=false;
+  let profileMode="profile";
+  let pendingFile=null;
+  let pendingObjectUrl="";
+
+  function bool(value){
+    return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
+  }
+
+  function esc(value){
+    return String(value??"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  async function getClient(){
+    if(client)return client;
+
+    client=
+      window.Ma7alakAccount?.client||
+      window.Ma7alakSupabase?.client||
+      window.Ma7alakSupabaseBootstrap?.client||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      null;
+
+    if(client)return client;
+
+    if(!window.supabase?.createClient){
+      await new Promise((resolve,reject)=>{
+        const existing=document.querySelector('script[src*="@supabase/supabase-js"]');
+        if(existing){
+          const started=Date.now();
+          const timer=setInterval(()=>{
+            if(window.supabase?.createClient){
+              clearInterval(timer);
+              resolve();
+            }else if(Date.now()-started>12000){
+              clearInterval(timer);
+              reject(new Error("Supabase did not load."));
+            }
+          },80);
+          return;
+        }
+        const script=document.createElement("script");
+        script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.async=true;
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error("Could not load Supabase."));
+        document.head.appendChild(script);
+      });
+    }
+
+    client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    window.__MA7ALAK_SHARED_SUPABASE_CLIENT__=
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||client;
+    return client;
+  }
+
+  function imageExtension(file){
+    const fromName=String(file?.name||"").split(".").pop().toLowerCase();
+    if(["jpg","jpeg","png","webp","gif"].includes(fromName)){
+      return fromName==="jpeg"?"jpg":fromName;
+    }
+    const mime=String(file?.type||"").toLowerCase();
+    if(mime==="image/png")return"png";
+    if(mime==="image/webp")return"webp";
+    if(mime==="image/gif")return"gif";
+    return"jpg";
+  }
+
+  function validateImage(file){
+    if(!file)throw new Error("Choose an image first.");
+    if(!/^image\/(jpeg|png|webp|gif)$/i.test(String(file.type||""))){
+      throw new Error("Use JPG, PNG, WEBP or GIF.");
+    }
+    if(file.size>MAX_IMAGE_BYTES){
+      throw new Error("Image must be smaller than 12 MB.");
+    }
+  }
+
+  function publicStoragePath(url){
+    const value=String(url||"").trim();
+    const marker="/storage/v1/object/public/"+IMAGE_BUCKET+"/";
+    const at=value.indexOf(marker);
+    if(at<0)return"";
+    try{
+      return decodeURIComponent(value.slice(at+marker.length).split("?")[0]);
+    }catch(_){
+      return value.slice(at+marker.length).split("?")[0];
+    }
+  }
+
+  function ownedCleanupPath(path,slug){
+    const parts=String(path||"").split("/").filter(Boolean);
+    if(parts.length<2)return false;
+    const roots=new Set(["owner-profile","owner-banner","profiles","profile-banners"]);
+    return roots.has(parts[0])&&parts[1]===slug;
+  }
+
+  async function cleanupOldImage(url,slug){
+    const path=publicStoragePath(url);
+    if(!ownedCleanupPath(path,slug))return;
+    try{
+      const result=await (await getClient()).storage.from(IMAGE_BUCKET).remove([path]);
+      if(result.error)console.warn("SHOUFHON old profile media cleanup:",result.error);
+    }catch(error){
+      console.warn("SHOUFHON old profile media cleanup:",error);
+    }
+  }
+
+  async function loadOwnerProfile(slug){
+    const c=await getClient();
+    const session=await c.auth.getUser();
+    const user=session.data?.user;
+    if(!user)throw new Error("Owner login required.");
+
+    const owner=await c
+      .from("shop_owners")
+      .select("shop_slug")
+      .eq("user_id",user.id)
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+    if(owner.error)throw owner.error;
+    if(!owner.data)throw new Error("This account does not own this shop.");
+
+    const profile=await c
+      .from("shop_profiles")
+      .select("shop_slug,shop_name,profile_image_url,story_logo_url,directory_options")
+      .eq("shop_slug",slug)
+      .maybeSingle();
+
+    if(profile.error)throw profile.error;
+    if(!profile.data)throw new Error("Shop profile was not found.");
+
+    activeProfile=profile.data;
+    profileEditAllowed=bool(profile.data.directory_options?.owner_profile_edit_enabled);
+    return profile.data;
+  }
+
+  function revokePreview(){
+    if(pendingObjectUrl){
+      try{URL.revokeObjectURL(pendingObjectUrl)}catch(_){}
+      pendingObjectUrl="";
+    }
+    pendingFile=null;
+  }
 
   function injectChooser(){
-    if(document.getElementById("ma7alak-owner-add-chooser")) return;
+    if(document.getElementById("ma7alak-owner-add-chooser"))return;
+
     const style=document.createElement("style");
+    style.id="ma7alak-owner-add-chooser-style";
     style.textContent=`
-      #ma7alak-owner-add-chooser{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:rgba(3,4,5,.90)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;font-family:Arial,"Segoe UI",sans-serif!important}
-      #ma7alak-owner-add-chooser.active{display:flex!important}
-      #ma7alak-owner-add-panel{position:relative!important;width:min(430px,100%)!important;padding:27px 18px 19px!important;box-sizing:border-box!important;border:1px solid rgba(217,164,65,.28)!important;border-radius:26px!important;background:linear-gradient(180deg,#191613,#0d0d0e)!important;box-shadow:0 28px 90px rgba(0,0,0,.7)!important;color:#fff!important;text-align:center!important}
-      #ma7alak-owner-add-close{position:absolute!important;right:12px!important;top:11px!important;width:37px!important;height:37px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:50%!important;background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:24px!important;line-height:32px!important;padding:0!important}
-      .ma7alak-owner-add-title{font-size:22px!important;font-weight:900!important;margin:3px 38px 4px!important}.ma7alak-owner-add-sub{font-size:12px!important;color:rgba(255,255,255,.5)!important;margin:0 0 18px!important}
+      #ma7alak-owner-add-chooser,#m7-owner-profile-studio{
+        position:fixed!important;inset:0!important;z-index:2147483647!important;
+        display:none!important;align-items:center!important;justify-content:center!important;
+        width:100vw!important;height:100vh!important;height:100dvh!important;
+        padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;
+        box-sizing:border-box!important;background:rgba(3,4,5,.91)!important;
+        backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
+        font-family:Arial,"Segoe UI",sans-serif!important;overflow:auto!important;
+        -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+      }
+      #ma7alak-owner-add-chooser.active,#m7-owner-profile-studio.active{display:flex!important}
+      #ma7alak-owner-add-panel,#m7-owner-profile-card{
+        position:relative!important;width:min(460px,100%)!important;box-sizing:border-box!important;
+        border:1px solid rgba(217,164,65,.30)!important;border-radius:26px!important;
+        background:radial-gradient(circle at 15% 0,rgba(217,164,65,.10),transparent 36%),linear-gradient(180deg,#191613,#0d0d0e)!important;
+        box-shadow:0 28px 90px rgba(0,0,0,.72)!important;color:#fff!important;
+      }
+      #ma7alak-owner-add-panel{padding:27px 18px 19px!important;text-align:center!important}
+      #ma7alak-owner-add-close,#m7-owner-profile-close{
+        position:absolute!important;right:12px!important;top:11px!important;width:40px!important;height:40px!important;
+        border:1px solid rgba(255,255,255,.10)!important;border-radius:50%!important;
+        background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:25px!important;
+        line-height:36px!important;padding:0!important;z-index:4!important;touch-action:manipulation!important;
+      }
+      .ma7alak-owner-add-title{font-size:22px!important;font-weight:900!important;margin:3px 42px 4px!important}
+      .ma7alak-owner-add-sub{font-size:12px!important;color:rgba(255,255,255,.52)!important;margin:0 0 18px!important;line-height:1.45!important}
       .ma7alak-owner-add-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important}
-      .ma7alak-owner-add-choice{min-height:137px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:20px!important;background:rgba(255,255,255,.045)!important;color:#fff!important;padding:17px 10px!important;font:inherit!important;font-weight:900!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}
-      .ma7alak-owner-add-choice:active{transform:scale(.97)!important}.ma7alak-owner-add-icon{display:block!important;font-size:32px!important;margin-bottom:9px!important}.ma7alak-owner-add-choice small{display:block!important;margin-top:7px!important;color:rgba(255,255,255,.45)!important;font-size:10px!important;font-weight:600!important;line-height:1.4!important}
-      @media(max-width:380px){.ma7alak-owner-add-grid{grid-template-columns:1fr!important}.ma7alak-owner-add-choice{min-height:105px!important}}
+      .ma7alak-owner-add-choice{
+        min-height:126px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:20px!important;
+        background:rgba(255,255,255,.045)!important;color:#fff!important;padding:15px 10px!important;
+        font:inherit!important;font-weight:900!important;cursor:pointer!important;
+        -webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;
+      }
+      .ma7alak-owner-add-choice.profile-tool{border-color:rgba(217,164,65,.24)!important;background:rgba(217,164,65,.055)!important}
+      .ma7alak-owner-add-choice[hidden]{display:none!important}
+      .ma7alak-owner-add-choice:active{transform:scale(.97)!important}
+      .ma7alak-owner-add-icon{display:block!important;font-size:30px!important;margin-bottom:8px!important}
+      .ma7alak-owner-add-choice small{display:block!important;margin-top:7px!important;color:rgba(255,255,255,.46)!important;font-size:10px!important;font-weight:600!important;line-height:1.4!important}
+      #m7-owner-add-permission{min-height:16px;margin:11px 2px 0;color:#8f816d;font-size:9px;line-height:1.4}
+      #m7-owner-profile-card{padding:18px!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
+      .m7ops-head{padding:3px 48px 14px 0}.m7ops-head b{display:block;font-size:19px}.m7ops-head small{display:block;margin-top:4px;color:#948773;font-size:10px;line-height:1.45}
+      .m7ops-mode{display:flex;gap:7px;margin:5px 0 14px}
+      .m7ops-mode button{flex:1;min-height:40px;border:1px solid rgba(217,164,65,.17);border-radius:12px;background:#11100e;color:#bbaa8e;font-size:10px;font-weight:900;touch-action:manipulation}
+      .m7ops-mode button.active{border-color:#d9a441;background:rgba(217,164,65,.13);color:#f2ce87}
+      .m7ops-preview{position:relative;display:grid;place-items:center;min-height:210px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#080706;overflow:hidden}
+      .m7ops-preview.banner{min-height:170px}
+      .m7ops-preview img{display:block;max-width:100%;max-height:290px;object-fit:cover;background:#111}
+      .m7ops-preview.profile img{width:150px;height:150px;border-radius:50%;border:3px solid #d9a441;box-shadow:0 0 22px rgba(217,164,65,.28)}
+      .m7ops-preview.banner img{width:100%;height:170px;border-radius:0;object-fit:cover}
+      .m7ops-preview span{padding:20px;color:#746b5e;font-size:10px;text-align:center}
+      .m7ops-pick,.m7ops-save{
+        width:100%;min-height:48px;border-radius:14px;font-size:12px;font-weight:950;touch-action:manipulation;cursor:pointer;
+      }
+      .m7ops-pick{display:grid;place-items:center;border:1px solid rgba(217,164,65,.28);background:rgba(217,164,65,.08);color:#edcb85}
+      .m7ops-save{margin-top:9px;border:0;background:linear-gradient(135deg,#f1cf83,#c58b31);color:#211507}
+      .m7ops-save:disabled{opacity:.45;pointer-events:none}
+      #m7-owner-profile-file{position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0}
+      #m7-owner-profile-status{min-height:20px;margin:9px 2px 0;color:#a99d8a;font-size:10px;line-height:1.45}
+      #m7-owner-profile-status.ok{color:#80dda5}#m7-owner-profile-status.err{color:#ff9999}
+      @media(max-width:390px){
+        .ma7alak-owner-add-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+        .ma7alak-owner-add-choice{min-height:112px!important;padding:12px 8px!important}
+        .ma7alak-owner-add-icon{font-size:26px!important}
+        #m7-owner-profile-card{padding:14px!important}
+      }
     `;
     document.head.appendChild(style);
 
@@ -2462,75 +2671,302 @@
     overlay.id="ma7alak-owner-add-chooser";
     overlay.innerHTML=`<div id="ma7alak-owner-add-panel">
       <button id="ma7alak-owner-add-close" type="button" aria-label="Close">×</button>
-      <div class="ma7alak-owner-add-title">What would you like to add?</div>
-      <div class="ma7alak-owner-add-sub">Choose Story or Homepage Reel</div>
+      <div class="ma7alak-owner-add-title">Create & manage</div>
+      <div class="ma7alak-owner-add-sub">Choose what you want to update for this shop.</div>
       <div class="ma7alak-owner-add-grid">
         <button id="ma7alak-owner-add-story" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">📸</span>Add Story<small>Disappears automatically after 24 hours</small></button>
         <button id="ma7alak-owner-add-reel" class="ma7alak-owner-add-choice" type="button"><span class="ma7alak-owner-add-icon">🔥</span>Add Homepage Reel<small>Appears in Reels on the homepage</small></button>
+        <button id="m7-owner-change-profile" class="ma7alak-owner-add-choice profile-tool" type="button" hidden><span class="ma7alak-owner-add-icon">◉</span>Profile Photo<small>Updates this circle and Show Shops</small></button>
+        <button id="m7-owner-change-banner" class="ma7alak-owner-add-choice profile-tool" type="button" hidden><span class="ma7alak-owner-add-icon">▭</span>Profile Banner<small>Replace the banner above your profile</small></button>
       </div>
+      <div id="m7-owner-add-permission" aria-live="polite"></div>
     </div>`;
     document.body.appendChild(overlay);
 
-    const close=()=>overlay.classList.remove("active");
-    document.getElementById("ma7alak-owner-add-close").addEventListener("click",close);
-    overlay.addEventListener("click",e=>{if(e.target===overlay) close();});
+    const studio=document.createElement("div");
+    studio.id="m7-owner-profile-studio";
+    studio.innerHTML=`<section id="m7-owner-profile-card">
+      <button id="m7-owner-profile-close" type="button" aria-label="Close">×</button>
+      <div class="m7ops-head"><b id="m7-owner-profile-title">Change profile photo</b><small>Choose an image from your phone. The previous stored image is removed after the new one is saved.</small></div>
+      <div class="m7ops-mode">
+        <button type="button" data-m7ops-mode="profile">Profile photo</button>
+        <button type="button" data-m7ops-mode="banner">Banner</button>
+      </div>
+      <div id="m7-owner-profile-preview" class="m7ops-preview profile"><span>Choose an image to preview it.</span></div>
+      <button id="m7-owner-profile-pick" class="m7ops-pick" type="button">📱 Choose image from device</button>
+      <input id="m7-owner-profile-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <button id="m7-owner-profile-save" class="m7ops-save" type="button" disabled>Save replacement</button>
+      <div id="m7-owner-profile-status" aria-live="polite"></div>
+    </section>`;
+    document.body.appendChild(studio);
 
-    document.getElementById("ma7alak-owner-add-story").addEventListener("click",function(){
-      close();
+    const closeChooser=()=>overlay.classList.remove("active");
+    const closeStudio=()=>{
+      revokePreview();
+      studio.classList.remove("active");
+      document.getElementById("m7-owner-profile-status").textContent="";
+      document.getElementById("m7-owner-profile-save").disabled=true;
+      document.getElementById("m7-owner-profile-file").value="";
+    };
 
-      window.postMessage(
-        {
-          type:"MA7ALAK_OPEN_STORY_UPLOADER",
-          shopSlug:activeSlug,
-          __ma7alakOpenStoryNow:true
-        },
-        "*"
-      );
+    document.getElementById("ma7alak-owner-add-close").addEventListener("click",closeChooser);
+    overlay.addEventListener("click",event=>{if(event.target===overlay)closeChooser();});
+    document.getElementById("m7-owner-profile-close").addEventListener("click",closeStudio);
+    studio.addEventListener("click",event=>{if(event.target===studio)closeStudio();});
+
+    document.getElementById("ma7alak-owner-add-story").addEventListener("click",()=>{
+      closeChooser();
+      window.postMessage({
+        type:"MA7ALAK_OPEN_STORY_UPLOADER",
+        shopSlug:activeSlug,
+        __ma7alakOpenStoryNow:true
+      },"*");
     });
 
-    document.getElementById("ma7alak-owner-add-reel").addEventListener("click",function(){
-      close();
-      if(window.Ma7alakOwnerReels && typeof window.Ma7alakOwnerReels.open==="function"){
-        window.Ma7alakOwnerReels.open(activeSlug).catch(function(error){console.error("SHOUFHON Reel uploader:",error);});
+    document.getElementById("ma7alak-owner-add-reel").addEventListener("click",()=>{
+      closeChooser();
+      if(window.Ma7alakOwnerReels&&typeof window.Ma7alakOwnerReels.open==="function"){
+        window.Ma7alakOwnerReels.open(activeSlug).catch(error=>console.error("SHOUFHON Reel uploader:",error));
       }else{
         window.postMessage({type:"MA7ALAK_OPEN_REEL_UPLOADER",shopSlug:activeSlug},"*");
       }
     });
+
+    document.getElementById("m7-owner-change-profile").addEventListener("click",()=>{
+      closeChooser();
+      openProfileStudio("profile");
+    });
+    document.getElementById("m7-owner-change-banner").addEventListener("click",()=>{
+      closeChooser();
+      openProfileStudio("banner");
+    });
+
+    studio.querySelectorAll("[data-m7ops-mode]").forEach(button=>{
+      button.addEventListener("click",()=>openProfileStudio(button.dataset.m7opsMode));
+    });
+
+    document.getElementById("m7-owner-profile-pick").addEventListener("click",()=>{
+      document.getElementById("m7-owner-profile-file").click();
+    });
+
+    document.getElementById("m7-owner-profile-file").addEventListener("change",event=>{
+      const file=event.target.files?.[0]||null;
+      const status=document.getElementById("m7-owner-profile-status");
+      try{
+        validateImage(file);
+        revokePreview();
+        pendingFile=file;
+        pendingObjectUrl=URL.createObjectURL(file);
+        renderProfilePreview(pendingObjectUrl);
+        document.getElementById("m7-owner-profile-save").disabled=false;
+        status.textContent="Ready to save.";
+        status.className="";
+      }catch(error){
+        revokePreview();
+        event.target.value="";
+        document.getElementById("m7-owner-profile-save").disabled=true;
+        status.textContent=error.message||"Invalid image.";
+        status.className="err";
+      }
+    });
+
+    document.getElementById("m7-owner-profile-save").addEventListener("click",saveProfileReplacement);
   }
 
-  function showChooser(slug,source){
+  function renderProfilePreview(url){
+    const preview=document.getElementById("m7-owner-profile-preview");
+    if(!preview)return;
+    preview.className="m7ops-preview "+profileMode;
+    preview.innerHTML=url
+      ? '<img src="'+esc(url)+'" alt="Preview">'
+      : "<span>Choose an image to preview it.</span>";
+  }
+
+  function currentModeUrl(){
+    if(!activeProfile)return"";
+    if(profileMode==="banner"){
+      return String(activeProfile.directory_options?.profile_banner_image_url||"").trim();
+    }
+    return String(activeProfile.story_logo_url||activeProfile.profile_image_url||"").trim();
+  }
+
+  function openProfileStudio(mode){
+    injectChooser();
+    profileMode=mode==="banner"?"banner":"profile";
+    revokePreview();
+
+    const studio=document.getElementById("m7-owner-profile-studio");
+    const title=document.getElementById("m7-owner-profile-title");
+    title.textContent=profileMode==="banner"?"Change profile banner":"Change profile photo";
+
+    studio.querySelectorAll("[data-m7ops-mode]").forEach(button=>{
+      button.classList.toggle("active",button.dataset.m7opsMode===profileMode);
+    });
+
+    renderProfilePreview(currentModeUrl());
+    document.getElementById("m7-owner-profile-save").disabled=true;
+    document.getElementById("m7-owner-profile-file").value="";
+    const status=document.getElementById("m7-owner-profile-status");
+    status.textContent="";
+    status.className="";
+    studio.classList.add("active");
+  }
+
+  async function uploadReplacement(file,mode){
+    validateImage(file);
+    const c=await getClient();
+    const ext=imageExtension(file);
+    const folder=mode==="banner"?"owner-banner":"owner-profile";
+    const path=
+      folder+"/"+activeSlug+"/"+
+      Date.now()+"-"+Math.random().toString(36).slice(2,10)+"."+ext;
+
+    const upload=await c.storage.from(IMAGE_BUCKET).upload(path,file,{
+      cacheControl:"0",
+      upsert:false,
+      contentType:file.type||undefined
+    });
+    if(upload.error)throw upload.error;
+
+    const publicResult=c.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+    const publicUrl=publicResult.data?.publicUrl||"";
+    if(!publicUrl){
+      await c.storage.from(IMAGE_BUCKET).remove([path]).catch(()=>{});
+      throw new Error("Could not create the new image URL.");
+    }
+
+    return{path,publicUrl};
+  }
+
+  async function saveProfileReplacement(){
+    const save=document.getElementById("m7-owner-profile-save");
+    const status=document.getElementById("m7-owner-profile-status");
+    if(!pendingFile||!activeSlug)return;
+
+    save.disabled=true;
+    save.textContent="Saving…";
+    status.textContent="Uploading replacement…";
+    status.className="";
+
+    let uploaded=null;
+    try{
+      const c=await getClient();
+      await loadOwnerProfile(activeSlug);
+      if(!profileEditAllowed)throw new Error("Profile editing is disabled for this shop.");
+
+      const oldProfile=String(activeProfile.profile_image_url||"").trim();
+      const oldStoryLogo=String(activeProfile.story_logo_url||"").trim();
+      const oldBanner=String(activeProfile.directory_options?.profile_banner_image_url||"").trim();
+
+      uploaded=await uploadReplacement(pendingFile,profileMode);
+
+      const rpc=await c.rpc("owner_update_profile_media",{
+        p_shop_slug:activeSlug,
+        p_profile_image_url:profileMode==="profile"?uploaded.publicUrl:null,
+        p_banner_image_url:profileMode==="banner"?uploaded.publicUrl:null,
+        p_update_profile:profileMode==="profile",
+        p_update_banner:profileMode==="banner"
+      });
+
+      if(rpc.error)throw rpc.error;
+
+      if(profileMode==="profile"){
+        await cleanupOldImage(oldProfile,activeSlug);
+        if(oldStoryLogo&&oldStoryLogo!==oldProfile){
+          await cleanupOldImage(oldStoryLogo,activeSlug);
+        }
+      }else{
+        await cleanupOldImage(oldBanner,activeSlug);
+      }
+
+      await loadOwnerProfile(activeSlug);
+      status.textContent=profileMode==="banner"
+        ?"Banner updated."
+        :"Profile photo updated everywhere.";
+      status.className="ok";
+      renderProfilePreview(currentModeUrl());
+      revokePreview();
+
+      try{
+        originalSource?.postMessage({
+          type:"MA7ALAK_OWNER_PROFILE_UPDATED",
+          shopSlug:activeSlug,
+          mode:profileMode
+        },"*");
+      }catch(_){}
+
+      try{
+        window.Ma7alakDirectory?.refresh?.();
+      }catch(_){}
+
+      setTimeout(()=>{
+        document.getElementById("m7-owner-profile-studio")?.classList.remove("active");
+      },750);
+    }catch(error){
+      if(uploaded?.path){
+        try{await (await getClient()).storage.from(IMAGE_BUCKET).remove([uploaded.path])}catch(_){}
+      }
+      status.textContent=error?.message||"Could not update the image.";
+      status.className="err";
+      save.disabled=false;
+    }finally{
+      save.textContent="Save replacement";
+    }
+  }
+
+  async function showChooser(slug,source){
     activeSlug=String(slug||"").trim();
     originalSource=source||null;
-    if(!activeSlug) return;
+    if(!activeSlug)return;
     injectChooser();
-    document.getElementById("ma7alak-owner-add-chooser").classList.add("active");
+
+    const overlay=document.getElementById("ma7alak-owner-add-chooser");
+    const profileButton=document.getElementById("m7-owner-change-profile");
+    const bannerButton=document.getElementById("m7-owner-change-banner");
+    const permission=document.getElementById("m7-owner-add-permission");
+
+    profileButton.hidden=true;
+    bannerButton.hidden=true;
+    permission.textContent="Checking your shop permissions…";
+    overlay.classList.add("active");
+
+    try{
+      await loadOwnerProfile(activeSlug);
+      profileButton.hidden=!profileEditAllowed;
+      bannerButton.hidden=!profileEditAllowed;
+      permission.textContent=profileEditAllowed
+        ?"Profile editing is enabled by Admin."
+        :"Profile/banner editing is currently locked by Admin.";
+    }catch(error){
+      profileEditAllowed=false;
+      permission.textContent=error?.message||"Could not check profile editing permission.";
+    }
   }
 
-  // Normal + request -> chooser. Explicit Story request -> Story uploader.
-  window.addEventListener("message",function(event){
-    if(!event.data || event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER") return;
+  window.addEventListener("message",event=>{
+    if(!event.data||event.data.type!=="MA7ALAK_OPEN_STORY_UPLOADER")return;
 
     if(
       event.data.__ma7alakOpenStoryNow===true &&
-      (
-        !event.source ||
-        event.source===window
-      )
+      (!event.source||event.source===window)
     ){
       return;
     }
 
     const slug=String(event.data.shopSlug||"").trim();
-    if(!slug) return;
+    if(!slug)return;
 
     event.stopImmediatePropagation();
     showChooser(slug,event.source);
   },true);
 
-  document.addEventListener("keydown",function(event){
-    if(event.key!=="Escape") return;
-    const el=document.getElementById("ma7alak-owner-add-chooser");
-    if(el) el.classList.remove("active");
+  document.addEventListener("keydown",event=>{
+    if(event.key!=="Escape")return;
+    document.getElementById("ma7alak-owner-add-chooser")?.classList.remove("active");
+    if(document.getElementById("m7-owner-profile-studio")?.classList.contains("active")){
+      revokePreview();
+      document.getElementById("m7-owner-profile-studio").classList.remove("active");
+    }
   });
 })();
 
