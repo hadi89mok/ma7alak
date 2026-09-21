@@ -7402,9 +7402,7 @@ function decorateAll(){
         }
       };
 
-      moveSection("Banner Placement");
-      moveSection("Profile Logo Placement");
-
+      /* Keep the actual image editors together first, then their layout controls. */
       const topBanner=findSection("Top Profile Banner");
       if(topBanner){
         let node=topBanner;
@@ -7414,6 +7412,9 @@ function decorateAll(){
           node=next;
         }
       }
+
+      moveSection("Banner Placement");
+      moveSection("Profile Logo Placement");
     }
 
     const titleBox =
