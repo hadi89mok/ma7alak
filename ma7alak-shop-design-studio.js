@@ -49,13 +49,14 @@
       body.m7studio-body-open #m7savebar{display:none!important}
       #ma-admin-edit-card.m7studio-fullscreen{position:fixed!important;inset:0!important;z-index:100000!important;width:100vw!important;height:100dvh!important;min-height:0!important;max-width:none!important;max-height:none!important;display:flex!important;flex-direction:column!important;margin:0!important;padding:0!important;overflow:hidden!important;touch-action:auto!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at 8% 0%,rgba(218,170,82,.07),transparent 29%),linear-gradient(180deg,#0b0d0e,#070809 58%,#060707)!important;box-shadow:none!important;container-type:normal!important;color:#f4ead9!important}
       #ma-admin-edit-card.m7studio-fullscreen>.m7v4-panel-close{display:none!important}
-      #ma-admin-edit-card.m7studio-fullscreen>:not(.m7studio-topbar):not(.m7studio-tabs):not(.m7v4-preview-grid){display:none!important}
+      #ma-admin-edit-card.m7studio-fullscreen>:not(.m7studio-topbar):not(.m7studio-tabs):not(.m7v4-preview-grid):not(.m7studio-desktop-save-dock){display:none!important}
       .m7studio-topbar{position:relative;flex:0 0 auto;z-index:130;min-height:72px;display:flex;align-items:center;gap:14px;padding:10px clamp(16px,2.2vw,34px);border-bottom:1px solid rgba(218,170,82,.15);background:rgba(8,10,11,.965);box-shadow:0 10px 28px rgba(0,0,0,.30);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
       .m7studio-brand-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border:1px solid rgba(218,170,82,.25);border-radius:14px;background:rgba(218,170,82,.07);color:#efc76e;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
       .m7studio-title{min-width:0;margin-right:auto}.m7studio-title b{display:block;color:#f3ca70;font-size:clamp(18px,1.55vw,25px);line-height:1.1;font-weight:950}.m7studio-title small{display:block;margin-top:4px;color:#938878;font-size:10px;line-height:1.35}
       .m7studio-sync{display:flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid rgba(72,219,138,.18);border-radius:999px;background:rgba(72,219,138,.055);color:#74e3a4;font-size:8px;font-weight:900;white-space:nowrap}.m7studio-sync:before{content:"";width:7px;height:7px;border-radius:50%;background:#46dc88;box-shadow:0 0 11px rgba(70,220,136,.65)}
       .m7studio-top-btn{min-height:42px;padding:0 15px;border:1px solid rgba(218,170,82,.28);border-radius:12px;background:rgba(218,170,82,.035);color:#e9c57b;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}.m7studio-top-btn.primary{min-width:130px;border-color:#e4b355;background:linear-gradient(135deg,#f4d383,#d9a13f);color:#1a1208;box-shadow:0 8px 22px rgba(218,170,82,.12)}.m7studio-top-btn.close{width:42px;min-width:42px;padding:0;font-size:21px;line-height:1}
       .m7studio-tabs{position:relative;flex:0 0 auto;z-index:125;display:flex;gap:7px;padding:10px clamp(16px,2.2vw,34px);overflow-x:auto;border-bottom:1px solid rgba(218,170,82,.11);background:rgba(9,11,12,.955);scrollbar-width:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.m7studio-tabs::-webkit-scrollbar{display:none}
+      .m7studio-desktop-save-dock{display:none}
       .m7studio-tab{flex:0 0 auto;min-height:42px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:#101214;color:#b7aea1;font-size:9px;font-weight:900;cursor:pointer;transition:.15s ease}.m7studio-tab i{color:#d9aa58;font-style:normal;font-size:12px}.m7studio-tab.active{border-color:#d9aa58;background:radial-gradient(circle at 20% 0%,rgba(239,194,101,.17),transparent 58%),#17150f;color:#f2ce83;box-shadow:0 0 0 1px rgba(217,170,88,.10),0 0 16px rgba(217,170,88,.12)}
       #ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{display:grid!important;grid-template-columns:minmax(580px,1fr) minmax(360px,430px)!important;gap:18px!important;align-items:stretch!important;flex:1 1 auto!important;width:min(1760px,calc(100vw - 38px))!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:14px 0 18px!important;overflow:hidden!important;box-sizing:border-box!important}
       #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{width:100%!important;max-width:none!important;min-width:0!important;height:100%!important;min-height:0!important;padding:0 8px 56px 0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;scrollbar-gutter:stable!important;touch-action:pan-y!important;background:transparent!important}
@@ -171,6 +172,90 @@
       #ma-admin-edit-card .m7studio-global-extras .m7da-field:not(.m7studio-field-hidden){display:flex!important}
       #ma-admin-edit-card .m7studio-global-extras .m7studio-field-hidden{display:none!important}
       .m7v4-actions-studio{grid-template-columns:1fr!important}
+
+      /*
+         Desktop only: the public/site header lives above the Studio. Keep the
+         Studio chrome out of that click zone and give Save its own fixed dock.
+         Mobile keeps the existing two-row top bar unchanged.
+      */
+      @media(min-width:821px){
+        #ma-admin-edit-card.m7studio-fullscreen{
+          inset:88px 0 0!important;
+          height:auto!important;
+          max-height:none!important;
+        }
+        #ma-admin-edit-card.m7studio-fullscreen .m7studio-topbar [data-m7studio-save]{
+          display:none!important;
+        }
+        #ma-admin-edit-card.m7studio-fullscreen #ma-admin-edit-form{
+          padding-bottom:118px!important;
+        }
+        .m7studio-desktop-save-dock{
+          position:fixed;
+          right:28px;
+          bottom:22px;
+          z-index:200500;
+          width:min(390px,calc(100vw - 56px));
+          min-height:64px;
+          display:flex;
+          align-items:center;
+          gap:13px;
+          padding:10px 11px 10px 15px;
+          border:1px solid rgba(239,194,101,.40);
+          border-radius:16px;
+          background:rgba(10,11,11,.965);
+          box-shadow:0 16px 46px rgba(0,0,0,.56),0 0 24px rgba(217,170,88,.12),inset 0 1px 0 rgba(255,255,255,.035);
+          backdrop-filter:blur(18px);
+          -webkit-backdrop-filter:blur(18px);
+        }
+        .m7studio-desktop-save-copy{
+          min-width:0;
+          flex:1 1 auto;
+        }
+        .m7studio-desktop-save-copy b{
+          display:block;
+          color:#f0ce87;
+          font-size:11px;
+          font-weight:950;
+          line-height:1.25;
+        }
+        .m7studio-desktop-save-copy small{
+          display:block;
+          min-height:14px;
+          margin-top:3px;
+          overflow:hidden;
+          color:#988a76!important;
+          font-size:8px!important;
+          line-height:1.35!important;
+          text-overflow:ellipsis;
+          white-space:nowrap;
+        }
+        .m7studio-desktop-save-button{
+          flex:0 0 auto;
+          min-width:142px;
+          min-height:44px;
+          padding:0 16px;
+          border:1px solid #edc061;
+          border-radius:12px;
+          background:linear-gradient(135deg,#f6d682,#dda943);
+          color:#171008;
+          font-size:11px;
+          font-weight:950;
+          cursor:pointer;
+          box-shadow:0 8px 22px rgba(218,170,82,.18);
+        }
+        .m7studio-desktop-save-button:hover{
+          filter:brightness(1.06);
+        }
+        .m7studio-desktop-save-button:disabled{
+          opacity:.66;
+          cursor:wait;
+        }
+        #ma-admin-edit-card.m7studio-manager-mode .m7studio-desktop-save-dock{
+          display:none!important;
+        }
+      }
+
       @media(max-width:820px){
         #ma-admin-edit-card.m7studio-fullscreen{display:flex!important;overflow:hidden!important}
         .m7studio-topbar{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;gap:8px;padding:10px;padding-top:max(10px,env(safe-area-inset-top))}
@@ -981,6 +1066,28 @@
         },true);
       });
     }
+    let desktopSaveDock=panel.querySelector(":scope > .m7studio-desktop-save-dock");
+    if(!desktopSaveDock){
+      desktopSaveDock=document.createElement("div");
+      desktopSaveDock.className="m7studio-desktop-save-dock";
+      desktopSaveDock.innerHTML=
+        '<div class="m7studio-desktop-save-copy">'+
+          '<b>Save shop changes</b>'+
+          '<small data-m7studio-save-dock-status>Ready · saves the current Studio draft</small>'+
+        '</div>'+
+        '<button type="button" class="m7studio-desktop-save-button" data-m7studio-save-dock>▣ Save Changes</button>';
+
+      desktopSaveDock
+        .querySelector("[data-m7studio-save-dock]")
+        ?.addEventListener("click",()=>{
+          top
+            .querySelector("[data-m7studio-save]")
+            ?.click();
+        });
+
+      panel.appendChild(desktopSaveDock);
+    }
+
     const picker=nav.querySelector(".m7studio-section-picker");if(picker)picker.value=activeTab;
     const name=String(document.getElementById("ma-edit-name")?.value||document.getElementById("ma-edit-original-slug")?.value||"Shop").trim();
     const subtitle=top.querySelector("[data-m7studio-subtitle]");if(subtitle)subtitle.textContent="Editing "+name;
@@ -1119,11 +1226,41 @@
   }
   function bindSaveFeedback(panel){
     if(panel.__studioSaveFeedback)return;panel.__studioSaveFeedback=true;
-    const status=panel.querySelector("[data-m7studio-save-status]"),source=document.getElementById("ma-admin-edit-status");
-    if(source)new MutationObserver(()=>{status.textContent=source.textContent}).observe(source,{childList:true,characterData:true,subtree:true});
+    const status=panel.querySelector("[data-m7studio-save-status]");
+    const dockStatus=panel.querySelector("[data-m7studio-save-dock-status]");
+    const source=document.getElementById("ma-admin-edit-status");
+
+    if(source){
+      new MutationObserver(()=>{
+        const message=source.textContent||"";
+        if(status)status.textContent=message;
+        if(dockStatus&&message)dockStatus.textContent=message;
+      }).observe(source,{childList:true,characterData:true,subtree:true});
+    }
+
     window.addEventListener("ma7alak:studio-save-state",event=>{
-      const button=panel.querySelector("[data-m7studio-save]");button.disabled=event.detail.state==="saving";button.textContent=button.disabled?"Saving…":"Save Changes";
-      status.textContent=event.detail.state==="saved"?"Saved successfully.":event.detail.message||"Saving…";
+      const saving=event.detail.state==="saving";
+      const button=panel.querySelector("[data-m7studio-save]");
+      const dockButton=panel.querySelector("[data-m7studio-save-dock]");
+
+      if(button){
+        button.disabled=saving;
+        button.textContent=saving?"Saving…":"Save Changes";
+      }
+
+      if(dockButton){
+        dockButton.disabled=saving;
+        dockButton.textContent=saving?"Saving…":"▣ Save Changes";
+      }
+
+      const message=
+        event.detail.state==="saved"
+          ?"Saved successfully."
+          :event.detail.message||"Saving…";
+
+      if(status)status.textContent=message;
+      if(dockStatus)dockStatus.textContent=message;
+
       if(event.detail.state==="saved"&&keepOpenAfterSave){
         [0,180,520].forEach(delay=>setTimeout(()=>restoreStudioAfterSave(panel),delay));
       }
