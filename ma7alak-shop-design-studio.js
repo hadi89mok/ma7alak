@@ -27,6 +27,7 @@
   ];
 
   let activeTab="profile";
+  let keepOpenAfterSave=false;
   let openingWanted=false;
   let openTimer=0;
 
@@ -937,6 +938,7 @@
           activateTab(id.startsWith("ma-edit-")?"details":id.includes("hours")?"hours":id.includes("about")?"about":id.includes("profile")?"profile":"advanced");
           invalid.scrollIntoView({block:"center"});invalid.reportValidity();return;
         }
+        keepOpenAfterSave=true;
         document.getElementById("ma-admin-save-edit")?.click();
       });
       top.querySelector("[data-m7studio-preview]")?.addEventListener("click",()=>{
@@ -1122,7 +1124,26 @@
     window.addEventListener("ma7alak:studio-save-state",event=>{
       const button=panel.querySelector("[data-m7studio-save]");button.disabled=event.detail.state==="saving";button.textContent=button.disabled?"Saving…":"Save Changes";
       status.textContent=event.detail.state==="saved"?"Saved successfully.":event.detail.message||"Saving…";
+      if(event.detail.state==="saved"&&keepOpenAfterSave){
+        [0,180,520].forEach(delay=>setTimeout(()=>restoreStudioAfterSave(panel),delay));
+      }
     });
+    window.addEventListener("ma7alak:studio-save-complete",()=>{
+      if(!keepOpenAfterSave)return;
+      restoreStudioAfterSave(panel);
+      setTimeout(()=>{keepOpenAfterSave=false},700);
+    });
+  }
+
+  function restoreStudioAfterSave(panel){
+    const form=document.getElementById("ma-admin-edit-form");
+    if(!panel||!form||!keepOpenAfterSave)return;
+    panel.hidden=false;
+    panel.removeAttribute("hidden");
+    panel.classList.add("m7v4-show","m7v4-mode-design","m7studio-fullscreen");
+    document.body.classList.add("m7studio-body-open");
+    ensureChrome(panel);
+    activateTab(activeTab);
   }
   function simplifyAddShop(){
     const form=document.getElementById("ma-admin-shop-form");if(!form)return;form.classList.add("m7studio-simple-add");
@@ -1413,6 +1434,7 @@
   function closeStudio(){
     clearTimeout(openTimer);
     openingWanted=false;
+    keepOpenAfterSave=false;
 
     const form=document.getElementById("ma-admin-edit-form");
     if(form&&form.__m7studioDisconnectedObserver){
