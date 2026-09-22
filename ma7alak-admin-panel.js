@@ -12801,6 +12801,36 @@ function ensureCss(){
       scroll-margin-top:18px;
     }
 
+    body.m7-admin-v4.m7v4-add-shop-open{
+      overflow:hidden!important;
+    }
+
+    body.m7-admin-v4 .m7v4-add-shop-panel.m7v4-show{
+      position:fixed!important;
+      z-index:12000!important;
+      inset:18px!important;
+      width:min(900px,calc(100vw - 36px))!important;
+      max-width:900px!important;
+      max-height:calc(100dvh - 36px)!important;
+      margin:auto!important;
+      box-sizing:border-box!important;
+      overflow-x:hidden!important;
+      overflow-y:auto!important;
+      overscroll-behavior:contain;
+      border:1px solid rgba(217,170,88,.34)!important;
+      border-radius:22px!important;
+      background:#12100e!important;
+      box-shadow:0 0 0 100vmax rgba(0,0,0,.82),0 24px 80px rgba(0,0,0,.72)!important;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    body.m7-admin-v4 .m7v4-add-shop-panel.m7v4-show > .m7v4-panel-close{
+      position:sticky!important;
+      top:8px!important;
+      float:right;
+      margin:0 0 -34px!important;
+    }
+
     .m7v4-panel-close{
       position:absolute!important;
       top:10px!important;
@@ -14336,6 +14366,12 @@ function ensureCss(){
     }
 
     @media(max-width:470px){
+      body.m7-admin-v4 .m7v4-add-shop-panel.m7v4-show{
+        inset:7px!important;
+        width:calc(100vw - 14px)!important;
+        max-height:calc(100dvh - 14px)!important;
+        border-radius:17px!important;
+      }
       .m7v4-top{padding:13px}
       .m7v4-home,.m7v4-shop-workspace{padding:11px}
       .m7v4-shop{grid-template-columns:52px minmax(0,1fr)}
@@ -14356,12 +14392,22 @@ function markLegacyPanels(){
     const el=document.getElementById(id);
     if(el)el.classList.add("m7v4-legacy-panel");
   });
+
+  const addPanel=document.getElementById("ma-admin-shop-form")?.closest(".ma-admin-card,section,fieldset");
+  if(addPanel){
+    if(!addPanel.id)addPanel.id="m7v4-add-shop-panel";
+    addPanel.classList.add("m7v4-legacy-panel","m7v4-add-shop-panel");
+  }
 }
 
 function closeV4Panel(panel){
   if(!panel)return;
 
   const id=panel.id||"";
+
+  if(panel.classList.contains("m7v4-add-shop-panel")){
+    document.body.classList.remove("m7v4-add-shop-open");
+  }
 
   const nativeClose={
     "ma-admin-edit-card":"ma-admin-cancel-edit",
@@ -14501,6 +14547,7 @@ function clearLegacy(){
   });
 
   document.getElementById("ma-manage-shops-card")?.classList.remove("m7v4-show-add");
+  document.body.classList.remove("m7v4-add-shop-open");
 }
 
 function showLegacy(id){
@@ -17621,17 +17668,10 @@ function mount(){
 
     if(event.target.closest("[data-m7v4-add]")){
       const form=document.getElementById("ma-admin-shop-form");
-      const manage=document.getElementById("ma-manage-shops-card");
       const drawer=form?.closest(".m7sc-add-drawer");
       const section=form?.closest(".ma-admin-card,section,fieldset");
 
       clearLegacy();
-
-      if(manage){
-        manage.classList.add("m7v4-show-add");
-        manage.hidden=false;
-        ensurePanelCloseButton(manage);
-      }
 
       if(drawer){
         drawer.open=true;
@@ -17640,8 +17680,12 @@ function mount(){
 
       if(section){
         section.hidden=false;
+        section.removeAttribute("hidden");
         section.style.removeProperty("display");
-        setTimeout(()=>section.scrollIntoView({behavior:"smooth",block:"start"}),60);
+        section.classList.add("m7v4-show","m7v4-add-shop-panel");
+        document.body.classList.add("m7v4-add-shop-open");
+        ensurePanelCloseButton(section);
+        setTimeout(()=>document.getElementById("ma-shop-name")?.focus(),60);
       }
       return;
     }
