@@ -1865,6 +1865,51 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
   }
 
+  async function getFollowBroadcastTopic(){
+    const visitorId=getFollowVisitorId();
+    if(!visitorId||!window.crypto||!window.crypto.subtle||typeof TextEncoder==="undefined"){
+      return "";
+    }
+    try{
+      const bytes=new TextEncoder().encode(visitorId);
+      const digest=await window.crypto.subtle.digest("SHA-256",bytes);
+      const hex=Array.from(new Uint8Array(digest)).map(function(value){
+        return value.toString(16).padStart(2,"0");
+      }).join("");
+      return "follow:"+hex;
+    }catch(error){
+      return "";
+    }
+  }
+
+  async function bindFollowingRealtime(){
+    const supabaseClient=getClient();
+    if(!supabaseClient||typeof supabaseClient.channel!=="function"){
+      return;
+    }
+
+    if(followingRealtimeChannel){
+      try{
+        await supabaseClient.removeChannel(followingRealtimeChannel);
+      }catch(error){}
+      followingRealtimeChannel=null;
+    }
+
+    const topic=await getFollowBroadcastTopic();
+    if(!topic){
+      return;
+    }
+
+    try{
+      followingRealtimeChannel=supabaseClient
+        .channel(topic)
+        .on("broadcast",{event:"follow_changed"},function(){
+          setTimeout(refreshFollowingState,25);
+        })
+        .subscribe();
+    }catch(error){}
+  }
+
   function normalizeFollowedSlugs(data){
     const rows=Array.isArray(data)?data:[];
     return Array.from(new Set(rows.map(function(row){
@@ -2081,14 +2126,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     },120000);
 
     const supabaseClient=getClient();
-    if(supabaseClient&&typeof supabaseClient.channel==="function"){
-      try{
-        followingRealtimeChannel=supabaseClient
-          .channel("ma7alak-header-following-live-"+Math.random().toString(36).slice(2))
-          .on("postgres_changes",{event:"*",schema:"public",table:"shop_follows",filter:"visitor_id=eq."+getFollowVisitorId()},function(){refreshFollowingState();})
-          .subscribe();
-      }catch(error){}
-    }
+    bindFollowingRealtime();
 
     if(supabaseClient&&typeof supabaseClient.channel==="function"){
       try{
@@ -2105,7 +2143,14 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
     window.addEventListener("focus",refreshFollowingState);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){refreshFollowingState();}});
-    window.addEventListener("storage",function(event){if(event.key===FOLLOW_VISITOR_KEY){refreshFollowingState();}});
+    window.addEventListener("storage",function(event){
+      if(event.key===FOLLOW_VISITOR_KEY){
+        bindFollowingRealtime();
+        refreshFollowingState();
+      }
+    });
+    window.addEventListener("ma7alak:follow-change",function(){setTimeout(refreshFollowingState,25);});
+    window.addEventListener("ma7alak:follow-changed",function(){setTimeout(refreshFollowingState,25);});
     window.addEventListener("message",function(event){
       if(!event.data){return;}
       if(event.data.type==="MA7ALAK_FOLLOW_CHANGED"||event.data.type==="MA7ALAK_FOLLOW_STATE_CHANGED"){
@@ -3877,7 +3922,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
    3. Clicking Following opens a premium dark/gold panel matching ShoufHon.
    4. Every followed shop shows its real shop icon/name and “You are following this shop ✓”.
    5. Clicking the shop row/circle opens that shop page.
-   6. Uses the existing get_visitor_followed_shops RPC and ma7alak_visitor_id — no second follow system.
+   6. Uses get_visitor_followed_shops for state and a hashed Realtime Broadcast signal — no raw shop_follows subscription.
    7. Live refresh via Supabase Realtime when available + 30s recovery fallback, focus/visibility/message sync.
    8. Works for normal viewers and shop owners following other shops.
    9. Existing Reels, Search, Notifications, owner profile and owner-only Story Likes remain intact.
