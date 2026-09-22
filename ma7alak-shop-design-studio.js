@@ -14,6 +14,7 @@
     ["details","✎","Details","Shop name, Arabic name, category, area, location and page link"],
     ["profile","♙","Profile & Banner","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
     ["story","◉","Story","Story motion, upload burst, glow color/strength, speed, sparkles and logo pulse"],
+    ["vip","♛","VIP Effects","Custom rings, branded orbit objects, particles, colors, motion and phone performance"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
     ["uploads","↑","Uploads","Manage photos and videos here. Media actions save immediately."],
@@ -416,7 +417,7 @@
     const panel=document.getElementById("ma-admin-edit-card");
     if(!form||!panel)return null;
 
-    if(activeTab==="profile"||activeTab==="story"){
+    if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
       return form.querySelector("[data-m7-profile-shell-preview]");
     }
 
@@ -591,7 +592,7 @@
        the current controls before cloning them.
     */
     try{
-      if(activeTab==="profile"||activeTab==="story"){
+      if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
         design.__m7ProfileShellRefresh?.();
         design.__m7BannerRefresh?.();
       }
@@ -635,7 +636,7 @@
       clone.removeAttribute("id");
       clone.querySelectorAll("[id]").forEach(el=>el.removeAttribute("id"));
 
-      if(activeTab==="profile"||activeTab==="story"){
+      if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
         hydrateProfilePreview(clone);
       }
 
@@ -933,6 +934,16 @@
       if(storyTitle)storyTitle.textContent="Story Effects";
       hideDesignChrome();
       tidyPane(design?.querySelector('[data-m7ds-pane="identity"]'));
+      hideFormRoots(form,roots);
+    }
+    else if(key==="vip"){
+      const roots=showRoots(form,[".m7-design-studio"]);
+      showPanes(form,["vip"]);
+      const vipPane=design?.querySelector('[data-m7ds-pane="vip"]');
+      const vipTitle=vipPane?.querySelector(":scope > .m7ds-section-title");
+      if(vipTitle)vipTitle.textContent="VIP Story Identity";
+      hideDesignChrome();
+      tidyPane(vipPane);
       hideFormRoots(form,roots);
     }
     else if(key==="live"){
