@@ -811,8 +811,8 @@ function injectNotificationCSS(){
 
   max-height:
     min(
-      620px,
-      calc(100vh - 90px)
+      455px,
+      calc(100dvh - 92px)
     );
 
   display:none;
@@ -1004,6 +1004,15 @@ function injectNotificationCSS(){
   touch-action:pan-y;
 
   padding:7px;
+
+  max-height:
+    min(
+      370px,
+      calc(100dvh - 170px)
+    );
+
+  scrollbar-width:thin;
+  scrollbar-color:rgba(217,164,65,.28) transparent;
 
 }
 
@@ -3673,12 +3682,7 @@ function renderNotifications(){
 
 
   const visibleNotifications =
-    showAllNotifications
-      ? notifications
-      : notifications.slice(
-          0,
-          6
-        );
+    notifications;
 
 
   list.innerHTML =
@@ -3840,51 +3844,8 @@ function renderNotifications(){
       .join("");
 
 
-  if(
-    !showAllNotifications &&
-    notifications.length > 6
-  ){
-
-    const seePrevious =
-      document.createElement(
-        "button"
-      );
-
-
-    seePrevious.type =
-      "button";
-
-
-    seePrevious.className =
-      "ma7alak-see-previous";
-
-
-    seePrevious.textContent =
-      "See previous notifications";
-
-
-    seePrevious.addEventListener(
-      "click",
-      function(event){
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        showAllNotifications =
-          true;
-
-        renderNotifications();
-
-      }
-    );
-
-
-    list.appendChild(
-      seePrevious
-    );
-
-  }
-
+  /* All loaded notifications stay in the fixed-height list.
+     Older items are reached by scrolling inside the panel. */
 
   list
     .querySelectorAll(
