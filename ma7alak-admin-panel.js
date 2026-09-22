@@ -3741,7 +3741,7 @@
         .select("directory_options").eq("shop_slug",slug).maybeSingle();
       if(latest.error)throw latest.error;
       if(!latest.data)throw new Error("This shop no longer exists. Reopen the shop list.");
-      for(const key of ["badge","vip_crown_enabled","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+      for(const key of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
         if(Object.prototype.hasOwnProperty.call(latest.data.directory_options||{},key))payload.directory_options[key]=latest.data.directory_options[key];
         else delete payload.directory_options[key];
       }
@@ -13143,9 +13143,16 @@ function ensureCss(){
       width:100%;min-height:38px;margin-top:9px;border:1px solid rgba(217,170,88,.28);border-radius:11px;
       background:linear-gradient(135deg,rgba(217,170,88,.16),rgba(217,170,88,.06));color:#efcd88;font-size:8px;font-weight:950;cursor:pointer;
     }
+    .m7v4-og-settings{margin-top:10px;padding:13px;border:1px solid rgba(232,184,81,.28);border-radius:16px;background:radial-gradient(circle at 8% 0,rgba(232,184,81,.10),transparent 40%),#100d09;color:#eee1ca}
+    .m7v4-og-head{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:12px;align-items:center;margin-bottom:12px}.m7v4-og-head b{display:block;color:#f4d48f;font-size:11px}.m7v4-og-head small{display:block;margin-top:3px;color:#8f8169;font-size:8px;line-height:1.45}
+    .m7v4-og-preview{--og1:#d9a441;--og2:#fff2a4;--ogbg:#160e06;--ogtext:#fff0b8;--ogsize:42px;--ogfont:11px;--ogspeed:2.8s;--ogglow:14px;position:relative;width:var(--ogsize);height:var(--ogsize);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;justify-self:end;border:2px solid var(--og2);border-radius:50%;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--og1) 82%,transparent),0 0 var(--ogglow) color-mix(in srgb,var(--og1) 74%,transparent);background:radial-gradient(circle at 34% 23%,color-mix(in srgb,var(--og1) 27%,var(--ogbg)),var(--ogbg) 64%);color:var(--ogtext);line-height:1;isolation:isolate}.m7v4-og-preview i{position:relative;z-index:1;height:10px;margin-top:-3px;color:var(--og1);font-size:10px;font-style:normal;text-shadow:0 0 6px currentColor}.m7v4-og-preview strong{position:relative;z-index:1;max-width:88%;overflow:hidden;color:var(--ogtext);font-size:var(--ogfont);font-weight:950;white-space:nowrap;text-shadow:0 1px 3px #000}.m7v4-og-preview:after{content:"";position:absolute;inset:-38%;z-index:0;background:linear-gradient(105deg,transparent 38%,color-mix(in srgb,var(--og2) 72%,transparent) 49%,transparent 60%);transform:translateX(-72%) rotate(8deg)}
+    .m7v4-og-preview[data-animation="shimmer"]:after{animation:m7v4OgShimmer var(--ogspeed) ease-in-out infinite}.m7v4-og-preview[data-animation="breathe"]{animation:m7v4OgBreathe var(--ogspeed) ease-in-out infinite}.m7v4-og-preview[data-animation="float"]{animation:m7v4OgFloat var(--ogspeed) ease-in-out infinite}.m7v4-og-preview[data-animation="pulse"]{animation:m7v4OgPulse var(--ogspeed) ease-in-out infinite}.m7v4-og-preview[data-animation="sparkle"]{animation:m7v4OgSparkle var(--ogspeed) steps(2,end) infinite}
+    @keyframes m7v4OgShimmer{0%,28%{transform:translateX(-72%) rotate(8deg);opacity:0}48%{opacity:1}72%,100%{transform:translateX(72%) rotate(8deg);opacity:0}}@keyframes m7v4OgBreathe{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.28)}}@keyframes m7v4OgFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}@keyframes m7v4OgPulse{0%,100%{transform:scale(.96)}50%{transform:scale(1.08)}}@keyframes m7v4OgSparkle{0%,100%{filter:brightness(1)}25%{filter:brightness(1.5)}50%{filter:brightness(1.08)}75%{filter:brightness(1.4)}}
+    .m7v4-og-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.m7v4-og-grid label{display:flex;flex-direction:column;gap:5px;min-width:0;color:#a79880;font-size:8px;font-weight:900}.m7v4-og-grid input,.m7v4-og-grid select{width:100%;min-height:40px;padding:0 9px;border:1px solid rgba(232,184,81,.18);border-radius:10px;background:#080706;color:#fff;box-sizing:border-box;color-scheme:dark}.m7v4-og-grid input[type="color"]{padding:4px;height:40px}.m7v4-og-settings>button{width:100%;min-height:40px;margin-top:10px;border:1px solid #e6b95466;border-radius:11px;background:linear-gradient(135deg,#e7b950,#9f6819);color:#150e05;font-size:9px;font-weight:950;cursor:pointer}
     @media(max-width:620px){
       .m7v4-owner-quota-grid{grid-template-columns:1fr 1fr}
       .m7v4-owner-quota{padding:10px}
+      .m7v4-og-grid{grid-template-columns:1fr 1fr}.m7v4-og-settings{padding:11px}
     }
 
     .m7v4-tag.new{
@@ -13156,6 +13163,8 @@ function ensureCss(){
 .m7v4-tag.vip{color:#1a1202!important;border-color:#ffd76c!important;background:linear-gradient(135deg,#fff0a8,#d99d27)!important;box-shadow:0 0 16px #f5bd4266!important}
 .m7v4-state-action.tone-vip.is-on{border-color:#ffd76c88!important;background:radial-gradient(circle at 20% 0,#ffdf6b26,transparent 46%),#171109!important;box-shadow:inset 0 0 0 1px #ffd76c24,0 0 20px #d99d2730!important}
 .m7v4-state-action.tone-vip.is-on .m7v4-state-icon{filter:drop-shadow(0 0 8px #ffd76c)}
+.m7v4-tag.og{color:#160e05!important;border-color:#fff0a0!important;background:linear-gradient(135deg,#fff0a8,#c98a20)!important;box-shadow:0 0 14px #e7aa3560!important}.m7v4-state-action.tone-og.is-on{border-color:#e8b85188!important;background:radial-gradient(circle at 18% 0,#e8b85128,transparent 48%),#161008!important;box-shadow:inset 0 0 0 1px #f4d17d20,0 0 20px #d99d2730!important}
+@media(prefers-reduced-motion:reduce){.m7v4-og-preview,.m7v4-og-preview:after{animation:none!important}}
 
 
     .m7v4-tag.featured{
@@ -16324,6 +16333,11 @@ function vipCrownOn(shop){
   return shop?.directory_options?.vip_crown_enabled===true;
 }
 
+function ogBadgeOn(shop){
+  const value=shop?.directory_options?.og_badge_enabled;
+  return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
+}
+
 function ownerCapabilityOn(shop,key){
   const value=shop?.directory_options?.[key];
   return value===true||String(value||"").toLowerCase()==="true"||String(value||"")==="1";
@@ -16369,6 +16383,68 @@ function ownerMediaQuotaHtml(shop){
     '</div>'+
     '<button type="button" data-m7v4-save-owner-media-limits>Save media limits</button>'+
   '</div>';
+}
+
+function ogBadgeSettingsHtml(shop){
+  const options=shop?.directory_options&&typeof shop.directory_options==="object"?shop.directory_options:{};
+  const color=(key,fallback)=>/^#[0-9a-f]{6}$/i.test(String(options[key]||""))?String(options[key]):fallback;
+  const number=(key,min,max,fallback)=>{const n=Number(options[key]);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback};
+  const text=String(options.og_badge_text||"OG").trim().slice(0,8)||"OG";
+  const icon=String(options.og_badge_icon===undefined||options.og_badge_icon===null?"♛":options.og_badge_icon).trim().slice(0,4);
+  const animation=["none","shimmer","breathe","float","pulse","sparkle"].includes(String(options.og_badge_animation||"").toLowerCase())?String(options.og_badge_animation).toLowerCase():"shimmer";
+  const selected=value=>animation===value?' selected':'';
+  const primary=color("og_badge_primary_color","#d9a441");
+  const secondary=color("og_badge_secondary_color","#fff2a4");
+  const background=color("og_badge_background_color","#160e06");
+  const textColor=color("og_badge_text_color","#fff0b8");
+  const size=number("og_badge_size",22,40,30);
+  const speed=number("og_badge_animation_speed",1,8,2.8);
+  const glow=number("og_badge_glow_strength",0,100,55);
+  const previewSize=Math.max(38,size),previewFont=Math.max(6,previewSize*(text.length<=3?.27:text.length<=5?.19:.15));
+  const previewStyle="--og1:"+primary+";--og2:"+secondary+";--ogbg:"+background+";--ogtext:"+textColor+";--ogsize:"+previewSize+"px;--ogfont:"+previewFont.toFixed(1)+"px;--ogspeed:"+speed+"s;--ogglow:"+(2+glow*.22).toFixed(1)+"px";
+  return '<div class="m7v4-og-settings" data-m7v4-og-settings>'+
+    '<div class="m7v4-og-head"><div><b>OG Member badge design</b><small>Customize the badge shown above verification on the shop profile and Show Shops cards.</small></div><span class="m7v4-og-preview" data-m7v4-og-preview data-animation="'+esc(animation)+'" style="'+esc(previewStyle)+'"><i data-m7v4-og-preview-icon>'+esc(icon)+'</i><strong data-m7v4-og-preview-text dir="auto">'+esc(text)+'</strong></span></div>'+
+    '<div class="m7v4-og-grid">'+
+      '<label>Text inside<input type="text" maxlength="8" value="'+esc(text)+'" data-m7v4-og-text></label>'+
+      '<label>Icon / emoji<input type="text" maxlength="4" value="'+esc(icon)+'" data-m7v4-og-icon></label>'+
+      '<label>Animation<select data-m7v4-og-animation><option value="none"'+selected("none")+'>None</option><option value="shimmer"'+selected("shimmer")+'>Gold shimmer</option><option value="breathe"'+selected("breathe")+'>Breathing glow</option><option value="float"'+selected("float")+'>Float</option><option value="pulse"'+selected("pulse")+'>Pulse</option><option value="sparkle"'+selected("sparkle")+'>Sparkle</option></select></label>'+
+      '<label>Animation speed (seconds)<input type="number" min="1" max="8" step="0.1" value="'+esc(speed)+'" data-m7v4-og-speed></label>'+
+      '<label>Main gold / accent<input type="color" value="'+esc(primary)+'" data-m7v4-og-primary></label>'+
+      '<label>Outer highlight<input type="color" value="'+esc(secondary)+'" data-m7v4-og-secondary></label>'+
+      '<label>Badge background<input type="color" value="'+esc(background)+'" data-m7v4-og-background></label>'+
+      '<label>Text color<input type="color" value="'+esc(textColor)+'" data-m7v4-og-text-color></label>'+
+      '<label>Badge size (22–40)<input type="number" min="22" max="40" step="1" value="'+esc(size)+'" data-m7v4-og-size></label>'+
+      '<label>Glow power (0–100)<input type="number" min="0" max="100" step="1" value="'+esc(glow)+'" data-m7v4-og-glow></label>'+
+    '</div>'+
+    '<button type="button" data-m7v4-save-og-badge>Save OG badge design</button>'+
+  '</div>';
+}
+
+async function saveOgBadgeSettings(shop,settings){
+  if(!shop)throw new Error("Select a shop first.");
+  const text=String(settings.text||"").trim().slice(0,8);
+  if(!text)throw new Error("OG badge text cannot be empty.");
+  const icon=String(settings.icon||"").trim().slice(0,4);
+  const colors=[settings.primary,settings.secondary,settings.background,settings.textColor];
+  if(colors.some(value=>!/^#[0-9a-f]{6}$/i.test(String(value||""))))throw new Error("Choose valid badge colors.");
+  const animations=["none","shimmer","breathe","float","pulse","sparkle"];
+  if(!animations.includes(settings.animation))throw new Error("Choose a valid OG animation.");
+  const size=Number(settings.size),speed=Number(settings.speed),glow=Number(settings.glow);
+  if(!Number.isFinite(size)||size<22||size>40)throw new Error("Badge size must be from 22 to 40.");
+  if(!Number.isFinite(speed)||speed<1||speed>8)throw new Error("Animation speed must be from 1 to 8 seconds.");
+  if(!Number.isFinite(glow)||glow<0||glow>100)throw new Error("Glow power must be from 0 to 100.");
+  await saveOwnerCapabilityPatch(shop,{
+    og_badge_text:text,
+    og_badge_icon:icon,
+    og_badge_animation:settings.animation,
+    og_badge_animation_speed:speed,
+    og_badge_primary_color:settings.primary,
+    og_badge_secondary_color:settings.secondary,
+    og_badge_background_color:settings.background,
+    og_badge_text_color:settings.textColor,
+    og_badge_size:Math.round(size),
+    og_badge_glow_strength:Math.round(glow)
+  },"shop_og_badge_design_updated");
 }
 
 function featureState(shop){
@@ -16487,6 +16563,7 @@ function renderList(){
           '<span class="m7v4-tag '+(shop.is_active?"on":"")+'">'+(shop.is_active?"VISIBLE":"HIDDEN")+'</span>'+
           '<span class="m7v4-tag '+(shop.verified?"verified":"")+'">'+(shop.verified?"VERIFIED":"UNVERIFIED")+'</span>'+
           (newBadgeOn(shop)?'<span class="m7v4-tag new">NEW</span>':"")+
+          (ogBadgeOn(shop)?'<span class="m7v4-tag og">OG</span>':"")+
           (vipCrownOn(shop)?'<span class="m7v4-tag vip">♛ VIP</span>':"")+
           (featureState(shop).on?'<span class="m7v4-tag featured">FEATURED</span>':"")+
         '</div>'+
@@ -16535,12 +16612,14 @@ function studioPublishingMarkup(){
       stateAction("visibility","◐","Shop visibility",shop.is_active===true,shop.is_active===true?"Visible to visitors":"Hidden from visitors","visibility")+
       stateAction("verify","✓","Verification",shop.verified===true,shop.verified===true?"Verified badge is active":"Verified badge is off","verify")+
       stateAction("new","NEW","NEW badge",newBadgeOn(shop),newBadgeOn(shop)?"NEW badge is showing":"NEW badge is hidden","new")+
+      stateAction("og","OG","OG member badge",ogBadgeOn(shop),ogBadgeOn(shop)?"OG badge is attached above verification":"OG badge is hidden","og")+
       stateAction("vip","♛","VIP crown",vipCrownOn(shop),vipCrownOn(shop)?"Animated crown is attached to the profile circle":"VIP crown is hidden","vip")+
       stateAction("owner-profile-edit","◉","Owner profile / banner editing",ownerCapabilityOn(shop,"owner_profile_edit_enabled"),ownerCapabilityOn(shop,"owner_profile_edit_enabled")?"Owner can replace profile photo and banner":"Profile/banner editing is locked","owner-access")+
       stateAction("owner-media-edit","▧","Owner Media editing",ownerCapabilityOn(shop,"owner_media_edit_enabled"),ownerCapabilityOn(shop,"owner_media_edit_enabled")?"Owner can add, replace and delete Media":"Owner Media editing is locked","owner-access")+
       stateAction("owner-about-edit","✎","Owner About editing",ownerCapabilityOn(shop,"owner_about_edit_enabled"),ownerCapabilityOn(shop,"owner_about_edit_enabled")?"Owner can edit About text":"Owner About editing is locked","owner-access")+
       stateAction("feature","★","Featured",featureState(shop).on,featureState(shop).on?(featureState(shop).days?("Featured · "+featureState(shop).days+"d left"):"Featured is active"):"Featured is off","feature")+
     '</div>'+
+    ogBadgeSettingsHtml(shop)+
     ownerMediaQuotaHtml(shop);
 }
 window.Ma7alakAdminStudioBridge={
@@ -16564,13 +16643,24 @@ window.Ma7alakAdminStudioBridge={
     const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
     if(form&&shop){
       const options=JSON.parse(form.dataset.directoryOptions||"{}");
-      for(const k of ["badge","vip_crown_enabled","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+      for(const k of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
         if(Object.prototype.hasOwnProperty.call(shop.directory_options||{},k))options[k]=shop.directory_options[k];else delete options[k];
       }
       form.dataset.directoryOptions=JSON.stringify(options);
     }
   },
-  async limits(photos,videos){await saveOwnerCapabilityPatch(selectedShop(),{owner_media_photo_limit:photos,owner_media_video_limit:videos},"owner_media_limits_updated")}
+  async limits(photos,videos){await saveOwnerCapabilityPatch(selectedShop(),{owner_media_photo_limit:photos,owner_media_video_limit:videos},"owner_media_limits_updated")},
+  async og(settings){
+    await saveOgBadgeSettings(selectedShop(),settings);
+    const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
+    if(form&&shop){
+      const options=JSON.parse(form.dataset.directoryOptions||"{}");
+      for(const key of ["og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength"]){
+        if(Object.prototype.hasOwnProperty.call(shop.directory_options||{},key))options[key]=shop.directory_options[key];else delete options[key];
+      }
+      form.dataset.directoryOptions=JSON.stringify(options);
+    }
+  }
 };
 
 function action(key,icon,title,copy){
@@ -16818,6 +16908,30 @@ async function handleAction(key){
       shop
     );
 
+    await loadShops();
+    return;
+  }
+
+  if(key==="og"){
+    const current=shop.directory_options&&typeof shop.directory_options==="object"?shop.directory_options:{};
+    const nextOn=!ogBadgeOn(shop);
+    const nextOptions={
+      ...current,
+      og_badge_enabled:nextOn,
+      og_badge_text:current.og_badge_text||"OG",
+      og_badge_icon:current.og_badge_icon===undefined?"♛":current.og_badge_icon,
+      og_badge_animation:current.og_badge_animation||"shimmer",
+      og_badge_animation_speed:Number(current.og_badge_animation_speed)||2.8,
+      og_badge_primary_color:current.og_badge_primary_color||"#d9a441",
+      og_badge_secondary_color:current.og_badge_secondary_color||"#fff2a4",
+      og_badge_background_color:current.og_badge_background_color||"#160e06",
+      og_badge_text_color:current.og_badge_text_color||"#fff0b8",
+      og_badge_size:Number(current.og_badge_size)||30,
+      og_badge_glow_strength:Number.isFinite(Number(current.og_badge_glow_strength))?Number(current.og_badge_glow_strength):55
+    };
+    const result=await client.from("shop_profiles").update({directory_options:nextOptions}).eq("shop_slug",shop.shop_slug);
+    if(result.error)throw result.error;
+    await logV4Activity(nextOn?"shop_og_badge_enabled":"shop_og_badge_disabled",shop,{og_badge_enabled:nextOn});
     await loadShops();
     return;
   }
