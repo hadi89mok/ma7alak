@@ -3557,7 +3557,54 @@ function buildNotificationUrl(path,params){
   return url.href;
 }
 
+const SHOUFHON_STORY_DEEP_LINK_PENDING_KEY =
+  "shoufhon_story_deep_link_v1";
+
+function rememberStoryDeepLink(url){
+  try{
+    const parsed =
+      new URL(
+        url,
+        window.location.href
+      );
+
+    const storyId =
+      String(
+        parsed.searchParams.get("story") ||
+        ""
+      ).trim();
+
+    if(!storyId){
+      return;
+    }
+
+    const shopSlug =
+      String(
+        parsed.searchParams.get("shop") ||
+        parsed.pathname
+          .split("/")
+          .filter(Boolean)
+          .pop() ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    sessionStorage.setItem(
+      SHOUFHON_STORY_DEEP_LINK_PENDING_KEY,
+      JSON.stringify({
+        storyId:storyId,
+        shopSlug:shopSlug,
+        savedAt:Date.now()
+      })
+    );
+  }
+  catch(error){}
+}
+
 function navigateFromNotification(url){
+  rememberStoryDeepLink(url);
+
   if(typeof window.ma7alakFreshNavigate==="function"){
     window.ma7alakFreshNavigate(url);
   }
@@ -3576,41 +3623,630 @@ function ensureExactReelOpened(reelId){
   },500);
 }
 
-function openStoryDeepLinkOnShopPage(){
-  let params;
-  try{params=new URLSearchParams(window.location.search)}catch(error){return}
-  const storyId=String(params.get("story")||"").trim();
-  if(!storyId)return;
+function readPendingStoryDeepLink(){
+  try{
+    const raw =
+      sessionStorage.getItem(
+        SHOUFHON_STORY_DEEP_LINK_PENDING_KEY
+      );
 
-  let attempts=0;
-  const tryOpen=function(){
-    attempts+=1;
-    const selectors="#ma7alak-story-button,.ma7alak-story-button,#ma7alak-story-active-ring,#ma7alak-story-new-ring";
-    let button=document.querySelector(selectors);
-
-    if(!button){
-      document.querySelectorAll("iframe").forEach(function(frame){
-        if(button)return;
-        try{button=frame.contentDocument&&frame.contentDocument.querySelector(selectors)}catch(error){}
-      });
+    if(!raw){
+      return null;
     }
 
-    if(button){
-      try{button.click();return}catch(error){}
+    const value =
+      JSON.parse(raw);
+
+    const savedAt =
+      Number(
+        value && value.savedAt
+      ) || 0;
+
+    if(
+      !savedAt ||
+      Date.now() - savedAt >
+        2 * 60 * 1000
+    ){
+      sessionStorage.removeItem(
+        SHOUFHON_STORY_DEEP_LINK_PENDING_KEY
+      );
+      return null;
     }
 
-    if(attempts<24)setTimeout(tryOpen,250);
-  };
+    const storyId =
+      String(
+        value && value.storyId ||
+        ""
+      ).trim();
 
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",function(){setTimeout(tryOpen,100)},{once:true});
+    if(!storyId){
+      return null;
+    }
+
+    return {
+      storyId:storyId,
+      shopSlug:String(
+        value && value.shopSlug ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+    };
   }
-  else{
-    setTimeout(tryOpen,100);
+  catch(error){
+    return null;
   }
 }
 
-openStoryDeepLinkOnShopPage();
+function clearPendingStoryDeepLink(){
+  try{
+    sessionStorage.removeItem(
+      SHOUFHON_STORY_DEEP_LINK_PENDING_KEY
+    );
+  }
+  catch(error){}
+}
+
+function pageShopSlug(params){
+  const fromQuery =
+    String(
+      params &&
+      params.get("shop") ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if(fromQuery){
+    return fromQuery;
+  }
+
+  try{
+    return String(
+      decodeURIComponent(
+        window.location.pathname
+          .split("/")
+          .filter(Boolean)
+          .pop() ||
+        ""
+      )
+    )
+      .trim()
+      .toLowerCase();
+  }
+  catch(error){
+    return "";
+  }
+}
+
+function findStoryViewerSurface(){
+  const selector =
+    "#ma7alak-story-button," +
+    ".ma7alak-story-button," +
+    "#ma7alak-story-active-ring," +
+    "#ma7alak-story-new-ring";
+
+  const ownButton =
+    document.querySelector(
+      selector
+    );
+
+  if(ownButton){
+    return {
+      doc:document,
+      button:ownButton,
+      frame:null
+    };
+  }
+
+  const frames =
+    Array.from(
+      document.querySelectorAll(
+        "iframe"
+      )
+    );
+
+  for(
+    let index = 0;
+    index < frames.length;
+    index++
+  ){
+    const frame =
+      frames[index];
+
+    try{
+      const doc =
+        frame.contentDocument;
+
+      if(!doc){
+        continue;
+      }
+
+      const button =
+        doc.querySelector(
+          selector
+        );
+
+      if(button){
+        return {
+          doc:doc,
+          button:button,
+          frame:frame
+        };
+      }
+    }
+    catch(error){}
+  }
+
+  return null;
+}
+
+function normalizeStoryMediaUrl(value){
+  const raw =
+    String(
+      value ||
+      ""
+    ).trim();
+
+  if(!raw){
+    return "";
+  }
+
+  try{
+    const url =
+      new URL(
+        raw,
+        window.location.href
+      );
+
+    let path =
+      url.pathname;
+
+    try{
+      path =
+        decodeURIComponent(
+          path
+        );
+    }
+    catch(error){}
+
+    return (
+      url.origin +
+      path
+    ).replace(/\/+$/,"");
+  }
+  catch(error){
+    return raw;
+  }
+}
+
+function storyViewerHasTargetMedia(
+  doc,
+  targetUrl
+){
+  if(
+    !doc ||
+    !targetUrl
+  ){
+    return false;
+  }
+
+  const expected =
+    normalizeStoryMediaUrl(
+      targetUrl
+    );
+
+  if(!expected){
+    return false;
+  }
+
+  const media =
+    Array.from(
+      doc.querySelectorAll(
+        "#ma7alak-full-story-media img," +
+        "#ma7alak-full-story-media video"
+      )
+    );
+
+  return media.some(
+    function(element){
+      const current =
+        String(
+          element.currentSrc ||
+          element.src ||
+          element.getAttribute("src") ||
+          ""
+        ).trim();
+
+      return (
+        current &&
+        normalizeStoryMediaUrl(
+          current
+        ) === expected
+      );
+    }
+  );
+}
+
+function storyPublicMediaUrl(
+  client,
+  story
+){
+  const raw =
+    String(
+      story &&
+      story.storage_path ||
+      ""
+    ).trim();
+
+  if(!raw){
+    return "";
+  }
+
+  if(/^https?:\/\//i.test(raw)){
+    return raw;
+  }
+
+  try{
+    return (
+      client
+        .storage
+        .from("shop-stories")
+        .getPublicUrl(raw)
+        .data
+        .publicUrl ||
+      ""
+    );
+  }
+  catch(error){
+    return "";
+  }
+}
+
+async function waitForStorySurface(
+  timeoutMs
+){
+  const started =
+    Date.now();
+
+  while(
+    Date.now() - started <
+    timeoutMs
+  ){
+    const surface =
+      findStoryViewerSurface();
+
+    if(surface){
+      return surface;
+    }
+
+    await new Promise(
+      function(resolve){
+        setTimeout(
+          resolve,
+          200
+        );
+      }
+    );
+  }
+
+  return null;
+}
+
+async function waitForStoryViewerOpen(
+  surface,
+  timeoutMs
+){
+  const started =
+    Date.now();
+
+  while(
+    Date.now() - started <
+    timeoutMs
+  ){
+    try{
+      const screen =
+        surface &&
+        surface.doc &&
+        surface.doc.getElementById(
+          "ma7alak-full-story"
+        );
+
+      if(
+        screen &&
+        screen.classList.contains(
+          "active"
+        )
+      ){
+        return true;
+      }
+    }
+    catch(error){}
+
+    await new Promise(
+      function(resolve){
+        setTimeout(
+          resolve,
+          120
+        );
+      }
+    );
+  }
+
+  return false;
+}
+
+async function openExactStoryInExistingViewer(
+  storyId,
+  shopSlug
+){
+  const client =
+    await loadMa7alakSupabase();
+
+  if(
+    !client ||
+    !storyId ||
+    !shopSlug
+  ){
+    return false;
+  }
+
+  const result =
+    await client
+      .from("shop_stories")
+      .select(
+        "id,shop_slug,media_type,storage_path,created_at,expires_at"
+      )
+      .eq(
+        "shop_slug",
+        shopSlug
+      )
+      .gt(
+        "expires_at",
+        new Date().toISOString()
+      )
+      .order(
+        "created_at",
+        {
+          ascending:true
+        }
+      );
+
+  if(
+    result.error ||
+    !Array.isArray(
+      result.data
+    ) ||
+    !result.data.length
+  ){
+    return false;
+  }
+
+  const activeStories =
+    result.data;
+
+  const targetIndex =
+    activeStories.findIndex(
+      function(story){
+        return (
+          String(
+            story && story.id
+          ) ===
+          String(storyId)
+        );
+      }
+    );
+
+  if(targetIndex < 0){
+    return false;
+  }
+
+  const targetUrl =
+    storyPublicMediaUrl(
+      client,
+      activeStories[targetIndex]
+    );
+
+  if(!targetUrl){
+    return false;
+  }
+
+  const surface =
+    await waitForStorySurface(
+      20000
+    );
+
+  if(!surface){
+    return false;
+  }
+
+  try{
+    surface.button.click();
+  }
+  catch(error){
+    return false;
+  }
+
+  const opened =
+    await waitForStoryViewerOpen(
+      surface,
+      8000
+    );
+
+  if(!opened){
+    return false;
+  }
+
+  /*
+     The V7 Story/Profile viewer already owns fullscreen, progress,
+     likes, views, swipe/tap navigation and phone Back behavior.
+     Reuse it and move through its own "Next Story" control until
+     the exact media belonging to the notification's story_id is active.
+  */
+  for(
+    let step = 0;
+    step <=
+      activeStories.length;
+    step++
+  ){
+    if(
+      storyViewerHasTargetMedia(
+        surface.doc,
+        targetUrl
+      )
+    ){
+      return true;
+    }
+
+    const nextButton =
+      surface.doc.getElementById(
+        "ma7alak-story-tap-right"
+      );
+
+    if(!nextButton){
+      break;
+    }
+
+    try{
+      nextButton.click();
+    }
+    catch(error){
+      break;
+    }
+
+    await new Promise(
+      function(resolve){
+        setTimeout(
+          resolve,
+          220
+        );
+      }
+    );
+  }
+
+  return storyViewerHasTargetMedia(
+    surface.doc,
+    targetUrl
+  );
+}
+
+async function openStoryDeepLinkOnShopPage(){
+  let params;
+
+  try{
+    params =
+      new URLSearchParams(
+        window.location.search
+      );
+  }
+  catch(error){
+    params =
+      null;
+  }
+
+  const pending =
+    readPendingStoryDeepLink();
+
+  const storyId =
+    String(
+      (
+        params &&
+        params.get("story")
+      ) ||
+      (
+        pending &&
+        pending.storyId
+      ) ||
+      ""
+    ).trim();
+
+  if(!storyId){
+    return;
+  }
+
+  const queryShop =
+    pageShopSlug(
+      params
+    );
+
+  const pendingShop =
+    String(
+      pending &&
+      pending.shopSlug ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const shopSlug =
+    queryShop ||
+    pendingShop;
+
+  if(!shopSlug){
+    return;
+  }
+
+  /*
+     If a canonical Hostinger redirect dropped the query string,
+     only reuse the pending target when it belongs to this page.
+  */
+  if(
+    pendingShop &&
+    queryShop &&
+    pendingShop !==
+      queryShop
+  ){
+    return;
+  }
+
+  try{
+    const opened =
+      await openExactStoryInExistingViewer(
+        storyId,
+        shopSlug
+      );
+
+    if(opened){
+      clearPendingStoryDeepLink();
+    }
+  }
+  catch(error){
+    console.warn(
+      "ShoufHon Story deep link:",
+      error
+    );
+  }
+}
+
+if(
+  document.readyState ===
+    "loading"
+){
+  document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+      setTimeout(
+        function(){
+          openStoryDeepLinkOnShopPage()
+            .catch(function(){});
+        },
+        120
+      );
+    },
+    {
+      once:true
+    }
+  );
+}
+else{
+  setTimeout(
+    function(){
+      openStoryDeepLinkOnShopPage()
+        .catch(function(){});
+    },
+    120
+  );
+}
 
 
 /* =========================================================
