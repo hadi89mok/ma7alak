@@ -41,6 +41,7 @@
     page_float_distance:"6",
     page_use_universal_accent:true,
 
+    profile_circle_enabled:true,
     profile_ring_color:"$ACCENT",
 
     profile_banner_enabled:false,
