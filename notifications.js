@@ -3007,25 +3007,13 @@ async function loadNotifications(){
       const {
         data:seenRows,
         error:seenError
-      } = await client
-
-        .from(
-          "story_notification_views"
-        )
-
-        .select(
-          "story_id,seen_at"
-        )
-
-        .eq(
-          "visitor_id",
-          visitorId
-        )
-
-        .in(
-          "story_id",
-          storyIds
-        );
+      } = await client.rpc(
+        "get_story_notification_seen_state",
+        {
+          p_visitor_id:visitorId,
+          p_story_ids:storyIds
+        }
+      );
 
 
       if(seenError){
@@ -4072,28 +4060,22 @@ async function markSingleStoryAsSeen(
     }
 
 
-    await client
+    const {
+      error
+    } = await client.rpc(
+      "mark_story_notifications_seen",
+      {
+        p_visitor_id:visitorId,
+        p_story_ids:[numericStoryId]
+      }
+    );
 
-      .from(
-        "story_notification_views"
-      )
-
-      .upsert(
-        {
-          visitor_id:
-            visitorId,
-
-          story_id:
-            numericStoryId
-        },
-        {
-          onConflict:
-            "visitor_id,story_id",
-
-          ignoreDuplicates:
-            true
-        }
+    if(error){
+      console.error(
+        "ShoufHon mark notification:",
+        error
       );
+    }
 
   }
   catch(error){
@@ -4170,20 +4152,16 @@ async function markAllCurrentNotificationsAsSeen(){
       const {
         error
       } =
-        await client
-          .from(
-            "story_notification_views"
-          )
-          .upsert(
-            storyRows,
-            {
-              onConflict:
-                "visitor_id,story_id",
-
-              ignoreDuplicates:
-                true
-            }
-          );
+        await client.rpc(
+          "mark_story_notifications_seen",
+          {
+            p_visitor_id:visitorId,
+            p_story_ids:
+              storyRows.map(function(row){
+                return row.story_id;
+              })
+          }
+        );
 
 
       if(error){
