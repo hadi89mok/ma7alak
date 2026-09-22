@@ -3709,6 +3709,17 @@
       (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
       category;
 
+    const designStudio=
+      editForm.querySelector(
+        ".m7-design-studio"
+      );
+
+    const activeDesignTab=
+      designStudio?.__m7dsGetActiveTab?.() ||
+      designStudio?.dataset?.m7dsActiveTab ||
+      designStudio?.querySelector("[data-m7ds-tab].active")?.dataset?.m7dsTab ||
+      "identity";
+
     saveEditButton.disabled = true;
     saveEditButton.textContent = "Saving…";
     window.dispatchEvent(new CustomEvent("ma7alak:studio-save-state",{detail:{state:"saving"}}));
@@ -3746,18 +3757,49 @@
         else delete payload.directory_options[key];
       }
 
-      const vipEffectsToggle =
-        document.getElementById("m7de-vip_effects_enabled");
-
       /*
-         OFF is a real saved value, not an empty/missing setting. Pin the
-         visible master switch into the final payload after every wrapper and
-         preservation merge has run so an older `true` can never return.
+         Treat the mounted VIP panel as the final source of truth for every
+         VIP control. This deliberately runs after all legacy collectors and
+         preservation merges so newer VIP fields cannot silently disappear.
       */
-      payload.directory_options.vip_effects_enabled =
-        vipEffectsToggle
-          ? vipEffectsToggle.checked === true
-          : false;
+      payload.directory_options =
+        payload.directory_options &&
+        typeof payload.directory_options === "object"
+          ? payload.directory_options
+          : {};
+
+      const expectedVipOptions={};
+
+      editForm
+        .querySelectorAll("[id^='m7de-vip_']")
+        .forEach(function(input){
+          const key=String(input.id||"").slice("m7de-".length);
+          if(!key)return;
+
+          let value;
+
+          if(input.type==="checkbox"){
+            value=input.checked===true;
+          }
+          else if(input.type==="number"){
+            const raw=Number(input.value);
+            const min=Number(input.min);
+            const max=Number(input.max);
+            const low=Number.isFinite(min)?min:-Infinity;
+            const high=Number.isFinite(max)?max:Infinity;
+            value=String(
+              Number.isFinite(raw)
+                ? Math.max(low,Math.min(high,raw))
+                : ""
+            );
+          }
+          else{
+            value=String(input.value??"").trim();
+          }
+
+          payload.directory_options[key]=value;
+          expectedVipOptions[key]=value;
+        });
 
       const { error } = await supabaseClient
         .from("shop_profiles")
@@ -3781,11 +3823,29 @@
           ? savedProfile.data.directory_options
           : {};
 
-      if(
-        savedOptions.vip_effects_enabled !==
-        payload.directory_options.vip_effects_enabled
-      ){
-        throw new Error("VIP ON/OFF did not persist. Please try Save again.");
+      const vipMismatches=
+        Object.keys(expectedVipOptions)
+          .filter(function(key){
+            const expected=expectedVipOptions[key];
+            const actual=savedOptions[key];
+
+            if(typeof expected==="boolean"){
+              return actual!==expected;
+            }
+
+            return String(actual??"")!==String(expected??"");
+          });
+
+      if(vipMismatches.length){
+        console.error(
+          "SHOUFHON Admin: VIP save verification failed:",
+          vipMismatches
+        );
+        throw new Error(
+          "Some VIP settings did not persist ("+
+          vipMismatches.slice(0,4).join(", ")+
+          "). Please try Save again."
+        );
       }
 
       /* Keep the editor snapshot aligned with the value confirmed by DB. */
@@ -3805,12 +3865,25 @@
       );
       loadAdminActivity();
 
-      setStatus(editStatus, "Changes saved successfully.", "success");
+      setStatus(
+        editStatus,
+        activeDesignTab==="vip"
+          ? "Changes saved successfully. VIP settings confirmed."
+          : "Changes saved successfully.",
+        "success"
+      );
       window.dispatchEvent(new CustomEvent("ma7alak:studio-save-state",{detail:{state:"saved"}}));
 
       await loadManagedShops();
       await loadExistingDirectoryValues();
-      window.dispatchEvent(new CustomEvent("ma7alak:studio-save-complete",{detail:{state:"saved",slug}}));
+
+      /*
+         Data reloads are allowed to refresh values, never editor navigation.
+         Put the admin back on the exact Design Studio tab they saved from.
+      */
+      designStudio?.__m7dsSetActiveTab?.(activeDesignTab);
+
+      window.dispatchEvent(new CustomEvent("ma7alak:studio-save-complete",{detail:{state:"saved",slug,active_tab:activeDesignTab}}));
 
     }catch(error){
       setStatus(editStatus, error.message || "Could not save changes.", "error");
@@ -7068,7 +7141,7 @@ function decorateAll(){
           ${colorField(prefix,"vip_ring_color_2","Secondary ring color")}
           ${colorField(prefix,"vip_ring_color_3","Highlight color")}
           ${effectNumberField(prefix,"vip_ring_width","Ring thickness",1,10,1,"px")}
-          ${effectNumberField(prefix,"vip_ring_speed","Ring rotation speed",1.5,14,.5,"seconds")}
+          ${effectNumberField(prefix,"vip_ring_speed","Ring & orbit rotation speed",1.5,14,.5,"seconds")}
 
           <label class="m7ds-check">
             <input id="${prefix}vip_orbit_enabled" type="checkbox">
@@ -7125,6 +7198,9 @@ function decorateAll(){
               <option value="light">Light — slower phones</option>
             </select>
           </label>
+          <p class="m7ds-help">
+            Balanced limits the shell to 3 frame layers. Light limits it to 2 and disables ambient particles / corner ornaments to protect phone performance.
+          </p>
         </div>
 
         <div class="m7ds-section-title">VIP Shop Name</div>
@@ -7988,13 +8064,56 @@ function decorateAll(){
     const tabs = [...box.querySelectorAll("[data-m7ds-tab]")];
     const panes = [...box.querySelectorAll("[data-m7ds-pane]")];
 
+    /*
+       Keep the selected Design Studio tab as editor UI state. Data refreshes
+       and Save must never bounce an admin from VIP Effects back to Identity.
+    */
+    box.__m7dsSetActiveTab = function(rawKey){
+      const requested=String(rawKey||"").trim();
+      const key=tabs.some(button=>button.dataset.m7dsTab===requested)
+        ? requested
+        : "identity";
+
+      box.dataset.m7dsActiveTab=key;
+
+      tabs.forEach(button=>{
+        button.classList.toggle(
+          "active",
+          button.dataset.m7dsTab===key
+        );
+      });
+
+      panes.forEach(pane=>{
+        pane.classList.toggle(
+          "active",
+          pane.dataset.m7dsPane===key
+        );
+      });
+
+      return key;
+    };
+
+    box.__m7dsGetActiveTab = function(){
+      const active=tabs.find(button=>button.classList.contains("active"));
+      return String(
+        box.dataset.m7dsActiveTab ||
+        active?.dataset.m7dsTab ||
+        "identity"
+      ).trim();
+    };
+
     tabs.forEach(button=>{
       button.addEventListener("click",()=>{
-        const key = button.dataset.m7dsTab;
-        tabs.forEach(b=>b.classList.toggle("active",b===button));
-        panes.forEach(p=>p.classList.toggle("active",p.dataset.m7dsPane===key));
+        box.__m7dsSetActiveTab(
+          button.dataset.m7dsTab
+        );
       });
     });
+
+    box.__m7dsSetActiveTab(
+      tabs.find(button=>button.classList.contains("active"))?.dataset.m7dsTab ||
+      "identity"
+    );
 
     box.querySelectorAll('input[type="color"]').forEach(input=>{
       const code = box.querySelector('[data-color-for="'+input.id+'"]');
@@ -10151,6 +10270,17 @@ function decorateAll(){
   }
 
   function fillForm(prefix,options){
+    const studio=
+      document
+        .getElementById(prefix+"page_design_preset")
+        ?.closest(".m7-design-studio");
+
+    const activeTab=
+      studio?.__m7dsGetActiveTab?.() ||
+      studio?.dataset?.m7dsActiveTab ||
+      studio?.querySelector("[data-m7ds-tab].active")?.dataset?.m7dsTab ||
+      "identity";
+
     const accent =
       safeHex(
         options.story_color ||
@@ -10201,6 +10331,12 @@ function decorateAll(){
       .getElementById(prefix+"page_design_preset")
       ?.closest(".m7-design-studio")
       ?.__m7dsRefresh?.();
+
+    /*
+       fill() is also used after database/realtime refreshes. Restore the tab
+       the admin was actually editing instead of accepting the markup default.
+    */
+    studio?.__m7dsSetActiveTab?.(activeTab);
   }
 
   function collectForm(prefix,result){
@@ -14857,38 +14993,48 @@ function applyEditSectionVisibility(panel,mode,shop){
         )
       ];
 
-      let active=
+      const active=
         tabs.find(button=>
           button.classList.contains(
             "active"
           )
         );
 
-      if(!active){
-        active=tabs[0]||null;
-      }
+      const remembered=
+        String(
+          design.dataset.m7dsActiveTab ||
+          active?.dataset.m7dsTab ||
+          "identity"
+        ).trim();
 
       const key=
         mode==="profile"
-          ?"profile"
-          :(
-              active?.dataset.m7dsTab||
-              "identity"
-            );
+          ? "profile"
+          : remembered;
 
-      tabs.forEach(button=>{
-        button.classList.toggle(
-          "active",
-          button.dataset.m7dsTab===key
-        );
-      });
+      if(
+        typeof design.__m7dsSetActiveTab ===
+        "function"
+      ){
+        design.__m7dsSetActiveTab(key);
+      }
+      else{
+        design.dataset.m7dsActiveTab=key;
 
-      panes.forEach(pane=>{
-        pane.classList.toggle(
-          "active",
-          pane.dataset.m7dsPane===key
-        );
-      });
+        tabs.forEach(button=>{
+          button.classList.toggle(
+            "active",
+            button.dataset.m7dsTab===key
+          );
+        });
+
+        panes.forEach(pane=>{
+          pane.classList.toggle(
+            "active",
+            pane.dataset.m7dsPane===key
+          );
+        });
+      }
     }
   }
 
@@ -17959,17 +18105,17 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
       return;
     }
 
+    const activeTab=
+      box.__m7dsGetActiveTab?.() ||
+      box.dataset.m7dsActiveTab ||
+      "identity";
+
     applyState(
       box,
       buildResetState(box)
     );
 
-    const identityTab =
-      box.querySelector(
-        '[data-m7ds-tab="identity"]'
-      );
-
-    identityTab?.click();
+    box.__m7dsSetActiveTab?.(activeTab);
 
     flash(
       box,
@@ -18448,6 +18594,31 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     mountAll();
     patchApi();
     bindGlobalModuleOverrideListener();
+
+    if(!window.__MA7ALAK_DS_V2_SAVE_SYNC__){
+      window.__MA7ALAK_DS_V2_SAVE_SYNC__=true;
+
+      window.addEventListener(
+        "ma7alak:studio-save-complete",
+        event=>{
+          const box=boxForPrefix("m7de-");
+          if(!box)return;
+
+          const requested=
+            String(
+              event?.detail?.active_tab ||
+              box.__m7dsGetActiveTab?.() ||
+              box.dataset.m7dsActiveTab ||
+              "identity"
+            ).trim();
+
+          box.__m7dsSetActiveTab?.(requested);
+          snapshots["m7de-"]=capture(box);
+          box.__m7dsRefresh?.();
+          updateLinkState(box);
+        }
+      );
+    }
   }
 
   async function start(){
