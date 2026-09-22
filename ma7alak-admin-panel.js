@@ -5999,6 +5999,10 @@ function decorateAll(){
   const COLORS = [
     ["profile_ring_color","Story / profile ring"],
     ["story_glow_color","Story glow"],
+    ["vip_ring_color_1","VIP ring primary"],
+    ["vip_ring_color_2","VIP ring secondary"],
+    ["vip_ring_color_3","VIP ring highlight"],
+    ["vip_particle_color","VIP particle color"],
     ["profile_banner_color","Profile banner"],
     ["profile_shell_bg_color","Profile shell background"],
     ["profile_shell_border_color","Profile shell border"],
@@ -6090,6 +6094,27 @@ function decorateAll(){
     story_glow_power:"72",
     story_new_image_pulse:true,
     story_new_sparkle_count:"2",
+
+    vip_effects_enabled:false,
+    vip_ring_visibility:"unseen",
+    vip_ring_style:"aurora",
+    vip_ring_color_1:"#f2caed",
+    vip_ring_color_2:"#d9a441",
+    vip_ring_color_3:"#ffffff",
+    vip_ring_width:"4",
+    vip_ring_speed:"5",
+    vip_orbit_enabled:false,
+    vip_orbit_symbol:"✦",
+    vip_orbit_image_url:"",
+    vip_orbit_count:"4",
+    vip_orbit_size:"18",
+    vip_orbit_distance:"12",
+    vip_orbit_direction:"clockwise",
+    vip_particle_style:"sparkles",
+    vip_particle_count:"6",
+    vip_particle_color:"#f2caed",
+    vip_particle_speed:"4.5",
+    vip_mobile_quality:"balanced",
 
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
@@ -6883,6 +6908,7 @@ function decorateAll(){
       <div class="m7ds-tabs" role="tablist">
         <button type="button" class="active" data-m7ds-tab="identity">Identity</button>
         <button type="button" data-m7ds-tab="profile">Profile</button>
+        <button type="button" data-m7ds-tab="vip">VIP Effects</button>
         <button type="button" data-m7ds-tab="motion">Motion FX</button>
         <button type="button" data-m7ds-tab="lines">Lines & Symbols</button>
         <button type="button" data-m7ds-tab="about">About Panel</button>
@@ -6909,6 +6935,108 @@ function decorateAll(){
         <p class="m7ds-help">
           One source for the profile image. Saving updates both the profile image and the Story/profile logo.
         </p>
+      </div>
+
+      <div class="m7ds-pane" data-m7ds-pane="vip">
+        <div class="m7ds-section-title">VIP Story Identity</div>
+        <p class="m7ds-help">
+          Build a unique animated identity for this shop. These controls are generic—each VIP shop can use different colors, symbols, artwork and motion.
+        </p>
+        <div class="m7ds-grid">
+          <label class="m7ds-check">
+            <input id="${prefix}vip_effects_enabled" type="checkbox">
+            <span>
+              <b>Enable VIP effects</b>
+              <small>Off by default, so existing Basic and Premium shops stay unchanged.</small>
+            </span>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Show VIP ring</span>
+            <select id="${prefix}vip_ring_visibility">
+              <option value="unseen">Only for a new / unseen Story</option>
+              <option value="always">Always around the profile</option>
+            </select>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Ring design</span>
+            <select id="${prefix}vip_ring_style">
+              <option value="aurora">Aurora flow</option>
+              <option value="double">Double luxury ring</option>
+              <option value="neon">Neon glow</option>
+              <option value="segments">Animated segments</option>
+              <option value="pearls">Pearl dots</option>
+              <option value="classic">Clean classic</option>
+            </select>
+          </label>
+
+          ${colorField(prefix,"vip_ring_color_1","Primary ring color")}
+          ${colorField(prefix,"vip_ring_color_2","Secondary ring color")}
+          ${colorField(prefix,"vip_ring_color_3","Highlight color")}
+          ${effectNumberField(prefix,"vip_ring_width","Ring thickness",1,10,1,"px")}
+          ${effectNumberField(prefix,"vip_ring_speed","Ring rotation speed",1.5,14,.5,"seconds")}
+
+          <label class="m7ds-check">
+            <input id="${prefix}vip_orbit_enabled" type="checkbox">
+            <span>
+              <b>Orbit branded objects</b>
+              <small>Use a symbol, emoji or a transparent uploaded image unique to this shop.</small>
+            </span>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Orbit symbol / emoji</span>
+            <input id="${prefix}vip_orbit_symbol" type="text" maxlength="12" placeholder="✦">
+          </label>
+
+          <label class="m7ds-field">
+            <span>Orbit image URL (optional)</span>
+            <input id="${prefix}vip_orbit_image_url" type="url" placeholder="https://… transparent PNG/WebP">
+          </label>
+
+          ${effectNumberField(prefix,"vip_orbit_count","Orbit object count",1,8,1,"objects")}
+          ${effectNumberField(prefix,"vip_orbit_size","Orbit object size",8,42,1,"px")}
+          ${effectNumberField(prefix,"vip_orbit_distance","Orbit distance",2,42,1,"px")}
+
+          <label class="m7ds-field">
+            <span>Orbit direction</span>
+            <select id="${prefix}vip_orbit_direction">
+              <option value="clockwise">Clockwise</option>
+              <option value="counter">Counter-clockwise</option>
+            </select>
+          </label>
+
+          <label class="m7ds-field">
+            <span>Ambient particles</span>
+            <select id="${prefix}vip_particle_style">
+              <option value="sparkles">Sparkles</option>
+              <option value="stars">Stars</option>
+              <option value="petals">Petals</option>
+              <option value="bubbles">Bubbles</option>
+              <option value="hearts">Hearts</option>
+              <option value="dots">Light dots</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+
+          ${effectNumberField(prefix,"vip_particle_count","Particle count",0,12,1,"particles")}
+          ${colorField(prefix,"vip_particle_color","Particle color")}
+          ${effectNumberField(prefix,"vip_particle_speed","Particle speed",2,12,.5,"seconds")}
+
+          <label class="m7ds-field">
+            <span>Phone performance</span>
+            <select id="${prefix}vip_mobile_quality">
+              <option value="balanced">Balanced — recommended</option>
+              <option value="full">Full visual quality</option>
+              <option value="light">Light — slower phones</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="m7ds-vip-note">
+          This is the first reusable VIP layer. Doze can use food/chocolate artwork, while tattoo, perfume, café and fashion shops can use completely different assets.
+        </div>
       </div>
 
       <div class="m7ds-pane active" data-m7ds-pane="identity">
@@ -10014,6 +10142,7 @@ function decorateAll(){
       .m7ds-pane{display:none}.m7ds-pane.active{display:block}
       .m7ds-section-title{margin:11px 0 7px;padding-bottom:6px;border-bottom:1px solid rgba(216,170,88,.10);color:#e9d4ad;font-size:9px;font-weight:950;letter-spacing:.5px;text-transform:uppercase}
       .m7ds-help{margin:10px 0 0;color:#837765;font-size:8px;line-height:1.5}
+      .m7ds-vip-note{margin-top:12px;padding:10px 11px;border:1px solid rgba(216,170,88,.16);border-radius:11px;background:linear-gradient(135deg,rgba(216,170,88,.055),rgba(166,91,210,.045));color:#b9aa91;font-size:8px;line-height:1.55}
       .m7ds-banner-grid{align-items:stretch}
       .m7ds-banner-upload{position:relative;min-height:64px;padding:9px 11px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed rgba(216,170,88,.26);border-radius:11px;background:rgba(255,255,255,.018);color:#d7c4a5;cursor:pointer;overflow:hidden}
       .m7ds-banner-upload b{display:block;font-size:9px}
@@ -16921,6 +17050,27 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     story_new_image_pulse:true,
     story_new_sparkle_count:"2",
 
+    vip_effects_enabled:false,
+    vip_ring_visibility:"unseen",
+    vip_ring_style:"aurora",
+    vip_ring_color_1:"$ACCENT",
+    vip_ring_color_2:"#d9a441",
+    vip_ring_color_3:"#ffffff",
+    vip_ring_width:"4",
+    vip_ring_speed:"5",
+    vip_orbit_enabled:false,
+    vip_orbit_symbol:"✦",
+    vip_orbit_image_url:"",
+    vip_orbit_count:"4",
+    vip_orbit_size:"18",
+    vip_orbit_distance:"12",
+    vip_orbit_direction:"clockwise",
+    vip_particle_style:"sparkles",
+    vip_particle_count:"6",
+    vip_particle_color:"$ACCENT",
+    vip_particle_speed:"4.5",
+    vip_mobile_quality:"balanced",
+
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
@@ -17965,13 +18115,38 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   const CHANNEL_NAME="ma7alak-design-live-v1";
   const STORAGE_PREFIX="ma7alak_design_live_v1:";
   const DESIGN_KEYS=[
+    "page_design_preset",
+    "page_motion_mode",
     "page_use_universal_accent",
+    "profile_ring_color",
     "story_new_effect",
     "story_upload_effect",
     "story_new_speed",
     "story_new_intensity",
+    "story_glow_color",
+    "story_glow_power",
     "story_new_image_pulse",
     "story_new_sparkle_count",
+    "vip_effects_enabled",
+    "vip_ring_visibility",
+    "vip_ring_style",
+    "vip_ring_color_1",
+    "vip_ring_color_2",
+    "vip_ring_color_3",
+    "vip_ring_width",
+    "vip_ring_speed",
+    "vip_orbit_enabled",
+    "vip_orbit_symbol",
+    "vip_orbit_image_url",
+    "vip_orbit_count",
+    "vip_orbit_size",
+    "vip_orbit_distance",
+    "vip_orbit_direction",
+    "vip_particle_style",
+    "vip_particle_count",
+    "vip_particle_color",
+    "vip_particle_speed",
+    "vip_mobile_quality",
     "profile_shell_enabled",
     "profile_shell_layout",
     "profile_shell_bg_color",
