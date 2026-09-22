@@ -32,6 +32,15 @@
   let visible=true;
   let bootTimer=0;
 
+  /*
+     Admin draft preview must win over slower saved/cache refreshes while the
+     admin is actively editing. Without this, a realtime DB refresh can make a
+     VIP change appear for a moment and then snap back before Save is pressed.
+  */
+  const PREVIEW_HOLD_MS=120000;
+  let previewOptions=null;
+  let previewTouchedAt=0;
+
   function clamp(value,min,max,fallback){
     const n=Number(value);
     return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
@@ -289,9 +298,12 @@
       .m7vip-shell-frame[data-style="gradient"] .m7vip-frame-layer,.m7vip-shell-frame[data-style="glass"] .m7vip-frame-layer,.m7vip-shell-frame[data-style="metallic"] .m7vip-frame-layer{border:0!important;padding:var(--m7vip-frame-width)!important;background:linear-gradient(var(--m7vip-frame-angle,120deg),var(--m7vip-frame-c1),var(--m7vip-frame-c3),var(--m7vip-frame-c2),var(--m7vip-frame-c4),var(--m7vip-frame-c1))!important;background-size:300% 300%!important;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask-composite:exclude!important}
       .m7vip-shell-frame[data-style="neon"] .m7vip-frame-layer{box-shadow:0 0 calc(var(--m7vip-frame-glow) * .4) var(--m7vip-frame-color),inset 0 0 calc(var(--m7vip-frame-glow) * .3) var(--m7vip-frame-color)!important}
       .m7vip-shell-frame[data-style="segments"] .m7vip-frame-layer{border-style:dashed!important}
-      .m7vip-shell-frame[data-animation="flow"] .m7vip-frame-layer,.m7vip-shell-frame[data-animation="shimmer"] .m7vip-frame-layer{animation:m7vip-frame-flow var(--m7vip-frame-speed) linear infinite!important}
+      .m7vip-shell-frame[data-animation="flow"] .m7vip-frame-layer{animation:m7vip-frame-flow var(--m7vip-frame-speed) linear infinite!important}
+      .m7vip-shell-frame[data-animation="shimmer"] .m7vip-frame-layer{animation:m7vip-frame-shimmer var(--m7vip-frame-speed) ease-in-out infinite!important;animation-delay:calc(var(--m7vip-frame-index) * -.22s)!important}
       .m7vip-shell-frame[data-animation="breathe"] .m7vip-frame-layer{animation:m7vip-frame-breathe var(--m7vip-frame-speed) ease-in-out infinite!important}
       .m7vip-shell-frame[data-animation="comet"] .m7vip-frame-layer{animation:m7vip-frame-comet var(--m7vip-frame-speed) ease-in-out infinite!important;animation-delay:calc(var(--m7vip-frame-index) * -.35s)!important}
+      .m7vip-shell-frame[data-animation="none"] .m7vip-frame-layer{animation:none!important}
+      .m7vip-shell-frame[data-corner-animation="none"] .m7vip-corner{animation:none!important}
       .m7vip-corner{position:absolute!important;width:var(--m7vip-corner-size,20px)!important;height:var(--m7vip-corner-size,20px)!important;display:grid!important;place-items:center!important;color:var(--m7vip-frame-c1)!important;font-size:calc(var(--m7vip-corner-size,20px) * .75)!important;line-height:1!important;text-shadow:0 0 8px currentColor!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))!important}
       .m7vip-corner img{width:100%!important;height:100%!important;display:block!important;object-fit:contain!important}
       .m7vip-corner[data-corner="tl"]{left:5px;top:5px}.m7vip-corner[data-corner="tr"]{right:5px;top:5px}.m7vip-corner[data-corner="bl"]{left:5px;bottom:5px}.m7vip-corner[data-corner="br"]{right:5px;bottom:5px}
@@ -312,6 +324,7 @@
       @keyframes m7vip-category-glow{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.24);box-shadow:0 0 18px var(--m7vip-category-border)}}
       @keyframes m7vip-category-shimmer{0%{background-position:160% 50%}100%{background-position:-60% 50%}}
       @keyframes m7vip-frame-flow{0%{background-position:0 50%;filter:hue-rotate(0deg)}50%{background-position:100% 50%;filter:brightness(1.2)}100%{background-position:0 50%;filter:hue-rotate(0deg)}}
+      @keyframes m7vip-frame-shimmer{0%,18%{filter:brightness(.78);opacity:.62}45%{filter:brightness(1.55);opacity:1}68%,100%{filter:brightness(.9);opacity:.78}}
       @keyframes m7vip-frame-breathe{0%,100%{filter:brightness(.82);opacity:.58}50%{filter:brightness(1.3);opacity:1}}
       @keyframes m7vip-frame-comet{0%,100%{opacity:.28;filter:brightness(.8)}45%,58%{opacity:1;filter:brightness(1.5)}}
       @keyframes m7vip-corner-float{0%,100%{margin-top:0}50%{margin-top:-5px}}
@@ -372,7 +385,10 @@
   function renderOrbit(q){
     const stage=layer.querySelector(".m7vip-orbit");
     stage.replaceChildren();
-    if(!bool(options.vip_orbit_enabled,false))return;
+    if(
+      !bool(options.vip_effects_enabled,false) ||
+      !bool(options.vip_orbit_enabled,false)
+    )return;
     const count=effectiveCount(options.vip_orbit_count,8,q);
     const symbol=String(options.vip_orbit_symbol||"✦").trim().slice(0,12)||"✦";
     const imageUrl=safeUrl(options.vip_orbit_image_url);
@@ -401,6 +417,7 @@
   function renderParticles(q){
     const stage=layer.querySelector(".m7vip-particles");
     stage.replaceChildren();
+    if(!bool(options.vip_effects_enabled,false))return;
     const style=choice(options.vip_particle_style,ALLOWED_PARTICLES,"sparkles");
     if(style==="none"||q==="light")return;
     const count=effectiveCount(options.vip_particle_count,12,q);
@@ -677,12 +694,49 @@
     syncActive();
   }
 
-  function receive(event){
+  function eventOptions(event){
     const detail=event?.detail||{};
     const eventSlug=String(detail.shop_slug||detail.shopSlug||"").trim().toLowerCase();
     const current=slug();
-    if(eventSlug&&current&&eventSlug!==current)return;
-    apply(detail.directory_options);
+    if(eventSlug&&current&&eventSlug!==current)return null;
+
+    const next=detail.directory_options;
+    return next&&typeof next==="object"&&!Array.isArray(next)
+      ? next
+      : null;
+  }
+
+  function receivePreview(event){
+    const next=eventOptions(event);
+    if(!next)return;
+
+    previewTouchedAt=Date.now();
+    previewOptions={
+      ...(previewOptions||options||{}),
+      ...next
+    };
+
+    apply(previewOptions);
+  }
+
+  function receiveSaved(event){
+    const next=eventOptions(event);
+    if(!next)return;
+
+    /*
+       Ignore a stale saved/cache repaint while the Admin has a newer draft
+       open. A page refresh still loads the database version normally.
+    */
+    if(
+      previewOptions &&
+      Date.now()-previewTouchedAt < PREVIEW_HOLD_MS
+    ){
+      return;
+    }
+
+    previewOptions=null;
+    previewTouchedAt=0;
+    apply(next);
   }
 
   function observe(){
@@ -715,12 +769,12 @@
       return;
     }
     observe();
-    apply(cachedOptions()||{});
+    apply(previewOptions||cachedOptions()||{});
   }
 
-  window.addEventListener("ma7alak:profile-design-preview",receive);
-  window.addEventListener("ma7alak:profile-design-saved",receive);
-  window.addEventListener("ma7alak:profile-draft-preview",receive);
+  window.addEventListener("ma7alak:profile-design-preview",receivePreview);
+  window.addEventListener("ma7alak:profile-design-saved",receiveSaved);
+  window.addEventListener("ma7alak:profile-draft-preview",receivePreview);
   document.addEventListener("visibilitychange",syncActive);
   window.addEventListener("resize",()=>{syncSize();apply(options);},{passive:true});
 
