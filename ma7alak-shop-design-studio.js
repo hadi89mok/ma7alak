@@ -619,6 +619,8 @@
     const particleStyle=allowedParticles.has(particleRaw)?particleRaw:"sparkles";
     const quality=value("m7de-vip_mobile_quality","balanced").toLowerCase();
     const speed=num("m7de-vip_ring_speed",1.5,14,5);
+    const ringToggle=byId("m7de-vip_ring_enabled");
+    const ringEnabled=ringToggle ? !!ringToggle.checked : true;
     const orbitEnabled=!!byId("m7de-vip_orbit_enabled")?.checked;
     const orbitCount=Math.min(
       quality==="light"?3:quality==="balanced"?6:8,
@@ -647,8 +649,14 @@
     fx.style.setProperty("--vp-distance",num("m7de-vip_orbit_distance",2,42,12)+"px");
     fx.style.setProperty("--vp-particle-speed",num("m7de-vip_particle_speed",2,12,4.5)+"s");
 
-    const ringNode=document.createElement("span");
-    ringNode.className="m7studio-vip-ring";
+    const ringNode=ringEnabled
+      ? document.createElement("span")
+      : null;
+
+    if(ringNode){
+      ringNode.className="m7studio-vip-ring";
+    }
+
     const orbit=document.createElement("span");
     orbit.className="m7studio-vip-orbit";
     const particles=document.createElement("span");
@@ -690,7 +698,10 @@
       }
     }
 
-    fx.append(ringNode,orbit,particles);
+    if(ringNode){
+      fx.appendChild(ringNode);
+    }
+    fx.append(orbit,particles);
     logo.classList.add("m7studio-vip-logo");
     logo.appendChild(fx);
   }
