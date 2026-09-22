@@ -27,9 +27,11 @@
   ];
 
   let activeTab="profile";
+  let saveReturnTab="profile";
   let keepOpenAfterSave=false;
   let openingWanted=false;
   let openTimer=0;
+  let saveFeedbackTimer=0;
 
   function esc(value){
     return String(value??"")
@@ -192,10 +194,12 @@
         }
         .m7studio-desktop-save-dock{
           position:fixed;
-          right:28px;
+          left:50%;
+          right:auto;
           bottom:22px;
+          transform:translateX(-50%);
           z-index:200500;
-          width:min(390px,calc(100vw - 56px));
+          width:min(420px,calc(100vw - 56px));
           min-height:64px;
           display:flex;
           align-items:center;
@@ -250,6 +254,49 @@
         .m7studio-desktop-save-button:disabled{
           opacity:.66;
           cursor:wait;
+        }
+        .m7studio-desktop-save-dock.is-saved{
+          border-color:rgba(72,219,138,.58);
+          box-shadow:0 16px 46px rgba(0,0,0,.56),0 0 28px rgba(72,219,138,.16),inset 0 1px 0 rgba(255,255,255,.04);
+        }
+        .m7studio-desktop-save-dock.is-saved .m7studio-desktop-save-copy b{
+          color:#7de6aa;
+        }
+        .m7studio-desktop-save-dock.is-error{
+          border-color:rgba(255,96,96,.52);
+        }
+        .m7studio-save-toast{
+          position:absolute;
+          left:50%;
+          bottom:calc(100% + 10px);
+          transform:translate(-50%,8px);
+          min-width:230px;
+          max-width:min(420px,calc(100vw - 48px));
+          padding:10px 14px;
+          border:1px solid rgba(72,219,138,.45);
+          border-radius:12px;
+          background:rgba(7,18,12,.97);
+          color:#82e9ad;
+          font-size:11px;
+          font-weight:950;
+          line-height:1.35;
+          text-align:center;
+          opacity:0;
+          visibility:hidden;
+          pointer-events:none;
+          box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 22px rgba(72,219,138,.12);
+          transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+        }
+        .m7studio-save-toast.show{
+          opacity:1;
+          visibility:visible;
+          transform:translate(-50%,0);
+        }
+        .m7studio-save-toast.error{
+          border-color:rgba(255,96,96,.48);
+          background:rgba(28,9,9,.97);
+          color:#ffaaa5;
+          box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 22px rgba(255,96,96,.10);
         }
         #ma-admin-edit-card.m7studio-manager-mode .m7studio-desktop-save-dock{
           display:none!important;
@@ -1016,13 +1063,14 @@
       top.innerHTML='<div class="m7studio-brand-icon">🎨</div><div class="m7studio-title"><b>Shop Design Studio</b><small data-m7studio-subtitle>Design the shop page and see changes instantly.</small></div><span class="m7studio-sync">Studio preview ready</span><button type="button" class="m7studio-top-btn preview" data-m7studio-open>Open shop ↗</button><button type="button" class="m7studio-top-btn" data-m7studio-preview>Preview</button><button type="button" class="m7studio-top-btn primary" data-m7studio-save>▣ Save Changes</button><button type="button" class="m7studio-top-btn close" data-m7studio-close aria-label="Close">×</button>';
       panel.prepend(top);
       top.querySelector("[data-m7studio-save]")?.addEventListener("click",()=>{
-        const form=document.getElementById("ma-admin-edit-form");
-        const invalid=[...form.elements].find(el=>el.willValidate&&!el.validity.valid);
-        if(invalid){
-          const id=invalid.id;
-          activateTab(id.startsWith("ma-edit-")?"details":id.includes("hours")?"hours":id.includes("about")?"about":id.includes("profile")?"profile":"advanced");
-          invalid.scrollIntoView({block:"center"});invalid.reportValidity();return;
-        }
+        /*
+           The real Admin form intentionally uses novalidate and performs its
+           own validation inside the authoritative save handler. Do not run a
+           second browser-wide validity scan here: hidden legacy fields can be
+           invalid and used to throw the fullscreen Studio into Global even
+           though the real save is valid.
+        */
+        saveReturnTab=activeTab;
         keepOpenAfterSave=true;
         document.getElementById("ma-admin-save-edit")?.click();
       });
@@ -1071,8 +1119,9 @@
       desktopSaveDock=document.createElement("div");
       desktopSaveDock.className="m7studio-desktop-save-dock";
       desktopSaveDock.innerHTML=
+        '<div class="m7studio-save-toast" data-m7studio-save-toast role="status" aria-live="polite"></div>'+
         '<div class="m7studio-desktop-save-copy">'+
-          '<b>Save shop changes</b>'+
+          '<b data-m7studio-save-dock-title>Save shop changes</b>'+
           '<small data-m7studio-save-dock-status>Ready · saves the current Studio draft</small>'+
         '</div>'+
         '<button type="button" class="m7studio-desktop-save-button" data-m7studio-save-dock>▣ Save Changes</button>';
@@ -1225,62 +1274,173 @@
     });
   }
   function bindSaveFeedback(panel){
-    if(panel.__studioSaveFeedback)return;panel.__studioSaveFeedback=true;
-    const status=panel.querySelector("[data-m7studio-save-status]");
-    const dockStatus=panel.querySelector("[data-m7studio-save-dock-status]");
+    if(panel.__studioSaveFeedback)return;
+    panel.__studioSaveFeedback=true;
+
     const source=document.getElementById("ma-admin-edit-status");
+
+    function showDockFeedback(state,message){
+      const status=panel.querySelector("[data-m7studio-save-status]");
+      const dock=panel.querySelector("[data-m7studio-save-dock]");
+      const dockTitle=panel.querySelector("[data-m7studio-save-dock-title]");
+      const dockStatus=panel.querySelector("[data-m7studio-save-dock-status]");
+      const toast=panel.querySelector("[data-m7studio-save-toast]");
+      const shell=panel.querySelector(":scope > .m7studio-desktop-save-dock");
+
+      shell?.classList.toggle("is-saved",state==="saved");
+      shell?.classList.toggle("is-error",state==="error");
+
+      if(dock){
+        dock.disabled=state==="saving";
+        dock.textContent=
+          state==="saving"
+            ?"Saving…"
+            :state==="saved"
+              ?"✓ UPDATED"
+              :"▣ Save Changes";
+      }
+
+      if(dockTitle){
+        dockTitle.textContent=
+          state==="saving"
+            ?"Saving shop changes…"
+            :state==="saved"
+              ?"✓ UPDATED"
+              :state==="error"
+                ?"Save failed"
+                :"Save shop changes";
+      }
+
+      if(dockStatus){
+        dockStatus.textContent=
+          message ||
+          (state==="saved"
+            ?"Changes saved successfully."
+            :state==="saving"
+              ?"Saving current Studio draft…"
+              :"Ready · saves the current Studio draft");
+      }
+
+      if(status){
+        status.textContent=message||"";
+      }
+
+      clearTimeout(saveFeedbackTimer);
+
+      if(toast){
+        toast.classList.remove("show","error");
+
+        if(state==="saved"||state==="error"){
+          toast.textContent=
+            state==="saved"
+              ?"✓ UPDATED — changes saved successfully"
+              :"⚠ "+(message||"Save failed");
+          toast.classList.toggle("error",state==="error");
+
+          requestAnimationFrame(()=>{
+            toast.classList.add("show");
+          });
+
+          saveFeedbackTimer=setTimeout(()=>{
+            toast.classList.remove("show","error");
+
+            if(state==="saved"){
+              const currentDock=panel.querySelector("[data-m7studio-save-dock]");
+              const currentTitle=panel.querySelector("[data-m7studio-save-dock-title]");
+
+              if(currentDock){
+                currentDock.textContent="▣ Save Changes";
+              }
+
+              if(currentTitle){
+                currentTitle.textContent="Save shop changes";
+              }
+
+              panel
+                .querySelector(":scope > .m7studio-desktop-save-dock")
+                ?.classList.remove("is-saved");
+            }
+          },2600);
+        }
+      }
+    }
 
     if(source){
       new MutationObserver(()=>{
-        const message=source.textContent||"";
+        const message=String(source.textContent||"").trim();
+        if(!message)return;
+
+        const dockStatus=panel.querySelector("[data-m7studio-save-dock-status]");
+        const status=panel.querySelector("[data-m7studio-save-status]");
+
         if(status)status.textContent=message;
-        if(dockStatus&&message)dockStatus.textContent=message;
+        if(dockStatus)dockStatus.textContent=message;
       }).observe(source,{childList:true,characterData:true,subtree:true});
     }
 
     window.addEventListener("ma7alak:studio-save-state",event=>{
-      const saving=event.detail.state==="saving";
-      const button=panel.querySelector("[data-m7studio-save]");
-      const dockButton=panel.querySelector("[data-m7studio-save-dock]");
+      const state=event?.detail?.state||"";
+      const topButton=panel.querySelector("[data-m7studio-save]");
 
-      if(button){
-        button.disabled=saving;
-        button.textContent=saving?"Saving…":"Save Changes";
+      if(topButton){
+        topButton.disabled=state==="saving";
+        topButton.textContent=state==="saving"?"Saving…":"Save Changes";
       }
 
-      if(dockButton){
-        dockButton.disabled=saving;
-        dockButton.textContent=saving?"Saving…":"▣ Save Changes";
-      }
+      showDockFeedback(
+        state,
+        state==="saved"
+          ?"Changes saved successfully."
+          :event?.detail?.message||
+            (state==="saving"?"Saving current Studio draft…":"")
+      );
 
-      const message=
-        event.detail.state==="saved"
-          ?"Saved successfully."
-          :event.detail.message||"Saving…";
-
-      if(status)status.textContent=message;
-      if(dockStatus)dockStatus.textContent=message;
-
-      if(event.detail.state==="saved"&&keepOpenAfterSave){
-        [0,180,520].forEach(delay=>setTimeout(()=>restoreStudioAfterSave(panel),delay));
+      if(state==="saved"&&keepOpenAfterSave){
+        /*
+           Ignore internal Design Studio tab state from the save cycle.
+           The fullscreen Shop Studio returns to the exact tab that initiated
+           Save (VIP stays VIP, Story stays Story, etc.).
+        */
+        [0,180,520].forEach(delay=>
+          setTimeout(
+            ()=>restoreStudioAfterSave(panel,saveReturnTab),
+            delay
+          )
+        );
       }
     });
+
     window.addEventListener("ma7alak:studio-save-complete",()=>{
       if(!keepOpenAfterSave)return;
-      restoreStudioAfterSave(panel);
-      setTimeout(()=>{keepOpenAfterSave=false},700);
+
+      restoreStudioAfterSave(
+        panel,
+        saveReturnTab
+      );
+
+      setTimeout(()=>{
+        keepOpenAfterSave=false;
+      },700);
     });
   }
 
-  function restoreStudioAfterSave(panel){
+  function restoreStudioAfterSave(panel,requestedTab){
     const form=document.getElementById("ma-admin-edit-form");
     if(!panel||!form||!keepOpenAfterSave)return;
+
+    const tab=
+      TABS.some(row=>row[0]===requestedTab)
+        ?requestedTab
+        :saveReturnTab;
+
     panel.hidden=false;
     panel.removeAttribute("hidden");
     panel.classList.add("m7v4-show","m7v4-mode-design","m7studio-fullscreen");
     document.body.classList.add("m7studio-body-open");
     ensureChrome(panel);
-    activateTab(activeTab);
+
+    activeTab=tab;
+    activateTab(tab);
   }
   function simplifyAddShop(){
     const form=document.getElementById("ma-admin-shop-form");if(!form)return;form.classList.add("m7studio-simple-add");
@@ -1570,8 +1730,10 @@
 
   function closeStudio(){
     clearTimeout(openTimer);
+    clearTimeout(saveFeedbackTimer);
     openingWanted=false;
     keepOpenAfterSave=false;
+    saveReturnTab=activeTab;
 
     const form=document.getElementById("ma-admin-edit-form");
     if(form&&form.__m7studioDisconnectedObserver){
