@@ -1376,6 +1376,39 @@
 
     }
 
+
+    const quota=
+      document.getElementById(
+        "ma7alak-page-story-quota"
+      );
+
+    if(quota){
+      quota.textContent=
+        "Story limit: loading…";
+      quota.classList.remove(
+        "off"
+      );
+    }
+
+
+    const imageButton=
+      document.getElementById(
+        "ma7alak-page-story-image"
+      );
+
+    const videoButton=
+      document.getElementById(
+        "ma7alak-page-story-video"
+      );
+
+    if(imageButton){
+      imageButton.disabled=false;
+    }
+
+    if(videoButton){
+      videoButton.disabled=false;
+    }
+
   }
 
 
