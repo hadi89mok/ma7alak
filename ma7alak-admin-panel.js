@@ -6208,6 +6208,7 @@ function decorateAll(){
     page_float_distance:"6",
     page_use_universal_accent:true,
 
+    profile_circle_enabled:true,
     profile_ring_color:"#f2caed",
 
     story_new_effect:"premium",
@@ -6220,6 +6221,7 @@ function decorateAll(){
     story_new_sparkle_count:"2",
 
     vip_effects_enabled:false,
+    vip_ring_enabled:true,
     vip_ring_visibility:"unseen",
     vip_ring_style:"aurora",
     vip_ring_color_1:"#f2caed",
@@ -7117,8 +7119,16 @@ function decorateAll(){
             <span class="m7ds-vip-switch" aria-hidden="true"><i></i><b></b></span>
           </label>
 
+          <label class="m7ds-check">
+            <input id="${prefix}vip_ring_enabled" type="checkbox" checked>
+            <span>
+              <b>Show VIP outer circle</b>
+              <small>Turn off only the VIP circle. VIP name, category, frame, particles and other effects stay available.</small>
+            </span>
+          </label>
+
           <label class="m7ds-field">
-            <span>Show VIP ring</span>
+            <span>VIP ring visibility</span>
             <select id="${prefix}vip_ring_visibility">
               <option value="unseen">Only for a new / unseen Story</option>
               <option value="always">Always around the profile</option>
@@ -7346,6 +7356,14 @@ function decorateAll(){
       <div class="m7ds-pane active" data-m7ds-pane="identity">
         <div class="m7ds-section-title">Profile & Shop Identity</div>
         <div class="m7ds-grid">
+          <label class="m7ds-check">
+            <input id="${prefix}profile_circle_enabled" type="checkbox" checked>
+            <span>
+              <b>Show normal profile circle</b>
+              <small>Turn this frame OFF when the VIP outer circle should be the only visible ring.</small>
+            </span>
+          </label>
+
           ${colorField(prefix,"profile_ring_color","Story / profile ring color")}
 
           <label class="m7ds-field">
@@ -8443,6 +8461,11 @@ function decorateAll(){
           DEFAULTS.profile_ring_color
         );
 
+      const profileCircleEnabled=
+        get("profile_circle_enabled")
+          ? !!get("profile_circle_enabled").checked
+          : true;
+
       const borderWidth=
         number("profile_shell_border_width",0,4,1);
 
@@ -8699,10 +8722,18 @@ function decorateAll(){
           bannerEnabled
             ? (-Math.min(82,overlap*.58))+"px"
             : "8px";
-        logo.style.borderColor=ringColor;
+        logo.style.borderColor=
+          profileCircleEnabled
+            ? ringColor
+            : "transparent";
+
         logo.style.boxShadow=
-          "0 0 0 1px "+hexToRgba(ringColor,.18)+
-          ",0 0 18px "+hexToRgba(ringColor,.26);
+          profileCircleEnabled
+            ? (
+                "0 0 0 1px "+hexToRgba(ringColor,.18)+
+                ",0 0 18px "+hexToRgba(ringColor,.26)
+              )
+            : "0 8px 22px rgba(0,0,0,.32)";
 
         /*
            Edit Shop profile image is a core field, not a directory option.
@@ -17537,6 +17568,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     page_float_distance:"6",
     page_use_universal_accent:true,
 
+    profile_circle_enabled:true,
     profile_ring_color:"$ACCENT",
 
     story_new_effect:"premium",
@@ -17549,6 +17581,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     story_new_sparkle_count:"2",
 
     vip_effects_enabled:false,
+    vip_ring_enabled:true,
     vip_ring_visibility:"unseen",
     vip_ring_style:"aurora",
     vip_ring_color_1:"$ACCENT",
@@ -18682,6 +18715,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "page_design_preset",
     "page_motion_mode",
     "page_use_universal_accent",
+    "profile_circle_enabled",
     "profile_ring_color",
     "story_new_effect",
     "story_upload_effect",
@@ -18692,6 +18726,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "story_new_image_pulse",
     "story_new_sparkle_count",
     "vip_effects_enabled",
+    "vip_ring_enabled",
     "vip_ring_visibility",
     "vip_ring_style",
     "vip_ring_color_1",
