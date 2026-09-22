@@ -13,14 +13,11 @@
   const TABS=[
     ["details","✎","Details","Shop name, Arabic name, category, area, location and page link"],
     ["profile","♙","Profile & Banner","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
-    ["story","◉","Story","Story motion, upload burst, glow color/strength, speed, sparkles and logo pulse"],
-    ["vip","♛","VIP Effects","Custom rings, branded orbit objects, particles, colors, motion and phone performance"],
+    ["animations","✦","VIP / Story Animations","Story glow, bursts and motion together with optional VIP rings, particles and branded effects"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
-    ["uploads","↑","Uploads","Manage photos and videos here. Media actions save immediately."],
-    ["reels","▶","Reels","Upload and manage homepage reels and owner limits. Actions save immediately."],
-    ["offers","⚡","Offers","Owner access, offer limits and existing offers. Actions save immediately."],
-    ["publishing","✓","Access & Visibility","Owner editing permissions, media quotas, visibility and badges. Actions save immediately."],
+    ["uploads","↑","Uploads","Photos, videos, reels, offers and owner upload limits in one place"],
+    ["publishing","✓","Access & Visibility","Shop visibility, verification, directory badges and publishing controls"],
     ["about","●","About / Hub","ABOUT + HUB: description, services, social links, location, colors, typography and effects"],
     ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
     ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
@@ -151,13 +148,13 @@
       .m7studio-vip-name[data-style="outline"]{color:transparent!important;-webkit-text-stroke:max(1px,var(--vpn-outline-width,1px)) var(--vpn-c1)!important}
       .m7studio-vip-name[data-style="solid"]{color:var(--vpn-c1)!important;background:none!important}
       .m7studio-vip-name[data-animation="shimmer"],.m7studio-vip-name[data-animation="gradient-flow"]{animation-name:m7studioVipNameFlow!important;animation-timing-function:linear!important}.m7studio-vip-name[data-animation="neon-pulse"]{animation-name:m7studioVipNameNeon!important}.m7studio-vip-name[data-animation="float"]{animation-name:m7studioVipNameFloat!important}.m7studio-vip-name[data-animation="pulse"]{animation-name:m7studioVipNamePulse!important}.m7studio-vip-name[data-animation="none"]{animation:none!important}
-      .m7studio-vip-category{color:var(--vpc-text,#fff)!important;border:1px solid var(--vpc-border,#f2caed)!important;background:var(--vpc-bg,#171217)!important;box-shadow:0 5px 14px rgba(0,0,0,.25),0 0 10px color-mix(in srgb,var(--vpc-border) 25%,transparent)!important;animation-duration:var(--vpc-speed,3s)!important;animation-iteration-count:infinite!important;animation-timing-function:ease-in-out!important}
+      .m7studio-vip-category{color:var(--vpc-text,#fff)!important;border:1px solid var(--vpc-border,#f2caed)!important;background:var(--vpc-bg,#171217)!important;box-shadow:none!important;animation-duration:var(--vpc-speed,3s)!important;animation-iteration-count:infinite!important;animation-timing-function:ease-in-out!important}
       .m7studio-vip-category[data-style="pill"],.m7studio-vip-category[data-style="glass"],.m7studio-vip-category[data-style="neon"]{padding:5px 10px!important;border-radius:999px!important}.m7studio-vip-category[data-style="ribbon"]{padding:5px 15px!important;border-radius:4px!important;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%)}.m7studio-vip-category[data-style="seal"]{padding:6px 10px!important;border-radius:12px 3px 12px 3px!important;border-width:2px!important}.m7studio-vip-category[data-style="minimal"]{padding:4px 6px!important;border-width:0 0 1px!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
       .m7studio-vip-category[data-animation="float"]{animation-name:m7studioVipCategoryFloat!important}.m7studio-vip-category[data-animation="pulse"]{animation-name:m7studioVipNamePulse!important}.m7studio-vip-category[data-animation="glow"]{animation-name:m7studioVipCategoryGlow!important}.m7studio-vip-category[data-animation="shimmer"]{animation-name:m7studioVipNameFlow!important;background-size:240% 100%!important}.m7studio-vip-category[data-animation="none"]{animation:none!important}
       .m7studio-vip-frame-preview{position:absolute!important;inset:0!important;z-index:10!important;border-radius:inherit!important;pointer-events:none!important;overflow:visible!important}.m7studio-vip-frame-preview>i{position:absolute!important;inset:var(--vpf-inset,0px)!important;border:var(--vpf-width) solid var(--vpf-color)!important;border-radius:max(5px,calc(18px - var(--vpf-radius-cut,0px)))!important;box-sizing:border-box!important;animation-duration:var(--vpf-speed)!important;animation-iteration-count:infinite!important}.m7studio-vip-frame-preview[data-style="gradient"]>i,.m7studio-vip-frame-preview[data-style="glass"]>i,.m7studio-vip-frame-preview[data-style="metallic"]>i{border:0!important;padding:var(--vpf-width)!important;background:linear-gradient(var(--vpf-angle),var(--vpf-c1),var(--vpf-c3),var(--vpf-c2),var(--vpf-c4),var(--vpf-c1))!important;background-size:300% 300%!important;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask-composite:exclude!important}.m7studio-vip-frame-preview[data-style="neon"]>i{box-shadow:0 0 var(--vpf-glow) var(--vpf-color)!important}.m7studio-vip-frame-preview[data-style="segments"]>i{border-style:dashed!important}.m7studio-vip-frame-preview[data-animation="flow"]>i,.m7studio-vip-frame-preview[data-animation="shimmer"]>i{animation-name:m7studioVipFrameFlow!important;animation-timing-function:linear!important}.m7studio-vip-frame-preview[data-animation="breathe"]>i{animation-name:m7studioVipBreathe!important}.m7studio-vip-frame-preview[data-animation="comet"]>i{animation-name:m7studioVipFrameComet!important}
       .m7studio-vip-frame-corner{position:absolute!important;width:var(--vpf-corner-size)!important;height:var(--vpf-corner-size)!important;display:grid!important;place-items:center!important;color:var(--vpf-c1)!important;font-style:normal!important;font-size:calc(var(--vpf-corner-size) * .7)!important;text-shadow:0 0 7px currentColor!important}.m7studio-vip-frame-corner img{width:100%!important;height:100%!important;object-fit:contain!important}.m7studio-vip-frame-corner.tl{left:0;top:0;translate:-30% -30%}.m7studio-vip-frame-corner.tr{right:0;top:0;translate:30% -30%}.m7studio-vip-frame-corner.bl{left:0;bottom:0;translate:-30% 30%}.m7studio-vip-frame-corner.br{right:0;bottom:0;translate:30% 30%}
       .m7studio-vip-frame-preview[data-corner-animation="float"] .m7studio-vip-frame-corner{animation:m7studioVipCornerFloat 3s ease-in-out infinite!important}.m7studio-vip-frame-preview[data-corner-animation="pulse"] .m7studio-vip-frame-corner{animation:m7studioVipNamePulse 2.4s ease-in-out infinite!important}.m7studio-vip-frame-preview[data-corner-animation="spin"] .m7studio-vip-frame-corner{animation:m7studioVipCornerSpin 6s linear infinite!important}
-      @keyframes m7studioVipNameFlow{0%{background-position:180% 50%}100%{background-position:-80% 50%}}@keyframes m7studioVipNameNeon{50%{filter:brightness(1.35)}}@keyframes m7studioVipNameFloat{50%{transform:translateY(-3px)}}@keyframes m7studioVipNamePulse{50%{transform:scale(1.035)}}@keyframes m7studioVipCategoryFloat{50%{transform:translateY(-2px)}}@keyframes m7studioVipCategoryGlow{50%{filter:brightness(1.25);box-shadow:0 0 16px var(--vpc-border)}}@keyframes m7studioVipFrameFlow{0%{background-position:0 50%}50%{background-position:100% 50%;filter:brightness(1.2)}100%{background-position:0 50%}}@keyframes m7studioVipFrameComet{0%,100%{opacity:.3}50%{opacity:1;filter:brightness(1.5)}}@keyframes m7studioVipCornerFloat{50%{margin-top:-4px}}@keyframes m7studioVipCornerSpin{to{rotate:360deg}}
+      @keyframes m7studioVipNameFlow{0%{background-position:180% 50%}100%{background-position:-80% 50%}}@keyframes m7studioVipNameNeon{50%{filter:brightness(1.35)}}@keyframes m7studioVipNameFloat{50%{transform:translateY(-3px)}}@keyframes m7studioVipNamePulse{50%{transform:scale(1.035)}}@keyframes m7studioVipCategoryFloat{50%{transform:translateY(-2px)}}@keyframes m7studioVipCategoryGlow{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.35);border-color:var(--vpc-border)}}@keyframes m7studioVipFrameFlow{0%{background-position:0 50%}50%{background-position:100% 50%;filter:brightness(1.2)}100%{background-position:0 50%}}@keyframes m7studioVipFrameComet{0%,100%{opacity:.3}50%{opacity:1;filter:brightness(1.5)}}@keyframes m7studioVipCornerFloat{50%{margin-top:-4px}}@keyframes m7studioVipCornerSpin{to{rotate:360deg}}
       .m7v4-actions-studio{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important}.m7v4-actions-studio [data-m7v4-action="design"]{border-color:rgba(217,170,88,.35)!important;background:radial-gradient(circle at 15% 0%,rgba(217,170,88,.11),transparent 50%),rgba(217,170,88,.035)!important}
       @media(max-width:1100px){#ma-admin-edit-card.m7studio-fullscreen .m7v4-preview-grid{grid-template-columns:minmax(0,1fr) 350px!important;width:calc(100vw - 24px)!important;gap:12px!important}#ma-admin-edit-card.m7studio-fullscreen .m7studio-colors-mode .m7ds-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
       #ma-admin-edit-card.m7studio-fullscreen{box-sizing:border-box!important;height:100vh!important;height:100dvh!important}
@@ -191,6 +188,24 @@
       .m7studio-upload-tabs{display:flex;gap:8px;margin-bottom:14px}
       .m7studio-upload-tabs button{padding:10px 16px;background:#211b12;color:#f0cc84;border:1px solid #6b542d;border-radius:12px}
       .m7studio-upload-tabs button[aria-pressed=true]{background:#e5b85e;color:#17120a}
+      /* Compact Studio: controls stay close to the section they affect. */
+      #ma-admin-edit-card.m7studio-fullscreen fieldset{margin-bottom:7px!important;padding:10px!important;border-radius:12px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7-design-studio>.m7ds-pane{margin-bottom:7px!important;padding:9px!important;border-radius:11px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7da-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin:9px 0 6px!important;padding:6px 8px!important;font-size:9px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-field,#ma-admin-edit-card.m7studio-fullscreen .m7da-field,#ma-admin-edit-card.m7studio-fullscreen .m7cd-field,#ma-admin-edit-card.m7studio-fullscreen .m7ats-row{padding:7px!important;border-radius:9px!important}
+      #ma-admin-edit-card.m7studio-fullscreen input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),#ma-admin-edit-card.m7studio-fullscreen select,#ma-admin-edit-card.m7studio-fullscreen textarea{min-height:36px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-section-banner{margin-bottom:7px;padding:9px 10px;border-radius:11px}.m7studio-section-banner i{width:28px;height:28px;flex-basis:28px}.m7studio-section-banner small{margin-top:1px}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-compact-check{min-height:44px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;margin:0!important;padding:7px 9px!important;border:1px solid rgba(218,170,82,.15)!important;border-radius:10px!important;background:rgba(255,255,255,.014)!important;cursor:pointer!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-compact-check input[type="checkbox"]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+      .m7studio-check-copy{min-width:0}.m7studio-check-copy b{display:block;color:#eee2cd;font-size:10px;line-height:1.25}.m7studio-check-copy small{display:block;margin-top:2px;color:#8f867a!important;font-size:8px!important;line-height:1.25!important;white-space:normal}
+      .m7studio-check-state{min-width:42px;height:25px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#191b1d;color:#918b82;font-size:8px;font-weight:950;box-shadow:none!important}
+      .m7studio-compact-check.is-on .m7studio-check-state{border-color:#e0ae50;background:linear-gradient(135deg,#f0c86f,#c98e2e);color:#211609}
+      .m7studio-range-field{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;column-gap:8px!important}.m7studio-range-field>label,.m7studio-range-field>span:first-child{grid-column:1/-1}.m7studio-range-field input[type="range"]{grid-column:1;width:100%!important;height:24px!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;accent-color:#e5b85e}.m7studio-range-value{grid-column:2;min-width:48px;padding:4px 6px;border:1px solid rgba(218,170,82,.18);border-radius:7px;background:#0b0d0e;color:#f0c978;font-size:9px;font-weight:900;text-align:center}
+      .m7studio-profile-media-row{grid-template-columns:132px minmax(0,1fr)!important;gap:9px!important;margin:7px 0!important;padding:9px!important}.m7studio-profile-media-row .m7ds-profile-image-preview{min-height:90px!important}
+      .m7studio-profile-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;align-self:stretch}.m7studio-profile-quick .m7studio-compact-check{height:100%}
+      .m7studio-upload-menu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 10px}.m7studio-upload-card{min-height:74px!important;display:flex!important;flex-direction:column;align-items:flex-start!important;justify-content:center!important;gap:4px;padding:10px!important;border:1px solid rgba(218,170,82,.19)!important;border-radius:11px!important;background:rgba(218,170,82,.035)!important;color:#e9c77e!important;text-align:left;box-shadow:none!important}.m7studio-upload-card b{font-size:11px}.m7studio-upload-card small{font-size:8px!important;color:#918777!important}.m7studio-upload-card[aria-pressed="true"]{border-color:#e0ae50!important;background:linear-gradient(135deg,rgba(224,174,80,.18),rgba(224,174,80,.055))!important}
+      .m7studio-manager-host:empty{display:none}.m7studio-manager-host>section{padding:10px!important;border-radius:12px!important}.m7studio-inline-capability{margin:0 0 8px}.m7studio-inline-capability .m7v4-actions{gap:7px!important}.m7studio-inline-capability [data-m7v4-action]{min-height:48px!important;padding:8px!important}
       #ma-admin-edit-card .m7studio-global-extras .m7da-field:not(.m7studio-field-hidden){display:flex!important}
       #ma-admin-edit-card .m7studio-global-extras .m7studio-field-hidden{display:none!important}
       .m7v4-actions-studio{grid-template-columns:1fr!important}
@@ -341,13 +356,14 @@
         #ma-admin-edit-card.m7studio-fullscreen .m7v4-edit-preview{display:none!important}
         #ma-admin-edit-card.m7studio-preview-open #ma-admin-edit-form{display:none!important}
         #ma-admin-edit-card.m7studio-preview-open .m7v4-edit-preview{display:block!important}
-        #ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7da-grid,#ma-admin-edit-card.m7studio-fullscreen .m7studio-profile-core{grid-template-columns:minmax(0,1fr)!important}
+        #ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,#ma-admin-edit-card.m7studio-fullscreen .m7ds-top-grid,#ma-admin-edit-card.m7studio-fullscreen .m7da-grid,#ma-admin-edit-card.m7studio-fullscreen .m7studio-profile-core{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
         #ma-admin-edit-card.m7studio-fullscreen fieldset{min-inline-size:0!important;padding:12px!important}
         #ma-admin-edit-card.m7studio-fullscreen .m7ds-layer-grid{grid-template-columns:minmax(0,1fr)!important}
         .m7studio-manager-dock{flex:1;width:100%;overscroll-behavior:contain}
         .m7studio-manager-dock .m7v4-actions{grid-template-columns:1fr}
         .m7studio-phone{width:100%;min-height:420px;height:calc(100dvh - 260px)}
-        .m7studio-profile-media-row{grid-template-columns:1fr!important}.m7studio-profile-media-row .m7ds-profile-image-preview{width:100%!important}
+        .m7studio-profile-media-row{grid-template-columns:96px minmax(0,1fr)!important}.m7studio-profile-media-row .m7ds-profile-image-preview{width:100%!important}.m7studio-profile-quick{grid-template-columns:1fr}.m7studio-upload-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.m7studio-upload-card{min-height:66px!important}
+        #ma-admin-edit-card.m7studio-fullscreen .m7studio-compact-check{min-height:42px!important}#ma-admin-edit-card.m7studio-fullscreen label,#ma-admin-edit-card.m7studio-fullscreen .m7ds-field>span{font-size:11px!important}#ma-admin-edit-card.m7studio-fullscreen small,#ma-admin-edit-card.m7studio-fullscreen .m7ds-help{font-size:9px!important}
       }
     `;
     document.head.appendChild(style);
@@ -374,6 +390,7 @@
     form.classList.remove("m7studio-colors-mode");
     form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
     form.querySelector(":scope > .m7studio-hub-note")?.remove();
+    form.querySelector(":scope > .m7studio-inline-capability")?.remove();
     form.querySelector(".m7da-sectioned-extras")?.classList.remove("m7studio-hub-extras","m7studio-global-extras");
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
     form.querySelectorAll(".m7studio-field-hidden,.m7studio-group-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden","m7studio-group-hidden"));
@@ -414,6 +431,56 @@
 
   function fieldWrapper(input){
     return input.closest(".m7ds-field,.m7ds-check,.m7da-field,.m7cd-field,.m7ats-row,.m7as-row,.m7-availability-extra-row")||input.closest("label")||input.parentElement;
+  }
+
+  function compactStudioControls(scope){
+    if(!scope)return;
+    scope.querySelectorAll('input[type="checkbox"]').forEach(input=>{
+      const wrap=fieldWrapper(input);if(!wrap||wrap.classList.contains("m7studio-field-hidden"))return;
+      wrap.classList.add("m7studio-compact-check");
+      let state=wrap.querySelector(":scope > .m7studio-check-state");
+      if(!state){state=document.createElement("strong");state.className="m7studio-check-state";wrap.append(state)}
+      const sync=()=>{wrap.classList.toggle("is-on",input.checked);state.textContent=input.checked?"ON":"OFF"};
+      sync();
+      if(!input.__m7studioCompactBound){input.__m7studioCompactBound=true;input.addEventListener("change",sync)}
+    });
+    scope.querySelectorAll('input[type="number"]').forEach(input=>{
+      if(input.dataset.m7studioKeepNumber==="1")return;
+      const wrap=fieldWrapper(input);if(!wrap||wrap.classList.contains("m7studio-field-hidden"))return;
+      const value=Number(input.value)||0;
+      if(!input.hasAttribute("min"))input.min=String(Math.min(0,value));
+      if(!input.hasAttribute("max"))input.max=String(Math.max(100,Math.ceil(Math.abs(value)*2)||100));
+      if(!input.hasAttribute("step"))input.step=String(Number.isInteger(value)?1:.1);
+      input.type="range";wrap.classList.add("m7studio-range-field");
+      let output=wrap.querySelector(":scope > .m7studio-range-value");
+      if(!output){output=document.createElement("output");output.className="m7studio-range-value";wrap.append(output)}
+      const suffix=/speed/i.test(input.id)?"s":/%|opacity|glow|intensity|blur|shadow/i.test(input.id)?"%":"";
+      const sync=()=>{output.value=input.value+suffix;output.textContent=input.value+suffix};sync();
+      if(!input.__m7studioRangeBound){input.__m7studioRangeBound=true;input.addEventListener("input",sync);input.addEventListener("change",sync)}
+    });
+  }
+
+  function publishingFragment(actionKeys,includeQuota){
+    const source=document.createElement("div");
+    source.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"";
+    const fragment=document.createElement("div");
+    fragment.className="m7studio-inline-capability";
+    const actions=document.createElement("div");actions.className="m7v4-actions";
+    actionKeys.forEach(key=>{const button=source.querySelector('[data-m7v4-action="'+key+'"]');if(button)actions.append(button)});
+    if(actions.children.length)fragment.append(actions);
+    if(includeQuota){const quota=source.querySelector(".m7v4-owner-quota");if(quota)fragment.append(quota)}
+    return fragment;
+  }
+
+  function addInlineCapability(form,keys){
+    form.querySelector(":scope > .m7studio-inline-capability")?.remove();
+    const block=publishingFragment(keys,false);if(!block.childElementCount)return;
+    const banner=form.querySelector(":scope > .m7studio-section-banner");banner?.after(block);
+    block.addEventListener("click",async event=>{
+      const button=event.target.closest("[data-m7v4-action]");if(!button)return;
+      button.disabled=true;
+      try{await window.Ma7alakAdminStudioBridge?.action(button.dataset.m7v4Action);const next=publishingFragment(keys,false);block.replaceWith(next);addInlineCapability(form,keys)}catch(error){button.disabled=false;window.alert(error.message||"Could not save this setting.")}
+    });
   }
 
   function filterFields(scope,predicate){
@@ -608,7 +675,7 @@
     const panel=document.getElementById("ma-admin-edit-card");
     if(!form||!panel)return null;
 
-    if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
+    if(activeTab==="profile"||activeTab==="animations"){
       return form.querySelector("[data-m7-profile-shell-preview]");
     }
 
@@ -728,7 +795,7 @@
   }
 
   function hydrateStoryPreview(logo,byId,num,value){
-    if(!logo||activeTab!=="story")return;
+    if(!logo||activeTab!=="animations")return;
     const effects=new Set(["premium","glow","shimmer","sparkle","heartbeat","soft","radar","halo","comet","neon-wave","none"]);
     const bursts=new Set(["spark-burst","ripple","flash","pop","confetti","starburst","radar-burst","none"]);
     const selected=value("m7de-story_new_effect","premium").toLowerCase();
@@ -1047,7 +1114,7 @@
        the current controls before cloning them.
     */
     try{
-      if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
+      if(activeTab==="profile"||activeTab==="animations"){
         design.__m7ProfileShellRefresh?.();
         design.__m7BannerRefresh?.();
       }
@@ -1091,7 +1158,7 @@
       clone.removeAttribute("id");
       clone.querySelectorAll("[id]").forEach(el=>el.removeAttribute("id"));
 
-      if(activeTab==="profile"||activeTab==="story"||activeTab==="vip"){
+      if(activeTab==="profile"||activeTab==="animations"){
         hydrateProfilePreview(clone);
       }
 
@@ -1305,6 +1372,28 @@
       }
     }catch(error){if(request===managerRequest)host.textContent=error.message||"Could not load this manager."}
   }
+  async function saveOwnerLimits(host){
+    const value=selector=>{const input=host.querySelector(selector);const n=Number(input?.value);if(!Number.isInteger(n)||n<0||n>100)throw Error("Upload limits must be whole numbers from 0 to 100.");return n};
+    const photos=value("[data-m7v4-owner-photo-limit]");
+    const videos=value("[data-m7v4-owner-video-limit]");
+    const stories=value("[data-m7v4-owner-story-limit]");
+    await window.Ma7alakAdminStudioBridge?.limits(photos,videos,stories);
+    const form=document.getElementById("ma-admin-edit-form");
+    form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos,owner_story_limit:stories});
+  }
+  function renderUploadPermissions(host,note){
+    host.replaceChildren(publishingFragment(["owner-media-edit"],true));
+    compactStudioControls(host);
+    host.onclick=async event=>{
+      const button=event.target.closest("[data-m7v4-action],[data-m7v4-save-owner-media-limits]");if(!button)return;
+      button.disabled=true;
+      try{
+        if(button.hasAttribute("data-m7v4-save-owner-media-limits"))await saveOwnerLimits(host);
+        else await window.Ma7alakAdminStudioBridge?.action(button.dataset.m7v4Action);
+        renderUploadPermissions(host,note);note.textContent="Saved. Upload access and limits are updated.";
+      }catch(error){note.textContent=error.message||"Could not save.";button.disabled=false}
+    };
+  }
   function showManagerDock(panel,key){
     panel.classList.add("m7studio-manager-mode");
     let dock=panel.querySelector(".m7studio-manager-dock");
@@ -1313,7 +1402,12 @@
     const note=document.createElement("p");note.textContent="Changes in this section save immediately. Your unsaved design edits stay in the Studio.";dock.append(note);
     const host=document.createElement("div");
     if(key==="publishing"){
-      dock.append(host);const render=()=>{host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first.";updateOgPreview(host)};render();
+      dock.append(host);const render=()=>{
+        host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first.";
+        ["owner-profile-edit","owner-media-edit","owner-about-edit"].forEach(action=>host.querySelector('[data-m7v4-action="'+action+'"]')?.remove());
+        host.querySelector(".m7v4-owner-quota")?.remove();
+        updateOgPreview(host);compactStudioControls(host);
+      };render();
       host.addEventListener("input",()=>updateOgPreview(host));
       host.addEventListener("change",()=>updateOgPreview(host));
       host.addEventListener("click",async event=>{
@@ -1322,18 +1416,7 @@
         try{
           const bridge=window.Ma7alakAdminStudioBridge;
           if(button.hasAttribute("data-m7v4-save-owner-media-limits")){
-            const value=selector=>{const input=host.querySelector(selector);const n=Number(input?.value);if(!Number.isInteger(n)||n<0||n>100)throw Error("Upload limits must be whole numbers from 0 to 100.");return n};
-            const photos=value("[data-m7v4-owner-photo-limit]");
-            const videos=value("[data-m7v4-owner-video-limit]");
-            const stories=value("[data-m7v4-owner-story-limit]");
-            await bridge.limits(photos,videos,stories);
-            const form=document.getElementById("ma-admin-edit-form");
-            form.dataset.directoryOptions=JSON.stringify({
-              ...JSON.parse(form.dataset.directoryOptions||"{}"),
-              owner_media_photo_limit:photos,
-              owner_media_video_limit:videos,
-              owner_story_limit:stories
-            });
+            await saveOwnerLimits(host);
           }else if(button.hasAttribute("data-m7v4-save-og-badge")){
             await bridge.og(readOgSettings(host));
           }else await bridge.action(button.dataset.m7v4Action);
@@ -1342,9 +1425,10 @@
       });return;
     }
     if(key==="uploads"){
-      const nav=document.createElement("div");nav.className="m7studio-upload-tabs";nav.innerHTML='<button type="button" data-manager="gallery" aria-pressed="true">Photos</button><button type="button" data-manager="video" aria-pressed="false">Videos</button>';
-      nav.addEventListener("click",event=>{const button=event.target.closest("[data-manager]");if(!button)return;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));mountManager(host,button.dataset.manager)});
-      dock.append(nav,host);mountManager(host,"gallery");
+      const nav=document.createElement("div");nav.className="m7studio-upload-menu";nav.innerHTML='<button type="button" class="m7studio-upload-card" data-manager="gallery" aria-pressed="false"><b>▧ Photos</b><small>Upload and manage gallery images</small></button><button type="button" class="m7studio-upload-card" data-manager="video" aria-pressed="false"><b>▶ Videos</b><small>Upload and manage shop videos</small></button><button type="button" class="m7studio-upload-card" data-manager="reels" aria-pressed="false"><b>▸ Reels</b><small>Homepage reel uploads</small></button><button type="button" class="m7studio-upload-card" data-manager="offers" aria-pressed="false"><b>⚡ Offers</b><small>Live and scheduled offers</small></button><button type="button" class="m7studio-upload-card" data-manager="permissions" aria-pressed="false"><b>✓ Access & limits</b><small>Owner upload access and quotas</small></button>';
+      host.className="m7studio-manager-host";
+      nav.addEventListener("click",event=>{const button=event.target.closest("[data-manager]");if(!button)return;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));host.onclick=null;if(button.dataset.manager==="permissions")renderUploadPermissions(host,note);else mountManager(host,button.dataset.manager)});
+      dock.append(nav,host);
     }else{dock.append(host);mountManager(host,key)}
   }
   function ensureProfileUpload(form){
@@ -1361,7 +1445,9 @@
     }
 
     const bannerInput=document.getElementById("m7de-profile_banner_enabled");
+    const circleInput=document.getElementById("m7de-profile_circle_enabled");
     const bannerToggle=bannerInput&&fieldWrapper(bannerInput);
+    const circleToggle=circleInput&&fieldWrapper(circleInput);
     const profilePreview=pane.querySelector(".m7ds-profile-image-preview");
     if(bannerToggle&&profilePreview){
       let row=pane.querySelector(":scope > .m7studio-profile-media-row");
@@ -1370,24 +1456,17 @@
         row.className="m7studio-profile-media-row";
         pane.querySelector(":scope > .m7ds-section-title")?.after(row);
       }
-      row.append(profilePreview,bannerToggle);
+      let quick=row.querySelector(":scope > .m7studio-profile-quick");
+      if(!quick){quick=document.createElement("div");quick.className="m7studio-profile-quick"}
+      row.append(profilePreview,quick);
+      quick.append(bannerToggle);
+      if(circleToggle)quick.append(circleToggle);
       bannerToggle.classList.add("m7studio-banner-toggle");
-      let state=bannerToggle.querySelector(".m7studio-banner-toggle-state");
-      if(!state){
-        state=document.createElement("strong");
-        state.className="m7studio-banner-toggle-state";
-        bannerToggle.appendChild(state);
-      }
-      const sync=()=>{state.textContent=bannerInput.checked?"ON":"OFF";};
-      sync();
-      if(!bannerInput.__m7studioBannerToggleBound){
-        bannerInput.__m7studioBannerToggleBound=true;
-        bannerInput.addEventListener("change",sync);
-      }
       const headings=[...pane.querySelectorAll(":scope > .m7ds-section-title")];
       const bannerHeading=headings.find(node=>/top profile banner/i.test(node.textContent||""));
       if(bannerHeading)bannerHeading.textContent="Banner design";
     }
+    compactStudioControls(pane);
   }
   function bindSaveFeedback(panel){
     if(panel.__studioSaveFeedback)return;
@@ -1610,7 +1689,7 @@
     };
 
     hideManagerDock(panel);
-    if(["uploads","reels","offers","publishing"].includes(key)){
+    if(["uploads","publishing"].includes(key)){
       hideFormRoots(form,[]);showManagerDock(panel,key);
     }
     else if(key==="details"){
@@ -1642,28 +1721,23 @@
 
       hideFormRoots(form,roots);
       ensureProfileUpload(form);
+      addInlineCapability(form,["owner-profile-edit"]);
     }
-    else if(key==="story"){
+    else if(key==="animations"){
       const roots=showRoots(form,[".m7-design-studio"]);
-      showPanes(form,["identity"]);
+      showPanes(form,["identity","vip"]);
       const storyPane=design?.querySelector('[data-m7ds-pane="identity"]');
       filterFields(
         storyPane,
         id=>id.includes("story_")
       );
       const storyTitle=storyPane?.querySelector(":scope > .m7ds-section-title");
-      if(storyTitle)storyTitle.textContent="Story Effects";
-      hideDesignChrome();
-      tidyPane(design?.querySelector('[data-m7ds-pane="identity"]'));
-      hideFormRoots(form,roots);
-    }
-    else if(key==="vip"){
-      const roots=showRoots(form,[".m7-design-studio"]);
-      showPanes(form,["vip"]);
+      if(storyTitle)storyTitle.textContent="Story Animations";
       const vipPane=design?.querySelector('[data-m7ds-pane="vip"]');
       const vipTitle=vipPane?.querySelector(":scope > .m7ds-section-title");
-      if(vipTitle)vipTitle.textContent="VIP Story Identity";
+      if(vipTitle)vipTitle.textContent="Optional VIP Effects";
       hideDesignChrome();
+      tidyPane(storyPane);
       tidyPane(vipPane);
       hideFormRoots(form,roots);
     }
@@ -1764,6 +1838,7 @@
       tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       tidyPane(design?.querySelector('[data-m7ds-pane="modules"]'));
       hideFormRoots(form,roots);
+      addInlineCapability(form,["owner-about-edit"]);
     }
     else if(key==="hours"){
       const roots=showRoots(form,[
@@ -1812,6 +1887,7 @@
       hideFormRoots(form,roots);
     }
 
+    compactStudioControls(form);
     ensureChrome(panel);
     ensureStudioPreview(panel);
 
