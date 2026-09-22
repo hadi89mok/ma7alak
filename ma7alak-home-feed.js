@@ -294,6 +294,9 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)spotlightCl
 /* REELS */
 const reelsContainer=document.querySelector(".ma7alak-reels"),viewer=document.getElementById("ma7alakReelViewer"),viewerVideo=document.getElementById("ma7alakReelViewerVideo"),viewerClose=document.getElementById("ma7alakReelViewerClose"),viewerShop=document.getElementById("ma7alakReelViewerShop"),viewerName=document.getElementById("ma7alakReelViewerShopName"),viewerIcon=document.getElementById("ma7alakReelViewerShopIcon"),viewerFav=document.getElementById("ma7alakViewerFavorite"),favCount=document.getElementById("ma7alakFavoritesCount");let reels=[],viewerIndex=0,favoriteIds=new Set(),channel,loading=false,lastRandom=null,reelDataSignature="";
 let visitorId=localStorage.getItem("ma7alak_visitor_id");if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem("ma7alak_visitor_id",visitorId)}
+const favoriteTokenKey="ma7alak_favorite_token_v1";
+let favoriteToken=String(localStorage.getItem(favoriteTokenKey)||"").trim();
+if(!/^[A-Za-z0-9._:-]{32,200}$/.test(favoriteToken)){favoriteToken=crypto.randomUUID()+"-"+crypto.randomUUID();localStorage.setItem(favoriteTokenKey,favoriteToken)}
 function refreshReels(){reels=[...document.querySelectorAll(".ma7alak-reel[data-reel-id]")];return reels}
 function card(row){let d=document.createElement("div");d.className="ma7alak-reel";d.dataset.reelId=row.reel_id;d.dataset.shopName=row.shop_name||"Shop";d.dataset.shopUrl=row.shop_url||"";d.dataset.shopIcon=row.shop_icon||"";d.dataset.videoUrl=row.video_url||"";d.innerHTML=`<video class="ma7alak-video" muted loop playsinline webkit-playsinline preload="none"></video><div class="reel-info" role="link" tabindex="0"><img class="reel-shop-icon" src="${esc(row.shop_icon||"")}" alt="${esc(row.shop_name||"Shop")}" loading="lazy" decoding="async"><div class="reel-info-text"><strong>${esc(row.shop_name||"Shop")}</strong><span>${esc(row.caption||"")}</span></div></div>`;return d}
 function ensureCardVideo(v){if(!v||v.dataset.m7Loaded==="1")return;let reel=v.closest(".ma7alak-reel"),src=reel?.dataset.videoUrl||"";if(!src)return;v.src=src;v.dataset.m7Loaded="1";v.load()}
@@ -465,7 +468,7 @@ function closeViewer(){
 
 viewerClose.onclick=e=>{e.stopPropagation();closeViewer()};
 viewerShop.onclick=e=>{e.stopPropagation();if(viewerShop.dataset.shopUrl)window.top.location.href=viewerShop.dataset.shopUrl};
-viewerFav.onclick=async e=>{e.stopPropagation();let reel=reels[viewerIndex],id=reel?.dataset.reelId;if(!id)return;viewerFav.disabled=true;if(favoriteIds.has(id)){let r=await sb.from("ma7alak_favorites").delete().eq("visitor_id",visitorId).eq("reel_id",id);if(!r.error)favoriteIds.delete(id)}else{let r=await sb.from("ma7alak_favorites").insert({visitor_id:visitorId,reel_id:id,shop_name:reel.dataset.shopName});if(!r.error)favoriteIds.add(id)}viewerFav.disabled=false;updateViewerFav();await syncFavorites()};
+viewerFav.onclick=async e=>{e.stopPropagation();let reel=reels[viewerIndex],id=reel?.dataset.reelId;if(!id)return;viewerFav.disabled=true;try{if(favoriteIds.has(id)){let r=await sb.rpc("remove_my_favorite",{p_visitor_id:visitorId,p_favorite_token:favoriteToken,p_reel_id:id});if(!r.error)favoriteIds.delete(id)}else{let r=await sb.rpc("add_my_favorite",{p_visitor_id:visitorId,p_favorite_token:favoriteToken,p_reel_id:id});if(!r.error&&r.data!==false)favoriteIds.add(id)}}catch(err){console.warn("Favorites update:",err)}finally{viewerFav.disabled=false;updateViewerFav();await syncFavorites()}};
 
 let tx=0,ty=0,tt=0;
 viewer.addEventListener("touchstart",e=>{tx=e.changedTouches[0].clientX;ty=e.changedTouches[0].clientY;tt=Date.now()},{passive:true});
@@ -486,7 +489,7 @@ function onReelFullscreenChange(){
 document.addEventListener("fullscreenchange",onReelFullscreenChange);
 document.addEventListener("webkitfullscreenchange",onReelFullscreenChange);
 const observer=new IntersectionObserver(es=>es.forEach(e=>{let v=e.target;if(e.isIntersecting&&!viewer.classList.contains("open")&&!document.hidden){ensureCardVideo(v);v.muted=true;v.play().catch(()=>{})}else{v.pause();v.muted=true}}),{rootMargin:"80px 80px",threshold:.05});
-async function syncFavorites(){let r=await sb.from("ma7alak_favorites").select("reel_id").eq("visitor_id",visitorId);if(!r.error){favoriteIds=new Set((r.data||[]).map(x=>String(x.reel_id)));favCount.textContent=favoriteIds.size;updateViewerFav()}}
+async function syncFavorites(){let r=await sb.rpc("get_my_favorites",{p_visitor_id:visitorId,p_favorite_token:favoriteToken});if(!r.error){favoriteIds=new Set((r.data||[]).map(x=>String(x.reel_id)));favCount.textContent=favoriteIds.size;updateViewerFav()}}
 document.getElementById("ma7alakFavoritesButton").onclick=e=>{e.preventDefault();let msg={type:"ma7alak-scroll-favorites"};try{window.postMessage(msg,"*")}catch(_){}try{let bc=new BroadcastChannel("ma7alak-favorites-navigation");bc.postMessage(msg);bc.close()}catch(_){}};
 function reelsData(){return refreshReels().map(r=>({id:r.dataset.reelId,shop:r.dataset.shopName,shopUrl:r.dataset.shopUrl,icon:r.dataset.shopIcon,video:r.dataset.videoUrl||""}))}
 function sendReelsState(){let data=reelsData();if(!data.length)return;window.postMessage({type:"MA7ALAK_REELS_STATE",source:"ma7alak-reels-embed",sentAt:Date.now(),reelIds:data.map(x=>[x.id,x.video,x.shopUrl].join("::")),reels:data},"*")}
