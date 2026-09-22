@@ -204,7 +204,7 @@
       .${LAYER_CLASS}[data-quality="light"] .m7vip-ring::after{display:none!important}
 
       .m7og-badge{--m7og-primary:#d9a441;--m7og-secondary:#fff2a4;--m7og-bg:#160e06;--m7og-text:#fff0b8;--m7og-size:30px;--m7og-font:8.7px;--m7og-speed:2.8s;--m7og-glow:13px;position:absolute!important;right:-8px!important;bottom:-4px!important;z-index:28!important;width:var(--m7og-size)!important;height:var(--m7og-size)!important;display:grid!important;place-items:center!important;padding:0!important;border:0!important;border-radius:50%!important;pointer-events:none!important;filter:drop-shadow(0 4px 7px rgba(0,0,0,.72))!important}
-      .m7og-badge.has-verified{bottom:calc(var(--m7og-size) * .72)!important}
+      .m7og-badge.has-verified{right:auto!important;bottom:auto!important;left:var(--m7og-verified-left,auto)!important;top:var(--m7og-verified-top,auto)!important}
       .m7og-core{position:relative!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:0!important;overflow:hidden!important;border:2px solid var(--m7og-secondary)!important;border-radius:50%!important;box-sizing:border-box!important;color:var(--m7og-text)!important;background:radial-gradient(circle at 34% 23%,color-mix(in srgb,var(--m7og-primary) 27%,var(--m7og-bg)),var(--m7og-bg) 64%)!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--m7og-primary) 82%,transparent),0 0 var(--m7og-glow) color-mix(in srgb,var(--m7og-primary) 74%,transparent)!important;font-family:Arial,sans-serif!important;line-height:1!important;isolation:isolate!important;will-change:transform,filter,box-shadow!important}
       .m7og-core small{position:relative!important;z-index:1!important;height:calc(var(--m7og-size) * .25)!important;margin-top:calc(var(--m7og-size) * -.07)!important;color:var(--m7og-primary)!important;font-size:calc(var(--m7og-size) * .25)!important;line-height:1!important;text-shadow:0 0 7px currentColor!important}
       .m7og-core b{position:relative!important;z-index:1!important;display:block!important;max-width:88%!important;overflow:hidden!important;color:var(--m7og-text)!important;font-size:var(--m7og-font)!important;font-weight:950!important;letter-spacing:-.3px!important;line-height:1.05!important;text-overflow:clip!important;white-space:nowrap!important;text-shadow:0 1px 3px rgba(0,0,0,.9)!important}
@@ -446,8 +446,73 @@
 
   function syncOgPlacement(){
     if(!ogLayer||!wrapper)return;
-    const verified=wrapper.classList.contains("m7-profile-is-verified")||wrapper.getAttribute("data-verified")==="true"||document.getElementById("ma7alak-profile-verified-badge")?.classList.contains("visible");
-    ogLayer.classList.toggle("has-verified",verified);
+
+    const verifiedBadge=
+      document.getElementById(
+        "ma7alak-profile-verified-badge"
+      );
+
+    const verified=
+      wrapper.classList.contains(
+        "m7-profile-is-verified"
+      ) ||
+      wrapper.getAttribute("data-verified")==="true" ||
+      verifiedBadge?.classList.contains("visible");
+
+    ogLayer.classList.toggle(
+      "has-verified",
+      !!verified
+    );
+
+    if(!verified||!verifiedBadge){
+      ogLayer.style.removeProperty(
+        "--m7og-verified-left"
+      );
+      ogLayer.style.removeProperty(
+        "--m7og-verified-top"
+      );
+      return;
+    }
+
+    /*
+       Anchor OG to the REAL verification badge instead of guessing a bottom
+       offset. Both badges live inside the Story wrapper, so offsetLeft/Top
+       keeps the stack correct when logo size, overlap or phone CSS changes.
+    */
+    const ogSize=
+      ogLayer.offsetWidth ||
+      clamp(
+        options.og_badge_size,
+        22,
+        40,
+        30
+      );
+
+    const verifiedWidth=
+      verifiedBadge.offsetWidth ||
+      28;
+
+    const left=
+      verifiedBadge.offsetLeft +
+      (verifiedWidth-ogSize)/2;
+
+    const top=
+      Math.max(
+        0,
+        verifiedBadge.offsetTop -
+        ogSize -
+        6
+      );
+
+    ogLayer.style.setProperty(
+      "--m7og-verified-left",
+      left.toFixed(1)+"px"
+    );
+
+    ogLayer.style.setProperty(
+      "--m7og-verified-top",
+      top.toFixed(1)+"px"
+    );
   }
 
   function renderOgBadge(){
@@ -487,7 +552,16 @@
     core.appendChild(textNode);
     ogLayer.appendChild(core);
     wrapper.appendChild(ogLayer);
+
     syncOgPlacement();
+
+    /*
+       Run once more after layout so custom OG sizes and the verified badge's
+       final responsive dimensions are both known.
+    */
+    requestAnimationFrame(
+      syncOgPlacement
+    );
   }
 
   function restoreCategoryIcon(){
