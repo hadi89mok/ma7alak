@@ -122,6 +122,7 @@
         contain:layout style!important;
       }
       .${LAYER_CLASS}[data-active="1"]{opacity:1!important;visibility:visible!important}
+      .${LAYER_CLASS}[data-ring-enabled="0"] .m7vip-ring{display:none!important}
       .${LAYER_CLASS}[data-paused="1"] *,
       #ma7alak-profile-shell[data-motion-mode="off"] .${LAYER_CLASS} *{
         animation-play-state:paused!important;
@@ -748,6 +749,7 @@
     const q=quality();
 
     layer.dataset.ring=choice(options.vip_ring_style,ALLOWED_RING,"aurora");
+    layer.dataset.ringEnabled=bool(options.vip_ring_enabled,true)?"1":"0";
     layer.dataset.direction=String(options.vip_orbit_direction||"").toLowerCase()==="counter"?"counter":"clockwise";
     layer.dataset.particle=choice(options.vip_particle_style,ALLOWED_PARTICLES,"sparkles");
     layer.dataset.quality=q;
