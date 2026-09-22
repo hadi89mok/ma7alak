@@ -13065,6 +13065,38 @@ function ensureCss(){
       white-space:nowrap;
     }
 
+    .m7v4-shop-controls{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:96px;
+    }
+
+    .m7v4-delete-shop{
+      min-height:34px;
+      padding:0 10px;
+      border:1px solid rgba(255,91,91,.30);
+      border-radius:10px;
+      background:rgba(131,25,25,.16);
+      color:#ff9b9b;
+      font-size:8px;
+      font-weight:950;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .m7v4-delete-shop:hover,
+    .m7v4-delete-shop:focus-visible{
+      border-color:rgba(255,111,111,.62);
+      background:rgba(159,31,31,.28);
+      color:#ffd0d0;
+    }
+
+    .m7v4-delete-shop:disabled{
+      opacity:.55;
+      cursor:wait;
+    }
+
     .m7v4-empty{
       grid-column:1/-1;
       padding:28px 14px;
@@ -14297,7 +14329,8 @@ function ensureCss(){
       .m7v4-home,.m7v4-shop-workspace{padding:11px}
       .m7v4-shop{grid-template-columns:52px minmax(0,1fr)}
       .m7v4-shop img,.m7v4-shop-fallback{width:52px;height:52px}
-      .m7v4-manage{grid-column:1/-1;width:100%}
+      .m7v4-shop-controls{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;min-width:0}
+      .m7v4-manage{width:100%}
       .m7v4-actions{grid-template-columns:1fr 1fr}
       .m7v4-shop-head{align-items:flex-start;flex-wrap:wrap}
       .m7v4-view{margin-left:auto}
@@ -16864,7 +16897,10 @@ function renderList(){
           (featureState(shop).on?'<span class="m7v4-tag featured">FEATURED</span>':"")+
         '</div>'+
       '</div>'+
-      '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Open Studio →</button>'+
+      '<div class="m7v4-shop-controls">'+
+        '<button class="m7v4-manage" type="button" data-m7v4-manage="'+esc(shop.shop_slug)+'">Open Studio →</button>'+
+        '<button class="m7v4-delete-shop" type="button" data-m7v4-delete-shop="'+esc(shop.shop_slug)+'" aria-label="Permanently delete '+esc(shop.shop_name||shop.shop_slug)+'">Delete</button>'+
+      '</div>'+
     '</article>';
   }).join("");
 }
@@ -16897,10 +16933,6 @@ function renderWorkspace(){
       '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
       '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
       '<button type="button" data-m7v4-system="m7adm-history">Activity history</button>'+
-    '</div>'+
-    '<div class="m7v4-danger-zone">'+
-      '<div><b>Danger zone</b><small>Permanent deletion removes this shop, owner assignment, Stories, Reels, Media, Live / Offers, messages, follows, likes, stats and stored shop files. This cannot be undone.</small></div>'+
-      '<button type="button" data-m7v4-action="purge-shop">Delete shop permanently</button>'+
     '</div>';
 }
 
@@ -17538,6 +17570,36 @@ function mount(){
       renderWorkspace();
       try{await openEditMode(selectedSlug,"design");window.Ma7alakShopDesignStudio?.open()}
       catch(error){window.alert(error.message||"Could not open Studio.")}
+      return;
+    }
+
+    const deleteShopButton=event.target.closest("[data-m7v4-delete-shop]");
+    if(deleteShopButton){
+      const shop=shops.find(row=>String(row.shop_slug)===String(deleteShopButton.dataset.m7v4DeleteShop||""));
+      if(!shop){
+        window.alert("This shop could not be found. Refresh Manage Shops and try again.");
+        return;
+      }
+
+      deleteShopButton.disabled=true;
+      const originalLabel=deleteShopButton.textContent;
+      deleteShopButton.textContent="Deleting…";
+
+      try{
+        const result=await permanentlyDeleteShop(shop);
+        if(!result)return;
+        await loadShops();
+        window.alert(
+          '"'+(shop.shop_name||shop.shop_slug)+'" was permanently deleted. The former owner account was kept, but it no longer owns this shop.'
+        );
+      }catch(error){
+        window.alert(error.message||"Could not permanently delete this shop.");
+      }finally{
+        if(deleteShopButton.isConnected){
+          deleteShopButton.disabled=false;
+          deleteShopButton.textContent=originalLabel;
+        }
+      }
       return;
     }
 

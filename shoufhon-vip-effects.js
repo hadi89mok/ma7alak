@@ -736,6 +736,35 @@
     syncOgPlacement();
   }
 
+  function syncBaseProfileCircle(){
+    if(!shell||!button)return;
+
+    const enabled=bool(
+      options.profile_circle_enabled,
+      shell.dataset.profileCircle!=="0"
+    );
+    const accent=hex(options.story_color||options.card_color,"#d9a441");
+    const ringColor=hex(options.profile_ring_color,accent);
+
+    shell.dataset.profileCircle=enabled?"1":"0";
+    button.style.setProperty(
+      "border-color",
+      enabled?ringColor:"transparent",
+      "important"
+    );
+
+    if(enabled){
+      button.style.setProperty(
+        "box-shadow",
+        "0 0 0 1px color-mix(in srgb,"+ringColor+" 14%,transparent),0 0 18px color-mix(in srgb,"+ringColor+" 18%,transparent)",
+        "important"
+      );
+    }else{
+      button.style.setProperty("box-shadow","none","important");
+      button.style.setProperty("-webkit-box-shadow","none","important");
+    }
+  }
+
   function apply(next){
     if(!next||typeof next!=="object"||Array.isArray(next))return;
     options={...options,...next};
@@ -766,6 +795,7 @@
     renderOgBadge();
     renderOrbit(q);
     renderParticles(q);
+    syncBaseProfileCircle();
     syncSize();
     syncActive();
   }
