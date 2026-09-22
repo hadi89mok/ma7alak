@@ -727,6 +727,32 @@
 }
 
 
+#ma7alak-page-story-quota{
+  min-height:24px!important;
+  margin:-14px 0 20px!important;
+  padding:6px 11px!important;
+  border:1px solid rgba(217,164,65,.18)!important;
+  border-radius:999px!important;
+  background:rgba(217,164,65,.055)!important;
+  color:rgba(241,214,158,.82)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  line-height:1.2!important;
+  text-align:center!important;
+}
+
+#ma7alak-page-story-quota.off{
+  border-color:rgba(255,92,92,.24)!important;
+  background:rgba(255,92,92,.06)!important;
+  color:#ffb1b1!important;
+}
+
+.ma7alak-page-story-option:disabled{
+  opacity:.38!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+}
+
 #ma7alak-page-story-status{
 
   width:100%!important;
@@ -1053,6 +1079,13 @@
         <div
           id="ma7alak-page-story-shop"
         ></div>
+
+        <div
+          id="ma7alak-page-story-quota"
+          aria-live="polite"
+        >
+          Story limit: loading…
+        </div>
 
 
         <div
@@ -1495,6 +1528,10 @@
         "active"
       );
 
+      refreshStoryQuotaDisplay(
+        client
+      ).catch(function(){});
+
     }
 
     catch(error){
@@ -1597,6 +1634,169 @@
 
   const MAX_STORY_BATCH_FILES = 10;
   const MAX_STORY_FILE_SIZE = 50 * 1024 * 1024;
+
+
+  function renderStoryQuota(quota){
+
+    const badge=
+      document.getElementById(
+        "ma7alak-page-story-quota"
+      );
+
+    if(!badge){
+      return;
+    }
+
+    const limit=
+      Math.max(
+        0,
+        Number(quota?.story_limit)||0
+      );
+
+    const active=
+      Math.max(
+        0,
+        Number(quota?.active_count)||0
+      );
+
+    const remaining=
+      Math.max(
+        0,
+        Number(quota?.remaining)||0
+      );
+
+    if(limit<=0){
+      badge.textContent=
+        "Story uploads are OFF for this shop";
+      badge.classList.add("off");
+    }
+    else{
+      badge.textContent=
+        active+
+        " / "+
+        limit+
+        " active Stories · "+
+        remaining+
+        " slot"+
+        (remaining===1?"":"s")+
+        " left";
+      badge.classList.toggle(
+        "off",
+        remaining<=0
+      );
+    }
+
+    const disabled=
+      limit<=0 ||
+      remaining<=0;
+
+    const imageButton=
+      document.getElementById(
+        "ma7alak-page-story-image"
+      );
+
+    const videoButton=
+      document.getElementById(
+        "ma7alak-page-story-video"
+      );
+
+    if(imageButton){
+      imageButton.disabled=disabled;
+    }
+
+    if(videoButton){
+      videoButton.disabled=disabled;
+    }
+  }
+
+
+  async function getStoryQuota(client){
+
+    const result=
+      await client.rpc(
+        "get_my_story_quota",
+        {
+          p_shop_slug:
+            activeShopSlug
+        }
+      );
+
+    if(result.error){
+      throw result.error;
+    }
+
+    const row=
+      Array.isArray(result.data)
+        ? result.data[0]
+        : result.data;
+
+    if(!row){
+      throw new Error(
+        "Could not load Story limit."
+      );
+    }
+
+    return {
+      story_limit:
+        Math.max(
+          0,
+          Number(row.story_limit)||0
+        ),
+      active_count:
+        Math.max(
+          0,
+          Number(row.active_count)||0
+        ),
+      remaining:
+        Math.max(
+          0,
+          Number(row.remaining)||0
+        )
+    };
+  }
+
+
+  async function refreshStoryQuotaDisplay(client){
+
+    const badge=
+      document.getElementById(
+        "ma7alak-page-story-quota"
+      );
+
+    if(badge){
+      badge.textContent=
+        "Story limit: loading…";
+      badge.classList.remove("off");
+    }
+
+    try{
+      const quota=
+        await getStoryQuota(
+          client ||
+          await loadSupabase()
+        );
+
+      renderStoryQuota(
+        quota
+      );
+
+      return quota;
+    }
+    catch(error){
+      console.warn(
+        "SHOUFHON Story quota:",
+        error
+      );
+
+      if(badge){
+        badge.textContent=
+          "Story limit unavailable";
+        badge.classList.add("off");
+      }
+
+      throw error;
+    }
+  }
 
 
   function storyUploadProgress(
@@ -1992,6 +2192,39 @@
         await getStoryUploadContext();
 
 
+      const quota =
+        await getStoryQuota(
+          context.client
+        );
+
+
+      renderStoryQuota(
+        quota
+      );
+
+
+      if(quota.story_limit<=0){
+        throw new Error(
+          "STORY_PUBLISHING_DISABLED"
+        );
+      }
+
+
+      if(quota.remaining<=0){
+        throw new Error(
+          "STORY_LIMIT_REACHED"
+        );
+      }
+
+
+      if(files.length>quota.remaining){
+        throw new Error(
+          "STORY_BATCH_EXCEEDS_LIMIT:"+
+          quota.remaining
+        );
+      }
+
+
       for(
         let index = 0;
         index < files.length;
@@ -2101,6 +2334,71 @@
         showStatus(
           "You don’t have permission for this shop."
         );
+
+      }
+
+      else if(
+        String(error?.message||"") ===
+          "STORY_PUBLISHING_DISABLED"
+      ){
+
+        showStatus(
+          "Story uploads are turned OFF for this shop."
+        );
+
+        refreshStoryQuotaDisplay().catch(function(){});
+
+      }
+
+      else if(
+        String(error?.message||"") ===
+          "STORY_LIMIT_REACHED" ||
+        String(error?.message||"")
+          .includes("Story limit reached")
+      ){
+
+        if(uploaded>0){
+          broadcastStoriesUploaded();
+        }
+
+        showStatus(
+          "Story limit reached. Delete a Story or ask ShoufHon Admin to increase the limit."
+        );
+
+        refreshStoryQuotaDisplay().catch(function(){});
+
+      }
+
+      else if(
+        String(error?.message||"")
+          .startsWith(
+            "STORY_BATCH_EXCEEDS_LIMIT:"
+          )
+      ){
+
+        const remaining=
+          Math.max(
+            0,
+            Number(
+              String(error.message)
+                .split(":")
+                .pop()
+            )||0
+          );
+
+        showStatus(
+          remaining>0
+            ? (
+                "You can upload only "+
+                remaining+
+                " more active Stor"+
+                (remaining===1?"y":"ies")+
+                "."
+              )
+            : "Story limit reached."
+        );
+
+        refreshStoryQuotaDisplay().catch(function(){});
 
       }
 
