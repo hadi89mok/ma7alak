@@ -368,9 +368,20 @@
      IMPORTANT:
      The Directory Control V2 layer adds/selects fields dynamically.
      Browser native required-field validation could block the submit event
-     before our JavaScript save handler ever runs, making Save Changes look
-     completely dead. All Edit Shop validation is handled explicitly below.
+     before our JavaScript save handlers ever run, making Add Shop or Save
+     Changes look completely dead. Both forms are validated explicitly below.
   */
+  if(shopForm){
+    shopForm.noValidate = true;
+    shopForm.setAttribute("novalidate", "novalidate");
+  }
+
+  if(addShopButton){
+    addShopButton.type = "submit";
+    addShopButton.setAttribute("type", "submit");
+    addShopButton.setAttribute("form", "ma-admin-shop-form");
+  }
+
   if(editForm){
     editForm.noValidate = true;
     editForm.setAttribute("novalidate", "novalidate");
@@ -3021,7 +3032,7 @@
 
       setStatus(
         shopStatus,
-        ""
+        "Checking shop details…"
       );
 
       const slug =
