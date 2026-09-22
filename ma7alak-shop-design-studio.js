@@ -1015,6 +1015,43 @@
     restoreManagers();panel.classList.remove("m7studio-manager-mode");panel.querySelector(".m7studio-manager-dock")?.replaceChildren();
     for(const selector of ["[data-m7studio-save]","[data-m7studio-preview]"]){const el=panel.querySelector(selector);if(el)el.hidden=false}
   }
+  function readOgSettings(host){
+    const value=selector=>String(host.querySelector(selector)?.value??"").trim();
+    return {
+      text:value("[data-m7v4-og-text]"),
+      icon:value("[data-m7v4-og-icon]"),
+      animation:value("[data-m7v4-og-animation]").toLowerCase(),
+      speed:Number(value("[data-m7v4-og-speed]")),
+      primary:value("[data-m7v4-og-primary]"),
+      secondary:value("[data-m7v4-og-secondary]"),
+      background:value("[data-m7v4-og-background]"),
+      textColor:value("[data-m7v4-og-text-color]"),
+      size:Number(value("[data-m7v4-og-size]")),
+      glow:Number(value("[data-m7v4-og-glow]"))
+    };
+  }
+  function updateOgPreview(host){
+    const preview=host.querySelector("[data-m7v4-og-preview]");
+    if(!preview)return;
+    const settings=readOgSettings(host);
+    const color=(value,fallback)=>/^#[0-9a-f]{6}$/i.test(value)?value:fallback;
+    const number=(value,min,max,fallback)=>Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
+    preview.dataset.animation=["none","shimmer","breathe","float","pulse","sparkle"].includes(settings.animation)?settings.animation:"shimmer";
+    preview.style.setProperty("--og1",color(settings.primary,"#d9a441"));
+    preview.style.setProperty("--og2",color(settings.secondary,"#fff2a4"));
+    preview.style.setProperty("--ogbg",color(settings.background,"#160e06"));
+    preview.style.setProperty("--ogtext",color(settings.textColor,"#fff0b8"));
+    const previewSize=Math.max(38,number(settings.size,22,40,30));
+    const previewText=settings.text.slice(0,8)||"OG";
+    preview.style.setProperty("--ogsize",previewSize+"px");
+    preview.style.setProperty("--ogfont",Math.max(6,previewSize*(previewText.length<=3?.27:previewText.length<=5?.19:.15)).toFixed(1)+"px");
+    preview.style.setProperty("--ogspeed",number(settings.speed,1,8,2.8)+"s");
+    preview.style.setProperty("--ogglow",(2+number(settings.glow,0,100,55)*.22).toFixed(1)+"px");
+    const icon=preview.querySelector("[data-m7v4-og-preview-icon]");
+    const text=preview.querySelector("[data-m7v4-og-preview-text]");
+    if(icon)icon.textContent=settings.icon.slice(0,4);
+    if(text)text.textContent=previewText;
+  }
   async function mountManager(host,key){
     restoreManagers();const request=++managerRequest;
     const shop=window.Ma7alakAdminStudioBridge?.shop();if(!shop)return;
@@ -1042,9 +1079,11 @@
     const note=document.createElement("p");note.textContent="Changes in this section save immediately. Your unsaved design edits stay in the Studio.";dock.append(note);
     const host=document.createElement("div");
     if(key==="publishing"){
-      dock.append(host);const render=()=>{host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first."};render();
+      dock.append(host);const render=()=>{host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first.";updateOgPreview(host)};render();
+      host.addEventListener("input",()=>updateOgPreview(host));
+      host.addEventListener("change",()=>updateOgPreview(host));
       host.addEventListener("click",async event=>{
-        const button=event.target.closest("[data-m7v4-action],[data-m7v4-save-owner-media-limits]");if(!button)return;
+        const button=event.target.closest("[data-m7v4-action],[data-m7v4-save-owner-media-limits],[data-m7v4-save-og-badge]");if(!button)return;
         button.disabled=true;
         try{
           const bridge=window.Ma7alakAdminStudioBridge;
@@ -1053,6 +1092,8 @@
             const photos=value("[data-m7v4-owner-photo-limit]"),videos=value("[data-m7v4-owner-video-limit]");
             await bridge.limits(photos,videos);
             const form=document.getElementById("ma-admin-edit-form");form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos});
+          }else if(button.hasAttribute("data-m7v4-save-og-badge")){
+            await bridge.og(readOgSettings(host));
           }else await bridge.action(button.dataset.m7v4Action);
           render();note.textContent="Saved. Your unsaved design edits are still here.";
         }catch(error){note.textContent=error.message||"Could not save."}finally{button.disabled=false}
