@@ -839,7 +839,7 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   left:50%;
   transform:translateX(-50%);
   width:min(680px,calc(100vw - 24px));
-  max-height:min(650px,calc(100vh - 120px));
+  max-height:min(480px,calc(100dvh - 112px));
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -890,7 +890,7 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   cursor:pointer;
 }
 .ma7alak-search-panel-title{padding:16px 18px 7px;color:rgba(255,255,255,.38);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase;}
-#ma7alak-search-results{flex:1;min-height:120px;padding:7px 10px 14px;overflow-y:auto;overscroll-behavior:contain;}
+#ma7alak-search-results{flex:1;min-height:120px;max-height:min(350px,calc(100dvh - 215px));padding:7px 10px 14px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(217,164,65,.25) transparent;}
 #ma7alak-search-results::-webkit-scrollbar{width:6px;}
 #ma7alak-search-results::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(217,164,65,.25);}
 .ma7alak-search-result{
@@ -1317,7 +1317,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 @keyframes ma7alakFollowingFade{from{opacity:0}to{opacity:1}}
 #ma7alak-following-panel{
   width:min(470px,100%);
-  max-height:min(680px,calc(100dvh - 118px));
+  max-height:min(520px,calc(100dvh - 118px));
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -1342,7 +1342,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 #ma7alak-following-search-clear:active{transform:translateY(-50%) scale(.9);}
 #ma7alak-following-close{width:39px;height:39px;flex:0 0 39px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.035);color:rgba(255,255,255,.72);font-size:23px;line-height:1;cursor:pointer;}
 #ma7alak-following-close:active{transform:scale(.92)}
-#ma7alak-following-list{padding:10px;overflow-y:auto;overscroll-behavior:contain;}
+#ma7alak-following-list{flex:1;min-height:0;max-height:min(390px,calc(100dvh - 245px));padding:10px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(217,164,65,.25) transparent;}
 #ma7alak-following-list::-webkit-scrollbar{width:6px}#ma7alak-following-list::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(217,164,65,.25)}
 .ma7alak-following-row{display:flex;align-items:center;gap:12px;min-height:72px;padding:9px 10px;border:1px solid rgba(255,255,255,.055);border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.018));color:#fff!important;text-decoration:none!important;transition:transform .16s ease,border-color .16s ease,background .16s ease;}
 .ma7alak-following-row + .ma7alak-following-row{margin-top:8px}.ma7alak-following-row:hover{transform:translateX(2px);border-color:rgba(217,164,65,.22);background:rgba(217,164,65,.055)}.ma7alak-following-row:active{transform:scale(.985)}
@@ -1353,7 +1353,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 @keyframes ma7alakFollowingStoryRing{from{transform:translateZ(0) rotate(0deg)}to{transform:translateZ(0) rotate(360deg)}}
 @-webkit-keyframes ma7alakFollowingStoryRing{from{-webkit-transform:translateZ(0) rotate(0deg)}to{-webkit-transform:translateZ(0) rotate(360deg)}}
 .ma7alak-following-avatar-inner{width:100%;height:100%;padding:2px;border-radius:50%;background:#090a0b;overflow:hidden}.ma7alak-following-avatar{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%;background:#151719}.ma7alak-following-avatar-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;background:linear-gradient(145deg,#252729,#0f1011);color:#efc66e;font-family:Georgia,"Times New Roman",serif;font-size:14px;font-weight:900}
-.ma7alak-following-copy{min-width:0;flex:1}.ma7alak-following-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:850}.ma7alak-following-status{margin-top:5px;color:#7fc5ff;font-size:10px;font-weight:700}.ma7alak-following-check{color:#efc66e}.ma7alak-following-arrow{width:34px;height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,255,255,.035);color:#efc66e;font-size:20px}
+.ma7alak-following-copy{min-width:0;flex:1}.ma7alak-following-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:850}.ma7alak-following-status{margin-top:5px;color:rgba(255,255,255,.42);font-size:10px;font-weight:700}.ma7alak-following-arrow{width:34px;height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,255,255,.035);color:#efc66e;font-size:20px}
 .ma7alak-following-empty{min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}.ma7alak-following-empty-icon{width:58px;height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:13px;border:1px solid rgba(217,164,65,.18);border-radius:18px;background:rgba(217,164,65,.055);color:#efc66e}.ma7alak-following-empty-title{font-size:15px;font-weight:850}.ma7alak-following-empty-text{max-width:260px;margin-top:7px;color:rgba(255,255,255,.40);font-size:11px;line-height:1.5}
 .ma7alak-following-foot{padding:12px 15px 15px;border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.36);font-size:10px;text-align:center}.ma7alak-following-foot strong{color:#efc66e;font-weight:800}
 
@@ -1366,7 +1366,7 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
   #ma7alak-header-following{min-width:40px!important;width:40px!important;height:48px!important;}
   #ma7alak-following-badge{top:1px;right:1px;min-width:17px;height:17px;font-size:9px;padding:0 4px;}
   #ma7alak-following-overlay{padding-top:max(78px,calc(env(safe-area-inset-top) + 68px));}
-  #ma7alak-following-panel{max-height:calc(100dvh - 92px);border-radius:21px;}
+  #ma7alak-following-panel{max-height:min(520px,calc(100dvh - 92px));border-radius:21px;}
 }
 @media(max-width:480px){
   /* Five personal/action icons fit without removing Reels, Search, Bell or owner Likes. */
@@ -1970,7 +1970,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
           <div class="ma7alak-following-avatar-ring"><div class="ma7alak-following-avatar-inner">${media}</div></div>
           <div class="ma7alak-following-copy">
             <div class="ma7alak-following-name">${escapeHTML(name)}</div>
-            <div class="ma7alak-following-status">You are following this shop <span class="ma7alak-following-check">✓</span></div>
+            <div class="ma7alak-following-status">Following</div>
           </div>
           <div class="ma7alak-following-arrow">›</div>
         </a>`;
