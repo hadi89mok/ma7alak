@@ -1,5 +1,5 @@
 /* =========================================================
-   SHOUFHON SHOP VISIBILITY GUARD V2
+   SHOUFHON SHOP VISIBILITY GUARD V1
    ---------------------------------------------------------
    One global guard for manual Hostinger shop pages.
 
@@ -8,8 +8,6 @@
        normal visitor -> page is covered, loading is stopped,
        then redirected to /shwf-almhlat-
        site admin -> page remains available for preview/editing.
-   - Uses a minimal visibility RPC so inactive shop profile rows
-     stay hidden by RLS from public API reads.
    - Non-shop routes fail open and are left untouched.
    - No destructive action: hiding never deletes the shop or media.
 ========================================================= */
@@ -131,40 +129,34 @@ function keepBlocked(){
 
 curtainTimer=setTimeout(installCurtain,90);
 
-async function fetchVisibilityBySlug(slug){
+async function fetchProfileBySlug(slug){
   const normalized=normalizeSlug(slug);
   if(!normalized)return null;
 
-  const response=await fetch(
-    SUPABASE_URL+"/rest/v1/rpc/get_shop_visibility_status",
-    {
-      method:"POST",
-      headers:{
-        apikey:SUPABASE_KEY,
-        Authorization:"Bearer "+SUPABASE_KEY,
-        "Content-Type":"application/json",
-        Accept:"application/json"
-      },
-      body:JSON.stringify({p_shop_slug:normalized}),
-      cache:"no-store",
-      credentials:"omit"
-    }
-  );
+  const url=
+    SUPABASE_URL+
+    "/rest/v1/shop_profiles"+
+    "?select=shop_slug,is_active,shop_url"+
+    "&shop_slug=eq."+encodeURIComponent(normalized)+
+    "&limit=1";
+
+  const response=await fetch(url,{
+    method:"GET",
+    headers:{
+      apikey:SUPABASE_KEY,
+      Authorization:"Bearer "+SUPABASE_KEY,
+      Accept:"application/json"
+    },
+    cache:"no-store",
+    credentials:"omit"
+  });
 
   if(!response.ok){
     throw new Error("Visibility lookup failed: "+response.status);
   }
 
-  const payload=await response.json();
-  const row=Array.isArray(payload)?payload[0]:payload;
-
-  if(!row||typeof row!=="object")return null;
-
-  return {
-    shop_slug:normalizeSlug(row.shop_slug||normalized),
-    exists_in_directory:row.exists_in_directory===true,
-    is_active:row.is_active===true
-  };
+  const rows=await response.json();
+  return Array.isArray(rows)&&rows.length?rows[0]:null;
 }
 
 function domShopSlug(){
@@ -180,7 +172,7 @@ function domShopSlug(){
   return normalizeSlug(explicit);
 }
 
-async function fallbackVisibilityFromPage(){
+async function fallbackProfileFromPage(){
   if(document.readyState==="loading"){
     await new Promise(resolve=>{
       document.addEventListener("DOMContentLoaded",resolve,{once:true});
@@ -194,7 +186,7 @@ async function fallbackVisibilityFromPage(){
     return null;
   }
 
-  return fetchVisibilityBySlug(slug);
+  return fetchProfileBySlug(slug);
 }
 
 function existingSupabaseClient(){
@@ -283,36 +275,27 @@ async function currentUserIsSiteAdmin(){
 
 async function evaluate(){
   try{
-    let visibility=await fetchVisibilityBySlug(pathSlug);
+    let profile=await fetchProfileBySlug(pathSlug);
 
-    if(!visibility?.exists_in_directory){
-      const fallback=await fallbackVisibilityFromPage();
-      if(fallback?.exists_in_directory){
-        visibility=fallback;
-      }
+    if(!profile){
+      profile=await fallbackProfileFromPage();
     }
 
     /*
       No matching shop means this is not a shop route managed by
       shop_profiles. Never interfere with ordinary ShoufHon pages.
     */
-    if(!visibility?.exists_in_directory){
+    if(!profile){
       clearCurtain();
       return;
     }
 
-    if(visibility.is_active===true){
+    if(profile.is_active===true){
       clearCurtain();
       window.dispatchEvent(
         new CustomEvent(
           "shoufhon:shop-visibility",
-          {
-            detail:{
-              shopSlug:visibility.shop_slug,
-              visible:true,
-              adminPreview:false
-            }
-          }
+          {detail:{shopSlug:profile.shop_slug,visible:true,adminPreview:false}}
         )
       );
       return;
@@ -334,30 +317,29 @@ async function evaluate(){
       window.dispatchEvent(
         new CustomEvent(
           "shoufhon:shop-visibility",
-          {
-            detail:{
-              shopSlug:visibility.shop_slug,
-              visible:false,
-              adminPreview:true
-            }
-          }
+          {detail:{shopSlug:profile.shop_slug,visible:false,adminPreview:true}}
         )
       );
       return;
     }
 
+    /*
+      Stop as much of the still-loading manual Hostinger page as possible
+      before leaving it. The underlying Hostinger route still physically
+      exists, but normal browser visitors never receive the shop UI.
+    */
     try{window.stop()}catch(_){}
 
     const target=
       REDIRECT_PATH+
       "?unavailable="+
-      encodeURIComponent(visibility.shop_slug||pathSlug);
+      encodeURIComponent(profile.shop_slug||pathSlug);
 
     location.replace(target);
   }catch(error){
     /*
-      Fail open at the Hostinger display layer if Supabase/network is
-      unavailable. Database RLS still protects inactive shop rows.
+      Fail open if Supabase/network is unavailable. A temporary backend
+      problem must never make every ShoufHon route inaccessible.
     */
     console.warn("[ShoufHon Visibility Guard]",error);
     clearCurtain();
