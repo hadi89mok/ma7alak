@@ -3399,29 +3399,35 @@
 
       if(action === "delete"){
 
-        const confirmed = window.confirm(
-          'Delete "' + (shop.shop_name || slug) + '" from shop_profiles?\\n\\nThis does NOT delete its owner account or Story media.'
-        );
+        if(
+          typeof window.Ma7alakAdminPermanentDeleteShop !==
+          "function"
+        ){
+          throw new Error(
+            "Permanent shop deletion is still loading. Try again."
+          );
+        }
 
-        if(!confirmed) return;
+        const result =
+          await window.Ma7alakAdminPermanentDeleteShop(
+            shop
+          );
 
-        const { error } = await supabaseClient
-          .from("shop_profiles")
-          .delete()
-          .eq("shop_slug", slug);
-
-        if(error) throw error;
+        if(!result){
+          return;
+        }
 
         if(editOriginalSlug.value === slug){
           closeEditShop();
         }
 
-        await logAdminActivity(
-          "shop_deleted",
-          slug,
-          { shop_name: shop.shop_name || slug }
+        setStatus(
+          manageStatus,
+          '"' +
+            (shop.shop_name || slug) +
+            '" was permanently deleted with its shop data and owner assignment.',
+          "success"
         );
-        loadAdminActivity();
 
         await loadManagedShops();
         await loadExistingDirectoryValues();
@@ -13338,6 +13344,29 @@ function ensureCss(){
     .m7v4-state-action.tone-owner-access.is-on .m7v4-switch{border-color:rgba(217,170,88,.42);background:#4b3514}
     .m7v4-state-action.tone-owner-access.is-on .m7v4-switch:after{background:#f0c864;box-shadow:0 0 10px rgba(217,170,88,.5)}
 
+    .m7v4-danger-zone{
+      margin-top:14px;
+      padding:13px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+      border:1px solid rgba(255,88,88,.28);
+      border-radius:15px;
+      background:linear-gradient(135deg,rgba(116,18,24,.14),rgba(255,255,255,.012));
+    }
+    .m7v4-danger-zone b{display:block;color:#ffaaaa;font-size:10px}
+    .m7v4-danger-zone small{display:block;margin-top:4px;color:#9e7e7e;font-size:8px;line-height:1.45}
+    .m7v4-danger-zone button{
+      min-height:38px;padding:0 12px;border:1px solid rgba(255,96,96,.42);border-radius:10px;
+      background:#3a1115;color:#ffb4b4;font-size:8px;font-weight:950;cursor:pointer;
+    }
+    .m7v4-danger-zone button:disabled{opacity:.48;cursor:wait}
+    @media(max-width:520px){
+      .m7v4-danger-zone{grid-template-columns:1fr}
+      .m7v4-danger-zone button{width:100%}
+    }
+
     .m7v4-owner-quota{
       margin-top:9px;
       padding:12px;
@@ -16602,14 +16631,54 @@ async function saveOwnerCapabilityPatch(shop,patch,activity){
 function ownerMediaQuotaHtml(shop){
   const photos=ownerMediaLimit(shop,"owner_media_photo_limit",6);
   const videos=ownerMediaLimit(shop,"owner_media_video_limit",2);
+  const stories=ownerMediaLimit(shop,"owner_story_limit",10);
   return '<div class="m7v4-owner-quota">'+
-    '<div class="m7v4-owner-quota-head"><div><b>Owner Media limits</b><small>Separate upload limits for the shop owner.</small></div><span>PHOTOS / VIDEOS</span></div>'+
+    '<div class="m7v4-owner-quota-head"><div><b>Owner access & upload limits</b><small>Set how many photos, videos and active 24-hour Stories this shop owner can publish. Set 0 to disable a type.</small></div><span>OWNER ACCESS</span></div>'+
     '<div class="m7v4-owner-quota-grid">'+
       '<label><span>Photo limit</span><input type="number" min="0" max="100" step="1" value="'+esc(photos)+'" data-m7v4-owner-photo-limit inputmode="numeric"></label>'+
       '<label><span>Video limit</span><input type="number" min="0" max="100" step="1" value="'+esc(videos)+'" data-m7v4-owner-video-limit inputmode="numeric"></label>'+
+      '<label><span>Active Story limit</span><input type="number" min="0" max="100" step="1" value="'+esc(stories)+'" data-m7v4-owner-story-limit inputmode="numeric"></label>'+
     '</div>'+
-    '<button type="button" data-m7v4-save-owner-media-limits>Save media limits</button>'+
+    '<button type="button" data-m7v4-save-owner-media-limits>Save owner upload limits</button>'+
   '</div>';
+}
+
+async function saveOwnerUploadLimits(
+  shop,
+  photos,
+  videos,
+  stories
+){
+  if(!shop){
+    throw new Error("Select a shop first.");
+  }
+
+  const result=
+    await client.rpc(
+      "ma7alak_admin_set_owner_upload_limits",
+      {
+        p_shop_slug:shop.shop_slug,
+        p_photo_limit:photos,
+        p_video_limit:videos,
+        p_story_limit:stories
+      }
+    );
+
+  if(result.error){
+    throw result.error;
+  }
+
+  await logV4Activity(
+    "owner_upload_limits_updated",
+    shop,
+    {
+      photo_limit:photos,
+      video_limit:videos,
+      story_limit:stories
+    }
+  );
+
+  await loadShops();
 }
 
 function ogBadgeSettingsHtml(shop){
@@ -16828,6 +16897,10 @@ function renderWorkspace(){
       '<button type="button" data-m7v4-system="m7da-settings">Directory design</button>'+
       '<button type="button" data-m7v4-system="m7-sub-admin">Subscriptions</button>'+
       '<button type="button" data-m7v4-system="m7adm-history">Activity history</button>'+
+    '</div>'+
+    '<div class="m7v4-danger-zone">'+
+      '<div><b>Danger zone</b><small>Permanent deletion removes this shop, owner assignment, Stories, Reels, Media, Live / Offers, messages, follows, likes, stats and stored shop files. This cannot be undone.</small></div>'+
+      '<button type="button" data-m7v4-action="purge-shop">Delete shop permanently</button>'+
     '</div>';
 }
 
@@ -16870,13 +16943,20 @@ window.Ma7alakAdminStudioBridge={
     const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
     if(form&&shop){
       const options=JSON.parse(form.dataset.directoryOptions||"{}");
-      for(const k of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+      for(const k of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_story_limit"]){
         if(Object.prototype.hasOwnProperty.call(shop.directory_options||{},k))options[k]=shop.directory_options[k];else delete options[k];
       }
       form.dataset.directoryOptions=JSON.stringify(options);
     }
   },
-  async limits(photos,videos){await saveOwnerCapabilityPatch(selectedShop(),{owner_media_photo_limit:photos,owner_media_video_limit:videos},"owner_media_limits_updated")},
+  async limits(photos,videos,stories){
+    await saveOwnerUploadLimits(
+      selectedShop(),
+      photos,
+      videos,
+      stories
+    );
+  },
   async og(settings){
     await saveOgBadgeSettings(selectedShop(),settings);
     const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
@@ -16912,6 +16992,109 @@ async function loadShops(){
   }
 }
 
+async function permanentlyDeleteShop(shop){
+  if(!shop||!shop.shop_slug){
+    throw new Error("Select a shop first.");
+  }
+
+  const slug=
+    String(shop.shop_slug)
+      .trim()
+      .toLowerCase();
+
+  const first=
+    window.confirm(
+      'Permanently delete "'+
+      (shop.shop_name||slug)+
+      '"?\n\nThis removes the shop and ALL ShoufHon data tied to it: owner assignment, Stories, Reels, Gallery, Videos, Media, Live / Offers, messages, follows, likes, stats and stored shop files.\n\nThe person\'s normal Google/ShoufHon user account will be kept.\n\nThis cannot be undone.'
+    );
+
+  if(!first){
+    return null;
+  }
+
+  const typed=
+    window.prompt(
+      'Final confirmation: type the exact shop slug to delete it permanently:\n\n'+
+      slug,
+      ""
+    );
+
+  if(
+    String(typed||"")
+      .trim()
+      .toLowerCase() !== slug
+  ){
+    if(typed!==null){
+      throw new Error(
+        "Deletion cancelled because the shop slug did not match."
+      );
+    }
+    return null;
+  }
+
+  const adminClient=
+    client ||
+    window.Ma7alakAdminClient;
+
+  if(!adminClient){
+    throw new Error(
+      "Admin connection is not ready. Try again."
+    );
+  }
+
+  const response=
+    await adminClient.functions.invoke(
+      "admin-delete-shop",
+      {
+        body:{
+          shop_slug:slug,
+          confirm_slug:slug,
+          dry_run:false
+        }
+      }
+    );
+
+  if(response.error){
+    let message=
+      response.error.message ||
+      "Permanent shop deletion failed.";
+
+    try{
+      if(
+        response.error.context &&
+        typeof response.error.context.json ===
+          "function"
+      ){
+        const payload=
+          await response.error.context.json();
+
+        if(payload?.error){
+          message=payload.error;
+        }
+      }
+    }catch(_){}
+
+    throw new Error(message);
+  }
+
+  if(
+    !response.data ||
+    response.data.success !== true ||
+    response.data.deleted !== true
+  ){
+    throw new Error(
+      response.data?.error ||
+      "Permanent shop deletion did not complete."
+    );
+  }
+
+  return response.data;
+}
+
+window.Ma7alakAdminPermanentDeleteShop=
+  permanentlyDeleteShop;
+
 async function handleAction(key){
   const shop=selectedShop();
   if(!shop)return;
@@ -16919,6 +17102,29 @@ async function handleAction(key){
   if(key==="view"){
     const target=String(shop.shop_url||"").trim()||("https://shoufhon.com/"+encodeURIComponent(shop.shop_slug));
     window.open(target,"_blank","noopener");
+    return;
+  }
+
+  if(key==="purge-shop"){
+    const result=
+      await permanentlyDeleteShop(
+        shop
+      );
+
+    if(!result){
+      return;
+    }
+
+    selectedSlug="";
+    clearLegacy();
+    await loadShops();
+    showHome();
+
+    window.alert(
+      '"' +
+      (shop.shop_name||shop.shop_slug) +
+      '" was permanently deleted. The former owner Google/ShoufHon account was kept, but it no longer owns this shop.'
+    );
     return;
   }
 
@@ -17375,27 +17581,27 @@ function mount(){
       const workspace=root.querySelector("[data-m7v4-shop-workspace]");
       const photoInput=workspace?.querySelector("[data-m7v4-owner-photo-limit]");
       const videoInput=workspace?.querySelector("[data-m7v4-owner-video-limit]");
+      const storyInput=workspace?.querySelector("[data-m7v4-owner-story-limit]");
       const photos=Math.max(0,Math.min(100,Math.round(Number(photoInput?.value)||0)));
       const videos=Math.max(0,Math.min(100,Math.round(Number(videoInput?.value)||0)));
+      const stories=Math.max(0,Math.min(100,Math.round(Number(storyInput?.value)||0)));
 
       saveOwnerLimits.disabled=true;
       saveOwnerLimits.textContent="Saving…";
 
       try{
-        await saveOwnerCapabilityPatch(
+        await saveOwnerUploadLimits(
           shop,
-          {
-            owner_media_photo_limit:photos,
-            owner_media_video_limit:videos
-          },
-          "owner_media_limits_updated"
+          photos,
+          videos,
+          stories
         );
       }catch(error){
         console.error("SHOUFHON owner media limits:",error);
         window.alert(error?.message||"Could not save owner media limits.");
       }finally{
         saveOwnerLimits.disabled=false;
-        saveOwnerLimits.textContent="Save media limits";
+        saveOwnerLimits.textContent="Save owner upload limits";
       }
       return;
     }
