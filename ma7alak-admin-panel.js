@@ -6300,7 +6300,7 @@ function decorateAll(){
     vip_corner_size:"20",
     vip_corner_animation:"float",
 
-    profile_banner_enabled:false,
+    profile_banner_enabled:true,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
     profile_banner_style:"rounded-fade",
@@ -7130,7 +7130,7 @@ function decorateAll(){
           <label class="m7ds-vip-master">
             <span class="m7ds-vip-master-copy">
               <b>VIP effects</b>
-              <small>New shops start OFF.</small>
+              <small>OFF by default · switch ON only for VIP shops.</small>
             </span>
             <input id="${prefix}vip_effects_enabled" type="checkbox" aria-label="VIP effects">
             <span class="m7ds-vip-switch" aria-hidden="true"><i></i><b></b></span>
@@ -7392,6 +7392,10 @@ function decorateAll(){
               <option value="sparkle">Orbiting sparkle</option>
               <option value="heartbeat">Heartbeat</option>
               <option value="soft">Soft breathe</option>
+              <option value="radar">Radar waves</option>
+              <option value="halo">Floating halo</option>
+              <option value="comet">Comet ring</option>
+              <option value="neon-wave">Neon wave</option>
               <option value="none">Static ring</option>
             </select>
           </label>
@@ -7403,6 +7407,9 @@ function decorateAll(){
               <option value="ripple">Ring ripple</option>
               <option value="flash">Color flash</option>
               <option value="pop">Circle pop</option>
+              <option value="confetti">Confetti burst</option>
+              <option value="starburst">Star burst</option>
+              <option value="radar-burst">Radar burst</option>
               <option value="none">Off</option>
             </select>
           </label>
@@ -7681,11 +7688,11 @@ function decorateAll(){
         <div class="m7ds-section-title">Top Profile Banner</div>
 
         <label class="m7ds-check">
-          <input id="${prefix}profile_banner_enabled" type="checkbox">
+          <input id="${prefix}profile_banner_enabled" type="checkbox" checked>
           <span>
-            <b>Show profile banner</b>
+            <b>Profile banner</b>
             <small>
-              Only the short strip above the profile circle. It never replaces the Hostinger page background.
+              ON by default · controls only the short strip above the profile circle.
             </small>
           </span>
         </label>
@@ -17966,7 +17973,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     vip_corner_size:"20",
     vip_corner_animation:"float",
 
-    profile_banner_enabled:false,
+    profile_banner_enabled:true,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
     profile_banner_style:"rounded-fade",
