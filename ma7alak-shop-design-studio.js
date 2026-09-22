@@ -1257,10 +1257,18 @@
         try{
           const bridge=window.Ma7alakAdminStudioBridge;
           if(button.hasAttribute("data-m7v4-save-owner-media-limits")){
-            const value=selector=>{const n=Number(host.querySelector(selector).value);if(!Number.isInteger(n)||n<0||n>100)throw Error("Media limits must be whole numbers from 0 to 100.");return n};
-            const photos=value("[data-m7v4-owner-photo-limit]"),videos=value("[data-m7v4-owner-video-limit]");
-            await bridge.limits(photos,videos);
-            const form=document.getElementById("ma-admin-edit-form");form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos});
+            const value=selector=>{const input=host.querySelector(selector);const n=Number(input?.value);if(!Number.isInteger(n)||n<0||n>100)throw Error("Upload limits must be whole numbers from 0 to 100.");return n};
+            const photos=value("[data-m7v4-owner-photo-limit]");
+            const videos=value("[data-m7v4-owner-video-limit]");
+            const stories=value("[data-m7v4-owner-story-limit]");
+            await bridge.limits(photos,videos,stories);
+            const form=document.getElementById("ma-admin-edit-form");
+            form.dataset.directoryOptions=JSON.stringify({
+              ...JSON.parse(form.dataset.directoryOptions||"{}"),
+              owner_media_photo_limit:photos,
+              owner_media_video_limit:videos,
+              owner_story_limit:stories
+            });
           }else if(button.hasAttribute("data-m7v4-save-og-badge")){
             await bridge.og(readOgSettings(host));
           }else await bridge.action(button.dataset.m7v4Action);
