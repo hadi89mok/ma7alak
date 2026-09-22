@@ -2210,7 +2210,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     try{
       const result=await supabaseClient
         .from("shop_profiles")
-        .select("shop_slug,shop_name,profile_image_url")
+        .select("shop_slug,shop_name,profile_image_url,category,category_name,location,area,city")
         .order("shop_name",{ascending:true});
 
       if(result.error){throw result.error;}
@@ -2252,14 +2252,28 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     if(!results){return;}
 
     const normalized=String(query||"").trim().toLowerCase();
-    let matches=shopProfiles.slice();
-
-    if(normalized){
-      matches=shopProfiles.filter(function(shop){
-        const haystack=(String(shop.shop_name||"")+" "+String(shop.shop_slug||"")).toLowerCase();
-        return haystack.includes(normalized);
-      });
+    if(!normalized){
+      results.innerHTML=`
+        <div class="ma7alak-search-empty">
+          <div class="ma7alak-search-empty-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="ma7alak-search-empty-title">Search ShoufHon</div>
+          <div class="ma7alak-search-empty-text">Type a shop, category, or location.</div>
+        </div>`;
+      return;
     }
+
+    let matches=shopProfiles.filter(function(shop){
+      const haystack=[shop.shop_name,shop.shop_slug,shop.category,shop.category_name,shop.location,shop.area,shop.city]
+        .map(function(value){return String(value||"");})
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(normalized);
+    });
 
     matches=matches.slice(0,12);
 
