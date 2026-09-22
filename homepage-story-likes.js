@@ -2,7 +2,7 @@
  SHOUFHON OWNER SOCIAL HEART V6
  - owner-only activity heart
  - live Realtime + safe 2s fallback refresh
- - signed follower/story-like identity + circular avatar enrichment
+ - signed follower/story/shop-like identity + circular avatar enrichment
  - shop-owner follows show the follower shop identity and open that shop
  - anonymous activity says Someone, never Guest
  - Just now / live relative timestamps
@@ -15,6 +15,33 @@ let c=null,owner=null,rows=[],ch=null,loading=false,poll=null,lastSig="",clock=n
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const heartSVG=`<svg viewBox="0 0 24 24" width="25" height="25" fill="none" aria-hidden="true"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.3 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const actorUserId=x=>String(x?.actor_user_id||x?.user_id||x?.viewer_user_id||x?.liked_by_user_id||x?.follower_user_id||x?.actor_id||"").trim();
+async function shopLikeBridgeClient(){
+  try{await window.Ma7alakAccount?.ready?.()}catch(_){}
+  let bridgeClient=window.Ma7alakAccount?.client||window.Ma7alakOwnerAuth?.client||window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||null;
+  if(!bridgeClient&&window.Ma7alakSupabaseBootstrap?.ready){try{bridgeClient=await window.Ma7alakSupabaseBootstrap.ready()}catch(_){}}
+  return bridgeClient;
+}
+function installShopLikeBridge(){
+  if(window.__M7_SHOP_LIKE_BRIDGE__)return;window.__M7_SHOP_LIKE_BRIDGE__=true;
+  window.addEventListener("message",async event=>{
+    const data=event?.data||{};
+    if(data.type!=="MA7ALAK_SHOP_LIKE_RPC")return;
+    const requestId=String(data.requestId||"");
+    const operation=data.operation==="like"?"like_shop":data.operation==="state"?"get_shop_like_state":"";
+    const shopSlug=String(data.shopSlug||"").trim().toLowerCase();
+    const visitorId=String(data.visitorId||"").trim();
+    if(!/^[a-z0-9_-]{8,100}$/i.test(requestId)||!operation||shopSlug.length<1||shopSlug.length>160||visitorId.length<8||visitorId.length>160)return;
+    let payload={type:"MA7ALAK_SHOP_LIKE_RPC_RESULT",requestId,data:null,error:"Could not connect"};
+    try{
+      const bridgeClient=await shopLikeBridgeClient();
+      if(!bridgeClient)throw new Error("Could not connect");
+      const result=await bridgeClient.rpc(operation,{p_shop_slug:shopSlug,p_visitor_id:visitorId});
+      if(result.error)throw result.error;
+      payload={type:"MA7ALAK_SHOP_LIKE_RPC_RESULT",requestId,data:result.data,error:""};
+    }catch(error){payload.error=String(error?.message||"Could not update shop like")}
+    try{event.source?.postMessage(payload,"*")}catch(_){}
+  });
+}
 function relativeTime(value){const t=new Date(value).getTime();if(!Number.isFinite(t))return"Just now";const sec=Math.max(0,Math.floor((Date.now()-t)/1000));if(sec<45)return"Just now";const min=Math.floor(sec/60);if(min<60)return min+"m ago";const hr=Math.floor(min/60);if(hr<24)return hr+"h ago";const day=Math.floor(hr/24);if(day<7)return day+"d ago";return new Date(t).toLocaleDateString()}
 function safeName(x){const raw=String(x?.actor_name||"").trim();if(!raw||/^(guest|anonymous|visitor|null|undefined)$/i.test(raw))return"Someone";return raw}
 async function ready(){for(let i=0;i<120&&!window.Ma7alakOwnerAuth;i++)await new Promise(r=>setTimeout(r,75));await window.Ma7alakOwnerAuth?.ready?.();owner=window.Ma7alakOwnerAuth?.owner;if(!owner)return;c=window.Ma7alakOwnerAuth.client;mount();await load(true);subscribe();startFallback();startClock()}
@@ -23,13 +50,14 @@ function actorKey(x){return actorUserId(x)||String(x.actor_visitor_id||x.visitor
 function followShopTarget(x){if(x?.type!=="follow")return"";const marker=String(x?.actor_username||"").trim();if(!marker.toLowerCase().startsWith("shop:"))return"";let raw=marker.slice(5).trim();if(!raw)return"";if(/^https?:\/\//i.test(raw))return raw;if(raw.startsWith("/"))return location.origin+raw;if(/^[a-z0-9.-]+\.[a-z]{2,}(?:\/|$)/i.test(raw))return"https://"+raw;return location.origin+"/"+raw.replace(/^\/+/, "")}
 function cleanRows(input){const seen=new Set(),out=[];for(const x of input||[]){const key=(x.type||"")+"|"+actorKey(x)+"|"+String(x.story_id||x.content_id||"");if(x.type==="follow"&&seen.has(key))continue;seen.add(key);out.push(x)}return out}
 function groupRows(input){const out=[];const HOUR=60*60*1000;for(const row of input||[]){if(row?.type!=="like"){out.push({...row,_groupCount:1});continue}const who=actorKey(row),time=Date.parse(row.created_at||"")||0;let match=null;for(const existing of out){if(existing?.type!=="like"||actorKey(existing)!==who)continue;const existingTime=Date.parse(existing.created_at||"")||0;if(Math.abs(existingTime-time)<=HOUR){match=existing;break}}if(!match){out.push({...row,_groupCount:1});continue}match._groupCount=(match._groupCount||1)+1;match.seen=!!match.seen&&!!row.seen;const currentTime=Date.parse(match.created_at||"")||0;if(time>currentTime){match.created_at=row.created_at;match.id=row.id;match.story_id=row.story_id;match.content_id=row.content_id}}return out}
-function render(){const b=document.getElementById("m7-heart-badge"),list=document.getElementById("m7sn-list");if(!b||!list)return;const clean=cleanRows(rows),displayRows=groupRows(clean),n=clean.filter(x=>!x.seen).length;b.textContent=n>99?"99+":n;b.style.display=n?"grid":"none";list.innerHTML=displayRows.length?displayRows.map(x=>{const name=safeName(x),avatar=String(x.actor_avatar||"").trim(),target=followShopTarget(x),isShopFollow=!!target,count=Math.max(1,Number(x._groupCount||1)),message=x.type==="follow"?(isShopFollow?`Shop <b>${esc(name)}</b> followed you.`:`<b>${esc(name)}</b> followed you.`):`<b>${esc(name)}</b> liked your story${count>1?` <span class="m7sn-count">× ${count}</span>`:""}`;const avatarHTML=avatar?`<img src="${esc(avatar)}" alt="${esc(name)}">`:`<div class="av">${isShopFollow?"🏪":"👤"}</div>`;const action=x.type==="follow"?"＋":"♥";return `<div class="m7sn ${x.seen?"":"new"} ${isShopFollow?"follow":""}" ${isShopFollow?`role="button" tabindex="0" data-m7-shop-target="${esc(target)}" aria-label="Open ${esc(name)} shop"`:""}><div class="m7sn-avatar-wrap">${avatarHTML}<span class="m7sn-action ${x.type==="like"?"like":"follow"}">${action}</span></div><div class="m7sn-copy">${message}<small data-m7-time="${esc(x.created_at)}">${esc(relativeTime(x.created_at))}</small></div></div>`}).join(""):'<div class="m7sn-empty">No activity yet.</div>'}
+function render(){const b=document.getElementById("m7-heart-badge"),list=document.getElementById("m7sn-list");if(!b||!list)return;const clean=cleanRows(rows),displayRows=groupRows(clean),n=clean.filter(x=>!x.seen).length;b.textContent=n>99?"99+":n;b.style.display=n?"grid":"none";list.innerHTML=displayRows.length?displayRows.map(x=>{const name=safeName(x),avatar=String(x.actor_avatar||"").trim(),target=followShopTarget(x),isShopFollow=!!target,count=Math.max(1,Number(x._groupCount||1)),isShopLike=x.type==="shop_like",message=x.type==="follow"?(isShopFollow?`Shop <b>${esc(name)}</b> followed you.`:`<b>${esc(name)}</b> followed you.`):isShopLike?`<b>${esc(name)}</b> liked your shop.`:`<b>${esc(name)}</b> liked your story${count>1?` <span class="m7sn-count">× ${count}</span>`:""}`;const avatarHTML=avatar?`<img src="${esc(avatar)}" alt="${esc(name)}">`:`<div class="av">${isShopFollow?"🏪":"👤"}</div>`;const action=x.type==="follow"?"＋":"♥";return `<div class="m7sn ${x.seen?"":"new"} ${isShopFollow?"follow":""}" ${isShopFollow?`role="button" tabindex="0" data-m7-shop-target="${esc(target)}" aria-label="Open ${esc(name)} shop"`:""}><div class="m7sn-avatar-wrap">${avatarHTML}<span class="m7sn-action ${x.type==="like"||isShopLike?"like":"follow"}">${action}</span></div><div class="m7sn-copy">${message}<small data-m7-time="${esc(x.created_at)}">${esc(relativeTime(x.created_at))}</small></div></div>`}).join(""):'<div class="m7sn-empty">No activity yet.</div>'}
 function refreshTimes(){document.querySelectorAll("#m7sn-list [data-m7-time]").forEach(el=>{el.textContent=relativeTime(el.getAttribute("data-m7-time"))})}
-async function enrichViewerIdentity(input){const list=Array.isArray(input)?input:[],needsViewer=x=>!(x?.type==="follow"&&String(x?.actor_username||"").toLowerCase().startsWith("shop:")),ids=[...new Set(list.filter(needsViewer).map(actorUserId).filter(Boolean))];if(!ids.length)return list;try{const r=await c.from("viewer_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);if(r.error)return list;const map=new Map((r.data||[]).map(p=>[String(p.user_id),p]));return list.map(x=>{if(!needsViewer(x))return x;const p=map.get(actorUserId(x));if(!p)return x;return {...x,actor_name:String(p.username||p.display_name||x.actor_name||"").trim(),actor_avatar:String(p.avatar_url||x.actor_avatar||"").trim()}})}catch(_){return list}}
+async function enrichViewerIdentity(input){const list=Array.isArray(input)?input:[],needsViewer=x=>!(x?.type==="follow"&&String(x?.actor_username||"").toLowerCase().startsWith("shop:")),ids=[...new Set(list.filter(needsViewer).map(actorUserId).filter(Boolean))];if(!ids.length)return list;try{const r=await c.from("viewer_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);if(r.error)return list;const map=new Map((r.data||[]).map(p=>[String(p.user_id),p]));return list.map(x=>{if(!needsViewer(x))return x;const p=map.get(actorUserId(x));if(!p)return x;return {...x,actor_name:String(p.display_name||p.username||x.actor_name||"").trim(),actor_avatar:String(p.avatar_url||x.actor_avatar||"").trim()}})}catch(_){return list}}
 async function load(force=false){if(loading||!c)return;loading=true;try{const r=await c.rpc("ma7alak_get_my_owner_notifications");if(r.error){console.warn("SHOUFHON owner activity:",r.error);return}let next=await enrichViewerIdentity(r.data||[]);const ownerUid=String(owner?.user_id||owner?.id||"");if(ownerUid)next=next.filter(x=>actorUserId(x)!==ownerUid);const sig=next.map(x=>[x.id,x.created_at,x.seen,actorUserId(x),x.actor_name,x.actor_avatar].join("|")).join(";");if(force||sig!==lastSig){lastSig=sig;rows=next;render()}}finally{loading=false}}
 async function markSeen(){const b=document.getElementById("m7-heart-badge");if(b)b.style.display="none";rows=rows.map(x=>({...x,seen:true}));render();try{await c.rpc("ma7alak_mark_my_owner_notifications_seen")}catch(_){}}
 function subscribe(){if(ch)try{c.removeChannel(ch)}catch(_){}ch=c.channel("m7-owner-social-v6-"+owner.shop_slug).on("postgres_changes",{event:"INSERT",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).on("postgres_changes",{event:"UPDATE",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).subscribe(status=>{if(status==="SUBSCRIBED")load(true)})}
 function startFallback(){if(poll)clearInterval(poll);poll=setInterval(()=>{if(document.visibilityState==="visible")load(false)},2000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")load(true)})}
 function startClock(){if(clock)clearInterval(clock);clock=setInterval(()=>{if(document.visibilityState==="visible")refreshTimes()},15000)}
+installShopLikeBridge();
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ready,{once:true});else ready();
 })();
