@@ -831,6 +831,9 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)spotlightCl
 /* REELS */
 const reelsContainer=document.querySelector(".ma7alak-reels"),viewer=document.getElementById("ma7alakReelViewer"),viewerVideo=document.getElementById("ma7alakReelViewerVideo"),viewerClose=document.getElementById("ma7alakReelViewerClose"),viewerShop=document.getElementById("ma7alakReelViewerShop"),viewerName=document.getElementById("ma7alakReelViewerShopName"),viewerIcon=document.getElementById("ma7alakReelViewerShopIcon"),viewerFav=document.getElementById("ma7alakViewerFavorite"),favCount=document.getElementById("ma7alakFavoritesCount"),savedDrawer=document.getElementById("ma7alakSavedDrawer"),savedBody=document.getElementById("ma7alakSavedBody"),savedClose=document.getElementById("ma7alakSavedClose"),savedCount=document.getElementById("ma7alakSavedCount"),savedButton=document.getElementById("ma7alakFavoritesButton");let reels=[],viewerIndex=0,favoriteIds=new Set(),channel,loading=false,lastRandom=null,reelDataSignature="",savedHistoryArmed=false,savedCloseFallbackTimer=null;
 let visitorId=localStorage.getItem("ma7alak_visitor_id");if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem("ma7alak_visitor_id",visitorId)}
+const favoriteTokenKey="ma7alak_favorite_token_v1";
+let favoriteToken=String(localStorage.getItem(favoriteTokenKey)||"").trim();
+if(!/^[A-Za-z0-9._:-]{32,200}$/.test(favoriteToken)){favoriteToken=crypto.randomUUID()+"-"+crypto.randomUUID();localStorage.setItem(favoriteTokenKey,favoriteToken)}
 function refreshReels(){reels=[...document.querySelectorAll(".ma7alak-reel[data-reel-id]")];return reels}
 let m7InitialReelStripResetDone=false;
 function resetReelsStripToStart(){
@@ -1011,11 +1014,11 @@ bindViewerTap(viewerFav,async()=>{
   viewerFavoriteBusy=true;viewerFav.disabled=true;
   try{
     if(favoriteIds.has(id)){
-      let r=await sb.from("ma7alak_favorites").delete().eq("visitor_id",visitorId).eq("reel_id",id);
+      let r=await sb.rpc("remove_my_favorite",{p_visitor_id:visitorId,p_favorite_token:favoriteToken,p_reel_id:id});
       if(!r.error)favoriteIds.delete(id);
     }else{
-      let r=await sb.from("ma7alak_favorites").insert({visitor_id:visitorId,reel_id:id,shop_name:reel.dataset.shopName});
-      if(!r.error)favoriteIds.add(id);
+      let r=await sb.rpc("add_my_favorite",{p_visitor_id:visitorId,p_favorite_token:favoriteToken,p_reel_id:id});
+      if(!r.error&&r.data!==false)favoriteIds.add(id);
     }
     favCount.textContent=String(favoriteIds.size);
     if(savedCount)savedCount.textContent=String(favoriteIds.size);
@@ -1091,7 +1094,7 @@ function renderSavedDrawer(){
     cardEl.querySelector(".m7-saved-remove").onclick=async e=>{
       e.preventDefault();e.stopPropagation();
       const btn=e.currentTarget;btn.disabled=true;
-      const r=await sb.from("ma7alak_favorites").delete().eq("visitor_id",visitorId).eq("reel_id",id);
+      const r=await sb.rpc("remove_my_favorite",{p_visitor_id:visitorId,p_favorite_token:favoriteToken,p_reel_id:id});
       btn.disabled=false;
       if(!r.error){
         favoriteIds.delete(id);
@@ -1149,7 +1152,7 @@ function closeSavedDrawer(fromPopState=false){
   finishSavedClose();
 }
 async function syncFavorites(){
-  let r=await sb.from("ma7alak_favorites").select("reel_id").eq("visitor_id",visitorId);
+  let r=await sb.rpc("get_my_favorites",{p_visitor_id:visitorId,p_favorite_token:favoriteToken});
   if(!r.error){
     favoriteIds=new Set((r.data||[]).map(x=>String(x.reel_id)));
     favCount.textContent=String(favoriteIds.size);
