@@ -6003,6 +6003,18 @@ function decorateAll(){
     ["vip_ring_color_2","VIP ring secondary"],
     ["vip_ring_color_3","VIP ring highlight"],
     ["vip_particle_color","VIP particle color"],
+    ["vip_name_color_1","VIP shop name primary"],
+    ["vip_name_color_2","VIP shop name secondary"],
+    ["vip_name_color_3","VIP shop name highlight"],
+    ["vip_name_outline_color","VIP shop name outline"],
+    ["vip_category_text_color","VIP category text"],
+    ["vip_category_bg_color","VIP category background"],
+    ["vip_category_border_color","VIP category border"],
+    ["vip_category_icon_color","VIP category icon"],
+    ["vip_frame_color_1","VIP frame layer 1"],
+    ["vip_frame_color_2","VIP frame layer 2"],
+    ["vip_frame_color_3","VIP frame layer 3"],
+    ["vip_frame_color_4","VIP frame layer 4"],
     ["profile_banner_color","Profile banner"],
     ["profile_shell_bg_color","Profile shell background"],
     ["profile_shell_border_color","Profile shell border"],
@@ -6115,6 +6127,47 @@ function decorateAll(){
     vip_particle_color:"#f2caed",
     vip_particle_speed:"4.5",
     vip_mobile_quality:"balanced",
+
+    vip_name_style:"gradient",
+    vip_name_color_1:"#f2caed",
+    vip_name_color_2:"#d9a441",
+    vip_name_color_3:"#ffffff",
+    vip_name_gradient_angle:"110",
+    vip_name_outline_color:"#100d0b",
+    vip_name_outline_width:"0",
+    vip_name_letter_spacing:"0",
+    vip_name_shadow_power:"45",
+    vip_name_animation:"shimmer",
+    vip_name_animation_speed:"3.2",
+
+    vip_category_style:"glass",
+    vip_category_text_color:"#ffffff",
+    vip_category_bg_color:"#171217",
+    vip_category_border_color:"#f2caed",
+    vip_category_icon_color:"#d9a441",
+    vip_category_icon_text:"",
+    vip_category_icon_image_url:"",
+    vip_category_animation:"float",
+    vip_category_animation_speed:"3",
+
+    vip_frame_enabled:false,
+    vip_frame_style:"layered",
+    vip_frame_color_1:"#f2caed",
+    vip_frame_color_2:"#d9a441",
+    vip_frame_color_3:"#ffffff",
+    vip_frame_color_4:"#8a2cff",
+    vip_frame_layer_count:"3",
+    vip_frame_width:"2",
+    vip_frame_gap:"3",
+    vip_frame_angle:"120",
+    vip_frame_glow:"38",
+    vip_frame_animation:"flow",
+    vip_frame_animation_speed:"5",
+    vip_corner_enabled:false,
+    vip_corner_symbol:"✦",
+    vip_corner_image_url:"",
+    vip_corner_size:"20",
+    vip_corner_animation:"float",
 
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
@@ -7034,8 +7087,143 @@ function decorateAll(){
           </label>
         </div>
 
+        <div class="m7ds-section-title">VIP Shop Name</div>
+        <div class="m7ds-grid">
+          <label class="m7ds-field">
+            <span>Name material</span>
+            <select id="${prefix}vip_name_style">
+              <option value="gradient">Animated gradient</option>
+              <option value="gold">Polished gold</option>
+              <option value="chrome">Chrome / metallic</option>
+              <option value="neon">Neon light</option>
+              <option value="glass">Glass shine</option>
+              <option value="outline">Outline lettering</option>
+              <option value="solid">Solid color</option>
+            </select>
+          </label>
+          ${colorField(prefix,"vip_name_color_1","Name primary color")}
+          ${colorField(prefix,"vip_name_color_2","Name secondary color")}
+          ${colorField(prefix,"vip_name_color_3","Name highlight color")}
+          ${effectNumberField(prefix,"vip_name_gradient_angle","Gradient angle",0,360,5,"°")}
+          ${colorField(prefix,"vip_name_outline_color","Name outline color")}
+          ${effectNumberField(prefix,"vip_name_outline_width","Outline thickness",0,4,.25,"px")}
+          ${effectNumberField(prefix,"vip_name_letter_spacing","Letter spacing",-2,12,.5,"px")}
+          ${effectNumberField(prefix,"vip_name_shadow_power","Name glow / shadow",0,100,5,"%")}
+          <label class="m7ds-field">
+            <span>Name animation</span>
+            <select id="${prefix}vip_name_animation">
+              <option value="shimmer">Shimmer sweep</option>
+              <option value="gradient-flow">Gradient flow</option>
+              <option value="neon-pulse">Neon pulse</option>
+              <option value="float">Gentle float</option>
+              <option value="pulse">Soft pulse</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          ${effectNumberField(prefix,"vip_name_animation_speed","Name animation speed",1.5,12,.5,"seconds")}
+        </div>
+
+        <div class="m7ds-section-title">VIP Category Badge</div>
+        <div class="m7ds-grid">
+          <label class="m7ds-field">
+            <span>Badge design</span>
+            <select id="${prefix}vip_category_style">
+              <option value="glass">Glass pill</option>
+              <option value="pill">Luxury pill</option>
+              <option value="ribbon">Ribbon</option>
+              <option value="seal">Seal / stamp</option>
+              <option value="neon">Neon badge</option>
+              <option value="minimal">Minimal</option>
+            </select>
+          </label>
+          ${colorField(prefix,"vip_category_text_color","Category text color")}
+          ${colorField(prefix,"vip_category_bg_color","Category background")}
+          ${colorField(prefix,"vip_category_border_color","Category frame")}
+          ${colorField(prefix,"vip_category_icon_color","Category icon")}
+          <label class="m7ds-field">
+            <span>Custom icon / emoji</span>
+            <input id="${prefix}vip_category_icon_text" type="text" maxlength="12" placeholder="Leave blank for current icon">
+          </label>
+          <label class="m7ds-field">
+            <span>Custom icon image URL</span>
+            <input id="${prefix}vip_category_icon_image_url" type="url" placeholder="https://… transparent PNG/WebP">
+          </label>
+          <label class="m7ds-field">
+            <span>Badge animation</span>
+            <select id="${prefix}vip_category_animation">
+              <option value="float">Gentle float</option>
+              <option value="shimmer">Shimmer</option>
+              <option value="pulse">Pulse</option>
+              <option value="glow">Glow</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          ${effectNumberField(prefix,"vip_category_animation_speed","Badge animation speed",1.5,12,.5,"seconds")}
+        </div>
+
+        <div class="m7ds-section-title">VIP Profile Frame</div>
+        <div class="m7ds-grid">
+          <label class="m7ds-check">
+            <input id="${prefix}vip_frame_enabled" type="checkbox">
+            <span><b>Enable custom shell frame</b><small>Add independent animated layers around the entire profile panel.</small></span>
+          </label>
+          <label class="m7ds-field">
+            <span>Frame design</span>
+            <select id="${prefix}vip_frame_style">
+              <option value="layered">Layered luxury</option>
+              <option value="gradient">Gradient edge</option>
+              <option value="neon">Neon depth</option>
+              <option value="metallic">Metallic</option>
+              <option value="glass">Glass edge</option>
+              <option value="segments">Segments</option>
+            </select>
+          </label>
+          ${colorField(prefix,"vip_frame_color_1","Frame layer 1")}
+          ${colorField(prefix,"vip_frame_color_2","Frame layer 2")}
+          ${colorField(prefix,"vip_frame_color_3","Frame layer 3")}
+          ${colorField(prefix,"vip_frame_color_4","Frame layer 4")}
+          ${effectNumberField(prefix,"vip_frame_layer_count","Visible frame layers",1,4,1,"layers")}
+          ${effectNumberField(prefix,"vip_frame_width","Layer thickness",1,6,.5,"px")}
+          ${effectNumberField(prefix,"vip_frame_gap","Space between layers",0,10,1,"px")}
+          ${effectNumberField(prefix,"vip_frame_angle","Gradient angle",0,360,5,"°")}
+          ${effectNumberField(prefix,"vip_frame_glow","Frame glow",0,100,5,"%")}
+          <label class="m7ds-field">
+            <span>Frame animation</span>
+            <select id="${prefix}vip_frame_animation">
+              <option value="flow">Color flow</option>
+              <option value="comet">Comet edge</option>
+              <option value="breathe">Breathe</option>
+              <option value="shimmer">Shimmer</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          ${effectNumberField(prefix,"vip_frame_animation_speed","Frame animation speed",2,14,.5,"seconds")}
+          <label class="m7ds-check">
+            <input id="${prefix}vip_corner_enabled" type="checkbox">
+            <span><b>Corner ornaments</b><small>Add four brand decorations to the profile-frame corners.</small></span>
+          </label>
+          <label class="m7ds-field">
+            <span>Corner symbol / emoji</span>
+            <input id="${prefix}vip_corner_symbol" type="text" maxlength="12" placeholder="✦">
+          </label>
+          <label class="m7ds-field">
+            <span>Corner image URL</span>
+            <input id="${prefix}vip_corner_image_url" type="url" placeholder="https://… transparent PNG/WebP">
+          </label>
+          ${effectNumberField(prefix,"vip_corner_size","Corner ornament size",10,52,1,"px")}
+          <label class="m7ds-field">
+            <span>Corner animation</span>
+            <select id="${prefix}vip_corner_animation">
+              <option value="float">Float</option>
+              <option value="pulse">Pulse</option>
+              <option value="spin">Spin</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+        </div>
+
         <div class="m7ds-vip-note">
-          This is the first reusable VIP layer. Doze can use food/chocolate artwork, while tattoo, perfume, café and fashion shops can use completely different assets.
+          Every setting belongs only to this shop. Combine custom artwork, name materials, category badges and frame layers to build a different identity for every VIP page.
         </div>
       </div>
 
@@ -17071,6 +17259,47 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     vip_particle_speed:"4.5",
     vip_mobile_quality:"balanced",
 
+    vip_name_style:"gradient",
+    vip_name_color_1:"$ACCENT",
+    vip_name_color_2:"#d9a441",
+    vip_name_color_3:"#ffffff",
+    vip_name_gradient_angle:"110",
+    vip_name_outline_color:"#100d0b",
+    vip_name_outline_width:"0",
+    vip_name_letter_spacing:"0",
+    vip_name_shadow_power:"45",
+    vip_name_animation:"shimmer",
+    vip_name_animation_speed:"3.2",
+
+    vip_category_style:"glass",
+    vip_category_text_color:"#ffffff",
+    vip_category_bg_color:"#171217",
+    vip_category_border_color:"$ACCENT",
+    vip_category_icon_color:"#d9a441",
+    vip_category_icon_text:"",
+    vip_category_icon_image_url:"",
+    vip_category_animation:"float",
+    vip_category_animation_speed:"3",
+
+    vip_frame_enabled:false,
+    vip_frame_style:"layered",
+    vip_frame_color_1:"$ACCENT",
+    vip_frame_color_2:"#d9a441",
+    vip_frame_color_3:"#ffffff",
+    vip_frame_color_4:"#8a2cff",
+    vip_frame_layer_count:"3",
+    vip_frame_width:"2",
+    vip_frame_gap:"3",
+    vip_frame_angle:"120",
+    vip_frame_glow:"38",
+    vip_frame_animation:"flow",
+    vip_frame_animation_speed:"5",
+    vip_corner_enabled:false,
+    vip_corner_symbol:"✦",
+    vip_corner_image_url:"",
+    vip_corner_size:"20",
+    vip_corner_animation:"float",
+
     profile_banner_enabled:false,
     profile_banner_color:"#171217",
     profile_banner_image_url:"",
@@ -18147,6 +18376,44 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     "vip_particle_color",
     "vip_particle_speed",
     "vip_mobile_quality",
+    "vip_name_style",
+    "vip_name_color_1",
+    "vip_name_color_2",
+    "vip_name_color_3",
+    "vip_name_gradient_angle",
+    "vip_name_outline_color",
+    "vip_name_outline_width",
+    "vip_name_letter_spacing",
+    "vip_name_shadow_power",
+    "vip_name_animation",
+    "vip_name_animation_speed",
+    "vip_category_style",
+    "vip_category_text_color",
+    "vip_category_bg_color",
+    "vip_category_border_color",
+    "vip_category_icon_color",
+    "vip_category_icon_text",
+    "vip_category_icon_image_url",
+    "vip_category_animation",
+    "vip_category_animation_speed",
+    "vip_frame_enabled",
+    "vip_frame_style",
+    "vip_frame_color_1",
+    "vip_frame_color_2",
+    "vip_frame_color_3",
+    "vip_frame_color_4",
+    "vip_frame_layer_count",
+    "vip_frame_width",
+    "vip_frame_gap",
+    "vip_frame_angle",
+    "vip_frame_glow",
+    "vip_frame_animation",
+    "vip_frame_animation_speed",
+    "vip_corner_enabled",
+    "vip_corner_symbol",
+    "vip_corner_image_url",
+    "vip_corner_size",
+    "vip_corner_animation",
     "profile_shell_enabled",
     "profile_shell_layout",
     "profile_shell_bg_color",
