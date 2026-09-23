@@ -407,6 +407,8 @@
   if(location.pathname.replace(/\/+$/,'') && !/^\/(?:home|index)?$/i.test(location.pathname.replace(/\/+$/,'')))return;
   const url="https://wdtaiuwtqdepzdamgsrs.supabase.co";
   const key="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+  const storyScriptSrc=document.currentScript?.src||"";
+  let storyViewerPromise=null;
   let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,expiryTimer=0,version=0,channel=null,storyBus=null,playing=[],index=0,mediaTimer=0,viewerOpen=false;
   const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const path=s=>'/'+encodeURIComponent(s);
@@ -537,60 +539,135 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     if(latest)try{localStorage.setItem('ma7alak_story_seen_'+slug,latest)}catch(_){}
     render();
   }
-  function stopMedia(){clearTimeout(mediaTimer);document.querySelector('#shoufhon-story-viewer video')?.pause();}
-  function exitViewerFullscreen(){
+  function sharedViewerUrl(){
     try{
-      const active=document.fullscreenElement||document.webkitFullscreenElement;if(!active)return;
-      const exit=document.exitFullscreen||document.webkitExitFullscreen;
-      if(typeof exit==='function'){const result=exit.call(document);if(result&&typeof result.catch==='function')result.catch(()=>{})}
-    }catch(_){}
+      return new URL(
+        "shoufhon-story-viewer.js",
+        storyScriptSrc||location.href
+      ).href;
+    }
+    catch(_){
+      return "shoufhon-story-viewer.js";
+    }
   }
-  function closeViewer(fromHistory){
-    if(!viewerOpen)return;viewerOpen=false;stopMedia();
-    document.getElementById('shoufhon-story-viewer')?.remove();
-    document.documentElement.classList.remove('shoufhon-story-open');document.body.classList.remove('shoufhon-story-open');
-    exitViewerFullscreen();
-    if(!fromHistory&&history.state?.shoufhonStoryViewer)history.back();
+
+  function ensureSharedViewer(){
+
+    if(
+      window.ShoufHonStoryViewer &&
+      typeof window.ShoufHonStoryViewer.open==="function"
+    ){
+      return Promise.resolve(
+        window.ShoufHonStoryViewer
+      );
+    }
+
+    if(storyViewerPromise){
+      return storyViewerPromise;
+    }
+
+    storyViewerPromise=
+      new Promise(function(resolve){
+
+        const existing=
+          Array.from(
+            document.scripts
+          ).find(function(script){
+            return /shoufhon-story-viewer\.js(?:$|[?#])/.test(
+              script.src||""
+            );
+          });
+
+        if(existing){
+
+          let tries=0;
+
+          const wait=function(){
+
+            if(
+              window.ShoufHonStoryViewer &&
+              typeof window.ShoufHonStoryViewer.open==="function"
+            ){
+              resolve(
+                window.ShoufHonStoryViewer
+              );
+              return;
+            }
+
+            tries++;
+
+            if(tries<100){
+              setTimeout(
+                wait,
+                40
+              );
+            }
+            else{
+              resolve(
+                null
+              );
+            }
+
+          };
+
+          wait();
+
+          return;
+        }
+
+        const script=
+          document.createElement(
+            "script"
+          );
+
+        script.src=
+          sharedViewerUrl();
+
+        script.onload=function(){
+          resolve(
+            window.ShoufHonStoryViewer||
+            null
+          );
+        };
+
+        script.onerror=function(){
+          resolve(
+            null
+          );
+        };
+
+        document.head.appendChild(
+          script
+        );
+
+      });
+
+    return storyViewerPromise;
+
   }
-  function next(){if(index+1>=playing.length){closeViewer();return}index++;showMedia()}
-  function showMedia(){
-    stopMedia();const story=playing[index];if(!story||new Date(story.expires_at).getTime()<=Date.now()){next();return}
-    const viewer=document.getElementById('shoufhon-story-viewer');if(!viewer)return;
-    const urlValue=/^https:\/\//i.test(story.storage_path||'')?story.storage_path:db().storage.from('shop-stories').getPublicUrl(story.storage_path).data.publicUrl;
-    if(!/^https:\/\//i.test(urlValue||'')){next();return}
-    const media=viewer.querySelector('.shv-content');media.replaceChildren();
-    const element=document.createElement(story.media_type==='video'?'video':'img');element.className='shv-media';element.src=urlValue;
-    if(element.tagName==='VIDEO'){element.autoplay=true;element.playsInline=true;element.controls=false;element.onended=next;element.onerror=next;element.play().catch(()=>{element.controls=true;});mediaTimer=setTimeout(next,30000)}
-    else{element.onerror=next;mediaTimer=setTimeout(next,6000)}
-    media.appendChild(element);
-    const profile=profiles.get(story.shop_slug)||{};
-    viewer.querySelector('.shv-name').textContent=profile.shop_name||story.shop_slug;
-    viewer.querySelector('.shv-bars').innerHTML=playing.map((_,i)=>'<i class="'+(i<=index?'done':'')+'"></i>').join('');
+
+  async function openViewer(slug){
+
+    const viewer=
+      await ensureSharedViewer();
+
+    if(
+      !viewer ||
+      typeof viewer.open!=="function"
+    ){
+      console.warn(
+        "ShoufHon Story viewer could not load."
+      );
+      return;
+    }
+
+    viewer.open({
+      shopSlug:slug,
+      preferUnseen:true
+    });
+
   }
-  function openViewer(slug){
-    playing=rows.filter(r=>r.shop_slug===slug&&new Date(r.expires_at).getTime()>Date.now()).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-    if(!playing.length){render();return}
-    const seenAt=seenStoryTime(slug);
-    const unseenIndex=playing.findIndex(r=>new Date(r.created_at||0).getTime()>seenAt);
-    index=unseenIndex>=0?unseenIndex:0;
-    markStoriesSeen(slug);
-    const viewer=document.createElement('div');viewer.id='shoufhon-story-viewer';viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');
-    viewer.innerHTML='<div class="shv-frame"><div class="shv-content"></div><div class="shv-top"><div class="shv-bars"></div><button class="shv-close" type="button" aria-label="Close story">×</button><b class="shv-name"></b></div><button class="shv-nav shv-prev" type="button" aria-label="Previous story">Previous</button><button class="shv-nav shv-next" type="button" aria-label="Next story">Next</button></div>';
-    document.body.appendChild(viewer);viewerOpen=true;
-    document.documentElement.classList.add('shoufhon-story-open');document.body.classList.add('shoufhon-story-open');
-    try{history.pushState({...history.state,shoufhonStoryViewer:true},'')}catch(_){}
-    viewer.querySelector('.shv-close').onclick=()=>closeViewer();
-    viewer.querySelector('.shv-prev').onclick=()=>{index=Math.max(0,index-1);showMedia()};
-    viewer.querySelector('.shv-next').onclick=next;
-    let touchX=0;
-    viewer.addEventListener('touchstart',e=>{touchX=e.touches[0]?.clientX||0},{passive:true});
-    viewer.addEventListener('touchend',e=>{const dx=(e.changedTouches[0]?.clientX||0)-touchX;if(Math.abs(dx)>65){if(dx<0)next();else{index=Math.max(0,index-1);showMedia()}}},{passive:true});
-    try{
-      const request=viewer.requestFullscreen||viewer.webkitRequestFullscreen;
-      if(typeof request==='function'){const result=request.call(viewer,{navigationUI:'hide'});if(result&&typeof result.catch==='function')result.catch(()=>{})}
-    }catch(_){}
-    showMedia();
-  }
+
   function openOwnerUploader(){
     if(!owner)return;
     const send=()=>window.postMessage({type:'MA7ALAK_OPEN_STORY_UPLOADER',shopSlug:owner.shop_slug,__ma7alakOpenStoryNow:true},location.origin);
@@ -696,9 +773,9 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
   window.addEventListener('message',e=>{if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED','MA7ALAK_STORY_DELETED'].includes(e.data?.type))applyStoryMutation(e.data)});
   function start(){
     slugs=Array.isArray(window.Ma7alakFollowingState?.slugs)?window.Ma7alakFollowingState.slugs:[];
-    bindStoryTray();refresh();
-    window.addEventListener('popstate',()=>closeViewer(true));
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
+    bindStoryTray();
+    refresh();
+    ensureSharedViewer();
     timer=setInterval(()=>{if(!document.hidden)refresh()},30000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
     const c=db();

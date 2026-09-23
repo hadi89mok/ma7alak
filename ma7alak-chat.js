@@ -9,7 +9,8 @@
 (function(){
 "use strict";
 if(window.__MA7ALAK_CHAT_V9__)return;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
-let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null;
+const CHAT_SCRIPT_SRC=document.currentScript?.src||"";
+let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null;
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 async function vr(){for(let i=0;i<100&&!window.Ma7alakAccount;i++)await sleep(50);if(!window.Ma7alakAccount)throw new Error("ShoufHon account system is not ready.");await window.Ma7alakAccount.ready();client=window.Ma7alakAccount.client;user=window.Ma7alakAccount.user;mode="viewer"}
@@ -76,29 +77,196 @@ function storyCardHtml(m){
     : (imageUrl?'<span class="m7-story-card-fallback" aria-hidden="true">▧</span><img loading="lazy" decoding="async" data-story-thumb src="'+esc(imageUrl)+'" alt="">':'<span class="m7-story-card-fallback" aria-hidden="true">▧</span>');
   return '<button type="button" class="m7-story-reply-card '+(expired?"is-expired":"")+'" data-story-open="'+esc(storyId)+'" data-story-shop="'+esc(slug)+'" data-story-url="'+esc(shopUrl)+'" data-story-expires="'+esc(expires)+'" '+(expired?'aria-disabled="true"':'')+'><span class="m7-story-card-top"><span class="m7-story-card-media">'+visual+'</span><span class="m7-story-card-copy"><span class="m7-story-card-label">Replied to story</span><span class="m7-story-card-name">'+esc(shopName)+'</span>'+(status?'<span class="m7-story-card-status">'+esc(status)+'</span>':"")+(expired?'<span class="m7-story-card-badge">Story expired</span>':"")+'</span></span></button>';
 }
-async function openStoryFromMessage(button){
-  if(!button||button.classList.contains("is-expired")){alert("This Story has expired.");return}
-  const storyId=String(button.dataset.storyOpen||"").trim(),slug=String(button.dataset.storyShop||"").trim();
-  if(!storyId||!slug){alert("This Story is no longer available.");return}
-  let shopUrl=String(button.dataset.storyUrl||"").trim();
+function sharedStoryViewerUrl(){
   try{
-    if(!shopUrl){
-      if(!client)await vr();
-      const r=await client.from("shop_profiles").select("shop_url").eq("shop_slug",slug).maybeSingle();
-      if(!r.error)shopUrl=String(r.data?.shop_url||"").trim();
-    }
-    if(!shopUrl)shopUrl="/"+encodeURIComponent(slug);
-    const target=new URL(shopUrl,window.location.origin);
-    target.searchParams.set("story",storyId);target.searchParams.set("shop",slug);
-    const samePage=target.origin===window.location.origin&&cleanPath(target.pathname)===cleanPath(window.location.pathname);
-    if(samePage){
-      let delivered=false;
-      document.querySelectorAll("iframe").forEach(frame=>{try{frame.contentWindow?.postMessage({type:"SHOUFHON_OPEN_STORY_BY_ID",storyId,shopSlug:slug},"*");delivered=true}catch(_){}});
-      if(delivered){close();return}
-    }
-    window.location.href=target.toString();
-  }catch(e){console.warn("Open Story reply:",e);alert("Could not open this Story.")}
+    return new URL(
+      "shoufhon-story-viewer.js",
+      CHAT_SCRIPT_SRC||location.href
+    ).href;
+  }
+  catch(_){
+    return "shoufhon-story-viewer.js";
+  }
 }
+
+function ensureSharedStoryViewer(){
+
+  if(
+    window.ShoufHonStoryViewer &&
+    typeof window.ShoufHonStoryViewer.open==="function"
+  ){
+    return Promise.resolve(
+      window.ShoufHonStoryViewer
+    );
+  }
+
+  if(sharedStoryViewerPromise){
+    return sharedStoryViewerPromise;
+  }
+
+  sharedStoryViewerPromise=
+    new Promise(function(resolve){
+
+      const existing=
+        Array.from(
+          document.scripts
+        ).find(function(script){
+          return /shoufhon-story-viewer\.js(?:$|[?#])/.test(
+            script.src||""
+          );
+        });
+
+      if(existing){
+
+        let tries=0;
+
+        const wait=function(){
+
+          if(
+            window.ShoufHonStoryViewer &&
+            typeof window.ShoufHonStoryViewer.open==="function"
+          ){
+            resolve(
+              window.ShoufHonStoryViewer
+            );
+            return;
+          }
+
+          tries++;
+
+          if(tries<100){
+            setTimeout(
+              wait,
+              40
+            );
+          }
+          else{
+            resolve(
+              null
+            );
+          }
+
+        };
+
+        wait();
+
+        return;
+      }
+
+      const script=
+        document.createElement(
+          "script"
+        );
+
+      script.src=
+        sharedStoryViewerUrl();
+
+      script.onload=function(){
+        resolve(
+          window.ShoufHonStoryViewer||
+          null
+        );
+      };
+
+      script.onerror=function(){
+        resolve(
+          null
+        );
+      };
+
+      document.head.appendChild(
+        script
+      );
+
+    });
+
+  return sharedStoryViewerPromise;
+
+}
+
+async function openStoryFromMessage(button){
+
+  if(
+    !button ||
+    button.classList.contains(
+      "is-expired"
+    )
+  ){
+    alert(
+      "This Story has expired."
+    );
+    return;
+  }
+
+  const storyId=
+    String(
+      button.dataset.storyOpen||
+      ""
+    ).trim();
+
+  const slug=
+    String(
+      button.dataset.storyShop||
+      ""
+    ).trim();
+
+  if(
+    !storyId ||
+    !slug
+  ){
+    alert(
+      "This Story is no longer available."
+    );
+    return;
+  }
+
+  try{
+
+    const viewer=
+      await ensureSharedStoryViewer();
+
+    if(
+      !viewer ||
+      typeof viewer.open!=="function"
+    ){
+      throw new Error(
+        "Story viewer unavailable."
+      );
+    }
+
+    const opened=
+      await viewer.open({
+        shopSlug:slug,
+        storyId:storyId,
+        preferUnseen:false
+      });
+
+    if(
+      !opened &&
+      !viewer.isOpen?.()
+    ){
+      throw new Error(
+        "This Story is no longer available."
+      );
+    }
+
+  }
+  catch(error){
+
+    console.warn(
+      "Open Story reply:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Could not open this Story."
+    );
+
+  }
+
+}
+
 function wireStoryCards(b){
   b.querySelectorAll("[data-story-open]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();openStoryFromMessage(btn)});
   b.querySelectorAll("[data-story-thumb]").forEach(img=>img.addEventListener("error",()=>{img.style.display="none"},{once:true}));
@@ -309,7 +477,7 @@ function loadError(b,e){if(!b)return;console.error("ShoufHon chat load error:",e
 async function deleteMessage(id,c){if(!id||!c)return;if(!confirm("Delete this message?"))return;let r=await client.rpc("ma7alak_delete_my_message",{p_message_id:id});if(r.error){alert(r.error.message);return}await messages(c)}
 async function deleteConversation(c,back){if(!c?.id)return;if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;let r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});if(r.error){alert(r.error.message);return false}dispatchEvent(new Event("ma7alak:messages-read"));if(typeof back==="function")await back();else close();return true}
 async function messages(c){let b=document.getElementById("m7-chat-body");if(!b)return false;if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}try{let r=await Promise.race([client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))]);if(!b.isConnected)return false;if(r.error)throw r.error;b.innerHTML=(r.data||[]).map(m=>{let mine=sameId(m.sender_id,user?.id),card=storyCardHtml(m);return `<div class="m7-msg ${mine?"mine":""}" data-message-id="${esc(m.id)}">${card}<div class="m7-msg-text">${esc(m.body)}</div>${mine?`<button class="m7-msg-delete" type="button" data-delete-message="${esc(m.id)}" title="Delete message">×</button>`:""}<div class="m7-msg-time">${tm(m.created_at)}</div><div class="m7-msg-reactions" data-reactions-for="${esc(m.id)}"></div></div>`}).join("")||'<div class="m7-empty">No messages yet.</div>';wireStoryCards(b);b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});wireMessageReactionGestures(b,c);await refreshReactionsOnly(c);b.scrollTop=b.scrollHeight;client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));return true}catch(e){loadError(b,e);return false}}
-async function convo(c,title,avatar,back,shopProfile){shell(title,avatar,!!back);if(!c||c.id==null){loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));return}if(shopProfile&&shopProfile.isShop){bindShopProfileLink(shopProfile.url,shopProfile.slug)}if(back)document.getElementById("m7-back").onclick=back;let del=document.getElementById("m7-delete-convo");del.style.display="block";del.onclick=()=>deleteConversation(c,back);document.getElementById("m7-report").onclick=async()=>{let reason=prompt("Why are you reporting this conversation?","Abusive messages");if(!reason)return;let r=await client.rpc("ma7alak_report_conversation",{p_conversation_id:c.id,p_reason:reason,p_details:"Reported from ShoufHon chat"});alert(r.error?r.error.message:"Report sent to ShoufHon Admin ✓")};document.getElementById("m7-chat").insertAdjacentHTML("beforeend",`<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`);await messages(c);let form=document.getElementById("m7-chat-send");if(form)form.onsubmit=async e=>{e.preventDefault();let i=document.getElementById("m7-chat-input"),t=i?.value.trim();if(!t)return;i.value="";try{let r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){alert(r.error.message);i.value=t}}catch(err){alert(err?.message||"Could not send message");i.value=t}};channel=client.channel("m7c-"+c.id+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages",filter:"conversation_id=eq."+c.id},()=>messages(c)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_message_reactions",filter:"conversation_id=eq."+c.id},()=>refreshReactionsOnly(c)).on("postgres_changes",{event:"DELETE",schema:"public",table:"ma7alak_conversations",filter:"id=eq."+c.id},()=>{if(typeof back==="function")back();else close()}).subscribe()}
+async function convo(c,title,avatar,back,shopProfile){ensureSharedStoryViewer();shell(title,avatar,!!back);if(!c||c.id==null){loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));return}if(shopProfile&&shopProfile.isShop){bindShopProfileLink(shopProfile.url,shopProfile.slug)}if(back)document.getElementById("m7-back").onclick=back;let del=document.getElementById("m7-delete-convo");del.style.display="block";del.onclick=()=>deleteConversation(c,back);document.getElementById("m7-report").onclick=async()=>{let reason=prompt("Why are you reporting this conversation?","Abusive messages");if(!reason)return;let r=await client.rpc("ma7alak_report_conversation",{p_conversation_id:c.id,p_reason:reason,p_details:"Reported from ShoufHon chat"});alert(r.error?r.error.message:"Report sent to ShoufHon Admin ✓")};document.getElementById("m7-chat").insertAdjacentHTML("beforeend",`<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`);await messages(c);let form=document.getElementById("m7-chat-send");if(form)form.onsubmit=async e=>{e.preventDefault();let i=document.getElementById("m7-chat-input"),t=i?.value.trim();if(!t)return;i.value="";try{let r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){alert(r.error.message);i.value=t}}catch(err){alert(err?.message||"Could not send message");i.value=t}};channel=client.channel("m7c-"+c.id+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages",filter:"conversation_id=eq."+c.id},()=>messages(c)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_message_reactions",filter:"conversation_id=eq."+c.id},()=>refreshReactionsOnly(c)).on("postgres_changes",{event:"DELETE",schema:"public",table:"ma7alak_conversations",filter:"id=eq."+c.id},()=>{if(typeof back==="function")back();else close()}).subscribe()}
 async function unreadMap(rows,sideFor){let out=new Set;if(!rows.length)return out;try{let ids=rows.map(x=>x.id),r=await client.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids);if(r.error)return out;for(let m of r.data||[]){let c=rows.find(x=>sameId(x.id,m.conversation_id));if(!c)continue;let side=typeof sideFor==="function"?sideFor(c):mode,rd=side==="owner"?c.owner_last_read_at:c.viewer_last_read_at;if(!sameId(m.sender_id,user?.id)&&(!rd||new Date(m.created_at)>new Date(rd)))out.add(String(m.conversation_id))}}catch(e){console.warn("Unread map failed:",e)}return out}
 async function accepts(slug){let r=await client.rpc("ma7alak_shop_accepts_messages",{p_shop_slug:String(slug||"").trim()});if(r.error){console.warn("Message setting:",r.error);return true}return r.data!==false}
 async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim();if(ownSlug&&ownSlug.toLowerCase()===slug.toLowerCase()){alert("You cannot message your own shop");return}if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url,shop_url").eq("shop_slug",c.shop_slug).maybeSingle();mode="viewer";convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null,{isShop:true,url:sp.data?.shop_url||"",slug:c.shop_slug})}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}

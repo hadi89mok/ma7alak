@@ -1,0 +1,2364 @@
+/* SHOUFHON SHARED STORY VIEWER V1 */
+(function ShoufHonSharedStoryViewer(){
+  "use strict";
+  if(window.__SHOUFHON_SHARED_STORY_VIEWER_V1__)return;
+  window.__SHOUFHON_SHARED_STORY_VIEWER_V1__=true;
+
+  const SCRIPT_SRC=document.currentScript?.src||"";
+  const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
+  const SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+  const VISITOR_KEY="ma7alak_visitor_id";
+  const INTERACTION_TOKEN_KEY="ma7alak_interaction_token_v1";
+  const ROOT_ID="shoufhon-global-story-viewer";
+  const STYLE_ID="shoufhon-global-story-viewer-css";
+
+  let client=null;
+  let root=null;
+  let stories=[];
+  let profile=null;
+  let currentIndex=0;
+  let currentOwner=false;
+  let mediaTimer=0;
+  let loadToken=0;
+  let historyArmed=false;
+  let storyChannel=null;
+  let touchX=0;
+  let touchY=0;
+
+  const esc=value=>String(value??"").replace(
+    /[&<>"']/g,
+    ch=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[ch])
+  );
+
+  function getClient(){
+    if(client)return client;
+
+    client=
+      window.Ma7alakOwnerAuth?.client||
+      window.Ma7alakAccount?.client||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      window.Ma7alakSupabase?.client||
+      window.Ma7alakSupabaseBootstrap?.client||
+      window.supabase?.createClient?.(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      )||
+      null;
+
+    return client;
+  }
+
+  function randomId(){
+    try{
+      return crypto.randomUUID();
+    }
+    catch(_){}
+
+    try{
+      const bytes=
+        new Uint8Array(
+          16
+        );
+
+      crypto.getRandomValues(
+        bytes
+      );
+
+      return [...bytes]
+        .map(
+          x=>
+            x
+              .toString(16)
+              .padStart(2,"0")
+        )
+        .join("");
+    }
+    catch(_){
+      return (
+        "v-"+
+        Date.now()+
+        "-"+
+        Math.random()
+          .toString(36)
+          .slice(2)
+      );
+    }
+  }
+
+  function visitorId(){
+    try{
+      let value=
+        String(
+          localStorage.getItem(
+            VISITOR_KEY
+          )||
+          ""
+        ).trim();
+
+      if(
+        value.length<
+        8
+      ){
+        value=
+          randomId();
+
+        localStorage.setItem(
+          VISITOR_KEY,
+          value
+        );
+      }
+
+      return value;
+    }
+    catch(_){
+      return randomId();
+    }
+  }
+
+  function interactionToken(){
+    try{
+      const helper=
+        window.Ma7alakInteractionSecurity||
+        window.ShoufHonInteractionSecurityBridge;
+
+      if(
+        typeof helper?.getToken===
+        "function"
+      ){
+        const value=
+          String(
+            helper.getToken()||
+            ""
+          ).trim();
+
+        if(
+          value.length>=
+          32
+        ){
+          return value;
+        }
+      }
+    }
+    catch(_){}
+
+    try{
+      let value=
+        String(
+          localStorage.getItem(
+            INTERACTION_TOKEN_KEY
+          )||
+          ""
+        ).trim();
+
+      if(
+        !/^[A-Za-z0-9._:-]{32,200}$/.test(
+          value
+        )
+      ){
+        const bytes=
+          new Uint8Array(
+            24
+          );
+
+        crypto.getRandomValues(
+          bytes
+        );
+
+        value=
+          [...bytes]
+            .map(
+              x=>
+                x
+                  .toString(16)
+                  .padStart(2,"0")
+            )
+            .join("");
+
+        localStorage.setItem(
+          INTERACTION_TOKEN_KEY,
+          value
+        );
+      }
+
+      return value;
+    }
+    catch(_){
+      return (
+        randomId()+
+        randomId()
+      )
+        .replace(
+          /[^A-Za-z0-9._:-]/g,
+          ""
+        )
+        .slice(
+          0,
+          64
+        );
+    }
+  }
+
+  function mediaUrl(story){
+    const raw=
+      String(
+        story?.storage_path||
+        ""
+      ).trim();
+
+    if(
+      /^https:\/\//i.test(
+        raw
+      )
+    ){
+      return raw;
+    }
+
+    const c=
+      getClient();
+
+    return (
+      raw &&
+      c?.storage?.from
+    )
+      ? c
+          .storage
+          .from(
+            "shop-stories"
+          )
+          .getPublicUrl(
+            raw
+          )
+          .data
+          .publicUrl
+      : "";
+  }
+
+  function likedKey(id){
+    return (
+      "ma7alak_story_liked_"+
+      String(
+        id||
+        ""
+      )
+    );
+  }
+
+  function isLocallyLiked(id){
+    try{
+      return (
+        localStorage.getItem(
+          likedKey(
+            id
+          )
+        )===
+        "1"
+      );
+    }
+    catch(_){
+      return false;
+    }
+  }
+
+  function markLocallyLiked(id){
+    try{
+      localStorage.setItem(
+        likedKey(
+          id
+        ),
+        "1"
+      );
+    }
+    catch(_){}
+  }
+
+  function injectStyle(){
+    if(
+      document.getElementById(
+        STYLE_ID
+      )
+    ){
+      return;
+    }
+
+    const style=
+      document.createElement(
+        "style"
+      );
+
+    style.id=
+      STYLE_ID;
+
+    style.textContent=`
+html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!important}
+#${ROOT_ID}{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font-family:Arial,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+#${ROOT_ID}[hidden]{display:none!important}
+#${ROOT_ID} *{box-sizing:border-box}
+#${ROOT_ID} .ssv-frame{position:relative;width:min(100vw,470px);height:100dvh;overflow:hidden;background:#000;isolation:isolate}
+#${ROOT_ID} .ssv-media-host{position:absolute;inset:0;display:grid;place-items:center;background:#000}
+#${ROOT_ID} .ssv-media{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+#${ROOT_ID} .ssv-loading{position:absolute;inset:0;display:grid;place-items:center;color:#aaa;font-size:12px}
+#${ROOT_ID} .ssv-top{position:absolute;z-index:20;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 12px 30px;background:linear-gradient(#000d,#0008 58%,transparent)}
+#${ROOT_ID} .ssv-bars{display:flex;gap:3px;margin-bottom:10px}
+#${ROOT_ID} .ssv-bar{height:3px;flex:1;border-radius:4px;background:#ffffff4a;overflow:hidden}
+#${ROOT_ID} .ssv-bar>i{display:block;width:0;height:100%;background:#fff}
+#${ROOT_ID} .ssv-bar.done>i{width:100%}
+#${ROOT_ID} .ssv-bar.active>i{animation:ssvProgress var(--ssv-duration,6s) linear forwards;-webkit-animation:ssvProgress var(--ssv-duration,6s) linear forwards}
+#${ROOT_ID} .ssv-head-row{display:flex;align-items:center;gap:9px;min-width:0}
+#${ROOT_ID} .ssv-shop-avatar{width:38px;height:38px;flex:0 0 38px;padding:0;border:2px solid #d9a441;border-radius:50%;overflow:hidden;background:#211a15;color:#efc878;display:grid;place-items:center;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#${ROOT_ID} .ssv-shop-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+#${ROOT_ID} .ssv-copy{min-width:0;flex:1}
+#${ROOT_ID} .ssv-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:900}
+#${ROOT_ID} .ssv-status{display:block;margin-top:2px;color:#c4c4c4;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#${ROOT_ID} .ssv-owner-views{display:none;align-items:center;gap:5px;padding:7px 9px;border:1px solid #ffffff2a;border-radius:999px;background:#0007;color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
+#${ROOT_ID}.is-owner .ssv-owner-views{display:inline-flex}
+#${ROOT_ID} .ssv-close{width:40px;height:40px;flex:0 0 40px;padding:0;border:1px solid #ffffff35;border-radius:50%;background:#0008;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+#${ROOT_ID} .ssv-nav{position:absolute;z-index:8;top:82px;bottom:92px;width:34%;border:0;background:transparent;color:transparent;padding:0}
+#${ROOT_ID} .ssv-prev{left:0}
+#${ROOT_ID} .ssv-next{right:0}
+#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:0;padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px}
+#${ROOT_ID}.is-owner .ssv-bottom{display:none}
+#${ROOT_ID} .ssv-like{width:44px;height:44px;flex:0 0 44px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#090909b8;color:#fff;display:grid;place-items:center;font-size:23px;cursor:pointer;touch-action:manipulation}
+#${ROOT_ID} .ssv-like.is-liked{color:#ff3e55;border-color:#ff5b6c88;background:#2b0d12cc}
+#${ROOT_ID} .ssv-reply{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
+#${ROOT_ID} .ssv-reply input{min-width:0;flex:1;height:44px;border:1px solid #ffffff32;border-radius:999px;background:#0d0d0dc9;color:#fff;padding:0 15px;font-size:16px;outline:0}
+#${ROOT_ID} .ssv-reply input:focus{border-color:#d9a441}
+#${ROOT_ID} .ssv-send{height:44px;min-width:54px;padding:0 14px;border:0;border-radius:999px;background:#d9a441;color:#160f08;font-weight:950;cursor:pointer;touch-action:manipulation}
+#${ROOT_ID} .ssv-send:disabled,#${ROOT_ID} .ssv-like:disabled{opacity:.55;cursor:default}
+#${ROOT_ID} .ssv-feedback{position:absolute;z-index:25;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 62px));transform:translateX(-50%);max-width:calc(100% - 30px);padding:8px 11px;border-radius:999px;background:#17120fee;border:1px solid #d9a44155;color:#f2d093;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .16s ease}
+#${ROOT_ID} .ssv-feedback.show{opacity:1}
+@keyframes ssvProgress{from{width:0}to{width:100%}}
+@-webkit-keyframes ssvProgress{from{width:0}to{width:100%}}
+@media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100vw}#${ROOT_ID} .ssv-nav{bottom:86px}}
+@supports not (height:100dvh){#${ROOT_ID} .ssv-frame{height:100vh}}
+`;
+
+    document.head.appendChild(
+      style
+    );
+  }
+
+  function ensureRoot(){
+    injectStyle();
+
+    root=
+      document.getElementById(
+        ROOT_ID
+      );
+
+    if(root){
+      return root;
+    }
+
+    root=
+      document.createElement(
+        "div"
+      );
+
+    root.id=
+      ROOT_ID;
+
+    root.hidden=
+      true;
+
+    root.setAttribute(
+      "role",
+      "dialog"
+    );
+
+    root.setAttribute(
+      "aria-modal",
+      "true"
+    );
+
+    root.innerHTML=`
+      <div class="ssv-frame">
+        <div class="ssv-loading">Loading Story…</div>
+        <div class="ssv-media-host"></div>
+
+        <div class="ssv-top">
+          <div class="ssv-bars"></div>
+
+          <div class="ssv-head-row">
+
+            <button
+              type="button"
+              class="ssv-shop-avatar"
+              aria-label="Open shop page"
+            ></button>
+
+            <div class="ssv-copy">
+              <b class="ssv-name"></b>
+              <span class="ssv-status"></span>
+            </div>
+
+            <span
+              class="ssv-owner-views"
+              title="Story views"
+            >
+              ◉ <b>0</b>
+            </span>
+
+            <button
+              type="button"
+              class="ssv-close"
+              aria-label="Close Story"
+            >
+              ×
+            </button>
+
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="ssv-nav ssv-prev"
+          aria-label="Previous Story"
+        >
+          Previous
+        </button>
+
+        <button
+          type="button"
+          class="ssv-nav ssv-next"
+          aria-label="Next Story"
+        >
+          Next
+        </button>
+
+        <div class="ssv-bottom">
+
+          <button
+            type="button"
+            class="ssv-like"
+            aria-label="Like Story"
+          >
+            ♡
+          </button>
+
+          <form class="ssv-reply">
+
+            <input
+              maxlength="2000"
+              autocomplete="off"
+              placeholder="Reply to story…"
+              aria-label="Reply to Story"
+            >
+
+            <button
+              type="submit"
+              class="ssv-send"
+            >
+              Send
+            </button>
+
+          </form>
+
+        </div>
+
+        <div
+          class="ssv-feedback"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+      </div>
+    `;
+
+    document.body.appendChild(
+      root
+    );
+
+    root
+      .querySelector(
+        ".ssv-close"
+      )
+      .onclick=
+        ()=>
+          close();
+
+    root
+      .querySelector(
+        ".ssv-prev"
+      )
+      .onclick=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          previous();
+        };
+
+    root
+      .querySelector(
+        ".ssv-next"
+      )
+      .onclick=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          next();
+        };
+
+    root
+      .querySelector(
+        ".ssv-shop-avatar"
+      )
+      .onclick=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          goShop();
+        };
+
+    root
+      .querySelector(
+        ".ssv-like"
+      )
+      .onclick=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          likeCurrent();
+        };
+
+    root
+      .querySelector(
+        ".ssv-reply"
+      )
+      .onsubmit=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          replyCurrent();
+        };
+
+    root.addEventListener(
+      "touchstart",
+      event=>{
+
+        if(
+          event.target.closest(
+            "button,input,form"
+          )
+        ){
+          return;
+        }
+
+        touchX=
+          event.touches?.[0]?.clientX||
+          0;
+
+        touchY=
+          event.touches?.[0]?.clientY||
+          0;
+
+      },
+      {
+        passive:true
+      }
+    );
+
+    root.addEventListener(
+      "touchend",
+      event=>{
+
+        if(
+          event.target.closest(
+            "button,input,form"
+          )
+        ){
+          return;
+        }
+
+        const x=
+          event.changedTouches?.[0]?.clientX||
+          0;
+
+        const y=
+          event.changedTouches?.[0]?.clientY||
+          0;
+
+        const dx=
+          x-
+          touchX;
+
+        const dy=
+          y-
+          touchY;
+
+        if(
+          Math.abs(dx)>
+          65 &&
+          Math.abs(dx)>
+          Math.abs(dy)*
+          1.1
+        ){
+
+          if(dx<0){
+            next();
+          }
+          else{
+            previous();
+          }
+
+        }
+
+      },
+      {
+        passive:true
+      }
+    );
+
+    return root;
+  }
+
+  function flash(message){
+    const box=
+      ensureRoot()
+        .querySelector(
+          ".ssv-feedback"
+        );
+
+    box.textContent=
+      String(
+        message||
+        ""
+      );
+
+    box.classList.add(
+      "show"
+    );
+
+    clearTimeout(
+      box.__timer
+    );
+
+    box.__timer=
+      setTimeout(
+        ()=>
+          box.classList.remove(
+            "show"
+          ),
+        2200
+      );
+  }
+
+  function stopMedia(){
+    clearTimeout(
+      mediaTimer
+    );
+
+    mediaTimer=
+      0;
+
+    const video=
+      root?.querySelector(
+        ".ssv-media-host video"
+      );
+
+    if(video){
+      try{
+        video.pause();
+      }
+      catch(_){}
+    }
+  }
+
+  function exitFullscreen(){
+    try{
+      const active=
+        document.fullscreenElement||
+        document.webkitFullscreenElement;
+
+      if(
+        !active ||
+        active!==root
+      ){
+        return;
+      }
+
+      const exit=
+        document.exitFullscreen||
+        document.webkitExitFullscreen;
+
+      if(
+        typeof exit===
+        "function"
+      ){
+        const result=
+          exit.call(
+            document
+          );
+
+        if(
+          result &&
+          typeof result.catch===
+          "function"
+        ){
+          result.catch(
+            ()=>{}
+          );
+        }
+      }
+    }
+    catch(_){}
+  }
+
+  function close(fromHistory){
+    if(
+      !root ||
+      root.hidden
+    ){
+      return;
+    }
+
+    stopMedia();
+
+    loadToken++;
+
+    root.hidden=
+      true;
+
+    root.classList.remove(
+      "is-owner"
+    );
+
+    root
+      .querySelector(
+        ".ssv-media-host"
+      )
+      ?.replaceChildren();
+
+    document
+      .documentElement
+      .classList
+      .remove(
+        "ssv-open"
+      );
+
+    document
+      .body
+      ?.classList
+      .remove(
+        "ssv-open"
+      );
+
+    if(
+      storyChannel &&
+      getClient()
+        ?.removeChannel
+    ){
+      try{
+        getClient()
+          .removeChannel(
+            storyChannel
+          );
+      }
+      catch(_){}
+    }
+
+    storyChannel=
+      null;
+
+    exitFullscreen();
+
+    if(
+      !fromHistory &&
+      historyArmed &&
+      history.state
+        ?.shoufhonSharedStory
+    ){
+      historyArmed=
+        false;
+
+      history.back();
+    }
+    else{
+      historyArmed=
+        false;
+    }
+  }
+
+  function armHistory(){
+    try{
+      history.pushState(
+        {
+          ...history.state,
+          shoufhonSharedStory:true
+        },
+        ""
+      );
+
+      historyArmed=
+        true;
+    }
+    catch(_){
+      historyArmed=
+        false;
+    }
+  }
+
+  function requestFullscreen(){
+    try{
+      const request=
+        root?.requestFullscreen||
+        root?.webkitRequestFullscreen;
+
+      if(
+        typeof request===
+        "function"
+      ){
+        const result=
+          request.call(
+            root,
+            {
+              navigationUI:"hide"
+            }
+          );
+
+        if(
+          result &&
+          typeof result.catch===
+          "function"
+        ){
+          result.catch(
+            ()=>{}
+          );
+        }
+      }
+    }
+    catch(_){}
+  }
+
+  function markSeen(
+    slug,
+    list
+  ){
+    const latest=
+      (list||[])
+        .reduce(
+          (
+            best,
+            story
+          )=>
+            new Date(
+              story.created_at||
+              0
+            )>
+            new Date(
+              best||
+              0
+            )
+              ? story.created_at
+              : best,
+          ""
+        );
+
+    if(latest){
+      try{
+        localStorage.setItem(
+          "ma7alak_story_seen_"+
+          slug,
+          latest
+        );
+      }
+      catch(_){}
+    }
+
+    try{
+      window.dispatchEvent(
+        new CustomEvent(
+          "ma7alak:story-seen",
+          {
+            detail:{
+              shop_slug:
+                slug,
+              created_at:
+                latest
+            }
+          }
+        )
+      );
+    }
+    catch(_){}
+  }
+
+  async function ownerFor(slug){
+    const known=
+      String(
+        window
+          .Ma7alakOwnerAuth
+          ?.owner
+          ?.shop_slug||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if(known){
+      return (
+        known===
+        String(
+          slug||
+          ""
+        )
+          .trim()
+          .toLowerCase()
+      );
+    }
+
+    const c=
+      getClient();
+
+    if(
+      !c?.auth
+    ){
+      return false;
+    }
+
+    try{
+      const user=
+        (
+          await c
+            .auth
+            .getUser()
+        )
+          .data
+          ?.user;
+
+      if(!user){
+        return false;
+      }
+
+      const result=
+        await c
+          .from(
+            "shop_owners"
+          )
+          .select(
+            "shop_slug"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .eq(
+            "shop_slug",
+            slug
+          )
+          .maybeSingle();
+
+      return (
+        !result.error &&
+        !!result.data
+      );
+    }
+    catch(_){
+      return false;
+    }
+  }
+
+  function shopTarget(){
+    const raw=
+      String(
+        profile?.shop_url||
+        ""
+      ).trim();
+
+    if(raw){
+      return raw;
+    }
+
+    const slug=
+      String(
+        profile?.shop_slug||
+        stories[currentIndex]
+          ?.shop_slug||
+        ""
+      ).trim();
+
+    return slug
+      ? (
+          "/"+
+          encodeURIComponent(
+            slug
+          )
+        )
+      : "/";
+  }
+
+  function renderHeader(){
+    if(!root){
+      return;
+    }
+
+    const story=
+      stories[
+        currentIndex
+      ]||
+      {};
+
+    const slug=
+      String(
+        story.shop_slug||
+        profile?.shop_slug||
+        ""
+      );
+
+    const name=
+      String(
+        profile?.shop_name||
+        slug||
+        "Story"
+      );
+
+    const image=
+      String(
+        profile?.story_logo_url||
+        profile?.profile_image_url||
+        ""
+      ).trim();
+
+    const avatar=
+      root.querySelector(
+        ".ssv-shop-avatar"
+      );
+
+    avatar.innerHTML=
+      image
+        ? (
+            '<img src="'+
+            esc(
+              image
+            )+
+            '" alt="">'
+          )
+        : (
+            "<span>"+
+            esc(
+              name
+                .slice(
+                  0,
+                  1
+                )
+                .toUpperCase()
+            )+
+            "</span>"
+          );
+
+    root
+      .querySelector(
+        ".ssv-name"
+      )
+      .textContent=
+        name;
+
+    root
+      .querySelector(
+        ".ssv-status"
+      )
+      .textContent=
+        String(
+          story.status_text||
+          ""
+        );
+
+    root.classList.toggle(
+      "is-owner",
+      currentOwner
+    );
+
+    const liked=
+      isLocallyLiked(
+        story.id
+      );
+
+    const like=
+      root.querySelector(
+        ".ssv-like"
+      );
+
+    like.classList.toggle(
+      "is-liked",
+      liked
+    );
+
+    like.textContent=
+      liked
+        ? "♥"
+        : "♡";
+
+    like.disabled=
+      currentOwner;
+
+    root
+      .querySelector(
+        ".ssv-reply input"
+      )
+      .disabled=
+        currentOwner;
+
+    root
+      .querySelector(
+        ".ssv-send"
+      )
+      .disabled=
+        currentOwner;
+  }
+
+  function renderBars(duration){
+    const box=
+      root.querySelector(
+        ".ssv-bars"
+      );
+
+    box.innerHTML=
+      stories
+        .map(
+          (
+            _,
+            index
+          )=>
+            (
+              '<span class="ssv-bar '+
+              (
+                index<
+                currentIndex
+                  ? "done"
+                  : (
+                      index===
+                      currentIndex
+                        ? "active"
+                        : ""
+                    )
+              )+
+              '"><i></i></span>'
+            )
+        )
+        .join("");
+
+    box.style.setProperty(
+      "--ssv-duration",
+      Math.max(
+        .5,
+        duration||
+        6
+      )+
+      "s"
+    );
+  }
+
+  async function recordView(story){
+    const c=
+      getClient();
+
+    if(
+      !c ||
+      !story?.id
+    ){
+      return;
+    }
+
+    try{
+      await c.rpc(
+        "record_story_view_secure",
+        {
+          p_story_id:
+            Number(
+              story.id
+            ),
+          p_shop_slug:
+            String(
+              story.shop_slug||
+              ""
+            ),
+          p_visitor_id:
+            visitorId(),
+          p_interaction_token:
+            interactionToken()
+        }
+      );
+
+      if(currentOwner){
+
+        const result=
+          await c.rpc(
+            "get_story_view_count",
+            {
+              p_story_id:
+                Number(
+                  story.id
+                ),
+              p_shop_slug:
+                String(
+                  story.shop_slug||
+                  ""
+                )
+            }
+          );
+
+        if(
+          !result.error &&
+          root &&
+          !root.hidden &&
+          String(
+            stories[
+              currentIndex
+            ]?.id
+          )===
+          String(
+            story.id
+          )
+        ){
+
+          root
+            .querySelector(
+              ".ssv-owner-views b"
+            )
+            .textContent=
+              String(
+                Number(
+                  result.data
+                )||
+                0
+              );
+
+        }
+      }
+    }
+    catch(error){
+      console.warn(
+        "ShoufHon Story view:",
+        error
+      );
+    }
+  }
+
+  async function likeCurrent(){
+    if(currentOwner){
+      return;
+    }
+
+    const story=
+      stories[
+        currentIndex
+      ];
+
+    if(
+      !story?.id
+    ){
+      return;
+    }
+
+    const button=
+      root.querySelector(
+        ".ssv-like"
+      );
+
+    button.disabled=
+      true;
+
+    try{
+      const c=
+        getClient();
+
+      if(!c){
+        throw new Error(
+          "Connection unavailable."
+        );
+      }
+
+      const result=
+        await c.rpc(
+          "like_story_secure",
+          {
+            p_story_id:
+              Number(
+                story.id
+              ),
+            p_visitor_id:
+              visitorId(),
+            p_interaction_token:
+              interactionToken()
+          }
+        );
+
+      if(result.error){
+        throw result.error;
+      }
+
+      const data=
+        result.data||
+        {};
+
+      if(
+        data.blocked &&
+        !data.success
+      ){
+        throw new Error(
+          data.message||
+          "Could not like Story."
+        );
+      }
+
+      if(
+        data.success!==
+        false
+      ){
+        markLocallyLiked(
+          story.id
+        );
+
+        button.classList.add(
+          "is-liked"
+        );
+
+        button.textContent=
+          "♥";
+
+        flash(
+          data.already_liked
+            ? "Already liked"
+            : "Story liked ♥"
+        );
+      }
+      else{
+        throw new Error(
+          data.message||
+          "Could not like Story."
+        );
+      }
+    }
+    catch(error){
+      flash(
+        error?.message||
+        "Could not like Story."
+      );
+    }
+    finally{
+      button.disabled=
+        currentOwner;
+    }
+  }
+
+  function siblingUrl(file){
+    try{
+      return new URL(
+        file,
+        SCRIPT_SRC||
+        location.href
+      ).href;
+    }
+    catch(_){
+      return file;
+    }
+  }
+
+  async function ensureChat(){
+    if(
+      window.Ma7alakChat
+        ?.sendStoryReply
+    ){
+      return window.Ma7alakChat;
+    }
+
+    if(
+      window
+        .__shoufhonChatLoadingPromise
+    ){
+      return window
+        .__shoufhonChatLoadingPromise;
+    }
+
+    window
+      .__shoufhonChatLoadingPromise=
+        new Promise(
+          function(resolve){
+
+            const existing=
+              Array.from(
+                document.scripts
+              )
+                .find(
+                  function(script){
+                    return /ma7alak-chat\.js(?:$|[?#])/.test(
+                      script.src||
+                      ""
+                    );
+                  }
+                );
+
+            if(existing){
+
+              let tries=0;
+
+              const wait=
+                function(){
+
+                  if(
+                    window
+                      .Ma7alakChat
+                      ?.sendStoryReply
+                  ){
+                    resolve(
+                      window
+                        .Ma7alakChat
+                    );
+                    return;
+                  }
+
+                  tries++;
+
+                  if(
+                    tries<
+                    100
+                  ){
+                    setTimeout(
+                      wait,
+                      50
+                    );
+                  }
+                  else{
+                    resolve(
+                      null
+                    );
+                  }
+
+                };
+
+              wait();
+
+              return;
+            }
+
+            const script=
+              document.createElement(
+                "script"
+              );
+
+            script.src=
+              siblingUrl(
+                "ma7alak-chat.js"
+              );
+
+            script.onload=
+              function(){
+                resolve(
+                  window
+                    .Ma7alakChat||
+                  null
+                );
+              };
+
+            script.onerror=
+              function(){
+                resolve(
+                  null
+                );
+              };
+
+            document
+              .head
+              .appendChild(
+                script
+              );
+
+          }
+        );
+
+    return window
+      .__shoufhonChatLoadingPromise;
+  }
+
+  async function replyCurrent(){
+    if(currentOwner){
+      return;
+    }
+
+    const story=
+      stories[
+        currentIndex
+      ];
+
+    const input=
+      root.querySelector(
+        ".ssv-reply input"
+      );
+
+    const send=
+      root.querySelector(
+        ".ssv-send"
+      );
+
+    const body=
+      String(
+        input.value||
+        ""
+      ).trim();
+
+    if(!body){
+      flash(
+        "Write a reply first."
+      );
+      return;
+    }
+
+    send.disabled=
+      true;
+
+    try{
+      const chat=
+        await ensureChat();
+
+      if(
+        !chat?.sendStoryReply
+      ){
+        throw new Error(
+          "Messages are unavailable right now."
+        );
+      }
+
+      const result=
+        await chat
+          .sendStoryReply({
+            story_id:
+              Number(
+                story.id
+              ),
+            shop_slug:
+              String(
+                story.shop_slug||
+                ""
+              ),
+            body:
+              body
+          });
+
+      if(
+        result?.ok
+      ){
+        input.value=
+          "";
+
+        flash(
+          "Reply sent ✓"
+        );
+
+        return;
+      }
+
+      if(
+        result
+          ?.login_required
+      ){
+        close();
+
+        setTimeout(
+          ()=>
+            window
+              .Ma7alakAccount
+              ?.open?.(),
+          100
+        );
+
+        return;
+      }
+
+      throw new Error(
+        result?.error||
+        "Could not send reply."
+      );
+    }
+    catch(error){
+      flash(
+        error?.message||
+        "Could not send reply."
+      );
+    }
+    finally{
+      if(
+        root &&
+        !root.hidden
+      ){
+        send.disabled=
+          currentOwner;
+      }
+    }
+  }
+
+  function goShop(){
+    const target=
+      shopTarget();
+
+    close(
+      true
+    );
+
+    setTimeout(
+      ()=>{
+        try{
+          window.location.href=
+            new URL(
+              target,
+              window.location.origin
+            ).toString();
+        }
+        catch(_){
+          window.location.href=
+            target;
+        }
+      },
+      40
+    );
+  }
+
+  function next(){
+    if(
+      currentIndex+
+      1>=
+      stories.length
+    ){
+      close();
+      return;
+    }
+
+    currentIndex++;
+
+    showCurrent();
+  }
+
+  function previous(){
+    if(
+      currentIndex<=
+      0
+    ){
+      currentIndex=
+        0;
+
+      showCurrent();
+
+      return;
+    }
+
+    currentIndex--;
+
+    showCurrent();
+  }
+
+  function showCurrent(){
+    stopMedia();
+
+    let story=
+      stories[
+        currentIndex
+      ];
+
+    if(
+      !story ||
+      new Date(
+        story.expires_at||
+        0
+      ).getTime()<=
+      Date.now()
+    ){
+
+      stories=
+        stories.filter(
+          item=>
+            new Date(
+              item.expires_at||
+              0
+            ).getTime()>
+            Date.now()
+        );
+
+      if(
+        !stories.length
+      ){
+        close();
+        return;
+      }
+
+      currentIndex=
+        Math.min(
+          currentIndex,
+          stories.length-
+          1
+        );
+
+      story=
+        stories[
+          currentIndex
+        ];
+    }
+
+    const host=
+      root.querySelector(
+        ".ssv-media-host"
+      );
+
+    const loading=
+      root.querySelector(
+        ".ssv-loading"
+      );
+
+    loading.hidden=
+      false;
+
+    host.replaceChildren();
+
+    renderHeader();
+
+    const url=
+      mediaUrl(
+        story
+      );
+
+    if(
+      !/^https:\/\//i.test(
+        url
+      )
+    ){
+      flash(
+        "Story media is unavailable."
+      );
+
+      next();
+
+      return;
+    }
+
+    const media=
+      document.createElement(
+        story.media_type===
+        "video"
+          ? "video"
+          : "img"
+      );
+
+    media.className=
+      "ssv-media";
+
+    media.src=
+      url;
+
+    if(
+      media.tagName===
+      "VIDEO"
+    ){
+
+      media.autoplay=
+        true;
+
+      media.playsInline=
+        true;
+
+      media.controls=
+        false;
+
+      media.preload=
+        "auto";
+
+      media.onloadedmetadata=
+        ()=>{
+
+          const duration=
+            Math.max(
+              .6,
+              Math.min(
+                30,
+                Number(
+                  media.duration
+                )||
+                15
+              )
+            );
+
+          renderBars(
+            duration
+          );
+
+          loading.hidden=
+            true;
+
+        };
+
+      media.onended=
+        next;
+
+      media.onerror=
+        next;
+
+      host.appendChild(
+        media
+      );
+
+      renderBars(
+        15
+      );
+
+      loading.hidden=
+        true;
+
+      media
+        .play()
+        .catch(
+          ()=>{
+            media.controls=
+              true;
+          }
+        );
+
+      mediaTimer=
+        setTimeout(
+          next,
+          30000
+        );
+
+    }
+    else{
+
+      media.onload=
+        ()=>{
+          loading.hidden=
+            true;
+        };
+
+      media.onerror=
+        next;
+
+      host.appendChild(
+        media
+      );
+
+      renderBars(
+        6
+      );
+
+      mediaTimer=
+        setTimeout(
+          next,
+          6000
+        );
+
+    }
+
+    recordView(
+      story
+    );
+  }
+
+  async function loadStories(slug){
+    const c=
+      getClient();
+
+    if(!c){
+      throw new Error(
+        "Connection unavailable."
+      );
+    }
+
+    const [
+      storyResult,
+      profileResult
+    ]=
+      await Promise.all([
+        c
+          .from(
+            "shop_stories"
+          )
+          .select(
+            "id,shop_slug,media_type,storage_path,status_text,created_at,expires_at"
+          )
+          .eq(
+            "shop_slug",
+            slug
+          )
+          .gt(
+            "expires_at",
+            new Date()
+              .toISOString()
+          )
+          .order(
+            "created_at",
+            {
+              ascending:true
+            }
+          ),
+
+        c
+          .from(
+            "shop_profiles"
+          )
+          .select(
+            "shop_slug,shop_name,profile_image_url,story_logo_url,shop_url"
+          )
+          .eq(
+            "shop_slug",
+            slug
+          )
+          .maybeSingle()
+      ]);
+
+    if(
+      storyResult.error
+    ){
+      throw storyResult.error;
+    }
+
+    if(
+      profileResult.error
+    ){
+      throw profileResult.error;
+    }
+
+    return {
+      stories:
+        storyResult.data||
+        [],
+      profile:
+        profileResult.data||
+        {
+          shop_slug:
+            slug
+        }
+    };
+  }
+
+  function subscribe(slug){
+    const c=
+      getClient();
+
+    if(
+      storyChannel &&
+      c?.removeChannel
+    ){
+      try{
+        c.removeChannel(
+          storyChannel
+        );
+      }
+      catch(_){}
+    }
+
+    storyChannel=
+      null;
+
+    if(
+      !c?.channel
+    ){
+      return;
+    }
+
+    try{
+      storyChannel=
+        c
+          .channel(
+            "ssv-"+
+            slug+
+            "-"+
+            Math
+              .random()
+              .toString(36)
+              .slice(2)
+          )
+          .on(
+            "postgres_changes",
+            {
+              event:"*",
+              schema:"public",
+              table:"shop_stories",
+              filter:
+                "shop_slug=eq."+
+                slug
+            },
+            ()=>{
+
+              if(
+                root?.hidden
+              ){
+                return;
+              }
+
+              reloadOpen(
+                slug,
+                stories[
+                  currentIndex
+                ]?.id
+              );
+
+            }
+          )
+          .subscribe();
+    }
+    catch(_){}
+  }
+
+  async function reloadOpen(
+    slug,
+    storyId
+  ){
+    const token=
+      ++loadToken;
+
+    try{
+      const data=
+        await loadStories(
+          slug
+        );
+
+      if(
+        token!==
+        loadToken ||
+        root?.hidden
+      ){
+        return;
+      }
+
+      stories=
+        data.stories;
+
+      profile=
+        data.profile;
+
+      if(
+        !stories.length
+      ){
+        close();
+        return;
+      }
+
+      const target=
+        stories.findIndex(
+          story=>
+            String(
+              story.id
+            )===
+            String(
+              storyId
+            )
+        );
+
+      currentIndex=
+        target>=0
+          ? target
+          : Math.min(
+              currentIndex,
+              stories.length-
+              1
+            );
+
+      currentOwner=
+        await ownerFor(
+          slug
+        );
+
+      if(
+        token!==
+        loadToken ||
+        root?.hidden
+      ){
+        return;
+      }
+
+      showCurrent();
+    }
+    catch(_){}
+  }
+
+  async function open(input){
+    input=
+      input||
+      {};
+
+    const slug=
+      String(
+        input.shopSlug||
+        input.shop_slug||
+        ""
+      ).trim();
+
+    const storyId=
+      String(
+        input.storyId??
+        input.story_id??
+        ""
+      ).trim();
+
+    if(!slug){
+      return false;
+    }
+
+    ensureRoot();
+
+    root.hidden=
+      false;
+
+    root.classList.remove(
+      "is-owner"
+    );
+
+    root
+      .querySelector(
+        ".ssv-loading"
+      )
+      .hidden=
+        false;
+
+    root
+      .querySelector(
+        ".ssv-media-host"
+      )
+      .replaceChildren();
+
+    document
+      .documentElement
+      .classList
+      .add(
+        "ssv-open"
+      );
+
+    document
+      .body
+      ?.classList
+      .add(
+        "ssv-open"
+      );
+
+    if(
+      !historyArmed
+    ){
+      armHistory();
+    }
+
+    /*
+      Request immediately, before any await, so a direct mobile tap can
+      enter browser fullscreen when supported.
+    */
+    requestFullscreen();
+
+    const token=
+      ++loadToken;
+
+    try{
+      const data=
+        await loadStories(
+          slug
+        );
+
+      if(
+        token!==
+        loadToken ||
+        root.hidden
+      ){
+        return false;
+      }
+
+      stories=
+        data.stories;
+
+      profile=
+        data.profile;
+
+      if(
+        !stories.length
+      ){
+        flash(
+          "This Story is no longer available."
+        );
+
+        setTimeout(
+          ()=>close(),
+          700
+        );
+
+        return false;
+      }
+
+      let targetIndex=
+        storyId
+          ? stories.findIndex(
+              story=>
+                String(
+                  story.id
+                )===
+                storyId
+            )
+          : -1;
+
+      if(
+        targetIndex<
+        0 &&
+        input.preferUnseen!==
+        false
+      ){
+
+        let seenAt=
+          0;
+
+        try{
+          seenAt=
+            new Date(
+              localStorage.getItem(
+                "ma7alak_story_seen_"+
+                slug
+              )||
+              0
+            )
+              .getTime()||
+            0;
+        }
+        catch(_){}
+
+        targetIndex=
+          stories.findIndex(
+            story=>
+              new Date(
+                story.created_at||
+                0
+              )
+                .getTime()>
+              seenAt
+          );
+
+      }
+
+      currentIndex=
+        targetIndex>=
+        0
+          ? targetIndex
+          : 0;
+
+      currentOwner=
+        await ownerFor(
+          slug
+        );
+
+      if(
+        token!==
+        loadToken ||
+        root.hidden
+      ){
+        return false;
+      }
+
+      markSeen(
+        slug,
+        stories
+      );
+
+      subscribe(
+        slug
+      );
+
+      showCurrent();
+
+      return true;
+    }
+    catch(error){
+
+      console.warn(
+        "ShoufHon shared Story viewer:",
+        error
+      );
+
+      flash(
+        "Could not load this Story."
+      );
+
+      setTimeout(
+        ()=>close(),
+        900
+      );
+
+      return false;
+    }
+  }
+
+  window.addEventListener(
+    "popstate",
+    ()=>{
+      if(
+        root &&
+        !root.hidden
+      ){
+        close(
+          true
+        );
+      }
+    }
+  );
+
+  document.addEventListener(
+    "keydown",
+    event=>{
+      if(
+        event.key===
+        "Escape" &&
+        root &&
+        !root.hidden
+      ){
+        close();
+      }
+    }
+  );
+
+  window.addEventListener(
+    "message",
+    event=>{
+      const data=
+        event.data;
+
+      if(
+        data?.type===
+        "SHOUFHON_OPEN_STORY_BY_ID"
+      ){
+        open({
+          shopSlug:
+            data.shopSlug||
+            data.shop_slug,
+          storyId:
+            data.storyId||
+            data.story_id,
+          preferUnseen:
+            false
+        });
+      }
+    }
+  );
+
+  window.ShoufHonStoryViewer={
+    open:open,
+    openStory:
+      (
+        shopSlug,
+        storyId
+      )=>
+        open({
+          shopSlug:
+            shopSlug,
+          storyId:
+            storyId,
+          preferUnseen:
+            false
+        }),
+    openShop:
+      shopSlug=>
+        open({
+          shopSlug:
+            shopSlug,
+          preferUnseen:
+            true
+        }),
+    close:close,
+    isOpen:
+      ()=>
+        !!root &&
+        !root.hidden
+  };
+})();
