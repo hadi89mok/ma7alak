@@ -1,0 +1,21 @@
+{
+  "appId": "com.shoufhon.app",
+  "appName": "ShoufHon",
+  "webDir": "www",
+  "server": {
+    "url": "https://shoufhon.com",
+    "cleartext": false
+  },
+  "android": {
+    "backgroundColor": "#090503"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 900,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 250,
+      "backgroundColor": "#090503",
+      "showSpinner": false
+    }
+  }
+}
