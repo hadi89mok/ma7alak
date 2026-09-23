@@ -22,7 +22,7 @@ function css(){if(document.getElementById("m7c-v8-css"))return;document.getEleme
 #m7-owner-accept{border:1px solid #ffffff18;border-radius:10px;padding:8px 9px;font:800 10px Arial;cursor:pointer;white-space:nowrap}#m7-owner-accept.on{background:#24452e;color:#bff1cb}#m7-owner-accept.off{background:#522b27;color:#ffd0ca}
 #m7-chat-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:9px;overscroll-behavior:contain}
 .m7-msg{max-width:78%;padding:10px 12px;border-radius:16px;background:#29231f;line-height:1.35;word-break:break-word;position:relative}.m7-msg.mine{align-self:flex-end;background:#a96d28;padding-right:34px}.m7-msg-text{white-space:pre-wrap}.m7-msg-time{font-size:10px;opacity:.6;margin-top:4px}.m7-msg-delete{position:absolute;right:5px;top:5px;width:25px;height:25px;border:0;border-radius:8px;background:#0003;color:#fff;display:grid;place-items:center;font-size:14px;cursor:pointer;padding:0}
-.m7-story-reply-card{width:min(260px,100%);margin:0 0 8px;padding:0;border:1px solid #ffffff22;border-radius:14px;overflow:hidden;background:#0f0d0c;color:#fff;text-align:left;cursor:pointer;display:block;box-shadow:0 8px 22px #0004}.m7-story-reply-card:active{transform:scale(.985)}.m7-story-card-top{display:flex;gap:10px;align-items:center;padding:8px}.m7-story-card-media{width:62px;height:78px;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#2c241e,#0d0b0a);display:grid;place-items:center;position:relative;flex:0 0 62px;border:1px solid #ffffff17}.m7-story-card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.m7-story-card-fallback{font-size:24px;opacity:.75}.m7-story-card-play{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0009;border:1px solid #fff5;font-size:16px;padding-left:2px}.m7-story-card-copy{min-width:0;flex:1}.m7-story-card-label{font-size:11px;font-weight:900;color:#efb35d;letter-spacing:.02em}.m7-story-card-name{margin-top:4px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-status{margin-top:4px;font-size:11px;color:#bdb3aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-badge{display:inline-flex;margin-top:6px;padding:3px 6px;border-radius:999px;background:#4a211f;color:#ffb9b1;font-size:9px;font-weight:900}.m7-story-reply-card.is-expired{cursor:default;opacity:.72}.m7-story-reply-card.is-expired .m7-story-card-label{color:#c7b8aa}
+.m7-story-reply-card{width:min(260px,100%);margin:0 0 8px;padding:0;border:1px solid #ffffff22;border-radius:14px;overflow:hidden;background:#0f0d0c;color:#fff;text-align:left;cursor:pointer;display:block;box-shadow:0 8px 22px #0004}.m7-story-reply-card:active{transform:scale(.985)}.m7-story-card-top{display:flex;gap:10px;align-items:center;padding:8px}.m7-story-card-media{width:62px;height:78px;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#2c241e,#0d0b0a);display:grid;place-items:center;position:relative;flex:0 0 62px;border:1px solid #ffffff17}.m7-story-card-media img,.m7-story-card-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.m7-story-card-media video{background:#18130f}.m7-story-card-fallback{font-size:24px;opacity:.75}.m7-story-card-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0009;border:1px solid #fff5;font-size:16px;padding-left:2px;box-shadow:0 3px 10px #0008}.m7-story-card-copy{min-width:0;flex:1}.m7-story-card-label,.m7-story-card-name,.m7-story-card-status{display:block}.m7-story-card-label{font-size:11px;font-weight:900;color:#efb35d;letter-spacing:.02em}.m7-story-card-name{margin-top:4px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-status{margin-top:4px;font-size:11px;color:#bdb3aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-badge{display:inline-flex;margin-top:6px;padding:3px 6px;border-radius:999px;background:#4a211f;color:#ffb9b1;font-size:9px;font-weight:900}.m7-story-reply-card.is-expired{cursor:default;opacity:.72}.m7-story-reply-card.is-expired .m7-story-card-label{color:#c7b8aa}
 #m7-chat-send{display:flex;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#171310;border-top:1px solid #34261e;flex:0 0 auto}#m7-chat-input{flex:1;min-width:0;border:1px solid #453327;background:#0e0c0b;color:#fff;border-radius:14px;padding:12px;font-size:16px}#m7-chat-send button{border:0;border-radius:14px;background:#d99a45;font-weight:900;padding:0 17px}
 .m7-convo{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #34281f;border-radius:16px;background:#191512;cursor:pointer;position:relative;flex:0 0 auto}.m7-convo.unread{border-color:#e7a84f;background:linear-gradient(135deg,#332215,#1a1512);box-shadow:0 0 0 1px #e7a84f22}.m7-convo-copy{min-width:0;flex:1}.m7-convo strong{color:#f1b45a}.m7-convo small{display:block;color:#aaa;margin-top:4px}.m7-convo-delete{border:0;border-radius:10px;width:34px;height:34px;background:#3b1f1c;color:#ffb0a7;font-size:16px;cursor:pointer;flex:0 0 34px}.m7-new{background:#e58f25;color:#fff;font-size:9px;font-weight:900;border-radius:999px;padding:5px 7px}.m7-empty{text-align:center;color:#aaa;margin-top:30px}.m7-loading{text-align:center;color:#b7aa9d;margin-top:25px}.m7-error{text-align:center;color:#ffb3a8;margin:25px 12px;line-height:1.45}
 #m7-chat.m7-inbox-panel{height:min(500px,calc(100dvh - 120px));max-height:min(500px,calc(100dvh - 120px))}
@@ -65,8 +65,10 @@ function cleanPath(path){path=String(path||"");while(path.length>1&&path.endsWit
 function storyExpired(ctx){const x=ctx&&ctx.story_expires_at;if(!x)return false;const t=new Date(x).getTime();return Number.isFinite(t)&&t<=Date.now()}
 function storyCardHtml(m){
   if(String(m?.message_type||"")!=="story_reply")return"";
-  const ctx=storyCtx(m),storyId=String(m?.reply_story_id??ctx.story_id??"").trim(),slug=String(ctx.shop_slug||"").trim(),shopUrl=String(ctx.shop_url||"").trim(),expires=String(ctx.story_expires_at||"").trim(),mediaType=String(ctx.media_type||"").trim().toLowerCase(),storagePath=String(ctx.storage_path||"").trim(),status=String(ctx.status_text||"").trim(),shopName=String(ctx.shop_name||slug||"Story").trim(),expired=storyExpired(ctx),imageUrl=mediaType==="image"?storyMediaUrl(storagePath):"";
-  const visual=mediaType==="video"?'<span class="m7-story-card-play" aria-hidden="true">▶</span>':(imageUrl?'<span class="m7-story-card-fallback" aria-hidden="true">▧</span><img loading="lazy" decoding="async" data-story-thumb src="'+esc(imageUrl)+'" alt="">':'<span class="m7-story-card-fallback" aria-hidden="true">▧</span>');
+  const ctx=storyCtx(m),storyId=String(m?.reply_story_id??ctx.story_id??"").trim(),slug=String(ctx.shop_slug||"").trim(),shopUrl=String(ctx.shop_url||"").trim(),expires=String(ctx.story_expires_at||"").trim(),mediaType=String(ctx.media_type||"").trim().toLowerCase(),storagePath=String(ctx.storage_path||"").trim(),status=String(ctx.status_text||"").trim(),shopName=String(ctx.shop_name||slug||"Story").trim(),expired=storyExpired(ctx),mediaUrl=storyMediaUrl(storagePath),imageUrl=mediaType==="image"?mediaUrl:"";
+  const visual=mediaType==="video"&&mediaUrl
+    ? '<video muted playsinline preload="none" data-story-video-preview data-story-video-src="'+esc(mediaUrl)+'"></video><span class="m7-story-card-play" aria-hidden="true">▶</span>'
+    : (imageUrl?'<span class="m7-story-card-fallback" aria-hidden="true">▧</span><img loading="lazy" decoding="async" data-story-thumb src="'+esc(imageUrl)+'" alt="">':'<span class="m7-story-card-fallback" aria-hidden="true">▧</span>');
   return '<button type="button" class="m7-story-reply-card '+(expired?"is-expired":"")+'" data-story-open="'+esc(storyId)+'" data-story-shop="'+esc(slug)+'" data-story-url="'+esc(shopUrl)+'" data-story-expires="'+esc(expires)+'" '+(expired?'aria-disabled="true"':'')+'><span class="m7-story-card-top"><span class="m7-story-card-media">'+visual+'</span><span class="m7-story-card-copy"><span class="m7-story-card-label">Replied to story</span><span class="m7-story-card-name">'+esc(shopName)+'</span>'+(status?'<span class="m7-story-card-status">'+esc(status)+'</span>':"")+(expired?'<span class="m7-story-card-badge">Story expired</span>':"")+'</span></span></button>';
 }
 async function openStoryFromMessage(button){
@@ -95,6 +97,42 @@ async function openStoryFromMessage(button){
 function wireStoryCards(b){
   b.querySelectorAll("[data-story-open]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();openStoryFromMessage(btn)});
   b.querySelectorAll("[data-story-thumb]").forEach(img=>img.addEventListener("error",()=>{img.style.display="none"},{once:true}));
+
+  const videos=[...b.querySelectorAll("[data-story-video-preview]")];
+  const prime=video=>{
+    if(!video||video.dataset.previewPrimed==="1")return;
+    const src=String(video.dataset.storyVideoSrc||"").trim();
+    if(!src)return;
+    video.dataset.previewPrimed="1";
+    video.preload="metadata";
+    video.src=src;
+
+    const seekFirstFrame=()=>{
+      try{
+        const duration=Number(video.duration||0);
+        const target=duration>0?Math.min(.18,Math.max(.03,duration*.015)):.06;
+        if(Math.abs(Number(video.currentTime||0)-target)>.01)video.currentTime=target;
+      }catch(_){}
+    };
+    video.addEventListener("loadedmetadata",seekFirstFrame,{once:true});
+    video.addEventListener("loadeddata",()=>{try{video.pause()}catch(_){}},{once:true});
+    video.addEventListener("error",()=>{video.style.display="none"},{once:true});
+    try{video.load()}catch(_){}
+  };
+
+  if("IntersectionObserver" in window){
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          prime(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    },{root:b,rootMargin:"120px 0px"});
+    videos.forEach(video=>observer.observe(video));
+  }else{
+    videos.slice(0,4).forEach(prime);
+  }
 }
 async function sendStoryReply(input){
   const storyId=Number(input?.story_id??input?.storyId),body=String(input?.body||"").trim(),slug=String(input?.shop_slug??input?.shopSlug??"").trim();
