@@ -2751,14 +2751,10 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
   }
 
-  function setCurrentReelIds(ids){
+  function setCurrentReelIds(ids,authoritative){
     const normalized=normalizeReelIds(ids);
 
-    /*
-      Never wipe a valid Reel state with an empty/late response.
-      Hostinger pages can contain several embeds and delayed messages.
-    */
-    if(!normalized.length){
+    if(!normalized.length&&!authoritative){
       return;
     }
 
@@ -2796,18 +2792,24 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
         reel.querySelector(".ma7alak-video");
 
       const source =
-        video
-          ? (
-              video.currentSrc ||
-              video.getAttribute("src") ||
-              (
-                video.querySelector("source")
-                  ? video.querySelector("source").getAttribute("src")
-                  : ""
-              ) ||
-              ""
-            )
-          : "";
+        String(
+          reel.getAttribute("data-video-url") ||
+          (
+            video
+              ? (
+                  video.currentSrc ||
+                  video.getAttribute("src") ||
+                  (
+                    video.querySelector("source")
+                      ? video.querySelector("source").getAttribute("src")
+                      : ""
+                  ) ||
+                  ""
+                )
+              : ""
+          ) ||
+          ""
+        ).trim();
 
       const shopUrl =
         String(
@@ -2842,6 +2844,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       const id = String(reel.getAttribute("data-reel-id") || "").trim();
       const videoUrl = String(
+        reel.getAttribute("data-video-url") ||
         (video && (video.currentSrc || video.getAttribute("src"))) ||
         (sourceEl && sourceEl.getAttribute("src")) ||
         ""
@@ -2875,6 +2878,220 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
         }
         catch(error){}
       }
+    );
+  }
+
+  let headerReelsCatalogLoading=false;
+  let headerReelsCatalogQueued=false;
+  let headerReelsCatalogReady=false;
+  let headerReelsCatalogChannel=null;
+  let headerReelsRetryTimer=null;
+  let headerReelsRetryIndex=0;
+  const HEADER_REELS_RETRY_DELAYS=[250,700,1600,3200,6500];
+
+  function scheduleHeaderReelsRetry(){
+    clearTimeout(headerReelsRetryTimer);
+
+    const delay=
+      HEADER_REELS_RETRY_DELAYS[
+        Math.min(
+          headerReelsRetryIndex++,
+          HEADER_REELS_RETRY_DELAYS.length-1
+        )
+      ];
+
+    headerReelsRetryTimer=setTimeout(
+      function(){
+        if(!document.hidden){
+          loadHeaderReelsCatalog();
+        }
+      },
+      delay
+    );
+  }
+
+  function normalizeHeaderReelRows(rows){
+    return (Array.isArray(rows)?rows:[])
+      .map(function(row){
+        if(!row){return null;}
+
+        const id=String(row.reel_id||"").trim();
+        const video=String(row.video_url||"").trim();
+
+        if(!id||!/^https?:\/\//i.test(video)){
+          return null;
+        }
+
+        return {
+          id:id,
+          shop:String(row.shop_name||row.shop_slug||"Shop").trim(),
+          shopUrl:String(row.shop_url||"").trim(),
+          icon:String(row.shop_icon||"").trim(),
+          video:video
+        };
+      })
+      .filter(Boolean);
+  }
+
+  async function loadHeaderReelsCatalog(){
+    if(headerReelsCatalogLoading){
+      headerReelsCatalogQueued=true;
+      return false;
+    }
+
+    const supabaseClient=getClient();
+
+    if(!supabaseClient){
+      scheduleHeaderReelsRetry();
+      return false;
+    }
+
+    headerReelsCatalogLoading=true;
+
+    try{
+      let timeoutId=null;
+
+      const result=await Promise.race([
+        supabaseClient
+          .from("shop_reels")
+          .select("reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,active,created_at")
+          .eq("active",true)
+          .order("created_at",{ascending:false}),
+        new Promise(function(_,reject){
+          timeoutId=setTimeout(
+            function(){
+              reject(
+                new Error(
+                  "Header Reels refresh timed out"
+                )
+              );
+            },
+            8000
+          );
+        })
+      ]).finally(function(){
+        clearTimeout(timeoutId);
+      });
+
+      if(result.error){
+        throw result.error;
+      }
+
+      const current=normalizeHeaderReelRows(result.data||[]);
+
+      setCurrentReelIds(
+        current.map(function(reel){
+          return [reel.id,reel.video,reel.shopUrl].join("::");
+        }),
+        true
+      );
+
+      setGlobalReelsFromLiveData(
+        current,
+        true
+      );
+
+      headerReelsCatalogReady=true;
+      headerReelsRetryIndex=0;
+      clearTimeout(headerReelsRetryTimer);
+      headerReelsRetryTimer=null;
+
+      return true;
+    }
+    catch(error){
+      console.warn(
+        "SHOUFHON header Reels refresh:",
+        error
+      );
+
+      scheduleHeaderReelsRetry();
+      return false;
+    }
+    finally{
+      headerReelsCatalogLoading=false;
+
+      if(headerReelsCatalogQueued){
+        headerReelsCatalogQueued=false;
+        setTimeout(
+          loadHeaderReelsCatalog,
+          0
+        );
+      }
+    }
+  }
+
+  function setupHeaderReelsCatalog(){
+    loadHeaderReelsCatalog();
+
+    const supabaseClient=getClient();
+
+    if(
+      supabaseClient &&
+      typeof supabaseClient.channel==="function"
+    ){
+      try{
+        if(
+          headerReelsCatalogChannel &&
+          typeof supabaseClient.removeChannel==="function"
+        ){
+          supabaseClient.removeChannel(
+            headerReelsCatalogChannel
+          );
+        }
+      }
+      catch(error){}
+
+      try{
+        headerReelsCatalogChannel=
+          supabaseClient
+            .channel(
+              "shoufhon-header-reels-current"
+            )
+            .on(
+              "postgres_changes",
+              {
+                event:"*",
+                schema:"public",
+                table:"shop_reels"
+              },
+              function(){
+                loadHeaderReelsCatalog();
+              }
+            )
+            .subscribe();
+      }
+      catch(error){}
+    }
+
+    window.addEventListener(
+      "pageshow",
+      loadHeaderReelsCatalog
+    );
+
+    window.addEventListener(
+      "focus",
+      loadHeaderReelsCatalog
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      function(){
+        if(
+          document.visibilityState===
+          "visible"
+        ){
+          loadHeaderReelsCatalog();
+        }
+      }
+    );
+
+    setInterval(
+      function(){
+        if(!document.hidden){
+          loadHeaderReelsCatalog();
+        }
+      },
+      45000
     );
   }
 
@@ -2925,8 +3142,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
   );
 
-  function setGlobalReelsFromLiveData(reels){
-    if(!Array.isArray(reels) || !reels.length){
+  function setGlobalReelsFromLiveData(reels,authoritative){
+    if(!Array.isArray(reels)){
       return;
     }
 
@@ -2937,7 +3154,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
         const id = String(reel.id || "").trim();
         const video = String(reel.video || "").trim();
 
-        if(!id || !video){
+        if(!id || !/^https?:\/\//i.test(video)){
           return null;
         }
 
@@ -2951,23 +3168,49 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       })
       .filter(Boolean);
 
-    if(!normalized.length){
+    if(!normalized.length&&!authoritative){
       return;
     }
 
-    /*
-      Replace the old hardcoded viewer catalog with the LIVE Reel panel.
-      This means every Reel added to the panel automatically becomes
-      available in the header Reel player too.
-    */
+    const activeId=
+      MA7ALAK_GLOBAL_REELS[
+        ma7alakGlobalReelIndex
+      ]?.id||"";
+
     MA7ALAK_GLOBAL_REELS = normalized;
 
-    if(ma7alakGlobalReelIndex >= MA7ALAK_GLOBAL_REELS.length){
-      ma7alakGlobalReelIndex = 0;
+    if(!MA7ALAK_GLOBAL_REELS.length){
+      ma7alakGlobalReelIndex=0;
+
+      const el=getGlobalReelElements();
+
+      if(
+        el.viewer &&
+        el.viewer.classList.contains("open")
+      ){
+        closeGlobalReel();
+      }
+
+      return;
     }
 
-    /* If a notification/deep link arrived before the live catalog,
-       open the exact Reel now that the catalog is ready. */
+    const retainedIndex=
+      activeId
+        ? MA7ALAK_GLOBAL_REELS.findIndex(function(reel){
+            return reel.id===activeId;
+          })
+        : -1;
+
+    if(retainedIndex>=0){
+      ma7alakGlobalReelIndex=retainedIndex;
+    }
+    else if(
+      ma7alakGlobalReelIndex >=
+      MA7ALAK_GLOBAL_REELS.length
+    ){
+      ma7alakGlobalReelIndex=0;
+    }
+
     if(ma7alakPendingExactReelId){
       const pendingId = ma7alakPendingExactReelId;
       setTimeout(function(){
@@ -2987,12 +3230,18 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
         return;
       }
 
+      const authoritative=
+        event.data.authoritative===true ||
+        event.data.source==="ma7alak-reels-embed";
+
       setCurrentReelIds(
-        event.data.reelIds || []
+        event.data.reelIds || [],
+        authoritative
       );
 
       setGlobalReelsFromLiveData(
-        event.data.reels || []
+        event.data.reels || [],
+        authoritative
       );
     }
   );
@@ -3380,7 +3629,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
      catalog used by the working Reels V5 section.
   ========================================================= */
 
-  let MA7ALAK_GLOBAL_REELS = [{"id": "masaya-cafe-2", "shop": "Masaya Cafe", "shopUrl": "https://shoufhon.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/63dfd3f2-881d-4bba-939c-4de7a6590190/play_720p.mp4"}, {"id": "zee-tattoo-1", "shop": "Zee Tattoo", "shopUrl": "https://shoufhon.com/Zee-Tattoo&-Piercing", "icon": "https://i.ibb.co/Vpb84TJD/IMG-20260909-WA0100.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/2a34ce89-cdd6-4009-b10e-16307df0b39d/play_720p.mp4"}, {"id": "masaya-cafe-1", "shop": "Masaya Cafe", "shopUrl": "https://shoufhon.com/masaya-cafe", "icon": "https://i.ibb.co/RpLPX6jM/file-000000009170820c8b0604e92a7aa0d2.png", "video": "https://vz-0bfd5f45-77d.b-cdn.net/08014fd8-35d8-448c-a297-873f15828c8f/play_1080p.mp4"}, {"id": "doze-3ale-1", "shop": "Doze 3ale", "shopUrl": "https://shoufhon.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/d9b32804-0db8-4263-9627-6d6e46c8de39/play_720p.mp4"}, {"id": "doze-3ale-2", "shop": "Doze 3ale", "shopUrl": "https://shoufhon.com/doze-3ale", "icon": "https://i.ibb.co/nNhdqmjz/IMG-20260906-WA0108.jpg", "video": "https://vz-0bfd5f45-77d.b-cdn.net/cfd5e24c-e300-4c8c-baee-faef3161a7f5/play_720p.mp4"}];
+  /* Live Supabase is the only Reel catalog. Never ship deleted fallback videos. */
+  let MA7ALAK_GLOBAL_REELS = [];
 
   let ma7alakGlobalReelIndex = 0;
   let ma7alakGlobalTouchStartY = 0;
@@ -3970,18 +4220,33 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
           "ma7alak-active"
         );
 
-        /*
-          DIRECT TOP-LEVEL OPEN.
-          No iframe. No scrolling. No postMessage. No lazy-load race.
-          Opens one random Reel immediately from the same current V5
-          Reel catalog.
-        */
-        openRandomGlobalReel();
+        const openCurrent=function(){
+          if(!MA7ALAK_GLOBAL_REELS.length){
+            return;
+          }
 
-        try{
-          markCurrentReelsSeen();
+          openRandomGlobalReel();
+
+          try{
+            markCurrentReelsSeen();
+          }
+          catch(error){}
+        };
+
+        if(headerReelsCatalogReady){
+          openCurrent();
+
+          /* Refresh in the background without delaying native fullscreen. */
+          loadHeaderReelsCatalog();
         }
-        catch(error){}
+        else{
+          /* Never fall back to deleted hardcoded Reel data. */
+          loadHeaderReelsCatalog()
+            .then(function(){
+              openCurrent();
+            })
+            .catch(function(){});
+        }
 
         setTimeout(function(){
           button.classList.remove(
@@ -4033,19 +4298,12 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       }
     }catch(error){}
 
+    setupHeaderReelsCatalog();
+
+    /* Homepage DOM/message state remains a fast same-page hint only. */
     requestReelsState();
     setTimeout(requestReelsState,500);
     setTimeout(requestReelsState,1600);
-
-    /*
-      Keep checking for newly-added Reels while the visitor stays
-      on the page. This fixes Hostinger/Embed cases where Reels are
-      updated after the initial header load.
-    */
-    setInterval(
-      requestReelsState,
-      3000
-    );
 
     setupSearchEvents();
     startControlIntegrationWatcher();

@@ -937,7 +937,7 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
 @media(min-width:700px){.m7ap-shell{padding:38px}.m7ap-grid{grid-template-columns:repeat(4,1fr);gap:12px}.m7ap-benefit{min-height:185px}.m7ap-benefit strong{font-size:15px}.m7ap-benefit span.m7ap-copy{font-size:12px}}
 @media(max-width:600px){#ma7alak-add-shop-promo{margin-top:14px}.m7ap-shell{padding:24px 15px 18px;border-radius:24px}.m7ap h2{font-size:clamp(32px,9.5vw,42px);line-height:1}.m7ap-intro{font-size:13px}.m7ap-grid{gap:9px;margin:19px 0}.m7ap-benefit{min-height:164px;padding:13px 11px}.m7ap-icon{width:54px;height:54px;border-radius:16px}.m7ap-icon svg{width:28px;height:28px}.m7ap-benefit strong{font-size:13px}.m7ap-benefit span.m7ap-copy{font-size:10.5px}.m7ap-action{min-height:68px;padding:12px 15px;border-radius:18px}.m7ap-action b{font-size:16px}.m7ap-action small{font-size:9.5px}}
 
-/* REELS — naturally follows LIVE with no reserved gap */\n.ma7alak-reels-wrapper{position:relative;width:100%;margin:28px 0 14px;padding:15px 0 14px}.ma7alak-reels-wrapper:before,.ma7alak-reels-wrapper:after{content:"";position:absolute;left:50%;width:100vw;height:3px;transform:translateX(-50%);background:#ffffff1a;box-shadow:0 1px #0009}.ma7alak-reels-wrapper:before{top:0}.ma7alak-reels-wrapper:after{bottom:0}.ma7alak-reels-title{display:flex;align-items:center;gap:8px;margin:0 0 10px 4px;font-size:20px;font-weight:800}.ma7alak-reels{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:5px 4px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}.ma7alak-reels::-webkit-scrollbar{display:none}.ma7alak-reel{position:relative;flex:0 0 290px;height:515px;border-radius:22px;overflow:hidden;background:#0d0d0e;border:1px solid #e2b45b38;scroll-snap-align:start;scroll-snap-stop:always}.ma7alak-video{width:100%;height:100%;display:block;object-fit:cover;cursor:pointer}.reel-info{position:absolute;left:14px;right:14px;bottom:14px;z-index:10;display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid #ffffff12;border-radius:15px;background:linear-gradient(to top,#0006,#0001);backdrop-filter:blur(5px);cursor:pointer}.reel-shop-icon{width:42px;height:42px;min-width:42px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover;background:#171717}.reel-info-text{min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}.reel-info-text strong,.reel-info-text span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 5px #000}.reel-info-text strong{font-size:17px}.reel-info-text span{font-size:12px;color:#fffffff5}.coming-soon{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#f5d48a;background:radial-gradient(circle,#e2b45b17,transparent 60%)}.coming-soon span{font-size:42px}.ma7alak-favorites-corner{display:flex;justify-content:flex-end;margin-top:8px;padding:0 6px}.ma7alak-favorites-button{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border:1px solid #e2b45b4d;border-radius:99px;background:linear-gradient(135deg,#e2b45b21,#000a);color:#f5d48a;font-size:13px;font-weight:700}.ma7alak-favorites-button b{min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e2b45b;color:#111;font-size:11px}\n/* SAVED REELS — 50% mobile drawer, created/loaded only when opened. */
+/* REELS — naturally follows LIVE with no reserved gap */\n.ma7alak-reels-wrapper{position:relative;width:100%;margin:28px 0 14px;padding:15px 0 14px}.ma7alak-reels-wrapper:before,.ma7alak-reels-wrapper:after{content:"";position:absolute;left:50%;width:100vw;height:3px;transform:translateX(-50%);background:#ffffff1a;box-shadow:0 1px #0009}.ma7alak-reels-wrapper:before{top:0}.ma7alak-reels-wrapper:after{bottom:0}.ma7alak-reels-title{display:flex;align-items:center;gap:8px;margin:0 0 10px 4px;font-size:20px;font-weight:800}.ma7alak-reels{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:5px 4px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}.ma7alak-reels::-webkit-scrollbar{display:none}.ma7alak-reel{position:relative;flex:0 0 270px;height:480px;border-radius:22px;overflow:hidden;background:#0d0d0e;border:1px solid #e2b45b38;scroll-snap-align:start;scroll-snap-stop:always}.ma7alak-video{width:100%;height:100%;display:block;object-fit:cover;cursor:pointer}.reel-info{position:absolute;left:14px;right:14px;bottom:14px;z-index:10;display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid #ffffff12;border-radius:15px;background:linear-gradient(to top,#0006,#0001);backdrop-filter:blur(5px);cursor:pointer}.reel-shop-icon{width:42px;height:42px;min-width:42px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover;background:#171717}.reel-info-text{min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}.reel-info-text strong,.reel-info-text span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 5px #000}.reel-info-text strong{font-size:17px}.reel-info-text span{font-size:12px;color:#fffffff5}.coming-soon{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#f5d48a;background:radial-gradient(circle,#e2b45b17,transparent 60%)}.coming-soon span{font-size:42px}.ma7alak-favorites-corner{display:flex;justify-content:flex-end;margin-top:8px;padding:0 6px}.ma7alak-favorites-button{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border:1px solid #e2b45b4d;border-radius:99px;background:linear-gradient(135deg,#e2b45b21,#000a);color:#f5d48a;font-size:13px;font-weight:700}.ma7alak-favorites-button b{min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e2b45b;color:#111;font-size:11px}\n/* SAVED REELS — 50% mobile drawer, created/loaded only when opened. */
 html.m7-saved-open,body.m7-saved-open{overflow:hidden!important}
 .m7-saved-drawer{position:fixed;inset:0;z-index:2147483600;display:none;align-items:flex-end;background:rgba(0,0,0,.52);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .m7-saved-drawer.open{display:flex}
@@ -965,7 +965,7 @@ html.m7-saved-open,body.m7-saved-open{overflow:hidden!important}
 @media(min-width:700px){.m7-saved-sheet{left:50%;width:min(720px,100%);transform:translate3d(-50%,100%,0)}.m7-saved-drawer.open .m7-saved-sheet{transform:translate3d(-50%,0,0)}.m7-saved-card{flex-basis:190px}}
 @media(prefers-reduced-motion:reduce){.m7-saved-sheet{transition:none!important}}
 
-/* VIEWER */\n.ma7alak-reel-viewer{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:#000;overflow:hidden;touch-action:none}.ma7alak-reel-viewer.open{display:flex}.ma7alak-reel-viewer-video{position:absolute;inset:5px;width:calc(100vw - 10px);height:calc(100dvh - 10px);object-fit:contain;background:#000;border-radius:18px;transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1)}.ma7alak-reel-viewer-shop{position:absolute;top:15px;left:10px;z-index:2147483646;max-width:70%;display:flex;align-items:center;gap:9px;padding:6px 13px 6px 6px;border:1px solid #ffffff3d;border-radius:99px;background:#000b;color:#fff;backdrop-filter:blur(14px)}.ma7alak-reel-viewer-shop img{width:40px;height:40px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover}.ma7alak-reel-viewer-shop span{min-width:0;display:flex;flex-direction:column;text-align:left}.ma7alak-reel-viewer-shop strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.ma7alak-reel-viewer-shop small{color:#ffffffad;font-size:10px}.ma7alak-reel-viewer-shop em{color:#f5d48a;font-size:18px;font-style:normal}.ma7alak-reel-viewer-close,.ma7alak-viewer-favorite{position:absolute;z-index:2147483646;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff40;border-radius:50%;background:#000b;color:#fff;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-shop{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-close{top:14px;right:10px;width:45px;height:45px;font-size:31px}.ma7alak-viewer-favorite{right:10px;bottom:72px;width:50px;height:50px;font-size:28px}.ma7alak-viewer-favorite.active{color:#f5d48a;background:#e2b45b2b;border-color:#e2b45b8c}.ma7alak-swipe-hint{position:absolute;bottom:20px;left:50%;z-index:2147483645;transform:translateX(-50%);color:#ffffff73;font-size:11px;pointer-events:none}\n@media(max-width:600px){#m7-global-home-feed-shell{padding-left:10px!important;padding-right:10px!important}#m7-home-feed{min-width:0!important}#m7-live-home{width:100%!important;max-width:100%!important;min-width:0!important;padding:15px;border-radius:23px}#m7-live-home h2{font-size:27px}.m7-live-cards,.ma7alak-reels{max-width:100%!important;min-width:0!important;scroll-padding-inline:2px 10px}.m7-live-card{flex-basis:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;height:465px}.ma7alak-reel{flex-basis:min(68vw,290px)!important;max-width:calc(100vw - 42px)!important;height:auto;aspect-ratio:9/16;border-radius:18px}.reel-info{left:10px;right:10px;bottom:10px;padding:8px 10px}.reel-shop-icon{width:37px;height:37px;min-width:37px}.reel-info-text strong{font-size:15px}.reel-info-text span{font-size:10px}}\n/* Exact Lebanon schedule + live countdown. Only this text updates every second;\n   the card and its video stay mounted, preventing black flicker. */\n.m7-live-times{display:block;margin-top:11px;padding:10px 11px;border:1px solid #ffffff17;border-radius:13px;background:#050807b8}.m7-live-schedule{display:grid;gap:4px}.m7-live-schedule b{color:#fff;font-size:11px;line-height:1.25}.m7-live-schedule small{color:#36dc82;font-size:10px;font-weight:900;line-height:1.2;text-shadow:0 0 9px #36dc826b}.m7-live-schedule span{color:#ffffff9c;font-size:10px;font-weight:800;line-height:1.25}\n/* Live indicators intentionally remain animated on mobile, including browsers\n   that inherit Android\'s reduced-motion preference. */\n@media(prefers-reduced-motion:reduce){.ma7alak-reel-viewer-video{transition:none}.m7-live-status i,.m7-live-card,.m7-shop-avatar,.m7-shop-avatar:before,.m7-shop-avatar:after{-webkit-animation-play-state:running!important;animation-play-state:running!important}}\n\n/* FINAL HOSTINGER BACKGROUND LOCK
+/* VIEWER */\n.ma7alak-reel-viewer{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:#000;overflow:hidden;touch-action:none}.ma7alak-reel-viewer.open{display:flex}.ma7alak-reel-viewer-video{position:absolute;inset:5px;width:calc(100vw - 10px);height:calc(100dvh - 10px);object-fit:contain;background:#000;border-radius:18px;transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1)}.ma7alak-reel-viewer-shop{position:absolute;top:15px;left:10px;z-index:2147483646;max-width:70%;display:flex;align-items:center;gap:9px;padding:6px 13px 6px 6px;border:1px solid #ffffff3d;border-radius:99px;background:#000b;color:#fff;backdrop-filter:blur(14px)}.ma7alak-reel-viewer-shop img{width:40px;height:40px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover}.ma7alak-reel-viewer-shop span{min-width:0;display:flex;flex-direction:column;text-align:left}.ma7alak-reel-viewer-shop strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.ma7alak-reel-viewer-shop small{color:#ffffffad;font-size:10px}.ma7alak-reel-viewer-shop em{color:#f5d48a;font-size:18px;font-style:normal}.ma7alak-reel-viewer-close,.ma7alak-viewer-favorite{position:absolute;z-index:2147483646;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff40;border-radius:50%;background:#000b;color:#fff;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-shop{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-close{top:14px;right:10px;width:45px;height:45px;font-size:31px}.ma7alak-viewer-favorite{right:10px;bottom:72px;width:50px;height:50px;font-size:28px}.ma7alak-viewer-favorite.active{color:#f5d48a;background:#e2b45b2b;border-color:#e2b45b8c}.ma7alak-swipe-hint{position:absolute;bottom:20px;left:50%;z-index:2147483645;transform:translateX(-50%);color:#ffffff73;font-size:11px;pointer-events:none}\n@media(max-width:600px){#m7-global-home-feed-shell{padding-left:10px!important;padding-right:10px!important}#m7-home-feed{min-width:0!important}#m7-live-home{width:100%!important;max-width:100%!important;min-width:0!important;padding:15px;border-radius:23px}#m7-live-home h2{font-size:27px}.m7-live-cards,.ma7alak-reels{max-width:100%!important;min-width:0!important;scroll-padding-inline:2px 10px}.m7-live-card{flex-basis:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;height:465px}.ma7alak-reel{flex-basis:min(62vw,270px)!important;max-width:calc(100vw - 58px)!important;height:auto;aspect-ratio:9/16;border-radius:18px}.reel-info{left:10px;right:10px;bottom:10px;padding:8px 10px}.reel-shop-icon{width:37px;height:37px;min-width:37px}.reel-info-text strong{font-size:15px}.reel-info-text span{font-size:10px}}\n/* Exact Lebanon schedule + live countdown. Only this text updates every second;\n   the card and its video stay mounted, preventing black flicker. */\n.m7-live-times{display:block;margin-top:11px;padding:10px 11px;border:1px solid #ffffff17;border-radius:13px;background:#050807b8}.m7-live-schedule{display:grid;gap:4px}.m7-live-schedule b{color:#fff;font-size:11px;line-height:1.25}.m7-live-schedule small{color:#36dc82;font-size:10px;font-weight:900;line-height:1.2;text-shadow:0 0 9px #36dc826b}.m7-live-schedule span{color:#ffffff9c;font-size:10px;font-weight:800;line-height:1.25}\n/* Live indicators intentionally remain animated on mobile, including browsers\n   that inherit Android\'s reduced-motion preference. */\n@media(prefers-reduced-motion:reduce){.ma7alak-reel-viewer-video{transition:none}.m7-live-status i,.m7-live-card,.m7-shop-avatar,.m7-shop-avatar:before,.m7-shop-avatar:after{-webkit-animation-play-state:running!important;animation-play-state:running!important}}\n\n/* FINAL HOSTINGER BACKGROUND LOCK
    The global feed owns NO page/background layer.
    Only the actual Live/Reel/Spotlight cards keep their intended styling. */
 #m7-global-home-feed-shell,
@@ -1133,7 +1133,7 @@ function m7StartHomeFeedData(){
 (function(sb){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 /* LIVE OFFERS */
-const liveRoot=document.getElementById("m7-live-home"),liveCards=document.getElementById("m7-live-cards"),liveSub=document.getElementById("m7-live-sub"),liveCount=document.getElementById("m7-live-count");let livePosts=[],liveSignature="";const LIVE_TIME_ZONE="Asia/Beirut";
+const liveRoot=document.getElementById("m7-live-home"),liveCards=document.getElementById("m7-live-cards"),liveSub=document.getElementById("m7-live-sub"),liveCount=document.getElementById("m7-live-count");let livePosts=[],liveSignature="",liveDirectLoading=false,liveDirectQueued=false,liveDirectRetryTimer=null,liveDirectRetryIndex=0,liveDirectChannel=null;const LIVE_TIME_ZONE="Asia/Beirut";
 function remain(date){let s=Math.max(0,Math.floor((new Date(date)-Date.now())/1000)),d=Math.floor(s/86400);s%=86400;let h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),q=s%60;return d?`${d}d ${h}h ${m}m`:[h,m,q].map(v=>String(v).padStart(2,"0")).join(":")}
 function started(x){let s=Math.floor((Date.now()-new Date(x.starts_at))/1000);if(s<0)return"Starts in "+remain(x.starts_at);if(s<60)return`Started ${s}s ago`;let m=Math.floor(s/60);if(m<60)return`Started ${m}m ago`;let h=Math.floor(m/60);return h<24?`Started ${h}h ${m%60}m ago`:`Started ${Math.floor(h/24)}d ago`}
 function beirutParts(value){let parts=new Intl.DateTimeFormat("en-CA",{timeZone:LIVE_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(value)),o={};parts.forEach(p=>o[p.type]=p.value);return o}
@@ -1208,12 +1208,179 @@ addEventListener("message",e=>{
   if(d.type==="MA7ALAK_OPEN_REELS")openRandomReel();
 });
 function requestLive(){if(!liveStateReceived)window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}
+
+const LIVE_DIRECT_RETRY_DELAYS=[400,1000,2200,5000,9000];
+
+function withHomeFeedTimeout(promise,label,ms=8000){
+  let timer;
+
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_,reject)=>{
+      timer=setTimeout(
+        ()=>reject(new Error(label+" timed out")),
+        ms
+      );
+    })
+  ]).finally(()=>clearTimeout(timer));
+}
+
+function scheduleLiveDirectRetry(){
+  clearTimeout(liveDirectRetryTimer);
+
+  const delay=
+    LIVE_DIRECT_RETRY_DELAYS[
+      Math.min(
+        liveDirectRetryIndex++,
+        LIVE_DIRECT_RETRY_DELAYS.length-1
+      )
+    ];
+
+  liveDirectRetryTimer=setTimeout(
+    ()=>{
+      if(!document.hidden){
+        loadHomepageLiveDirect();
+      }
+    },
+    delay
+  );
+}
+
+function applyDirectLiveState(next){
+  next=Array.isArray(next)?next:[];
+
+  const signature=getLiveSignature(next);
+  livePosts=next;
+
+  if(signature!==liveSignature){
+    liveSignature=signature;
+    renderLive();
+  }else{
+    updateLiveTimers();
+  }
+}
+
+async function loadHomepageLiveDirect(){
+  if(liveDirectLoading){
+    liveDirectQueued=true;
+    return;
+  }
+
+  liveDirectLoading=true;
+
+  try{
+    const now=new Date().toISOString();
+
+    const result=await withHomeFeedTimeout(
+      sb.from("shop_live_posts")
+        .select("id,shop_slug,shop_name,post_type,title,description,media_url,media_type,original_price,offer_price,starts_at,ends_at,status,created_at")
+        .eq("status","active")
+        .gt("ends_at",now)
+        .order("starts_at",{ascending:false})
+        .limit(80),
+      "Homepage Live refresh"
+    );
+
+    if(result.error)throw result.error;
+
+    let next=result.data||[];
+
+    const slugs=[
+      ...new Set(
+        next
+          .map(x=>String(x.shop_slug||"").trim().toLowerCase())
+          .filter(Boolean)
+      )
+    ];
+
+    if(slugs.length){
+      const profiles=await withHomeFeedTimeout(
+        sb.from("shop_profiles")
+          .select("shop_slug,profile_image_url,shop_url")
+          .in("shop_slug",slugs),
+        "Homepage Live profiles"
+      );
+
+      if(!profiles.error){
+        const bySlug=
+          new Map(
+            (profiles.data||[]).map(
+              profile=>[
+                String(profile.shop_slug||"").trim().toLowerCase(),
+                profile
+              ]
+            )
+          );
+
+        next=next.map(item=>{
+          const profile=
+            bySlug.get(
+              String(item.shop_slug||"").trim().toLowerCase()
+            )||{};
+
+          return {
+            ...item,
+            profile_image_url:profile.profile_image_url||null,
+            shop_url:profile.shop_url||null
+          };
+        });
+      }
+    }
+
+    liveDirectRetryIndex=0;
+    clearTimeout(liveDirectRetryTimer);
+    liveDirectRetryTimer=null;
+
+    applyDirectLiveState(next);
+  }
+  catch(error){
+    console.warn(
+      "SHOUFHON homepage Live direct refresh:",
+      error
+    );
+
+    scheduleLiveDirectRetry();
+  }
+  finally{
+    liveDirectLoading=false;
+
+    if(liveDirectQueued){
+      liveDirectQueued=false;
+      setTimeout(
+        loadHomepageLiveDirect,
+        0
+      );
+    }
+  }
+}
+
+function setupHomepageLiveDirect(){
+  loadHomepageLiveDirect();
+
+  try{
+    liveDirectChannel=
+      sb.channel("shoufhon-home-live-direct")
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"shop_live_posts"
+          },
+          loadHomepageLiveDirect
+        )
+        .subscribe();
+  }
+  catch(_){}
+}
+
 hydrateHomepageLiveCache();
+setupHomepageLiveDirect();
 [0,250,750,1500,3000,5000,8000,12000].forEach(ms=>liveRequestTimers.push(setTimeout(requestLive,ms)));
 const liveProviderCacheTimer=setInterval(syncLiveFromProviderCache,4000);
 window.addEventListener("focus",syncLiveFromProviderCache);
-window.addEventListener("pageshow",syncLiveFromProviderCache);
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){syncLiveFromProviderCache();requestLive()}});
+window.addEventListener("pageshow",()=>{syncLiveFromProviderCache();loadHomepageLiveDirect()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){syncLiveFromProviderCache();loadHomepageLiveDirect();requestLive()}});
 setInterval(updateLiveTimers,1000);
 const liveMediaObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
  const v=entry.target;
@@ -1251,7 +1418,7 @@ spotlightChannel=sb.channel("home-shop-spotlight-bundled").on("postgres_changes"
 document.addEventListener("visibilitychange",()=>{if(document.hidden)spotlightClearAuto();else{loadSpotlight();spotlightScheduleAuto(4000)}});
 
 /* REELS */
-const reelsContainer=document.querySelector(".ma7alak-reels"),viewer=document.getElementById("ma7alakReelViewer"),viewerVideo=document.getElementById("ma7alakReelViewerVideo"),viewerClose=document.getElementById("ma7alakReelViewerClose"),viewerShop=document.getElementById("ma7alakReelViewerShop"),viewerName=document.getElementById("ma7alakReelViewerShopName"),viewerIcon=document.getElementById("ma7alakReelViewerShopIcon"),viewerFav=document.getElementById("ma7alakViewerFavorite"),favCount=document.getElementById("ma7alakFavoritesCount"),savedDrawer=document.getElementById("ma7alakSavedDrawer"),savedBody=document.getElementById("ma7alakSavedBody"),savedClose=document.getElementById("ma7alakSavedClose"),savedCount=document.getElementById("ma7alakSavedCount"),savedButton=document.getElementById("ma7alakFavoritesButton");let reels=[],viewerIndex=0,favoriteIds=new Set(),channel,loading=false,lastRandom=null,reelDataSignature="",savedHistoryArmed=false,savedCloseFallbackTimer=null;
+const reelsContainer=document.querySelector(".ma7alak-reels"),viewer=document.getElementById("ma7alakReelViewer"),viewerVideo=document.getElementById("ma7alakReelViewerVideo"),viewerClose=document.getElementById("ma7alakReelViewerClose"),viewerShop=document.getElementById("ma7alakReelViewerShop"),viewerName=document.getElementById("ma7alakReelViewerShopName"),viewerIcon=document.getElementById("ma7alakReelViewerShopIcon"),viewerFav=document.getElementById("ma7alakViewerFavorite"),favCount=document.getElementById("ma7alakFavoritesCount"),savedDrawer=document.getElementById("ma7alakSavedDrawer"),savedBody=document.getElementById("ma7alakSavedBody"),savedClose=document.getElementById("ma7alakSavedClose"),savedCount=document.getElementById("ma7alakSavedCount"),savedButton=document.getElementById("ma7alakFavoritesButton");let reels=[],viewerIndex=0,favoriteIds=new Set(),channel,loading=false,reelReloadQueued=false,reelRetryTimer=null,reelRetryIndex=0,lastRandom=null,reelDataSignature="",savedHistoryArmed=false,savedCloseFallbackTimer=null;
 let visitorId=localStorage.getItem("ma7alak_visitor_id");if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem("ma7alak_visitor_id",visitorId)}
 const favoriteTokenKey="ma7alak_favorite_token_v1";
 let favoriteToken=String(localStorage.getItem(favoriteTokenKey)||"").trim();
@@ -1274,9 +1441,232 @@ function resetReelsStripToStart(){
   setTimeout(reset,240);
 }
 function card(row){let d=document.createElement("div");d.className="ma7alak-reel";d.dataset.reelId=row.reel_id;d.dataset.shopName=row.shop_name||"Shop";d.dataset.shopUrl=row.shop_url||"";d.dataset.shopIcon=row.shop_icon||"";d.dataset.videoUrl=row.video_url||"";d.innerHTML=`<video class="ma7alak-video" muted loop playsinline webkit-playsinline preload="none"></video><div class="reel-info" role="link" tabindex="0"><img class="reel-shop-icon" src="${esc(row.shop_icon||"")}" alt="${esc(row.shop_name||"Shop")}" loading="lazy" decoding="async"><div class="reel-info-text"><strong>${esc(row.shop_name||"Shop")}</strong><span>${esc(row.caption||"")}</span></div></div>`;return d}
-function ensureCardVideo(v){if(!v||v.dataset.m7Loaded==="1")return;let reel=v.closest(".ma7alak-reel"),src=reel?.dataset.videoUrl||"";if(!src)return;v.src=src;v.dataset.m7Loaded="1";v.load()}
-function bindCard(reel){let v=reel.querySelector("video"),info=reel.querySelector(".reel-info"),sx=0,sy=0,swiped=false;v.draggable=false;v.addEventListener("timeupdate",()=>{if(!viewer.classList.contains("open")&&v.currentTime>=1){v.currentTime=0;v.play().catch(()=>{})}});v.addEventListener("touchstart",e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY;swiped=false},{passive:true});v.addEventListener("touchmove",e=>{let t=e.changedTouches[0];if(Math.abs(t.clientX-sx)>10&&Math.abs(t.clientX-sx)>Math.abs(t.clientY-sy))swiped=true},{passive:true});v.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();if(swiped){swiped=false;return}openViewer(reel)});let openShop=e=>{e.preventDefault();e.stopPropagation();if(reel.dataset.shopUrl)window.top.location.href=reel.dataset.shopUrl};info.onclick=openShop;info.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")openShop(e)};observer.observe(v)}
-async function loadReels(){if(loading)return;loading=true;try{let r=await sb.from("shop_reels").select("reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,caption,created_at").eq("active",true).order("created_at",{ascending:false});if(r.error)throw r.error;let rows=(r.data||[]).slice();let nextSignature=JSON.stringify(rows.map(x=>[x.reel_id,x.shop_slug,x.shop_name,x.shop_url,x.shop_icon,x.video_url,x.caption,x.created_at]));if(nextSignature===reelDataSignature&&reelsContainer.querySelectorAll("[data-reel-id]").length===rows.length){refreshReels();sendReelsState();return}reelDataSignature=nextSignature;reelsContainer.querySelectorAll("[data-reel-id]").forEach(n=>n.remove());if(!window.__M7_REELS_SHUFFLED__){for(let i=rows.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[rows[i],rows[j]]=[rows[j],rows[i]]}window.__M7_REELS_SHUFFLED__=1;window.__M7_REEL_ORDER__=rows.map(x=>String(x.reel_id))}else{let order=window.__M7_REEL_ORDER__||[],pos=new Map(order.map((id,i)=>[id,i]));rows.sort((a,b)=>(pos.has(String(a.reel_id))?pos.get(String(a.reel_id)): -1)-(pos.has(String(b.reel_id))?pos.get(String(b.reel_id)): -1));window.__M7_REEL_ORDER__=rows.map(x=>String(x.reel_id))}let soon=reelsContainer.querySelector(".coming-soon-reel");rows.forEach(row=>{let c=card(row);reelsContainer.insertBefore(c,soon);bindCard(c)});refreshReels();if(!m7InitialReelStripResetDone){m7InitialReelStripResetDone=true;resetReelsStripToStart()}sendReelsState()}catch(e){console.error("Live Reels:",e)}finally{loading=false}}
+function ensureCardVideo(v){if(!v||v.dataset.m7Loaded==="1")return;let reel=v.closest(".ma7alak-reel"),src=reel?.dataset.videoUrl||"";if(!/^https?:\/\//i.test(src))return;v.src=src;v.dataset.m7Loaded="1";v.load()}
+function bindCard(reel){let v=reel.querySelector("video"),info=reel.querySelector(".reel-info"),sx=0,sy=0,swiped=false;v.draggable=false;v.addEventListener("timeupdate",()=>{if(!viewer.classList.contains("open")&&v.currentTime>=1){v.currentTime=0;v.play().catch(()=>{})}});v.addEventListener("error",()=>{let tries=Number(v.dataset.m7VideoRetry||0);if(tries>=2)return;v.dataset.m7VideoRetry=String(tries+1);v.dataset.m7Loaded="";try{v.pause();v.removeAttribute("src");v.load()}catch(_){}setTimeout(()=>{let r=reel.getBoundingClientRect();if(r.bottom>-120&&r.top<innerHeight+180){ensureCardVideo(v);v.muted=true;v.play().catch(()=>{})}},700*(tries+1))});v.addEventListener("touchstart",e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY;swiped=false},{passive:true});v.addEventListener("touchmove",e=>{let t=e.changedTouches[0];if(Math.abs(t.clientX-sx)>10&&Math.abs(t.clientX-sx)>Math.abs(t.clientY-sy))swiped=true},{passive:true});v.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();if(swiped){swiped=false;return}openViewer(reel)});let openShop=e=>{e.preventDefault();e.stopPropagation();if(reel.dataset.shopUrl)window.top.location.href=reel.dataset.shopUrl};info.onclick=openShop;info.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")openShop(e)};observer.observe(v)}
+const REEL_RETRY_DELAYS=[350,900,1900,4000,8000];
+
+function scheduleReelRetry(){
+  clearTimeout(reelRetryTimer);
+
+  const delay=
+    REEL_RETRY_DELAYS[
+      Math.min(
+        reelRetryIndex++,
+        REEL_RETRY_DELAYS.length-1
+      )
+    ];
+
+  reelRetryTimer=setTimeout(
+    ()=>{
+      if(!document.hidden){
+        loadReels();
+      }
+    },
+    delay
+  );
+}
+
+function primeVisibleReelCards(){
+  requestAnimationFrame(()=>{
+    refreshReels().forEach(reel=>{
+      const video=reel.querySelector("video");
+
+      if(!video){
+        return;
+      }
+
+      const rect=reel.getBoundingClientRect();
+
+      if(
+        rect.bottom>-120 &&
+        rect.top<innerHeight+180
+      ){
+        ensureCardVideo(video);
+        video.muted=true;
+        video.play().catch(()=>{});
+      }
+    });
+  });
+}
+
+async function loadReels(){
+  if(loading){
+    reelReloadQueued=true;
+    return;
+  }
+
+  loading=true;
+
+  try{
+    const result=await withHomeFeedTimeout(
+      sb.from("shop_reels")
+        .select("reel_id,shop_slug,shop_name,shop_url,shop_icon,video_url,caption,created_at")
+        .eq("active",true)
+        .order("created_at",{ascending:false}),
+      "Homepage Reels refresh"
+    );
+
+    if(result.error){
+      throw result.error;
+    }
+
+    const rows=
+      (result.data||[])
+        .filter(
+          row=>
+            String(row?.reel_id||"").trim() &&
+            /^https?:\/\//i.test(
+              String(row?.video_url||"").trim()
+            )
+        );
+
+    reelRetryIndex=0;
+    clearTimeout(reelRetryTimer);
+    reelRetryTimer=null;
+
+    const nextSignature=
+      JSON.stringify(
+        rows.map(
+          row=>[
+            row.reel_id,
+            row.shop_slug,
+            row.shop_name,
+            row.shop_url,
+            row.shop_icon,
+            row.video_url,
+            row.caption,
+            row.created_at
+          ]
+        )
+      );
+
+    if(
+      nextSignature===reelDataSignature &&
+      reelsContainer.querySelectorAll("[data-reel-id]").length===rows.length
+    ){
+      refreshReels();
+      primeVisibleReelCards();
+      sendReelsState();
+      return;
+    }
+
+    reelDataSignature=nextSignature;
+
+    reelsContainer
+      .querySelectorAll("[data-reel-id]")
+      .forEach(
+        node=>node.remove()
+      );
+
+    if(!window.__M7_REELS_SHUFFLED__){
+      for(
+        let i=rows.length-1;
+        i>0;
+        i--
+      ){
+        const j=
+          Math.floor(
+            Math.random()*
+            (i+1)
+          );
+
+        [
+          rows[i],
+          rows[j]
+        ]=[
+          rows[j],
+          rows[i]
+        ];
+      }
+
+      window.__M7_REELS_SHUFFLED__=1;
+      window.__M7_REEL_ORDER__=
+        rows.map(
+          row=>String(row.reel_id)
+        );
+    }
+    else{
+      const order=
+        window.__M7_REEL_ORDER__||
+        [];
+
+      const pos=
+        new Map(
+          order.map(
+            (id,index)=>[
+              id,
+              index
+            ]
+          )
+        );
+
+      rows.sort(
+        (a,b)=>
+          (
+            pos.has(String(a.reel_id))
+              ? pos.get(String(a.reel_id))
+              : -1
+          )-
+          (
+            pos.has(String(b.reel_id))
+              ? pos.get(String(b.reel_id))
+              : -1
+          )
+      );
+
+      window.__M7_REEL_ORDER__=
+        rows.map(
+          row=>String(row.reel_id)
+        );
+    }
+
+    const soon=
+      reelsContainer.querySelector(
+        ".coming-soon-reel"
+      );
+
+    rows.forEach(
+      row=>{
+        const reel=card(row);
+        reelsContainer.insertBefore(
+          reel,
+          soon
+        );
+        bindCard(reel);
+      }
+    );
+
+    refreshReels();
+
+    if(!m7InitialReelStripResetDone){
+      m7InitialReelStripResetDone=true;
+      resetReelsStripToStart();
+    }
+
+    primeVisibleReelCards();
+    sendReelsState();
+  }
+  catch(error){
+    console.error(
+      "Live Reels:",
+      error
+    );
+
+    scheduleReelRetry();
+  }
+  finally{
+    loading=false;
+
+    if(reelReloadQueued){
+      reelReloadQueued=false;
+      setTimeout(
+        loadReels,
+        0
+      );
+    }
+  }
+}
+
 function updateViewerFav(){let r=reels[viewerIndex];if(!r)return;let on=favoriteIds.has(r.dataset.reelId);viewerFav.classList.toggle("active",on);viewerFav.textContent=on?"★":"☆"}
 function stopCards(){document.querySelectorAll(".ma7alak-video").forEach(v=>{v.pause();v.muted=true})}
 function loadViewer(reel,direction){
@@ -1587,9 +1977,9 @@ savedButton.onclick=e=>{e.preventDefault();openSavedDrawer()};
 savedClose.onclick=e=>{e.preventDefault();e.stopPropagation();closeSavedDrawer()};
 savedDrawer.addEventListener("click",e=>{if(e.target===savedDrawer)closeSavedDrawer()});
 function reelsData(){return refreshReels().map(r=>({id:r.dataset.reelId,shop:r.dataset.shopName,shopUrl:r.dataset.shopUrl,icon:r.dataset.shopIcon,video:r.dataset.videoUrl||""}))}
-function sendReelsState(){let data=reelsData();if(!data.length)return;window.postMessage({type:"MA7ALAK_REELS_STATE",source:"ma7alak-reels-embed",sentAt:Date.now(),reelIds:data.map(x=>[x.id,x.video,x.shopUrl].join("::")),reels:data},"*")}
+function sendReelsState(){let data=reelsData();window.postMessage({type:"MA7ALAK_REELS_STATE",source:"ma7alak-reels-embed",authoritative:true,sentAt:Date.now(),reelIds:data.map(x=>[x.id,x.video,x.shopUrl].join("::")),reels:data},"*")}
 function openRandomReel(){let a=refreshReels();if(!a.length)return;let candidates=a.length>1&&lastRandom?a.filter(r=>r.dataset.reelId!==lastRandom):a,reel=candidates[Math.floor(Math.random()*candidates.length)];lastRandom=reel.dataset.reelId;openViewer(reel)}
-loadReels();syncFavorites();window.addEventListener("pageshow",resetReelsStripToStart);channel=sb.channel("ma7alak-combined-reels").on("postgres_changes",{event:"*",schema:"public",table:"shop_reels"},loadReels).subscribe();setInterval(()=>{if(!document.hidden)sendReelsState()},10000);let m7HomeWakeAt=0;function refreshHomeFeedOnWake(){const now=Date.now();if(document.hidden||now-m7HomeWakeAt<800)return;m7HomeWakeAt=now;loadReels();syncFavorites();try{window.Ma7alakLiveOffers?.refresh?.()}catch(_){}try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}catch(_){}}window.addEventListener("ma7alak:page-wake",refreshHomeFeedOnWake);window.addEventListener("pageshow",refreshHomeFeedOnWake);document.addEventListener("visibilitychange",()=>{if(document.hidden){unloadSavedMedia()}else{refreshHomeFeedOnWake();if(savedDrawer?.classList.contains("open"))renderSavedDrawer()}});
+loadReels();syncFavorites();window.addEventListener("pageshow",()=>{resetReelsStripToStart();primeVisibleReelCards();loadReels()});channel=sb.channel("ma7alak-combined-reels").on("postgres_changes",{event:"*",schema:"public",table:"shop_reels"},()=>{loadReels()}).subscribe();setInterval(()=>{if(!document.hidden)sendReelsState()},10000);let m7HomeWakeAt=0;function refreshHomeFeedOnWake(){const now=Date.now();if(document.hidden||now-m7HomeWakeAt<800)return;m7HomeWakeAt=now;loadReels();syncFavorites();try{window.Ma7alakLiveOffers?.refresh?.()}catch(_){}try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}catch(_){}}window.addEventListener("ma7alak:page-wake",refreshHomeFeedOnWake);window.addEventListener("pageshow",refreshHomeFeedOnWake);document.addEventListener("visibilitychange",()=>{if(document.hidden){unloadSavedMedia()}else{refreshHomeFeedOnWake();if(savedDrawer?.classList.contains("open"))renderSavedDrawer()}});
 })(sb);
 
  const client=sb;
