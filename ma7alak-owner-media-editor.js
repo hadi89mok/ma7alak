@@ -277,8 +277,61 @@
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
       #m7-owner-media-status{min-height:20px;margin-top:10px;text-align:center;color:#a99b87;font-size:9px}#m7-owner-media-status[data-type="ok"]{color:#7ee3a0}#m7-owner-media-status[data-type="error"]{color:#ff8f8f}
       @media(max-width:600px){#m7-owner-media-sheet{padding-left:10px!important;padding-right:10px!important}.m7om-card{border-radius:19px}.m7om-item{grid-template-columns:64px minmax(0,1fr)}.m7om-thumb{width:64px;height:62px}.m7om-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.m7om-actions button{min-height:40px}.m7om-add{grid-template-columns:1fr}.m7om-add button{min-height:50px}}
+
+      /*
+         The Media embed intentionally treats a selected frame animation as
+         authoritative. Its older blanket .m7-media-static rule accidentally
+         cancelled those explicit Gallery/Video choices on Basic/Minimal shops.
+         These later, more specific rules restore only the selected frame FX;
+         unrelated ambient page motion stays disabled.
+      */
+      #m7-media-showcase.m7-media-static.m7-frame-anim-pulse .photo::after{animation:m7GalleryFramePulse var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFramePulse var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-frame-anim-wave .photo::after{animation:m7GalleryFrameWave var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameWave var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-frame-anim-glow .photo::after{animation:m7GalleryFrameGlow var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameGlow var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-frame-anim-shimmer .photo::after{animation:m7GalleryFrameShimmer var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameShimmer var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-frame-anim-breathe .photo::after{animation:m7GalleryFrameBreathe var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameBreathe var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-frame-anim-flicker .photo::after{animation:m7GalleryFrameFlicker var(--m7-gallery-frame-speed,3.2s) linear infinite!important;-webkit-animation:m7GalleryFrameFlicker var(--m7-gallery-frame-speed,3.2s) linear infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-pulse .video::after{animation:m7VideoFramePulse var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFramePulse var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-wave .video::after{animation:m7VideoFrameWave var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameWave var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-glow .video::after{animation:m7VideoFrameGlow var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameGlow var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-shimmer .video::after{animation:m7VideoFrameShimmer var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameShimmer var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-breathe .video::after{animation:m7VideoFrameBreathe var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameBreathe var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-anim-flicker .video::after{animation:m7VideoFrameFlicker var(--m7-video-frame-speed,3.2s) linear infinite!important;-webkit-animation:m7VideoFrameFlicker var(--m7-video-frame-speed,3.2s) linear infinite!important}
+
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-pulse .photo .m7-media-frame-layer{animation:m7GalleryFramePulse var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFramePulse var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-wave .photo .m7-media-frame-layer{animation:m7GalleryFrameWave var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameWave var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-glow .photo .m7-media-frame-layer{animation:m7GalleryFrameGlow var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameGlow var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-shimmer .photo .m7-media-frame-layer{animation:m7GalleryFrameShimmer var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameShimmer var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-breathe .photo .m7-media-frame-layer{animation:m7GalleryFrameBreathe var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7GalleryFrameBreathe var(--m7-gallery-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-gallery-frame-layers.m7-frame-anim-flicker .photo .m7-media-frame-layer{animation:m7GalleryFrameFlicker var(--m7-gallery-frame-speed,3.2s) linear infinite!important;-webkit-animation:m7GalleryFrameFlicker var(--m7-gallery-frame-speed,3.2s) linear infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-pulse .video .m7-media-frame-layer{animation:m7VideoFramePulse var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFramePulse var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-wave .video .m7-media-frame-layer{animation:m7VideoFrameWave var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameWave var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-glow .video .m7-media-frame-layer{animation:m7VideoFrameGlow var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameGlow var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-shimmer .video .m7-media-frame-layer{animation:m7VideoFrameShimmer var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameShimmer var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-breathe .video .m7-media-frame-layer{animation:m7VideoFrameBreathe var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important;-webkit-animation:m7VideoFrameBreathe var(--m7-video-frame-speed,3.2s) ease-in-out infinite!important}
+      #m7-media-showcase.m7-media-static.m7-video-frame-layers.m7-video-frame-anim-flicker .video .m7-media-frame-layer{animation:m7VideoFrameFlicker var(--m7-video-frame-speed,3.2s) linear infinite!important;-webkit-animation:m7VideoFrameFlicker var(--m7-video-frame-speed,3.2s) linear infinite!important}
+
+      #m7-media-showcase.m7-media-effects-paused .photo::after,#m7-media-showcase.m7-media-effects-paused .video::after,#m7-media-showcase.m7-media-effects-paused .m7-media-frame-layer{animation-play-state:paused!important;-webkit-animation-play-state:paused!important}
     `;
     document.head.appendChild(style);
+
+    /* Stop decorative frame work while this embed is off-screen or hidden. */
+    const mediaRoot=document.getElementById("m7-media-showcase");
+    if(mediaRoot&&!mediaRoot.__m7FrameVisibilityBound){
+      mediaRoot.__m7FrameVisibilityBound=true;
+      let onScreen=true;
+      const syncFrameMotion=()=>mediaRoot.classList.toggle("m7-media-effects-paused",document.hidden||!onScreen);
+      document.addEventListener("visibilitychange",syncFrameMotion,{passive:true});
+      if("IntersectionObserver" in window){
+        const frameObserver=new IntersectionObserver(entries=>{
+          const entry=entries[entries.length-1];
+          onScreen=!!entry?.isIntersecting;
+          syncFrameMotion();
+        },{threshold:[0,.02]});
+        frameObserver.observe(mediaRoot);
+      }
+      syncFrameMotion();
+    }
 
     const edit=document.createElement("button");
     edit.id="m7-owner-media-edit";
