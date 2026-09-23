@@ -141,11 +141,27 @@ Deno.serve(async (req: Request) => {
         ? Number(body.subscription_id)
         : null;
 
+    const requestedTargetUserId =
+      String(body.target_user_id || "").trim();
+
+    const targetUserId =
+      isInternal &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        requestedTargetUserId
+      )
+        ? requestedTargetUserId
+        : null;
+
     let subscriptionQuery =
       supabase
         .from("push_subscriptions")
-        .select("id,endpoint,p256dh,auth,enabled")
+        .select("id,endpoint,p256dh,auth,enabled,user_id")
         .eq("enabled", true);
+
+    if (targetUserId !== null) {
+      subscriptionQuery =
+        subscriptionQuery.eq("user_id", targetUserId);
+    }
 
     if (targetSubscriptionId !== null) {
       subscriptionQuery =
@@ -251,6 +267,7 @@ Deno.serve(async (req: Request) => {
       success: true,
       subscribers: subscriptions.length,
       target_subscription_id: targetSubscriptionId,
+      target_user_id: targetUserId,
       sent,
       failed,
       removed: expiredSubscriptionIds.length

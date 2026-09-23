@@ -8,7 +8,7 @@
 */
 "use strict";
 
-const VERSION="m7-pwa-2026-09-24-1";
+const VERSION="m7-pwa-2026-09-24-2";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
 
 self.addEventListener("install",event=>{
@@ -98,7 +98,7 @@ self.addEventListener("push",event=>{
     ),
     badge:String(
       payload.badge||
-      "/pwa-icon-192.png"
+      "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/pwa/icon-badge-96.png"
     ),
     tag:String(
       payload.tag||

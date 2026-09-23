@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.24.1";
+  const VERSION="2026.09.24.2";
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=

@@ -5,7 +5,7 @@
   if(window.__SHOUFHON_WEB_PUSH__)return;
   window.__SHOUFHON_WEB_PUSH__=true;
 
-  const VERSION="2026.09.24.1";
+  const VERSION="2026.09.24.2";
   const SUPABASE_URL=
     "https://wdtaiuwtqdepzdamgsrs.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY=
@@ -208,6 +208,53 @@
     return data;
   }
 
+  async function currentAccessToken(){
+    try{
+      if(
+        window.Ma7alakAccount &&
+        typeof window.Ma7alakAccount.ready==="function"
+      ){
+        await Promise.race([
+          window.Ma7alakAccount.ready(),
+          new Promise(resolve=>setTimeout(resolve,1800))
+        ]);
+      }
+    }catch(_){}
+
+    try{
+      const token=
+        String(
+          window.Ma7alakAccount?.session?.access_token||
+          ""
+        ).trim();
+
+      if(token)return token;
+    }catch(_){}
+
+    try{
+      const client=
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+        window.Ma7alakSupabase?.client ||
+        null;
+
+      if(
+        client &&
+        client.auth &&
+        typeof client.auth.getSession==="function"
+      ){
+        const result=
+          await client.auth.getSession();
+
+        return String(
+          result?.data?.session?.access_token||
+          ""
+        ).trim();
+      }
+    }catch(_){}
+
+    return "";
+  }
+
   async function getVapidPublicKey(){
     const data=
       await api(
@@ -289,13 +336,22 @@
         subscription
       );
 
+    const accessToken=
+      await currentAccessToken();
+
     return api(
       SUBSCRIBE_URL,
       {
         method:"POST",
         headers:{
           "Content-Type":
-            "application/json"
+            "application/json",
+          ...(accessToken
+            ? {
+                "Authorization":
+                  "Bearer "+accessToken
+              }
+            : {})
         },
         body:JSON.stringify({
           action:"subscribe",
@@ -909,7 +965,7 @@
 
     if(copy){
       copy.textContent=
-        "Get new Stories & Reels even when ShoufHon is closed.";
+        "Get messages, new Stories & Reels even when ShoufHon is closed.";
     }
 
     current.classList.remove(
@@ -961,6 +1017,40 @@
       );
     }
   }
+
+  function scheduleAccountSubscriptionSync(){
+    if(
+      !supported() ||
+      Notification.permission!=="granted"
+    ){
+      return;
+    }
+
+    setTimeout(
+      ()=>syncExisting().catch(()=>{}),
+      250
+    );
+  }
+
+  addEventListener(
+    "ma7alak:account-change",
+    scheduleAccountSubscriptionSync
+  );
+
+  addEventListener(
+    "ma7alak:owner-auth-change",
+    scheduleAccountSubscriptionSync
+  );
+
+  /*
+    Account/auth modules may finish after the push client.
+    One delayed sync makes sure an already-granted subscription
+    is linked to the current authenticated ShoufHon user.
+  */
+  setTimeout(
+    scheduleAccountSubscriptionSync,
+    3500
+  );
 
   window.Ma7alakPush={
     version:VERSION,

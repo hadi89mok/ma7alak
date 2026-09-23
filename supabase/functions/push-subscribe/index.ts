@@ -69,6 +69,26 @@ function looksLikePushEndpoint(value: string) {
   }
 }
 
+async function authenticatedUserId(req: Request) {
+  const authHeader = req.headers.get("Authorization") || "";
+
+  if (!authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.slice(7).trim();
+
+  if (!token) return null;
+
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error || !data?.user?.id) {
+    return null;
+  }
+
+  return data.user.id;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders(req) });
@@ -83,6 +103,7 @@ Deno.serve(async (req: Request) => {
     const action =
       String(body.action || "subscribe").trim().toLowerCase();
 
+    const userId = await authenticatedUserId(req);
     const visitorId = validText(body.visitor_id, 180);
     const endpoint = validText(body.endpoint, 4096);
 
@@ -129,26 +150,55 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data, error } = await supabase
+    const now = new Date().toISOString();
+
+    const { data: existing, error: existingError } = await supabase
       .from("push_subscriptions")
-      .upsert(
-        {
+      .select("id")
+      .eq("endpoint", endpoint)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+
+    let data = null;
+
+    if (existing?.id) {
+      const { data: updated, error } = await supabase
+        .from("push_subscriptions")
+        .update({
+          visitor_id: visitorId,
+          p256dh,
+          auth,
+          user_agent: userAgent || null,
+          user_id: userId,
+          enabled: true,
+          updated_at: now
+        })
+        .eq("id", existing.id)
+        .select("id,enabled,user_id")
+        .single();
+
+      if (error) throw error;
+      data = updated;
+    } else {
+      const { data: inserted, error } = await supabase
+        .from("push_subscriptions")
+        .insert({
           visitor_id: visitorId,
           endpoint,
           p256dh,
           auth,
           user_agent: userAgent || null,
+          user_id: userId,
           enabled: true,
-          updated_at: new Date().toISOString()
-        },
-        {
-          onConflict: "endpoint"
-        }
-      )
-      .select("id,enabled")
-      .single();
+          updated_at: now
+        })
+        .select("id,enabled,user_id")
+        .single();
 
-    if (error) throw error;
+      if (error) throw error;
+      data = inserted;
+    }
 
     let testSent = false;
 
@@ -164,7 +214,6 @@ Deno.serve(async (req: Request) => {
             body: "Notifications are on 🔔",
             url: "https://shoufhon.com/",
             icon: "https://shoufhon.com/pwa-icon-192.png",
-            badge: "https://shoufhon.com/pwa-icon-192.png",
             type: "push-ready",
             tag: "shoufhon-push-ready"
           }),
@@ -180,6 +229,7 @@ Deno.serve(async (req: Request) => {
       success: true,
       enabled: true,
       id: data?.id || null,
+      linked_user: !!data?.user_id,
       test_sent: testSent
     });
   } catch (error: any) {
