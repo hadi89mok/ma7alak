@@ -290,14 +290,10 @@
               const safe=await safeBindingTopic(binding);
               if(!safe||!safe.topic)return null;
 
-              const aux=originalChannel(
-                safe.topic+"-"+Math.random().toString(36).slice(2)
-              );
-
               /*
                  Broadcast channel topic must exactly match the server topic.
-                 Supabase channel() uses the supplied channel name as topic,
-                 so recreate it without the local random suffix.
+                 The payload contains only a generic "changed" signal; the
+                 embed then refreshes its existing RPC count/state.
               */
               const channel=originalChannel(safe.topic)
                 .on(
@@ -317,7 +313,6 @@
                 .subscribe();
 
               auxChannels.push(channel);
-              try{await aux.unsubscribe()}catch(_){}
               return channel;
             })
           )
@@ -346,7 +341,11 @@
             });
 
             if(bindings.length){
-              return Promise.all(jobs).then(function(){return "ok"});
+              return Promise.all(jobs)
+                .then(function(){
+                  return Promise.resolve(originalUnsubscribe(timeout))
+                    .catch(function(){return "ok"});
+                });
             }
 
             return originalUnsubscribe(timeout);
