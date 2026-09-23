@@ -144,6 +144,15 @@ Deno.serve(async (req: Request) => {
     const requestedTargetUserId =
       String(body.target_user_id || "").trim();
 
+    const requestedFollowerShop =
+      String(body.target_followers_of_shop || "").trim().toLowerCase();
+
+    const targetFollowerShop =
+      isInternal &&
+      /^[a-z0-9][a-z0-9-]{0,159}$/i.test(requestedFollowerShop)
+        ? requestedFollowerShop
+        : null;
+
     const targetUserId =
       isInternal &&
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -152,26 +161,90 @@ Deno.serve(async (req: Request) => {
         ? requestedTargetUserId
         : null;
 
-    let subscriptionQuery =
-      supabase
-        .from("push_subscriptions")
-        .select("id,endpoint,p256dh,auth,enabled,user_id")
-        .eq("enabled", true);
+    let subscriptions: any[] = [];
 
-    if (targetUserId !== null) {
-      subscriptionQuery =
-        subscriptionQuery.eq("user_id", targetUserId);
+    if (targetFollowerShop !== null) {
+      const { data: follows, error: followsError } =
+        await supabase
+          .from("shop_follows")
+          .select("visitor_id,user_id")
+          .eq("shop_slug", targetFollowerShop);
+
+      if (followsError) throw followsError;
+
+      const visitorIds = Array.from(
+        new Set(
+          (follows || [])
+            .map((row: any) => String(row.visitor_id || "").trim())
+            .filter(Boolean)
+        )
+      );
+
+      const userIds = Array.from(
+        new Set(
+          (follows || [])
+            .map((row: any) => String(row.user_id || "").trim())
+            .filter(Boolean)
+        )
+      );
+
+      const byId = new Map<number, any>();
+
+      if (visitorIds.length > 0) {
+        const { data, error } =
+          await supabase
+            .from("push_subscriptions")
+            .select("id,endpoint,p256dh,auth,enabled,user_id,visitor_id")
+            .eq("enabled", true)
+            .in("visitor_id", visitorIds);
+
+        if (error) throw error;
+
+        for (const row of data || []) {
+          byId.set(row.id, row);
+        }
+      }
+
+      if (userIds.length > 0) {
+        const { data, error } =
+          await supabase
+            .from("push_subscriptions")
+            .select("id,endpoint,p256dh,auth,enabled,user_id,visitor_id")
+            .eq("enabled", true)
+            .in("user_id", userIds);
+
+        if (error) throw error;
+
+        for (const row of data || []) {
+          byId.set(row.id, row);
+        }
+      }
+
+      subscriptions = Array.from(byId.values());
+    } else {
+      let subscriptionQuery =
+        supabase
+          .from("push_subscriptions")
+          .select("id,endpoint,p256dh,auth,enabled,user_id,visitor_id")
+          .eq("enabled", true);
+
+      if (targetUserId !== null) {
+        subscriptionQuery =
+          subscriptionQuery.eq("user_id", targetUserId);
+      }
+
+      if (targetSubscriptionId !== null) {
+        subscriptionQuery =
+          subscriptionQuery.eq("id", targetSubscriptionId);
+      }
+
+      const { data, error: subscriptionError } =
+        await subscriptionQuery;
+
+      if (subscriptionError) throw subscriptionError;
+
+      subscriptions = data || [];
     }
-
-    if (targetSubscriptionId !== null) {
-      subscriptionQuery =
-        subscriptionQuery.eq("id", targetSubscriptionId);
-    }
-
-    const { data: subscriptions, error: subscriptionError } =
-      await subscriptionQuery;
-
-    if (subscriptionError) throw subscriptionError;
 
     if (!subscriptions || subscriptions.length === 0) {
       return json(req, {
@@ -268,6 +341,7 @@ Deno.serve(async (req: Request) => {
       subscribers: subscriptions.length,
       target_subscription_id: targetSubscriptionId,
       target_user_id: targetUserId,
+      target_followers_of_shop: targetFollowerShop,
       sent,
       failed,
       removed: expiredSubscriptionIds.length
