@@ -435,7 +435,7 @@
   const key="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
   const storyScriptSrc=document.currentScript?.src||"";
   let storyViewerPromise=null;
-  let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,expiryTimer=0,version=0,channel=null,storyBus=null,playing=[],index=0,mediaTimer=0,viewerOpen=false;
+  let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,expiryTimer=0,version=0,channel=null,storyBus=null,playing=[],index=0,mediaTimer=0,viewerOpen=false,followSyncLoading=false,followSyncQueued=false;
   const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const path=s=>'/'+encodeURIComponent(s);
   function db(){return client||(client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||window.Ma7alakSupabase?.client||window.supabase?.createClient?.(url,key));}
@@ -767,6 +767,62 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     render();
   }
   function scheduleRefresh(){clearTimeout(window.__shoufhonHomeStoryRefreshTimer);window.__shoufhonHomeStoryRefreshTimer=setTimeout(refresh,50)}
+  function normalizeFollowSlugs(data){
+    const list=Array.isArray(data)?data:[];
+    return [...new Set(list.map(row=>{
+      if(typeof row==='string')return row.trim();
+      return String(row?.shop_slug||row?.p_shop_slug||row?.slug||'').trim();
+    }).filter(Boolean))];
+  }
+  function followVisitorId(){
+    try{
+      const secure=window.Ma7alakFollowSecurity?.getVisitorId?.();
+      if(secure)return String(secure).trim();
+      return String(localStorage.getItem('ma7alak_visitor_id')||'').trim();
+    }catch(_){return ''}
+  }
+  async function syncFollowedStoriesNow(){
+    if(followSyncLoading){
+      followSyncQueued=true;
+      return;
+    }
+
+    followSyncLoading=true;
+
+    try{
+      const c=db();
+      const visitor=followVisitorId();
+
+      if(c&&visitor){
+        const result=await c.rpc(
+          'get_visitor_followed_shops',
+          {p_visitor_id:visitor}
+        );
+
+        if(!result.error){
+          slugs=normalizeFollowSlugs(result.data);
+        }
+      }
+
+      await refresh();
+    }
+    catch(e){
+      console.warn(
+        'ShoufHon homepage followed Stories sync:',
+        e
+      );
+
+      scheduleRefresh();
+    }
+    finally{
+      followSyncLoading=false;
+
+      if(followSyncQueued){
+        followSyncQueued=false;
+        setTimeout(syncFollowedStoriesNow,0);
+      }
+    }
+  }
   window.addEventListener('ma7alak:following-state',e=>{slugs=Array.isArray(e.detail?.slugs)?e.detail.slugs.filter(x=>typeof x==='string'&&x.length<150):[];scheduleRefresh()});
   window.addEventListener('ma7alak:follow-change',scheduleRefresh);
   window.addEventListener('ma7alak:follow-changed',scheduleRefresh);
@@ -796,18 +852,18 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     if(e.key==='shoufhon_story_mutation'&&e.newValue){try{applyStoryMutation(JSON.parse(e.newValue))}catch(_){}}
   });
   window.addEventListener('ma7alak:story-mutation',e=>applyStoryMutation(e.detail));
-  window.addEventListener('ma7alak:page-wake',scheduleRefresh);
+  window.addEventListener('ma7alak:page-wake',syncFollowedStoriesNow);
   window.addEventListener('message',e=>{
-    if(e.data?.type==='MA7ALAK_PAGE_WAKE'){scheduleRefresh();return}
+    if(e.data?.type==='MA7ALAK_PAGE_WAKE'){syncFollowedStoriesNow();return}
     if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED','MA7ALAK_STORY_DELETED'].includes(e.data?.type))applyStoryMutation(e.data)
   });
   function start(){
     slugs=Array.isArray(window.Ma7alakFollowingState?.slugs)?window.Ma7alakFollowingState.slugs:[];
     bindStoryTray();
-    refresh();
+    syncFollowedStoriesNow();
     ensureSharedViewer();
     timer=setInterval(()=>{if(!document.hidden)refresh()},30000);
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncFollowedStoriesNow()});
     const c=db();
     if(c?.channel)channel=c.channel('shoufhon-home-stories')
       .on('postgres_changes',{event:'*',schema:'public',table:'shop_stories'},onStoryRealtime)

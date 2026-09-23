@@ -23,6 +23,7 @@
   let storyPaused=false;
   let storyClockRemainingMs=0;
   let storyClockStartedAt=0;
+  let replyViewportSyncTimer=0;
   let mediaTimer=0;
   let loadToken=0;
   let historyArmed=false;
@@ -363,10 +364,10 @@
 
     style.textContent=`
 html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!important}
-#${ROOT_ID}{position:fixed;top:var(--ssv-vv-top,0px);left:var(--ssv-vv-left,0px);right:auto;bottom:auto;width:var(--ssv-vv-width,100vw);height:var(--ssv-vv-height,100dvh);z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font-family:Arial,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font-family:Arial,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
 #${ROOT_ID}[hidden]{display:none!important}
 #${ROOT_ID} *{box-sizing:border-box}
-#${ROOT_ID} .ssv-frame{position:relative;width:min(100%,470px);height:100%;overflow:hidden;background:#000;isolation:isolate}
+#${ROOT_ID} .ssv-frame{position:relative;width:min(100vw,470px);height:100vh;height:100dvh;overflow:hidden;background:#000;isolation:isolate}
 #${ROOT_ID} .ssv-media-host{position:absolute;inset:0;display:grid;place-items:center;background:#000}
 #${ROOT_ID} .ssv-media{width:100%;height:100%;object-fit:contain;background:#000;display:block}
 #${ROOT_ID} .ssv-loading{position:absolute;inset:0;display:grid;place-items:center;color:#aaa;font-size:12px}
@@ -389,7 +390,9 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-nav{position:absolute;z-index:8;top:82px;bottom:92px;width:34%;border:0;background:transparent;color:transparent;padding:0}
 #${ROOT_ID} .ssv-prev{left:0}
 #${ROOT_ID} .ssv-next{right:0}
-#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:0;padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px}
+#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:var(--ssv-keyboard-offset,0px);padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px;transition:bottom .14s ease}
+#${ROOT_ID}.is-keyboard-open .ssv-bottom{z-index:30;transition:none}
+#${ROOT_ID}.is-keyboard-open .ssv-like{display:none!important}
 #${ROOT_ID}.is-owner .ssv-bottom{display:none}
 #${ROOT_ID}.is-logged-out .ssv-reply{display:none!important}
 #${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
@@ -408,7 +411,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 @-webkit-keyframes ssvHeartFloat{0%{opacity:0;-webkit-transform:translate(-50%,-50%) scale(.45) rotate(0deg)}12%{opacity:1}100%{opacity:0;-webkit-transform:translate(calc(-50% + var(--ssv-heart-x,0px)),calc(-50% + var(--ssv-heart-y,-180px))) scale(var(--ssv-heart-scale,1)) rotate(var(--ssv-heart-rotate,0deg))}}
 @keyframes ssvProgress{from{width:0}to{width:100%}}
 @-webkit-keyframes ssvProgress{from{width:0}to{width:100%}}
-@media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100%}#${ROOT_ID} .ssv-nav{bottom:86px}}
+@media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100vw}#${ROOT_ID} .ssv-nav{bottom:86px}}
 `;
 
     document.head.appendChild(
@@ -417,70 +420,108 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   }
 
   function syncVisualViewport(){
-    if(!root)return;
+    if(!root||root.hidden)return;
+
+    const bottom=
+      root.querySelector(
+        ".ssv-bottom"
+      );
+
+    const input=
+      root.querySelector(
+        ".ssv-reply input"
+      );
+
+    if(!bottom)return;
+
+    const focused=
+      !!input &&
+      document.activeElement===input;
+
+    if(!focused){
+      root.style.setProperty(
+        "--ssv-keyboard-offset",
+        "0px"
+      );
+
+      root.classList.remove(
+        "is-keyboard-open"
+      );
+
+      return;
+    }
+
+    /* Measure at zero lift, then move only the hidden overlap. */
+    root.style.setProperty(
+      "--ssv-keyboard-offset",
+      "0px"
+    );
 
     const vv=
       window.visualViewport;
 
-    const width=
-      Math.max(
-        1,
-        Math.round(
-          vv?.width||
-          window.innerWidth||
-          document.documentElement?.clientWidth||
-          1
-        )
-      );
+    const visibleBottom=
+      vv
+        ? Number(vv.offsetTop||0)+Number(vv.height||0)
+        : Number(window.innerHeight||0);
 
-    const height=
-      Math.max(
-        1,
-        Math.round(
-          vv?.height||
-          window.innerHeight||
-          document.documentElement?.clientHeight||
-          1
-        )
-      );
+    const rect=
+      bottom.getBoundingClientRect();
 
-    const top=
+    let offset=
       Math.max(
         0,
-        Math.round(
-          vv?.offsetTop||
-          0
+        Math.ceil(
+          rect.bottom-
+          visibleBottom+
+          10
         )
       );
 
-    const left=
-      Math.max(
-        0,
-        Math.round(
-          vv?.offsetLeft||
-          0
-        )
+    if(offset<8){
+      offset=0;
+    }
+
+    root.style.setProperty(
+      "--ssv-keyboard-offset",
+      offset+"px"
+    );
+
+    root.classList.add(
+      "is-keyboard-open"
+    );
+
+    if(
+      input &&
+      document.activeElement===input
+    ){
+      try{
+        input.scrollIntoView({
+          block:"nearest",
+          inline:"nearest"
+        });
+      }
+      catch(_){}
+    }
+  }
+
+  function scheduleVisualViewportSync(){
+    requestAnimationFrame(
+      syncVisualViewport
+    );
+
+    clearTimeout(
+      replyViewportSyncTimer
+    );
+
+    replyViewportSyncTimer=
+      setTimeout(
+        ()=>{
+          replyViewportSyncTimer=0;
+          syncVisualViewport();
+        },
+        120
       );
-
-    root.style.setProperty(
-      "--ssv-vv-width",
-      width+"px"
-    );
-
-    root.style.setProperty(
-      "--ssv-vv-height",
-      height+"px"
-    );
-
-    root.style.setProperty(
-      "--ssv-vv-top",
-      top+"px"
-    );
-
-    root.style.setProperty(
-      "--ssv-vv-left",
-      left+"px"
-    );
   }
 
   function ensureRoot(){
@@ -682,15 +723,16 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         ".ssv-reply input"
       );
 
+    replyInput.setAttribute(
+      "enterkeyhint",
+      "send"
+    );
+
     replyInput.addEventListener(
       "focus",
       ()=>{
         pauseStoryPlayback();
-        syncVisualViewport();
-        requestAnimationFrame(syncVisualViewport);
-        setTimeout(syncVisualViewport,60);
-        setTimeout(syncVisualViewport,180);
-        setTimeout(syncVisualViewport,360);
+        scheduleVisualViewportSync();
       }
     );
 
@@ -698,8 +740,14 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       "blur",
       ()=>{
         resumeStoryPlayback();
-        setTimeout(syncVisualViewport,80);
-        setTimeout(syncVisualViewport,220);
+        scheduleVisualViewportSync();
+      }
+    );
+
+    replyInput.addEventListener(
+      "keydown",
+      event=>{
+        event.stopPropagation();
       }
     );
 
@@ -1031,21 +1079,20 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       "is-paused"
     );
 
-    root.style.removeProperty(
-      "--ssv-vv-width"
+    root.classList.remove(
+      "is-keyboard-open"
     );
 
-    root.style.removeProperty(
-      "--ssv-vv-height"
+    root.style.setProperty(
+      "--ssv-keyboard-offset",
+      "0px"
     );
 
-    root.style.removeProperty(
-      "--ssv-vv-top"
+    clearTimeout(
+      replyViewportSyncTimer
     );
 
-    root.style.removeProperty(
-      "--ssv-vv-left"
-    );
+    replyViewportSyncTimer=0;
 
     root
       .querySelector(
@@ -1938,7 +1985,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
         input.blur();
         resumeStoryPlayback();
-        syncVisualViewport();
+        scheduleVisualViewportSync();
 
         flash(
           "Reply sent ✓"
@@ -2508,10 +2555,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     ensureRoot();
 
-    syncVisualViewport();
-
     root.hidden=
       false;
+
+    syncVisualViewport();
 
     root.classList.remove(
       "is-owner"
@@ -2697,20 +2744,20 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   if(window.visualViewport){
     window.visualViewport.addEventListener(
       "resize",
-      syncVisualViewport,
+      scheduleVisualViewportSync,
       {passive:true}
     );
 
     window.visualViewport.addEventListener(
       "scroll",
-      syncVisualViewport,
+      scheduleVisualViewportSync,
       {passive:true}
     );
   }
 
   window.addEventListener(
     "resize",
-    syncVisualViewport,
+    scheduleVisualViewportSync,
     {passive:true}
   );
 

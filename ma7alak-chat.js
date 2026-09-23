@@ -10,7 +10,7 @@
 "use strict";
 if(window.__MA7ALAK_CHAT_V9__)return;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
 const CHAT_SCRIPT_SRC=document.currentScript?.src||"";
-let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null;
+let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null;
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 async function vr(){for(let i=0;i<100&&!window.Ma7alakAccount;i++)await sleep(50);if(!window.Ma7alakAccount)throw new Error("ShoufHon account system is not ready.");await window.Ma7alakAccount.ready();client=window.Ma7alakAccount.client;user=window.Ma7alakAccount.user;mode="viewer"}
@@ -26,7 +26,7 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 .m7-story-reply-card{width:min(260px,100%);margin:0 0 8px;padding:0;border:1px solid #ffffff22;border-radius:14px;overflow:hidden;background:#0f0d0c;color:#fff;text-align:left;cursor:pointer;display:block;box-shadow:0 8px 22px #0004}.m7-story-reply-card:active{transform:scale(.985)}.m7-story-card-top{display:flex;gap:10px;align-items:center;padding:8px}.m7-story-card-media{width:62px;height:78px;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#2c241e,#0d0b0a);display:grid;place-items:center;position:relative;flex:0 0 62px;border:1px solid #ffffff17}.m7-story-card-media img,.m7-story-card-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.m7-story-card-media video{background:#18130f}.m7-story-card-fallback{font-size:24px;opacity:.75}.m7-story-card-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0009;border:1px solid #fff5;font-size:16px;padding-left:2px;box-shadow:0 3px 10px #0008}.m7-story-card-copy{min-width:0;flex:1}.m7-story-card-label,.m7-story-card-name,.m7-story-card-status{display:block}.m7-story-card-label{font-size:11px;font-weight:900;color:#efb35d;letter-spacing:.02em}.m7-story-card-name{margin-top:4px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-status{margin-top:4px;font-size:11px;color:#bdb3aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-badge{display:inline-flex;margin-top:6px;padding:3px 6px;border-radius:999px;background:#4a211f;color:#ffb9b1;font-size:9px;font-weight:900}.m7-story-reply-card.is-expired{cursor:default;opacity:.72}.m7-story-reply-card.is-expired .m7-story-card-label{color:#c7b8aa}
 .m7-msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.m7-msg-reactions:empty{display:none}.m7-reaction-pill{border:1px solid #ffffff1c;background:#171310;color:#fff;border-radius:999px;min-height:27px;padding:3px 8px;font:700 13px/1 Arial,sans-serif;display:inline-flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px #0002}.m7-msg.mine .m7-reaction-pill{background:#6f451f}.m7-reaction-pill.mine{border-color:#e7aa50;background:#3b2a16!important;box-shadow:0 0 0 1px #e7aa5033}.m7-reaction-count{font-size:10px;opacity:.82}.m7-reaction-picker{position:fixed;z-index:2147483646;display:flex;align-items:center;gap:4px;padding:7px;border:1px solid #ffffff24;border-radius:999px;background:#171310f5;box-shadow:0 14px 38px #000b;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);touch-action:manipulation}.m7-reaction-choice{width:39px;height:39px;border:0;border-radius:50%;background:transparent;color:#fff;font-size:23px;display:grid;place-items:center;padding:0;cursor:pointer;transition:transform .12s ease,background .12s ease}.m7-reaction-choice:active{transform:scale(.86)}.m7-reaction-choice.selected{background:#d99a452a;box-shadow:inset 0 0 0 1px #d99a4560}
 #m7-chat-send{display:flex;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#171310;border-top:1px solid #34261e;flex:0 0 auto}#m7-chat-input{flex:1;min-width:0;border:1px solid #453327;background:#0e0c0b;color:#fff;border-radius:14px;padding:12px;font-size:16px}#m7-chat-send button{border:0;border-radius:14px;background:#d99a45;font-weight:900;padding:0 17px}
-.m7-convo{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #34281f;border-radius:16px;background:#191512;cursor:pointer;position:relative;flex:0 0 auto}.m7-convo.unread{border-color:#e7a84f;background:linear-gradient(135deg,#332215,#1a1512);box-shadow:0 0 0 1px #e7a84f22}.m7-convo-copy{min-width:0;flex:1}.m7-convo strong{color:#f1b45a}.m7-convo small{display:block;color:#aaa;margin-top:4px}.m7-convo-delete{border:0;border-radius:10px;width:34px;height:34px;background:#3b1f1c;color:#ffb0a7;font-size:16px;cursor:pointer;flex:0 0 34px}.m7-new{background:#e58f25;color:#fff;font-size:9px;font-weight:900;border-radius:999px;padding:5px 7px}.m7-empty{text-align:center;color:#aaa;margin-top:30px}.m7-loading{text-align:center;color:#b7aa9d;margin-top:25px}.m7-error{text-align:center;color:#ffb3a8;margin:25px 12px;line-height:1.45}
+.m7-convo{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #34281f;border-radius:16px;background:#191512;cursor:pointer;position:relative;flex:0 0 auto}.m7-convo.unread{border-color:#49ce78;background:linear-gradient(135deg,#1f2e22,#181512);box-shadow:0 0 0 1px #49ce7838,0 0 22px #49ce7815}.m7-convo-copy{min-width:0;flex:1}.m7-convo strong{color:#f1b45a}.m7-convo small{display:block;color:#aaa;margin-top:4px}.m7-convo-time{display:block;margin-top:5px;color:#8f877f;font-size:10px;font-weight:700;white-space:nowrap}.m7-convo.unread .m7-convo-time{color:#8fd9a6}.m7-convo-delete{border:0;border-radius:10px;width:34px;height:34px;background:#3b1f1c;color:#ffb0a7;font-size:16px;cursor:pointer;flex:0 0 34px}.m7-new{position:relative;background:#36c66d;color:#07170d;font-size:9px;font-weight:950;border-radius:999px;padding:6px 8px;box-shadow:0 0 0 1px #7cf4a26b,0 0 15px #36c66d55;animation:m7NewPulse 1.25s ease-in-out infinite;-webkit-animation:m7NewPulse 1.25s ease-in-out infinite}.m7-new::before{content:"";width:6px;height:6px;border-radius:50%;background:#eaffef;display:inline-block;margin-right:4px;vertical-align:1px;box-shadow:0 0 7px #fff}.m7-empty{text-align:center;color:#aaa;margin-top:30px}.m7-loading{text-align:center;color:#b7aa9d;margin-top:25px}.m7-error{text-align:center;color:#ffb3a8;margin:25px 12px;line-height:1.45}@keyframes m7NewPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.07);filter:brightness(1.18)}}@-webkit-keyframes m7NewPulse{0%,100%{-webkit-transform:scale(1);-webkit-filter:brightness(1)}50%{-webkit-transform:scale(1.07);-webkit-filter:brightness(1.18)}}
 #m7-chat.m7-inbox-panel{height:min(500px,calc(100dvh - 120px));max-height:min(500px,calc(100dvh - 120px))}
 #m7-chat.m7-inbox-panel #m7-chat-body{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d9a44155 transparent}
 #m7-chat.m7-inbox-panel #m7-chat-body::-webkit-scrollbar{width:5px}
@@ -61,8 +61,43 @@ function closeReactionPicker(){
   if(reactionPicker){reactionPicker.remove();reactionPicker=null}
   if(reactionPickerOutside){document.removeEventListener("pointerdown",reactionPickerOutside,true);reactionPickerOutside=null}
 }
-function close(remove=true){closeReactionPicker();if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
+function close(remove=true){closeReactionPicker();clearInterval(inboxClockTimer);inboxClockTimer=null;clearTimeout(inboxRefreshTimer);inboxRefreshTimer=null;if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
 const tm=v=>{try{return new Date(v).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}catch(_){return""}};
+function inboxRelativeTime(value){
+  const time=new Date(value||0).getTime();
+  if(!Number.isFinite(time)||time<=0)return "";
+  const diff=Math.max(0,Date.now()-time);
+  const sec=Math.floor(diff/1000);
+  if(sec<45)return "Now";
+  const min=Math.floor(sec/60);
+  if(min<60)return min+"m ago";
+  const hour=Math.floor(min/60);
+  if(hour<24)return hour+"h ago";
+  const day=Math.floor(hour/24);
+  if(day<7)return day+"d ago";
+  try{return new Date(time).toLocaleDateString([],{month:"short",day:"numeric"})}catch(_){return ""}
+}
+function refreshInboxTimes(scope){
+  const root=scope||document;
+  root.querySelectorAll?.("[data-msg-time]").forEach(el=>{
+    const raw=el.getAttribute("data-msg-time")||"";
+    el.textContent=inboxRelativeTime(raw);
+    try{el.title=new Date(raw).toLocaleString()}catch(_){}
+  });
+}
+function startInboxClock(scope){
+  clearInterval(inboxClockTimer);
+  refreshInboxTimes(scope);
+  inboxClockTimer=setInterval(()=>{
+    const shell=document.getElementById("m7-chat-shell");
+    if(!shell){
+      clearInterval(inboxClockTimer);
+      inboxClockTimer=null;
+      return;
+    }
+    refreshInboxTimes(shell);
+  },15000);
+}
 const sameId=(a,b)=>String(a??"")===String(b??"");
 const STORY_MEDIA_BASE="https://wdtaiuwtqdepzdamgsrs.supabase.co/storage/v1/object/public/shop-stories/";
 function storyCtx(m){let x=m&&m.context;if(!x)return{};if(typeof x==="string"){try{x=JSON.parse(x)}catch(_){return{}}}return x&&typeof x==="object"?x:{}}
@@ -478,7 +513,63 @@ async function deleteMessage(id,c){if(!id||!c)return;if(!confirm("Delete this me
 async function deleteConversation(c,back){if(!c?.id)return;if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;let r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});if(r.error){alert(r.error.message);return false}dispatchEvent(new Event("ma7alak:messages-read"));if(typeof back==="function")await back();else close();return true}
 async function messages(c){let b=document.getElementById("m7-chat-body");if(!b)return false;if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}try{let r=await Promise.race([client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))]);if(!b.isConnected)return false;if(r.error)throw r.error;b.innerHTML=(r.data||[]).map(m=>{let mine=sameId(m.sender_id,user?.id),card=storyCardHtml(m);return `<div class="m7-msg ${mine?"mine":""}" data-message-id="${esc(m.id)}">${card}<div class="m7-msg-text">${esc(m.body)}</div>${mine?`<button class="m7-msg-delete" type="button" data-delete-message="${esc(m.id)}" title="Delete message">×</button>`:""}<div class="m7-msg-time">${tm(m.created_at)}</div><div class="m7-msg-reactions" data-reactions-for="${esc(m.id)}"></div></div>`}).join("")||'<div class="m7-empty">No messages yet.</div>';wireStoryCards(b);b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});wireMessageReactionGestures(b,c);await refreshReactionsOnly(c);b.scrollTop=b.scrollHeight;client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));return true}catch(e){loadError(b,e);return false}}
 async function convo(c,title,avatar,back,shopProfile){ensureSharedStoryViewer();shell(title,avatar,!!back);if(!c||c.id==null){loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));return}if(shopProfile&&shopProfile.isShop){bindShopProfileLink(shopProfile.url,shopProfile.slug)}if(back)document.getElementById("m7-back").onclick=back;let del=document.getElementById("m7-delete-convo");del.style.display="block";del.onclick=()=>deleteConversation(c,back);document.getElementById("m7-report").onclick=async()=>{let reason=prompt("Why are you reporting this conversation?","Abusive messages");if(!reason)return;let r=await client.rpc("ma7alak_report_conversation",{p_conversation_id:c.id,p_reason:reason,p_details:"Reported from ShoufHon chat"});alert(r.error?r.error.message:"Report sent to ShoufHon Admin ✓")};document.getElementById("m7-chat").insertAdjacentHTML("beforeend",`<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`);await messages(c);let form=document.getElementById("m7-chat-send");if(form)form.onsubmit=async e=>{e.preventDefault();let i=document.getElementById("m7-chat-input"),t=i?.value.trim();if(!t)return;i.value="";try{let r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){alert(r.error.message);i.value=t}}catch(err){alert(err?.message||"Could not send message");i.value=t}};channel=client.channel("m7c-"+c.id+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages",filter:"conversation_id=eq."+c.id},()=>messages(c)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_message_reactions",filter:"conversation_id=eq."+c.id},()=>refreshReactionsOnly(c)).on("postgres_changes",{event:"DELETE",schema:"public",table:"ma7alak_conversations",filter:"id=eq."+c.id},()=>{if(typeof back==="function")back();else close()}).subscribe()}
-async function unreadMap(rows,sideFor){let out=new Set;if(!rows.length)return out;try{let ids=rows.map(x=>x.id),r=await client.from("ma7alak_messages").select("conversation_id,sender_id,created_at").in("conversation_id",ids);if(r.error)return out;for(let m of r.data||[]){let c=rows.find(x=>sameId(x.id,m.conversation_id));if(!c)continue;let side=typeof sideFor==="function"?sideFor(c):mode,rd=side==="owner"?c.owner_last_read_at:c.viewer_last_read_at;if(!sameId(m.sender_id,user?.id)&&(!rd||new Date(m.created_at)>new Date(rd)))out.add(String(m.conversation_id))}}catch(e){console.warn("Unread map failed:",e)}return out}
+async function inboxMessageState(rows,sideFor){
+  const state={unread:new Set(),latest:new Map()};
+  if(!rows.length)return state;
+
+  try{
+    const ids=rows.map(x=>x.id);
+
+    const r=await client
+      .from("ma7alak_messages")
+      .select("conversation_id,sender_id,created_at")
+      .in("conversation_id",ids)
+      .order("created_at",{ascending:false});
+
+    if(r.error)return state;
+
+    const byId=new Map(
+      rows.map(c=>[String(c.id),c])
+    );
+
+    for(const m of r.data||[]){
+      const id=String(m.conversation_id||"");
+      const c=byId.get(id);
+
+      if(!c)continue;
+
+      if(!state.latest.has(id)){
+        state.latest.set(id,m.created_at);
+      }
+
+      const side=
+        typeof sideFor==="function"
+          ? sideFor(c)
+          : mode;
+
+      const rd=
+        side==="owner"
+          ? c.owner_last_read_at
+          : c.viewer_last_read_at;
+
+      if(
+        !sameId(m.sender_id,user?.id) &&
+        (!rd||new Date(m.created_at)>new Date(rd))
+      ){
+        state.unread.add(id);
+      }
+    }
+  }
+  catch(e){
+    console.warn("Inbox message state failed:",e);
+  }
+
+  return state;
+}
+
+async function unreadMap(rows,sideFor){
+  return (await inboxMessageState(rows,sideFor)).unread;
+}
 async function accepts(slug){let r=await client.rpc("ma7alak_shop_accepts_messages",{p_shop_slug:String(slug||"").trim()});if(r.error){console.warn("Message setting:",r.error);return true}return r.data!==false}
 async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim();if(ownSlug&&ownSlug.toLowerCase()===slug.toLowerCase()){alert("You cannot message your own shop");return}if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url,shop_url").eq("shop_slug",c.shop_slug).maybeSingle();mode="viewer";convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null,{isShop:true,url:sp.data?.shop_url||"",slug:c.shop_slug})}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}
 function wireInboxDeletes(b,rows,reopen){b.querySelectorAll("[data-delete-convo]").forEach(btn=>btn.onclick=async e=>{e.preventDefault();e.stopPropagation();let c=rows.find(x=>sameId(x.id,btn.dataset.deleteConvo));if(c)await deleteConversation(c,reopen)})}
@@ -490,7 +581,10 @@ async function ownerInbox(){
       return;
     }
 
-    const shop=String(window.Ma7alakOwnerAuth.owner.shop_slug||"").trim();
+    const shop=String(
+      window.Ma7alakOwnerAuth.owner.shop_slug||
+      ""
+    ).trim();
 
     shell(
       "Shop Messages",
@@ -507,7 +601,7 @@ async function ownerInbox(){
     toggle.id="m7-owner-accept";
     head.insertBefore(toggle,document.getElementById("m7-close"));
 
-    async function sync(){
+    async function syncSetting(){
       const on=await accepts(shop);
       toggle.className=on?"on":"off";
       toggle.textContent=on?"Messages ON":"Messages OFF";
@@ -517,24 +611,26 @@ async function ownerInbox(){
     toggle.onclick=async()=>{
       toggle.disabled=true;
       const next=toggle.dataset.on!=="1";
-      const r=await client.rpc(
+
+      const result=await client.rpc(
         "ma7alak_set_my_shop_accepting_messages",
         {
           p_shop_slug:shop,
           p_accepting:next
         }
       );
+
       toggle.disabled=false;
 
-      if(r.error){
-        alert(r.error.message);
+      if(result.error){
+        alert(result.error.message);
         return;
       }
 
-      sync();
+      syncSetting();
     };
 
-    await sync();
+    await syncSetting();
 
     settingsChannel=
       client
@@ -547,147 +643,227 @@ async function ownerInbox(){
             table:"ma7alak_shop_message_settings",
             filter:"shop_slug=eq."+shop
           },
-          sync
+          syncSetting
         )
         .subscribe();
 
     const b=document.getElementById("m7-chat-body");
+    let renderTurn=0;
 
-    /*
-      RLS returns both:
-      - conversations sent TO this owner's shop
-      - conversations this same owner started with another shop
-    */
-    const r=
-      await client
-        .from("ma7alak_conversations")
-        .select("*")
-        .order("updated_at",{ascending:false});
+    async function renderOwnerInboxList(){
+      if(!b||!b.isConnected)return;
 
-    if(r.error){
-      b.textContent=r.error.message;
-      return;
-    }
+      const turn=++renderTurn;
 
-    const rows=(r.data||[]).filter(c=>{
-      const incoming=
-        String(c.shop_slug||"").toLowerCase()===
-        shop.toLowerCase();
+      try{
+        const result=
+          await client
+            .from("ma7alak_conversations")
+            .select("*")
+            .order("updated_at",{ascending:false});
 
-      const outgoing=
-        sameId(c.viewer_id,user?.id);
+        if(result.error)throw result.error;
+        if(turn!==renderTurn||!b.isConnected)return;
 
-      return incoming||outgoing;
-    });
+        let rows=(result.data||[]).filter(c=>{
+          const incoming=
+            String(c.shop_slug||"").toLowerCase()===
+            shop.toLowerCase();
 
-    const ids=rows.map(x=>x.id);
+          const outgoing=
+            sameId(c.viewer_id,user?.id);
 
-    const [un,partnersResult]=await Promise.all([
-      unreadMap(
-        rows,
-        c=>sameId(c.viewer_id,user?.id)
-          ? "viewer"
-          : "owner"
-      ),
-      ids.length
-        ? client.rpc(
-            "ma7alak_get_conversation_partners",
-            {p_conversation_ids:ids}
+          return incoming||outgoing;
+        });
+
+        const ids=rows.map(x=>x.id);
+
+        const [messageState,partnersResult]=await Promise.all([
+          inboxMessageState(
+            rows,
+            c=>sameId(c.viewer_id,user?.id)
+              ?"viewer"
+              :"owner"
+          ),
+          ids.length
+            ? client.rpc(
+                "ma7alak_get_conversation_partners",
+                {p_conversation_ids:ids}
+              )
+            : Promise.resolve({data:[]})
+        ]);
+
+        if(turn!==renderTurn||!b.isConnected)return;
+
+        if(partnersResult.error){
+          console.warn(
+            "Conversation partner identities:",
+            partnersResult.error
+          );
+        }
+
+        const partnerMap=new Map(
+          (partnersResult.data||[]).map(
+            p=>[String(p.conversation_id),p]
           )
-        : Promise.resolve({data:[]})
-    ]);
+        );
 
-    if(partnersResult.error){
-      console.warn(
-        "Conversation partner identities:",
-        partnersResult.error
-      );
-    }
+        rows=rows.slice().sort((a,bRow)=>{
+          const aTime=new Date(
+            messageState.latest.get(String(a.id))||
+            a.updated_at||
+            a.created_at||
+            0
+          ).getTime()||0;
 
-    const partnerMap=new Map(
-      (partnersResult.data||[]).map(
-        p=>[String(p.conversation_id),p]
-      )
-    );
+          const bTime=new Date(
+            messageState.latest.get(String(bRow.id))||
+            bRow.updated_at||
+            bRow.created_at||
+            0
+          ).getTime()||0;
 
-    b.innerHTML=
-      rows.length
-        ? rows.map(c=>{
-            const id=String(c.id);
-            const outgoing=sameId(c.viewer_id,user?.id);
-            const p=partnerMap.get(id)||{};
+          return bTime-aTime;
+        });
+
+        b.innerHTML=
+          rows.length
+            ? rows.map(c=>{
+                const id=String(c.id);
+                const outgoing=sameId(c.viewer_id,user?.id);
+                const p=partnerMap.get(id)||{};
+                const n=
+                  p.display_name||
+                  (outgoing?c.shop_slug:"Customer");
+
+                const shopActor=
+                  p.counterpart_type==="shop";
+
+                const subtitle=
+                  shopActor
+                    ? (
+                        outgoing
+                          ?"Shop · You messaged this shop"
+                          :"Shop · Messaged your shop"
+                      )
+                    : (
+                        p.username
+                          ?"@"+p.username
+                          :"Customer"
+                      );
+
+                const lastAt=
+                  messageState.latest.get(id)||
+                  c.updated_at||
+                  c.created_at||
+                  "";
+
+                const unread=
+                  messageState.unread.has(id);
+
+                return `<div class="m7-convo ${unread?"unread":""}" data-id="${esc(id)}" data-side="${outgoing?"viewer":"owner"}">${av(p.avatar_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>${esc(subtitle)}</small><time class="m7-convo-time" data-msg-time="${esc(lastAt)}"></time></div>${unread?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`;
+              }).join("")
+            : '<div class="m7-empty">No shop messages yet.</div>';
+
+        wireInboxDeletes(
+          b,
+          rows,
+          ownerInbox
+        );
+
+        b.querySelectorAll(".m7-convo").forEach(el=>{
+          el.onclick=()=>{
+            const c=rows.find(
+              x=>sameId(x.id,el.dataset.id)
+            );
+
+            if(!c){
+              loadError(
+                b,
+                new Error("Conversation not found.")
+              );
+              return;
+            }
+
+            const p=
+              partnerMap.get(String(c.id))||
+              {};
+
+            const outgoing=
+              sameId(c.viewer_id,user?.id);
+
+            mode=outgoing
+              ?"viewer"
+              :"owner";
+
             const n=
               p.display_name||
               (outgoing?c.shop_slug:"Customer");
 
-            const shopActor=
-              p.counterpart_type==="shop";
+            convo(
+              c,
+              n,
+              p.avatar_url||"",
+              ownerInbox,
+              {
+                isShop:p.counterpart_type==="shop",
+                url:p.shop_url||"",
+                slug:p.shop_slug||""
+              }
+            );
+          };
+        });
 
-            const subtitle=
-              shopActor
-                ? (
-                    outgoing
-                      ? "Shop · You messaged this shop"
-                      : "Shop · Messaged your shop"
-                  )
-                : (
-                    p.username
-                      ? "@"+p.username
-                      : "Customer"
-                  );
-
-            return `<div class="m7-convo ${un.has(id)?"unread":""}" data-id="${esc(id)}" data-side="${outgoing?"viewer":"owner"}">${av(p.avatar_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>${esc(subtitle)}</small></div>${un.has(id)?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`;
-          }).join("")
-        : '<div class="m7-empty">No shop messages yet.</div>';
-
-    wireInboxDeletes(
-      b,
-      rows,
-      ownerInbox
-    );
-
-    b.querySelectorAll(".m7-convo").forEach(el=>{
-      el.onclick=()=>{
-        const c=rows.find(
-          x=>sameId(x.id,el.dataset.id)
-        );
-
-        if(!c){
-          loadError(
-            b,
-            new Error("Conversation not found.")
-          );
-          return;
+        startInboxClock(b);
+      }
+      catch(error){
+        if(turn===renderTurn){
+          loadError(b,error);
         }
+      }
+    }
 
-        const p=
-          partnerMap.get(String(c.id))||
-          {};
+    function scheduleOwnerInboxRefresh(){
+      clearTimeout(inboxRefreshTimer);
 
-        const outgoing=
-          sameId(c.viewer_id,user?.id);
+      inboxRefreshTimer=setTimeout(
+        ()=>{
+          inboxRefreshTimer=null;
+          renderOwnerInboxList();
+        },
+        70
+      );
+    }
 
-        mode=outgoing
-          ? "viewer"
-          : "owner";
+    await renderOwnerInboxList();
 
-        const n=
-          p.display_name||
-          (outgoing?c.shop_slug:"Customer");
-
-        convo(
-          c,
-          n,
-          p.avatar_url||"",
-          ownerInbox,
+    channel=
+      client
+        .channel(
+          "m7-owner-inbox-live-"+
+          shop+
+          "-"+
+          Math.random()
+        )
+        .on(
+          "postgres_changes",
           {
-            isShop:p.counterpart_type==="shop",
-            url:p.shop_url||"",
-            slug:p.shop_slug||""
-          }
-        );
-      };
-    });
+            event:"*",
+            schema:"public",
+            table:"ma7alak_messages"
+          },
+          scheduleOwnerInboxRefresh
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"ma7alak_conversations"
+          },
+          scheduleOwnerInboxRefresh
+        )
+        .subscribe();
   }
   catch(e){
     loadError(
