@@ -20,7 +20,7 @@ let settleToken=0;
 const lastAckAt={viewer:0,owner:0};
 
 const personSVG=`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.4-4 2.9-6.2 7-6.2s6.6 2.2 7 6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-const msgSVG=`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.2 5.2h13.6c1.2 0 2.2 1 2.2 2.2v8.1c0 1.2-1 2.2-2.2 2.2H11l-4.8 3v-3H5.2c-1.2 0-2.2-1 2.2-2.2V7.4c0-1.2 1-2.2 2.2-2.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+const msgSVG=`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.2 5.2h13.6c1.2 0 2.2 1 2.2 2.2v8.1c0 1.2-1 2.2-2.2 2.2H11l-4.8 3v-3H5.2c-1.2 0-2.2-1-2.2-2.2V7.4c0-1.2 1-2.2 2.2-2.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
 
 function style(){
   if(document.getElementById("m7-msg-int-css"))return;
