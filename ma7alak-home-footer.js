@@ -615,23 +615,52 @@ body.m7hf-home-mounted{background:#050403!important}
   }
 
   let reconnectTimer=null;
+  let stabilizationTimers=[];
+
+  function clearStabilizationTimers(){
+    stabilizationTimers.forEach(clearTimeout);
+    stabilizationTimers=[];
+  }
+
+  function stabilizeFooterMount(){
+    clearStabilizationTimers();
+
+    [0,90,240,520,950,1600,2800,4800].forEach(delay=>{
+      stabilizationTimers.push(
+        setTimeout(()=>{
+          if(!document.hidden)reconnect();
+        },delay)
+      );
+    });
+  }
 
   function reconnect(){
     if((location.pathname||"/").replace(/\/+$/,"")!=="/")return;
     const wasConnected=!!root?.isConnected;
+    const hadShell=!!root?.querySelector?.(".m7hf-shell");
+
     if(!ensureRootConnected())return;
-    if(!wasConnected)render();
+
+    if(
+      !wasConnected ||
+      !hadShell
+    ){
+      render();
+    }
   }
 
   async function boot(){
     ensureStyle();
+
+    /* Load the saved state before the first visible render. */
     current=mergedSettings({});
-    render();
     await load();
+
+    stabilizeFooterMount();
     subscribe();
 
-    /* Keep the footer alive through Hostinger UI hydration / soft refreshes.
-       One lightweight check every 1.5s; no document-wide MutationObserver. */
+    /* Keep the footer alive through later Hostinger soft refreshes.
+       This stays a small connection check, not a document MutationObserver. */
     clearInterval(reconnectTimer);
     reconnectTimer=setInterval(()=>{
       if(!document.hidden)reconnect();
@@ -641,7 +670,11 @@ body.m7hf-home-mounted{background:#050403!important}
   }
 
   window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(current.background_url==="builtin")render()});
-  window.addEventListener("pageshow",reconnect);
+  window.addEventListener("load",stabilizeFooterMount,{once:true});
+  window.addEventListener("pageshow",()=>{
+    reconnect();
+    stabilizeFooterMount();
+  });
   window.addEventListener("popstate",reconnect);
   window.addEventListener("focus",reconnect);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reconnect()});

@@ -18,6 +18,8 @@
   let profile=null;
   let currentIndex=0;
   let currentOwner=false;
+  let currentSignedIn=false;
+  let viewportBaseline=0;
   let mediaTimer=0;
   let loadToken=0;
   let historyArmed=false;
@@ -321,8 +323,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-nav{position:absolute;z-index:8;top:82px;bottom:92px;width:34%;border:0;background:transparent;color:transparent;padding:0}
 #${ROOT_ID} .ssv-prev{left:0}
 #${ROOT_ID} .ssv-next{right:0}
-#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:0;padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px}
+#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:var(--ssv-keyboard-offset,0px);padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px;transition:bottom .12s ease}
 #${ROOT_ID}.is-owner .ssv-bottom{display:none}
+#${ROOT_ID}.is-logged-out .ssv-reply{display:none!important}
+#${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
 #${ROOT_ID} .ssv-like{width:44px;height:44px;flex:0 0 44px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#090909b8;color:#fff;display:grid;place-items:center;font-size:23px;cursor:pointer;touch-action:manipulation}
 #${ROOT_ID} .ssv-like.is-liked{color:#ff3e55;border-color:#ff5b6c88;background:#2b0d12cc}
 #${ROOT_ID} .ssv-reply{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
@@ -340,6 +344,63 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     document.head.appendChild(
       style
+    );
+  }
+
+  function syncVisualViewport(){
+    if(!root)return;
+
+    const replyInput=
+      root.querySelector(
+        ".ssv-reply input"
+      );
+
+    const focused=
+      !!replyInput &&
+      document.activeElement===
+      replyInput;
+
+    const vv=
+      window.visualViewport;
+
+    if(!focused){
+      viewportBaseline=
+        Math.max(
+          window.innerHeight||0,
+          document.documentElement?.clientHeight||0,
+          vv?.height||0
+        );
+
+      root.style.setProperty(
+        "--ssv-keyboard-offset",
+        "0px"
+      );
+
+      return;
+    }
+
+    const base=
+      Math.max(
+        viewportBaseline||0,
+        window.innerHeight||0,
+        document.documentElement?.clientHeight||0
+      );
+
+    const offset=
+      vv
+        ? Math.max(
+            0,
+            Math.round(
+              base-
+              vv.height-
+              vv.offsetTop
+            )
+          )
+        : 0;
+
+    root.style.setProperty(
+      "--ssv-keyboard-offset",
+      offset+"px"
     );
   }
 
@@ -537,6 +598,27 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           replyCurrent();
         };
 
+    const replyInput=
+      root.querySelector(
+        ".ssv-reply input"
+      );
+
+    replyInput.addEventListener(
+      "focus",
+      ()=>{
+        syncVisualViewport();
+        setTimeout(syncVisualViewport,60);
+        setTimeout(syncVisualViewport,220);
+      }
+    );
+
+    replyInput.addEventListener(
+      "blur",
+      ()=>{
+        setTimeout(syncVisualViewport,80);
+      }
+    );
+
     root.addEventListener(
       "touchstart",
       event=>{
@@ -728,6 +810,15 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       "is-owner"
     );
 
+    root.classList.remove(
+      "is-logged-out"
+    );
+
+    root.style.setProperty(
+      "--ssv-keyboard-offset",
+      "0px"
+    );
+
     root
       .querySelector(
         ".ssv-media-host"
@@ -900,8 +991,17 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         .trim()
         .toLowerCase();
 
-    if(known){
+    const c=
+      getClient();
+
+    if(
+      !c?.auth
+    ){
+      currentSignedIn=
+        !!known;
+
       return (
+        !!known &&
         known===
         String(
           slug||
@@ -910,15 +1010,6 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           .trim()
           .toLowerCase()
       );
-    }
-
-    const c=
-      getClient();
-
-    if(
-      !c?.auth
-    ){
-      return false;
     }
 
     try{
@@ -931,8 +1022,23 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           .data
           ?.user;
 
+      currentSignedIn=
+        !!user;
+
       if(!user){
         return false;
+      }
+
+      if(known){
+        return (
+          known===
+          String(
+            slug||
+            ""
+          )
+            .trim()
+            .toLowerCase()
+        );
       }
 
       const result=
@@ -959,7 +1065,19 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       );
     }
     catch(_){
-      return false;
+      currentSignedIn=
+        !!known;
+
+      return (
+        !!known &&
+        known===
+        String(
+          slug||
+          ""
+        )
+          .trim()
+          .toLowerCase()
+      );
     }
   }
 
@@ -1073,6 +1191,11 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       currentOwner
     );
 
+    root.classList.toggle(
+      "is-logged-out",
+      !currentSignedIn
+    );
+
     const liked=
       isLocallyLiked(
         story.id
@@ -1101,14 +1224,20 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         ".ssv-reply input"
       )
       .disabled=
-        currentOwner;
+        (
+          currentOwner ||
+          !currentSignedIn
+        );
 
     root
       .querySelector(
         ".ssv-send"
       )
       .disabled=
-        currentOwner;
+        (
+          currentOwner ||
+          !currentSignedIn
+        );
   }
 
   function renderBars(duration){
@@ -1476,7 +1605,35 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   }
 
   async function replyCurrent(){
-    if(currentOwner){
+    if(
+      currentOwner ||
+      !currentSignedIn
+    ){
+      return;
+    }
+
+    const c=
+      getClient();
+
+    try{
+      const user=
+        (
+          await c
+            ?.auth
+            ?.getUser?.()
+        )
+          ?.data
+          ?.user;
+
+      if(!user){
+        currentSignedIn=false;
+        renderHeader();
+        return;
+      }
+    }
+    catch(_){
+      currentSignedIn=false;
+      renderHeader();
       return;
     }
 
@@ -2096,6 +2253,15 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     ensureRoot();
 
+    viewportBaseline=
+      Math.max(
+        window.innerHeight||0,
+        document.documentElement?.clientHeight||0,
+        window.visualViewport?.height||0
+      );
+
+    syncVisualViewport();
+
     root.hidden=
       false;
 
@@ -2279,6 +2445,60 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       return false;
     }
   }
+
+  if(window.visualViewport){
+    window.visualViewport.addEventListener(
+      "resize",
+      syncVisualViewport,
+      {passive:true}
+    );
+
+    window.visualViewport.addEventListener(
+      "scroll",
+      syncVisualViewport,
+      {passive:true}
+    );
+  }
+
+  window.addEventListener(
+    "resize",
+    syncVisualViewport,
+    {passive:true}
+  );
+
+  try{
+    getClient()?.auth?.onAuthStateChange?.(
+      ()=>{
+        if(
+          !root ||
+          root.hidden
+        ){
+          return;
+        }
+
+        const slug=
+          String(
+            stories[currentIndex]?.shop_slug||
+            profile?.shop_slug||
+            ""
+          ).trim();
+
+        if(!slug)return;
+
+        ownerFor(slug)
+          .then(()=>{
+            if(
+              root &&
+              !root.hidden
+            ){
+              renderHeader();
+            }
+          })
+          .catch(()=>{});
+      }
+    );
+  }
+  catch(_){}
 
   window.addEventListener(
     "popstate",

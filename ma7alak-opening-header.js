@@ -91,6 +91,32 @@
   const POSITION = "under-premium";
   const ROOT_ID = "ma7alak-opening-header-root";
   const HOME_BLOCK_ID = "shoufhon-homepage-content-block";
+  const HERO_IMAGE_URL = "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/2.0%20shuf.jfif";
+
+  function primeOpeningHeroImage(){
+    if(window.__M7_OPENING_HERO_PRIMED__)return;
+    window.__M7_OPENING_HERO_PRIMED__=true;
+
+    try{
+      const link=document.createElement("link");
+      link.rel="preload";
+      link.as="image";
+      link.href=HERO_IMAGE_URL;
+      link.setAttribute("fetchpriority","high");
+      link.dataset.m7OpeningHeroPreload="1";
+      (document.head||document.documentElement).appendChild(link);
+    }catch(_){}
+
+    try{
+      const image=new Image();
+      image.fetchPriority="high";
+      image.decoding="async";
+      image.src=HERO_IMAGE_URL;
+      window.__M7_OPENING_HERO_WARM_IMAGE__=image;
+    }catch(_){}
+  }
+
+  primeOpeningHeroImage();
   let homepageBlock = null;
   let openingRootRef = null;
   let openingGlobalEventsBound = false;
