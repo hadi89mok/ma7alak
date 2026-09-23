@@ -5,10 +5,10 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.22.2";
+  const VERSION="2026.09.23.1";
   const CONTENT_PROTECTION_URL=
     "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@56a7a66e1c4f69f4036f59b0b7c2b486a0130d2e/shoufhon-content-protection.js";
-  const DISMISS_KEY="shoufhon_pwa_install_dismissed_session";
+  const DISMISS_KEY="shoufhon_pwa_install_dismissed_session_v2";
 
   let deferredPrompt=null;
   let registration=null;
@@ -244,6 +244,63 @@
         display:block
       }
 
+      #m7-pwa-install-card[data-mode="ios"] .m7p-help{
+        margin-top:2px;
+        padding:11px 12px;
+        border:1px solid rgba(217,164,65,.16);
+        background:
+          linear-gradient(
+            145deg,
+            rgba(217,164,65,.075),
+            rgba(255,255,255,.025)
+          )
+      }
+
+      #m7-pwa-install-card .m7p-ios-title{
+        display:block;
+        margin-bottom:8px;
+        color:#fff;
+        font-size:10px;
+        font-weight:900
+      }
+
+      #m7-pwa-install-card .m7p-ios-steps{
+        display:grid;
+        gap:7px
+      }
+
+      #m7-pwa-install-card .m7p-ios-step{
+        display:grid;
+        grid-template-columns:22px minmax(0,1fr);
+        gap:8px;
+        align-items:center;
+        color:rgba(255,255,255,.80)
+      }
+
+      #m7-pwa-install-card .m7p-ios-step b{
+        width:22px;
+        height:22px;
+        display:grid;
+        place-items:center;
+        border-radius:50%;
+        background:rgba(217,164,65,.18);
+        color:#f2d69b;
+        font-size:10px;
+        line-height:1
+      }
+
+      #m7-pwa-install-card .m7p-ios-step span{
+        min-width:0
+      }
+
+      #m7-pwa-install-card .m7p-ios-note{
+        display:block;
+        margin-top:8px;
+        color:rgba(255,255,255,.46);
+        font-size:9px;
+        line-height:1.4
+      }
+
       #m7-pwa-install-card .m7p-actions{
         display:flex;
         align-items:center;
@@ -328,6 +385,10 @@
       "aria-label",
       "Install ShoufHon"
     );
+    card.setAttribute(
+      "aria-live",
+      "polite"
+    );
 
     card.innerHTML=`
       <span class="m7p-icon" aria-hidden="true">
@@ -392,6 +453,41 @@
     card.classList.add("help");
   }
 
+  function setHelpHtml(html){
+    const card=ensureCard();
+    const help=
+      card.querySelector(
+        "[data-m7p-help]"
+      );
+
+    if(help){
+      help.innerHTML=html;
+    }
+
+    card.classList.add("help");
+  }
+
+  function iosInstallHelp(){
+    return `
+      <strong class="m7p-ios-title">Install ShoufHon like an app</strong>
+      <span class="m7p-ios-steps">
+        <span class="m7p-ios-step">
+          <b>1</b>
+          <span>Tap the <strong>Share</strong> button on your iPhone.</span>
+        </span>
+        <span class="m7p-ios-step">
+          <b>2</b>
+          <span>Choose <strong>Add to Home Screen</strong>.</span>
+        </span>
+        <span class="m7p-ios-step">
+          <b>3</b>
+          <span>Keep <strong>Open as Web App</strong> on if shown, then tap <strong>Add</strong>.</span>
+        </span>
+      </span>
+      <span class="m7p-ios-note">After that, ShoufHon opens from its own Home Screen icon without the normal browser tab.</span>
+    `;
+  }
+
   function showCard(mode){
     if(
       isStandalone() ||
@@ -426,12 +522,16 @@
     else if(mode==="ios"){
       if(subtitle){
         subtitle.textContent=
-          "Add ShoufHon to your Home Screen";
+          "Add ShoufHon to your iPhone Home Screen";
       }
 
       if(button){
-        button.textContent="How";
+        button.textContent="Install";
       }
+
+      setHelpHtml(
+        iosInstallHelp()
+      );
     }
     else{
       if(subtitle){
@@ -485,8 +585,8 @@
     }
 
     if(mode==="ios"){
-      setHelp(
-        "Tap Share in Safari, then choose Add to Home Screen."
+      setHelpHtml(
+        iosInstallHelp()
       );
       return;
     }
@@ -758,9 +858,49 @@
   ensureStandaloneContentProtection();
   injectHead();
 
-  const start=async()=>{
-    await registerServiceWorker();
-    scheduleFallback();
+  /*
+     iPhone/iPad do not provide beforeinstallprompt.
+     Show ShoufHon's own install guide as soon as the DOM is ready instead
+     of waiting for the full page load, videos, or service-worker setup.
+     This makes the install prompt reliable even on media-heavy pages.
+  */
+  const startIOSInstallHint=()=>{
+    if(
+      !isIOS() ||
+      isStandalone() ||
+      dismissed()
+    ){
+      return;
+    }
+
+    clearTimeout(
+      fallbackTimer
+    );
+
+    fallbackTimer=setTimeout(
+      ()=>showCard("ios"),
+      650
+    );
+  };
+
+  if(document.readyState==="loading"){
+    document.addEventListener(
+      "DOMContentLoaded",
+      startIOSInstallHint,
+      {once:true}
+    );
+  }
+  else{
+    startIOSInstallHint();
+  }
+
+  const start=()=>{
+    registerServiceWorker()
+      .catch(()=>{});
+
+    if(!isIOS()){
+      scheduleFallback();
+    }
   };
 
   if(document.readyState==="complete"){
