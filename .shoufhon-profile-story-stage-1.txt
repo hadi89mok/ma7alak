@@ -1,0 +1,8491 @@
+<!-- =========================================================
+     MA7ALAK STORIES
+     SHOP: ONE-SLUG PROFILE
+
+     ✓ Story circle
+     ✓ Story viewer
+     ✓ Fullscreen
+     ✓ Images
+     ✓ Videos
+     ✓ Sound
+     ✓ Story navigation
+     ✓ Progress bars
+     ✓ New story animation
+     ✓ Owner + button
+     ✓ PAGE-LEVEL owner upload bridge
+     ✓ OWNER DELETE STORY
+     ✓ STORY TIME AGO
+     ✓ Mobile-safe
+     ✓ Supabase stories
+     ✓ 24 hour expiry
+========================================================= -->
+
+
+<style>
+
+/* =========================================================
+   STORY WRAPPER
+========================================================= */
+
+#ma7alak-story-wrapper{
+
+  width:100%!important;
+
+  display:flex!important;
+
+  justify-content:center!important;
+  align-items:center!important;
+
+  margin:15px 0!important;
+
+  padding:0!important;
+
+  position:relative!important;
+
+  min-height:min(240px,calc(100vw - 92px))!important;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  border-radius:0!important;
+
+  box-shadow:none!important;
+
+  -webkit-box-shadow:none!important;
+
+  outline:none!important;
+
+  overflow:visible!important;
+
+  z-index:999999!important;
+
+}
+
+
+/* =========================================================
+   NEW STORY RING
+========================================================= */
+
+#ma7alak-story-new-ring{
+
+  position:absolute!important;
+
+  left:50%!important;
+  top:50%!important;
+
+  width:min(262px,calc(100vw - 70px))!important;
+  height:min(262px,calc(100vw - 70px))!important;
+
+  transform:
+    translate(-50%,-50%)
+    scale(.88);
+
+  border-radius:50%!important;
+
+  border:2px solid rgba(217,164,65,.72)!important;
+
+  background:transparent!important;
+
+  box-shadow:none!important;
+
+  pointer-events:none!important;
+
+  opacity:0;
+
+  z-index:1!important;
+
+  box-sizing:border-box!important;
+
+}
+
+/* =========================================================
+   NEW / UNSEEN STORY GOLD ORBIT RING
+   Visible and rotating only while this Story is still unseen.
+========================================================= */
+
+#ma7alak-story-active-ring{
+
+  position:absolute!important;
+
+  left:50%!important;
+  top:50%!important;
+
+  width:min(252px,calc(100vw - 80px))!important;
+  height:min(252px,calc(100vw - 80px))!important;
+
+  transform:translate(-50%,-50%);
+
+  border-radius:50%!important;
+
+  padding:4px!important;
+
+  pointer-events:none!important;
+
+  opacity:0;
+
+  z-index:3!important;
+
+  box-sizing:border-box!important;
+
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(217,164,65,.10) 0deg,
+      #8f641d 35deg,
+      #ffd97c 78deg,
+      #d9a441 120deg,
+      rgba(217,164,65,.18) 165deg,
+      #fff0bd 210deg,
+      #d9a441 255deg,
+      #8f641d 310deg,
+      rgba(217,164,65,.10) 360deg
+    )!important;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0)!important;
+
+  -webkit-mask-composite:xor!important;
+  mask-composite:exclude!important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(217,164,65,.50))
+    drop-shadow(0 0 12px rgba(217,164,65,.24))!important;
+
+}
+
+#ma7alak-story-wrapper.story-has-new
+#ma7alak-story-active-ring{
+
+  opacity:1;
+
+  animation:
+    ma7alakStoryGoldOrbit
+    2.8s
+    linear
+    infinite!important;
+
+  -webkit-animation:
+    ma7alakStoryGoldOrbit
+    2.8s
+    linear
+    infinite!important;
+
+}
+
+@keyframes ma7alakStoryGoldOrbit{
+  from{
+    transform:translate(-50%,-50%) rotate(0deg);
+  }
+  to{
+    transform:translate(-50%,-50%) rotate(360deg);
+  }
+}
+
+@-webkit-keyframes ma7alakStoryGoldOrbit{
+  from{
+    -webkit-transform:translate(-50%,-50%) rotate(0deg);
+  }
+  to{
+    -webkit-transform:translate(-50%,-50%) rotate(360deg);
+  }
+}
+
+
+
+/* =========================================================
+   NEW STORY ACTIVE
+========================================================= */
+
+#ma7alak-story-wrapper.story-has-new
+#ma7alak-story-new-ring{
+
+  opacity:1;
+
+  animation:
+    ma7alakNewStoryPulse
+    1.65s
+    ease-out
+    infinite;
+
+  -webkit-animation:
+    ma7alakNewStoryPulse
+    1.65s
+    ease-out
+    infinite;
+
+}
+
+
+/* =========================================================
+   NEW STORY PULSE
+========================================================= */
+
+@keyframes ma7alakNewStoryPulse{
+
+  0%{
+
+    transform:
+      translate(-50%,-50%)
+      scale(.88);
+
+    opacity:1;
+
+    border-width:3px;
+
+  }
+
+  55%{
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.08);
+
+    opacity:.58;
+
+    border-width:2px;
+
+  }
+
+  100%{
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.30);
+
+    opacity:0;
+
+    border-width:1px;
+
+  }
+
+}
+
+
+@-webkit-keyframes ma7alakNewStoryPulse{
+
+  0%{
+
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(.88);
+
+    opacity:1;
+
+    border-width:3px;
+
+  }
+
+  55%{
+
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(1.08);
+
+    opacity:.58;
+
+    border-width:2px;
+
+  }
+
+  100%{
+
+    -webkit-transform:
+      translate(-50%,-50%)
+      scale(1.30);
+
+    opacity:0;
+
+    border-width:1px;
+
+  }
+
+}
+
+
+/* =========================================================
+   STORY BUTTON
+========================================================= */
+
+#ma7alak-story-button{
+
+  position:relative!important;
+
+  width:min(240px,calc(100vw - 92px))!important;
+  height:min(240px,calc(100vw - 92px))!important;
+
+  padding:3px!important;
+
+  margin:0!important;
+
+  border-radius:50%!important;
+
+  border:3px solid #d9a441!important;
+
+  background:transparent!important;
+
+  box-shadow:none!important;
+
+  -webkit-box-shadow:none!important;
+
+  filter:none!important;
+
+  cursor:pointer!important;
+
+  overflow:hidden!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  outline:none!important;
+
+  z-index:2!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+  touch-action:manipulation!important;
+
+  box-sizing:border-box!important;
+
+  clip-path:
+    circle(50% at 50% 50%)!important;
+
+  -webkit-clip-path:
+    circle(50% at 50% 50%)!important;
+
+}
+
+
+/* =========================================================
+   REMOVE BUTTON EFFECTS
+========================================================= */
+
+#ma7alak-story-button::before,
+#ma7alak-story-button::after{
+
+  content:none!important;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+}
+
+
+#ma7alak-story-button:hover,
+#ma7alak-story-button:focus,
+#ma7alak-story-button:focus-visible,
+#ma7alak-story-button:active{
+
+  outline:none!important;
+
+  background:transparent!important;
+
+  box-shadow:none!important;
+
+  -webkit-box-shadow:none!important;
+
+}
+
+
+/* =========================================================
+   STORY PREVIEW
+========================================================= */
+
+#ma7alak-story-preview{
+
+  width:100%!important;
+  height:100%!important;
+
+  margin:0!important;
+
+  padding:0!important;
+
+  border-radius:50%!important;
+
+  overflow:hidden!important;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+}
+
+
+#ma7alak-story-preview img{
+
+  width:100%!important;
+  height:100%!important;
+
+  object-fit:cover!important;
+
+  border-radius:50%!important;
+
+  border:none!important;
+
+  box-shadow:none!important;
+
+  display:block!important;
+
+}
+
+
+/* =========================================================
+   EMPTY CIRCLE
+   Permanent shop logo is used instead of Story media.
+========================================================= */
+
+.ma7alak-story-placeholder{
+
+  width:100%!important;
+  height:100%!important;
+
+  border-radius:50%!important;
+
+  display:block!important;
+
+  background:transparent!important;
+
+}
+
+
+/* =========================================================
+   OWNER PLUS
+========================================================= */
+
+#ma7alak-owner-add-story{
+
+  position:absolute!important;
+
+  width:28px!important;
+  height:28px!important;
+
+  right:calc(50% - 127px)!important;
+
+  bottom:8px!important;
+
+  border:2px solid #111!important;
+
+  border-radius:50%!important;
+
+  background:#d9a441!important;
+
+  color:#111!important;
+
+  display:none;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  font-size:21px!important;
+
+  font-weight:900!important;
+
+  line-height:1!important;
+
+  padding:0!important;
+
+  margin:0!important;
+
+  cursor:pointer!important;
+
+  z-index:20!important;
+
+  box-shadow:
+    0 3px 12px rgba(0,0,0,.45)!important;
+
+  -webkit-box-shadow:
+    0 3px 12px rgba(0,0,0,.45)!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  outline:none!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+}
+
+
+#ma7alak-owner-add-story.visible{
+
+  display:flex!important;
+
+}
+
+
+#ma7alak-owner-add-story:active{
+
+  transform:scale(.90)!important;
+
+}
+
+
+/* =========================================================
+   FULL STORY
+========================================================= */
+
+#ma7alak-full-story{
+
+  position:fixed!important;
+
+  inset:0!important;
+
+  width:100vw!important;
+  height:100vh!important;
+
+  width:100dvw!important;
+  height:100dvh!important;
+
+  background:#000!important;
+
+  display:none;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  overflow:hidden!important;
+
+  z-index:2147483647!important;
+
+  margin:0!important;
+
+  padding:0!important;
+
+  box-sizing:border-box!important;
+
+  isolation:isolate;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+#ma7alak-full-story.active{
+
+  display:flex!important;
+
+}
+/* Real browser fullscreen for Story viewer. */
+#ma7alak-full-story:fullscreen,
+#ma7alak-full-story:-webkit-full-screen{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  width:100dvw!important;
+  height:100dvh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+
+
+/* =========================================================
+   NATIVE FULLSCREEN
+========================================================= */
+
+#ma7alak-full-story:fullscreen{
+
+  width:100vw!important;
+  height:100vh!important;
+
+  background:#000!important;
+
+}
+
+
+#ma7alak-full-story:-webkit-full-screen{
+
+  width:100vw!important;
+  height:100vh!important;
+
+  background:#000!important;
+
+}
+
+
+/* =========================================================
+   STORY MEDIA
+========================================================= */
+
+#ma7alak-full-story-media{
+
+  position:absolute!important;
+
+  inset:0!important;
+  top:0!important;
+  left:0!important;
+
+  transform:none!important;
+
+  width:100%!important;
+  height:100%!important;
+  width:100dvw!important;
+  height:100dvh!important;
+
+  background:#000!important;
+
+  display:block!important;
+
+  overflow:hidden!important;
+
+  border-radius:0!important;
+
+  box-sizing:border-box!important;
+
+  isolation:isolate;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+/* =========================================================
+   MEDIA LAYERS
+========================================================= */
+
+.ma7alak-story-media-layer{
+
+  position:absolute!important;
+
+  inset:0!important;
+
+  width:100%!important;
+  height:100%!important;
+
+  object-fit:contain!important;
+
+  background:#000!important;
+
+  border-radius:0!important;
+
+  display:block!important;
+
+  opacity:0;
+
+  visibility:hidden;
+
+  transition:
+    opacity .32s ease;
+
+  will-change:opacity;
+
+  backface-visibility:hidden;
+
+  -webkit-backface-visibility:hidden;
+
+  transform:
+    translateZ(0);
+
+  z-index:1;
+
+  border:none!important;
+
+  outline:none!important;
+
+}
+
+
+.ma7alak-story-media-layer.active{
+
+  opacity:1;
+
+  visibility:visible;
+
+  z-index:2;
+
+}
+
+
+/* =========================================================
+   STORY SHOP NAME
+========================================================= */
+
+#ma7alak-story-shop-name{
+
+  position:absolute!important;
+
+  top:64px!important;
+
+  left:20px!important;
+
+  max-width:calc(100% - 130px)!important;
+
+  color:#fff!important;
+
+  font-family:
+    Arial,
+    "Segoe UI",
+    sans-serif!important;
+
+  font-size:16px!important;
+
+  font-weight:800!important;
+
+  line-height:22px!important;
+
+  white-space:nowrap!important;
+
+  overflow:hidden!important;
+
+  text-overflow:ellipsis!important;
+
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.55)!important;
+
+  pointer-events:none!important;
+
+  z-index:125!important;
+
+  box-sizing:border-box!important;
+
+}
+
+
+/* =========================================================
+   STORY TIME
+========================================================= */
+
+#ma7alak-story-time{
+
+  position:absolute!important;
+
+  top:90px!important;
+
+  left:20px!important;
+
+  min-height:32px!important;
+
+  padding:
+    0 12px!important;
+
+  display:flex!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  border:
+    1px solid
+    rgba(255,255,255,.14)!important;
+
+  border-radius:18px!important;
+
+  background:
+    rgba(15,15,15,.68)!important;
+
+  color:
+    rgba(255,255,255,.88)!important;
+
+  font-family:
+    Arial,
+    "Segoe UI",
+    sans-serif!important;
+
+  font-size:11px!important;
+
+  font-weight:700!important;
+
+  line-height:32px!important;
+
+  white-space:nowrap!important;
+
+  backdrop-filter:blur(12px)!important;
+
+  -webkit-backdrop-filter:blur(12px)!important;
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.28)!important;
+
+  pointer-events:none!important;
+
+  z-index:125!important;
+
+  box-sizing:border-box!important;
+
+}
+
+
+/* =========================================================
+   OWNER DELETE BUTTON
+========================================================= */
+
+#ma7alak-story-delete-btn{
+
+  position:absolute!important;
+
+  top:106px!important;
+
+  right:20px!important;
+
+  width:48px!important;
+
+  height:48px!important;
+
+  display:none!important;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  border:
+    1px solid
+    rgba(255,255,255,.13)!important;
+
+  border-radius:50%!important;
+
+  background:
+    rgba(20,20,20,.72)!important;
+
+  color:#fff!important;
+
+  font-size:20px!important;
+
+  line-height:1!important;
+
+  padding:0!important;
+
+  margin:0!important;
+
+  cursor:pointer!important;
+
+  z-index:125!important;
+
+  backdrop-filter:blur(10px)!important;
+
+  -webkit-backdrop-filter:blur(10px)!important;
+
+  outline:none!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+  box-sizing:border-box!important;
+
+}
+
+
+#ma7alak-story-delete-btn.visible{
+
+  display:flex!important;
+
+}
+
+
+#ma7alak-story-delete-btn:hover{
+
+  background:
+    rgba(150,25,25,.78)!important;
+
+  border-color:
+    rgba(255,90,90,.35)!important;
+
+}
+
+
+#ma7alak-story-delete-btn:active{
+
+  transform:scale(.90)!important;
+
+  background:
+    rgba(180,25,25,.88)!important;
+
+}
+
+
+/* =========================================================
+   DESKTOP STORY
+========================================================= */
+
+@media(min-width:601px){
+
+  #ma7alak-full-story-media{
+
+    width:
+      min(
+        520px,
+        calc(100vw - 40px)
+      )!important;
+
+    height:
+      min(
+        900px,
+        calc(100vh - 30px)
+      )!important;
+
+    width:
+      min(
+        520px,
+        calc(100dvw - 40px)
+      )!important;
+
+    height:
+      min(
+        900px,
+        calc(100dvh - 30px)
+      )!important;
+
+    border-radius:26px!important;
+
+  }
+
+
+  .ma7alak-story-media-layer{
+
+    border-radius:26px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:600px){
+
+  #ma7alak-story-wrapper{
+
+    min-height:min(240px,calc(100vw - 92px))!important;
+
+    margin:18px 0!important;
+
+  }
+
+
+  #ma7alak-story-button{
+
+    width:calc(100vw - 92px)!important;
+
+    max-width:240px!important;
+
+    height:calc(100vw - 92px)!important;
+    max-height:240px!important;
+
+  }
+
+
+  #ma7alak-story-new-ring{
+
+    width:calc(100vw - 70px)!important;
+
+    max-width:262px!important;
+
+    height:calc(100vw - 70px)!important;
+
+    max-height:262px!important;
+
+  }
+
+  #ma7alak-story-active-ring{
+
+    width:calc(100vw - 80px)!important;
+
+    max-width:252px!important;
+
+    height:calc(100vw - 80px)!important;
+
+    max-height:252px!important;
+
+  }
+
+
+
+  #ma7alak-owner-add-story{
+
+    width:34px!important;
+
+    height:34px!important;
+
+    right:calc(50% - 125px)!important;
+
+    bottom:6px!important;
+
+    font-size:24px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     STORY VIEWER
+  ----------------------------------------- */
+
+  #ma7alak-full-story-media{
+
+    width:
+      calc(100vw - 12px)!important;
+
+    height:
+      calc(100vh - 12px)!important;
+
+    width:
+      calc(100dvw - 12px)!important;
+
+    height:
+      calc(100dvh - 12px)!important;
+
+    border-radius:20px!important;
+
+  }
+
+
+  .ma7alak-story-media-layer{
+
+    border-radius:20px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     SHOP NAME
+  ----------------------------------------- */
+
+  #ma7alak-story-shop-name{
+
+    top:54px!important;
+
+    left:14px!important;
+
+    max-width:calc(100% - 105px)!important;
+
+    font-size:15px!important;
+
+    line-height:21px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     TIME
+  ----------------------------------------- */
+
+  #ma7alak-story-time{
+
+    top:80px!important;
+
+    left:14px!important;
+
+    min-height:30px!important;
+
+    padding:
+      0 10px!important;
+
+    font-size:10px!important;
+
+    line-height:30px!important;
+
+  }
+
+
+  /* -----------------------------------------
+     DELETE
+  ----------------------------------------- */
+
+  #ma7alak-story-delete-btn{
+
+    top:106px!important;
+
+    right:14px!important;
+
+    width:44px!important;
+
+    height:44px!important;
+
+    font-size:18px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media(max-width:380px){
+
+  #ma7alak-story-button{
+
+    width:calc(100vw - 64px)!important;
+    max-width:250px!important;
+    height:calc(100vw - 64px)!important;
+    max-height:250px!important;
+
+  }
+
+
+  #ma7alak-story-new-ring{
+
+    width:calc(100vw - 42px)!important;
+    max-width:252px!important;
+    height:calc(100vw - 42px)!important;
+    max-height:252px!important;
+
+  }
+
+
+  #ma7alak-owner-add-story{
+
+    right:14px!important;
+
+  }
+
+
+  #ma7alak-story-delete-btn{
+
+    top:104px!important;
+
+    right:14px!important;
+
+    width:42px!important;
+
+    height:42px!important;
+
+  }
+
+}
+
+
+/* =========================================================
+   STORY LIKE BUTTON
+========================================================= */
+
+#ma7alak-story-like-btn{
+
+  position:absolute!important;
+  left:50%!important;
+  bottom:34px!important;
+  transform:translateX(-50%)!important;
+
+  width:56px!important;
+  min-width:56px!important;
+  height:56px!important;
+  padding:0!important;
+  margin:0!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:50%!important;
+  background:linear-gradient(145deg,rgba(28,28,31,.86),rgba(8,8,10,.72))!important;
+  color:rgba(255,255,255,.96)!important;
+
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:30px!important;
+  line-height:1!important;
+  font-weight:400!important;
+
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -1px 0 rgba(0,0,0,.35)!important;
+
+  cursor:pointer!important;
+  z-index:2147483646!important;
+  outline:none!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+  box-sizing:border-box!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  transition:
+    transform .18s ease,
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease!important;
+}
+
+#ma7alak-story-like-btn::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-3px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(217,164,65,.28)!important;
+  pointer-events:none!important;
+  opacity:.8!important;
+}
+
+#ma7alak-story-like-btn .ma7alak-like-heart{
+  display:block!important;
+  position:relative!important;
+  z-index:1!important;
+  font-size:30px!important;
+  line-height:1!important;
+  transform:translateY(1px)!important;
+  text-shadow:0 2px 10px rgba(0,0,0,.35)!important;
+  transition:
+    transform .18s ease,
+    color .22s ease,
+    text-shadow .22s ease!important;
+}
+
+#ma7alak-story-like-btn.liked{
+  color:#ff4b67!important;
+  border-color:rgba(255,92,115,.72)!important;
+  background:linear-gradient(145deg,rgba(62,17,28,.94),rgba(22,8,14,.9))!important;
+  box-shadow:
+    0 10px 34px rgba(0,0,0,.42),
+    0 0 24px rgba(255,64,91,.22),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.35)!important;
+}
+
+#ma7alak-story-like-btn.liked::before{
+  border-color:rgba(255,92,115,.5)!important;
+}
+
+#ma7alak-story-like-btn.liked .ma7alak-like-heart{
+  color:#ff4b67!important;
+  text-shadow:
+    0 0 12px rgba(255,64,91,.42),
+    0 2px 10px rgba(0,0,0,.3)!important;
+  animation:ma7alakHeartPop .32s ease-out!important;
+}
+
+#ma7alak-story-like-btn:active{
+  transform:translateX(-50%) scale(.9)!important;
+}
+
+#ma7alak-story-like-btn:hover{
+  border-color:rgba(255,255,255,.42)!important;
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.42),
+    0 0 18px rgba(217,164,65,.10),
+    inset 0 1px 0 rgba(255,255,255,.2)!important;
+}
+
+#ma7alak-story-like-btn.liked:hover{
+  border-color:rgba(255,92,115,.86)!important;
+  box-shadow:
+    0 12px 36px rgba(0,0,0,.44),
+    0 0 28px rgba(255,64,91,.28),
+    inset 0 1px 0 rgba(255,255,255,.16)!important;
+}
+
+#ma7alak-story-like-btn:disabled{
+  cursor:default!important;
+  opacity:.72!important;
+}
+
+#ma7alak-story-like-btn[aria-hidden="true"]{
+  display:none!important;
+}
+
+@keyframes ma7alakHeartPop{
+  0%{transform:translateY(1px) scale(.72);}
+  55%{transform:translateY(1px) scale(1.18);}
+  100%{transform:translateY(1px) scale(1);}
+}
+
+@media(max-width:600px){
+  #ma7alak-story-like-btn{
+    bottom:28px!important;
+    width:54px!important;
+    min-width:54px!important;
+    height:54px!important;
+  }
+
+  #ma7alak-story-like-btn .ma7alak-like-heart{
+    font-size:29px!important;
+  }
+}
+
+
+/* =========================================================
+   OWNER-ONLY STORY VIEW COUNT
+========================================================= */
+
+#ma7alak-story-view-count{
+  position:absolute!important;
+  left:50%!important;
+  bottom:102px!important;
+  transform:translateX(-50%)!important;
+
+  min-width:94px!important;
+  height:38px!important;
+  padding:0 13px!important;
+  margin:0!important;
+
+  display:none;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+
+  border:1px solid rgba(255,255,255,.20)!important;
+  border-radius:22px!important;
+  background:linear-gradient(145deg,rgba(28,28,31,.86),rgba(8,8,10,.76))!important;
+
+  color:#fff!important;
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  line-height:1!important;
+
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+
+  box-shadow:
+    0 9px 26px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.12)!important;
+
+  z-index:2147483646!important;
+  pointer-events:none!important;
+  box-sizing:border-box!important;
+  white-space:nowrap!important;
+}
+
+#ma7alak-story-view-count.visible{
+  display:flex!important;
+}
+
+#ma7alak-story-view-count .ma7alak-view-eye{
+  font-size:17px!important;
+  line-height:1!important;
+  opacity:.96!important;
+  transform:translateY(-1px)!important;
+}
+
+#ma7alak-story-view-count .ma7alak-view-number{
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:900!important;
+}
+
+#ma7alak-story-view-count .ma7alak-view-label{
+  color:rgba(255,255,255,.68)!important;
+  font-size:10px!important;
+  font-weight:700!important;
+}
+
+@media(max-width:600px){
+  #ma7alak-story-view-count{
+    bottom:92px!important;
+    min-width:88px!important;
+    height:36px!important;
+    padding:0 12px!important;
+    gap:6px!important;
+  }
+}
+
+
+/* =========================================================
+   FACEBOOK-STYLE LIKE HEART BURST
+========================================================= */
+
+#ma7alak-story-heart-burst{
+  position:absolute!important;
+  inset:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  z-index:2147483645!important;
+}
+
+.ma7alak-story-floating-heart{
+  position:absolute!important;
+  left:50%!important;
+  bottom:52px!important;
+  color:#ff405b!important;
+  font-family:Arial,sans-serif!important;
+  font-weight:900!important;
+  line-height:1!important;
+  opacity:0;
+  pointer-events:none!important;
+  text-shadow:0 3px 14px rgba(255,64,91,.35)!important;
+  animation:ma7alakStoryHeartFloat var(--heart-duration,1.45s) ease-out forwards!important;
+}
+
+@keyframes ma7alakStoryHeartFloat{
+  0%{opacity:0;transform:translate(-50%,0) scale(.45) rotate(0deg);}
+  12%{opacity:1;}
+  100%{opacity:0;transform:translate(calc(-50% + var(--heart-x,0px)),var(--heart-y,-360px)) scale(var(--heart-scale,1)) rotate(var(--heart-rotate,0deg));}
+}
+
+/* =========================================================
+   PROGRESS BARS
+========================================================= */
+
+#ma7alak-story-progress-wrap{
+
+  position:absolute;
+
+  top:10px;
+
+  left:12px;
+  right:12px;
+
+  height:4px;
+
+  display:flex;
+
+  gap:4px;
+
+  z-index:100;
+
+  pointer-events:none;
+
+}
+
+
+.ma7alak-story-progress-segment{
+
+  flex:1;
+
+  height:4px;
+
+  border-radius:20px;
+
+  background:
+    rgba(255,255,255,.30);
+
+  overflow:hidden;
+
+  position:relative;
+
+}
+
+
+.ma7alak-story-progress-fill{
+
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:0%;
+
+  height:100%;
+
+  background:#d9a441;
+
+  border-radius:20px;
+
+}
+
+
+/* =========================================================
+   CLOSE STORY
+========================================================= */
+
+#ma7alak-story-close-btn{
+
+  position:absolute;
+
+  top:48px;
+  right:20px;
+
+  width:48px;
+  height:48px;
+
+  border:none!important;
+
+  border-radius:50%;
+
+  background:
+    rgba(20,20,20,.72);
+
+  color:#fff;
+
+  font-size:30px;
+
+  line-height:48px;
+
+  padding:0;
+
+  text-align:center;
+
+  cursor:pointer;
+
+  z-index:120;
+
+  backdrop-filter:blur(10px);
+
+  -webkit-backdrop-filter:blur(10px);
+
+  -webkit-tap-highlight-color:
+    transparent;
+
+  outline:none!important;
+
+}
+
+
+/* =========================================================
+   TAP AREAS
+========================================================= */
+
+#ma7alak-story-tap-left,
+#ma7alak-story-tap-right{
+
+  position:absolute;
+
+  top:0;
+  bottom:0;
+
+  width:50%;
+
+  z-index:90;
+
+  cursor:pointer;
+
+  background:transparent!important;
+
+  border:none!important;
+
+  padding:0;
+
+  margin:0;
+
+  outline:none!important;
+
+  appearance:none!important;
+
+  -webkit-appearance:none!important;
+
+  -webkit-tap-highlight-color:
+    transparent!important;
+
+  box-shadow:none!important;
+
+}
+
+
+#ma7alak-story-tap-left{
+
+  left:0;
+
+}
+
+
+#ma7alak-story-tap-right{
+
+  right:0;
+
+}
+
+
+#ma7alak-story-tap-left:focus,
+#ma7alak-story-tap-left:focus-visible,
+#ma7alak-story-tap-left:active,
+#ma7alak-story-tap-right:focus,
+#ma7alak-story-tap-right:focus-visible,
+#ma7alak-story-tap-right:active{
+
+  background:transparent!important;
+
+  border:0!important;
+
+  outline:none!important;
+
+  box-shadow:none!important;
+
+}
+
+
+/* =========================================================
+   MOBILE STORY CONTROLS
+========================================================= */
+
+@media(max-width:600px){
+
+  #ma7alak-story-close-btn{
+
+    top:54px;
+
+    right:14px;
+
+    width:44px;
+
+    height:44px;
+
+    line-height:44px;
+
+  }
+
+
+  #ma7alak-story-progress-wrap{
+
+    top:8px;
+
+    left:9px;
+    right:9px;
+
+    height:3px;
+
+    gap:3px;
+
+  }
+
+
+  .ma7alak-story-progress-segment{
+
+    height:3px;
+
+  }
+
+}
+
+
+
+/* =========================================================
+   PREMIUM SHOP IDENTITY — PHONE FIRST
+========================================================= */
+
+#ma7alak-shop-identity{
+  width:100%!important;
+  max-width:430px!important;
+  margin:2px auto 18px!important;
+  padding:0 16px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  text-align:center!important;
+  box-sizing:border-box!important;
+  font-family:Arial,"Segoe UI",sans-serif!important;
+}
+
+#ma7alak-shop-identity-category-row{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  margin:0 0 12px!important;
+}
+
+.ma7alak-shop-identity-line{
+  flex:1 1 54px!important;
+  max-width:74px!important;
+  height:1px!important;
+  position:relative!important;
+  background:linear-gradient(90deg,transparent,rgba(217,164,65,.28),rgba(255,218,132,.88))!important;
+}
+
+.ma7alak-shop-identity-line.right{
+  transform:scaleX(-1)!important;
+}
+
+.ma7alak-shop-identity-line::after{
+  content:""!important;
+  position:absolute!important;
+  top:50%!important;
+  right:-2px!important;
+  width:5px!important;
+  height:5px!important;
+  transform:translateY(-50%) rotate(45deg)!important;
+  border-radius:1px!important;
+  background:#f0c766!important;
+  box-shadow:0 0 9px rgba(217,164,65,.42)!important;
+}
+
+#ma7alak-shop-category-pill{
+  min-height:38px!important;
+  max-width:min(250px,66vw)!important;
+  padding:0 16px 0 11px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  border:1px solid rgba(217,164,65,.62)!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,rgba(38,29,13,.76),rgba(10,10,10,.78))!important;
+  color:#f2cc78!important;
+  box-shadow:0 7px 22px rgba(0,0,0,.26),0 0 18px rgba(217,164,65,.08),inset 0 1px 0 rgba(255,240,198,.10)!important;
+  backdrop-filter:blur(10px)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+}
+
+#ma7alak-shop-category-icon{
+  width:28px!important;
+  height:28px!important;
+  flex:0 0 28px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid rgba(217,164,65,.40)!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 35% 28%,rgba(255,231,170,.18),rgba(217,164,65,.07) 48%,rgba(0,0,0,.10) 100%)!important;
+  color:#f1c766!important;
+}
+
+#ma7alak-shop-category-icon svg{
+  width:17px!important;
+  height:17px!important;
+  display:block!important;
+}
+
+#ma7alak-shop-category-text{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#efc66e!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:2.15px!important;
+  text-transform:uppercase!important;
+}
+
+#ma7alak-shop-name{
+  width:100%!important;
+  margin:0!important;
+  color:#fff!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:34px!important;
+  font-weight:800!important;
+  line-height:1.08!important;
+  letter-spacing:-.65px!important;
+  text-shadow:0 4px 18px rgba(0,0,0,.42)!important;
+}
+
+#ma7alak-shop-arabic-name{
+  width:100%!important;
+  margin:7px 0 0!important;
+  color:#e5b753!important;
+  font-family:Tahoma,Arial,sans-serif!important;
+  font-size:24px!important;
+  font-weight:800!important;
+  line-height:1.25!important;
+  direction:rtl!important;
+  text-shadow:0 3px 13px rgba(0,0,0,.36),0 0 13px rgba(217,164,65,.10)!important;
+}
+
+#ma7alak-shop-identity-divider{
+  width:min(190px,58vw)!important;
+  height:13px!important;
+  margin:10px auto 0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+#ma7alak-shop-identity-divider::before,
+#ma7alak-shop-identity-divider::after{
+  content:""!important;
+  flex:1!important;
+  height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(217,164,65,.72))!important;
+}
+
+#ma7alak-shop-identity-divider::after{
+  transform:scaleX(-1)!important;
+}
+
+#ma7alak-shop-identity-divider span{
+  width:7px!important;
+  height:7px!important;
+  margin:0 9px!important;
+  transform:rotate(45deg)!important;
+  border:1px solid rgba(255,229,164,.85)!important;
+  border-radius:1px!important;
+  background:#d9a441!important;
+  box-shadow:0 0 10px rgba(217,164,65,.38)!important;
+}
+
+#ma7alak-shop-identity.ma7alak-identity-ready{
+  animation:ma7alakIdentityReveal .48s cubic-bezier(.2,.78,.2,1) both!important;
+}
+
+@keyframes ma7alakIdentityReveal{
+  from{opacity:0;transform:translateY(7px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@media(max-width:600px){
+  #ma7alak-shop-identity{max-width:100%!important;margin-bottom:16px!important;padding:0 14px!important;}
+  #ma7alak-shop-identity-category-row{gap:8px!important;margin-bottom:10px!important;}
+  .ma7alak-shop-identity-line{max-width:48px!important;}
+  #ma7alak-shop-category-pill{min-height:36px!important;max-width:68vw!important;padding:0 14px 0 9px!important;gap:8px!important;}
+  #ma7alak-shop-category-icon{width:26px!important;height:26px!important;flex-basis:26px!important;}
+  #ma7alak-shop-category-icon svg{width:16px!important;height:16px!important;}
+  #ma7alak-shop-category-text{font-size:10px!important;letter-spacing:1.75px!important;}
+  #ma7alak-shop-name{font-size:31px!important;}
+  #ma7alak-shop-arabic-name{margin-top:6px!important;font-size:22px!important;}
+}
+
+@media(max-width:380px){
+  #ma7alak-shop-identity{padding:0 10px!important;}
+  .ma7alak-shop-identity-line{max-width:34px!important;}
+  #ma7alak-shop-category-pill{max-width:72vw!important;}
+  #ma7alak-shop-name{font-size:28px!important;}
+  #ma7alak-shop-arabic-name{font-size:20px!important;}
+}
+
+
+/* =========================================================
+   ZEE TATTOO & PIERCING — PREMIUM IDENTITY ANIMATIONS
+   Phone-first, subtle and continuous.
+========================================================= */
+
+/* ---------------------------------------------------------
+   1. GOLD / ROSE SIDE LINES — STRONGER MOVING SHINE
+--------------------------------------------------------- */
+
+.ma7alak-shop-identity-line{
+  overflow:visible!important;
+  height:2px!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(217,164,65,.28) 12%,
+      rgba(255,184,211,.72) 34%,
+      #fff1bf 49%,
+      #ffd36e 58%,
+      rgba(255,184,211,.64) 74%,
+      transparent 100%
+    )!important;
+
+  background-size:260% 100%!important;
+
+  box-shadow:
+    0 0 5px rgba(217,164,65,.30),
+    0 0 10px rgba(255,170,205,.12)!important;
+
+  animation:
+    ma7alakIdentityLineShine
+    1.9s
+    linear
+    infinite!important;
+}
+
+.ma7alak-shop-identity-line.right{
+  transform:scaleX(-1)!important;
+  animation-delay:.12s!important;
+}
+
+@keyframes ma7alakIdentityLineShine{
+  0%{
+    background-position:140% 50%;
+    opacity:.68;
+  }
+
+  40%{
+    opacity:1;
+  }
+
+  100%{
+    background-position:-140% 50%;
+    opacity:.78;
+  }
+}
+
+
+/* Brighter traveling sparkle */
+.ma7alak-shop-identity-line::before{
+  content:""!important;
+
+  position:absolute!important;
+
+  top:50%!important;
+  left:-10px!important;
+
+  width:10px!important;
+  height:10px!important;
+
+  transform:
+    translateY(-50%)
+    rotate(45deg)!important;
+
+  border-radius:50%!important;
+
+  background:
+    radial-gradient(
+      circle,
+      #ffffff 0 16%,
+      #fff0b7 22%,
+      #ffc5df 42%,
+      rgba(217,164,65,.62) 60%,
+      transparent 76%
+    )!important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(255,236,177,.92))
+    drop-shadow(0 0 9px rgba(255,170,205,.55))!important;
+
+  opacity:0;
+
+  animation:
+    ma7alakLineSpark
+    1.9s
+    linear
+    infinite!important;
+
+  pointer-events:none!important;
+  z-index:3!important;
+}
+
+.ma7alak-shop-identity-line.right::before{
+  animation-delay:.12s!important;
+}
+
+@keyframes ma7alakLineSpark{
+  0%{
+    left:-10px;
+    opacity:0;
+  }
+
+  10%{
+    opacity:1;
+  }
+
+  55%{
+    opacity:1;
+  }
+
+  90%{
+    left:calc(100% + 2px);
+    opacity:.9;
+  }
+
+  100%{
+    left:calc(100% + 2px);
+    opacity:0;
+  }
+}
+
+
+/* End diamond stays visible while line shines */
+.ma7alak-shop-identity-line::after{
+  width:6px!important;
+  height:6px!important;
+  background:
+    linear-gradient(
+      135deg,
+      #fff1b9,
+      #d9a441
+    )!important;
+
+  box-shadow:
+    0 0 6px rgba(255,231,166,.72),
+    0 0 12px rgba(217,164,65,.44)!important;
+}
+
+
+/* ---------------------------------------------------------
+   2. DIVIDER UNDER ZEE — PREMIUM SHINE
+--------------------------------------------------------- */
+
+#ma7alak-shop-identity-divider{
+  position:relative!important;
+  overflow:visible!important;
+}
+
+#ma7alak-shop-identity-divider::before,
+#ma7alak-shop-identity-divider::after{
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(217,164,65,.18) 22%,
+      #ffe59a 47%,
+      rgba(217,164,65,.72) 66%,
+      transparent 100%
+    )!important;
+
+  background-size:220% 100%!important;
+
+  animation:
+    ma7alakDividerShine
+    2.9s
+    ease-in-out
+    infinite!important;
+}
+
+#ma7alak-shop-identity-divider::after{
+  transform:scaleX(-1)!important;
+  animation-delay:.18s!important;
+}
+
+@keyframes ma7alakDividerShine{
+  0%{
+    background-position:130% 50%;
+    opacity:.50;
+  }
+
+  50%{
+    opacity:1;
+  }
+
+  100%{
+    background-position:-130% 50%;
+    opacity:.56;
+  }
+}
+
+
+/* Center icon / diamond under Zee — brighter rose-gold glow */
+#ma7alak-shop-identity-divider span{
+  width:9px!important;
+  height:9px!important;
+
+  border:
+    1px solid rgba(255,245,214,.98)!important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff3c8 0%,
+      #f3bf63 46%,
+      #ef8fb6 100%
+    )!important;
+
+  animation:
+    ma7alakDividerDiamondGlow
+    1.65s
+    ease-in-out
+    infinite!important;
+}
+
+@keyframes ma7alakDividerDiamondGlow{
+  0%,100%{
+    transform:rotate(45deg) scale(.96)!important;
+
+    box-shadow:
+      0 0 5px rgba(255,240,198,.88),
+      0 0 12px rgba(217,164,65,.64),
+      0 0 18px rgba(239,143,182,.18)!important;
+  }
+
+  50%{
+    transform:rotate(45deg) scale(1.22)!important;
+
+    box-shadow:
+      0 0 7px rgba(255,255,255,.95),
+      0 0 16px rgba(255,211,110,.86),
+      0 0 26px rgba(239,143,182,.44)!important;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   3. TATTOO ICON — "INK" EFFECT
+   Only activates when this identity is detected as tattoo.
+--------------------------------------------------------- */
+
+#ma7alak-shop-category-icon{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate!important;
+}
+
+#ma7alak-shop-category-icon svg{
+  position:relative!important;
+  z-index:3!important;
+}
+
+
+/* Dark ink bloom behind tattoo needle */
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-icon::before{
+
+  content:""!important;
+
+  position:absolute!important;
+
+  left:50%!important;
+  top:50%!important;
+
+  width:22px!important;
+  height:22px!important;
+
+  border-radius:
+    48% 52% 45% 55%
+    /
+    56% 43% 57% 44%!important;
+
+  background:
+    radial-gradient(
+      circle at 40% 38%,
+      rgba(44,44,48,.98) 0 24%,
+      rgba(15,15,17,.98) 48%,
+      rgba(0,0,0,.78) 70%,
+      transparent 74%
+    )!important;
+
+  transform:
+    translate(-50%,-50%)
+    scale(.22)
+    rotate(0deg)!important;
+
+  opacity:0;
+
+  z-index:1!important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(0,0,0,.75))!important;
+
+  animation:
+    ma7alakTattooInkBloom
+    3.4s
+    ease-in-out
+    infinite!important;
+
+  pointer-events:none!important;
+}
+
+@keyframes ma7alakTattooInkBloom{
+  0%,18%{
+    opacity:0;
+    transform:
+      translate(-50%,-50%)
+      scale(.20)
+      rotate(0deg);
+  }
+
+  30%{
+    opacity:.88;
+  }
+
+  48%{
+    opacity:.72;
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.08)
+      rotate(24deg);
+  }
+
+  66%{
+    opacity:.24;
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.30)
+      rotate(42deg);
+  }
+
+  82%,100%{
+    opacity:0;
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.42)
+      rotate(58deg);
+  }
+}
+
+
+/* Animated ink drop from the tattoo icon */
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-icon::after{
+
+  content:""!important;
+
+  position:absolute!important;
+
+  left:50%!important;
+  top:72%!important;
+
+  width:5px!important;
+  height:7px!important;
+
+  border-radius:
+    55% 45% 62% 38%
+    /
+    42% 42% 58% 58%!important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2a2a2e,
+      #050506
+    )!important;
+
+  box-shadow:
+    0 2px 5px rgba(0,0,0,.65)!important;
+
+  transform:
+    translate(-50%,-1px)
+    scale(.45)!important;
+
+  transform-origin:
+    50% 0%!important;
+
+  opacity:0;
+
+  z-index:2!important;
+
+  animation:
+    ma7alakTattooInkDrop
+    3.4s
+    ease-in
+    infinite!important;
+
+  pointer-events:none!important;
+}
+
+@keyframes ma7alakTattooInkDrop{
+  0%,40%{
+    opacity:0;
+
+    transform:
+      translate(-50%,-1px)
+      scale(.35);
+  }
+
+  48%{
+    opacity:.96;
+
+    transform:
+      translate(-50%,1px)
+      scale(.72);
+  }
+
+  65%{
+    opacity:.90;
+
+    transform:
+      translate(-50%,9px)
+      scale(.86);
+  }
+
+  80%{
+    opacity:0;
+
+    transform:
+      translate(-50%,16px)
+      scale(.55);
+  }
+
+  100%{
+    opacity:0;
+
+    transform:
+      translate(-50%,16px)
+      scale(.55);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   4. TATTOO / PIERCING TEXT — DARK INK SWEEP
+--------------------------------------------------------- */
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-text{
+
+  background:
+    linear-gradient(
+      105deg,
+      #d9a441 0%,
+      #f6d986 28%,
+      #ffffff 43%,
+      #111214 48%,
+      #f0ca72 54%,
+      #d9a441 76%,
+      #f7df9b 100%
+    )!important;
+
+  background-size:
+    260% 100%!important;
+
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+
+  -webkit-text-fill-color:
+    transparent!important;
+
+  color:
+    transparent!important;
+
+  animation:
+    ma7alakTattooTextInk
+    4.2s
+    ease-in-out
+    infinite!important;
+}
+
+@keyframes ma7alakTattooTextInk{
+  0%{
+    background-position:
+      120% 50%;
+  }
+
+  45%{
+    background-position:
+      40% 50%;
+  }
+
+  70%{
+    background-position:
+      -30% 50%;
+  }
+
+  100%{
+    background-position:
+      -120% 50%;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   5. ZEE TATTOOS & PIERCING — GIRLY MAKEUP SHIMMER
+   Rose-gold / blush shine with tiny sparkles.
+--------------------------------------------------------- */
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-name{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate!important;
+
+  background:
+    linear-gradient(
+      105deg,
+      #ffffff 0%,
+      #fff8fb 20%,
+      #ffd8e8 34%,
+      #ffffff 43%,
+      #f2c46d 49%,
+      #ffffff 56%,
+      #f4a7c6 68%,
+      #fff5fa 82%,
+      #ffffff 100%
+    )!important;
+
+  background-size:
+    300% 100%!important;
+
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+
+  -webkit-text-fill-color:
+    transparent!important;
+
+  color:
+    transparent!important;
+
+  animation:
+    ma7alakZeeGirlyShimmer
+    3.6s
+    ease-in-out
+    infinite!important;
+
+  filter:
+    drop-shadow(0 3px 12px rgba(0,0,0,.38))
+    drop-shadow(0 0 6px rgba(255,172,204,.18))!important;
+}
+
+
+/* Left makeup sparkle */
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-name::before{
+  content:"✦"!important;
+
+  position:absolute!important;
+
+  left:4%!important;
+  top:-8px!important;
+
+  color:#ffd6e7!important;
+
+  -webkit-text-fill-color:#ffd6e7!important;
+
+  font-family:Arial,sans-serif!important;
+  font-size:12px!important;
+  line-height:1!important;
+
+  text-shadow:
+    0 0 5px rgba(255,255,255,.95),
+    0 0 11px rgba(255,166,203,.72)!important;
+
+  opacity:0;
+
+  animation:
+    ma7alakZeeSparkleOne
+    3.6s
+    ease-in-out
+    infinite!important;
+
+  pointer-events:none!important;
+}
+
+
+/* Right makeup sparkle */
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-name::after{
+  content:"✧"!important;
+
+  position:absolute!important;
+
+  right:5%!important;
+  bottom:-7px!important;
+
+  color:#ffe8a8!important;
+
+  -webkit-text-fill-color:#ffe8a8!important;
+
+  font-family:Arial,sans-serif!important;
+  font-size:13px!important;
+  line-height:1!important;
+
+  text-shadow:
+    0 0 5px rgba(255,255,255,.92),
+    0 0 11px rgba(245,181,68,.62)!important;
+
+  opacity:0;
+
+  animation:
+    ma7alakZeeSparkleTwo
+    3.6s
+    ease-in-out
+    infinite!important;
+
+  pointer-events:none!important;
+}
+
+
+@keyframes ma7alakZeeGirlyShimmer{
+  0%{
+    background-position:
+      130% 50%;
+  }
+
+  48%{
+    background-position:
+      35% 50%;
+  }
+
+  100%{
+    background-position:
+      -130% 50%;
+  }
+}
+
+
+@keyframes ma7alakZeeSparkleOne{
+  0%,18%,100%{
+    opacity:0;
+    transform:
+      scale(.55)
+      rotate(0deg);
+  }
+
+  34%{
+    opacity:1;
+    transform:
+      scale(1.16)
+      rotate(28deg);
+  }
+
+  48%{
+    opacity:.45;
+    transform:
+      scale(.88)
+      rotate(52deg);
+  }
+
+  60%{
+    opacity:0;
+    transform:
+      scale(.55)
+      rotate(80deg);
+  }
+}
+
+
+@keyframes ma7alakZeeSparkleTwo{
+  0%,48%,100%{
+    opacity:0;
+    transform:
+      scale(.55)
+      rotate(0deg);
+  }
+
+  64%{
+    opacity:1;
+    transform:
+      scale(1.18)
+      rotate(-24deg);
+  }
+
+  78%{
+    opacity:.42;
+    transform:
+      scale(.90)
+      rotate(-50deg);
+  }
+
+  90%{
+    opacity:0;
+    transform:
+      scale(.55)
+      rotate(-76deg);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   6. TATTOO ICON GENTLE NEEDLE MOTION
+--------------------------------------------------------- */
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-icon svg{
+
+  transform-origin:
+    50% 60%!important;
+
+  animation:
+    ma7alakTattooNeedleMove
+    2.8s
+    ease-in-out
+    infinite!important;
+}
+
+@keyframes ma7alakTattooNeedleMove{
+  0%,100%{
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  42%{
+    transform:
+      translateY(-1px)
+      rotate(-2deg);
+  }
+
+  48%{
+    transform:
+      translateY(1px)
+      rotate(1deg);
+  }
+
+  54%{
+    transform:
+      translateY(-1px)
+      rotate(-1deg);
+  }
+
+  60%{
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE — KEEP EFFECTS LIGHT & CLEAN
+--------------------------------------------------------- */
+
+@media(max-width:600px){
+
+  .ma7alak-shop-identity-line::before{
+    width:6px!important;
+    height:6px!important;
+  }
+
+  #ma7alak-shop-identity.ma7alak-identity-tattoo
+  #ma7alak-shop-category-icon::before{
+    width:20px!important;
+    height:20px!important;
+  }
+
+}
+
+
+
+
+/* =========================================================
+   ZEE CATEGORY PILL / TATTOO ICON — VISIBILITY BOOST
+========================================================= */
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-pill{
+  border-color:
+    rgba(239,177,105,.80)!important;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.32),
+    0 0 16px rgba(217,164,65,.14),
+    0 0 20px rgba(239,143,182,.08),
+    inset 0 1px 0 rgba(255,245,220,.13)!important;
+}
+
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-icon{
+  border:
+    1px solid rgba(255,222,149,.82)!important;
+
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      rgba(255,246,216,.25),
+      rgba(217,164,65,.14) 42%,
+      rgba(239,143,182,.10) 72%,
+      rgba(0,0,0,.16) 100%
+    )!important;
+
+  color:
+    #ffe5a0!important;
+
+  box-shadow:
+    0 0 6px rgba(255,235,184,.50),
+    0 0 13px rgba(217,164,65,.38),
+    0 0 20px rgba(239,143,182,.18),
+    inset 0 0 8px rgba(255,255,255,.05)!important;
+
+  animation:
+    ma7alakTattooIconGlow
+    2.2s
+    ease-in-out
+    infinite!important;
+}
+
+
+#ma7alak-shop-identity.ma7alak-identity-tattoo
+#ma7alak-shop-category-icon svg{
+  width:18px!important;
+  height:18px!important;
+
+  stroke-width:2!important;
+
+  filter:
+    drop-shadow(0 0 2px rgba(255,245,214,.90))
+    drop-shadow(0 0 5px rgba(217,164,65,.68))!important;
+}
+
+
+@keyframes ma7alakTattooIconGlow{
+  0%,100%{
+    box-shadow:
+      0 0 5px rgba(255,235,184,.42),
+      0 0 11px rgba(217,164,65,.32),
+      0 0 17px rgba(239,143,182,.12),
+      inset 0 0 7px rgba(255,255,255,.04)!important;
+  }
+
+  50%{
+    box-shadow:
+      0 0 8px rgba(255,246,216,.74),
+      0 0 17px rgba(217,164,65,.56),
+      0 0 25px rgba(239,143,182,.28),
+      inset 0 0 9px rgba(255,255,255,.07)!important;
+  }
+}
+
+
+@media(max-width:600px){
+
+  #ma7alak-shop-identity.ma7alak-identity-tattoo
+  #ma7alak-shop-category-icon svg{
+    width:17px!important;
+    height:17px!important;
+  }
+
+  #ma7alak-shop-identity.ma7alak-identity-tattoo
+  #ma7alak-shop-name::before{
+    left:1%!important;
+    top:-6px!important;
+  }
+
+  #ma7alak-shop-identity.ma7alak-identity-tattoo
+  #ma7alak-shop-name::after{
+    right:2%!important;
+    bottom:-6px!important;
+  }
+
+}
+
+
+/* Mobile animation fix: reduced-motion auto-disable removed for this visual component. */
+
+
+
+
+/* =========================================================
+   STORY STATUS / CAPTION — WHATSAPP STYLE
+========================================================= */
+
+#ma7alak-story-status-text{
+  position:absolute!important;
+  left:50%!important;
+  bottom:154px!important;
+  transform:translateX(-50%)!important;
+
+  width:min(440px,calc(100% - 40px))!important;
+  max-height:30vh!important;
+  overflow:auto!important;
+
+  display:none!important;
+  box-sizing:border-box!important;
+  padding:10px 14px!important;
+
+  border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:16px!important;
+
+  background:rgba(10,10,12,.60)!important;
+  backdrop-filter:blur(14px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(135%)!important;
+
+  color:#fff!important;
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:15px!important;
+  font-weight:600!important;
+  line-height:1.48!important;
+  text-align:center!important;
+
+  white-space:pre-wrap!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+
+  text-shadow:0 2px 10px rgba(0,0,0,.58)!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.24)!important;
+
+  pointer-events:none!important;
+  z-index:126!important;
+}
+
+#ma7alak-story-status-text.visible{
+  display:block!important;
+}
+
+@media(max-width:600px){
+  #ma7alak-story-status-text{
+    bottom:142px!important;
+    width:calc(100% - 28px)!important;
+    padding:9px 12px!important;
+    border-radius:14px!important;
+    font-size:14px!important;
+    line-height:1.45!important;
+  }
+}
+</style>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@8118229bbb1e1f664065bef7488fda400d596691/shoufhon-shop-context.js"></script>
+
+<section id="ma7alak-profile-shell" data-shop-slug="" class="m7-profile-theme-loading" aria-label="Shop profile">
+<style id="m7-profile-shell-preflight">
+  html,body{background:transparent!important;}
+  #ma7alak-profile-shell{
+    visibility:visible;
+    opacity:1;
+    background:transparent;
+  }
+  #ma7alak-profile-shell.m7-profile-theme-ready{
+    visibility:visible;
+    opacity:1;
+  }
+</style>
+<script>
+(async function(){
+  "use strict";
+
+  if(window.__MA7ALAK_PROFILE_SHELL_V1__)return;
+  window.__MA7ALAK_PROFILE_SHELL_V1__=true;
+
+  const shell=document.getElementById("ma7alak-profile-shell");
+  if(!shell)return;
+
+  let SHOP_SLUG="";
+  try{
+    const ctx=window.ShoufHonShopContextClient;
+    if(ctx){
+      SHOP_SLUG=String(ctx.slug||"").trim().toLowerCase();
+      if(!SHOP_SLUG){
+        SHOP_SLUG=await ctx.resolve({
+          explicit:String(shell.getAttribute("data-shop-slug")||"").trim(),
+          fallback:function(){return ctx.detectPageSlug();},
+          timeout:350
+        });
+      }
+    }
+  }catch(error){
+    console.warn("[ShoufHon Profile Shell] context:",error);
+  }
+  if(!SHOP_SLUG){
+    try{
+      SHOP_SLUG=String(
+        window.ShoufHonShopContextClient?.detectPageSlug?.()||""
+      ).trim().toLowerCase();
+    }catch(_){}
+  }
+  if(!SHOP_SLUG){
+    /*
+       Hostinger can deliver the parent shop context after this shell starts.
+       Keep the renderer alive; the main Story/Profile runtime resolves the
+       slug shortly after and hands it back through setSlug().
+    */
+    console.warn("[ShoufHon Profile Shell] Shop context is late; waiting for profile runtime.");
+  }else{
+    shell.setAttribute("data-shop-slug",SHOP_SLUG);
+  }
+
+  const CHANNEL_NAME="ma7alak-design-live-v1";
+
+  let bc=null;
+  let realtimeChannel=null;
+  let realtimeClient=null;
+  let realtimeSlug="";
+  let lastPreviewStamp=0;
+  let revealTimer=0;
+
+  function normalizeRuntimeSlug(value){
+    let slug=String(value||"").trim().toLowerCase();
+    try{slug=decodeURIComponent(slug)}catch(_){}
+    slug=slug.replace(/^\/+|\/+$/g,"");
+    return /^[a-z0-9][a-z0-9._&-]*$/i.test(slug)?slug:"";
+  }
+
+  function syncRuntimeSlug(value){
+    const explicit=normalizeRuntimeSlug(value);
+    const fromShell=normalizeRuntimeSlug(
+      shell.getAttribute("data-shop-slug")||""
+    );
+    const fromContext=normalizeRuntimeSlug(
+      window.ShoufHonShopContextClient?.slug||""
+    );
+    const next=explicit||fromShell||fromContext||SHOP_SLUG;
+
+    if(next&&next!==SHOP_SLUG){
+      SHOP_SLUG=next;
+      shell.setAttribute("data-shop-slug",SHOP_SLUG);
+    }
+
+    return SHOP_SLUG;
+  }
+
+  function cacheKey(){
+    const slug=syncRuntimeSlug();
+    return slug?"ma7alak_profile_theme_v1:"+slug:"";
+  }
+
+  function previewStorageKey(){
+    const slug=syncRuntimeSlug();
+    return slug?"ma7alak_design_live_v1:"+slug:"";
+  }
+
+  function clamp(value,min,max,fallback){
+    const n=Number(value);
+    return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+  }
+
+  function hex(value,fallback){
+    const raw=String(value||"").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+  }
+
+  function hexRgb(value,fallback){
+    const raw=hex(value,fallback).slice(1);
+    return [
+      parseInt(raw.slice(0,2),16),
+      parseInt(raw.slice(2,4),16),
+      parseInt(raw.slice(4,6),16)
+    ];
+  }
+
+  function bool(value,fallback){
+    if(value===undefined||value===null||value==="")return fallback;
+    if(value===true||String(value).toLowerCase()==="true")return true;
+    if(value===false||String(value).toLowerCase()==="false")return false;
+    return fallback;
+  }
+
+  function reveal(){
+    clearTimeout(revealTimer);
+    shell.classList.remove("m7-profile-theme-loading");
+    shell.classList.add("m7-profile-theme-ready");
+    requestAnimationFrame(()=>{shell.style.opacity="1";});
+  }
+
+  function hideUntilTheme(){
+    /* Fail-open: keep the shop profile visible while saved Admin design loads. */
+    shell.classList.remove("m7-profile-theme-loading");
+    shell.classList.add("m7-profile-theme-ready");
+    shell.style.opacity="1";
+  }
+
+  function readCachedOptions(){
+    try{
+      const key=cacheKey();
+      if(!key)return null;
+      const data=JSON.parse(localStorage.getItem(key)||"null");
+      return data&&typeof data==="object"&&!Array.isArray(data)?data:null;
+    }catch(_){return null;}
+  }
+
+  function cacheSavedOptions(options){
+    try{
+      const key=cacheKey();
+      if(!key)return;
+      localStorage.setItem(key,JSON.stringify(options||{}));
+    }catch(_){}
+  }
+
+  function apply(options,meta){
+    syncRuntimeSlug();
+    options=options&&typeof options==="object"&&!Array.isArray(options)?options:{};
+    meta=meta||{};
+
+    const accent=hex(options.story_color||options.card_color,"#d9a441");
+    const shellBg=hex(options.profile_shell_bg_color,"#100d0b");
+    const shellBgImageRaw=String(options.profile_shell_bg_image_url||"").trim();
+    const shellBgImage=/^https?:\/\//i.test(shellBgImageRaw)
+      ? shellBgImageRaw.replace(/\\/g,"%5C").replace(/"/g,"%22").replace(/[\r\n]/g,"")
+      : "";
+    const shellBorder=hex(options.profile_shell_border_color,accent);
+    const bannerBorder=hex(options.profile_banner_border_color,shellBorder);
+    const statsBg=hex(options.profile_stats_bg_color,"#0d0b0a");
+    const statsBorder=hex(options.profile_stats_border_color,shellBorder);
+    const statsNumber=hex(options.profile_stats_number_color,"#ffffff");
+    const statsLabel=hex(options.profile_stats_label_color,"#bcb5ae");
+    const followBg=hex(options.profile_follow_btn_bg_color,"#5a351a");
+    const followBorder=hex(options.profile_follow_btn_border_color,shellBorder);
+    const followText=hex(options.profile_follow_btn_text_color,"#ffffff");
+    const messageBg=hex(options.profile_message_btn_bg_color,"#0d0d0e");
+    const messageBorder=hex(options.profile_message_btn_border_color,"#65543e");
+    const messageText=hex(options.profile_message_btn_text_color,"#ffffff");
+
+    const [bgR,bgG,bgB]=hexRgb(shellBg,"#100d0b");
+    const [borderR,borderG,borderB]=hexRgb(shellBorder,accent);
+    const [followR,followG,followB]=hexRgb(followBg,"#5a351a");
+    const [messageR,messageG,messageB]=hexRgb(messageBg,"#0d0d0e");
+
+    const opacity=clamp(options.profile_shell_opacity,0,100,92)/100;    const shellImageOverlay=clamp(options.profile_shell_bg_image_overlay,0,90,48)/100;
+    const shellImagePosition=clamp(options.profile_shell_bg_image_position_y,0,100,50);
+    const shellLayerAlpha=shellBgImage?shellImageOverlay:opacity;
+    const shadow=clamp(options.profile_shell_shadow,0,100,42);
+    const glow=clamp(options.profile_shell_glow,0,100,18);
+    const shellFrameAllowed=["current","shimmer","glow","breathe","float","pulse","sway","bounce","flicker","none"];
+    const shellFrameRaw=String(options.profile_shell_animation||"none").trim().toLowerCase();
+    const shellFrameAnimation=shellFrameAllowed.includes(shellFrameRaw)?shellFrameRaw:"none";
+    const shellFrameSpeed=clamp(options.profile_shell_animation_speed,0.8,8,2.8);
+    const shellFrameIntensity=clamp(options.profile_shell_animation_intensity,0,100,60)/100;
+    const blur=clamp(options.profile_shell_blur,0,30,10);
+    const padding=clamp(options.profile_shell_padding,0,28,14);
+    const topGap=clamp(options.profile_shell_top_gap,0,40,8);
+    const bottomGap=clamp(options.profile_shell_bottom_gap,0,50,18);
+    const borderWidth=clamp(options.profile_shell_border_width,0,4,1);
+    const radius=clamp(options.profile_shell_radius,0,48,30);
+    const bannerHeight=clamp(options.profile_banner_height,80,260,150);
+    const bannerOverlay=clamp(options.profile_banner_overlay,0,85,30)/100;
+    const bannerPos=clamp(options.profile_banner_position_y,0,100,50);
+    const bannerBorderWidth=clamp(options.profile_banner_border_width,0,4,1);
+    const logoSize=clamp(options.profile_logo_size,120,270,210);
+    const logoOverlap=clamp(options.profile_logo_overlap,0,130,62);
+    const statsRadius=clamp(options.profile_stats_radius,0,32,18);
+
+    const storyEffectAllowed=["premium","glow","shimmer","sparkle","heartbeat","soft","none"];
+    const storyUploadAllowed=["spark-burst","ripple","flash","pop","none"];
+    const storyEffectRaw=String(options.story_new_effect||"premium").trim().toLowerCase();
+    const storyUploadRaw=String(options.story_upload_effect||"spark-burst").trim().toLowerCase();
+    const storyEffect=storyEffectAllowed.includes(storyEffectRaw)?storyEffectRaw:"premium";
+    const storyUploadEffect=storyUploadAllowed.includes(storyUploadRaw)?storyUploadRaw:"spark-burst";
+    const storySpeed=clamp(options.story_new_speed,1,6,2.2);
+    const storyIntensity=clamp(options.story_new_intensity,0,100,72)/100;
+    const storyGlowColor=hex(
+      options.story_glow_color,
+      hex(options.profile_ring_color,accent)
+    );
+    const [storyGlowR,storyGlowG,storyGlowB]=hexRgb(
+      storyGlowColor,
+      hex(options.profile_ring_color,accent)
+    );
+    const storyGlowPower=clamp(options.story_glow_power,0,100,72)/100;
+    const storySparkles=Math.round(clamp(options.story_new_sparkle_count,0,2,2));
+    const storyImagePulse=bool(options.story_new_image_pulse,true);
+    const pageMotionMode=String(options.page_motion_mode||"preset").trim().toLowerCase();
+
+    shell.dataset.layout=String(options.profile_shell_layout||"luxury").trim().toLowerCase();
+    shell.dataset.actionStyle=String(options.profile_action_style||"premium").trim().toLowerCase();
+    shell.dataset.frameAnimation=shellFrameAnimation;
+    shell.classList.toggle("m7-profile-vip",bool(options.vip_crown_enabled,false));
+    shell.dataset.storyEffect=storyEffect;
+    shell.dataset.storyUploadEffect=storyUploadEffect;
+    shell.dataset.storyImagePulse=storyImagePulse?"1":"0";
+    shell.dataset.storySparkles=String(storySparkles);
+    shell.dataset.motionMode=pageMotionMode;
+    shell.dataset.profileCircle=bool(options.profile_circle_enabled,true)?"1":"0";
+    shell.classList.toggle("m7-profile-shell-disabled",!bool(options.profile_shell_enabled,true));
+    shell.classList.toggle("m7-profile-no-inner-highlight",!bool(options.profile_shell_inner_highlight,true));
+    shell.classList.toggle("m7-profile-has-banner",bool(options.profile_banner_enabled,false));
+
+    shell.style.setProperty("--m7-profile-accent",accent);
+    shell.style.setProperty("--m7-profile-shell-bg-rgb",bgR+","+bgG+","+bgB);
+    shell.style.setProperty("--m7-profile-shell-opacity",String(opacity));
+    shell.style.setProperty("--m7-profile-shell-bg-image",shellBgImage?'url("'+shellBgImage+'")':"none");
+    shell.style.setProperty("--m7-profile-shell-bg-layer-alpha",String(shellLayerAlpha));
+    shell.style.setProperty("--m7-profile-shell-bg-image-position",shellImagePosition+"%");
+    shell.style.setProperty("--m7-profile-shell-border",shellBorder);
+    shell.style.setProperty("--m7-profile-shell-border-rgb",borderR+","+borderG+","+borderB);
+    shell.style.setProperty("--m7-profile-shell-border-width",borderWidth+"px");
+    shell.style.setProperty("--m7-profile-shell-radius",radius+"px");
+    shell.style.setProperty("--m7-profile-shell-shadow-alpha",String(Math.min(.72,shadow/100*.58)));
+    shell.style.setProperty("--m7-profile-shell-glow-alpha",String(Math.min(.62,glow/100*.48)));
+    shell.style.setProperty("--m7-profile-shell-glow-size",(4+glow*.22).toFixed(1)+"px");
+    shell.style.setProperty("--m7-profile-shell-frame-speed",shellFrameSpeed+"s");
+    shell.style.setProperty("--m7-profile-shell-frame-intensity",String(shellFrameIntensity));
+    shell.style.setProperty("--m7-profile-shell-blur",blur+"px");
+    shell.style.setProperty("--m7-profile-shell-padding",padding+"px");
+    shell.style.setProperty("--m7-profile-shell-top-gap",topGap+"px");
+    shell.style.setProperty("--m7-profile-shell-bottom-gap",bottomGap+"px");
+
+    shell.style.setProperty("--m7-profile-banner-height",bannerHeight+"px");
+    shell.style.setProperty("--m7-profile-banner-overlay",String(bannerOverlay));
+    shell.style.setProperty("--m7-profile-banner-position",bannerPos+"%");
+    shell.style.setProperty("--m7-profile-banner-border",bannerBorder);
+    shell.style.setProperty("--m7-profile-banner-border-width",bannerBorderWidth+"px");
+
+    shell.style.setProperty("--m7-profile-logo-size",logoSize+"px");
+    shell.style.setProperty("--m7-profile-logo-overlap",logoOverlap+"px");
+    shell.style.setProperty("--m7-story-orbit-y",(-(logoSize/2+2)).toFixed(1)+"px");
+
+    shell.style.setProperty("--m7-story-speed",storySpeed+"s");
+    shell.style.setProperty("--m7-story-soft-speed",(storySpeed*1.35).toFixed(2)+"s");
+    shell.style.setProperty("--m7-story-delay",(-storySpeed*.45).toFixed(2)+"s");
+    shell.style.setProperty("--m7-story-intensity",String(storyIntensity));
+    shell.style.setProperty(
+      "--m7-story-glow-rgb",
+      storyGlowR+","+storyGlowG+","+storyGlowB
+    );
+    shell.style.setProperty(
+      "--m7-story-glow-alpha",
+      String((.14+storyGlowPower*.78).toFixed(3))
+    );
+    shell.style.setProperty(
+      "--m7-story-soft-alpha",
+      String((.06+storyGlowPower*.38).toFixed(3))
+    );
+    shell.style.setProperty(
+      "--m7-story-glow-near",
+      (10+storyGlowPower*28).toFixed(1)+"px"
+    );
+    shell.style.setProperty(
+      "--m7-story-glow-far",
+      (18+storyGlowPower*46).toFixed(1)+"px"
+    );
+    shell.style.setProperty("--m7-story-scale",String((1+storyIntensity*.080).toFixed(4)));
+    shell.style.setProperty("--m7-story-scale-soft",String((1+storyIntensity*.035).toFixed(4)));
+
+    shell.style.setProperty("--m7-profile-stats-bg",statsBg);
+    shell.style.setProperty("--m7-profile-stats-border",statsBorder);
+    shell.style.setProperty("--m7-profile-stats-radius",statsRadius+"px");
+    shell.style.setProperty("--m7-profile-stats-number",statsNumber);
+    shell.style.setProperty("--m7-profile-stats-label",statsLabel);
+
+    shell.style.setProperty("--m7-profile-follow-bg",followBg);
+    shell.style.setProperty("--m7-profile-follow-bg-rgb",followR+","+followG+","+followB);
+    shell.style.setProperty("--m7-profile-follow-border",followBorder);
+    shell.style.setProperty("--m7-profile-follow-text",followText);
+    shell.style.setProperty("--m7-profile-message-bg",messageBg);
+    shell.style.setProperty("--m7-profile-message-bg-rgb",messageR+","+messageG+","+messageB);
+    shell.style.setProperty("--m7-profile-message-border",messageBorder);
+    shell.style.setProperty("--m7-profile-message-text",messageText);
+
+    if(meta.cache===true)cacheSavedOptions(options);
+    if(meta.reveal===true)reveal();
+
+    if(meta.emit!==false){
+      const eventName=meta.preview===true?"ma7alak:profile-design-preview":"ma7alak:profile-design-saved";
+      try{
+        window.dispatchEvent(new CustomEvent(eventName,{detail:{shop_slug:SHOP_SLUG,directory_options:options,source:meta.source||"profile-shell"}}));
+      }catch(_){}
+    }
+  }
+
+  /*
+     IMPORTANT: Admin/profile design previews must NEVER manufacture Story state.
+     The new/unseen Story ring is controlled only by real active shop_stories.
+     Profile image/banner add, change or remove events therefore cannot trigger it.
+  */
+  function previewStoryDesign(){
+    return;
+  }
+
+  function receivePreview(message,source){
+    if(!message||message.type!=="MA7ALAK_DESIGN_PREVIEW")return;
+    const slug=normalizeRuntimeSlug(message.shop_slug||message.shopSlug||"");
+    const currentSlug=syncRuntimeSlug(slug);
+    if(!slug||!currentSlug||slug!==currentSlug)return;
+    const stamp=Number(message.sent_at)||Date.now();
+    if(stamp<lastPreviewStamp)return;
+    lastPreviewStamp=stamp;
+
+    const options=
+      message.directory_options &&
+      typeof message.directory_options==="object"
+        ? message.directory_options
+        : {};
+
+    apply(options,{cache:false,reveal:true,emit:true,preview:true,source:source||"preview"});
+    previewStoryDesign(options);
+
+    const profile=
+      message.profile &&
+      typeof message.profile==="object"
+        ? message.profile
+        : null;
+
+    if(profile){
+      try{
+        window.dispatchEvent(
+          new CustomEvent(
+            "ma7alak:profile-draft-preview",
+            {
+              detail:{
+                ...profile,
+                shop_slug:SHOP_SLUG,
+                directory_options:options,
+                sent_at:stamp,
+                source:source||"preview"
+              }
+            }
+          )
+        );
+      }catch(_){}
+    }
+  }
+
+  function connectRealtime(client){
+    const currentSlug=syncRuntimeSlug();
+    if(!client||typeof client.channel!=="function"||!currentSlug)return;
+    if(realtimeChannel&&realtimeClient===client&&realtimeSlug===currentSlug)return;
+    if(realtimeChannel&&realtimeClient){try{realtimeClient.removeChannel(realtimeChannel);}catch(_){}}
+    realtimeClient=client;
+    realtimeSlug=currentSlug;
+    realtimeChannel=client
+      .channel("ma7alak-design-preview-"+currentSlug)
+      .on("broadcast",{event:"design-preview"},payload=>receivePreview(payload&&payload.payload,"supabase"))
+      .subscribe();
+  }
+
+  try{
+    if("BroadcastChannel" in window){
+      bc=new BroadcastChannel(CHANNEL_NAME);
+      bc.onmessage=event=>receivePreview(event.data,"broadcast-channel");
+    }
+  }catch(_){}
+
+  window.addEventListener("storage",event=>{
+    const key=previewStorageKey();
+    if(!key||event.key!==key||!event.newValue)return;
+    try{receivePreview(JSON.parse(event.newValue),"storage");}catch(_){}
+  });
+
+  window.addEventListener("message",event=>receivePreview(event&&event.data,"post-message"));
+
+  const cached=readCachedOptions();
+  if(cached)apply(cached,{cache:false,reveal:false,emit:false,source:"cache-preflight"});
+
+  hideUntilTheme();
+  revealTimer=setTimeout(reveal,700);
+
+  window.Ma7alakProfileShell={
+    get slug(){return syncRuntimeSlug();},
+    setSlug:function(value){
+      return syncRuntimeSlug(value);
+    },
+    apply,
+    reveal,
+    hideUntilTheme,
+    getCachedOptions:readCachedOptions,
+    connectRealtime
+  };
+})();
+</script>
+
+
+<!-- =========================================================
+     PROFILE TOP BANNER
+     Admin-controlled.
+     IMPORTANT: this is only a shallow top banner.
+     It does NOT replace the Hostinger page background.
+========================================================= -->
+
+<div
+  id="ma7alak-profile-banner"
+  aria-hidden="true"
+></div>
+
+<style>
+#ma7alak-profile-banner{
+  width:calc(100vw - 14px)!important;
+  max-width:none!important;
+  height:202px!important;
+
+  position:relative!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+
+  margin:
+    0
+    0
+    -60px!important;
+
+  display:none;
+
+  background-color:#171217;
+  background-image:none;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+
+  border:0!important;
+  outline:0!important;
+
+  box-shadow:none!important;
+
+  overflow:hidden!important;
+
+  pointer-events:none!important;
+
+  animation:none!important;
+  -webkit-animation:none!important;
+  transition:none!important;
+
+  z-index:0!important;
+}
+
+
+/* ---------------------------------------------------------
+   BANNER EDGE DESIGNS
+   These shape ONLY the banner. Hostinger page background
+   remains untouched and visible around / below the banner.
+--------------------------------------------------------- */
+
+#ma7alak-profile-banner.m7-banner-straight{
+  width:100vw!important;
+  border-radius:0!important;
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+#ma7alak-profile-banner.m7-banner-rounded{
+  border-radius:
+    22px 22px
+    30px 30px!important;
+
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+#ma7alak-profile-banner.m7-banner-wave{
+  border-radius:
+    22px 22px
+    0 0!important;
+
+  clip-path:
+    polygon(
+      0 0,
+      100% 0,
+      100% 80%,
+      92% 84%,
+      78% 90%,
+      62% 95%,
+      50% 98%,
+      38% 95%,
+      22% 90%,
+      8% 84%,
+      0 80%
+    )!important;
+
+  -webkit-clip-path:
+    polygon(
+      0 0,
+      100% 0,
+      100% 80%,
+      92% 84%,
+      78% 90%,
+      62% 95%,
+      50% 98%,
+      38% 95%,
+      22% 90%,
+      8% 84%,
+      0 80%
+    )!important;
+
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+#ma7alak-profile-banner.m7-banner-fade{
+  width:100vw!important;
+  border-radius:0!important;
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 68%,
+      rgba(0,0,0,.86) 78%,
+      rgba(0,0,0,.34) 91%,
+      transparent 100%
+    )!important;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 68%,
+      rgba(0,0,0,.86) 78%,
+      rgba(0,0,0,.34) 91%,
+      transparent 100%
+    )!important;
+}
+
+#ma7alak-profile-banner.m7-banner-rounded-fade{
+  border-radius:
+    22px 22px
+    34px 34px!important;
+
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 72%,
+      rgba(0,0,0,.90) 81%,
+      rgba(0,0,0,.40) 92%,
+      transparent 100%
+    )!important;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 72%,
+      rgba(0,0,0,.90) 81%,
+      rgba(0,0,0,.40) 92%,
+      transparent 100%
+    )!important;
+}
+
+
+#ma7alak-profile-banner.visible{
+  display:block!important;
+}
+
+
+@media(max-width:600px){
+  #ma7alak-profile-banner{
+    height:190px!important;
+    width:calc(100vw - 10px)!important;
+
+    /*
+      Circle is now 5% smaller.
+      This overlap keeps only the upper part of the circle inside
+      the banner instead of swallowing the profile section.
+    */
+    margin-bottom:-58px!important;
+  }
+
+  #ma7alak-profile-banner.m7-banner-straight,
+  #ma7alak-profile-banner.m7-banner-fade{
+    width:100vw!important;
+  }
+}
+
+
+@media(max-width:380px){
+  #ma7alak-profile-banner{
+    height:180px!important;
+    width:calc(100vw - 8px)!important;
+    margin-bottom:-56px!important;
+  }
+
+  #ma7alak-profile-banner.m7-banner-straight,
+  #ma7alak-profile-banner.m7-banner-fade{
+    width:100vw!important;
+  }
+}
+</style>
+
+
+<!-- =========================================================
+     STORY CIRCLE
+========================================================= -->
+
+<div
+  id="ma7alak-story-wrapper"
+  style="
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    outline:none !important;
+  "
+>
+
+  <div
+    id="ma7alak-story-new-ring"
+    aria-hidden="true"
+  ></div>
+
+
+  <div
+    id="ma7alak-story-active-ring"
+    aria-hidden="true"
+  ></div>
+
+
+  <div id="ma7alak-vip-crown" aria-hidden="true">
+    <svg viewBox="0 0 120 76" focusable="false" aria-hidden="true">
+      <defs>
+        <linearGradient id="m7-vip-crown-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff4ad"/>
+          <stop offset=".24" stop-color="#ffd65d"/>
+          <stop offset=".58" stop-color="#e7a329"/>
+          <stop offset="1" stop-color="#fff0a0"/>
+        </linearGradient>
+      </defs>
+      <path d="M13 55 20 22l26 18L60 10l14 30 26-18 7 33-11 10H24Z" fill="url(#m7-vip-crown-gold)" stroke="#fff2a2" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M24 56h72v10H24Z" rx="5" fill="#c67d15" stroke="#ffe987" stroke-width="2"/>
+      <circle cx="20" cy="21" r="5" fill="#fff6bd"/>
+      <circle cx="60" cy="9" r="5.5" fill="#fff8c9"/>
+      <circle cx="100" cy="21" r="5" fill="#fff6bd"/>
+      <path d="M38 55 60 20l22 35" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <i class="m7-vip-spark s1"></i>
+    <i class="m7-vip-spark s2"></i>
+    <i class="m7-vip-spark s3"></i>
+  </div>
+
+
+  <button
+    id="ma7alak-story-button"
+    type="button"
+    aria-label="View stories"
+  >
+
+    <div id="ma7alak-story-preview">
+
+      <div
+        class="ma7alak-story-placeholder"
+      ></div>
+
+    </div>
+
+  </button>
+
+
+  <span
+    id="ma7alak-profile-verified-badge"
+    title="Verified shop"
+    aria-label="Verified shop"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2.4l2.3 1.7 2.9-.1.8 2.8 2.4 1.7-.9 2.8.9 2.8-2.4 1.7-.8 2.8-2.9-.1L12 21.6l-2.3-1.7-2.9.1-.8-2.8-2.4-1.7.9-2.8-.9-2.8L6 6.8 6.8 4l2.9.1L12 2.4z"/>
+      <path d="m8.2 12.1 2.3 2.3 5.2-5.2" fill="none"/>
+    </svg>
+  </span>
+
+
+  <button
+    id="ma7alak-owner-add-story"
+    type="button"
+    aria-label="Add story"
+  >
+    +
+  </button>
+
+</div>
+
+
+
+<style>
+/* =========================================================
+   PROFILE CIRCLE — 5% SMALLER
+   Only the profile/story circle unit is scaled.
+========================================================= */
+#ma7alak-story-wrapper{
+  transform:scale(.95)!important;
+  -webkit-transform:scale(.95)!important;
+  transform-origin:50% 50%!important;
+  -webkit-transform-origin:50% 50%!important;
+}
+</style>
+
+<!-- =========================================================
+     PREMIUM SHOP IDENTITY
+========================================================= -->
+
+<section id="ma7alak-shop-identity" aria-label="Shop identity">
+  <div id="ma7alak-shop-identity-category-row">
+    <span class="ma7alak-shop-identity-line" aria-hidden="true"></span>
+
+    <div id="ma7alak-shop-category-pill">
+      <span id="ma7alak-shop-category-icon" aria-hidden="true"></span>
+      <span id="ma7alak-shop-category-text"></span>
+    </div>
+
+    <span class="ma7alak-shop-identity-line right" aria-hidden="true"></span>
+  </div>
+
+  <h1 id="ma7alak-shop-name"></h1>
+  <div id="ma7alak-shop-arabic-name"></div>
+
+  <div id="ma7alak-shop-identity-divider" aria-hidden="true">
+    <span></span>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     SUPABASE
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- SHOUFHON FOLLOW SECURITY BRIDGE -->
+<script src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@fb2eb677cd8185045f9c5c2f381e4e624b0b4dee/shoufhon-follow-security-bridge.js"></script>
+
+
+<script>
+
+(async function(){
+
+  "use strict";
+
+
+  /* =========================================================
+     SUPABASE
+  ========================================================= */
+
+  const SUPABASE_URL =
+    "https://wdtaiuwtqdepzdamgsrs.supabase.co";
+
+
+  const SUPABASE_KEY =
+    "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
+
+  /*
+     IMPORTANT:
+     The shop Story system must use the SAME authenticated
+     Ma7alak Supabase client as the global account/owner system.
+     Creating another client here can use a different auth
+     storage key and make a real owner look logged out.
+  */
+  let supabaseClient =
+    (
+      window.Ma7alakAccount &&
+      window.Ma7alakAccount.client
+    ) ||
+    window.__MA7ALAK_SHARED_SUPABASE_CLIENT__ ||
+    null;
+
+  async function getMa7alakSupabaseClient(){
+
+    if(
+      window.Ma7alakAccount &&
+      typeof window.Ma7alakAccount.ready === "function"
+    ){
+      try{
+        await window.Ma7alakAccount.ready();
+      }
+      catch(error){}
+    }
+
+    if(
+      window.Ma7alakSupabaseBootstrap &&
+      typeof window.Ma7alakSupabaseBootstrap.ready === "function"
+    ){
+      try{
+        const shared =
+          await window.Ma7alakSupabaseBootstrap.ready();
+
+        if(shared){
+          supabaseClient = shared;
+        }
+      }
+      catch(error){}
+    }
+
+    if(
+      window.Ma7alakAccount &&
+      window.Ma7alakAccount.client
+    ){
+      supabaseClient =
+        window.Ma7alakAccount.client;
+    }
+
+    if(
+      !supabaseClient &&
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__
+    ){
+      supabaseClient =
+        window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
+    }
+
+    /*
+       Compatibility fallback only.
+       On the current Ma7alak setup the shared client above
+       should always be available because viewer-account.js
+       loads globally before this shop embed.
+    */
+    if(
+      !supabaseClient &&
+      window.supabase &&
+      typeof window.supabase.createClient === "function"
+    ){
+      supabaseClient =
+        window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        );
+    }
+
+    if(!supabaseClient){
+      throw new Error(
+        "MA7ALAK_SHARED_SUPABASE_CLIENT_NOT_READY"
+      );
+    }
+
+    return supabaseClient;
+  }
+
+
+  /* =========================================================
+     SHOP
+     ---------------------------------------------------------
+     UNIVERSAL SLUG:
+     Automatically resolves the published owner-page slug from
+     the parent page / referrer. You can optionally set
+     data-shop-slug on #ma7alak-story-wrapper for testing.
+
+     The code automatically reads this shop from shop_profiles
+     and loads:
+       - profile / story circle image
+       - shop name
+       - Arabic name (if available)
+       - independent Admin Shop Label + icon
+       - category remains only for Show Shops filtering
+  ========================================================= */
+
+  function ma7alakResolveOwnerPageSlug(){
+
+    const explicit =
+      document
+        .getElementById(
+          "ma7alak-profile-shell"
+        )
+        ?.getAttribute(
+          "data-shop-slug"
+        ) ||
+      "";
+
+
+    if(String(explicit).trim()){
+      return String(explicit)
+        .trim()
+        .toLowerCase();
+    }
+
+
+    const candidates = [];
+
+
+    try{
+
+      if(
+        window.parent &&
+        window.parent !== window
+      ){
+        candidates.push(
+          window.parent.location.pathname ||
+          ""
+        );
+      }
+
+    }
+    catch(_){}
+
+
+    try{
+
+      if(document.referrer){
+
+        candidates.push(
+          new URL(
+            document.referrer
+          ).pathname ||
+          ""
+        );
+
+      }
+
+    }
+    catch(_){}
+
+
+    candidates.push(
+      window.location.pathname ||
+      ""
+    );
+
+
+    for(
+      let i = 0;
+      i < candidates.length;
+      i++
+    ){
+
+      const parts =
+        String(
+          candidates[i]
+        )
+          .split("/")
+          .filter(Boolean);
+
+
+      const last =
+        parts.length
+          ? decodeURIComponent(
+              parts[
+                parts.length - 1
+              ]
+            )
+          : "";
+
+
+      if(
+        last &&
+        last !== "embed" &&
+        last !== "editor"
+      ){
+        return last
+          .trim()
+          .toLowerCase();
+      }
+
+    }
+
+
+    return "";
+  }
+
+
+  let SHOP_SLUG =
+    String(document.getElementById("ma7alak-profile-shell")?.getAttribute("data-shop-slug") || "")
+      .trim()
+      .toLowerCase();
+
+  if(!SHOP_SLUG){
+    try{
+      const ctx=window.ShoufHonShopContextClient;
+      SHOP_SLUG=String(ctx?.slug||"").trim().toLowerCase();
+      if(!SHOP_SLUG&&ctx){
+        SHOP_SLUG=await ctx.resolve({fallback:ma7alakResolveOwnerPageSlug,timeout:350});
+      }
+    }catch(_){}
+  }
+
+  if(!SHOP_SLUG){
+    SHOP_SLUG=ma7alakResolveOwnerPageSlug();
+  }
+
+  if(!SHOP_SLUG){
+    console.warn("[ShoufHon Story] No shop context available.");
+    return;
+  }
+
+  document.getElementById("ma7alak-profile-shell")?.setAttribute("data-shop-slug",SHOP_SLUG);
+
+  if(
+    window.Ma7alakProfileShell &&
+    typeof window.Ma7alakProfileShell.setSlug === "function"
+  ){
+    window.Ma7alakProfileShell.setSlug(SHOP_SLUG);
+  }
+
+
+  /* =========================================================
+     SHOP PROFILE DATA — AUTO FROM ADMIN / SUPABASE
+  ========================================================= */
+
+  let STORY_CIRCLE_IMAGE_URL = "";
+
+  let SHOP_PROFILE = null;
+
+  const SHOP_IDENTITY = {
+    category: "",
+    label: "",
+    labelIcon: "shop",
+    labelIconText: "",
+    name:
+      SHOP_SLUG
+        .split("-")
+        .filter(Boolean)
+        .map(function(part){
+          return part.charAt(0).toUpperCase() + part.slice(1);
+        })
+        .join(" "),
+    arabicName: "",
+    icon: "auto"
+  };
+
+
+  /* =========================================================
+     SEEN KEY
+  ========================================================= */
+
+  const STORY_SEEN_KEY =
+    "ma7alak_story_seen_" +
+    SHOP_SLUG;
+
+
+  /* =========================================================
+     ELEMENTS
+  ========================================================= */
+
+  const storyWrapper =
+    document.getElementById(
+      "ma7alak-story-wrapper"
+    );
+
+
+  const storyButton =
+    document.getElementById(
+      "ma7alak-story-button"
+    );
+
+
+  const storyPreview =
+    document.getElementById(
+      "ma7alak-story-preview"
+    );
+
+
+  const ownerAddButton =
+    document.getElementById(
+      "ma7alak-owner-add-story"
+    );
+
+
+  const newRing =
+    document.getElementById(
+      "ma7alak-story-new-ring"
+    );
+
+
+  const activeStoryRing =
+    document.getElementById(
+      "ma7alak-story-active-ring"
+    );
+
+
+  /* =========================================================
+     DATA
+  ========================================================= */
+
+  let stories = [];
+  let storiesLoaded = false;
+
+  let currentStory = 0;
+
+  let timer = null;
+
+  let currentMedia = null;
+
+  let transitionToken = 0;
+
+  let isShopOwner = false;
+
+  /*
+     Top-level owner bridge state.
+     Hostinger shop embeds can live in an iframe, so the global account
+     object is not always available inside this embed. The parent page
+     sends the authoritative current shop-owner state with postMessage.
+  */
+  let ma7alakParentOwnerStateReceived = false;
+  let ma7alakParentIsOwner = false;
+  let ma7alakParentOwnerSlug = "";
+
+  let newRingAnimation = null;
+
+  let isDeletingStory = false;
+
+  /*
+     Some mobile browsers exit native fullscreen when window.confirm()
+     opens. Keep the CSS Story viewer alive throughout the complete
+     delete flow so the owner can continue managing remaining Stories.
+  */
+  let storyDeleteFlowActive = false;
+
+  /*
+     Performance:
+     - Realtime handles Story INSERT / UPDATE / DELETE.
+     - One expiry timer removes Stories when their 24h lifetime ends.
+     - A slow visible-page fallback refresh protects against a dropped
+       Realtime connection without polling the database every 10 seconds.
+  */
+  let ma7alakStoryDataChannel = null;
+  let ma7alakStoryExpiryTimer = null;
+
+
+  /* =========================================================
+     STORY LIKES
+  ========================================================= */
+
+  const VISITOR_ID_KEY =
+    "ma7alak_visitor_id";
+
+  let visitorId = null;
+
+  const likedStoryIds = new Set();
+
+  /*
+     Avoid sending the same Story-view request repeatedly
+     during one page session. Supabase also enforces one
+     unique view per visitor per Story.
+  */
+  const recordedStoryViews = new Set();
+
+  try{
+    visitorId =
+      localStorage.getItem(
+        VISITOR_ID_KEY
+      );
+
+  }
+  catch(error){}
+
+  if(!visitorId){
+
+    try{
+
+      visitorId =
+        crypto.randomUUID();
+
+    }
+    catch(error){
+
+      visitorId =
+        "visitor_" +
+        Date.now() +
+        "_" +
+        Math.random()
+          .toString(36)
+          .slice(2);
+
+    }
+
+    try{
+
+      localStorage.setItem(
+        VISITOR_ID_KEY,
+        visitorId
+      );
+
+    }
+    catch(error){}
+
+  }
+
+  try{
+
+    const savedLikes =
+      JSON.parse(
+        localStorage.getItem(
+          "ma7alak_story_liked_ids"
+        ) || "[]"
+      );
+
+    if(Array.isArray(savedLikes)){
+
+      savedLikes.forEach(
+        function(id){
+
+          if(id != null){
+            likedStoryIds.add(
+              String(id)
+            );
+          }
+
+        }
+      );
+
+    }
+
+  }
+  catch(error){}
+
+  function saveLikedStories(){
+
+    try{
+
+      localStorage.setItem(
+        "ma7alak_story_liked_ids",
+        JSON.stringify(
+          Array.from(
+            likedStoryIds
+          )
+        )
+      );
+
+    }
+    catch(error){}
+
+  }
+
+
+  /* =========================================================
+     PREMIUM SHOP IDENTITY — INDEPENDENT ADMIN SHOP LABEL
+  ========================================================= */
+
+  function normalizeIdentityText(value){
+    return String(value || "").toLowerCase().trim();
+  }
+
+  function detectShopIconKey(){
+
+    const selected =
+      normalizeIdentityText(
+        SHOP_IDENTITY &&
+        SHOP_IDENTITY.labelIcon
+      );
+
+    if(
+      !selected ||
+      selected === "auto"
+    ){
+      return "shop";
+    }
+
+    return selected;
+  }
+
+  function shopIdentityIconSVG(iconKey){
+
+    const common =
+      'viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    switch(iconKey){
+
+      case "cafe":
+        return `<svg ${common}>
+          <path d="M7.3 14.8c3.7 1.1 7.3-.8 8.4-4.4.7-2.2.2-4.5-1.1-6.2-3.8.3-6.9 2.9-7.8 6.2-.4 1.5-.2 3 .5 4.4Z"/>
+          <path d="M8.1 14.2c2.1-1.7 4.1-4.2 5.6-7.1"/>
+          <path d="M5 18.3h14"/>
+        </svg>`;
+
+      case "tattoo":
+        return `<svg ${common}>
+          <path d="m5 18 9.2-9.2 2 2L7 20H5v-2Z"/>
+          <path d="m13.2 7.8 2.2-2.2 3 3-2.2 2.2"/>
+          <path d="M4 6c2.2 0 2.2-2 4.4-2S10.6 6 12.8 6"/>
+        </svg>`;
+
+      case "phone":
+        return `<svg ${common}>
+          <rect x="7" y="2.8" width="10" height="18.4" rx="2.2"/>
+          <path d="M10 5.6h4M11.2 18.3h1.6"/>
+        </svg>`;
+
+      case "fashion":
+        return `<svg ${common}>
+          <path d="M9 5.2a3 3 0 0 0 6 0"/>
+          <path d="m9.2 7-5 3.2 2.1 3 2.2-1.2V21h7v-9l2.2 1.2 2.1-3-5-3.2"/>
+        </svg>`;
+
+      case "barber":
+        return `<svg ${common}>
+          <circle cx="6.5" cy="7" r="2.2"/>
+          <circle cx="6.5" cy="17" r="2.2"/>
+          <path d="m8.4 8.2 10 7.3M8.4 15.8l10-7.3"/>
+        </svg>`;
+
+      case "beauty":
+        return `<svg ${common}>
+          <path d="M12 3.2 13.4 8l4.8 1.4-4.8 1.4L12 15.6l-1.4-4.8-4.8-1.4L10.6 8 12 3.2Z"/>
+        </svg>`;
+
+      case "food":
+        return `<svg ${common}>
+          <path d="M6 3v7M3.8 3v4.2C3.8 8.8 4.8 10 6 10s2.2-1.2 2.2-2.8V3M6 10v11"/>
+          <path d="M15 3v18M15 3c3 1.7 4.6 4.1 4.6 7.2H15"/>
+        </svg>`;
+
+      case "gym":
+        return `<svg ${common}>
+          <path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>
+        </svg>`;
+
+      case "kiosk":
+        return `<svg ${common}>
+          <path d="M4 9h16M5 4l-1 5c0 1.3 1 2.3 2.3 2.3 1.1 0 2-.7 2.3-1.7.3 1 1.2 1.7 2.4 1.7s2.1-.7 2.4-1.7c.3 1 1.2 1.7 2.3 1.7C19 11.3 20 10.3 20 9l-1-5H5Z"/>
+          <path d="M6 11.3V21h12v-9.7M9 21v-5h6v5"/>
+        </svg>`;
+
+      case "hijab":
+        return `<svg ${common}>
+          <path d="M12 3.5c3.5 0 6 2.7 6 6.4 0 3.6-2.1 7.7-6 10.6-3.9-2.9-6-7-6-10.6 0-3.7 2.5-6.4 6-6.4Z"/>
+          <path d="M9 9.7c.8 1.1 1.8 1.7 3 1.7s2.2-.6 3-1.7"/>
+        </svg>`;
+
+      case "piercing":
+        return `<svg ${common}>
+          <circle cx="12" cy="12" r="6.8"/>
+          <circle cx="12" cy="12" r="2.2"/>
+          <path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4"/>
+        </svg>`;
+
+      case "perfume":
+        return `<svg ${common}>
+          <path d="M9 3h6v3H9zM8 6h8l1.8 3.2V20H6.2V9.2L8 6Z"/>
+          <path d="M9.5 12.2h5M10.5 9.2h3"/>
+        </svg>`;
+
+      case "star":
+        return `<svg ${common}>
+          <path d="m12 3 2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8L12 3Z"/>
+        </svg>`;
+
+      case "heart":
+        return `<svg ${common}>
+          <path d="M20 8.8c0 5.1-8 10.1-8 10.1S4 13.9 4 8.8C4 5.9 5.9 4 8.5 4c1.5 0 2.8.7 3.5 1.8C12.7 4.7 14 4 15.5 4 18.1 4 20 5.9 20 8.8Z"/>
+        </svg>`;
+
+      case "sparkle":
+        return `<svg ${common}>
+          <path d="M12 3.2 13.6 8l4.8 1.6-4.8 1.6L12 16l-1.6-4.8-4.8-1.6L10.4 8 12 3.2Z"/>
+          <path d="m18.2 15 .7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z"/>
+        </svg>`;
+
+      case "none":
+        return "";
+
+      default:
+        return `<svg ${common}>
+          <path d="M4 10.5 12 4l8 6.5M6 9.5V21h12V9.5M9 21v-6h6v6"/>
+        </svg>`;
+    }
+  }
+
+  function renderShopIdentity(){
+
+    const root = document.getElementById("ma7alak-shop-identity");
+    const categoryText = document.getElementById("ma7alak-shop-category-text");
+    const icon = document.getElementById("ma7alak-shop-category-icon");
+    const name = document.getElementById("ma7alak-shop-name");
+    const arabicName = document.getElementById("ma7alak-shop-arabic-name");
+
+    if(!root) return;
+
+    const labelValue =
+      String(
+        SHOP_IDENTITY.label ||
+        ""
+      ).trim();
+
+    const categoryRow =
+      document.getElementById(
+        "ma7alak-shop-identity-category-row"
+      );
+
+    if(categoryText){
+      categoryText.textContent =
+        labelValue;
+    }
+
+    if(categoryRow){
+      categoryRow.style.display =
+        labelValue
+          ? "flex"
+          : "none";
+    }
+
+    const identityIconKey =
+      detectShopIconKey();
+
+    if(icon){
+
+      const customIconText =
+        String(
+          SHOP_IDENTITY.labelIconText ||
+          ""
+        ).trim();
+
+      if(customIconText){
+        icon.textContent =
+          customIconText;
+
+        icon.style.display =
+          "flex";
+      }
+      else if(
+        identityIconKey ===
+        "none"
+      ){
+        icon.innerHTML = "";
+        icon.style.display = "none";
+      }
+      else{
+        icon.innerHTML =
+          shopIdentityIconSVG(
+            identityIconKey
+          );
+
+        icon.style.display =
+          "flex";
+      }
+
+    }
+
+    root.classList.toggle(
+      "ma7alak-identity-tattoo",
+      identityIconKey === "tattoo"
+    );
+
+    if(name){
+      name.textContent = String(SHOP_IDENTITY.name || "");
+    }
+
+    if(arabicName){
+      const value = String(SHOP_IDENTITY.arabicName || "").trim();
+      arabicName.textContent = value;
+      arabicName.style.display = value ? "block" : "none";
+    }
+
+    root.classList.add("ma7alak-identity-ready");
+  }
+
+
+
+  /* =========================================================
+     ADMIN STORY COLOR
+     ---------------------------------------------------------
+     directory_options.story_color is the source of truth.
+     card_color is only the fallback.
+
+     IMPORTANT:
+     The old Shahznan theme CSS at the bottom uses !important.
+     We apply the Admin color as INLINE !important styles so
+     the actual owner-page Story circle/rings always win.
+  ========================================================= */
+
+  function ma7alakStoryHexToRgb(hex){
+
+    const clean =
+      String(hex || "")
+        .trim()
+        .replace("#","");
+
+    if(!/^[0-9a-f]{6}$/i.test(clean)){
+      return null;
+    }
+
+    return {
+      r:parseInt(clean.slice(0,2),16),
+      g:parseInt(clean.slice(2,4),16),
+      b:parseInt(clean.slice(4,6),16)
+    };
+  }
+
+
+  function ma7alakStoryMixHex(
+    rgb,
+    target,
+    amount
+  ){
+
+    function clamp(value){
+      return Math.max(
+        0,
+        Math.min(
+          255,
+          Math.round(value)
+        )
+      );
+    }
+
+    return (
+      "#" +
+      [
+        clamp(rgb.r + (target.r-rgb.r)*amount),
+        clamp(rgb.g + (target.g-rgb.g)*amount),
+        clamp(rgb.b + (target.b-rgb.b)*amount)
+      ]
+        .map(
+          function(value){
+            return value
+              .toString(16)
+              .padStart(2,"0");
+          }
+        )
+        .join("")
+    );
+  }
+
+
+  function ma7alakStoryRgba(
+    rgb,
+    alpha
+  ){
+
+    return (
+      "rgba(" +
+      rgb.r + "," +
+      rgb.g + "," +
+      rgb.b + "," +
+      alpha +
+      ")"
+    );
+  }
+
+
+  function applyStoryColorFromAdmin(
+    profile
+  ){
+
+    const options =
+      profile &&
+      profile.directory_options &&
+      typeof profile.directory_options === "object"
+        ? profile.directory_options
+        : {};
+
+
+    const accent =
+      String(
+        options.story_color ||
+        options.card_color ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const rgb =
+      ma7alakStoryHexToRgb(
+        accent
+      );
+
+
+    if(!rgb){
+      return false;
+    }
+
+
+    const light =
+      ma7alakStoryMixHex(
+        rgb,
+        {r:255,g:255,b:255},
+        .43
+      );
+
+
+    const soft =
+      ma7alakStoryMixHex(
+        rgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+
+    const dark =
+      ma7alakStoryMixHex(
+        rgb,
+        {r:0,g:0,b:0},
+        .38
+      );
+
+
+    const storyButtonEl =
+      document.getElementById(
+        "ma7alak-story-button"
+      );
+
+
+    const newRingEl =
+      document.getElementById(
+        "ma7alak-story-new-ring"
+      );
+
+
+    const activeRingEl =
+      document.getElementById(
+        "ma7alak-story-active-ring"
+      );
+
+
+    const ownerAddEl =
+      document.getElementById(
+        "ma7alak-owner-add-story"
+      );
+
+
+    if(storyWrapper){
+
+      storyWrapper.style.setProperty(
+        "--ma7alak-story-admin-color",
+        accent
+      );
+
+      storyWrapper.style.setProperty(
+        "--ma7alak-story-admin-rgb",
+        rgb.r + "," + rgb.g + "," + rgb.b
+      );
+
+    }
+
+
+    if(storyButtonEl){
+
+      storyButtonEl.style.setProperty(
+        "border-color",
+        accent,
+        "important"
+      );
+
+
+      storyButtonEl.style.setProperty(
+        "box-shadow",
+        (
+          "0 0 0 1px " +
+          ma7alakStoryRgba(rgb,.16) +
+          ", 0 0 18px " +
+          ma7alakStoryRgba(rgb,.19)
+        ),
+        "important"
+      );
+
+    }
+
+
+    if(newRingEl){
+
+      newRingEl.style.setProperty(
+        "border-color",
+        ma7alakStoryRgba(rgb,.98),
+        "important"
+      );
+
+
+      newRingEl.style.setProperty(
+        "box-shadow",
+        (
+          "0 0 8px " +
+          ma7alakStoryRgba(rgb,.54) +
+          ", 0 0 18px " +
+          ma7alakStoryRgba(rgb,.24)
+        ),
+        "important"
+      );
+
+    }
+
+
+    if(activeRingEl){
+
+      activeRingEl.style.setProperty(
+        "background",
+        (
+          "conic-gradient(" +
+            "from 0deg," +
+            ma7alakStoryRgba(rgb,.05) + " 0deg," +
+            accent + " 24deg," +
+            light + " 56deg," +
+            "#ffffff 78deg," +
+            accent + " 112deg," +
+            dark + " 145deg," +
+            ma7alakStoryRgba(rgb,.12) + " 178deg," +
+            light + " 205deg," +
+            "#ffffff 226deg," +
+            accent + " 258deg," +
+            soft + " 292deg," +
+            light + " 324deg," +
+            ma7alakStoryRgba(rgb,.05) + " 360deg" +
+          ")"
+        ),
+        "important"
+      );
+
+
+      activeRingEl.style.setProperty(
+        "filter",
+        (
+          "drop-shadow(0 0 7px " +
+          ma7alakStoryRgba(rgb,.82) +
+          ") drop-shadow(0 0 18px " +
+          ma7alakStoryRgba(rgb,.42) +
+          ") drop-shadow(0 0 28px " +
+          ma7alakStoryRgba(rgb,.18) +
+          ")"
+        ),
+        "important"
+      );
+
+    }
+
+
+    if(ownerAddEl){
+
+      ownerAddEl.style.setProperty(
+        "background",
+        (
+          "linear-gradient(135deg," +
+          light + " 0%," +
+          accent + " 48%," +
+          dark + " 100%)"
+        ),
+        "important"
+      );
+
+
+      ownerAddEl.style.setProperty(
+        "box-shadow",
+        (
+          "0 3px 12px rgba(0,0,0,.45)," +
+          "0 0 13px " +
+          ma7alakStoryRgba(rgb,.30)
+        ),
+        "important"
+      );
+
+    }
+
+
+    /*
+       COMPLETE OWNER-PAGE ACCENT SYNC
+       --------------------------------
+       This overrides the old fixed pink/purple theme CSS so the Admin
+       Story Color literally recolors the full identity system:
+       category pill, category icon/logo, category text, side sparkles,
+       shop-name shimmer, divider under the name, progress bar and glows.
+    */
+    let accentStyle =
+      document.getElementById(
+        "ma7alak-owner-page-admin-accent"
+      );
+
+
+    if(!accentStyle){
+
+      accentStyle =
+        document.createElement(
+          "style"
+        );
+
+      accentStyle.id =
+        "ma7alak-owner-page-admin-accent";
+
+      document.head.appendChild(
+        accentStyle
+      );
+
+    }
+
+
+    const a08 = ma7alakStoryRgba(rgb,.08);
+    const a10 = ma7alakStoryRgba(rgb,.10);
+    const a12 = ma7alakStoryRgba(rgb,.12);
+    const a14 = ma7alakStoryRgba(rgb,.14);
+    const a18 = ma7alakStoryRgba(rgb,.18);
+    const a22 = ma7alakStoryRgba(rgb,.22);
+    const a25 = ma7alakStoryRgba(rgb,.25);
+    const a30 = ma7alakStoryRgba(rgb,.30);
+    const a36 = ma7alakStoryRgba(rgb,.36);
+    const a42 = ma7alakStoryRgba(rgb,.42);
+    const a50 = ma7alakStoryRgba(rgb,.50);
+    const a64 = ma7alakStoryRgba(rgb,.64);
+    const a78 = ma7alakStoryRgba(rgb,.78);
+
+
+    const shopNameColor =
+      (
+        /^#[0-9a-f]{6}$/i.test(
+          String(
+            options.shop_name_color ||
+            ""
+          ).trim()
+        )
+          ? String(
+              options.shop_name_color
+            ).trim()
+          : accent
+      );
+
+
+    const shopNameRgb =
+      ma7alakStoryHexToRgb(
+        shopNameColor
+      ) ||
+      rgb;
+
+
+    const shopNameLight =
+      ma7alakStoryMixHex(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+
+    const shopNameSoft =
+      ma7alakStoryMixHex(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+
+    const shopNameMode =
+      String(
+        options.shop_name_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    let shopNameAnimationCss = "";
+
+
+    if(shopNameMode === "shimmer"){
+
+      shopNameAnimationCss = `
+        animation:m7AdminShopNameShimmer 3.4s ease-in-out infinite!important;
+        -webkit-animation:m7AdminShopNameShimmer 3.4s ease-in-out infinite!important;
+      `;
+
+    }
+    else if(shopNameMode === "glow"){
+
+      shopNameAnimationCss = `
+        background:none!important;
+        color:${shopNameColor}!important;
+        -webkit-text-fill-color:${shopNameColor}!important;
+        animation:m7AdminShopNameGlow 2.1s ease-in-out infinite!important;
+        -webkit-animation:m7AdminShopNameGlow 2.1s ease-in-out infinite!important;
+      `;
+
+    }
+    else if(shopNameMode === "breathe"){
+
+      shopNameAnimationCss = `
+        background:none!important;
+        color:${shopNameColor}!important;
+        -webkit-text-fill-color:${shopNameColor}!important;
+        animation:m7AdminShopNameBreathe 2.6s ease-in-out infinite!important;
+        -webkit-animation:m7AdminShopNameBreathe 2.6s ease-in-out infinite!important;
+      `;
+
+    }
+    else if(shopNameMode === "none"){
+
+      shopNameAnimationCss = `
+        background:none!important;
+        color:${shopNameColor}!important;
+        -webkit-text-fill-color:${shopNameColor}!important;
+        animation:none!important;
+        -webkit-animation:none!important;
+      `;
+
+    }
+
+
+    accentStyle.textContent = `
+      @keyframes m7AdminShopNameShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @-webkit-keyframes m7AdminShopNameShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @keyframes m7AdminShopNameGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${ma7alakStoryRgba(shopNameRgb,.24)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+        50%{
+          text-shadow:
+            0 0 13px ${ma7alakStoryRgba(shopNameRgb,.80)},
+            0 0 22px ${ma7alakStoryRgba(shopNameRgb,.34)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+      }
+
+      @-webkit-keyframes m7AdminShopNameGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${ma7alakStoryRgba(shopNameRgb,.24)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+        50%{
+          text-shadow:
+            0 0 13px ${ma7alakStoryRgba(shopNameRgb,.80)},
+            0 0 22px ${ma7alakStoryRgba(shopNameRgb,.34)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+      }
+
+      @keyframes m7AdminShopNameBreathe{
+        0%,100%{transform:scale(1);opacity:.94}
+        50%{transform:scale(1.035);opacity:1}
+      }
+
+      @-webkit-keyframes m7AdminShopNameBreathe{
+        0%,100%{-webkit-transform:scale(1);opacity:.94}
+        50%{-webkit-transform:scale(1.035);opacity:1}
+      }
+
+      #ma7alak-shop-identity{
+        --m7-owner-accent:${accent};
+        --m7-owner-light:${light};
+        --m7-owner-soft:${soft};
+        --m7-owner-dark:${dark};
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-pill{
+        border-color:${a50}!important;
+        background:
+          radial-gradient(circle at 18% 0%,${a14},transparent 38%),
+          linear-gradient(145deg,rgba(31,24,30,.96),rgba(10,9,11,.98))!important;
+        box-shadow:
+          0 7px 22px rgba(0,0,0,.26),
+          0 0 18px ${a12},
+          inset 0 1px 0 ${a10}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-icon{
+        border-color:${a50}!important;
+        background:
+          radial-gradient(circle at 35% 28%,${a22},${a08} 48%,rgba(0,0,0,.10) 100%)!important;
+        color:${light}!important;
+        box-shadow:
+          0 0 8px ${a30},
+          0 0 16px ${a12}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-icon svg{
+        color:${light}!important;
+        fill:currentColor!important;
+        filter:
+          drop-shadow(0 0 3px ${a64})
+          drop-shadow(0 0 7px ${a42})!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-text{
+        color:${light}!important;
+        background:
+          linear-gradient(
+            100deg,
+            ${light} 0%,
+            ${soft} 28%,
+            #ffffff 48%,
+            ${accent} 68%,
+            ${light} 100%
+          )!important;
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+        -webkit-text-fill-color:transparent!important;
+        text-shadow:0 0 10px ${a18}!important;
+      }
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line{
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0%,
+            ${a25} 14%,
+            ${a64} 45%,
+            ${light} 50%,
+            ${a64} 55%,
+            ${a25} 86%,
+            transparent 100%
+          )!important;
+        box-shadow:
+          0 0 6px ${a36},
+          0 0 13px ${a14}!important;
+      }
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line::before{
+        background:
+          radial-gradient(
+            circle,
+            #ffffff 0 15%,
+            ${light} 23%,
+            ${accent} 48%,
+            transparent 72%
+          )!important;
+        filter:
+          drop-shadow(0 0 6px ${a78})
+          drop-shadow(0 0 11px ${a64})
+          drop-shadow(0 0 15px ${a30})!important;
+      }
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line::after{
+        background:
+          linear-gradient(
+            135deg,
+            ${light},
+            ${accent} 52%,
+            ${soft}
+          )!important;
+        box-shadow:
+          0 0 7px ${a50},
+          0 0 13px ${a22}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-name{
+        background:
+          linear-gradient(
+            105deg,
+            #ffffff 0%,
+            ${shopNameLight} 18%,
+            ${shopNameSoft} 37%,
+            #ffffff 52%,
+            ${shopNameColor} 70%,
+            ${shopNameLight} 86%,
+            #ffffff 100%
+          )!important;
+
+        background-size:280% 100%!important;
+
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+        -webkit-text-fill-color:transparent!important;
+        color:transparent!important;
+
+        text-shadow:
+          0 3px 13px rgba(0,0,0,.36),
+          0 0 13px ${ma7alakStoryRgba(shopNameRgb,.18)}!important;
+
+        ${shopNameAnimationCss}
+      }
+
+      ${
+        shopNameMode !== "current"
+          ? `
+              html body #ma7alak-shop-identity #ma7alak-shop-name::before,
+              html body #ma7alak-shop-identity #ma7alak-shop-name::after{
+                animation:none!important;
+                -webkit-animation:none!important;
+                opacity:0!important;
+              }
+            `
+          : ""
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-arabic-name{
+        color:${soft}!important;
+        text-shadow:
+          0 3px 13px rgba(0,0,0,.36),
+          0 0 13px ${a18}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::before,
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::after{
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0%,
+            ${a22} 14%,
+            ${a64} 56%,
+            ${light} 100%
+          )!important;
+        box-shadow:0 0 9px ${a30}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider span{
+        border-color:${light}!important;
+        background:
+          linear-gradient(
+            135deg,
+            ${light},
+            ${accent} 55%,
+            ${soft}
+          )!important;
+        box-shadow:
+          0 0 8px ${a64},
+          0 0 15px ${a30}!important;
+      }
+
+      html body #ma7alak-full-story .ma7alak-story-progress-fill{
+        background:
+          linear-gradient(
+            90deg,
+            ${accent},
+            ${light}
+          )!important;
+        box-shadow:
+          0 0 7px ${a30}!important;
+      }
+    `;
+
+
+    return true;
+  }
+
+
+
+  /* =========================================================
+     PAGE DESIGN STUDIO — OWNER PAGE IDENTITY
+     ---------------------------------------------------------
+     Supports:
+       premium / basic / minimal / custom
+       label side-line styles + symbols
+       shop-name divider styles + symbols
+       Arabic-name color + animation
+       independent profile-ring color
+       full live Admin updates
+  ========================================================= */
+
+  function m7dsSafeHex(value,fallback){
+    const raw =
+      String(value || "").trim();
+
+    return (      /^#[0-9a-f]{6}$/i.test(raw)
+        ? raw
+        : fallback
+    );
+  }
+
+
+  function m7dsCssText(value){
+    return String(value || "")
+      .replace(/\\/g,"\\\\")
+      .replace(/"/g,'\\"')
+      .replace(/\n/g," ");
+  }
+
+
+  function m7dsSymbol(
+    kind,
+    custom
+  ){
+
+    const own =
+      String(custom || "").trim();
+
+    if(
+      kind === "custom" &&
+      own
+    ){
+      return own.slice(0,5);
+    }
+
+    return (
+      {
+        diamond:"◆",
+        star:"★",
+        sparkle:"✦",
+        dot:"•",
+        none:""
+      }[kind] ||
+      "◆"
+    );
+  }
+
+
+  function m7dsLineBackground(
+    style,
+    color,
+    rgba
+  ){
+
+    if(style === "solid"){
+      return color;
+    }
+
+    if(style === "double"){
+      return (
+        "linear-gradient(to bottom," +
+        color +
+        " 0 1px,transparent 1px 2px," +
+        color +
+        " 2px 3px)"
+      );
+    }
+
+    if(style === "dotted"){
+      return (
+        "radial-gradient(circle," +
+        color +
+        " 0 1.2px,transparent 1.4px) 0 50% / 7px 3px repeat-x"
+      );
+    }
+
+    return (
+      "linear-gradient(90deg,transparent 0%," +
+      rgba +
+      " 24%," +
+      color +
+      " 100%)"
+    );
+  }
+
+
+
+  /* =========================================================
+     PAGE TYPOGRAPHY
+     Global + per-module font style and proportional text size.
+     No external font downloads are used.
+  ========================================================= */
+
+  function m7dsFontStack(
+    mode
+  ){
+
+    return (
+      {
+        system:
+          '"Segoe UI",Arial,Helvetica,sans-serif',
+
+        modern:
+          '"Trebuchet MS","Segoe UI",Arial,sans-serif',
+
+        elegant:
+          'Georgia,"Times New Roman",serif',
+
+        classic:
+          '"Times New Roman",Georgia,serif',
+
+        mono:
+          '"Courier New",Courier,monospace'
+      }[
+        String(mode || "")
+          .trim()
+          .toLowerCase()
+      ]
+      ||
+      ""
+    );
+  }
+
+
+  function m7dsFontPercent(
+    value
+  ){
+
+    const number =
+      Number(value);
+
+    if(
+      !Number.isFinite(number)
+    ){
+      return 100;
+    }
+
+    return Math.max(
+      70,
+      Math.min(
+        150,
+        number
+      )
+    );
+  }
+
+
+  function m7dsApplyTypography(
+    root,
+    options,
+    moduleKey
+  ){
+
+    if(!root){
+      return;
+    }
+
+
+    const globalStyle =
+      String(
+        options.global_font_style ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const moduleStyleRaw =
+      String(
+        options[
+          moduleKey +
+          "_font_style"
+        ] ||
+        "inherit"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const finalStyle =
+      moduleStyleRaw === "inherit"
+        ? globalStyle
+        : moduleStyleRaw;
+
+
+    const family =
+      m7dsFontStack(
+        finalStyle
+      );
+
+
+    const globalScale =
+      m7dsFontPercent(
+        options.global_font_size
+      );
+
+
+    const moduleScale =
+      m7dsFontPercent(
+        options[
+          moduleKey +
+          "_font_size"
+        ]
+      );
+
+
+    const finalScale =
+      (
+        globalScale *
+        moduleScale
+      ) / 10000;
+
+
+    const elements =
+      [
+        root,
+        ...root.querySelectorAll("*")
+      ];
+
+
+    elements.forEach(
+      function(el){
+
+        if(
+          !el ||
+          !el.tagName
+        ){
+          return;
+        }
+
+
+        const tag =
+          el.tagName
+            .toUpperCase();
+
+
+        if(
+          [
+            "STYLE",
+            "SCRIPT",
+            "SVG",
+            "PATH",
+            "IMG",
+            "VIDEO"
+          ].includes(tag)
+        ){
+          return;
+        }
+
+
+        const directText =
+          Array.from(
+            el.childNodes || []
+          )
+            .some(
+              function(node){
+                return (
+                  node.nodeType === 3 &&
+                  String(
+                    node.textContent || ""
+                  ).trim()
+                );
+              }
+            );
+
+
+        const formText =
+          [
+            "BUTTON",
+            "INPUT",
+            "TEXTAREA",
+            "SELECT",
+            "OPTION"
+          ].includes(tag);
+
+
+        if(
+          !directText &&
+          !formText
+        ){
+          return;
+        }
+
+
+        if(
+          family
+        ){
+          el.style.setProperty(
+            "font-family",
+            family,
+            "important"
+          );
+        }
+        else{
+          el.style.removeProperty(
+            "font-family"
+          );
+        }
+
+
+        let base =
+          Number(
+            el.dataset
+              .m7BaseFontSize
+          );
+
+
+        if(
+          !Number.isFinite(base) ||
+          base <= 0
+        ){
+
+          const current =
+            parseFloat(
+              getComputedStyle(el)
+                .fontSize
+            );
+
+
+          if(
+            !Number.isFinite(current) ||
+            current <= 0
+          ){
+            return;
+          }
+
+
+          base =
+            current;
+
+
+          el.dataset
+            .m7BaseFontSize =
+              String(base);
+
+        }
+
+
+        el.style.setProperty(
+          "font-size",
+          (
+            base *
+            finalScale
+          )
+            .toFixed(2) +
+          "px",
+          "important"
+        );
+
+      }
+    );
+
+  }
+
+
+  function applyPageDesignFromAdmin(
+    profile
+  ){
+
+    const options =
+      profile &&
+      profile.directory_options &&
+      typeof profile.directory_options ===
+        "object"
+        ? profile.directory_options
+        : {};
+
+
+    const accent =
+      m7dsSafeHex(
+        options.story_color ||
+        options.card_color,
+        "#f2caed"
+      );
+
+
+    const accentRgb =
+      ma7alakStoryHexToRgb(
+        accent
+      ) || {
+        r:242,
+        g:202,
+        b:237
+      };
+
+
+    const preset =
+      String(
+        options.page_design_preset ||
+        "premium"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const motionMode =
+      String(
+        options.page_motion_mode ||
+        "preset"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const useUniversal =
+      options.page_use_universal_accent === undefined
+        ? true
+        : (
+            options.page_use_universal_accent === true ||
+            String(
+              options.page_use_universal_accent
+            ).toLowerCase() === "true"
+          );
+
+
+    const motionOff =
+      motionMode === "off" ||
+      (
+        motionMode === "preset" &&
+        (
+          preset === "basic" ||
+          preset === "minimal"
+        )
+      );
+
+
+    const motionSubtle =
+      motionMode === "subtle";
+
+
+    function picked(
+      key,
+      fallback
+    ){
+
+      /*
+        Universal Accent links MODULE colors only.
+        Identity controls stay independent, exactly as the Admin
+        Design Studio says they do.
+      */
+      return m7dsSafeHex(
+        options[key],
+        fallback || accent
+      );
+    }
+
+
+    const ringColor =
+      picked(
+        "profile_ring_color",
+        accent
+      );
+
+    const profileCircleEnabled =
+      options.profile_circle_enabled === undefined
+        ? true
+        : (
+            options.profile_circle_enabled === true ||
+            String(options.profile_circle_enabled).toLowerCase() === "true"
+          );
+
+    const profileShell =
+      document.getElementById(
+        "ma7alak-profile-shell"
+      );
+
+    if(profileShell){
+      profileShell.dataset.profileCircle =
+        profileCircleEnabled
+          ? "1"
+          : "0";
+    }
+
+
+    const labelText =
+      picked(
+        "shop_label_text_color",
+        accent
+      );
+
+
+    const labelBorder =
+      picked(
+        "shop_label_border_color",
+        accent
+      );
+
+
+    const labelIcon =
+      picked(
+        "shop_label_icon_color",
+        accent
+      );
+
+    const labelIconAnimation =
+      String(
+        options.shop_label_icon_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+    const labelIconSpeedRaw =
+      Number(options.shop_label_icon_speed);
+
+    const labelIconSpeed =
+      Number.isFinite(labelIconSpeedRaw)
+        ? Math.max(.6,Math.min(8,labelIconSpeedRaw))
+        : 2.2;
+
+    const labelIconGlowRaw =
+      Number(options.shop_label_icon_glow);
+
+    const labelIconGlow =
+      Number.isFinite(labelIconGlowRaw)
+        ? Math.max(0,Math.min(100,labelIconGlowRaw))
+        : 55;
+
+
+    const labelLine =
+      picked(
+        "shop_label_line_color",
+        accent
+      );
+
+
+    const arabicColor =
+      picked(
+        "arabic_name_color",
+        accent
+      );
+
+
+    const dividerColor =
+      picked(
+        "identity_divider_color",
+        accent
+      );
+
+
+    /*
+      SHOP NAME
+      Use the exact saved Shop Name color independently from
+      Universal Accent.
+    */
+    const shopNameColor =
+      m7dsSafeHex(
+        options.shop_name_color,
+        accent
+      );
+
+
+    const shopNameRgb =
+      ma7alakStoryHexToRgb(
+        shopNameColor
+      ) ||
+      accentRgb;
+
+
+    const shopNameLight =
+      ma7alakStoryMixHex(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .48
+      );
+
+
+    const shopNameSoft =
+      ma7alakStoryMixHex(
+        shopNameRgb,
+        {r:255,g:255,b:255},
+        .20
+      );
+
+
+    const shopNameMode =
+      String(
+        options.shop_name_animation ||
+        "current"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+      PROFILE BANNER
+      This is NOT a page background. It only occupies the short
+      banner area above the profile and overlaps ~20% of the circle.
+    */
+    const bannerEnabled =
+      options.profile_banner_enabled === true ||
+      String(
+        options.profile_banner_enabled || ""
+      ).toLowerCase() === "true";
+
+
+    const bannerColor =
+      m7dsSafeHex(
+        options.profile_banner_color,
+        "#171217"
+      );
+
+
+    const bannerImage =
+      String(
+        options.profile_banner_image_url ||
+        ""
+      )
+        .trim();
+
+
+    const bannerStyle =
+      String(
+        options.profile_banner_style ||
+        "rounded-fade"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const allowedBannerStyles =
+      [
+        "rounded-fade",
+        "rounded",
+        "wave",
+        "fade",
+        "straight"
+      ];
+
+
+    const finalBannerStyle =
+      allowedBannerStyles.includes(
+        bannerStyle
+      )
+        ? bannerStyle
+        : "rounded-fade";
+
+
+    const labelBg =
+      m7dsSafeHex(
+        options.shop_label_bg_color,
+        preset === "basic"
+          ? "#18140d"
+          : "#171217"
+      );
+
+
+    const labelLineStyle =
+      String(
+        options.shop_label_line_style ||
+        (
+          preset === "minimal"
+            ? "solid"
+            : "fade"
+        )
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const dividerStyle =
+      String(
+        options.identity_divider_style ||
+        (
+          preset === "minimal"
+            ? "solid"
+            : "fade"
+        )
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const labelSymbol =
+      m7dsSymbol(
+        String(
+          options.shop_label_symbol ||
+          "diamond"
+        )
+          .trim()
+          .toLowerCase(),
+        options.shop_label_symbol_text
+      );
+
+
+    const dividerSymbol =
+      m7dsSymbol(
+        String(
+          options.identity_divider_symbol ||
+          "diamond"
+        )
+          .trim()
+          .toLowerCase(),
+        options.identity_divider_symbol_text
+      );
+
+
+    const lineRgb =
+      ma7alakStoryHexToRgb(
+        labelLine
+      ) ||
+      accentRgb;
+
+
+    const dividerRgb =
+      ma7alakStoryHexToRgb(
+        dividerColor
+      ) ||
+      accentRgb;
+
+
+    const labelLineBackground =
+      m7dsLineBackground(
+        labelLineStyle,
+        labelLine,
+        ma7alakStoryRgba(
+          lineRgb,
+          .56
+        )
+      );
+
+
+    const dividerBackground =
+      m7dsLineBackground(
+        dividerStyle,
+        dividerColor,
+        ma7alakStoryRgba(
+          dividerRgb,
+          .62
+        )
+      );
+
+
+    const bannerEl =
+      document.getElementById(
+        "ma7alak-profile-banner"
+      );
+
+
+    if(bannerEl){
+
+      bannerEl.classList.toggle(
+        "visible",
+        bannerEnabled
+      );
+
+
+      [
+        "straight",
+        "rounded",
+        "wave",
+        "fade",
+        "rounded-fade"
+      ]
+        .forEach(
+          function(name){
+            bannerEl
+              .classList
+              .toggle(
+                "m7-banner-" + name,
+                name ===
+                  finalBannerStyle
+              );
+          }
+        );
+
+
+      bannerEl.style.setProperty(
+        "background-color",
+        bannerColor,
+        "important"
+      );
+
+
+      if(
+        bannerEnabled &&
+        /^https?:\/\//i.test(
+          bannerImage
+        )
+      ){
+
+        const safeBannerImage =
+          bannerImage
+            .replace(/\\/g,"%5C")
+            .replace(/"/g,"%22")
+            .replace(/[\r\n]/g,"");
+
+
+        bannerEl.style.setProperty(
+          "background-image",
+          'url("' +
+          safeBannerImage +
+          '")',
+          "important"
+        );
+
+      }
+      else{
+
+        bannerEl.style.setProperty(
+          "background-image",
+          "none",
+          "important"
+        );
+
+      }
+
+    }
+
+
+    const dividerSpan =
+      document.querySelector(
+        "#ma7alak-shop-identity-divider span"
+      );
+
+
+    if(dividerSpan){
+
+      dividerSpan.textContent =
+        dividerSymbol;
+
+      dividerSpan.dataset.m7Symbol =
+        dividerSymbol
+          ? "1"
+          : "0";
+
+    }
+
+
+    let style =
+      document.getElementById(
+        "ma7alak-owner-page-design-studio"
+      );
+
+
+    if(!style){
+
+      style =
+        document.createElement(
+          "style"
+        );
+
+      style.id =
+        "ma7alak-owner-page-design-studio";
+
+      document.head.appendChild(
+        style
+      );
+
+    }
+
+
+    const storyButtonEl =
+      document.getElementById(
+        "ma7alak-story-button"
+      );
+
+    const activeRingEl =
+      document.getElementById(
+        "ma7alak-story-active-ring"
+      );
+
+    const newRingEl =
+      document.getElementById(
+        "ma7alak-story-new-ring"
+      );
+
+    const ringRgb =
+      ma7alakStoryHexToRgb(
+        ringColor
+      ) ||
+      accentRgb;
+
+    const labelIconEl =
+      document.getElementById(
+        "ma7alak-shop-category-icon"
+      );
+
+    if(labelIconEl){
+      labelIconEl.style.setProperty(
+        "color",
+        labelIcon,
+        "important"
+      );
+
+      labelIconEl.style.setProperty(
+        "--m7-label-icon-glow",
+        String(labelIconGlow/100)
+      );
+
+      const animMap={
+        glow:"m7dsLabelIconGlow",
+        breathe:"m7dsLabelIconPulse",
+        pulse:"m7dsLabelIconPulse",
+        float:"m7dsLabelIconFloat",
+        sway:"m7dsLabelIconSway",
+        bounce:"m7dsLabelIconBounce",
+        flicker:"m7dsLabelIconFlicker",
+        shimmer:"m7dsLabelIconGlow"
+      };
+
+      if(labelIconAnimation==="none"){
+        labelIconEl.style.setProperty("animation","none","important");
+        labelIconEl.style.setProperty("-webkit-animation","none","important");
+        labelIconEl.style.setProperty("filter","none","important");
+      }
+      else if(animMap[labelIconAnimation]){
+        const value=
+          animMap[labelIconAnimation]+" "+
+          labelIconSpeed+"s ease-in-out infinite";
+
+        labelIconEl.style.setProperty("animation",value,"important");
+        labelIconEl.style.setProperty("-webkit-animation",value,"important");
+      }
+      else{
+        labelIconEl.style.removeProperty("animation");
+        labelIconEl.style.removeProperty("-webkit-animation");
+      }
+    }
+
+    if(storyButtonEl){
+      storyButtonEl.style.setProperty(
+        "border-color",
+        ringColor,
+        "important"
+      );
+
+      storyButtonEl.style.setProperty(
+        "box-shadow",
+        (
+          "0 0 0 1px " +
+          ma7alakStoryRgba(ringRgb,.14) +
+          ",0 0 18px " +
+          ma7alakStoryRgba(ringRgb,.18)
+        )
+      );
+    }
+
+    if(newRingEl){
+      newRingEl.style.setProperty(
+        "border-color",
+        ma7alakStoryRgba(ringRgb,.82),
+        "important"
+      );
+    }
+
+    if(activeRingEl){
+      const ringLight =
+        ma7alakStoryMixHex(
+          ringRgb,
+          {r:255,g:255,b:255},
+          .46
+        );
+
+      const ringDark =
+        ma7alakStoryMixHex(
+          ringRgb,
+          {r:0,g:0,b:0},
+          .38
+        );
+
+      activeRingEl.style.setProperty(
+        "background",
+        (
+          "conic-gradient(" +
+          ringColor + "," +
+          ringLight + "," +
+          ringDark + "," +
+          ringColor + ")"
+        ),
+        "important"
+      );
+    }
+
+
+    const labelLineHidden =
+      labelLineStyle === "none";
+
+
+    const dividerHidden =
+      dividerStyle === "none";
+
+
+    const staticCss =
+      motionOff
+        ? `
+            html body #ma7alak-shop-identity.ma7alak-identity-ready{
+              animation:none!important;
+              -webkit-animation:none!important;
+            }
+
+            html body #ma7alak-shop-identity .ma7alak-shop-identity-line,
+            html body #ma7alak-shop-identity .ma7alak-shop-identity-line::before,
+            html body #ma7alak-shop-identity .ma7alak-shop-identity-line::after,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-pill,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-icon,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-icon::before,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-icon::after,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-icon svg,
+            html body #ma7alak-shop-identity #ma7alak-shop-category-text,
+            html body #ma7alak-shop-identity #ma7alak-shop-name,
+            html body #ma7alak-shop-identity #ma7alak-shop-name::before,
+            html body #ma7alak-shop-identity #ma7alak-shop-name::after,
+            html body #ma7alak-shop-identity #ma7alak-shop-arabic-name,
+            html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::before,            html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::after,
+            html body #ma7alak-shop-identity #ma7alak-shop-identity-divider span,
+            html body #ma7alak-story-wrapper #ma7alak-story-active-ring,
+            html body #ma7alak-story-wrapper #ma7alak-story-new-ring{
+              animation:none!important;
+              -webkit-animation:none!important;
+            }
+
+            html body #ma7alak-shop-identity .ma7alak-shop-identity-line::before{
+              display:none!important;
+            }
+          `
+        : "";
+
+
+    const subtleCss =
+      motionSubtle
+        ? `
+            html body #ma7alak-shop-identity .ma7alak-shop-identity-line,
+            html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::before,
+            html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::after{
+              animation-duration:4.8s!important;
+              -webkit-animation-duration:4.8s!important;
+            }
+
+            html body #ma7alak-shop-identity #ma7alak-shop-name,
+            html body #ma7alak-shop-identity #ma7alak-shop-arabic-name{
+              animation-duration:5s!important;
+              -webkit-animation-duration:5s!important;
+            }
+          `
+        : "";
+
+
+    const basicSurfaceCss =
+      (
+        preset === "basic" ||
+        preset === "minimal"
+      )
+        ? `
+            html body #ma7alak-shop-identity #ma7alak-shop-category-pill{
+              box-shadow:
+                0 5px 16px rgba(0,0,0,.22)!important;
+              backdrop-filter:none!important;
+              -webkit-backdrop-filter:none!important;
+            }
+
+            html body #ma7alak-shop-identity #ma7alak-shop-name{
+              filter:none!important;
+            }
+          `
+        : "";
+
+
+    const arabicAnim =
+      String(
+        options.arabic_name_animation ||
+        "none"
+      )
+        .trim()
+        .toLowerCase();
+
+
+    let arabicAnimationCss = "";
+
+    if(
+      !motionOff &&
+      arabicAnim === "glow"
+    ){
+      arabicAnimationCss = `
+        animation:m7dsArabicGlow 2.2s ease-in-out infinite!important;
+        -webkit-animation:m7dsArabicGlow 2.2s ease-in-out infinite!important;
+      `;
+    }
+    else if(
+      !motionOff &&
+      arabicAnim === "breathe"
+    ){
+      arabicAnimationCss = `
+        animation:m7dsArabicBreathe 2.8s ease-in-out infinite!important;
+        -webkit-animation:m7dsArabicBreathe 2.8s ease-in-out infinite!important;
+      `;
+    }
+    else if(
+      !motionOff &&
+      arabicAnim === "shimmer"
+    ){
+      arabicAnimationCss = `
+        background:
+          linear-gradient(
+            100deg,
+            ${arabicColor},
+            #ffffff,
+            ${arabicColor}
+          )!important;
+        background-size:240% 100%!important;
+        -webkit-background-clip:text!important;
+        background-clip:text!important;
+        color:transparent!important;
+        -webkit-text-fill-color:transparent!important;
+        animation:m7dsArabicShimmer 3.6s linear infinite!important;
+        -webkit-animation:m7dsArabicShimmer 3.6s linear infinite!important;
+      `;
+    }
+    else{
+      arabicAnimationCss = `
+        animation:none!important;
+        -webkit-animation:none!important;
+      `;
+    }
+
+
+    style.textContent = `
+      @keyframes m7dsShopNameShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @-webkit-keyframes m7dsShopNameShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      @keyframes m7dsShopNameGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${ma7alakStoryRgba(shopNameRgb,.24)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+        50%{
+          text-shadow:
+            0 0 14px ${ma7alakStoryRgba(shopNameRgb,.82)},
+            0 0 24px ${ma7alakStoryRgba(shopNameRgb,.34)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+      }
+
+      @-webkit-keyframes m7dsShopNameGlow{
+        0%,100%{
+          text-shadow:
+            0 0 5px ${ma7alakStoryRgba(shopNameRgb,.24)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+        50%{
+          text-shadow:
+            0 0 14px ${ma7alakStoryRgba(shopNameRgb,.82)},
+            0 0 24px ${ma7alakStoryRgba(shopNameRgb,.34)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+      }
+
+      @keyframes m7dsShopNameBreathe{
+        0%,100%{transform:scale(1);opacity:.94}
+        50%{transform:scale(1.035);opacity:1}
+      }
+
+      @-webkit-keyframes m7dsShopNameBreathe{
+        0%,100%{-webkit-transform:scale(1);opacity:.94}
+        50%{-webkit-transform:scale(1.035);opacity:1}
+      }
+
+      @keyframes m7dsLabelIconGlow{
+        0%,100%{
+          filter:
+            drop-shadow(0 0 2px ${ma7alakStoryRgba(
+              ma7alakStoryHexToRgb(labelIcon)||accentRgb,
+              Math.max(.10,labelIconGlow/100*.18)
+            )});
+          transform:translateZ(0) scale(1);
+        }
+        50%{
+          filter:
+            drop-shadow(0 0 ${Math.max(6,4+labelIconGlow*.16).toFixed(1)}px ${ma7alakStoryRgba(
+              ma7alakStoryHexToRgb(labelIcon)||accentRgb,
+              Math.min(.95,.24+labelIconGlow/100*.70)
+            )});
+          transform:translateZ(0) scale(${(1+labelIconGlow/100*.07).toFixed(3)});
+        }
+      }
+
+      @keyframes m7dsLabelIconPulse{
+        0%,100%{transform:translateZ(0) scale(1)}
+        50%{transform:translateZ(0) scale(${(1.04+labelIconGlow/100*.10).toFixed(3)})}
+      }
+
+      @keyframes m7dsLabelIconFloat{
+        0%,100%{transform:translate3d(0,0,0)}
+        50%{transform:translate3d(0,-${(2+labelIconGlow*.035).toFixed(1)}px,0)}
+      }
+
+      @keyframes m7dsLabelIconSway{
+        0%,100%{transform:rotate(-4deg)}
+        50%{transform:rotate(4deg)}
+      }
+
+      @keyframes m7dsLabelIconBounce{
+        0%,100%{transform:translateY(0)}
+        45%{transform:translateY(-${(2+labelIconGlow*.045).toFixed(1)}px)}
+        62%{transform:translateY(0)}
+        78%{transform:translateY(-1.5px)}
+      }
+
+      @keyframes m7dsLabelIconFlicker{
+        0%,18%,22%,25%,53%,57%,100%{opacity:1}
+        20%,24%,55%{opacity:.45}
+      }
+
+      @keyframes m7dsArabicGlow{
+        0%,100%{
+          text-shadow:
+            0 0 4px ${ma7alakStoryRgba(accentRgb,.20)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+        50%{
+          text-shadow:
+            0 0 14px ${ma7alakStoryRgba(accentRgb,.74)},
+            0 0 24px ${ma7alakStoryRgba(accentRgb,.26)},
+            0 3px 13px rgba(0,0,0,.36);
+        }
+      }
+
+      @keyframes m7dsArabicBreathe{
+        0%,100%{transform:scale(1);opacity:.94}
+        50%{transform:scale(1.035);opacity:1}
+      }
+
+      @keyframes m7dsArabicShimmer{
+        from{background-position:120% 50%}
+        to{background-position:-120% 50%}
+      }
+
+      html body #ma7alak-story-wrapper #ma7alak-story-button{
+        border-color:${profileCircleEnabled ? ringColor : "transparent"}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-pill{
+        border-color:${labelBorder}!important;
+        background:
+          linear-gradient(
+            180deg,
+            ${labelBg},
+            rgba(8,8,9,.94)
+          )!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-text{
+        color:${labelText}!important;
+        -webkit-text-fill-color:${labelText}!important;
+        text-shadow:none!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-icon{
+        color:${labelIcon}!important;
+        border-color:${labelBorder}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-category-icon svg{
+        color:${labelIcon}!important;
+      }
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line{
+        ${labelLineHidden ? "display:none!important;" : ""}
+        height:${labelLineStyle === "double" ? "3px" : "2px"}!important;
+        background:${labelLineBackground}!important;
+        box-shadow:
+          0 0 6px ${ma7alakStoryRgba(lineRgb,.20)}!important;
+      }
+
+      html body #ma7alak-shop-identity .ma7alak-shop-identity-line::after{
+        content:"${m7dsCssText(labelSymbol)}"!important;
+        width:auto!important;
+        height:auto!important;
+        min-width:0!important;
+        right:-5px!important;
+        top:50%!important;
+        transform:translateY(-50%)!important;
+        border:0!important;
+        border-radius:0!important;
+        background:none!important;
+        color:${labelLine}!important;
+        font-size:${labelSymbol === "•" ? "13px" : "8px"}!important;
+        line-height:1!important;
+        text-shadow:
+          0 0 7px ${ma7alakStoryRgba(lineRgb,.52)}!important;
+        box-shadow:none!important;
+      }
+
+      ${
+        (
+          shopNameMode !== "current" ||
+          motionOff
+        )
+          ? `
+              html body #ma7alak-shop-identity #ma7alak-shop-name::before,
+              html body #ma7alak-shop-identity #ma7alak-shop-name::after{
+                animation:none!important;
+                -webkit-animation:none!important;
+                opacity:0!important;
+              }
+            `
+          : ""
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-arabic-name{
+        color:${arabicColor}!important;
+        -webkit-text-fill-color:${arabicColor}!important;
+        ${arabicAnimationCss}
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider{
+        ${dividerHidden ? "display:none!important;" : ""}
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::before,
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider::after{
+        height:${dividerStyle === "double" ? "3px" : "1px"}!important;
+        background:${dividerBackground}!important;
+        box-shadow:
+          0 0 6px ${ma7alakStoryRgba(dividerRgb,.18)}!important;
+      }
+
+      html body #ma7alak-shop-identity #ma7alak-shop-identity-divider span{
+        width:auto!important;
+        height:auto!important;
+        min-width:9px!important;
+        min-height:9px!important;
+        margin:0 9px!important;
+        display:${dividerSymbol ? "grid" : "none"}!important;
+        place-items:center!important;
+        transform:none!important;
+        border:0!important;
+        border-radius:0!important;
+        background:none!important;
+        color:${dividerColor}!important;
+        font-size:${dividerSymbol === "•" ? "15px" : "10px"}!important;
+        line-height:1!important;
+        box-shadow:none!important;
+        text-shadow:
+          0 0 8px ${ma7alakStoryRgba(dividerRgb,.50)}!important;
+      }
+
+      ${staticCss}
+      ${subtleCss}
+      ${basicSurfaceCss}
+    `;
+
+
+    /*
+      FINAL SHOP NAME OVERRIDE
+
+      The old Shahznan/Zee theme at the bottom of this embed contains
+      hard-coded !important Shop Name colors and animations.
+      Inline !important is deliberately used here so Admin always wins.
+    */
+    const shopNameEl =
+      document.getElementById(
+        "ma7alak-shop-name"
+      );
+
+
+    if(shopNameEl){
+
+      shopNameEl.style.setProperty(
+        "--m7-shop-name-admin-color",
+        shopNameColor
+      );
+
+      shopNameEl.style.setProperty(
+        "color",
+        shopNameColor,
+        "important"
+      );
+
+      shopNameEl.style.setProperty(
+        "-webkit-text-fill-color",
+        shopNameColor,
+        "important"
+      );
+
+
+      const nameGradient =
+        (
+          "linear-gradient(" +
+          "105deg," +
+          shopNameColor + " 0%," +
+          shopNameLight + " 22%," +
+          shopNameColor + " 44%," +
+          shopNameSoft + " 66%," +
+          shopNameColor + " 82%," +
+          shopNameLight + " 100%" +
+          ")"
+        );
+
+
+      if(
+        shopNameMode === "shimmer" ||
+        shopNameMode === "current"
+      ){
+
+        shopNameEl.style.setProperty(
+          "background",
+          nameGradient,
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "background-size",
+          "280% 100%",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-background-clip",
+          "text",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "background-clip",
+          "text",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-text-fill-color",
+          "transparent",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "color",
+          "transparent",
+          "important"
+        );
+
+      }
+      else{
+
+        shopNameEl.style.setProperty(
+          "background",
+          "none",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-text-fill-color",
+          shopNameColor,
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "color",
+          shopNameColor,
+          "important"
+        );
+
+      }
+
+
+      if(
+        motionOff ||
+        shopNameMode === "none"
+      ){
+
+        shopNameEl.style.setProperty(
+          "animation",
+          "none",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-animation",
+          "none",
+          "important"
+        );
+
+      }
+      else if(
+        shopNameMode === "shimmer"
+      ){
+
+        shopNameEl.style.setProperty(
+          "animation",
+          "m7dsShopNameShimmer 3.4s ease-in-out infinite",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-animation",
+          "m7dsShopNameShimmer 3.4s ease-in-out infinite",
+          "important"
+        );
+
+      }
+      else if(
+        shopNameMode === "glow"
+      ){
+
+        shopNameEl.style.setProperty(
+          "animation",
+          "m7dsShopNameGlow 2.1s ease-in-out infinite",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-animation",
+          "m7dsShopNameGlow 2.1s ease-in-out infinite",
+          "important"
+        );
+
+      }
+      else if(
+        shopNameMode === "breathe"
+      ){
+
+        shopNameEl.style.setProperty(
+          "animation",
+          "m7dsShopNameBreathe 2.6s ease-in-out infinite",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-animation",
+          "m7dsShopNameBreathe 2.6s ease-in-out infinite",
+          "important"
+        );
+
+      }
+      else{
+
+        /*
+          "Current premium effect":
+          allow the existing theme animation to remain,
+          but keep the Admin-selected color gradient above.
+        */
+        shopNameEl.style.removeProperty(
+          "animation"
+        );
+
+        shopNameEl.style.removeProperty(
+          "-webkit-animation"
+        );
+
+      }
+
+
+      if(
+        motionSubtle &&
+        !motionOff &&
+        shopNameMode !== "none"
+      ){
+
+        shopNameEl.style.setProperty(
+          "animation-duration",
+          "5s",
+          "important"
+        );
+
+        shopNameEl.style.setProperty(
+          "-webkit-animation-duration",
+          "5s",
+          "important"
+        );
+
+      }
+
+    }
+
+
+    m7dsApplyTypography(
+      document.getElementById("ma7alak-profile-shell") || document.body,
+      options,
+      "profile"
+    );
+
+
+    return true;
+  }
+
+
+  /* =========================================================
+     LOAD SHOP PROFILE FROM ADMIN / SUPABASE
+     ---------------------------------------------------------
+     SHOP_SLUG is the ONLY shop-specific value needed here.
+
+     Priority for the Story circle image:
+       1. story_logo_url
+       2. profile_image_url
+       3. default placeholder when both are empty
+  ========================================================= */
+
+  async function loadShopProfileFromAdmin(){
+
+    try{
+      await getMa7alakSupabaseClient();
+    }
+    catch(error){
+      console.error(
+        "MA7ALAK shop profile client:",
+        error
+      );
+      return null;
+    }
+
+    try{
+
+      const result =
+        await supabaseClient
+          .from("shop_profiles")
+          .select(
+            "shop_slug,shop_name,profile_image_url,story_logo_url,category,arabic_name,is_active,verified,directory_options"
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
+          .maybeSingle();
+
+
+      if(result.error){
+
+        console.error(
+          "MA7ALAK shop profile:",
+          result.error
+        );
+
+        return null;
+
+      }
+
+
+      if(!result.data){
+
+        console.warn(
+          "MA7ALAK: No shop_profiles row found for slug:",
+          SHOP_SLUG
+        );
+
+        return null;
+
+      }
+
+
+      SHOP_PROFILE =
+        result.data;
+
+
+      STORY_CIRCLE_IMAGE_URL =
+        String(
+          SHOP_PROFILE.story_logo_url ||
+          SHOP_PROFILE.profile_image_url ||
+          ""
+        ).trim();
+
+
+      SHOP_IDENTITY.name =
+        String(
+          SHOP_PROFILE.shop_name ||
+          SHOP_IDENTITY.name ||
+          ""
+        ).trim();
+
+
+      SHOP_IDENTITY.category =
+        String(
+          SHOP_PROFILE.category ||
+          ""
+        ).trim();
+
+
+      const directoryOptions =
+        SHOP_PROFILE &&
+        SHOP_PROFILE.directory_options &&
+        typeof SHOP_PROFILE.directory_options === "object"
+          ? SHOP_PROFILE.directory_options
+          : {};
+
+
+      SHOP_IDENTITY.label =
+        String(
+          directoryOptions.shop_label ||
+          ""
+        ).trim();
+
+
+      SHOP_IDENTITY.labelIcon =
+        String(
+          directoryOptions.shop_label_icon ||
+          "shop"
+        ).trim().toLowerCase();
+
+
+      SHOP_IDENTITY.labelIconText =
+        String(
+          directoryOptions.shop_label_icon_text ||
+          ""
+        ).trim();
+
+
+      SHOP_IDENTITY.arabicName =
+        String(
+          SHOP_PROFILE.arabic_name ||
+          ""
+        ).trim();
+
+
+      /*
+         Refresh the already-existing UI with the Admin values.
+      */
+      renderShopIdentity();
+      renderStoryCircleImage();
+      renderProfileVerifiedBadge();
+      applyStoryColorFromAdmin(
+        SHOP_PROFILE
+      );
+
+      applyPageDesignFromAdmin(
+        SHOP_PROFILE
+      );
+
+      if(
+        window.Ma7alakProfileShell &&
+        typeof window.Ma7alakProfileShell.apply === "function"
+      ){
+        window.Ma7alakProfileShell.apply(
+          directoryOptions,
+          {
+            cache:true,
+            reveal:true,
+            emit:true,
+            preview:false,
+            source:"shop_profiles"
+          }
+        );
+      }
+
+
+      return SHOP_PROFILE;
+
+    }
+    catch(error){
+
+      console.error(
+        "MA7ALAK shop profile:",
+        error
+      );
+
+      return null;
+
+    }
+
+  }
+
+
+
+  /* =========================================================
+     LIVE ADMIN PROFILE SYNC
+     ---------------------------------------------------------
+     shop_profiles is already enabled in Supabase Realtime.
+
+     When Admin presses Save:
+       ✓ Story ring color updates
+       ✓ Story/profile image updates
+       ✓ Shop name/category/Arabic name update
+     without refreshing the owner/shop page.
+  ========================================================= */
+
+  let ma7alakStoryProfileChannel =
+    null;
+
+
+  function subscribeToStoryProfileAdminUpdates(){
+
+    if(
+      ma7alakStoryProfileChannel ||
+      !supabaseClient ||
+      typeof supabaseClient.channel !== "function"
+    ){
+      return;
+    }
+
+
+    ma7alakStoryProfileChannel =
+      supabaseClient
+        .channel(
+          "ma7alak-story-profile-" +
+          SHOP_SLUG +
+          "-" +
+          Math.random()
+            .toString(36)
+            .slice(2)
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"UPDATE",
+            schema:"public",
+            table:"shop_profiles",
+            filter:
+              "shop_slug=eq." +
+              SHOP_SLUG
+          },
+          function(){
+
+            loadShopProfileFromAdmin();
+
+          }
+        )
+        .subscribe();
+
+  }
+
+
+  /*
+     Story rows are enabled in Supabase Realtime.
+     This replaces the old 10-second database polling loop for normal
+     Story uploads / deletes / updates.
+  */
+  function subscribeToStoryDataUpdates(){
+
+    if(
+      ma7alakStoryDataChannel ||
+      !supabaseClient ||
+      typeof supabaseClient.channel !== "function"
+    ){
+      return;
+    }
+
+
+    ma7alakStoryDataChannel =
+      supabaseClient
+        .channel(
+          "ma7alak-story-data-" +
+          SHOP_SLUG +
+          "-" +
+          Math.random()
+            .toString(36)
+            .slice(2)
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"shop_stories",
+            filter:
+              "shop_slug=eq." +
+              SHOP_SLUG
+          },
+          function(payload){
+
+            if(
+              payload &&
+              String(payload.eventType||"").toUpperCase() === "INSERT"
+            ){
+              triggerStoryUploadEffect();
+            }
+
+            loadStories();
+
+          }
+        )
+        .subscribe();
+
+  }
+
+
+  document.addEventListener(
+    "visibilitychange",
+    function(){
+
+      if(
+        document.visibilityState ===
+        "visible"
+      ){
+        loadShopProfileFromAdmin();
+        loadStories();
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     LIVE ADMIN DRAFT — PROFILE / STORY / IDENTITY
+     The shared Admin bridge now sends the full unsaved shop draft,
+     not only directory_options. Apply it without writing to Supabase.
+  ========================================================= */
+
+  function applyProfileDraftPreview(event){
+
+    const draft =
+      event &&
+      event.detail &&
+      typeof event.detail === "object"
+        ? event.detail
+        : {};
+
+    const slug =
+      String(
+        draft.shop_slug ||
+        draft.shopSlug ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if(
+      slug &&
+      slug !== SHOP_SLUG
+    ){
+      return;
+    }
+
+    const options =
+      draft.directory_options &&
+      typeof draft.directory_options === "object"
+        ? draft.directory_options
+        : {};
+
+    const hasProfileImageDraft =
+      Object.prototype.hasOwnProperty.call(
+        draft,
+        "profile_image_url"
+      );
+
+    const draftedProfileImage =
+      hasProfileImageDraft
+        ? String(draft.profile_image_url || "").trim()
+        : "";
+
+    SHOP_PROFILE = {
+      ...(SHOP_PROFILE || {}),
+      ...draft,
+      ...(
+        hasProfileImageDraft
+          ? {story_logo_url:draftedProfileImage}
+          : {}
+      ),
+      shop_slug:SHOP_SLUG,
+      directory_options:{
+        ...(
+          SHOP_PROFILE &&
+          SHOP_PROFILE.directory_options &&
+          typeof SHOP_PROFILE.directory_options === "object"
+            ? SHOP_PROFILE.directory_options
+            : {}
+        ),
+        ...options
+      }
+    };
+
+    STORY_CIRCLE_IMAGE_URL =
+      String(
+        SHOP_PROFILE.story_logo_url ||
+        SHOP_PROFILE.profile_image_url ||
+        (hasProfileImageDraft ? "" : STORY_CIRCLE_IMAGE_URL) ||
+        ""
+      ).trim();
+
+    SHOP_IDENTITY.name =
+      String(
+        SHOP_PROFILE.shop_name ||
+        SHOP_IDENTITY.name ||
+        ""
+      ).trim();
+
+    SHOP_IDENTITY.category =
+      String(
+        SHOP_PROFILE.category ||
+        SHOP_IDENTITY.category ||
+        ""
+      ).trim();
+
+    SHOP_IDENTITY.label =
+      String(
+        options.shop_label ||
+        ""
+      ).trim();
+
+    SHOP_IDENTITY.labelIcon =
+      String(
+        options.shop_label_icon ||
+        "shop"
+      )
+        .trim()
+        .toLowerCase();
+
+    SHOP_IDENTITY.labelIconText =
+      String(
+        options.shop_label_icon_text ||
+        ""
+      ).trim();
+
+    SHOP_IDENTITY.arabicName =
+      String(
+        SHOP_PROFILE.arabic_name ||
+        ""
+      ).trim();
+    renderShopIdentity();
+    renderStoryCircleImage();
+    renderProfileVerifiedBadge();
+    applyStoryColorFromAdmin(
+      SHOP_PROFILE
+    );
+    applyPageDesignFromAdmin(
+      SHOP_PROFILE
+    );
+
+    if(
+      window.Ma7alakProfileShell &&
+      typeof window.Ma7alakProfileShell.apply === "function"
+    ){
+      window.Ma7alakProfileShell.apply(
+        SHOP_PROFILE.directory_options,
+        {
+          cache:false,
+          reveal:true,
+          emit:true,
+          preview:true,
+          source:"admin-draft"
+        }
+      );
+    }
+  }
+
+  window.addEventListener(
+    "ma7alak:profile-draft-preview",
+    applyProfileDraftPreview
+  );
+
+
+  /* =========================================================
+     LIVE PAGE DESIGN PREVIEW — MERGED PROFILE
+     Unsaved Admin changes arrive through the shared shell bridge.
+  ========================================================= */
+
+  function applyExternalProfileDesign(event){
+
+    const detail =
+      event &&
+      event.detail ||
+      {};
+
+    const slug =
+      String(
+        detail.shop_slug ||
+        detail.shopSlug ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if(
+      slug &&
+      slug !== SHOP_SLUG
+    ){
+      return;
+    }
+
+    const options =
+      detail.directory_options;
+
+    if(
+      !options ||
+      typeof options !== "object" ||
+      Array.isArray(options)
+    ){
+      return;
+    }
+
+    const previewProfile =
+      Object.assign(
+        {},
+        SHOP_PROFILE || {},
+        {directory_options:options}
+      );
+
+    applyStoryColorFromAdmin(
+      previewProfile
+    );
+
+    applyPageDesignFromAdmin(
+      previewProfile
+    );
+
+  }
+
+  window.addEventListener(
+    "ma7alak:profile-design-preview",
+    applyExternalProfileDesign
+  );
+
+  window.addEventListener(
+    "ma7alak:profile-design-saved",
+    applyExternalProfileDesign
+  );
+
+
+  /* =========================================================
+     STORY URL
+  ========================================================= */
+
+  function storyURL(path){
+
+    return (
+      SUPABASE_URL +
+      "/storage/v1/object/public/shop-stories/" +
+      path
+    );
+
+  }
+
+
+  /* =========================================================
+     STORY MEDIA WARM-UP — INTENT BASED
+     ---------------------------------------------------------
+     Do NOT download Story media just because the shop page loaded.
+
+     Once a visitor actually opens Stories, only the NEXT Story is
+     warmed. Videos warm metadata only; the active Story itself loads
+     normally when shown. This keeps swipe transitions responsive while
+     avoiding unnecessary Storage egress for visitors who never open
+     Stories.
+  ========================================================= */
+
+  const ma7alakStoryWarmCache =
+    new Map();
+
+  function warmStoryMedia(story){
+
+    if(
+      !story ||
+      !story.storage_path
+    ){
+      return;
+    }
+
+    const url =
+      storyURL(
+        story.storage_path
+      );
+
+    if(
+      ma7alakStoryWarmCache.has(
+        url
+      )
+    ){
+      return;
+    }
+
+    const type =
+      mediaType(
+        story
+      );
+
+    if(
+      type === "video"
+    ){
+      const video =
+        document.createElement(
+          "video"
+        );
+
+      video.preload =
+        "metadata";
+
+      video.muted =
+        true;
+
+      video.playsInline =
+        true;
+
+      video.setAttribute(
+        "playsinline",
+        ""
+      );
+
+      video.src =
+        url;
+
+      ma7alakStoryWarmCache.set(
+        url,
+        video
+      );
+
+      try{
+        video.load();
+      }
+      catch(error){}
+    }
+    else{
+      const image =
+        new Image();
+
+      image.decoding =
+        "async";
+
+      image.src =
+        url;
+
+      ma7alakStoryWarmCache.set(
+        url,
+        image
+      );
+
+      if(
+        typeof image.decode ===
+        "function"
+      ){
+        image.decode().catch(
+          function(){}
+        );
+      }
+    }
+
+  }
+
+  function pruneStoryWarmCache(){
+
+    const activeUrls =
+      new Set(
+        (Array.isArray(stories) ? stories : [])
+          .filter(function(story){
+            return story && story.storage_path;
+          })
+          .map(function(story){
+            return storyURL(
+              story.storage_path
+            );
+          })
+      );
+
+
+    ma7alakStoryWarmCache.forEach(
+      function(media,url){
+
+        if(
+          activeUrls.has(url)
+        ){
+          return;
+        }
+
+
+        try{
+
+          if(
+            media &&
+            media.tagName === "VIDEO"
+          ){
+            media.pause();
+            media.removeAttribute(
+              "src"
+            );
+            media.load();
+          }
+          else if(media){
+            media.src = "";
+          }
+
+        }
+        catch(error){}
+
+
+        ma7alakStoryWarmCache.delete(
+          url
+        );
+
+      }
+    );
+
+  }
+
+
+  function warmNextStoryMedia(){
+
+    const screen =
+      document.getElementById(
+        "ma7alak-full-story"
+      );
+
+
+    if(
+      document.hidden ||
+      !screen ||
+      !screen.classList.contains(
+        "active"
+      ) ||
+      !Array.isArray(stories) ||
+      stories.length < 2
+    ){
+      return;
+    }
+
+
+    const nextIndex =
+      (
+        currentStory + 1
+      ) %
+      stories.length;
+
+
+    warmStoryMedia(
+      stories[nextIndex]
+    );
+
+  }
+
+
+  function scheduleStoryExpiryRefresh(){
+
+    if(
+      ma7alakStoryExpiryTimer
+    ){
+      clearTimeout(
+        ma7alakStoryExpiryTimer
+      );
+
+      ma7alakStoryExpiryTimer =
+        null;
+    }
+
+
+    let nextExpiry =
+      Infinity;
+
+    const now =
+      Date.now();
+
+
+    (Array.isArray(stories) ? stories : [])
+      .forEach(
+        function(story){
+
+          const expires =
+            new Date(
+              story &&
+              story.expires_at ||
+              ""
+            ).getTime();
+
+
+          if(
+            Number.isFinite(expires) &&
+            expires > now &&
+            expires < nextExpiry
+          ){
+            nextExpiry =
+              expires;
+          }
+
+        }
+      );
+
+
+    if(
+      !Number.isFinite(
+        nextExpiry
+      )
+    ){
+      return;
+    }
+
+
+    const delay =
+      Math.max(
+        1000,
+        Math.min(
+          2147483000,
+          nextExpiry -
+          now +
+          1200
+        )
+      );
+
+
+    ma7alakStoryExpiryTimer =
+      setTimeout(
+        function(){
+
+          ma7alakStoryExpiryTimer =
+            null;
+
+
+          if(
+            document.visibilityState ===
+            "visible"
+          ){
+            loadStories();
+          }
+
+        },
+        delay
+      );
+
+  }
+
+  /* =========================================================
+     MEDIA TYPE
+  ========================================================= */
+
+  function mediaType(story){
+
+    if(
+      story.media_type ===
+      "video"
+    ){
+
+      return "video";
+
+    }
+
+
+    if(
+      story.media_type ===
+      "image"
+    ){
+
+      return "image";
+
+    }
+
+
+    const path =
+      String(
+        story.storage_path ||
+        ""
+      ).toLowerCase();
+
+
+    if(
+      path.endsWith(".mp4") ||
+      path.endsWith(".webm") ||
+      path.endsWith(".mov") ||
+      path.endsWith(".m4v")
+    ){
+
+      return "video";
+
+    }
+
+
+    return "image";
+
+  }
+
+
+  /* =========================================================
+     TIME AGO
+  ========================================================= */
+
+  function storyTimeAgo(createdAt){
+
+    const created =
+      new Date(createdAt).getTime();
+
+    if(!Number.isFinite(created)){
+      return "Just now";
+    }
+
+    const now = Date.now();
+
+    let seconds =
+      Math.floor(
+        (now - created) /
+        1000
+      );
+
+    if(seconds < 0){
+      seconds = 0;
+    }
+
+    if(seconds < 10){
+      return "Just now";
+    }
+
+    if(seconds < 60){
+      return seconds + (seconds === 1 ? " second ago" : " seconds ago");
+    }
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+    if(minutes < 60){
+      return minutes + (minutes === 1 ? " minute ago" : " minutes ago");
+    }
+
+    const hours =
+      Math.floor(minutes / 60);
+
+    if(hours < 24){
+      return hours + (hours === 1 ? " hour ago" : " hours ago");
+    }
+
+    const days =
+      Math.floor(hours / 24);
+
+    if(days === 1){
+      return "Yesterday";
+    }
+
+    if(days < 7){
+      return days + " days ago";
+    }
+
+    const weeks =
+      Math.floor(days / 7);
+
+    if(weeks === 1){
+      return "1 week ago";
+    }
+
+    return weeks + " weeks ago";
+
+  }
+
+
+  /* =========================================================
+     UPDATE STORY TIME
+  ========================================================= */
+
+  function updateStoryTime(){
+
+    const timeElement =
+      document.getElementById(
+        "ma7alak-story-time"
+      );
+
+    const nameElement =
+      document.getElementById(
+        "ma7alak-story-shop-name"
+      );
+
+
+    const statusElement =
+      document.getElementById(
+        "ma7alak-story-status-text"
+      );
+
+
+    if(
+      !stories.length
+    ){
+
+      return;
+
+    }
+
+
+    const story =
+      stories[
+        currentStory
+      ];
+
+
+    if(!story){
+
+      return;
+
+    }
+
+
+    if(timeElement){
+
+      timeElement.textContent =
+        storyTimeAgo(
+          story.created_at
+        );
+
+    }
+
+
+    if(nameElement){
+
+      const fallbackShopName =
+        String(story.shop_slug || SHOP_SLUG)
+          .split("-")
+          .filter(Boolean)
+          .map(function(part){
+            return part.charAt(0).toUpperCase() + part.slice(1);
+          })
+          .join(" ");
+
+      const shopName =
+        String(
+          SHOP_IDENTITY.name ||
+          fallbackShopName ||
+          "Ma7alak"
+        ).trim();
+
+      nameElement.textContent =
+        shopName || "Ma7alak";
+
+      /*
+        Every Story already has its own unique Supabase
+        story.id. Keep that ID attached to the displayed
+        shop name so the name always belongs to the exact
+        Story currently open.
+      */
+      nameElement.setAttribute(
+        "data-story-id",
+        String(story.id)
+      );
+
+    }
+
+
+    if(statusElement){
+
+      const statusText =
+        String(
+          story.status_text || ""
+        ).trim();
+
+      statusElement.textContent =
+        statusText;
+
+      statusElement.classList.toggle(
+        "visible",
+        Boolean(statusText)
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     START NEW STORY ANIMATION
+  ========================================================= */
+
+  function startNewStoryAnimation(){
+
+    if(!storyWrapper){
+      return;
+    }
+
+    storyWrapper.classList.remove(
+      "story-has-new"
+    );
+
+    /* Restart CSS animation reliably on mobile browsers. */
+    void storyWrapper.offsetWidth;
+
+    storyWrapper.classList.add(
+      "story-has-new"
+    );
+
+  }
+
+
+  /* =========================================================
+     STOP NEW STORY ANIMATION
+  ========================================================= */
+
+  function stopNewStoryAnimation(){
+
+    if(
+      storyWrapper
+    ){
+
+      storyWrapper.classList.remove(
+        "story-has-new"
+      );
+
+    }
+
+
+    if(newRingAnimation){
+      try{newRingAnimation.cancel();}catch(error){}
+      newRingAnimation=null;
+    }
+
+  }
+
+
+  /* =========================================================
+     CHECK NEW STORY
+  ========================================================= */
+
+  function updateNewStoryAnimation(){
+
+    if(!storyWrapper){
+
+      return;
+
+    }
+
+
+    if(
+      !stories.length
+    ){
+
+      stopNewStoryAnimation();
+
+      return;
+
+    }
+
+
+    const newestStory =
+      stories[
+        stories.length - 1
+      ];
+
+
+    let lastSeen =
+      null;
+
+
+    try{
+
+      lastSeen =
+        localStorage.getItem(
+          STORY_SEEN_KEY
+        );
+
+    }
+
+    catch(error){
+
+      lastSeen =
+        null;
+
+    }
+
+
+    if(!lastSeen){
+
+      startNewStoryAnimation();
+
+      return;
+
+    }
+
+
+    const newestTime =
+      new Date(
+        newestStory.created_at
+      ).getTime();
+
+
+    const lastSeenTime =
+      new Date(
+        lastSeen
+      ).getTime();
+
+
+    if(
+      newestTime >
+      lastSeenTime
+    ){
+
+      startNewStoryAnimation();
+
+    }
+
+    else{
+
+      stopNewStoryAnimation();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     MARK STORIES AS SEEN
+  ========================================================= */
+
+  function getFirstUnseenStoryIndex(){
+
+    if(!stories.length){
+      return 0;
+    }
+
+    let lastSeen = null;
+
+    try{
+      lastSeen =
+        localStorage.getItem(
+          STORY_SEEN_KEY
+        );
+    }
+    catch(error){}
+
+    /*
+       First visit: start from the oldest Story.
+    */
+    if(!lastSeen){
+      return 0;
+    }
+
+    const lastSeenTime =
+      new Date(lastSeen).getTime();
+
+    if(!Number.isFinite(lastSeenTime)){
+      return 0;
+    }
+
+    for(
+      let index = 0;
+      index < stories.length;
+      index++
+    ){
+
+      const storyTime =
+        new Date(
+          stories[index].created_at
+        ).getTime();
+
+      if(
+        Number.isFinite(storyTime) &&
+        storyTime > lastSeenTime
+      ){
+        return index;
+      }
+
+    }
+
+    /*
+       Everything has already been seen.
+       Start from the first Story again.
+    */
+    return 0;
+
+  }
+
+
+  /* =========================================================
+     MARK CURRENT STORY AS SEEN
+     ---------------------------------------------------------
+     Only the Story that is actually opened is marked seen.
+     If more new Stories remain, the new-story ring stays active.
+  ========================================================= */
+
+  function markCurrentStoryAsSeen(){
+
+    if(!stories.length){
+      return;
+    }
+
+    const story =
+      stories[currentStory];
+
+    if(
+      !story ||
+      !story.created_at
+    ){
+      return;
+    }
+
+    let lastSeen = null;
+
+    try{
+      lastSeen =
+        localStorage.getItem(
+          STORY_SEEN_KEY
+        );
+    }
+    catch(error){}
+
+    const storyTime =
+      new Date(
+        story.created_at
+      ).getTime();
+
+    const lastSeenTime =
+      lastSeen
+        ? new Date(lastSeen).getTime()
+        : 0;
+
+    if(
+      Number.isFinite(storyTime) &&
+      (
+        !Number.isFinite(lastSeenTime) ||
+        storyTime > lastSeenTime
+      )
+    ){
+
+      try{
+        localStorage.setItem(
+          STORY_SEEN_KEY,
+          story.created_at
+        );
+      }
+      catch(error){}
+
+    }
+
+    updateNewStoryAnimation();
+
+  }
+
+
+  /* =========================================================
+     OWNER STATE BRIDGE
+     ---------------------------------------------------------
+     The real owner/account system runs on the top-level page.
+     Story embeds ask the parent for the current owner state and also
+     receive live updates after admin remove/reassign actions.
+  ========================================================= */
+
+  function setShopOwnerState(value){
+
+    isShopOwner = !!value;
+
+    if(isShopOwner){
+      ownerAddButton.classList.add("visible");
+    }
+    else{
+      ownerAddButton.classList.remove("visible");
+    }
+
+    updateStoryViewCount();
+    updateLikeButton();
+
+  }
+
+  function applyParentOwnerState(data){
+
+    if(
+      !data ||
+      data.type !== "MA7ALAK_OWNER_STATE"
+    ){
+      return false;
+    }
+
+    const incomingSlug =
+      String(data.shopSlug || "")
+        .trim()
+        .toLowerCase();
+
+    const currentSlug =
+      String(SHOP_SLUG || "")
+        .trim()
+        .toLowerCase();
+
+    ma7alakParentOwnerStateReceived = true;
+    ma7alakParentIsOwner = !!data.isOwner;
+    ma7alakParentOwnerSlug = incomingSlug;
+
+    setShopOwnerState(
+      ma7alakParentIsOwner &&
+      incomingSlug === currentSlug
+    );
+
+    return true;
+
+  }
+
+  function ownerPageTarget(){
+
+    try{
+      if(
+        window.top &&
+        window.top !== window
+      ){
+        return window.top;
+      }
+    }
+    catch(error){}
+
+    try{
+      if(
+        window.parent &&
+        window.parent !== window
+      ){
+        return window.parent;
+      }
+    }
+    catch(error){}
+
+    return null;
+
+  }
+
+  function requestParentOwnerState(){
+
+    const target =
+      ownerPageTarget();
+
+    if(
+      !target
+    ){
+      return;
+    }
+
+    try{
+      target.postMessage(
+        {
+          type:"MA7ALAK_OWNER_STATE_GET",
+          shopSlug:SHOP_SLUG
+        },
+        "*"
+      );
+    }
+    catch(error){}
+  }
+
+
+  /* =========================================================
+     CHECK OWNER
+  ========================================================= */
+
+  async function checkShopOwner(){
+
+    /*
+       Parent owner state is authoritative for Hostinger embeds.
+       Never allow an iframe's own cached/stale Supabase session to grant
+       owner controls before the top-level page confirms ownership.
+    */
+    const insideShopEmbed =
+      !!(
+        window.parent &&
+        window.parent !== window
+      );
+
+    if(ma7alakParentOwnerStateReceived){
+
+      const currentSlug =
+        String(SHOP_SLUG || "")
+          .trim()
+          .toLowerCase();
+
+      setShopOwnerState(
+        ma7alakParentIsOwner &&
+        ma7alakParentOwnerSlug === currentSlug
+      );
+
+      return;
+
+    }
+
+    requestParentOwnerState();
+
+    if(insideShopEmbed){
+      setShopOwnerState(false);
+      return;
+    }
+
+    try{
+      await getMa7alakSupabaseClient();
+    }
+    catch(error){
+      console.error("MA7ALAK shared Supabase:", error);
+      return;
+    }
+
+
+    try{
+
+      const result =
+        await supabaseClient.auth.getSession();
+
+
+      const session =
+        result &&
+        result.data &&
+        result.data.session;
+
+
+      if(!session){
+
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
+        );
+
+        updateStoryViewCount();
+
+        return;
+
+      }
+
+
+      const user =
+        session.user;
+
+
+      if(!user){
+
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
+        );
+
+        updateStoryViewCount();
+
+        return;
+
+      }
+
+
+      const ownerResult =
+        await supabaseClient
+          .from("shop_owners")
+          .select(
+            "shop_slug"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
+          .maybeSingle();
+
+
+      if(
+        ownerResult.error ||
+        !ownerResult.data
+      ){
+
+        isShopOwner =
+          false;
+
+        ownerAddButton.classList.remove(
+          "visible"
+        );
+
+        updateStoryViewCount();
+
+        return;
+
+      }
+
+
+      isShopOwner =
+        true;
+
+
+      ownerAddButton.classList.add(
+        "visible"
+      );
+
+      updateStoryViewCount();
+
+    }
+
+    catch(error){
+
+      console.error(
+        "MA7ALAK owner check:",
+        error
+      );
+
+      isShopOwner =
+        false;
+
+      ownerAddButton.classList.remove(
+        "visible"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     OPEN OWNER UPLOADER
+
+     IMPORTANT:
+     The actual uploader is handled by
+     PAGE-LEVEL CUSTOM CODE.
+  ========================================================= */
+
+  function openOwnerUpload(){
+
+    if(!isShopOwner){
+
+      return;
+
+    }
+
+
+    try{
+
+      const target =
+        ownerPageTarget();
+
+      if(
+        !target
+      ){
+        return;
+      }
+
+      target.postMessage(
+
+        {
+
+          type:
+            "MA7ALAK_OPEN_STORY_UPLOADER",
+
+          shopSlug:
+            SHOP_SLUG,
+
+          __ma7alakOpenStoryNow:
+            true
+
+        },
+
+        "*"
+
+      );
+
+    }
+
+    catch(error){
+
+      console.error(
+        "MA7ALAK uploader bridge:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STORY UPLOAD EFFECT
+     One-time celebration on the SAME profile/story circle.
+  ========================================================= */
+
+  let ma7alakStoryUploadEffectTimer=null;
+
+  function triggerStoryUploadEffect(){
+
+    const profileShell=
+      document.getElementById("ma7alak-profile-shell");
+
+    if(!profileShell || !storyWrapper){
+      return;
+    }
+
+    if(
+      String(profileShell.dataset.storyUploadEffect||"spark-burst") ===
+      "none"
+    ){
+      return;
+    }
+
+    clearTimeout(ma7alakStoryUploadEffectTimer);
+
+    profileShell.classList.remove(
+      "m7-story-upload-active"
+    );
+
+    /* Force a restart even when two uploads happen close together. */
+    void profileShell.offsetWidth;
+
+    profileShell.classList.add(
+      "m7-story-upload-active"
+    );
+
+    ma7alakStoryUploadEffectTimer=
+      setTimeout(function(){
+        profileShell.classList.remove(
+          "m7-story-upload-active"
+        );
+      },1500);
+
+  }
+
+
+  /* =========================================================
+     UPLOAD FINISHED MESSAGE
+  ========================================================= */
+
+  window.addEventListener(
+    "message",
+    function(event){
+
+      if(applyParentOwnerState(event.data)){
+        return;
+      }
+
+      if(
+        event.data &&
+        event.data.type === "MA7ALAK_OWNER_PROFILE_UPDATED"
+      ){
+        if(
+          String(event.data.shopSlug || "")
+            .trim()
+            .toLowerCase() === SHOP_SLUG
+        ){
+          loadShopProfileFromAdmin();
+        }
+        return;
+      }
+
+      if(
+        !event.data ||
+        event.data.type !==
+        "MA7ALAK_STORY_UPLOADED"
+      ){
+
+        return;
+
+      }
+
+
+      if(
+        event.data.shopSlug !==
+        SHOP_SLUG
+      ){
+
+        return;
+
+      }
+
+
+      triggerStoryUploadEffect();
+      loadStories();
+
+    }
+  );
+
+
+  /* =========================================================
+     VERIFIED BADGE — same source + same icon as Show Shops
+  ========================================================= */
+
+  function renderProfileVerifiedBadge(){
+    const badge =
+      document.getElementById(
+        "ma7alak-profile-verified-badge"
+      );
+
+    const wrapper =
+      document.getElementById(
+        "ma7alak-story-wrapper"
+      );
+
+    if(!badge || !wrapper){
+      return;
+    }
+
+    const rawVerified =
+      SHOP_PROFILE
+        ? SHOP_PROFILE.verified
+        : false;
+
+    const verified =
+      rawVerified === true ||
+      rawVerified === 1 ||
+      String(rawVerified || "")
+        .trim()
+        .toLowerCase() === "true";
+
+    wrapper.classList.toggle(
+      "m7-profile-is-verified",
+      verified
+    );
+
+    wrapper.setAttribute(
+      "data-verified",
+      verified ? "true" : "false"
+    );
+
+    badge.classList.toggle(
+      "visible",
+      verified
+    );
+
+    /* Direct important style is intentional here. Hostinger/page CSS must
+       never be able to hide an active verification badge. */
+    badge.style.setProperty(
+      "display",
+      verified ? "grid" : "none",
+      "important"
+    );
+  }
+
+
+  /* =========================================================
+     PERMANENT STORY CIRCLE IMAGE
+     The Story itself NEVER replaces this image.
+  ========================================================= */
+
+  function renderStoryCircleImage(){
+
+    /* Verification belongs to the profile circle, so refresh it whenever
+       the circle itself is rebuilt. */
+    renderProfileVerifiedBadge();
+
+    if(!storyPreview){
+      return;
+    }
+
+    const imageURL =
+      String(
+        STORY_CIRCLE_IMAGE_URL || ""
+      ).trim();
+
+    storyPreview.innerHTML = "";
+
+    if(
+      !imageURL ||
+      imageURL === "PASTE_IMAGE_URL_HERE"
+    ){
+
+      const placeholder =
+        document.createElement("div");
+
+      placeholder.className =
+        "ma7alak-story-placeholder";
+
+      storyPreview.appendChild(
+        placeholder
+      );
+
+      return;
+
+    }
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      imageURL;
+
+    image.alt =
+      "Shop logo";
+
+    image.loading =
+      "eager";
+
+    image.decoding =
+      "async";
+
+    storyPreview.appendChild(
+      image
+    );
+
+  }
+
+
+  /* =========================================================
+     LOAD STORIES
+  ========================================================= */
+
+  async function loadStories(){
+
+    try{
+      await getMa7alakSupabaseClient();
+    }
+    catch(error){
+      console.error("MA7ALAK shared Supabase:", error);
+      return;
+    }
+
+
+    /*
+       Always keep the permanent shop image in the circle.
+       Stories only control the ring + fullscreen Story viewer.
+    */
+    renderStoryCircleImage();
+
+    try{
+
+      const now =
+        new Date().toISOString();
+
+
+      const result =
+        await supabaseClient
+          .from("shop_stories")
+          .select(
+            "id,shop_slug,media_type,storage_path,status_text,expires_at,created_at"
+          )
+          .eq(
+            "shop_slug",
+            SHOP_SLUG
+          )
+          .gt(
+            "expires_at",
+            now
+          )
+          .order(
+            "created_at",
+            {
+              ascending:true
+            }
+          );
+
+
+      if(
+        result.error
+      ){
