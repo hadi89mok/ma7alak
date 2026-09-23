@@ -245,6 +245,19 @@
     await loadState();
     window.addEventListener("ma7alak:owner-auth-change",()=>{paint();loadState()});
     window.addEventListener("ma7alak:account-change",()=>loadState());
+
+    let wakeAt=0;
+    const refreshOnWake=()=>{
+      const now=Date.now();
+      if(document.hidden||now-wakeAt<900)return;
+      wakeAt=now;
+      loadState();
+    };
+
+    window.addEventListener("ma7alak:page-wake",refreshOnWake);
+    window.addEventListener("message",event=>{
+      if(event.data?.type==="MA7ALAK_PAGE_WAKE")refreshOnWake();
+    });
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});

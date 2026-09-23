@@ -506,6 +506,45 @@ window.__MA7ALAK_PROFILE_HUB_REFRESH__ =
       );
   };
 
+let MA7ALAK_HUB_PAGE_WAKE_TIMER=null;
+
+function scheduleMa7alakHubPageWake(){
+  clearTimeout(MA7ALAK_HUB_PAGE_WAKE_TIMER);
+
+  MA7ALAK_HUB_PAGE_WAKE_TIMER=setTimeout(
+    function(){
+      if(document.hidden)return;
+
+      if(
+        typeof window.__MA7ALAK_PROFILE_HUB_REFRESH__===
+          "function"
+      ){
+        window.__MA7ALAK_PROFILE_HUB_REFRESH__(
+          "page-wake"
+        );
+      }
+    },
+    100
+  );
+}
+
+window.addEventListener(
+  "ma7alak:page-wake",
+  scheduleMa7alakHubPageWake
+);
+
+window.addEventListener(
+  "message",
+  function(event){
+    if(
+      event.data?.type===
+      "MA7ALAK_PAGE_WAKE"
+    ){
+      scheduleMa7alakHubPageWake();
+    }
+  }
+);
+
 
 /* =========================================================
    LIVE ADMIN DRAFT PREVIEW BUS

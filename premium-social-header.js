@@ -4445,6 +4445,49 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     supabaseClient.auth.onAuthStateChange(function(){setTimeout(loadOwnerProfile,80);});
   }
 
+  let premiumHeaderWakeAt=0;
+
+  async function refreshPremiumHeaderOnWake(){
+    const now=Date.now();
+
+    if(
+      document.hidden ||
+      now-premiumHeaderWakeAt<850
+    ){
+      return;
+    }
+
+    premiumHeaderWakeAt=now;
+
+    const profilePromise=
+      loadShopProfiles()
+        .then(()=>{
+          const overlay=
+            document.getElementById(
+              "ma7alak-header-search-overlay"
+            );
+
+          if(
+            overlay &&
+            overlay.classList.contains("open")
+          ){
+            renderSearchResults(
+              document.getElementById(
+                "ma7alak-overlay-search-input"
+              )?.value||
+              ""
+            );
+          }
+        });
+
+    await Promise.allSettled([
+      loadHeaderReelsCatalog(),
+      refreshFollowingState(),
+      profilePromise,
+      loadOwnerProfile()
+    ]);
+  }
+
   async function start(){
     setupScrollEffect();
     setupHeaderMenu();
@@ -4484,6 +4527,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     await refreshFollowingState();
     await loadOwnerProfile();
     setupAuthListener();
+    window.addEventListener("ma7alak:page-wake",refreshPremiumHeaderOnWake);
   }
 
   await start();

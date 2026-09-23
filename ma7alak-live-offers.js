@@ -708,6 +708,9 @@ async function init(){
   };
 
   addEventListener("ma7alak:page-wake",wakeSync);
+  addEventListener("message",event=>{
+    if(event.data?.type==="MA7ALAK_PAGE_WAKE")wakeSync();
+  });
   addEventListener("pageshow",wakeSync);
   document.addEventListener("visibilitychange",()=>{
     if(document.visibilityState==="visible")wakeSync();

@@ -669,6 +669,16 @@ body.m7hf-home-mounted{background:#050403!important}
     setInterval(()=>{if(!document.hidden)load()},45000);
   }
 
+  let footerWakeAt=0;
+  function refreshFooterOnWake(){
+    const now=Date.now();
+    if(document.hidden||now-footerWakeAt<900)return;
+    footerWakeAt=now;
+    reconnect();
+    load();
+  }
+
+  window.addEventListener("ma7alak:page-wake",refreshFooterOnWake);
   window.addEventListener("ma7alak:footer-builtin-bg-ready",()=>{if(current.background_url==="builtin")render()});
   window.addEventListener("load",stabilizeFooterMount,{once:true});
   window.addEventListener("pageshow",()=>{

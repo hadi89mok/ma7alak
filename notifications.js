@@ -5471,6 +5471,11 @@ window.addEventListener(
   refreshNotificationsAfterResume
 );
 
+window.addEventListener(
+  "ma7alak:page-wake",
+  refreshNotificationsAfterResume
+);
+
 
 /* =========================================================
    START AFTER PAGE LOAD

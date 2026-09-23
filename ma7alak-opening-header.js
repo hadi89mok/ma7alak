@@ -796,7 +796,11 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     if(e.key==='shoufhon_story_mutation'&&e.newValue){try{applyStoryMutation(JSON.parse(e.newValue))}catch(_){}}
   });
   window.addEventListener('ma7alak:story-mutation',e=>applyStoryMutation(e.detail));
-  window.addEventListener('message',e=>{if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED','MA7ALAK_STORY_DELETED'].includes(e.data?.type))applyStoryMutation(e.data)});
+  window.addEventListener('ma7alak:page-wake',scheduleRefresh);
+  window.addEventListener('message',e=>{
+    if(e.data?.type==='MA7ALAK_PAGE_WAKE'){scheduleRefresh();return}
+    if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED','MA7ALAK_STORY_DELETED'].includes(e.data?.type))applyStoryMutation(e.data)
+  });
   function start(){
     slugs=Array.isArray(window.Ma7alakFollowingState?.slugs)?window.Ma7alakFollowingState.slugs:[];
     bindStoryTray();
@@ -2064,7 +2068,7 @@ savedDrawer.addEventListener("click",e=>{if(e.target===savedDrawer)closeSavedDra
 function reelsData(){return refreshReels().map(r=>({id:r.dataset.reelId,shop:r.dataset.shopName,shopUrl:r.dataset.shopUrl,icon:r.dataset.shopIcon,video:r.dataset.videoUrl||""}))}
 function sendReelsState(){let data=reelsData();window.postMessage({type:"MA7ALAK_REELS_STATE",source:"ma7alak-reels-embed",authoritative:true,sentAt:Date.now(),reelIds:data.map(x=>[x.id,x.video,x.shopUrl].join("::")),reels:data},"*")}
 function openRandomReel(){let a=refreshReels();if(!a.length)return;let candidates=a.length>1&&lastRandom?a.filter(r=>r.dataset.reelId!==lastRandom):a,reel=candidates[Math.floor(Math.random()*candidates.length)];lastRandom=reel.dataset.reelId;openViewer(reel)}
-loadReels();syncFavorites();window.addEventListener("pageshow",()=>{resetReelsStripToStart();primeVisibleReelCards();loadReels()});channel=sb.channel("ma7alak-combined-reels").on("postgres_changes",{event:"*",schema:"public",table:"shop_reels"},()=>{loadReels()}).subscribe();setInterval(()=>{if(!document.hidden)sendReelsState()},10000);let m7HomeWakeAt=0;function refreshHomeFeedOnWake(){const now=Date.now();if(document.hidden||now-m7HomeWakeAt<800)return;m7HomeWakeAt=now;loadReels();syncFavorites();try{window.Ma7alakLiveOffers?.refresh?.()}catch(_){}try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}catch(_){}}window.addEventListener("ma7alak:page-wake",refreshHomeFeedOnWake);window.addEventListener("pageshow",refreshHomeFeedOnWake);document.addEventListener("visibilitychange",()=>{if(document.hidden){unloadSavedMedia()}else{refreshHomeFeedOnWake();if(savedDrawer?.classList.contains("open"))renderSavedDrawer()}});
+loadReels();syncFavorites();window.addEventListener("pageshow",()=>{resetReelsStripToStart();primeVisibleReelCards();loadReels()});channel=sb.channel("ma7alak-combined-reels").on("postgres_changes",{event:"*",schema:"public",table:"shop_reels"},()=>{loadReels()}).subscribe();setInterval(()=>{if(!document.hidden)sendReelsState()},10000);let m7HomeWakeAt=0;function refreshHomeFeedOnWake(){const now=Date.now();if(document.hidden||now-m7HomeWakeAt<800)return;m7HomeWakeAt=now;loadReels();syncFavorites();loadHomepageLiveDirect();loadSpotlight();syncLiveFromProviderCache();requestLive();try{window.Ma7alakLiveOffers?.refresh?.()}catch(_){}try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_GET",shopSlug:""},"*")}catch(_){}}window.addEventListener("ma7alak:page-wake",refreshHomeFeedOnWake);window.addEventListener("pageshow",refreshHomeFeedOnWake);document.addEventListener("visibilitychange",()=>{if(document.hidden){unloadSavedMedia()}else{refreshHomeFeedOnWake();if(savedDrawer?.classList.contains("open"))renderSavedDrawer()}});
 })(sb);
 
  const client=sb;
