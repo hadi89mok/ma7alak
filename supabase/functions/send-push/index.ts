@@ -135,11 +135,25 @@ Deno.serve(async (req: Request) => {
     const shopSlug = body.shop_slug || "";
     const contentId = body.content_id || "";
 
-    const { data: subscriptions, error: subscriptionError } =
-      await supabase
+    const targetSubscriptionId =
+      Number.isInteger(Number(body.subscription_id)) &&
+      Number(body.subscription_id) > 0
+        ? Number(body.subscription_id)
+        : null;
+
+    let subscriptionQuery =
+      supabase
         .from("push_subscriptions")
         .select("id,endpoint,p256dh,auth,enabled")
         .eq("enabled", true);
+
+    if (targetSubscriptionId !== null) {
+      subscriptionQuery =
+        subscriptionQuery.eq("id", targetSubscriptionId);
+    }
+
+    const { data: subscriptions, error: subscriptionError } =
+      await subscriptionQuery;
 
     if (subscriptionError) throw subscriptionError;
 
@@ -236,6 +250,7 @@ Deno.serve(async (req: Request) => {
     return json(req, {
       success: true,
       subscribers: subscriptions.length,
+      target_subscription_id: targetSubscriptionId,
       sent,
       failed,
       removed: expiredSubscriptionIds.length
