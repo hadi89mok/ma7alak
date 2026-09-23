@@ -19,7 +19,9 @@
   let currentIndex=0;
   let currentOwner=false;
   let currentSignedIn=false;
-  let viewportBaseline=0;
+  let storyPaused=false;
+  let storyClockRemainingMs=0;
+  let storyClockStartedAt=0;
   let mediaTimer=0;
   let loadToken=0;
   let historyArmed=false;
@@ -298,10 +300,10 @@
 
     style.textContent=`
 html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!important}
-#${ROOT_ID}{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font-family:Arial,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+#${ROOT_ID}{position:fixed;top:var(--ssv-vv-top,0px);left:var(--ssv-vv-left,0px);right:auto;bottom:auto;width:var(--ssv-vv-width,100vw);height:var(--ssv-vv-height,100dvh);z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font-family:Arial,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
 #${ROOT_ID}[hidden]{display:none!important}
 #${ROOT_ID} *{box-sizing:border-box}
-#${ROOT_ID} .ssv-frame{position:relative;width:min(100vw,470px);height:100dvh;overflow:hidden;background:#000;isolation:isolate}
+#${ROOT_ID} .ssv-frame{position:relative;width:min(100%,470px);height:100%;overflow:hidden;background:#000;isolation:isolate}
 #${ROOT_ID} .ssv-media-host{position:absolute;inset:0;display:grid;place-items:center;background:#000}
 #${ROOT_ID} .ssv-media{width:100%;height:100%;object-fit:contain;background:#000;display:block}
 #${ROOT_ID} .ssv-loading{position:absolute;inset:0;display:grid;place-items:center;color:#aaa;font-size:12px}
@@ -311,6 +313,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-bar>i{display:block;width:0;height:100%;background:#fff}
 #${ROOT_ID} .ssv-bar.done>i{width:100%}
 #${ROOT_ID} .ssv-bar.active>i{animation:ssvProgress var(--ssv-duration,6s) linear forwards;-webkit-animation:ssvProgress var(--ssv-duration,6s) linear forwards}
+#${ROOT_ID}.is-paused .ssv-bar.active>i{animation-play-state:paused!important;-webkit-animation-play-state:paused!important}
 #${ROOT_ID} .ssv-head-row{display:flex;align-items:center;gap:9px;min-width:0}
 #${ROOT_ID} .ssv-shop-avatar{width:38px;height:38px;flex:0 0 38px;padding:0;border:2px solid #d9a441;border-radius:50%;overflow:hidden;background:#211a15;color:#efc878;display:grid;place-items:center;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #${ROOT_ID} .ssv-shop-avatar img{width:100%;height:100%;object-fit:cover;display:block}
@@ -323,7 +326,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-nav{position:absolute;z-index:8;top:82px;bottom:92px;width:34%;border:0;background:transparent;color:transparent;padding:0}
 #${ROOT_ID} .ssv-prev{left:0}
 #${ROOT_ID} .ssv-next{right:0}
-#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:var(--ssv-keyboard-offset,0px);padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px;transition:bottom .12s ease}
+#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:0;padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px}
 #${ROOT_ID}.is-owner .ssv-bottom{display:none}
 #${ROOT_ID}.is-logged-out .ssv-reply{display:none!important}
 #${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
@@ -338,8 +341,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-feedback.show{opacity:1}
 @keyframes ssvProgress{from{width:0}to{width:100%}}
 @-webkit-keyframes ssvProgress{from{width:0}to{width:100%}}
-@media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100vw}#${ROOT_ID} .ssv-nav{bottom:86px}}
-@supports not (height:100dvh){#${ROOT_ID} .ssv-frame{height:100vh}}
+@media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100%}#${ROOT_ID} .ssv-nav{bottom:86px}}
 `;
 
     document.head.appendChild(
@@ -350,57 +352,67 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   function syncVisualViewport(){
     if(!root)return;
 
-    const replyInput=
-      root.querySelector(
-        ".ssv-reply input"
-      );
-
-    const focused=
-      !!replyInput &&
-      document.activeElement===
-      replyInput;
-
     const vv=
       window.visualViewport;
 
-    if(!focused){
-      viewportBaseline=
-        Math.max(
-          window.innerHeight||0,
-          document.documentElement?.clientHeight||0,
-          vv?.height||0
-        );
-
-      root.style.setProperty(
-        "--ssv-keyboard-offset",
-        "0px"
-      );
-
-      return;
-    }
-
-    const base=
+    const width=
       Math.max(
-        viewportBaseline||0,
-        window.innerHeight||0,
-        document.documentElement?.clientHeight||0
+        1,
+        Math.round(
+          vv?.width||
+          window.innerWidth||
+          document.documentElement?.clientWidth||
+          1
+        )
       );
 
-    const offset=
-      vv
-        ? Math.max(
-            0,
-            Math.round(
-              base-
-              vv.height-
-              vv.offsetTop
-            )
-          )
-        : 0;
+    const height=
+      Math.max(
+        1,
+        Math.round(
+          vv?.height||
+          window.innerHeight||
+          document.documentElement?.clientHeight||
+          1
+        )
+      );
+
+    const top=
+      Math.max(
+        0,
+        Math.round(
+          vv?.offsetTop||
+          0
+        )
+      );
+
+    const left=
+      Math.max(
+        0,
+        Math.round(
+          vv?.offsetLeft||
+          0
+        )
+      );
 
     root.style.setProperty(
-      "--ssv-keyboard-offset",
-      offset+"px"
+      "--ssv-vv-width",
+      width+"px"
+    );
+
+    root.style.setProperty(
+      "--ssv-vv-height",
+      height+"px"
+    );
+
+    root.style.setProperty(
+      "--ssv-vv-top",
+      top+"px"
+    );
+
+    root.style.setProperty(
+      "--ssv-vv-left",
+      left+"px"
     );
   }
 
@@ -606,16 +618,21 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     replyInput.addEventListener(
       "focus",
       ()=>{
+        pauseStoryPlayback();
         syncVisualViewport();
+        requestAnimationFrame(syncVisualViewport);
         setTimeout(syncVisualViewport,60);
-        setTimeout(syncVisualViewport,220);
+        setTimeout(syncVisualViewport,180);
+        setTimeout(syncVisualViewport,360);
       }
     );
 
     replyInput.addEventListener(
       "blur",
       ()=>{
+        resumeStoryPlayback();
         setTimeout(syncVisualViewport,80);
+        setTimeout(syncVisualViewport,220);
       }
     );
 
@@ -730,13 +747,142 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       );
   }
 
+  function armStoryAdvance(delayMs){
+    clearTimeout(
+      mediaTimer
+    );
+
+    mediaTimer=0;
+
+    storyClockRemainingMs=
+      Math.max(
+        0,
+        Number(delayMs)||
+        0
+      );
+
+    storyClockStartedAt=
+      performance.now();
+
+    if(
+      !storyPaused &&
+      storyClockRemainingMs>
+      0
+    ){
+      mediaTimer=
+        setTimeout(
+          next,
+          storyClockRemainingMs
+        );
+    }
+  }
+
+  function pauseStoryPlayback(){
+    if(
+      storyPaused ||
+      !root ||
+      root.hidden
+    ){
+      return;
+    }
+
+    storyPaused=true;
+
+    root.classList.add(
+      "is-paused"
+    );
+
+    if(mediaTimer){
+      clearTimeout(
+        mediaTimer
+      );
+
+      mediaTimer=0;
+
+      const elapsed=
+        Math.max(
+          0,
+          performance.now()-
+          storyClockStartedAt
+        );
+
+      storyClockRemainingMs=
+        Math.max(
+          0,
+          storyClockRemainingMs-
+          elapsed
+        );
+    }
+
+    const video=
+      root.querySelector(
+        ".ssv-media-host video"
+      );
+
+    if(video){
+      try{
+        video.pause();
+      }
+      catch(_){}
+    }
+  }
+
+  function resumeStoryPlayback(){
+    if(
+      !storyPaused ||
+      !root ||
+      root.hidden
+    ){
+      return;
+    }
+
+    storyPaused=false;
+
+    root.classList.remove(
+      "is-paused"
+    );
+
+    if(
+      storyClockRemainingMs>
+      0
+    ){
+      storyClockStartedAt=
+        performance.now();
+
+      mediaTimer=
+        setTimeout(
+          next,
+          storyClockRemainingMs
+        );
+    }
+
+    const video=
+      root.querySelector(
+        ".ssv-media-host video"
+      );
+
+    if(video){
+      video
+        .play()
+        .catch(
+          ()=>{}
+        );
+    }
+  }
+
   function stopMedia(){
     clearTimeout(
       mediaTimer
     );
 
-    mediaTimer=
-      0;
+    mediaTimer=0;
+    storyClockRemainingMs=0;
+    storyClockStartedAt=0;
+    storyPaused=false;
+
+    root?.classList.remove(
+      "is-paused"
+    );
 
     const video=
       root?.querySelector(
@@ -814,9 +960,24 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       "is-logged-out"
     );
 
-    root.style.setProperty(
-      "--ssv-keyboard-offset",
-      "0px"
+    root.classList.remove(
+      "is-paused"
+    );
+
+    root.style.removeProperty(
+      "--ssv-vv-width"
+    );
+
+    root.style.removeProperty(
+      "--ssv-vv-height"
+    );
+
+    root.style.removeProperty(
+      "--ssv-vv-top"
+    );
+
+    root.style.removeProperty(
+      "--ssv-vv-left"
     );
 
     root
@@ -1702,6 +1863,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         input.value=
           "";
 
+        input.blur();
+        resumeStoryPlayback();
+        syncVisualViewport();
+
         flash(
           "Reply sent ✓"
         );
@@ -1940,6 +2105,18 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
             duration
           );
 
+          armStoryAdvance(
+            duration*
+            1000
+          );
+
+          if(storyPaused){
+            try{
+              media.pause();
+            }
+            catch(_){}
+          }
+
           loading.hidden=
             true;
 
@@ -1971,11 +2148,9 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           }
         );
 
-      mediaTimer=
-        setTimeout(
-          next,
-          30000
-        );
+      armStoryAdvance(
+        30000
+      );
 
     }
     else{
@@ -1997,17 +2172,24 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         6
       );
 
-      mediaTimer=
-        setTimeout(
-          next,
-          6000
-        );
+      armStoryAdvance(
+        6000
+      );
 
     }
 
     recordView(
       story
     );
+
+    if(
+      document.activeElement===
+      root.querySelector(
+        ".ssv-reply input"
+      )
+    ){
+      pauseStoryPlayback();
+    }
   }
 
   async function loadStories(slug){
@@ -2252,13 +2434,6 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     }
 
     ensureRoot();
-
-    viewportBaseline=
-      Math.max(
-        window.innerHeight||0,
-        document.documentElement?.clientHeight||0,
-        window.visualViewport?.height||0
-      );
 
     syncVisualViewport();
 

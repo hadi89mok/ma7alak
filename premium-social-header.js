@@ -2762,17 +2762,51 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     updateReelsBadge();
   }
 
-  function markCurrentReelsSeen(){
-    if(!currentReelIds.length){return;}
+  function reelSeenFingerprint(id,video,shopUrl){
+    return [
+      String(id||"").trim(),
+      String(video||"").trim(),
+      String(shopUrl||"").trim()
+    ].join("::");
+  }
 
-    const seen = new Set(getSeenReelIds());
+  function markReelFingerprintSeen(fingerprint){
+    const value=String(fingerprint||"").trim();
 
-    currentReelIds.forEach(function(id){
-      seen.add(id);
-    });
+    if(!value){
+      return;
+    }
 
-    saveSeenReelIds(Array.from(seen));
+    const seen=new Set(
+      getSeenReelIds()
+    );
+
+    if(seen.has(value)){
+      updateReelsBadge();
+      return;
+    }
+
+    seen.add(value);
+
+    saveSeenReelIds(
+      Array.from(seen)
+    );
+
     updateReelsBadge();
+  }
+
+  function markGlobalReelSeen(reel){
+    if(!reel){
+      return;
+    }
+
+    markReelFingerprintSeen(
+      reelSeenFingerprint(
+        reel.id,
+        reel.video,
+        reel.shopUrl
+      )
+    );
   }
 
   function requestReelsState(){
@@ -3223,9 +3257,28 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   window.addEventListener(
     "message",
     function(event){
+      if(!event.data){
+        return;
+      }
+
       if(
-        !event.data ||
-        event.data.type !== "MA7ALAK_REELS_STATE"
+        event.data.type ===
+        "MA7ALAK_REEL_WATCHED"
+      ){
+        markReelFingerprintSeen(
+          reelSeenFingerprint(
+            event.data.reelId,
+            event.data.video,
+            event.data.shopUrl
+          )
+        );
+
+        return;
+      }
+
+      if(
+        event.data.type !==
+        "MA7ALAK_REELS_STATE"
       ){
         return;
       }
@@ -3638,6 +3691,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let ma7alakGlobalTouchStartTime = 0;
   let ma7alakGlobalFavoriteIds = new Set();
   let ma7alakGlobalFullscreenOwned = false;
+  let ma7alakGlobalWatchedHandler = null;
 
   function getGlobalReelElements(){
     return {
@@ -3870,6 +3924,42 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
     const reel =
       MA7ALAK_GLOBAL_REELS[index];
+
+    if(
+      ma7alakGlobalWatchedHandler
+    ){
+      el.video.removeEventListener(
+        "playing",
+        ma7alakGlobalWatchedHandler
+      );
+
+      ma7alakGlobalWatchedHandler=null;
+    }
+
+    ma7alakGlobalWatchedHandler=
+      function(){
+        const active=
+          MA7ALAK_GLOBAL_REELS[
+            ma7alakGlobalReelIndex
+          ];
+
+        if(
+          active &&
+          active.id===reel.id
+        ){
+          markGlobalReelSeen(
+            reel
+          );
+        }
+
+        ma7alakGlobalWatchedHandler=null;
+      };
+
+    el.video.addEventListener(
+      "playing",
+      ma7alakGlobalWatchedHandler,
+      {once:true}
+    );
 
     el.video.pause();
     el.video.classList.remove("ready");
@@ -4226,11 +4316,6 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
           }
 
           openRandomGlobalReel();
-
-          try{
-            markCurrentReelsSeen();
-          }
-          catch(error){}
         };
 
         if(headerReelsCatalogReady){

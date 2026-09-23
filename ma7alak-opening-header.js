@@ -1681,6 +1681,39 @@ function loadViewer(reel,direction){
   viewerIcon.src=reel.dataset.shopIcon||"";
   viewerIcon.style.display=reel.dataset.shopIcon?"block":"none";
 
+  if(viewerVideo.__m7WatchedHandler){
+    viewerVideo.removeEventListener(
+      "playing",
+      viewerVideo.__m7WatchedHandler
+    );
+    viewerVideo.__m7WatchedHandler=null;
+  }
+
+  viewerVideo.__m7WatchedHandler=()=>{
+    if(
+      viewerIndex===
+      reels.indexOf(reel)
+    ){
+      try{
+        window.postMessage({
+          type:"MA7ALAK_REEL_WATCHED",
+          reelId:String(reel.dataset.reelId||""),
+          video:String(reel.dataset.videoUrl||""),
+          shopUrl:String(reel.dataset.shopUrl||"")
+        },"*");
+      }
+      catch(_){}
+    }
+
+    viewerVideo.__m7WatchedHandler=null;
+  };
+
+  viewerVideo.addEventListener(
+    "playing",
+    viewerVideo.__m7WatchedHandler,
+    {once:true}
+  );
+
   viewerVideo.pause();
   viewerVideo.removeAttribute("src");
   viewerVideo.load();
