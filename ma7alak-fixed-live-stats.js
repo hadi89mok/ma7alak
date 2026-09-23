@@ -19,10 +19,10 @@ style.textContent=`
   bottom:max(8px,env(safe-area-inset-bottom))!important;
   transform:translateX(-50%)!important;
   z-index:2147483000!important;
-  width:calc(100% - 16px)!important;
-  max-width:520px!important;
+  width:calc(100% - 34px)!important;
+  max-width:470px!important;
   margin:0!important;
-  padding:0 8px!important;
+  padding:0 4px!important;
   box-sizing:border-box!important;
   font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important;
   -webkit-font-smoothing:antialiased;
@@ -40,8 +40,8 @@ style.textContent=`
     radial-gradient(circle at 50% 0%,rgba(224,153,62,.20),transparent 55%),
     linear-gradient(180deg,rgba(73,42,20,.96),rgba(35,21,13,.96));
   border:1px solid rgba(224,153,62,.42);
-  border-radius:14px;
-  padding:7px 8px;
+  border-radius:12px;
+  padding:5px 7px;
   box-sizing:border-box;
   box-shadow:0 8px 24px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.05);
   backdrop-filter:blur(7px);
@@ -61,44 +61,45 @@ style.textContent=`
 }
 #ma7alak-live-stats .ma7alak-live-item{
   flex:1;min-width:0;display:flex;align-items:center;justify-content:center;
-  gap:5px;padding:2px 4px;box-sizing:border-box;
+  gap:4px;padding:1px 3px;box-sizing:border-box;
 }
 #ma7alak-live-stats .ma7alak-live-text{min-width:0;text-align:left}
 #ma7alak-live-stats .ma7alak-live-divider{
-  width:1px;height:27px;flex:0 0 1px;
+  width:1px;height:23px;flex:0 0 1px;
   background:linear-gradient(180deg,transparent,rgba(255,165,0,.22),transparent);
 }
 #ma7alak-live-stats .ma7alak-live-icon{
-  flex:0 0 auto;font-size:15px;line-height:1;
+  flex:0 0 auto;font-size:14px;line-height:1;
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.22));
 }
 #ma7alak-live-stats .ma7alak-live-number{
-  font-size:18px;font-weight:800;line-height:1;color:#fff;letter-spacing:0;
+  font-size:16px;font-weight:800;line-height:1;color:#fff;letter-spacing:0;
   text-shadow:0 1px 2px rgba(0,0,0,.34);
 }
 #ma7alak-live-stats .ma7alak-live-label{
-  margin-top:3px;font-size:9px;font-weight:650;line-height:1.15;
+  margin-top:2px;font-size:8.5px;font-weight:650;line-height:1.15;
   color:rgba(255,255,255,.92);letter-spacing:.05px;white-space:nowrap;
   text-shadow:0 1px 1px rgba(0,0,0,.28);
 }
 html.m7-reel-open #ma7alak-live-stats,
 body.m7-reel-open #ma7alak-live-stats{display:none!important}
 @media(max-width:500px){
-  #ma7alak-live-stats{max-width:350px;width:calc(100% - 48px)!important;padding:0 4px!important}
-  #ma7alak-live-stats .ma7alak-live-panel{padding:7px 7px;border-radius:12px;backdrop-filter:none;-webkit-backdrop-filter:none}
-  #ma7alak-live-stats .ma7alak-live-item{gap:4px;padding:2px 3px}
-  #ma7alak-live-stats .ma7alak-live-icon{font-size:15px}
-  #ma7alak-live-stats .ma7alak-live-number{font-size:17px}
-  #ma7alak-live-stats .ma7alak-live-label{font-size:8.5px;font-weight:650}
-  #ma7alak-live-stats .ma7alak-live-divider{height:26px}
+  #ma7alak-live-stats{max-width:325px;width:calc(100% - 64px)!important;padding:0 3px!important}
+  #ma7alak-live-stats .ma7alak-live-panel{padding:5px 6px;border-radius:11px;backdrop-filter:none;-webkit-backdrop-filter:none}
+  #ma7alak-live-stats .ma7alak-live-item{gap:3px;padding:1px 2px}
+  #ma7alak-live-stats .ma7alak-live-icon{font-size:13px}
+  #ma7alak-live-stats .ma7alak-live-number{font-size:15px}
+  #ma7alak-live-stats .ma7alak-live-label{font-size:8px;font-weight:650}
+  #ma7alak-live-stats .ma7alak-live-divider{height:22px}
 }
 @media(max-width:360px){
-  #ma7alak-live-stats .ma7alak-live-panel{padding:7px 5px}
-  #ma7alak-live-stats .ma7alak-live-item{gap:4px;padding:1px 3px}
-  #ma7alak-live-stats .ma7alak-live-icon{font-size:15px}
-  #ma7alak-live-stats .ma7alak-live-number{font-size:17px}
-  #ma7alak-live-stats .ma7alak-live-label{font-size:8.6px;font-weight:650}
-  #ma7alak-live-stats .ma7alak-live-divider{height:25px}
+  #ma7alak-live-stats{width:calc(100% - 44px)!important}
+  #ma7alak-live-stats .ma7alak-live-panel{padding:5px 4px}
+  #ma7alak-live-stats .ma7alak-live-item{gap:3px;padding:1px 2px}
+  #ma7alak-live-stats .ma7alak-live-icon{font-size:13px}
+  #ma7alak-live-stats .ma7alak-live-number{font-size:15px}
+  #ma7alak-live-stats .ma7alak-live-label{font-size:8px;font-weight:650}
+  #ma7alak-live-stats .ma7alak-live-divider{height:21px}
 }
 `;
 document.head.appendChild(style);
