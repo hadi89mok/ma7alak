@@ -647,6 +647,46 @@ function bridge(){
   });
 }
 async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},payload=>{let s=String(payload?.new?.shop_slug||payload?.old?.shop_slug||"").trim().toLowerCase();(async()=>{if(s){profileOptions.delete(s);await ensureProfileOptions(s)}await load();broadcast()})().catch(()=>load())}).subscribe()}
+function openLiveDeepLinkFromUrl(){
+  try{
+    const url=new URL(window.location.href);
+    const id=String(url.searchParams.get("live")||"").trim();
+
+    if(!id)return false;
+
+    const exists=
+      [...items,...ownerItems]
+        .some(row=>String(row?.id)===id);
+
+    if(!exists)return false;
+
+    view(id);
+
+    url.searchParams.delete("live");
+
+    const next=
+      url.pathname+
+      (url.searchParams.toString()
+        ? "?"+url.searchParams.toString()
+        : "")+
+      url.hash;
+
+    history.replaceState(
+      history.state,
+      "",
+      next
+    );
+
+    return true;
+  }catch(error){
+    console.warn(
+      "SHOUFHON Live deep link:",
+      error
+    );
+    return false;
+  }
+}
+
 async function init(){
   css();
   galleryCss();
@@ -672,6 +712,7 @@ async function init(){
   while(!await ready())await sleep(1000);
   await identity();
   await load();
+  openLiveDeepLinkFromUrl();
   await realtime();
 
   setInterval(timers,1000);

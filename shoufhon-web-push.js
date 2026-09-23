@@ -5,7 +5,7 @@
   if(window.__SHOUFHON_WEB_PUSH__)return;
   window.__SHOUFHON_WEB_PUSH__=true;
 
-  const VERSION="2026.09.24.2";
+  const VERSION="2026.09.24.3";
   const SUPABASE_URL=
     "https://wdtaiuwtqdepzdamgsrs.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY=
@@ -965,7 +965,7 @@
 
     if(copy){
       copy.textContent=
-        "Get messages, new Stories & Reels even when ShoufHon is closed.";
+        "Get messages, Stories, Reels & Live Offers even when ShoufHon is closed.";
     }
 
     current.classList.remove(
