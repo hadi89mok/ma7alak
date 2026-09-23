@@ -21,6 +21,7 @@ function ownerStatePayload(){
   const verifiedOwner=!!(session?.user&&owner?.shop_slug);
   return {
     type:"MA7ALAK_OWNER_STATE",
+    isLoggedIn:!!session?.user,
     isOwner:verifiedOwner,
     shopSlug:verifiedOwner?String(owner.shop_slug||""):"",
     shop:verifiedOwner?(shop||null):null,

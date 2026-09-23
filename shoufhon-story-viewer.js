@@ -2807,6 +2807,42 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   }
   catch(_){}
 
+  function sharedStoryFullscreenChanged(){
+    if(
+      !root ||
+      root.hidden
+    ){
+      return;
+    }
+
+    const active=
+      document.fullscreenElement||
+      document.webkitFullscreenElement;
+
+    /*
+      Android Back gesture/button can exit browser fullscreen before it
+      changes page history. Treat that fullscreen exit as "close Story".
+      close() then consumes the Story history sentinel, keeping the user on
+      the same ShoufHon page instead of navigating/reloading it.
+    */
+    if(
+      !active &&
+      historyArmed
+    ){
+      close();
+    }
+  }
+
+  document.addEventListener(
+    "fullscreenchange",
+    sharedStoryFullscreenChanged
+  );
+
+  document.addEventListener(
+    "webkitfullscreenchange",
+    sharedStoryFullscreenChanged
+  );
+
   window.addEventListener(
     "popstate",
     ()=>{

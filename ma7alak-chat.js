@@ -19,7 +19,7 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 #m7-chat-shell{position:fixed;inset:0;background:#000b;z-index:2147483500;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;font-family:Arial;overscroll-behavior:contain}
 #m7-chat{width:min(540px,100%);height:min(760px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);background:#100e0d;color:#fff;border:1px solid #db9b4659;border-radius:24px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px #000b;min-height:0}
 #m7-chat-head{padding:12px 14px;background:#1d1511;border-bottom:1px solid #3b2a20;display:flex;align-items:center;gap:8px;flex:0 0 auto;min-height:64px;box-sizing:border-box}
-.m7-head-person{display:flex;align-items:center;gap:9px;min-width:0;flex:1}.m7-head-person.m7-shop-profile-link{cursor:pointer;border-radius:12px;padding:3px 5px;margin-left:-5px;transition:background .16s ease,transform .16s ease}.m7-head-person.m7-shop-profile-link:hover{background:#ffffff0b}.m7-head-person.m7-shop-profile-link:active{transform:scale(.985)}.m7-head-person.m7-shop-profile-link:focus-visible{outline:2px solid #d99a45;outline-offset:2px}.m7-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #d99a45;background:#30251f;flex:0 0 40px}.m7-avatar.fallback{display:grid;place-items:center;font-weight:900;color:#f1b45a}#m7-chat-title{font-weight:900;color:#f1b45a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7c-icon{border:0;background:#30251f;color:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;flex:0 0 auto}.m7c-danger{background:#4a211f;color:#ffb5ae}
+.m7-head-person{display:flex;align-items:center;gap:9px;min-width:0;flex:1}.m7-head-person.m7-shop-profile-link{cursor:pointer;border-radius:12px;padding:3px 5px;margin-left:-5px;transition:background .16s ease,transform .16s ease}.m7-head-person.m7-shop-profile-link:hover{background:#ffffff0b}.m7-head-person.m7-shop-profile-link:active{transform:scale(.985)}.m7-head-person.m7-shop-profile-link:focus-visible{outline:2px solid #d99a45;outline-offset:2px}.m7-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #d99a45;background:#30251f;flex:0 0 40px}.m7-avatar.fallback{display:grid;place-items:center;font-weight:900;color:#f1b45a}#m7-chat-title{font-weight:900;color:#f1b45a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7c-icon{border:0;background:#30251f;color:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;flex:0 0 auto}.m7c-danger{background:#4a211f;color:#ffb5ae}.m7c-icon.m7c-block-active{background:#6b2722;color:#ffd4cf;box-shadow:inset 0 0 0 1px #ff8f8245}.m7-chat-block-note{margin:0 10px 10px;padding:9px 12px;border:1px solid #ff8f8240;border-radius:12px;background:#321816;color:#ffd1cb;font:800 11px/1.35 Arial;text-align:center}
 #m7-owner-accept{border:1px solid #ffffff18;border-radius:10px;padding:8px 9px;font:800 10px Arial;cursor:pointer;white-space:nowrap}#m7-owner-accept.on{background:#24452e;color:#bff1cb}#m7-owner-accept.off{background:#522b27;color:#ffd0ca}
 #m7-chat-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:9px;overscroll-behavior:contain}
 .m7-msg{max-width:78%;padding:10px 12px;border-radius:16px;background:#29231f;line-height:1.35;word-break:break-word;position:relative}.m7-msg.mine{align-self:flex-end;background:#a96d28;padding-right:34px}.m7-msg-text{white-space:pre-wrap}.m7-msg-time{font-size:10px;opacity:.6;margin-top:4px}.m7-msg-delete{position:absolute;right:5px;top:5px;width:25px;height:25px;border:0;border-radius:8px;background:#0003;color:#fff;display:grid;place-items:center;font-size:14px;cursor:pointer;padding:0}
@@ -35,7 +35,7 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 @supports not (height:100dvh){@media(max-width:600px){#m7-chat{height:100vh;max-height:100vh}}}
 `;document.head.appendChild(s)}
 function av(url,name){return url?`<img class="m7-avatar" src="${esc(url)}" alt="">`:`<div class="m7-avatar fallback">${esc((name||"?").slice(0,1).toUpperCase())}</div>`}
-function shell(title,avatar,back){css();close(true);let x=document.createElement("div");x.id="m7-chat-shell";x.innerHTML=`<div id="m7-chat"><div id="m7-chat-head"><button class="m7c-icon" id="m7-back" style="display:${back?"block":"none"}">‹</button><div class="m7-head-person">${av(avatar,title)}<div id="m7-chat-title">${esc(title)}</div></div><button class="m7c-icon" id="m7-report" title="Report">⚑</button><button class="m7c-icon" id="m7-delete-convo" title="Delete conversation" style="display:none">🗑</button><button class="m7c-icon" id="m7-close">✕</button></div><div id="m7-chat-body"><div class="m7-loading">Loading…</div></div></div>`;document.body.appendChild(x);x.querySelector("#m7-close").onclick=()=>close();x.onclick=e=>{if(e.target===x)close()};return x}
+function shell(title,avatar,back){css();close(true);let x=document.createElement("div");x.id="m7-chat-shell";x.innerHTML=`<div id="m7-chat"><div id="m7-chat-head"><button class="m7c-icon" id="m7-back" style="display:${back?"block":"none"}">‹</button><div class="m7-head-person">${av(avatar,title)}<div id="m7-chat-title">${esc(title)}</div></div><button class="m7c-icon" id="m7-report" title="Report">⚑</button><button class="m7c-icon" id="m7-block-user" title="Block user" style="display:none">🚫</button><button class="m7c-icon" id="m7-delete-convo" title="Delete conversation" style="display:none">🗑</button><button class="m7c-icon" id="m7-close">✕</button></div><div id="m7-chat-body"><div class="m7-loading">Loading…</div></div></div>`;document.body.appendChild(x);x.querySelector("#m7-close").onclick=()=>close();x.onclick=e=>{if(e.target===x)close()};return x}
 function bindShopProfileLink(url,slug){
   const node=document.querySelector("#m7-chat-head .m7-head-person");
   if(!node)return;
@@ -502,6 +502,7 @@ async function sendStoryReply(input){
       if(msg.includes("SHOP_NOT_ACCEPTING_MESSAGES"))return{ok:false,error:"This shop is not accepting messages right now."};
       if(msg.includes("OWN_STORY_REPLY_NOT_ALLOWED"))return{ok:false,error:"You cannot reply to your own Story."};
       if(msg.includes("ACCOUNT_NOT_ACTIVE"))return{ok:false,error:"This account cannot send messages."};
+      if(msg.includes("CHAT_BLOCKED"))return{ok:false,error:"This shop has blocked this chat."};
       return{ok:false,error:msg||"Could not send Story reply."};
     }
     dispatchEvent(new Event("ma7alak:messages-read"));
@@ -512,7 +513,251 @@ function loadError(b,e){if(!b)return;console.error("ShoufHon chat load error:",e
 async function deleteMessage(id,c){if(!id||!c)return;if(!confirm("Delete this message?"))return;let r=await client.rpc("ma7alak_delete_my_message",{p_message_id:id});if(r.error){alert(r.error.message);return}await messages(c)}
 async function deleteConversation(c,back){if(!c?.id)return;if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;let r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});if(r.error){alert(r.error.message);return false}dispatchEvent(new Event("ma7alak:messages-read"));if(typeof back==="function")await back();else close();return true}
 async function messages(c){let b=document.getElementById("m7-chat-body");if(!b)return false;if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}try{let r=await Promise.race([client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))]);if(!b.isConnected)return false;if(r.error)throw r.error;b.innerHTML=(r.data||[]).map(m=>{let mine=sameId(m.sender_id,user?.id),card=storyCardHtml(m);return `<div class="m7-msg ${mine?"mine":""}" data-message-id="${esc(m.id)}">${card}<div class="m7-msg-text">${esc(m.body)}</div>${mine?`<button class="m7-msg-delete" type="button" data-delete-message="${esc(m.id)}" title="Delete message">×</button>`:""}<div class="m7-msg-time">${tm(m.created_at)}</div><div class="m7-msg-reactions" data-reactions-for="${esc(m.id)}"></div></div>`}).join("")||'<div class="m7-empty">No messages yet.</div>';wireStoryCards(b);b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});wireMessageReactionGestures(b,c);await refreshReactionsOnly(c);b.scrollTop=b.scrollHeight;client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));return true}catch(e){loadError(b,e);return false}}
-async function convo(c,title,avatar,back,shopProfile){ensureSharedStoryViewer();shell(title,avatar,!!back);if(!c||c.id==null){loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));return}if(shopProfile&&shopProfile.isShop){bindShopProfileLink(shopProfile.url,shopProfile.slug)}if(back)document.getElementById("m7-back").onclick=back;let del=document.getElementById("m7-delete-convo");del.style.display="block";del.onclick=()=>deleteConversation(c,back);document.getElementById("m7-report").onclick=async()=>{let reason=prompt("Why are you reporting this conversation?","Abusive messages");if(!reason)return;let r=await client.rpc("ma7alak_report_conversation",{p_conversation_id:c.id,p_reason:reason,p_details:"Reported from ShoufHon chat"});alert(r.error?r.error.message:"Report sent to ShoufHon Admin ✓")};document.getElementById("m7-chat").insertAdjacentHTML("beforeend",`<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`);await messages(c);let form=document.getElementById("m7-chat-send");if(form)form.onsubmit=async e=>{e.preventDefault();let i=document.getElementById("m7-chat-input"),t=i?.value.trim();if(!t)return;i.value="";try{let r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){alert(r.error.message);i.value=t}}catch(err){alert(err?.message||"Could not send message");i.value=t}};channel=client.channel("m7c-"+c.id+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_messages",filter:"conversation_id=eq."+c.id},()=>messages(c)).on("postgres_changes",{event:"*",schema:"public",table:"ma7alak_message_reactions",filter:"conversation_id=eq."+c.id},()=>refreshReactionsOnly(c)).on("postgres_changes",{event:"DELETE",schema:"public",table:"ma7alak_conversations",filter:"id=eq."+c.id},()=>{if(typeof back==="function")back();else close()}).subscribe()}
+function friendlyChatError(error){
+  const message=String(error?.message||error||"");
+  if(message.includes("CHAT_BLOCKED"))return "This chat is blocked.";
+  return message||"Could not send message";
+}
+function applyConversationBlockUi(blocked){
+  const btn=document.getElementById("m7-block-user");
+  const form=document.getElementById("m7-chat-send");
+  const input=document.getElementById("m7-chat-input");
+  const send=form?.querySelector("button");
+  let note=document.getElementById("m7-chat-block-note");
+
+  if(btn){
+    btn.dataset.blocked=blocked?"1":"0";
+    btn.classList.toggle("m7c-block-active",!!blocked);
+    btn.textContent=blocked?"↩":"🚫";
+    btn.title=blocked?"Unblock user":"Block user";
+    btn.setAttribute("aria-label",btn.title);
+  }
+
+  if(mode==="owner"){
+    if(blocked){
+      if(!note){
+        note=document.createElement("div");
+        note.id="m7-chat-block-note";
+        note.className="m7-chat-block-note";
+        form?.insertAdjacentElement("beforebegin",note);
+      }
+      if(note)note.textContent="User blocked · Unblock to continue chatting";
+    }else{
+      note?.remove();
+    }
+
+    if(input){
+      input.disabled=!!blocked;
+      input.placeholder=blocked?"User blocked":"Type a message...";
+    }
+    if(send)send.disabled=!!blocked;
+  }
+}
+async function syncConversationBlock(c){
+  const btn=document.getElementById("m7-block-user");
+  if(!btn||mode!=="owner"){
+    if(btn)btn.style.display="none";
+    return false;
+  }
+
+  btn.style.display="block";
+  btn.disabled=true;
+
+  try{
+    const result=await client.rpc(
+      "ma7alak_chat_block_state",
+      {p_conversation_id:c.id}
+    );
+
+    if(result.error)throw result.error;
+
+    const blocked=result.data===true;
+    applyConversationBlockUi(blocked);
+    return blocked;
+  }
+  catch(error){
+    console.warn("Chat block state:",error);
+    applyConversationBlockUi(false);
+    return false;
+  }
+  finally{
+    btn.disabled=false;
+  }
+}
+async function toggleConversationBlock(c){
+  const btn=document.getElementById("m7-block-user");
+  if(!btn||mode!=="owner")return false;
+
+  const next=btn.dataset.blocked!=="1";
+
+  if(
+    next &&
+    !confirm("Block this user from messaging your shop? You can unblock them from this chat later.")
+  ){
+    return false;
+  }
+
+  btn.disabled=true;
+
+  try{
+    const result=await client.rpc(
+      "ma7alak_set_chat_block",
+      {
+        p_conversation_id:c.id,
+        p_blocked:next
+      }
+    );
+
+    if(result.error)throw result.error;
+
+    applyConversationBlockUi(result.data===true);
+    return true;
+  }
+  catch(error){
+    alert(friendlyChatError(error));
+    return false;
+  }
+  finally{
+    btn.disabled=false;
+  }
+}
+async function convo(c,title,avatar,back,shopProfile){
+  ensureSharedStoryViewer();
+  shell(title,avatar,!!back);
+
+  if(!c||c.id==null){
+    loadError(document.getElementById("m7-chat-body"),new Error("Conversation not found."));
+    return;
+  }
+
+  if(shopProfile&&shopProfile.isShop){
+    bindShopProfileLink(shopProfile.url,shopProfile.slug);
+  }
+
+  if(back)document.getElementById("m7-back").onclick=back;
+
+  const del=document.getElementById("m7-delete-convo");
+  del.style.display="block";
+  del.onclick=()=>deleteConversation(c,back);
+
+  const blockButton=document.getElementById("m7-block-user");
+  if(blockButton){
+    blockButton.style.display=mode==="owner"?"block":"none";
+    blockButton.onclick=()=>toggleConversationBlock(c);
+  }
+
+  document.getElementById("m7-report").onclick=async()=>{
+    const reason=prompt("Why are you reporting this conversation?","Abusive messages");
+    if(!reason)return;
+    const r=await client.rpc(
+      "ma7alak_report_conversation",
+      {
+        p_conversation_id:c.id,
+        p_reason:reason,
+        p_details:"Reported from ShoufHon chat"
+      }
+    );
+    alert(r.error?r.error.message:"Report sent to ShoufHon Admin ✓");
+  };
+
+  document.getElementById("m7-chat").insertAdjacentHTML(
+    "beforeend",
+    `<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`
+  );
+
+  await Promise.all([
+    messages(c),
+    mode==="owner"
+      ? syncConversationBlock(c)
+      : Promise.resolve(false)
+  ]);
+
+  const form=document.getElementById("m7-chat-send");
+
+  if(form){
+    form.onsubmit=async e=>{
+      e.preventDefault();
+
+      if(
+        mode==="owner" &&
+        document.getElementById("m7-block-user")?.dataset.blocked==="1"
+      ){
+        alert("Unblock this user before sending a message.");
+        return;
+      }
+
+      const i=document.getElementById("m7-chat-input");
+      const t=i?.value.trim();
+      if(!t)return;
+
+      i.value="";
+
+      try{
+        const r=await client.rpc(
+          "ma7alak_send_message",
+          {
+            p_conversation_id:c.id,
+            p_body:t
+          }
+        );
+
+        if(r.error){
+          alert(friendlyChatError(r.error));
+          i.value=t;
+
+          if(
+            String(r.error.message||"").includes("CHAT_BLOCKED") &&
+            mode==="owner"
+          ){
+            applyConversationBlockUi(true);
+          }
+        }
+      }
+      catch(error){
+        alert(friendlyChatError(error));
+        i.value=t;
+      }
+    };
+  }
+
+  channel=
+    client
+      .channel("m7c-"+c.id+Math.random())
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"ma7alak_messages",
+          filter:"conversation_id=eq."+c.id
+        },
+        ()=>messages(c)
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"ma7alak_message_reactions",
+          filter:"conversation_id=eq."+c.id
+        },
+        ()=>refreshReactionsOnly(c)
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"DELETE",
+          schema:"public",
+          table:"ma7alak_conversations",
+          filter:"id=eq."+c.id
+        },
+        ()=>{
+          if(typeof back==="function")back();
+          else close();
+        }
+      )
+      .subscribe();
+}
 async function inboxMessageState(rows,sideFor){
   const state={unread:new Set(),latest:new Map()};
   if(!rows.length)return state;
@@ -571,7 +816,7 @@ async function unreadMap(rows,sideFor){
   return (await inboxMessageState(rows,sideFor)).unread;
 }
 async function accepts(slug){let r=await client.rpc("ma7alak_shop_accepts_messages",{p_shop_slug:String(slug||"").trim()});if(r.error){console.warn("Message setting:",r.error);return true}return r.data!==false}
-async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim();if(ownSlug&&ownSlug.toLowerCase()===slug.toLowerCase()){alert("You cannot message your own shop");return}if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url,shop_url").eq("shop_slug",c.shop_slug).maybeSingle();mode="viewer";convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null,{isShop:true,url:sp.data?.shop_url||"",slug:c.shop_slug})}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}
+async function openShop(slug){try{await vr();if(!user){window.Ma7alakAccount?.open();return}slug=String(slug||"").trim();const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim();if(ownSlug&&ownSlug.toLowerCase()===slug.toLowerCase()){alert("You cannot message your own shop");return}if(!await accepts(slug)){alert("Shop owner is currently not accepting messages");return}let r=await client.rpc("ma7alak_start_conversation",{p_shop_slug:slug});if(r.error){alert(String(r.error.message||"").includes("CHAT_BLOCKED")?"This shop has blocked this chat.":r.error.message);return}let c=Array.isArray(r.data)?r.data[0]:r.data;if(!c){alert("Could not open conversation.");return}let sp=await client.from("shop_profiles").select("shop_name,profile_image_url,shop_url").eq("shop_slug",c.shop_slug).maybeSingle();mode="viewer";convo(c,sp.data?.shop_name||c.shop_slug,sp.data?.profile_image_url||"",null,{isShop:true,url:sp.data?.shop_url||"",slug:c.shop_slug})}catch(e){console.error(e);alert(e?.message||"Could not open messages.")}}
 function wireInboxDeletes(b,rows,reopen){b.querySelectorAll("[data-delete-convo]").forEach(btn=>btn.onclick=async e=>{e.preventDefault();e.stopPropagation();let c=rows.find(x=>sameId(x.id,btn.dataset.deleteConvo));if(c)await deleteConversation(c,reopen)})}
 async function viewerInbox(){try{await vr();if(!user){window.Ma7alakAccount?.open();return}shell("Messages","",false);document.getElementById("m7-chat")?.classList.add("m7-inbox-panel");document.getElementById("m7-chat-shell")?.classList.add("m7-inbox-shell");document.getElementById("m7-report").style.display="none";let b=document.getElementById("m7-chat-body"),r=await client.from("ma7alak_conversations").select("*").order("updated_at",{ascending:false});if(r.error){b.textContent=r.error.message;return}let rows=r.data||[],slugs=[...new Set(rows.map(x=>x.shop_slug))];let [un,p]=await Promise.all([unreadMap(rows),slugs.length?client.from("shop_profiles").select("shop_slug,shop_name,profile_image_url,shop_url").in("shop_slug",slugs):Promise.resolve({data:[]})]);let map={};for(let x of p.data||[])map[x.shop_slug]=x;b.innerHTML=rows.length?rows.map(c=>{let p=map[c.shop_slug]||{},n=p.shop_name||c.shop_slug,id=String(c.id);return `<div class="m7-convo ${un.has(id)?"unread":""}" data-id="${esc(id)}">${av(p.profile_image_url,n)}<div class="m7-convo-copy"><strong>${esc(n)}</strong><small>Shop conversation</small></div>${un.has(id)?'<span class="m7-new">NEW</span>':""}<button class="m7-convo-delete" type="button" data-delete-convo="${esc(id)}" title="Delete conversation">🗑</button></div>`}).join(""):'<div class="m7-empty">No conversations yet.</div>';wireInboxDeletes(b,rows,viewerInbox);b.querySelectorAll(".m7-convo").forEach(el=>el.onclick=()=>{let c=rows.find(x=>sameId(x.id,el.dataset.id));if(!c){loadError(b,new Error("Conversation not found."));return}let p=map[c.shop_slug]||{};convo(c,p.shop_name||c.shop_slug,p.profile_image_url||"",viewerInbox,{isShop:true,url:p.shop_url||"",slug:c.shop_slug})})}catch(e){loadError(document.getElementById("m7-chat-body"),e)}}
 async function ownerInbox(){
