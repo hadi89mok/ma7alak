@@ -1850,6 +1850,13 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
   function getFollowVisitorId(){
     try{
+      if(
+        window.Ma7alakFollowSecurity &&
+        typeof window.Ma7alakFollowSecurity.getVisitorId==="function"
+      ){
+        return window.Ma7alakFollowSecurity.getVisitorId();
+      }
+
       let id=String(localStorage.getItem(FOLLOW_VISITOR_KEY)||"").trim();
       if(!id){
         if(window.crypto&&typeof window.crypto.randomUUID==="function"){
@@ -1866,6 +1873,23 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   }
 
   async function getFollowBroadcastTopic(){
+    try{
+      if(
+        window.Ma7alakFollowSecurity &&
+        typeof window.Ma7alakFollowSecurity.getBroadcastTopic==="function"
+      ){
+        const secureTopic=await window.Ma7alakFollowSecurity.getBroadcastTopic();
+        if(secureTopic){
+          return secureTopic;
+        }
+      }
+    }catch(error){}
+
+    /*
+      Compatibility fallback while a page is still using the previous
+      bootstrap. Stage-1 Supabase continues publishing the legacy signal
+      until every live caller has moved to the private-token path.
+    */
     const visitorId=getFollowVisitorId();
     if(!visitorId||!window.crypto||!window.crypto.subtle||typeof TextEncoder==="undefined"){
       return "";
