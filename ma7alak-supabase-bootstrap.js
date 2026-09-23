@@ -13,11 +13,26 @@
   const STORAGE_KEY = "ma7alak-viewer-auth-v1";
   const FOLLOW_VISITOR_KEY = "ma7alak_visitor_id";
   const FOLLOW_TOKEN_KEY = "ma7alak_follow_token_v1";
+  const INTERACTION_TOKEN_KEY = "ma7alak_interaction_token_v1";
   const SECURE_FOLLOW_RPCS = new Set([
     "follow_shop",
     "unfollow_shop",
     "get_shop_follow_state",
     "get_visitor_followed_shops"
+  ]);
+  const SECURE_INTERACTION_RPC_MAP = new Map([
+    ["like_shop","like_shop_secure"],
+    ["get_shop_like_state","get_shop_like_state_secure"],
+    ["like_story","like_story_secure"],
+    ["get_story_notification_seen_state","get_story_notification_seen_state_secure"],
+    ["get_unseen_story_count","get_unseen_story_count_secure"],
+    ["mark_story_notifications_seen","mark_story_notifications_seen_secure"],
+    ["record_shop_view","record_shop_view_secure"],
+    ["record_story_view","record_story_view_secure"],
+    ["record_website_visit","record_website_visit_secure"],
+    ["update_shop_presence","update_shop_presence_secure"],
+    ["update_website_presence","update_website_presence_secure"],
+    ["ma7alak_live_tick","ma7alak_live_tick_secure"]
   ]);
   let nativeCreateClient = null;
 
@@ -61,6 +76,19 @@
       if(value.length<32||value.length>200||!/^[A-Za-z0-9._:-]+$/.test(value)){
         value=randomFollowToken();
         localStorage.setItem(FOLLOW_TOKEN_KEY,value);
+      }
+      return value;
+    }catch(_){
+      return randomFollowToken();
+    }
+  }
+
+  function getInteractionToken(){
+    try{
+      let value=String(localStorage.getItem(INTERACTION_TOKEN_KEY)||"").trim();
+      if(value.length<32||value.length>200||!/^[A-Za-z0-9._:-]+$/.test(value)){
+        value=randomFollowToken();
+        localStorage.setItem(INTERACTION_TOKEN_KEY,value);
       }
       return value;
     }catch(_){
@@ -163,12 +191,15 @@
        Raw token values stay in this browser only. Supabase stores only the
        SHA-256 ownership hash.
     */
-    if(!shared.__ma7alakSecureFollowRpcBridge){
+    if(!shared.__ma7alakSecureVisitorRpcBridgeV2){
       const originalRpc=shared.rpc.bind(shared);
       shared.rpc=function(functionName,args,options){
+        const originalName=String(functionName||"");
+        let nextName=originalName;
         let nextArgs=args;
+
         if(
-          SECURE_FOLLOW_RPCS.has(String(functionName||"")) &&
+          SECURE_FOLLOW_RPCS.has(originalName) &&
           args &&
           typeof args==="object" &&
           !Array.isArray(args) &&
@@ -179,8 +210,24 @@
             nextArgs=Object.assign({},args,{p_follow_token:token});
           }
         }
-        return originalRpc(functionName,nextArgs,options);
+
+        const secureInteractionName=SECURE_INTERACTION_RPC_MAP.get(originalName);
+        if(
+          secureInteractionName &&
+          args &&
+          typeof args==="object" &&
+          !Array.isArray(args)
+        ){
+          const token=getInteractionToken();
+          if(token){
+            nextName=secureInteractionName;
+            nextArgs=Object.assign({},nextArgs,{p_interaction_token:token});
+          }
+        }
+
+        return originalRpc(nextName,nextArgs,options);
       };
+      shared.__ma7alakSecureVisitorRpcBridgeV2=true;
       shared.__ma7alakSecureFollowRpcBridge=true;
     }
 
@@ -190,6 +237,11 @@
       getVisitorId:getFollowVisitorId,
       getToken:getFollowToken,
       getBroadcastTopic:getFollowBroadcastTopic
+    };
+
+    window.Ma7alakInteractionSecurity={
+      tokenKey:INTERACTION_TOKEN_KEY,
+      getToken:getInteractionToken
     };
 
     /* Compatibility bridge for older ShoufHon modules.
