@@ -1,0 +1,25 @@
+{
+  "appId": "com.shoufhon.localtest",
+  "appName": "ShoufHon Local Test",
+  "webDir": "www",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https",
+    "allowNavigation": [
+      "shoufhon.com",
+      "*.shoufhon.com"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#090503"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 650,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 180,
+      "backgroundColor": "#090503",
+      "showSpinner": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "shoufhon-local-performance-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated Capacitor A/B test that bundles ShoufHon page HTML and repo JavaScript locally while keeping live remote data/services.",
+  "scripts": {
+    "snapshot": "node scripts/build-local-snapshot.mjs",
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "android:debug": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.0.0"
+  }
+}

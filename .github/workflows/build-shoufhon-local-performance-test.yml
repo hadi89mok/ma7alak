@@ -1,0 +1,69 @@
+name: Build ShoufHon Local Performance Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "shoufhon-app-local-test/**"
+      - ".github/workflows/build-shoufhon-local-performance-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-local-test-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: shoufhon-app-local-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install Capacitor
+        run: npm install --no-audit --no-fund
+
+      - name: Snapshot live ShoufHon HTML and bundle repo JavaScript
+        run: npm run snapshot
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Generate ShoufHon Android icon and splash assets
+        run: |
+          npx @capacitor/assets generate --android \
+            --iconBackgroundColor "#090503" \
+            --iconBackgroundColorDark "#090503" \
+            --splashBackgroundColor "#090503" \
+            --splashBackgroundColorDark "#090503"
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build debug APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload local performance APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShoufHon-Local-Performance-Test
+          path: shoufhon-app-local-test/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
