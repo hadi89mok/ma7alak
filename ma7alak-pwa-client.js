@@ -5,7 +5,9 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.23.1";
+  const VERSION="2026.09.24.1";
+  const PWA_CLIENT_SCRIPT_SRC=
+    String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
     "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@56a7a66e1c4f69f4036f59b0b7c2b486a0130d2e/shoufhon-content-protection.js";
   const DISMISS_KEY="shoufhon_pwa_install_dismissed_session_v2";
@@ -78,6 +80,65 @@
       ()=>{
         console.warn(
           "[ShoufHon PWA] Content protection failed to load."
+        );
+      },
+      {once:true}
+    );
+
+    (
+      document.head ||
+      document.documentElement
+    ).appendChild(script);
+  }
+
+  function resolveSiblingScript(file){
+    if(PWA_CLIENT_SCRIPT_SRC){
+      try{
+        return new URL(
+          file,
+          PWA_CLIENT_SCRIPT_SRC
+        ).href;
+      }catch(_){}
+    }
+
+    return "";
+  }
+
+  function loadWebPushClient(){
+    if(window.__SHOUFHON_WEB_PUSH__)return;
+
+    if(
+      document.querySelector(
+        'script[data-shoufhon-web-push="1"]'
+      )
+    ){
+      return;
+    }
+
+    const src=
+      resolveSiblingScript(
+        "shoufhon-web-push.js"
+      );
+
+    if(!src){
+      console.warn(
+        "[ShoufHon PWA] Could not resolve web push client."
+      );
+      return;
+    }
+
+    const script=
+      document.createElement("script");
+
+    script.src=src;
+    script.async=true;
+    script.dataset.shoufhonWebPush="1";
+
+    script.addEventListener(
+      "error",
+      ()=>{
+        console.warn(
+          "[ShoufHon PWA] Web push client failed to load."
         );
       },
       {once:true}
@@ -747,6 +808,8 @@
         )
       );
 
+      loadWebPushClient();
+
       return registration;
     }
     catch(error){
@@ -857,6 +920,13 @@
 
   ensureStandaloneContentProtection();
   injectHead();
+
+  /*
+     Load the push client early too. It waits for serviceWorker.ready
+     before subscribing, so this is safe even while registration is
+     still finishing.
+  */
+  loadWebPushClient();
 
   /*
      iPhone/iPad do not provide beforeinstallprompt.

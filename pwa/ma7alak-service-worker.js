@@ -4,10 +4,11 @@
    - never cache Supabase/API traffic
    - never cache video/audio
    - only cache immutable commit-pinned ShoufHon JS/CSS
+   - receive Web Push for installed ShoufHon PWAs
 */
 "use strict";
 
-const VERSION="m7-pwa-2026-09-21-1";
+const VERSION="m7-pwa-2026-09-24-1";
 const IMMUTABLE_CACHE=VERSION+"-immutable";
 
 self.addEventListener("install",event=>{
@@ -33,6 +34,152 @@ self.addEventListener("message",event=>{
   if(event.data&&event.data.type==="SKIP_WAITING"){
     self.skipWaiting();
   }
+});
+
+function safePushPayload(event){
+  if(!event.data){
+    return {};
+  }
+
+  try{
+    return event.data.json()||{};
+  }catch(_){}
+
+  try{
+    return {
+      body:event.data.text()
+    };
+  }catch(_){
+    return {};
+  }
+}
+
+function safeNotificationUrl(value){
+  try{
+    const url=
+      new URL(
+        String(value||"/"),
+        self.location.origin
+      );
+
+    if(
+      url.origin===
+        self.location.origin ||
+      url.hostname===
+        "shoufhon.com" ||
+      url.hostname===
+        "www.shoufhon.com"
+    ){
+      return url.href;
+    }
+  }catch(_){}
+
+  return self.location.origin+"/";
+}
+
+self.addEventListener("push",event=>{
+  const payload=
+    safePushPayload(event);
+
+  const title=
+    String(
+      payload.title||
+      "ShoufHon"
+    );
+
+  const options={
+    body:String(
+      payload.body||
+      "New update on ShoufHon"
+    ),
+    icon:String(
+      payload.icon||
+      "/pwa-icon-192.png"
+    ),
+    badge:String(
+      payload.badge||
+      "/pwa-icon-192.png"
+    ),
+    tag:String(
+      payload.tag||
+      "shoufhon-update"
+    ),
+    renotify:false,
+    requireInteraction:false,
+    data:{
+      url:
+        safeNotificationUrl(
+          payload.url
+        ),
+      type:String(
+        payload.type||""
+      ),
+      shop_slug:String(
+        payload.shop_slug||""
+      ),
+      content_id:String(
+        payload.content_id||""
+      )
+    }
+  };
+
+  if(payload.image){
+    options.image=
+      String(payload.image);
+  }
+
+  event.waitUntil(
+    self.registration
+      .showNotification(
+        title,
+        options
+      )
+  );
+});
+
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+
+  const targetUrl=
+    safeNotificationUrl(
+      event.notification?.data?.url
+    );
+
+  event.waitUntil(
+    (async()=>{
+      const windows=
+        await self.clients.matchAll({
+          type:"window",
+          includeUncontrolled:true
+        });
+
+      for(const client of windows){
+        try{
+          const current=
+            new URL(client.url);
+
+          if(
+            current.origin===
+            self.location.origin
+          ){
+            if(
+              "navigate" in client
+            ){
+              await client.navigate(
+                targetUrl
+              );
+            }
+
+            return client.focus();
+          }
+        }catch(_){}
+      }
+
+      return self.clients.openWindow(
+        targetUrl
+      );
+    })()
+  );
 });
 
 function isLiveBackend(url){

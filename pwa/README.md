@@ -67,3 +67,23 @@ After deploying the Worker and updating the Hostinger PWA client script:
 3. Tap Install.
 4. On iPhone/iPad Safari, use the ShoufHon install card and follow Share → Add to Home Screen.
 5. Verify the installed app opens in standalone mode and that Stories, Reels, messages, Live Offers, Admin updates, and owner uploads still use live data.
+
+
+## Web Push notifications
+
+The PWA client also loads `shoufhon-web-push.js` from the same commit-pinned jsDelivr revision.
+
+For installed PWAs, the push client:
+- waits for the root service worker
+- shows a user-controlled "Turn on ShoufHon notifications" prompt
+- requests notification permission only after the user taps the button
+- creates a standards-based Web Push subscription
+- stores the subscription through the `push-subscribe` Supabase Edge Function
+- sends a one-time welcome/test notification for a newly-created subscription
+- silently re-syncs an existing subscription on later launches
+
+On iPhone/iPad, the automatic push prompt only appears when ShoufHon is already running from the Home Screen as a web app.
+
+The service worker receives push payloads, displays a ShoufHon-branded system notification, and opens/focuses the target ShoufHon URL when the notification is tapped.
+
+Current automatic backend push producers include new Stories and new Reels.
