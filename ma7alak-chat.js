@@ -26,7 +26,7 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 .m7-story-reply-card{width:min(260px,100%);margin:0 0 8px;padding:0;border:1px solid #ffffff22;border-radius:14px;overflow:hidden;background:#0f0d0c;color:#fff;text-align:left;cursor:pointer;display:block;box-shadow:0 8px 22px #0004}.m7-story-reply-card:active{transform:scale(.985)}.m7-story-card-top{display:flex;gap:10px;align-items:center;padding:8px}.m7-story-card-media{width:62px;height:78px;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#2c241e,#0d0b0a);display:grid;place-items:center;position:relative;flex:0 0 62px;border:1px solid #ffffff17}.m7-story-card-media img,.m7-story-card-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.m7-story-card-media video{background:#18130f}.m7-story-card-fallback{font-size:24px;opacity:.75}.m7-story-card-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0009;border:1px solid #fff5;font-size:16px;padding-left:2px;box-shadow:0 3px 10px #0008}.m7-story-card-copy{min-width:0;flex:1}.m7-story-card-label,.m7-story-card-name,.m7-story-card-status{display:block}.m7-story-card-label{font-size:11px;font-weight:900;color:#efb35d;letter-spacing:.02em}.m7-story-card-name{margin-top:4px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-status{margin-top:4px;font-size:11px;color:#bdb3aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-story-card-badge{display:inline-flex;margin-top:6px;padding:3px 6px;border-radius:999px;background:#4a211f;color:#ffb9b1;font-size:9px;font-weight:900}.m7-story-reply-card.is-expired{cursor:default;opacity:.72}.m7-story-reply-card.is-expired .m7-story-card-label{color:#c7b8aa}
 .m7-msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.m7-msg-reactions:empty{display:none}.m7-reaction-pill{border:1px solid #ffffff1c;background:#171310;color:#fff;border-radius:999px;min-height:27px;padding:3px 8px;font:700 13px/1 Arial,sans-serif;display:inline-flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px #0002}.m7-msg.mine .m7-reaction-pill{background:#6f451f}.m7-reaction-pill.mine{border-color:#e7aa50;background:#3b2a16!important;box-shadow:0 0 0 1px #e7aa5033}.m7-reaction-count{font-size:10px;opacity:.82}.m7-reaction-picker{position:fixed;z-index:2147483646;display:flex;align-items:center;gap:4px;padding:7px;border:1px solid #ffffff24;border-radius:999px;background:#171310f5;box-shadow:0 14px 38px #000b;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);touch-action:manipulation}.m7-reaction-choice{width:39px;height:39px;border:0;border-radius:50%;background:transparent;color:#fff;font-size:23px;display:grid;place-items:center;padding:0;cursor:pointer;transition:transform .12s ease,background .12s ease}.m7-reaction-choice:active{transform:scale(.86)}.m7-reaction-choice.selected{background:#d99a452a;box-shadow:inset 0 0 0 1px #d99a4560}
 #m7-chat-send{display:flex;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#171310;border-top:1px solid #34261e;flex:0 0 auto}#m7-chat-input{flex:1;min-width:0;border:1px solid #453327;background:#0e0c0b;color:#fff;border-radius:14px;padding:12px;font-size:16px}#m7-chat-send button{border:0;border-radius:14px;background:#d99a45;font-weight:900;padding:0 17px}
-.m7-convo{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #34281f;border-radius:16px;background:#191512;cursor:pointer;position:relative;flex:0 0 auto}.m7-convo.unread{border-color:#49ce78;background:linear-gradient(135deg,#1f2e22,#181512);box-shadow:0 0 0 1px #49ce7838,0 0 22px #49ce7815}.m7-convo-copy{min-width:0;flex:1}.m7-convo strong{color:#f1b45a}.m7-convo small{display:block;color:#aaa;margin-top:4px}.m7-convo-time{display:block;margin-top:5px;color:#8f877f;font-size:10px;font-weight:700;white-space:nowrap}.m7-convo.unread .m7-convo-time{color:#8fd9a6}.m7-convo-delete{border:0;border-radius:10px;width:34px;height:34px;background:#3b1f1c;color:#ffb0a7;font-size:16px;cursor:pointer;flex:0 0 34px}.m7-new{position:relative;background:#36c66d;color:#07170d;font-size:9px;font-weight:950;border-radius:999px;padding:6px 8px;box-shadow:0 0 0 1px #7cf4a26b,0 0 15px #36c66d55;animation:m7NewPulse 1.25s ease-in-out infinite;-webkit-animation:m7NewPulse 1.25s ease-in-out infinite}.m7-new::before{content:"";width:6px;height:6px;border-radius:50%;background:#eaffef;display:inline-block;margin-right:4px;vertical-align:1px;box-shadow:0 0 7px #fff}.m7-empty{text-align:center;color:#aaa;margin-top:30px}.m7-loading{text-align:center;color:#b7aa9d;margin-top:25px}.m7-error{text-align:center;color:#ffb3a8;margin:25px 12px;line-height:1.45}@keyframes m7NewPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.07);filter:brightness(1.18)}}@-webkit-keyframes m7NewPulse{0%,100%{-webkit-transform:scale(1);-webkit-filter:brightness(1)}50%{-webkit-transform:scale(1.07);-webkit-filter:brightness(1.18)}}
+.m7-convo{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #34281f;border-radius:16px;background:#191512;cursor:pointer;position:relative;flex:0 0 auto}.m7-convo.unread{border-color:#49ce78;background:linear-gradient(135deg,#1f2e22,#181512);box-shadow:0 0 0 1px #49ce7838,0 0 22px #49ce7815}.m7-convo-copy{min-width:0;flex:1}.m7-convo strong{color:#f1b45a}.m7-convo small{display:block;color:#aaa;margin-top:4px}.m7-convo-time{display:block;margin-top:5px;color:#8f877f;font-size:10px;font-weight:700;white-space:nowrap}.m7-convo.unread .m7-convo-time{color:#8fd9a6}.m7-convo-delete{border:0;border-radius:10px;width:34px;height:34px;background:#3b1f1c;color:#ffb0a7;font-size:16px;cursor:pointer;flex:0 0 34px}.m7-new{position:relative;background:#13c45b;color:#fff;font-size:10px;font-weight:950;letter-spacing:.25px;border:1px solid #91ffb8;border-radius:999px;padding:7px 10px;box-shadow:0 0 0 1px #13c45b66,0 0 18px #13c45b70;text-shadow:0 1px 1px #0008;transform-origin:50% 50%;will-change:transform;animation:m7NewWiggle 1.65s ease-in-out infinite;-webkit-animation:m7NewWiggle 1.65s ease-in-out infinite}.m7-new::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;margin-right:4px;vertical-align:1px;box-shadow:0 0 8px #fff}.m7-empty{text-align:center;color:#aaa;margin-top:30px}.m7-loading{text-align:center;color:#b7aa9d;margin-top:25px}.m7-error{text-align:center;color:#ffb3a8;margin:25px 12px;line-height:1.45}@keyframes m7NewWiggle{0%,58%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}10%{transform:translate3d(-2px,0,0) rotate(-4deg) scale(1.03)}20%{transform:translate3d(2px,0,0) rotate(4deg) scale(1.05)}30%{transform:translate3d(-2px,0,0) rotate(-3deg) scale(1.04)}40%{transform:translate3d(2px,0,0) rotate(3deg) scale(1.05)}50%{transform:translate3d(0,0,0) rotate(0deg) scale(1.08)}}@-webkit-keyframes m7NewWiggle{0%,58%,100%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}10%{-webkit-transform:translate3d(-2px,0,0) rotate(-4deg) scale(1.03)}20%{-webkit-transform:translate3d(2px,0,0) rotate(4deg) scale(1.05)}30%{-webkit-transform:translate3d(-2px,0,0) rotate(-3deg) scale(1.04)}40%{-webkit-transform:translate3d(2px,0,0) rotate(3deg) scale(1.05)}50%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1.08)}}
 #m7-chat.m7-inbox-panel{height:min(500px,calc(100dvh - 120px));max-height:min(500px,calc(100dvh - 120px))}
 #m7-chat.m7-inbox-panel #m7-chat-body{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d9a44155 transparent}
 #m7-chat.m7-inbox-panel #m7-chat-body::-webkit-scrollbar{width:5px}
@@ -891,20 +891,77 @@ async function ownerInbox(){
       inboxWakeHandler
     );
 
-    /* Realtime is primary. This low-frequency visible-only check is recovery
-       for a dropped mobile/PWA realtime socket while the inbox stays open. */
-    inboxLiveFallbackTimer=setInterval(
-      ()=>{
+    /*
+      Realtime stays primary. While the inbox is visibly open, use a tiny
+      one-row message probe as a reliability fallback for browsers/mobile
+      WebViews that silently drop a Realtime socket. Only a changed message
+      signal triggers the heavier inbox render.
+    */
+    let inboxLivePollBusy=false;
+    let inboxLiveSignal="";
+
+    async function pollOwnerInboxSignal(){
+      if(
+        inboxLivePollBusy||
+        document.hidden||
+        !document
+          .getElementById("m7-chat-shell")
+          ?.classList.contains("m7-inbox-shell")
+      ){
+        return;
+      }
+
+      inboxLivePollBusy=true;
+
+      try{
+        const probe=
+          await client
+            .from("ma7alak_messages")
+            .select("id,conversation_id,created_at")
+            .order("created_at",{ascending:false})
+            .limit(1);
+
+        if(probe.error){
+          console.warn(
+            "Inbox live probe:",
+            probe.error
+          );
+          return;
+        }
+
+        const latest=(probe.data||[])[0]||null;
+        const nextSignal=
+          latest
+            ? String(latest.id)+"|"+
+              String(latest.conversation_id)+"|"+
+              String(latest.created_at||"")
+            : "";
+
         if(
-          !document.hidden &&
-          document
-            .getElementById("m7-chat-shell")
-            ?.classList.contains("m7-inbox-shell")
+          inboxLiveSignal&&
+          nextSignal!==inboxLiveSignal
         ){
           scheduleOwnerInboxRefresh();
         }
-      },
-      12000
+
+        inboxLiveSignal=nextSignal;
+      }
+      catch(error){
+        console.warn(
+          "Inbox live probe:",
+          error
+        );
+      }
+      finally{
+        inboxLivePollBusy=false;
+      }
+    }
+
+    await pollOwnerInboxSignal();
+
+    inboxLiveFallbackTimer=setInterval(
+      pollOwnerInboxSignal,
+      1800
     );
   }
   catch(e){
