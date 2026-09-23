@@ -2079,12 +2079,117 @@
   }
 
 
-  function broadcastStoriesUploaded(){
+  function broadcastStoryMutation(
+    action,
+    shopSlug,
+    storyId
+  ){
+
+    const normalizedSlug =
+      String(
+        shopSlug ||
+        activeShopSlug ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
 
     const message = {
-      type:"MA7ALAK_STORY_UPLOADED",
-      shopSlug:activeShopSlug
+      type:
+        action === "delete"
+          ? "MA7ALAK_STORY_DELETED"
+          : "MA7ALAK_STORY_UPLOADED",
+      action:
+        String(
+          action ||
+          "update"
+        ),
+      shopSlug:
+        normalizedSlug,
+      storyId:
+        Number.isFinite(
+          Number(
+            storyId
+          )
+        )
+          ? Number(
+              storyId
+            )
+          : null,
+      at:
+        Date.now()
     };
+
+
+    /*
+       Same-page listeners update immediately.
+       BroadcastChannel updates another open ShoufHon tab.
+       localStorage is the fallback for browsers where BroadcastChannel
+       is unavailable or gets suspended.
+    */
+    try{
+      window.dispatchEvent(
+        new CustomEvent(
+          "ma7alak:story-mutation",
+          {
+            detail:
+              message
+          }
+        )
+      );
+    }
+    catch(error){}
+
+
+    try{
+
+      if(
+        "BroadcastChannel" in
+        window
+      ){
+
+        const channel =
+          new BroadcastChannel(
+            "shoufhon-stories"
+          );
+
+        channel.postMessage(
+          message
+        );
+
+        channel.close();
+
+      }
+
+    }
+    catch(error){}
+
+
+    try{
+      localStorage.setItem(
+        "shoufhon_story_mutation",
+        JSON.stringify(
+          message
+        )
+      );
+    }
+    catch(error){}
+
+
+    return message;
+
+  }
+
+
+  function broadcastStoriesUploaded(){
+
+    const message =
+      broadcastStoryMutation(
+        "upload",
+        activeShopSlug,
+        null
+      );
 
 
     if(uploadSourceWindow){
@@ -2555,6 +2660,11 @@
          If Realtime already deleted this Story, treat the request as done.
       */
       if(!storyResult.data){
+        broadcastStoryMutation(
+          "delete",
+          shopSlug,
+          storyId
+        );
         replyStoryDelete(sourceWindow,requestId,true,"");
         return;
       }
@@ -2587,6 +2697,12 @@
           );
         }
       }
+
+      broadcastStoryMutation(
+        "delete",
+        shopSlug,
+        storyId
+      );
 
       replyStoryDelete(sourceWindow,requestId,true,"");
 
