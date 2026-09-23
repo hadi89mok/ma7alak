@@ -1,30 +1,44 @@
 /* =========================================================
-   SHOUFHON FOLLOW SECURITY BRIDGE V1
+   SHOUFHON VISITOR SECURITY BRIDGE V2
 
-   For Hostinger Custom Embed iframes that still use the original
-   Follow RPC names and old shop_follows postgres_changes listeners.
+   Compatibility layer for Hostinger Custom Embed iframes.
 
-   - Adds private per-browser p_follow_token automatically.
-   - Keeps visitor ID + token in sync with the parent page when allowed.
-   - Replaces raw shop_follows Realtime listeners with safe Broadcast topics:
-       follow-private:<sha256(visitor_id:token)>
-       shop-followers:<sha256(shop_slug)>
-       profile-following:<sha256(profile_shop_slug)>
-   - Does not change Stories, media, messaging, likes or profile design.
+   - Keeps the secure Follow token bridge and safe Follow Broadcast mapping.
+   - Adds a separate private interaction token for Shop Likes, Story Likes,
+     Story seen-state, Views, Presence and the combined live-stats heartbeat.
+   - Transparently remaps legacy RPC names to secure server RPCs so the
+     existing Profile/Story embed does not need a large rewrite.
+   - Does not change UI, media, messaging or profile design.
 ========================================================= */
 (function(){
   "use strict";
 
-  if(window.__SHOUFHON_FOLLOW_SECURITY_BRIDGE_V1__)return;
+  if(window.__SHOUFHON_VISITOR_SECURITY_BRIDGE_V2__)return;
+  window.__SHOUFHON_VISITOR_SECURITY_BRIDGE_V2__=true;
   window.__SHOUFHON_FOLLOW_SECURITY_BRIDGE_V1__=true;
 
   const VISITOR_KEY="ma7alak_visitor_id";
   const TOKEN_KEY="ma7alak_follow_token_v1";
+  const INTERACTION_TOKEN_KEY="ma7alak_interaction_token_v1";
   const FOLLOW_RPCS=new Set([
     "follow_shop",
     "unfollow_shop",
     "get_shop_follow_state",
     "get_visitor_followed_shops"
+  ]);
+  const INTERACTION_RPC_MAP=new Map([
+    ["like_shop","like_shop_secure"],
+    ["get_shop_like_state","get_shop_like_state_secure"],
+    ["like_story","like_story_secure"],
+    ["get_story_notification_seen_state","get_story_notification_seen_state_secure"],
+    ["get_unseen_story_count","get_unseen_story_count_secure"],
+    ["mark_story_notifications_seen","mark_story_notifications_seen_secure"],
+    ["record_shop_view","record_shop_view_secure"],
+    ["record_story_view","record_story_view_secure"],
+    ["record_website_visit","record_website_visit_secure"],
+    ["update_shop_presence","update_shop_presence_secure"],
+    ["update_website_presence","update_website_presence_secure"],
+    ["ma7alak_live_tick","ma7alak_live_tick_secure"]
   ]);
 
   function parentWindow(){
@@ -68,13 +82,22 @@
     const parent=parentWindow();
 
     try{
-      const helper=parent&&parent.Ma7alakFollowSecurity;
-      if(key===TOKEN_KEY&&helper&&typeof helper.getToken==="function"){
-        const value=String(helper.getToken()||"").trim();
+      const followHelper=parent&&parent.Ma7alakFollowSecurity;
+      const interactionHelper=parent&&parent.Ma7alakInteractionSecurity;
+      if(
+        key===INTERACTION_TOKEN_KEY &&
+        interactionHelper &&
+        typeof interactionHelper.getToken==="function"
+      ){
+        const value=String(interactionHelper.getToken()||"").trim();
         if(value)return value;
       }
-      if(key===VISITOR_KEY&&helper&&typeof helper.getVisitorId==="function"){
-        const value=String(helper.getVisitorId()||"").trim();
+      if(key===TOKEN_KEY&&followHelper&&typeof followHelper.getToken==="function"){
+        const value=String(followHelper.getToken()||"").trim();
+        if(value)return value;
+      }
+      if(key===VISITOR_KEY&&followHelper&&typeof followHelper.getVisitorId==="function"){
+        const value=String(followHelper.getVisitorId()||"").trim();
         if(value)return value;
       }
     }catch(_){}
@@ -122,6 +145,17 @@
       writeStorage(TOKEN_KEY,value);
     }else{
       writeStorage(TOKEN_KEY,value);
+    }
+    return value;
+  }
+
+  function getInteractionToken(){
+    let value=readStorage(INTERACTION_TOKEN_KEY);
+    if(!validToken(value)){
+      value=randomToken();
+      writeStorage(INTERACTION_TOKEN_KEY,value);
+    }else{
+      writeStorage(INTERACTION_TOKEN_KEY,value);
     }
     return value;
   }
@@ -180,18 +214,37 @@
     return "";
   }
 
-  function secureRpcArgs(functionName,args){
+  function secureRpcCall(functionName,args){
+    const originalName=String(functionName||"");
+    let nextName=originalName;
+    let nextArgs=args;
+
     if(
-      !FOLLOW_RPCS.has(String(functionName||"")) ||
-      !args ||
-      typeof args!=="object" ||
-      Array.isArray(args) ||
-      Object.prototype.hasOwnProperty.call(args,"p_follow_token")
+      FOLLOW_RPCS.has(originalName) &&
+      args &&
+      typeof args==="object" &&
+      !Array.isArray(args) &&
+      !Object.prototype.hasOwnProperty.call(args,"p_follow_token")
     ){
-      return args;
+      nextArgs=Object.assign({},nextArgs,{p_follow_token:getToken()});
     }
 
-    return Object.assign({},args,{p_follow_token:getToken()});
+    const secureInteractionName=INTERACTION_RPC_MAP.get(originalName);
+    if(
+      secureInteractionName &&
+      args &&
+      typeof args==="object" &&
+      !Array.isArray(args)
+    ){
+      nextName=secureInteractionName;
+      nextArgs=Object.assign(
+        {},
+        nextArgs,
+        {p_interaction_token:getInteractionToken()}
+      );
+    }
+
+    return {name:nextName,args:nextArgs};
   }
 
   function parseEqFilter(filter,prefix){
@@ -233,20 +286,23 @@
   }
 
   function patchClient(client){
-    if(!client||client.__shoufhonFollowSecurityPatched)return client;
+    if(!client||client.__shoufhonVisitorSecurityPatchedV2)return client;
 
     try{
       const originalRpc=client.rpc.bind(client);
       client.rpc=function(functionName,args,options){
+        const secure=secureRpcCall(functionName,args);
         return originalRpc(
-          functionName,
-          secureRpcArgs(functionName,args),
+          secure.name,
+          secure.args,
           options
         );
       };
     }catch(_){}
 
-    try{
+    const followChannelAlreadyPatched=!!client.__shoufhonFollowSecurityPatched;
+
+    if(!followChannelAlreadyPatched)try{
       const originalChannel=client.channel.bind(client);
 
       client.channel=function(channelName,options){
@@ -356,6 +412,7 @@
       };
     }catch(_){}
 
+    client.__shoufhonVisitorSecurityPatchedV2=true;
     client.__shoufhonFollowSecurityPatched=true;
     return client;
   }
@@ -368,7 +425,10 @@
       return false;
     }
 
-    if(window.supabase.__shoufhonFollowSecurityFactoryPatched){
+    if(window.supabase.__shoufhonVisitorSecurityFactoryPatchedV2){
+      try{patchClient(window.__MA7ALAK_SHARED_SUPABASE_CLIENT__)}catch(_){}
+      try{patchClient(window.Ma7alakAccount&&window.Ma7alakAccount.client)}catch(_){}
+      try{patchClient(window.Ma7alakOwnerAuth&&window.Ma7alakOwnerAuth.client)}catch(_){}
       return true;
     }
 
@@ -380,6 +440,7 @@
       );
     };
 
+    window.supabase.__shoufhonVisitorSecurityFactoryPatchedV2=true;
     window.supabase.__shoufhonFollowSecurityFactoryPatched=true;
 
     try{patchClient(window.__MA7ALAK_SHARED_SUPABASE_CLIENT__)}catch(_){}
@@ -392,9 +453,18 @@
   window.ShoufHonFollowSecurityBridge={
     visitorKey:VISITOR_KEY,
     tokenKey:TOKEN_KEY,
+    interactionTokenKey:INTERACTION_TOKEN_KEY,
     getVisitorId,
     getToken,
+    getInteractionToken,
     privateTopic,
+    patchClient,
+    install:installFactoryBridge
+  };
+
+  window.ShoufHonInteractionSecurityBridge={
+    tokenKey:INTERACTION_TOKEN_KEY,
+    getToken:getInteractionToken,
     patchClient,
     install:installFactoryBridge
   };
