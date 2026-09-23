@@ -35,13 +35,8 @@ function livePath(value:string|null|undefined){
 }
 
 Deno.serve(async(req)=>{
-  if(req.method!=='POST'){
-    return Response.json({ok:false,error:'POST required'},{status:405})
-  }
-
-  if(!(await authorized(req))){
-    return Response.json({ok:false,error:'Unauthorized'},{status:401})
-  }
+  if(req.method!=='POST')return Response.json({ok:false,error:'POST required'},{status:405})
+  if(!(await authorized(req)))return Response.json({ok:false,error:'Unauthorized'},{status:401})
 
   try{
     const now=new Date().toISOString()
@@ -51,7 +46,6 @@ Deno.serve(async(req)=>{
       .select('id,storage_path')
       .lte('expires_at',now)
       .limit(1000)
-
     if(storyError)throw storyError
 
     const storyIds=(storyRows??[]).map((r:any)=>Number(r.id)).filter(Number.isFinite)
@@ -82,7 +76,6 @@ Deno.serve(async(req)=>{
       .select('id,media_url,status,ends_at')
       .or(`status.neq.active,ends_at.lte.${now}`)
       .limit(1000)
-
     if(liveError)throw liveError
 
     const liveIds=(liveRows??[]).map((r:any)=>Number(r.id)).filter(Number.isFinite)
@@ -93,7 +86,6 @@ Deno.serve(async(req)=>{
         .from('shop_live_post_media')
         .select('post_id,storage_path,media_url')
         .in('post_id',liveIds)
-
       if(media.error)throw media.error
       childRows=media.data??[]
     }
@@ -120,7 +112,7 @@ Deno.serve(async(req)=>{
     const orphanRows=orphanResult.data??[]
     let orphanFilesDeleted=0
 
-    for(const bucket of ['live-offers','shop-videos']){
+    for(const bucket of ['live-offers','shop-videos','shop-stories']){
       const paths=unique(
         orphanRows
           .filter((r:any)=>String(r.bucket_id||'')===bucket)
