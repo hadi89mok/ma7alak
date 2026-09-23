@@ -1539,14 +1539,13 @@ body.ma7alak-owner-heart-visible #ma7alak-header-likes-slot{
 
 /* =========================================================
    FULL-WIDTH PREMIUM BACKDROP — FINAL OVERRIDE
-   Prevent older desktop/mobile gradient rules from replacing
-   the exact user-supplied background image.
+   Keep the area behind the floating Social Header solid black
+   so it joins the black Opening Header cleanly.
 ========================================================= */
 #ma7alak-header-theme-backdrop{
-  background-image:var(--ma7alak-premium-user-bg)!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
+  background-image:none!important;
+  background:#000!important;
+  background-color:#000!important;
 }
 #ma7alak-header-theme-backdrop::before,
 #ma7alak-header-theme-backdrop::after{
@@ -1574,13 +1573,13 @@ body.ma7alak-header-page.ma7alak-premium-homepage{
 
 /* =========================================================
    FINAL HOMEPAGE BACKDROP BOUNDARY FIX
-   - Social Header brown backdrop ends at the tiny 7px gap.
+   - Social Header black backdrop ends at the tiny 7px gap.
    - It no longer extends behind Opening Header top corners.
-   - Gap keeps the same brown/copper theme.
+   - Gap stays black to match the Opening Header.
 ========================================================= */
 body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   /* Keep the existing 7px visual separation, but carry the same
-     copper/brown backdrop underneath it and the opener's 7px offset. */
+     black backdrop underneath it and the opener's 7px offset. */
   height:calc(var(--m7-header-h) + 14px)!important;
 }
 
@@ -1865,6 +1864,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let followingRefreshTimer=null;
   let followingRealtimeChannel=null;
   let followingStoryRealtimeChannel=null;
+  let followingStoryExpiryTimer=null;
+  let followingStoryMutationBc=null;
   let followingRefreshInFlight=false;
   let followingRefreshQueued=false;
   let followingSearchQuery="";
@@ -2204,10 +2205,26 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }).join("");
   }
 
+  function scheduleFollowingStoryExpiry(stories){
+    clearTimeout(followingStoryExpiryTimer);
+    followingStoryExpiryTimer=null;
+    const now=Date.now();
+    const next=(stories||[])
+      .map(function(row){return new Date(row.expires_at||0).getTime();})
+      .filter(function(time){return Number.isFinite(time)&&time>now;})
+      .sort(function(a,b){return a-b;})[0];
+    if(!next){return;}
+    followingStoryExpiryTimer=setTimeout(function(){
+      refreshFollowingStoryState();
+    },Math.max(80,next-now+60));
+  }
+
   async function refreshFollowingStoryState(){
     const supabaseClient=getClient();
     if(!supabaseClient){return;}
     if(!followedShopSlugs.length){
+      clearTimeout(followingStoryExpiryTimer);
+      followingStoryExpiryTimer=null;
       activeFollowingStorySlugs=new Set();
       if(followingPanelOpen){renderFollowingPanel();}
       return;
@@ -2219,7 +2236,9 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
         .in("shop_slug",followedShopSlugs)
         .gt("expires_at",new Date().toISOString());
       if(result.error){throw result.error;}
-      const next=new Set((result.data||[]).map(function(row){return String(row.shop_slug||"").trim();}).filter(Boolean));
+      const storyRows=result.data||[];
+      scheduleFollowingStoryExpiry(storyRows);
+      const next=new Set(storyRows.map(function(row){return String(row.shop_slug||"").trim();}).filter(Boolean));
       const changed=JSON.stringify(Array.from(next).sort())!==JSON.stringify(Array.from(activeFollowingStorySlugs).sort());
       activeFollowingStorySlugs=next;
       if(changed||followingPanelOpen){renderFollowingPanel();}
@@ -2323,12 +2342,28 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       }catch(error){}
     }
 
+    function refreshStoriesFromMutation(){
+      setTimeout(refreshFollowingStoryState,20);
+    }
+
+    window.addEventListener("ma7alak:story-mutation",refreshStoriesFromMutation);
+
+    try{
+      if("BroadcastChannel" in window){
+        followingStoryMutationBc=new BroadcastChannel("shoufhon-stories");
+        followingStoryMutationBc.onmessage=refreshStoriesFromMutation;
+      }
+    }catch(error){}
+
     window.addEventListener("focus",refreshFollowingState);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){refreshFollowingState();}});
     window.addEventListener("storage",function(event){
       if(event.key===FOLLOW_VISITOR_KEY){
         bindFollowingRealtime();
         refreshFollowingState();
+      }
+      if(event.key==="shoufhon_story_mutation"){
+        refreshStoriesFromMutation();
       }
     });
     window.addEventListener("ma7alak:follow-change",function(){setTimeout(refreshFollowingState,25);});
@@ -2337,6 +2372,9 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       if(!event.data){return;}
       if(event.data.type==="MA7ALAK_FOLLOW_CHANGED"||event.data.type==="MA7ALAK_FOLLOW_STATE_CHANGED"){
         setTimeout(refreshFollowingState,30);
+      }
+      if(event.data.type==="MA7ALAK_STORY_UPLOADED"||event.data.type==="MA7ALAK_STORY_DELETED"){
+        refreshStoriesFromMutation();
       }
     });
   }
