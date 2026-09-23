@@ -11,7 +11,80 @@
   const URL = "https://wdtaiuwtqdepzdamgsrs.supabase.co";
   const KEY = "sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
   const STORAGE_KEY = "ma7alak-viewer-auth-v1";
+  const FOLLOW_VISITOR_KEY = "ma7alak_visitor_id";
+  const FOLLOW_TOKEN_KEY = "ma7alak_follow_token_v1";
+  const SECURE_FOLLOW_RPCS = new Set([
+    "follow_shop",
+    "unfollow_shop",
+    "get_shop_follow_state",
+    "get_visitor_followed_shops"
+  ]);
   let nativeCreateClient = null;
+
+  function randomFollowToken(){
+    try{
+      if(window.crypto && typeof window.crypto.randomUUID === "function"){
+        return window.crypto.randomUUID()+"-"+window.crypto.randomUUID();
+      }
+      if(window.crypto && typeof window.crypto.getRandomValues === "function"){
+        const bytes=new Uint8Array(32);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes,function(value){
+          return value.toString(16).padStart(2,"0");
+        }).join("");
+      }
+    }catch(_){}
+    return "ft_"+Date.now().toString(36)+"_"+
+      Math.random().toString(36).slice(2)+
+      Math.random().toString(36).slice(2)+
+      Math.random().toString(36).slice(2);
+  }
+
+  function getFollowVisitorId(){
+    try{
+      let value=String(localStorage.getItem(FOLLOW_VISITOR_KEY)||"").trim();
+      if(!value){
+        value=(window.crypto&&typeof window.crypto.randomUUID==="function")
+          ? window.crypto.randomUUID()
+          : "v_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+        localStorage.setItem(FOLLOW_VISITOR_KEY,value);
+      }
+      return value;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function getFollowToken(){
+    try{
+      let value=String(localStorage.getItem(FOLLOW_TOKEN_KEY)||"").trim();
+      if(value.length<32||value.length>200||!/^[A-Za-z0-9._:-]+$/.test(value)){
+        value=randomFollowToken();
+        localStorage.setItem(FOLLOW_TOKEN_KEY,value);
+      }
+      return value;
+    }catch(_){
+      return randomFollowToken();
+    }
+  }
+
+  async function getFollowBroadcastTopic(){
+    const visitorId=getFollowVisitorId();
+    const token=getFollowToken();
+    if(!visitorId||!token||!window.crypto||!window.crypto.subtle||typeof TextEncoder==="undefined"){
+      return "";
+    }
+    try{
+      const bytes=new TextEncoder().encode(visitorId+":"+token);
+      const digest=await window.crypto.subtle.digest("SHA-256",bytes);
+      const hex=Array.from(new Uint8Array(digest),function(value){
+        return value.toString(16).padStart(2,"0");
+      }).join("");
+      return "follow-private:"+hex;
+    }catch(_){
+      return "";
+    }
+  }
 
   function loadLibrary(){
     if(window.supabase && typeof window.supabase.createClient === "function"){
@@ -82,6 +155,42 @@
     }
 
     const shared = window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
+
+    /*
+       Follow security bridge.
+       Existing ShoufHon modules can keep their current RPC names; the shared
+       client quietly upgrades those calls to the private-token overloads.
+       Raw token values stay in this browser only. Supabase stores only the
+       SHA-256 ownership hash.
+    */
+    if(!shared.__ma7alakSecureFollowRpcBridge){
+      const originalRpc=shared.rpc.bind(shared);
+      shared.rpc=function(functionName,args,options){
+        let nextArgs=args;
+        if(
+          SECURE_FOLLOW_RPCS.has(String(functionName||"")) &&
+          args &&
+          typeof args==="object" &&
+          !Array.isArray(args) &&
+          !Object.prototype.hasOwnProperty.call(args,"p_follow_token")
+        ){
+          const token=getFollowToken();
+          if(token){
+            nextArgs=Object.assign({},args,{p_follow_token:token});
+          }
+        }
+        return originalRpc(functionName,nextArgs,options);
+      };
+      shared.__ma7alakSecureFollowRpcBridge=true;
+    }
+
+    window.Ma7alakFollowSecurity={
+      visitorKey:FOLLOW_VISITOR_KEY,
+      tokenKey:FOLLOW_TOKEN_KEY,
+      getVisitorId:getFollowVisitorId,
+      getToken:getFollowToken,
+      getBroadcastTopic:getFollowBroadcastTopic
+    };
 
     /* Compatibility bridge for older ShoufHon modules.
        Calls using this exact project/key and no custom options reuse the
