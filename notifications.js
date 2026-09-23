@@ -236,134 +236,163 @@ let notificationBadgeCount = 0;
      comes back for the new activity.
 ========================================================= */
 
-const MA7ALAK_BADGE_ACK_KEY =
-  "ma7alak_notification_badge_ack_v1";
+const MA7ALAK_BADGE_ACK_LOCAL_KEY =
+  "ma7alak_notification_badge_ack_at_v2";
+
+const MA7ALAK_INTERACTION_TOKEN_KEY =
+  "ma7alak_interaction_token_v1";
+
+let notificationBadgeAckAtMs = (function(){
+  try{
+    const value=Number(localStorage.getItem(MA7ALAK_BADGE_ACK_LOCAL_KEY)||0);
+    return Number.isFinite(value)&&value>0?value:0;
+  }catch(error){
+    return 0;
+  }
+})();
 
 let lastShopProfilesLoadAt = 0;
 
-
-function getNotificationSignature(notification){
-
-  if(!notification){
-    return "";
-  }
-
-  return [
-    String(notification.type || "story"),
-    String(notification.shop_slug || ""),
-    String(notification.id || "")
-  ].join(":");
-
+function validNotificationToken(value){
+  return (
+    typeof value==="string" &&
+    value.length>=32 &&
+    value.length<=200 &&
+    /^[A-Za-z0-9._:-]+$/.test(value)
+  );
 }
 
-
-function getBadgeAcknowledgedSet(){
-
+function randomNotificationToken(){
   try{
+    if(window.crypto&&typeof window.crypto.randomUUID==="function"){
+      return window.crypto.randomUUID()+"-"+window.crypto.randomUUID();
+    }
 
-    const raw =
-      localStorage.getItem(
-        MA7ALAK_BADGE_ACK_KEY
-      );
+    if(window.crypto&&typeof window.crypto.getRandomValues==="function"){
+      const bytes=new Uint8Array(32);
+      window.crypto.getRandomValues(bytes);
+      return Array.from(bytes,function(value){
+        return value.toString(16).padStart(2,"0");
+      }).join("");
+    }
+  }catch(error){}
 
-    const parsed =
-      raw ? JSON.parse(raw) : [];
-
-    return new Set(
-      Array.isArray(parsed)
-        ? parsed.map(function(value){
-            return String(value || "");
-          }).filter(Boolean)
-        : []
-    );
-
-  }
-  catch(error){
-
-    return new Set();
-
-  }
-
+  return "nt_"+Date.now().toString(36)+"_"+
+    Math.random().toString(36).slice(2)+
+    Math.random().toString(36).slice(2)+
+    Math.random().toString(36).slice(2);
 }
 
+function getNotificationInteractionToken(){
+  try{
+    const helper=
+      window.ShoufHonInteractionSecurityBridge ||
+      window.ShoufHonFollowSecurityBridge;
 
-function saveBadgeAcknowledgedSet(set){
+    if(helper&&typeof helper.getToken==="function"){
+      const value=String(helper.getToken()||"").trim();
+      if(validNotificationToken(value))return value;
+    }
+  }catch(error){}
+
+  let value="";
 
   try{
+    value=String(localStorage.getItem(MA7ALAK_INTERACTION_TOKEN_KEY)||"").trim();
+  }catch(error){}
 
-    const values =
-      Array.from(set || [])
-        .filter(Boolean)
-        .slice(-500);
+  if(!validNotificationToken(value)){
+    value=randomNotificationToken();
+    try{localStorage.setItem(MA7ALAK_INTERACTION_TOKEN_KEY,value)}catch(error){}
+  }
 
+  return value;
+}
+
+function saveNotificationBadgeAckLocal(value){
+  const ms=Number(value)||0;
+  if(!(ms>0))return;
+
+  notificationBadgeAckAtMs=Math.max(notificationBadgeAckAtMs,ms);
+
+  try{
     localStorage.setItem(
-      MA7ALAK_BADGE_ACK_KEY,
-      JSON.stringify(values)
+      MA7ALAK_BADGE_ACK_LOCAL_KEY,
+      String(notificationBadgeAckAtMs)
     );
-
-  }
-  catch(error){}
-
+  }catch(error){}
 }
 
+async function syncNotificationBadgeAcknowledgement(){
+  try{
+    const client=await loadMa7alakSupabase();
+    const token=getNotificationInteractionToken();
+
+    const result=await client.rpc(
+      "ma7alak_get_notification_badge_ack",
+      {
+        p_visitor_id:visitorId,
+        p_interaction_token:token
+      }
+    );
+
+    if(result.error)throw result.error;
+
+    const serverMs=result.data?new Date(result.data).getTime():0;
+    if(Number.isFinite(serverMs)&&serverMs>0){
+      saveNotificationBadgeAckLocal(serverMs);
+    }
+  }catch(error){
+    console.warn("ShoufHon notification badge sync:",error);
+  }
+}
 
 function acknowledgeCurrentBadgeNotifications(){
+  const localNow=Date.now();
+  saveNotificationBadgeAckLocal(localNow);
 
-  const acknowledged =
-    getBadgeAcknowledgedSet();
-
-  notifications.forEach(
-    function(notification){
-
-      const signature =
-        getNotificationSignature(
-          notification
-        );
-
-      if(signature){
-        acknowledged.add(signature);
-      }
-
-    }
-  );
-
-  saveBadgeAcknowledgedSet(
-    acknowledged
-  );
-
-  notificationBadgeCount = 0;
-
+  notificationBadgeCount=0;
   updateNotificationBadge();
 
-}
+  (async function(){
+    try{
+      const client=await loadMa7alakSupabase();
+      const token=getNotificationInteractionToken();
 
-
-function calculateBadgeCount(){
-
-  if(notificationsOpen){
-    return 0;
-  }
-
-  const acknowledged =
-    getBadgeAcknowledgedSet();
-
-  return notifications.filter(
-    function(notification){
-
-      const signature =
-        getNotificationSignature(
-          notification
-        );
-
-      return (
-        !notification.seen &&
-        signature &&
-        !acknowledged.has(signature)
+      const result=await client.rpc(
+        "ma7alak_ack_notification_badge",
+        {
+          p_visitor_id:visitorId,
+          p_interaction_token:token
+        }
       );
 
-    }
-  ).length;
+      if(result.error)throw result.error;
 
+      const serverMs=result.data?new Date(result.data).getTime():0;
+      if(Number.isFinite(serverMs)&&serverMs>0){
+        saveNotificationBadgeAckLocal(serverMs);
+      }
+    }catch(error){
+      console.warn("ShoufHon notification badge acknowledge:",error);
+    }
+  })();
+}
+
+function notificationCreatedAtMs(notification){
+  const value=new Date(notification&&notification.created_at||0).getTime();
+  return Number.isFinite(value)?value:0;
+}
+
+function calculateBadgeCount(){
+  if(notificationsOpen)return 0;
+
+  return notifications.filter(function(notification){
+    return (
+      !notification.seen &&
+      notificationCreatedAtMs(notification)>notificationBadgeAckAtMs
+    );
+  }).length;
 }
 
 
@@ -3012,10 +3041,11 @@ async function loadNotifications(){
         data:seenRows,
         error:seenError
       } = await client.rpc(
-        "get_story_notification_seen_state",
+        "get_story_notification_seen_state_secure",
         {
           p_visitor_id:visitorId,
-          p_story_ids:storyIds
+          p_story_ids:storyIds,
+          p_interaction_token:getNotificationInteractionToken()
         }
       );
 
@@ -4797,10 +4827,11 @@ async function markSingleStoryAsSeen(
     const {
       error
     } = await client.rpc(
-      "mark_story_notifications_seen",
+      "mark_story_notifications_seen_secure",
       {
         p_visitor_id:visitorId,
-        p_story_ids:[numericStoryId]
+        p_story_ids:[numericStoryId],
+        p_interaction_token:getNotificationInteractionToken()
       }
     );
 
@@ -4887,13 +4918,14 @@ async function markAllCurrentNotificationsAsSeen(){
         error
       } =
         await client.rpc(
-          "mark_story_notifications_seen",
+          "mark_story_notifications_seen_secure",
           {
             p_visitor_id:visitorId,
             p_story_ids:
               storyRows.map(function(row){
                 return row.story_id;
-              })
+              }),
+            p_interaction_token:getNotificationInteractionToken()
           }
         );
 
@@ -5455,6 +5487,8 @@ async function startMa7alakNotifications(){
     ensureNotificationStoryViewer().catch(function(){});
 
     await loadMa7alakSupabase();
+
+    await syncNotificationBadgeAcknowledgement();
 
     await loadShopProfiles();
 
