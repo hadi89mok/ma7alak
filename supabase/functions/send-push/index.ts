@@ -153,6 +153,21 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    /*
+      Diagnostic mode: validates trusted caller auth and confirms
+      that enabled subscriptions can be read without sending anything.
+    */
+    if (body.dry_run === true) {
+      return json(req, {
+        success: true,
+        dry_run: true,
+        subscribers: subscriptions.length,
+        sent: 0,
+        failed: 0,
+        removed: 0
+      });
+    }
+
     const payload = JSON.stringify({
       title,
       body: message,
