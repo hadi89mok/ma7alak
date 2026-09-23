@@ -1164,20 +1164,34 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
   function armHistory(){
     try{
-      history.pushState(
-        {
-          ...history.state,
-          shoufhonSharedStory:true
-        },
-        ""
-      );
+      const nextState={
+        ...(history.state||{}),
+        shoufhonSharedStory:true
+      };
 
-      historyArmed=
-        true;
+      /*
+        If a header panel already owns the current phone-history entry,
+        convert that entry into the Story entry instead of leaving a hidden
+        panel entry underneath the Story.
+      */
+      if(
+        Object.prototype.hasOwnProperty.call(
+          nextState,
+          "shoufhonUiPanel"
+        )
+      ){
+        delete nextState.shoufhonUiPanel;
+        history.replaceState(nextState,"");
+        try{window.dispatchEvent(new Event("ma7alak:panel-history-replaced-by-content"))}catch(_){}
+      }
+      else{
+        history.pushState(nextState,"");
+      }
+
+      historyArmed=true;
     }
     catch(_){
-      historyArmed=
-        false;
+      historyArmed=false;
     }
   }
 

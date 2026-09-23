@@ -4569,6 +4569,9 @@ function renderNotifications(){
             let contentOpened =
               false;
 
+            let storyOpenedDirectly =
+              false;
+
 
             if(
               notificationType === "reel"
@@ -4617,11 +4620,53 @@ function renderNotifications(){
             else{
 
               /*
-                 Story click keeps the existing shop-page behavior.
-                 The click itself counts as reading this notification.
+                 Open the shared Story viewer directly from THIS tap so
+                 Android Chrome/Brave still has user activation for native
+                 fullscreen instead of navigating first and showing browser UI.
               */
-              contentOpened =
-                Boolean(shopSlug);
+              const viewer =
+                window.ShoufHonStoryViewer;
+
+              if(
+                viewer &&
+                typeof viewer.open === "function" &&
+                shopSlug &&
+                notificationId
+              ){
+
+                closeNotifications();
+
+                storyOpenedDirectly =
+                  true;
+
+                contentOpened =
+                  true;
+
+                Promise.resolve(
+                  viewer.open({
+                    shopSlug:shopSlug,
+                    storyId:notificationId,
+                    preferUnseen:false
+                  })
+                )
+                  .then(function(opened){
+                    if(!opened&&shopSlug){
+                      navigateFromNotification(buildNotificationUrl("/"+encodeURIComponent(shopSlug),{story:notificationId,shop:shopSlug}));
+                    }
+                  })
+                  .catch(function(){
+                    if(shopSlug){
+                      navigateFromNotification(buildNotificationUrl("/"+encodeURIComponent(shopSlug),{story:notificationId,shop:shopSlug}));
+                    }
+                  });
+
+              }
+              else{
+
+                contentOpened =
+                  Boolean(shopSlug);
+
+              }
 
             }
 
@@ -4695,7 +4740,8 @@ function renderNotifications(){
 
             if(
               notificationType === "story" &&
-              shopSlug
+              shopSlug &&
+              !storyOpenedDirectly
             ){
 
               navigateFromNotification(
@@ -5400,6 +5446,13 @@ async function startMa7alakNotifications(){
   try{
 
     createNotificationUI();
+
+    /*
+       Preload the shared Story viewer without blocking Notifications.
+       By the time a Story row is tapped, viewer.open() can run directly
+       inside the tap and request native fullscreen.
+    */
+    ensureNotificationStoryViewer().catch(function(){});
 
     await loadMa7alakSupabase();
 

@@ -1,5 +1,5 @@
 /* =========================================================
- SHOUFHON GLOBAL HOTFIX V6.4 — MOBILE PERFORMANCE SAFE
+ SHOUFHON GLOBAL HOTFIX V6.6 — MOBILE BACK-BUTTON SAFE
  - replaces old show-shops-stability-fix.js
  - mobile Following Unfollow actions fixed
  - Unfollow never opens the shop page
@@ -15,6 +15,7 @@
 if(window.__MA7ALAK_GLOBAL_HOTFIX_V64__)return;window.__MA7ALAK_GLOBAL_HOTFIX_V64__=true;
 const HOTFIX_SCRIPT_SRC=document.currentScript?.src||"";
 let followingObserver=null,ownerOwnPage=false;
+let uiPanelHistoryArmed=false;
 let storyHoldActive=false,storyHoldPointer=null,storyHoldVideo=null,storyHoldWasPlaying=false,realDateNow=null,heldDateNow=0,holdRealStarted=0,storyPausedMs=0;
 function client(){return window.Ma7alakSupabase?.client||window.Ma7alakAccount?.client||window.Ma7alakOwnerAuth?.client||null}
 function ensurePageWakeRuntime(){
@@ -32,6 +33,58 @@ function ensurePageWakeRuntime(){
 }
 function visitorId(){let id="";try{id=localStorage.getItem("ma7alak_visitor_id")||""}catch(_){}if(!id){id=(window.crypto?.randomUUID?.()||("visitor_"+Date.now()+"_"+Math.random().toString(36).slice(2)));try{localStorage.setItem("ma7alak_visitor_id",id)}catch(_){}}return id}
 function isPhone(){return window.matchMedia&&window.matchMedia("(max-width: 700px)").matches}
+function activeUiPanelKind(){
+  if(document.getElementById("m7-chat-shell"))return "chat";
+  if(document.getElementById("ma7alak-header-search-overlay")?.classList.contains("open"))return "search";
+  if(document.getElementById("ma7alak-notification-panel")?.classList.contains("open"))return "notifications";
+  if(document.getElementById("m7-owner-social-panel")?.classList.contains("open"))return "heart";
+  if(document.getElementById("m7-account-overlay"))return "account";
+  if(document.getElementById("ma7alak-following-overlay")?.classList.contains("open"))return "following";
+  return "";
+}
+function storyOrReelViewerOpen(){
+  return !!(
+    window.ShoufHonStoryViewer?.isOpen?.() ||
+    document.getElementById("ma7alak-full-story")?.classList.contains("active") ||
+    document.getElementById("shoufhon-global-story-viewer")?.hidden===false ||
+    document.getElementById("ma7alakGlobalReelViewer")?.classList.contains("open")
+  );
+}
+function armUiPanelHistory(kind){
+  if(!isPhone()||!activeUiPanelKind())return;
+  try{
+    if(history.state?.shoufhonUiPanel){
+      uiPanelHistoryArmed=true;
+      return;
+    }
+    history.pushState({...history.state,shoufhonUiPanel:String(kind||activeUiPanelKind()||"panel")},"");
+    uiPanelHistoryArmed=true;
+  }catch(_){uiPanelHistoryArmed=false}
+}
+function scheduleUiPanelHistory(kind){if(isPhone())setTimeout(()=>armUiPanelHistory(kind),0)}
+function clickUiClose(selector,fallback){
+  const button=document.querySelector(selector);
+  if(button){try{button.click();return true}catch(_){}}
+  try{fallback?.()}catch(_){}
+  return false;
+}
+function closeActiveUiPanelFromHistory(){
+  const kind=activeUiPanelKind();
+  uiPanelHistoryArmed=false;
+  if(kind==="chat"){clickUiClose("#m7-close",()=>window.Ma7alakChat?.close?.());return}
+  if(kind==="search"){clickUiClose("#ma7alak-search-close",()=>{const o=document.getElementById("ma7alak-header-search-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")});return}
+  if(kind==="notifications"){clickUiClose("#ma7alak-notification-close",()=>document.getElementById("ma7alak-notification-panel")?.classList.remove("open"));return}
+  if(kind==="heart"){clickUiClose("#m7sn-close",()=>{const p=document.getElementById("m7-owner-social-panel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")});return}
+  if(kind==="account"){clickUiClose("#m7-account-overlay .m7a-close",()=>document.getElementById("m7-account-overlay")?.remove());return}
+  if(kind==="following"){clickUiClose("#ma7alak-following-close",()=>{const o=document.getElementById("ma7alak-following-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")})}
+}
+function reconcileUiPanelHistory(){
+  if(!isPhone()||!uiPanelHistoryArmed||activeUiPanelKind()||storyOrReelViewerOpen())return;
+  try{
+    if(history.state?.shoufhonUiPanel){uiPanelHistoryArmed=false;history.back()}
+    else uiPanelHistoryArmed=false;
+  }catch(_){uiPanelHistoryArmed=false}
+}
 function isShopPage(){const p=(location.pathname.replace(/\/+$/,"")||"/").toLowerCase();return p!=="/"&&p!=="/shwf-almhlat-"&&p!=="/dhyf-mhlk-"&&p!=="/add-shop-"&&p!=="/admin"}
 function css(){if(document.getElementById("m7-global-hotfix-css"))return;const s=document.createElement("style");s.id="m7-global-hotfix-css";s.textContent=`#ma7alak-following-list .ma7alak-following-row{position:relative!important;padding-right:98px!important}#ma7alak-following-list .m7-following-unfollow{position:absolute!important;right:10px!important;top:50%!important;transform:translateY(-50%)!important;min-width:76px!important;border:1px solid #ffffff1a!important;border-radius:999px!important;background:#ffffff0b!important;color:#ddd!important;font-size:10px!important;font-weight:800!important;padding:8px 10px!important;z-index:2147483646!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;-webkit-user-select:none!important;user-select:none!important}#ma7alak-following-list .m7-following-unfollow:disabled{opacity:.55!important}body.m7-owner-own-shop [data-like-story],body.m7-owner-own-shop [data-action="like-story"],body.m7-owner-own-shop #ma7alak-story-like-button,body.m7-owner-own-shop .ma7alak-story-like,body.m7-owner-own-shop [data-follow-shop],body.m7-owner-own-shop [data-shop-follow],body.m7-owner-own-shop #ma7alak-follow-shop,body.m7-owner-own-shop .ma7alak-follow-shop,body.m7-owner-own-shop .ma7alak-follow-button{display:none!important}body.ma7alak-header-page.ma7alak-shops-body{padding-top:var(--m7-header-h,76px)!important}#ma7alak-shops-page{padding-top:8px!important;margin-top:0!important}#ma7alak-full-story.m7-story-held:after{content:'PAUSED';position:absolute;left:50%;top:50%;z-index:2147483647;transform:translate(-50%,-50%);padding:9px 14px;border:1px solid #ffffff35;border-radius:999px;background:#080808a8;color:#fff;font:900 10px/1 Arial,sans-serif;letter-spacing:1.6px;pointer-events:none;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}@media(max-width:700px){#ma7alak-shops-page{padding-top:4px!important}#ma7alak-following-list .ma7alak-following-row{padding-right:92px!important}body.m7-mobile-shop-page{background-color:#000!important}body.m7-mobile-shop-page.ma7alak-header-page{background:#000!important}body.m7-mobile-shop-page #ma7alak-header-theme-backdrop{background-color:#000!important}#ma7alak-opening-header-root .ma7alak-ultra-hero{height:430px!important;min-height:430px!important}}@media(max-width:370px){#ma7alak-opening-header-root .ma7alak-ultra-hero{height:410px!important;min-height:410px!important}}.ma7alak-shop-image-ring.m7-story-stable.ma7alak-has-story{visibility:visible!important;opacity:1!important}`;document.head.appendChild(s)}
 function cleanupOwnFollow(slug){const c=client();if(!c||!slug)return;c.rpc('unfollow_shop',{p_shop_slug:slug,p_visitor_id:visitorId()}).then(()=>{dispatchEvent(new CustomEvent('ma7alak:follow-change',{detail:{shop_slug:slug,following:false}}))}).catch(()=>{})}
@@ -57,10 +110,49 @@ async function performUnfollow(btn){if(!btn||btn.dataset.m7Busy==="1")return;con
 function onUnfollowPointerDown(e){stopUnfollowEvent(e)}
 function onUnfollowTouchEnd(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
 function onUnfollowClick(e){const btn=stopUnfollowEvent(e);if(btn)performUnfollow(btn)}
-function closePanelsExcept(kind){if(kind!=="following"){const o=document.getElementById("ma7alak-following-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")}if(kind!=="notifications")document.getElementById("ma7alak-notification-panel")?.classList.remove("open");if(kind!=="heart"){const p=document.getElementById("m7-owner-social-panel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")}if(kind!=="chat"){try{window.Ma7alakChat?.close?.()}catch(_){}}if(kind!=="account")document.getElementById("m7-account-overlay")?.remove()}
-function panelCoordinator(e){const t=e.target;if(t.closest?.("#ma7alak-header-following")){closePanelsExcept("following");setTimeout(watchFollowingList,20);setTimeout(watchFollowingList,250);return}if(t.closest?.("#ma7alak-notification-bell")){closePanelsExcept("notifications");return}if(t.closest?.("#ma7alak-story-likes-button")){closePanelsExcept("heart");return}if(t.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages],#ma7alak-header-messages,#ma7alak-messages-button")){closePanelsExcept("chat");return}if(t.closest?.("#ma7alak-header-login,#ma7alak-header-account,[data-ma7alak-account],.ma7alak-account-button"))closePanelsExcept("account")}
+function closePanelsExcept(kind){
+  if(kind!=="following"&&document.getElementById("ma7alak-following-overlay")?.classList.contains("open"))clickUiClose("#ma7alak-following-close",()=>{const o=document.getElementById("ma7alak-following-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")});
+  if(kind!=="search"&&document.getElementById("ma7alak-header-search-overlay")?.classList.contains("open"))clickUiClose("#ma7alak-search-close",()=>{const o=document.getElementById("ma7alak-header-search-overlay");o?.classList.remove("open");o?.setAttribute("aria-hidden","true")});
+  if(kind!=="notifications"&&document.getElementById("ma7alak-notification-panel")?.classList.contains("open"))clickUiClose("#ma7alak-notification-close",()=>document.getElementById("ma7alak-notification-panel")?.classList.remove("open"));
+  if(kind!=="heart"&&document.getElementById("m7-owner-social-panel")?.classList.contains("open"))clickUiClose("#m7sn-close",()=>{const p=document.getElementById("m7-owner-social-panel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")});
+  if(kind!=="chat"&&document.getElementById("m7-chat-shell"))clickUiClose("#m7-close",()=>window.Ma7alakChat?.close?.());
+  if(kind!=="account"&&document.getElementById("m7-account-overlay"))clickUiClose("#m7-account-overlay .m7a-close",()=>document.getElementById("m7-account-overlay")?.remove());
+}
+function panelCoordinator(e){
+  const t=e.target;
+  if(t.closest?.("#ma7alak-header-following")){closePanelsExcept("following");scheduleUiPanelHistory("following");setTimeout(watchFollowingList,20);setTimeout(watchFollowingList,250);return}
+  if(t.closest?.("#ma7alak-mobile-search-button,#ma7alak-header-search")){closePanelsExcept("search");scheduleUiPanelHistory("search");return}
+  if(t.closest?.("#ma7alak-notification-bell")){closePanelsExcept("notifications");scheduleUiPanelHistory("notifications");return}
+  if(t.closest?.("#ma7alak-story-likes-button")){closePanelsExcept("heart");scheduleUiPanelHistory("heart");return}
+  if(t.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages],#ma7alak-header-messages,#m7-header-messages,#m7-owner-messages,#ma7alak-messages-button")){closePanelsExcept("chat");scheduleUiPanelHistory("chat");return}
+  if(t.closest?.("#m7-viewer-account-btn,#ma7alak-header-owner,#ma7alak-header-login,#ma7alak-header-account,[data-ma7alak-account],.ma7alak-account-button")){closePanelsExcept("account");scheduleUiPanelHistory("account")}
+}
 function placeDirectoryAtTop(){if(!directoryPage)return;const p=document.getElementById("ma7alak-shops-page");if(!p)return;const premium=document.getElementById("ma7alak-premium-social-header")||document.querySelector(".ma7alak-premium-social-header");if(premium&&premium.parentNode===document.body){if(premium.nextElementSibling!==p)premium.insertAdjacentElement("afterend",p)}else if(document.body.firstElementChild!==p)document.body.insertBefore(p,document.body.firstChild)}
 function bindMessageShortcuts(){document.addEventListener("click",e=>{const el=e.target.closest?.("[data-ma7alak-open-messages],[data-ma7alak-open-owner-messages]");if(!el)return;e.preventDefault();if(el.hasAttribute("data-ma7alak-open-owner-messages"))dispatchEvent(new Event("ma7alak:open-owner-messages"));else dispatchEvent(new Event("ma7alak:open-messages"))},true)}
-function boot(){ensurePageWakeRuntime();css();suppressNativeViewerFullscreen();markMobileShopPage();syncOwnerSelfGuard();document.addEventListener("pointerup",captureShopState,true);document.addEventListener("pointerdown",onUnfollowPointerDown,true);document.addEventListener("pointerdown",holdStory,{capture:true,passive:false});document.addEventListener("pointerup",releaseStory,true);document.addEventListener("pointercancel",releaseStory,true);window.addEventListener("blur",releaseStory);document.addEventListener("visibilitychange",()=>{if(document.hidden)releaseStory()});setInterval(()=>{const screen=document.getElementById('ma7alak-full-story');if(realDateNow&&(!screen||!screen.classList.contains('active')))resetStoryClock()},400);document.addEventListener("touchend",onUnfollowTouchEnd,{capture:true,passive:false});document.addEventListener("click",blockOwnerStoryLike,true);document.addEventListener("click",blockOwnerSelfFollow,true);document.addEventListener("click",onUnfollowClick,true);document.addEventListener("click",panelCoordinator,true);window.addEventListener("ma7alak:owner-auth-change",e=>syncOwnerSelfGuard(e.detail));window.addEventListener("ma7alak:panel-open",e=>closePanelsExcept(e.detail?.panel||""));document.addEventListener("input",e=>{if(e.target?.id==="ma7alak-following-search")setTimeout(watchFollowingList,0)},true);bindMessageShortcuts();if(directoryPage){[0,80,250,700,1500,3000].forEach(ms=>setTimeout(()=>{placeDirectoryAtTop();queueRestore();stabilizeStories()},ms));addEventListener("ma7alak:story-uploaded",()=>setTimeout(stabilizeStories,100));addEventListener("ma7alak:follow-change",()=>setTimeout(stabilizeStories,100))}}
+function boot(){
+  ensurePageWakeRuntime();css();suppressNativeViewerFullscreen();markMobileShopPage();syncOwnerSelfGuard();
+  document.addEventListener("pointerup",captureShopState,true);
+  document.addEventListener("pointerdown",onUnfollowPointerDown,true);
+  document.addEventListener("pointerdown",holdStory,{capture:true,passive:false});
+  document.addEventListener("pointerup",releaseStory,true);
+  document.addEventListener("pointercancel",releaseStory,true);
+  window.addEventListener("blur",releaseStory);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)releaseStory()});
+  setInterval(()=>{const screen=document.getElementById('ma7alak-full-story');if(realDateNow&&(!screen||!screen.classList.contains('active')))resetStoryClock()},400);
+  document.addEventListener("touchend",onUnfollowTouchEnd,{capture:true,passive:false});
+  document.addEventListener("click",blockOwnerStoryLike,true);
+  document.addEventListener("click",blockOwnerSelfFollow,true);
+  document.addEventListener("click",onUnfollowClick,true);
+  document.addEventListener("click",panelCoordinator,true);
+  document.addEventListener("click",()=>setTimeout(reconcileUiPanelHistory,0),false);
+  document.addEventListener("focusin",e=>{if(e.target?.id==="ma7alak-header-search")scheduleUiPanelHistory("search")},true);
+  window.addEventListener("popstate",()=>{if(!isPhone()||!uiPanelHistoryArmed)return;if(activeUiPanelKind())closeActiveUiPanelFromHistory();else uiPanelHistoryArmed=false});
+  window.addEventListener("ma7alak:owner-auth-change",e=>syncOwnerSelfGuard(e.detail));
+  window.addEventListener("ma7alak:panel-open",e=>{const kind=e.detail?.panel||"";closePanelsExcept(kind);scheduleUiPanelHistory(kind)});
+  window.addEventListener("ma7alak:panel-history-replaced-by-content",()=>{uiPanelHistoryArmed=false});
+  document.addEventListener("input",e=>{if(e.target?.id==="ma7alak-following-search")setTimeout(watchFollowingList,0)},true);
+  bindMessageShortcuts();
+  if(directoryPage){[0,80,250,700,1500,3000].forEach(ms=>setTimeout(()=>{placeDirectoryAtTop();queueRestore();stabilizeStories()},ms));addEventListener("ma7alak:story-uploaded",()=>setTimeout(stabilizeStories,100));addEventListener("ma7alak:follow-change",()=>setTimeout(stabilizeStories,100))}
+}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
