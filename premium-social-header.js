@@ -364,12 +364,12 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
 
 #ma7alak-header-menu-panel{
   position:absolute;
-  top:calc(100% + 10px);
+  top:calc(100% + 8px);
   right:0;
-  width:292px;
-  padding:10px;
-  border:1px solid rgba(217,164,65,.38);
-  border-radius:22px;
+  width:256px;
+  padding:8px;
+  border:1px solid rgba(217,164,65,.36);
+  border-radius:20px;
   background:
     linear-gradient(
       160deg,
@@ -378,29 +378,43 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
       rgba(7,8,9,.985)
     );
   box-shadow:
-    0 26px 60px rgba(0,0,0,.58),
-    0 0 26px rgba(217,164,65,.055),
-    inset 0 1px 0 rgba(255,255,255,.055);
-  backdrop-filter:blur(24px) saturate(145%);
-  -webkit-backdrop-filter:blur(24px) saturate(145%);
+    0 20px 48px rgba(0,0,0,.52),
+    0 0 18px rgba(217,164,65,.045),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(22px) saturate(140%);
+  -webkit-backdrop-filter:blur(22px) saturate(140%);
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transform:translateY(-9px) scale(.965);
+  transform:translate3d(8px,-10px,0) scale(.93);
   transform-origin:top right;
   transition:
-    opacity .17s ease,
-    visibility .17s ease,
-    transform .17s cubic-bezier(.2,.8,.2,1);
+    opacity .18s ease,
+    visibility .18s ease,
+    transform .22s cubic-bezier(.2,.86,.22,1.08);
   z-index:2147483646;
   overflow:hidden;
+  will-change:transform,opacity;
 }
 
 #ma7alak-header-menu-panel.open{
   opacity:1;
   visibility:visible;
   pointer-events:auto;
-  transform:translateY(0) scale(1);
+  transform:translate3d(0,0,0) scale(1);
+  animation:ma7alakMenuPop .28s cubic-bezier(.18,.88,.24,1.12);
+  -webkit-animation:ma7alakMenuPop .28s cubic-bezier(.18,.88,.24,1.12);
+}
+
+@keyframes ma7alakMenuPop{
+  0%{opacity:0;transform:translate3d(10px,-12px,0) scale(.90)}
+  68%{opacity:1;transform:translate3d(-1px,1px,0) scale(1.018)}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@-webkit-keyframes ma7alakMenuPop{
+  0%{opacity:0;-webkit-transform:translate3d(10px,-12px,0) scale(.90)}
+  68%{opacity:1;-webkit-transform:translate3d(-1px,1px,0) scale(1.018)}
+  100%{opacity:1;-webkit-transform:translate3d(0,0,0) scale(1)}
 }
 
 #ma7alak-header-menu-button.open{
@@ -420,12 +434,12 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
 
 .ma7alak-header-menu-link{
   position:relative;
-  min-height:64px;
-  padding:9px 10px;
+  min-height:55px;
+  padding:7px 9px;
   display:flex;
   align-items:center;
-  gap:12px;
-  border-radius:15px;
+  gap:10px;
+  border-radius:13px;
   color:rgba(255,255,255,.94)!important;
   text-decoration:none!important;
   font-size:13px;
@@ -446,15 +460,15 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
 .ma7alak-header-menu-link:not(:last-child)::after{
   content:"";
   position:absolute;
-  left:55px;
-  right:12px;
+  left:49px;
+  right:10px;
   bottom:-1px;
   height:1px;
   background:linear-gradient(
     90deg,
     rgba(217,164,65,.02),
-    rgba(255,255,255,.09),
-    rgba(217,164,65,.035)
+    rgba(255,255,255,.08),
+    rgba(217,164,65,.03)
   );
   pointer-events:none;
 }
@@ -472,25 +486,25 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
 }
 
 .ma7alak-header-menu-icon{
-  width:42px;
-  height:42px;
-  flex:0 0 42px;
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
   display:flex;
   align-items:center;
   justify-content:center;
-  border:1px solid rgba(217,164,65,.34);
-  border-radius:13px;
+  border:1px solid rgba(217,164,65,.32);
+  border-radius:12px;
   background:
     linear-gradient(
       145deg,
-      rgba(217,164,65,.14),
-      rgba(217,164,65,.045)
+      rgba(217,164,65,.13),
+      rgba(217,164,65,.04)
     );
   color:#f2bb58;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 6px 14px rgba(0,0,0,.18);
-  font-size:20px;
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 5px 12px rgba(0,0,0,.16);
+  font-size:18px;
   line-height:1;
 }
 
@@ -506,29 +520,29 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   display:block;
   color:inherit;
   line-height:1.12;
-  font-size:15px;
+  font-size:14px;
   font-weight:850;
   unicode-bidi:plaintext;
 }
 
 .ma7alak-header-menu-sub{
   display:block;
-  margin-top:5px;
+  margin-top:3px;
   color:rgba(255,255,255,.43);
-  font-size:10px;
+  font-size:9.5px;
   line-height:1.15;
   font-weight:700;
-  letter-spacing:.18px;
+  letter-spacing:.16px;
 }
 
 .ma7alak-header-menu-chevron{
-  width:18px;
-  height:18px;
-  flex:0 0 18px;
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
   display:grid;
   place-items:center;
   color:#e9af4d;
-  font-size:22px;
+  font-size:20px;
   font-weight:400;
   line-height:1;
   opacity:.92;
@@ -537,8 +551,8 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
 
 #ma7alak-header-menu-panel .ma7alak-header-menu-logout,
 #ma7alak-header-menu-panel #m7a-header-logout{
-  margin-top:7px;
-  min-height:66px;
+  margin-top:6px;
+  min-height:58px;
   border:1px solid rgba(235,75,83,.34);
   background:
     linear-gradient(
@@ -549,7 +563,7 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   color:#fff4f4!important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.035),
-    0 7px 18px rgba(80,11,16,.16);
+    0 6px 16px rgba(80,11,16,.14);
 }
 
 #ma7alak-header-menu-panel .ma7alak-header-menu-logout::after,
@@ -583,7 +597,7 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   color:#ff8a94;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
-    0 0 16px rgba(223,49,62,.10);
+    0 0 12px rgba(223,49,62,.09);
 }
 
 #ma7alak-header-menu-panel .ma7alak-header-menu-logout .ma7alak-header-menu-sub,
@@ -1141,8 +1155,8 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   }
 
   #ma7alak-header-menu-panel{
-    width:min(292px,calc(100vw - 24px));
-    top:calc(100% + 8px);
+    width:min(256px,calc(100vw - 26px));
+    top:calc(100% + 7px);
     right:0;
   }
   .ma7alak-header-search-wrap{display:none;}
@@ -1214,6 +1228,12 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   #ma7alak-social-header .ma7alak-owner-avatar-wrap{
     animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
     -webkit-animation:ma7alakOwnerCircleSpin 8s linear infinite!important;
+  }
+
+  #ma7alak-header-menu-panel.open{
+    animation:ma7alakMenuPop .28s cubic-bezier(.18,.88,.24,1.12)!important;
+    -webkit-animation:ma7alakMenuPop .28s cubic-bezier(.18,.88,.24,1.12)!important;
+    transition:opacity .18s ease,transform .22s cubic-bezier(.2,.86,.22,1.08)!important;
   }
 }
     
