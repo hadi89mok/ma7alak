@@ -390,9 +390,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-nav{position:absolute;z-index:8;top:82px;bottom:92px;width:34%;border:0;background:transparent;color:transparent;padding:0}
 #${ROOT_ID} .ssv-prev{left:0}
 #${ROOT_ID} .ssv-next{right:0}
-#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:var(--ssv-keyboard-offset,0px);padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px;transition:bottom .14s ease}
-#${ROOT_ID}.is-keyboard-open .ssv-bottom{z-index:30;transition:none}
+#${ROOT_ID} .ssv-bottom{position:absolute;z-index:24;left:0;right:0;bottom:0;padding:28px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#000b 40%,#000e);display:flex;align-items:center;gap:8px}
+#${ROOT_ID}.is-keyboard-open .ssv-bottom{z-index:30;padding:0;background:transparent;pointer-events:none}
 #${ROOT_ID}.is-keyboard-open .ssv-like{display:none!important}
+#${ROOT_ID}.is-keyboard-open .ssv-reply{position:absolute;left:14px;right:14px;bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--ssv-keyboard-offset,0px));width:auto;z-index:31;padding:5px 6px 5px 14px;border:1px solid rgba(255,255,255,.30);border-radius:999px;background:linear-gradient(145deg,rgba(24,24,27,.98),rgba(7,7,9,.96));box-shadow:0 10px 34px rgba(0,0,0,.58),0 0 0 1px rgba(217,164,65,.12);backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%);pointer-events:auto}
 #${ROOT_ID}.is-owner .ssv-bottom{display:none}
 #${ROOT_ID}.is-logged-out .ssv-reply{display:none!important}
 #${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
@@ -422,9 +423,9 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
   function syncVisualViewport(){
     if(!root||root.hidden)return;
 
-    const bottom=
+    const reply=
       root.querySelector(
-        ".ssv-bottom"
+        ".ssv-reply"
       );
 
     const input=
@@ -432,7 +433,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         ".ssv-reply input"
       );
 
-    if(!bottom)return;
+    if(!reply)return;
 
     const focused=
       !!input &&
@@ -451,7 +452,15 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       return;
     }
 
-    /* Measure at zero lift, then move only the hidden overlap. */
+    /*
+      Match the working shop-page Story viewer:
+      keep the Story fullscreen and move only the reply control by the
+      exact amount hidden below VisualViewport.
+    */
+    root.classList.remove(
+      "is-keyboard-open"
+    );
+
     root.style.setProperty(
       "--ssv-keyboard-offset",
       "0px"
@@ -466,7 +475,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         : Number(window.innerHeight||0);
 
     const rect=
-      bottom.getBoundingClientRect();
+      reply.getBoundingClientRect();
 
     let offset=
       Math.max(
@@ -733,6 +742,9 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       ()=>{
         pauseStoryPlayback();
         scheduleVisualViewportSync();
+        setTimeout(scheduleVisualViewportSync,60);
+        setTimeout(scheduleVisualViewportSync,180);
+        setTimeout(scheduleVisualViewportSync,360);
       }
     );
 

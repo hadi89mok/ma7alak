@@ -435,7 +435,7 @@
   const key="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
   const storyScriptSrc=document.currentScript?.src||"";
   let storyViewerPromise=null;
-  let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,expiryTimer=0,version=0,channel=null,storyBus=null,playing=[],index=0,mediaTimer=0,viewerOpen=false,followSyncLoading=false,followSyncQueued=false;
+  let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,expiryTimer=0,version=0,channel=null,storyBus=null,playing=[],index=0,mediaTimer=0,viewerOpen=false,followSyncLoading=false,followSyncQueued=false,followStoryVersion=0;
   const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const path=s=>'/'+encodeURIComponent(s);
   function db(){return client||(client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||window.Ma7alakSupabase?.client||window.supabase?.createClient?.(url,key));}
@@ -781,6 +781,87 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
       return String(localStorage.getItem('ma7alak_visitor_id')||'').trim();
     }catch(_){return ''}
   }
+  async function refreshFollowedStoryRows(c){
+    c=c||db();
+    if(!c)return;
+
+    const turn=++followStoryVersion;
+    const wanted=[...new Set(slugs)].slice(0,100);
+    const ownerSlug=String(owner?.shop_slug||"").trim();
+
+    if(!wanted.length){
+      if(turn!==followStoryVersion)return;
+
+      rows=rows.filter(
+        row=>ownerSlug&&String(row.shop_slug||"")===ownerSlug
+      );
+
+      profiles=new Map(
+        Array.from(profiles.entries()).filter(
+          ([slug])=>ownerSlug&&slug===ownerSlug
+        )
+      );
+
+      render();
+      return;
+    }
+
+    const [storiesResult,profilesResult]=await Promise.all([
+      c.from('shop_stories')
+        .select('id,shop_slug,media_type,storage_path,expires_at,created_at')
+        .in('shop_slug',wanted)
+        .gt('expires_at',new Date().toISOString())
+        .order('created_at',{ascending:false})
+        .limit(500),
+      c.from('shop_profiles')
+        .select('shop_slug,shop_name,profile_image_url,story_logo_url,directory_options')
+        .in('shop_slug',wanted)
+    ]);
+
+    if(storiesResult.error||profilesResult.error){
+      throw storiesResult.error||profilesResult.error;
+    }
+
+    if(turn!==followStoryVersion)return;
+
+    const followedSet=new Set(wanted);
+
+    const ownerRows=rows.filter(
+      row=>
+        ownerSlug&&
+        String(row.shop_slug||"")===ownerSlug&&
+        !followedSet.has(ownerSlug)
+    );
+
+    rows=[
+      ...ownerRows,
+      ...(storiesResult.data||[])
+    ];
+
+    const nextProfiles=new Map();
+
+    if(
+      ownerSlug&&
+      !followedSet.has(ownerSlug)&&
+      profiles.has(ownerSlug)
+    ){
+      nextProfiles.set(
+        ownerSlug,
+        profiles.get(ownerSlug)
+      );
+    }
+
+    (profilesResult.data||[]).forEach(
+      profile=>nextProfiles.set(
+        profile.shop_slug,
+        profile
+      )
+    );
+
+    profiles=nextProfiles;
+    render();
+  }
+
   async function syncFollowedStoriesNow(){
     if(followSyncLoading){
       followSyncQueued=true;
@@ -804,7 +885,10 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
         }
       }
 
-      await refresh();
+      await refreshFollowedStoryRows(c);
+
+      /* Owner/auth enrichment can finish after followed Story circles render. */
+      refresh();
     }
     catch(e){
       console.warn(
@@ -853,6 +937,8 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
   });
   window.addEventListener('ma7alak:story-mutation',e=>applyStoryMutation(e.detail));
   window.addEventListener('ma7alak:page-wake',syncFollowedStoriesNow);
+  window.addEventListener('pageshow',()=>{syncFollowedStoriesNow();setTimeout(syncFollowedStoriesNow,250)});
+  window.addEventListener('focus',syncFollowedStoriesNow);
   window.addEventListener('message',e=>{
     if(e.data?.type==='MA7ALAK_PAGE_WAKE'){syncFollowedStoriesNow();return}
     if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED','MA7ALAK_STORY_DELETED'].includes(e.data?.type))applyStoryMutation(e.data)

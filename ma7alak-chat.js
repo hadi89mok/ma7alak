@@ -10,7 +10,7 @@
 "use strict";
 if(window.__MA7ALAK_CHAT_V9__)return;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
 const CHAT_SCRIPT_SRC=document.currentScript?.src||"";
-let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null;
+let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null,inboxLiveFallbackTimer=null,inboxWakeHandler=null;
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 async function vr(){for(let i=0;i<100&&!window.Ma7alakAccount;i++)await sleep(50);if(!window.Ma7alakAccount)throw new Error("ShoufHon account system is not ready.");await window.Ma7alakAccount.ready();client=window.Ma7alakAccount.client;user=window.Ma7alakAccount.user;mode="viewer"}
@@ -61,7 +61,7 @@ function closeReactionPicker(){
   if(reactionPicker){reactionPicker.remove();reactionPicker=null}
   if(reactionPickerOutside){document.removeEventListener("pointerdown",reactionPickerOutside,true);reactionPickerOutside=null}
 }
-function close(remove=true){closeReactionPicker();clearInterval(inboxClockTimer);inboxClockTimer=null;clearTimeout(inboxRefreshTimer);inboxRefreshTimer=null;if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
+function close(remove=true){closeReactionPicker();clearInterval(inboxClockTimer);inboxClockTimer=null;clearTimeout(inboxRefreshTimer);inboxRefreshTimer=null;clearInterval(inboxLiveFallbackTimer);inboxLiveFallbackTimer=null;if(inboxWakeHandler){window.removeEventListener("ma7alak:page-wake",inboxWakeHandler);inboxWakeHandler=null}if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
 const tm=v=>{try{return new Date(v).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}catch(_){return""}};
 function inboxRelativeTime(value){
   const time=new Date(value||0).getTime();
@@ -863,7 +863,49 @@ async function ownerInbox(){
           },
           scheduleOwnerInboxRefresh
         )
-        .subscribe();
+        .subscribe(status=>{
+          if(
+            status==="CHANNEL_ERROR"||
+            status==="TIMED_OUT"||
+            status==="CLOSED"
+          ){
+            setTimeout(
+              scheduleOwnerInboxRefresh,
+              250
+            );
+          }
+        });
+
+    inboxWakeHandler=()=>{
+      if(
+        document
+          .getElementById("m7-chat-shell")
+          ?.classList.contains("m7-inbox-shell")
+      ){
+        scheduleOwnerInboxRefresh();
+      }
+    };
+
+    window.addEventListener(
+      "ma7alak:page-wake",
+      inboxWakeHandler
+    );
+
+    /* Realtime is primary. This low-frequency visible-only check is recovery
+       for a dropped mobile/PWA realtime socket while the inbox stays open. */
+    inboxLiveFallbackTimer=setInterval(
+      ()=>{
+        if(
+          !document.hidden &&
+          document
+            .getElementById("m7-chat-shell")
+            ?.classList.contains("m7-inbox-shell")
+        ){
+          scheduleOwnerInboxRefresh();
+        }
+      },
+      12000
+    );
   }
   catch(e){
     loadError(
