@@ -965,7 +965,7 @@ html.m7-saved-open,body.m7-saved-open{overflow:hidden!important}
 @media(min-width:700px){.m7-saved-sheet{left:50%;width:min(720px,100%);transform:translate3d(-50%,100%,0)}.m7-saved-drawer.open .m7-saved-sheet{transform:translate3d(-50%,0,0)}.m7-saved-card{flex-basis:190px}}
 @media(prefers-reduced-motion:reduce){.m7-saved-sheet{transition:none!important}}
 
-/* VIEWER */\n.ma7alak-reel-viewer{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:#000;overflow:hidden;touch-action:none}.ma7alak-reel-viewer.open{display:flex}.ma7alak-reel-viewer-video{position:absolute;inset:5px;width:calc(100vw - 10px);height:calc(100dvh - 10px);object-fit:contain;background:#000;border-radius:18px;transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1)}.ma7alak-reel-viewer-shop{position:absolute;top:15px;left:10px;z-index:2147483646;max-width:70%;display:flex;align-items:center;gap:9px;padding:6px 13px 6px 6px;border:1px solid #ffffff3d;border-radius:99px;background:#000b;color:#fff;backdrop-filter:blur(14px)}.ma7alak-reel-viewer-shop img{width:40px;height:40px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover}.ma7alak-reel-viewer-shop span{min-width:0;display:flex;flex-direction:column;text-align:left}.ma7alak-reel-viewer-shop strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.ma7alak-reel-viewer-shop small{color:#ffffffad;font-size:10px}.ma7alak-reel-viewer-shop em{color:#f5d48a;font-size:18px;font-style:normal}.ma7alak-reel-viewer-close,.ma7alak-viewer-favorite{position:absolute;z-index:2147483646;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff40;border-radius:50%;background:#000b;color:#fff;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-shop{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-close{top:14px;right:10px;width:45px;height:45px;font-size:31px}.ma7alak-viewer-favorite{right:10px;bottom:72px;width:50px;height:50px;font-size:28px}.ma7alak-viewer-favorite.active{color:#f5d48a;background:#e2b45b2b;border-color:#e2b45b8c}.ma7alak-swipe-hint{position:absolute;bottom:20px;left:50%;z-index:2147483645;transform:translateX(-50%);color:#ffffff73;font-size:11px;pointer-events:none}\n@media(max-width:600px){#m7-global-home-feed-shell{padding-left:10px!important;padding-right:10px!important}#m7-home-feed{min-width:0!important}#m7-live-home{width:100%!important;max-width:100%!important;min-width:0!important;padding:15px;border-radius:23px}#m7-live-home h2{font-size:27px}.m7-live-cards,.ma7alak-reels{max-width:100%!important;min-width:0!important;scroll-padding-inline:2px 10px}.m7-live-card{flex-basis:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;height:465px}.ma7alak-reel{flex-basis:min(62vw,270px)!important;max-width:calc(100vw - 58px)!important;height:auto;aspect-ratio:9/16;border-radius:18px}.reel-info{left:10px;right:10px;bottom:10px;padding:8px 10px}.reel-shop-icon{width:37px;height:37px;min-width:37px}.reel-info-text strong{font-size:15px}.reel-info-text span{font-size:10px}}\n/* Exact Lebanon schedule + live countdown. Only this text updates every second;\n   the card and its video stay mounted, preventing black flicker. */\n.m7-live-times{display:block;margin-top:11px;padding:10px 11px;border:1px solid #ffffff17;border-radius:13px;background:#050807b8}.m7-live-schedule{display:grid;gap:4px}.m7-live-schedule b{color:#fff;font-size:11px;line-height:1.25}.m7-live-schedule small{color:#36dc82;font-size:10px;font-weight:900;line-height:1.2;text-shadow:0 0 9px #36dc826b}.m7-live-schedule span{color:#ffffff9c;font-size:10px;font-weight:800;line-height:1.25}\n/* Live indicators intentionally remain animated on mobile, including browsers\n   that inherit Android\'s reduced-motion preference. */\n@media(prefers-reduced-motion:reduce){.ma7alak-reel-viewer-video{transition:none}.m7-live-status i,.m7-live-card,.m7-shop-avatar,.m7-shop-avatar:before,.m7-shop-avatar:after{-webkit-animation-play-state:running!important;animation-play-state:running!important}}\n\n/* FINAL HOSTINGER BACKGROUND LOCK
+/* VIEWER */\n.ma7alak-reel-viewer{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:#000;overflow:hidden;touch-action:none}.ma7alak-reel-viewer.open{display:flex}.ma7alak-reel-viewer-video{position:absolute;inset:5px;width:calc(100vw - 10px);height:calc(100dvh - 10px);object-fit:contain;background:#000;border-radius:18px;transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1)}.ma7alak-reel-viewer-shop{position:absolute;top:15px;left:10px;z-index:2147483646;max-width:70%;display:flex;align-items:center;gap:9px;padding:6px 13px 6px 6px;border:1px solid #ffffff3d;border-radius:99px;background:#000b;color:#fff;backdrop-filter:blur(14px)}.ma7alak-reel-viewer-shop img{width:40px;height:40px;border:2px solid #f5d48a;border-radius:50%;object-fit:cover}.ma7alak-reel-viewer-shop span{min-width:0;display:flex;flex-direction:column;text-align:left}.ma7alak-reel-viewer-shop strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.ma7alak-reel-viewer-shop small{color:#ffffffad;font-size:10px}.ma7alak-reel-viewer-shop em{color:#f5d48a;font-size:18px;font-style:normal}.ma7alak-reel-viewer-close,.ma7alak-viewer-favorite{position:absolute;z-index:2147483646;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff40;border-radius:50%;background:#000b;color:#fff;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-shop{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}.ma7alak-reel-viewer-close{top:14px;right:10px;width:45px;height:45px;font-size:31px}.ma7alak-viewer-favorite{right:8px;bottom:70px;width:58px;height:58px;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;color:#fff;font-size:38px;line-height:1;text-shadow:0 2px 6px #000,0 0 14px #000,0 0 3px #fff8;filter:drop-shadow(0 2px 2px #000);transition:transform .16s ease,color .16s ease,filter .16s ease}.ma7alak-viewer-favorite:active{transform:scale(.84)}.ma7alak-viewer-favorite.active{color:#ffd86b!important;background:transparent!important;border:0!important;filter:drop-shadow(0 2px 2px #000) drop-shadow(0 0 8px #d9a44199);text-shadow:0 2px 7px #000,0 0 16px #d9a441aa}.ma7alak-swipe-hint{position:absolute;bottom:20px;left:50%;z-index:2147483645;transform:translateX(-50%);color:#ffffff73;font-size:11px;pointer-events:none}\n@media(max-width:600px){#m7-global-home-feed-shell{padding-left:10px!important;padding-right:10px!important}#m7-home-feed{min-width:0!important}#m7-live-home{width:100%!important;max-width:100%!important;min-width:0!important;padding:15px;border-radius:23px}#m7-live-home h2{font-size:27px}.m7-live-cards,.ma7alak-reels{max-width:100%!important;min-width:0!important;scroll-padding-inline:2px 10px}.m7-live-card{flex-basis:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;height:465px}.ma7alak-reel{flex-basis:min(62vw,270px)!important;max-width:calc(100vw - 58px)!important;height:auto;aspect-ratio:9/16;border-radius:18px}.reel-info{left:10px;right:10px;bottom:10px;padding:8px 10px}.reel-shop-icon{width:37px;height:37px;min-width:37px}.reel-info-text strong{font-size:15px}.reel-info-text span{font-size:10px}}\n/* Exact Lebanon schedule + live countdown. Only this text updates every second;\n   the card and its video stay mounted, preventing black flicker. */\n.m7-live-times{display:block;margin-top:11px;padding:10px 11px;border:1px solid #ffffff17;border-radius:13px;background:#050807b8}.m7-live-schedule{display:grid;gap:4px}.m7-live-schedule b{color:#fff;font-size:11px;line-height:1.25}.m7-live-schedule small{color:#36dc82;font-size:10px;font-weight:900;line-height:1.2;text-shadow:0 0 9px #36dc826b}.m7-live-schedule span{color:#ffffff9c;font-size:10px;font-weight:800;line-height:1.25}\n/* Live indicators intentionally remain animated on mobile, including browsers\n   that inherit Android\'s reduced-motion preference. */\n@media(prefers-reduced-motion:reduce){.ma7alak-reel-viewer-video{transition:none}.m7-live-status i,.m7-live-card,.m7-shop-avatar,.m7-shop-avatar:before,.m7-shop-avatar:after{-webkit-animation-play-state:running!important;animation-play-state:running!important}}\n\n/* FINAL HOSTINGER BACKGROUND LOCK
    The global feed owns NO page/background layer.
    Only the actual Live/Reel/Spotlight cards keep their intended styling. */
 #m7-global-home-feed-shell,
@@ -1771,10 +1771,62 @@ function loadViewer(reel,direction){
 
   if(viewerVideo.readyState>=2)startPlayback();
 }
-let viewerReturnScrollY=0,viewerHistoryArmed=false,viewerCloseFallbackTimer=null;
-function rememberViewerPosition(){viewerReturnScrollY=Math.max(0,window.scrollY||document.documentElement.scrollTop||0)}
-function restoreViewerPosition(){let y=viewerReturnScrollY;requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:"auto"}));setTimeout(()=>window.scrollTo({top:y,left:0,behavior:"auto"}),90)}
-function armViewerBack(){if(viewerHistoryArmed)return;try{history.pushState({...history.state,__m7ReelViewer:true},"",location.href);viewerHistoryArmed=true}catch(_){}}
+let viewerReturnScrollY=0,viewerHistoryArmed=false,viewerCloseFallbackTimer=null,viewerPageLock=null;
+function rememberViewerPosition(){
+  viewerReturnScrollY=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
+
+  const body=document.body;
+  if(!body||viewerPageLock)return;
+
+  viewerPageLock={
+    position:body.style.position,
+    top:body.style.top,
+    left:body.style.left,
+    right:body.style.right,
+    width:body.style.width,
+    overflow:body.style.overflow,
+    scrollRestoration:("scrollRestoration" in history)?history.scrollRestoration:null
+  };
+
+  if("scrollRestoration" in history){
+    history.scrollRestoration="manual";
+  }
+
+  body.style.position="fixed";
+  body.style.top=(-viewerReturnScrollY)+"px";
+  body.style.left="0";
+  body.style.right="0";
+  body.style.width="100%";
+  body.style.overflow="hidden";
+}
+function restoreViewerPosition(){
+  const y=viewerReturnScrollY;
+  const body=document.body;
+  const lock=viewerPageLock;
+  viewerPageLock=null;
+
+  if(body&&lock){
+    body.style.position=lock.position;
+    body.style.top=lock.top;
+    body.style.left=lock.left;
+    body.style.right=lock.right;
+    body.style.width=lock.width;
+    body.style.overflow=lock.overflow;
+  }
+
+  window.scrollTo(0,y);
+
+  requestAnimationFrame(()=>{
+    window.scrollTo(0,y);
+  });
+
+  if(lock&&lock.scrollRestoration!==null&&"scrollRestoration" in history){
+    setTimeout(()=>{
+      history.scrollRestoration=lock.scrollRestoration;
+    },120);
+  }
+}
+function armViewerBack(){if(viewerHistoryArmed)return;try{history.pushState({...history.state,__m7ReelViewer:true,__m7ReelScrollY:viewerReturnScrollY},"",location.href);viewerHistoryArmed=true}catch(_){}}
 let viewerNativeFullscreenOwned=false,viewerNativeFullscreenClosing=false;
 function reelFullscreenElement(){return document.fullscreenElement||document.webkitFullscreenElement||null}
 function requestNativeViewerFullscreen(){

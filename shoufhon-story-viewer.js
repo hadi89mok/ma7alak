@@ -9,6 +9,7 @@
   const SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
   const VISITOR_KEY="ma7alak_visitor_id";
   const INTERACTION_TOKEN_KEY="ma7alak_interaction_token_v1";
+  const LIKED_STORIES_KEY="ma7alak_story_liked_ids";
   const ROOT_ID="shoufhon-global-story-viewer";
   const STYLE_ID="shoufhon-global-story-viewer-css";
 
@@ -243,42 +244,104 @@
       : "";
   }
 
-  function likedKey(id){
-    return (
-      "ma7alak_story_liked_"+
-      String(
-        id||
-        ""
-      )
-    );
+  function readLikedStoryIds(){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(LIKED_STORIES_KEY)||"[]");
+      return new Set(Array.isArray(parsed)?parsed.map(value=>String(value)):[]);
+    }catch(_){
+      return new Set();
+    }
+  }
+
+  function saveLikedStoryIds(set){
+    try{
+      localStorage.setItem(
+        LIKED_STORIES_KEY,
+        JSON.stringify(Array.from(set))
+      );
+    }catch(_){}
   }
 
   function isLocallyLiked(id){
+    const storyId=String(id||"");
+    if(!storyId)return false;
+
+    const ids=readLikedStoryIds();
+    if(ids.has(storyId))return true;
+
     try{
-      return (
-        localStorage.getItem(
-          likedKey(
-            id
-          )
-        )===
-        "1"
-      );
-    }
-    catch(_){
-      return false;
-    }
+      if(localStorage.getItem("ma7alak_story_liked_"+storyId)==="1"){
+        ids.add(storyId);
+        saveLikedStoryIds(ids);
+        return true;
+      }
+    }catch(_){}
+
+    return false;
   }
 
   function markLocallyLiked(id){
+    const storyId=String(id||"");
+    if(!storyId)return;
+
+    const ids=readLikedStoryIds();
+    ids.add(storyId);
+    saveLikedStoryIds(ids);
+
     try{
-      localStorage.setItem(
-        likedKey(
-          id
-        ),
-        "1"
+      localStorage.setItem("ma7alak_story_liked_"+storyId,"1");
+    }catch(_){}
+
+    try{
+      window.dispatchEvent(
+        new CustomEvent(
+          "ma7alak:story-liked",
+          {detail:{story_id:storyId}}
+        )
       );
+    }catch(_){}
+  }
+
+  function launchLikeHearts(){
+    if(!root||root.hidden)return;
+
+    let burst=root.querySelector(".ssv-heart-burst");
+
+    if(!burst){
+      burst=document.createElement("div");
+      burst.className="ssv-heart-burst";
+      root.querySelector(".ssv-frame")?.appendChild(burst);
     }
-    catch(_){}
+
+    burst.replaceChildren();
+
+    for(let index=0;index<14;index++){
+      const heart=document.createElement("span");
+      heart.className="ssv-floating-heart";
+      heart.textContent="♥";
+
+      const x=(Math.random()*180)-90;
+      const y=-(100+Math.random()*190);
+      const scale=.72+Math.random()*.85;
+      const rotation=(Math.random()*70)-35;
+      const duration=1.05+Math.random()*.75;
+      const delay=Math.random()*.16;
+      const size=18+Math.random()*18;
+
+      heart.style.setProperty("--ssv-heart-x",x+"px");
+      heart.style.setProperty("--ssv-heart-y",y+"px");
+      heart.style.setProperty("--ssv-heart-scale",String(scale));
+      heart.style.setProperty("--ssv-heart-rotate",rotation+"deg");
+      heart.style.setProperty("--ssv-heart-duration",duration+"s");
+      heart.style.animationDelay=delay+"s";
+      heart.style.fontSize=size+"px";
+
+      burst.appendChild(heart);
+    }
+
+    setTimeout(()=>{
+      if(burst)burst.replaceChildren();
+    },2100);
   }
 
   function injectStyle(){
@@ -339,6 +402,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-send:disabled,#${ROOT_ID} .ssv-like:disabled{opacity:.55;cursor:default}
 #${ROOT_ID} .ssv-feedback{position:absolute;z-index:25;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 62px));transform:translateX(-50%);max-width:calc(100% - 30px);padding:8px 11px;border-radius:999px;background:#17120fee;border:1px solid #d9a44155;color:#f2d093;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .16s ease}
 #${ROOT_ID} .ssv-feedback.show{opacity:1}
+#${ROOT_ID} .ssv-heart-burst{position:absolute;inset:0;z-index:31;overflow:hidden;pointer-events:none}
+#${ROOT_ID} .ssv-floating-heart{position:absolute;left:50%;top:72%;display:block;color:#ff375f;text-shadow:0 2px 7px #000,0 0 16px #ff375f66;opacity:0;transform:translate(-50%,-50%) scale(.45);animation:ssvHeartFloat var(--ssv-heart-duration,1.35s) cubic-bezier(.17,.67,.21,1) forwards;will-change:transform,opacity}
+@keyframes ssvHeartFloat{0%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(0deg)}12%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--ssv-heart-x,0px)),calc(-50% + var(--ssv-heart-y,-180px))) scale(var(--ssv-heart-scale,1)) rotate(var(--ssv-heart-rotate,0deg))}}
+@-webkit-keyframes ssvHeartFloat{0%{opacity:0;-webkit-transform:translate(-50%,-50%) scale(.45) rotate(0deg)}12%{opacity:1}100%{opacity:0;-webkit-transform:translate(calc(-50% + var(--ssv-heart-x,0px)),calc(-50% + var(--ssv-heart-y,-180px))) scale(var(--ssv-heart-scale,1)) rotate(var(--ssv-heart-rotate,0deg))}}
 @keyframes ssvProgress{from{width:0}to{width:100%}}
 @-webkit-keyframes ssvProgress{from{width:0}to{width:100%}}
 @media(max-width:600px){#${ROOT_ID} .ssv-frame{width:100%}#${ROOT_ID} .ssv-nav{bottom:86px}}
@@ -1600,6 +1667,8 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         data.success!==
         false
       ){
+        const wasLiked=isLocallyLiked(story.id);
+
         markLocallyLiked(
           story.id
         );
@@ -1610,6 +1679,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
         button.textContent=
           "♥";
+
+        if(!wasLiked){
+          launchLikeHearts();
+        }
 
         flash(
           data.already_liked

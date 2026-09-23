@@ -1038,7 +1038,7 @@ body:not(.ma7alak-premium-homepage) #ma7alak-header-theme-backdrop{
   line-height:1;
   cursor:pointer;
 }
-.ma7alak-search-panel-title{padding:16px 18px 7px;color:rgba(255,255,255,.38);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase;}
+.ma7alak-search-panel-title{padding:16px 18px 7px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:rgba(255,255,255,.38);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase}.ma7alak-search-history-clear-all{display:none;border:0;background:transparent;color:#efc66e;font:800 10px/1 Arial,"Segoe UI",sans-serif;letter-spacing:0;text-transform:none;cursor:pointer;padding:5px 0}.ma7alak-search-history-clear-all.visible{display:block}.ma7alak-search-history-row{display:flex;align-items:center;gap:7px}.ma7alak-search-history-row .ma7alak-search-result{min-width:0;flex:1}.ma7alak-search-history-remove{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#ffffff70;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent}.ma7alak-search-history-remove:hover{background:#ffffff0b;color:#fff}.ma7alak-search-history-remove:active{transform:scale(.88)}
 #ma7alak-search-results{flex:1;min-height:120px;max-height:min(350px,calc(100dvh - 215px));padding:7px 10px 14px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(217,164,65,.25) transparent;}
 #ma7alak-search-results::-webkit-scrollbar{width:6px;}
 #ma7alak-search-results::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(217,164,65,.25);}
@@ -1796,7 +1796,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       </div>
       <button id="ma7alak-search-close" type="button" aria-label="Close search">×</button>
     </div>
-    <div class="ma7alak-search-panel-title">Shops</div>
+    <div class="ma7alak-search-panel-title"><span id="ma7alak-search-panel-label">Shops</span><button id="ma7alak-search-history-clear-all" class="ma7alak-search-history-clear-all" type="button">Clear all</button></div>
     <div id="ma7alak-search-results"></div>
   </div>
 </div>
@@ -1858,6 +1858,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
   let shopProfiles=[];
   let ownerShop=null;
   let searchTimer=null;
+  const SEARCH_HISTORY_KEY="ma7alak_shop_search_history_v1";
   let followedShopSlugs=[];
   let followedShopTimes=new Map();
   let followingPanelOpen=false;
@@ -2489,6 +2490,63 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
   }
 
+  function getSearchHistory(){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)||"[]");
+      return Array.isArray(parsed)?parsed.map(value=>String(value||"").trim()).filter(Boolean).slice(0,12):[];
+    }catch(error){
+      return [];
+    }
+  }
+
+  function saveSearchHistory(items){
+    try{
+      localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(items.slice(0,12)));
+    }catch(error){}
+  }
+
+  function rememberSearchedShop(slug){
+    slug=String(slug||"").trim();
+    if(!slug)return;
+    saveSearchHistory([slug,...getSearchHistory().filter(value=>value!==slug)]);
+  }
+
+  function removeSearchedShop(slug){
+    slug=String(slug||"").trim();
+    saveSearchHistory(getSearchHistory().filter(value=>value!==slug));
+  }
+
+  function clearSearchedShops(){
+    saveSearchHistory([]);
+  }
+
+  function searchResultHTML(shop,historyMode){
+    const slug=String(shop.shop_slug);
+    const name=String(shop.shop_name||prettyShopName(slug));
+    const image=String(shop.profile_image_url||"");
+    const mediaHTML=image
+      ? `<img class="ma7alak-search-result-img" src="${escapeHTML(image)}" alt="${escapeHTML(name)}" loading="lazy">`
+      : `<div class="ma7alak-search-result-fallback">${escapeHTML(initials(name))}</div>`;
+
+    const link=`
+      <a class="ma7alak-search-result" href="/${encodeURIComponent(slug)}" data-search-shop="${escapeHTML(slug)}">
+        ${mediaHTML}
+        <div class="ma7alak-search-result-copy">
+          <div class="ma7alak-search-result-name">${escapeHTML(name)}</div>
+          <div class="ma7alak-search-result-meta">${historyMode?"Previously searched":"View shop on ShoufHon"}</div>
+        </div>
+        <div class="ma7alak-search-result-arrow">→</div>
+      </a>`;
+
+    if(!historyMode)return link;
+
+    return `
+      <div class="ma7alak-search-history-row">
+        ${link}
+        <button class="ma7alak-search-history-remove" type="button" data-search-history-remove="${escapeHTML(slug)}" aria-label="Remove ${escapeHTML(name)} from search history">×</button>
+      </div>`;
+  }
+
   function openSearch(initialValue){
     const overlay=document.getElementById("ma7alak-header-search-overlay");
     const input=document.getElementById("ma7alak-overlay-search-input");
@@ -2514,10 +2572,25 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
   function renderSearchResults(query){
     const results=document.getElementById("ma7alak-search-results");
-    if(!results){return;}
+    const label=document.getElementById("ma7alak-search-panel-label");
+    const clearAll=document.getElementById("ma7alak-search-history-clear-all");
+    if(!results)return;
 
     const normalized=String(query||"").trim().toLowerCase();
+
     if(!normalized){
+      const historySlugs=getSearchHistory();
+      const bySlug=new Map(shopProfiles.map(shop=>[String(shop.shop_slug||"").trim(),shop]));
+      const historyShops=historySlugs.map(slug=>bySlug.get(slug)).filter(Boolean);
+
+      if(label)label.textContent=historyShops.length?"Shops you search for":"Shops";
+      if(clearAll)clearAll.classList.toggle("visible",historyShops.length>0);
+
+      if(historyShops.length){
+        results.innerHTML=historyShops.map(shop=>searchResultHTML(shop,true)).join("");
+        return;
+      }
+
       results.innerHTML=`
         <div class="ma7alak-search-empty">
           <div class="ma7alak-search-empty-icon">
@@ -2532,15 +2605,16 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       return;
     }
 
+    if(label)label.textContent="Shops";
+    if(clearAll)clearAll.classList.remove("visible");
+
     let matches=shopProfiles.filter(function(shop){
       const haystack=[shop.shop_name,shop.shop_slug,shop.category,shop.category_name,shop.location,shop.area,shop.city]
         .map(function(value){return String(value||"");})
         .join(" ")
         .toLowerCase();
       return haystack.includes(normalized);
-    });
-
-    matches=matches.slice(0,12);
+    }).slice(0,12);
 
     if(!matches.length){
       results.innerHTML=`
@@ -2557,24 +2631,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       return;
     }
 
-    results.innerHTML=matches.map(function(shop){
-      const slug=String(shop.shop_slug);
-      const name=String(shop.shop_name||prettyShopName(slug));
-      const image=String(shop.profile_image_url||"");
-      const mediaHTML=image
-        ? `<img class="ma7alak-search-result-img" src="${escapeHTML(image)}" alt="${escapeHTML(name)}" loading="lazy">`
-        : `<div class="ma7alak-search-result-fallback">${escapeHTML(initials(name))}</div>`;
-
-      return `
-        <a class="ma7alak-search-result" href="/${encodeURIComponent(slug)}">
-          ${mediaHTML}
-          <div class="ma7alak-search-result-copy">
-            <div class="ma7alak-search-result-name">${escapeHTML(name)}</div>
-            <div class="ma7alak-search-result-meta">View shop on ShoufHon</div>
-          </div>
-          <div class="ma7alak-search-result-arrow">→</div>
-        </a>`;
-    }).join("");
+    results.innerHTML=matches.map(shop=>searchResultHTML(shop,false)).join("");
   }
 
   function setupSearchEvents(){
@@ -2584,6 +2641,8 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     const closeButton=document.getElementById("ma7alak-search-close");
     const clearButton=document.getElementById("ma7alak-search-clear");
     const overlay=document.getElementById("ma7alak-header-search-overlay");
+    const results=document.getElementById("ma7alak-search-results");
+    const clearAllHistory=document.getElementById("ma7alak-search-history-clear-all");
 
     if(desktopInput){
       desktopInput.addEventListener("focus",function(){openSearch(desktopInput.value);});
@@ -2611,6 +2670,33 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
     }
 
     if(closeButton){closeButton.addEventListener("click",closeSearch);}
+
+    if(results){
+      results.addEventListener("click",function(event){
+        const removeButton=event.target.closest("[data-search-history-remove]");
+
+        if(removeButton){
+          event.preventDefault();
+          event.stopPropagation();
+          removeSearchedShop(removeButton.getAttribute("data-search-history-remove"));
+          renderSearchResults(overlayInput?.value||"");
+          return;
+        }
+
+        const shopLink=event.target.closest("[data-search-shop]");
+
+        if(shopLink){
+          rememberSearchedShop(shopLink.getAttribute("data-search-shop"));
+        }
+      });
+    }
+
+    if(clearAllHistory){
+      clearAllHistory.addEventListener("click",function(){
+        clearSearchedShops();
+        renderSearchResults(overlayInput?.value||"");
+      });
+    }
 
     if(overlay){
       overlay.addEventListener("click",function(event){if(event.target===overlay){closeSearch();}});
