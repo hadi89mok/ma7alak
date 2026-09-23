@@ -5346,7 +5346,7 @@ const homeFields=[['home_spotlight_label','Homepage spotlight label','text'],['h
 const profileFields=[['about_text','About the shop','textarea'],['tiktok_url','TikTok — URL or @username','text'],['instagram_url','Instagram — URL or username','text'],['whatsapp_url','WhatsApp — URL or phone number','text'],['address_text','Full address','text'],['map_embed_url','Google Maps embed URL','url'],['menu_image_url','Menu image URL','url']];
 let settings={},section,client;
 function field(id,label,type,value=''){const safeValue=type==='color'&&!value?'#e3b85f':value;if(type==='checkbox')return `<label class="m7da-field m7da-check"><span><input id="${id}" type="checkbox" ${value===true||String(value).toLowerCase()==='true'?'checked':''}> ${esc(label)}</span></label>`;return `<label class="m7da-field">${esc(label)}${type==='textarea'?`<textarea id="${id}">${esc(safeValue)}</textarea>`:`<input id="${id}" type="${type}" ${type==='number'?'step="any"':''} value="${esc(safeValue)}">`}</label>`}
-function mountForm(form,prefix){if(!form)return;const existingBox=form.querySelector('.m7da-fields:not(.m7da-home-fields)');const requiredKeys=shopFields.concat(profileFields).map(([k])=>k);const missingRequired=requiredKeys.some(k=>!document.getElementById(prefix+k));if(existingBox&&!missingRequired)return;if(existingBox&&missingRequired){existingBox.remove();const oldHome=form.querySelector('.m7da-home-fields');if(oldHome)oldHome.remove();}const manualLocation=document.getElementById(prefix==='m7de-'?'ma-edit-location':'ma-shop-location');if(manualLocation){manualLocation.placeholder='e.g. Beirut, Online work only';const locSpan=manualLocation.closest('label')?.querySelector('span');if(locSpan)locSpan.textContent='Location / work type — manual';}const box=document.createElement('fieldset');box.className='m7da-fields m7da-sectioned-extras';box.innerHTML='<legend>Shop extras</legend><p class="m7da-sectioned-help">Only controls related to the section you opened are shown here.</p><div class="m7da-grid">'+shopFields.concat(profileFields).map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(box);shopFields.concat(profileFields).forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const home=document.createElement('fieldset');home.className='m7da-fields m7da-home-fields';home.innerHTML='<legend>Homepage spotlight</legend><p>These optional fields control this shop’s creative Featured / New homepage card. Featured and New status still come from the shop controls above.</p><div class="m7da-grid">'+homeFields.map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(home);homeFields.forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const cover=box.querySelector('#'+prefix+'cover');const upload=document.createElement('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';const label=document.createElement('label');label.className='m7da-field';label.dataset.m7ExtraKey='cover_upload';label.textContent='Or upload a cover photo (up to 8 MB)';label.append(upload);cover.parentElement.after(label);upload.onchange=async()=>{const f=upload.files?.[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8*1024*1024){alert('Choose a JPG, PNG or WebP image up to 8 MB.');return}upload.disabled=true;const c=window.Ma7alakAdminClient;const path='directory/'+crypto.randomUUID()+'.'+({"image/jpeg":'jpg',"image/png":'png',"image/webp":'webp'}[f.type]);try{const r=await c.storage.from('shop-gallery').upload(path,f,{cacheControl:'31536000',upsert:false,contentType:f.type});if(r.error)throw r.error;cover.value=c.storage.from('shop-gallery').getPublicUrl(path).data.publicUrl;label.firstChild.textContent='Uploaded. Save the shop to apply this cover.'}catch(e){alert(e.message||'Upload failed.')}finally{upload.disabled=false}}}
+function mountForm(form,prefix){if(!form)return;const existingBox=form.querySelector('.m7da-fields:not(.m7da-home-fields)');const requiredKeys=shopFields.concat(profileFields).map(([k])=>k);const missingRequired=requiredKeys.some(k=>!document.getElementById(prefix+k));if(existingBox&&!missingRequired)return;if(existingBox&&missingRequired){existingBox.remove();const oldHome=form.querySelector('.m7da-home-fields');if(oldHome)oldHome.remove();}const manualLocation=document.getElementById(prefix==='m7de-'?'ma-edit-location':'ma-shop-location');if(manualLocation){manualLocation.placeholder='e.g. Beirut, Online work only';const locSpan=manualLocation.closest('label')?.querySelector('span');if(locSpan)locSpan.textContent='Location / work type — manual';}const box=document.createElement('fieldset');box.className='m7da-fields m7da-sectioned-extras';box.innerHTML='<legend>Shop extras</legend><p class="m7da-sectioned-help">Only controls related to the section you opened are shown here.</p><div class="m7da-grid">'+shopFields.concat(profileFields).map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(box);shopFields.concat(profileFields).forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const home=document.createElement('fieldset');home.className='m7da-fields m7da-home-fields';home.innerHTML='<legend>Homepage spotlight</legend><p>These optional fields control this shop’s creative Featured / New homepage card. Featured and New status still come from the shop controls above.</p><div class="m7da-grid">'+homeFields.map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(home);homeFields.forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const cover=box.querySelector('#'+prefix+'cover');const upload=document.createElement('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';const label=document.createElement('label');label.className='m7da-field';label.dataset.m7ExtraKey='cover_upload';label.textContent='Or upload a cover photo (up to 8 MB)';label.append(upload);cover.parentElement.after(label);upload.onchange=async()=>{const f=upload.files?.[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8*1024*1024){alert('Choose a JPG, PNG or WebP image up to 8 MB.');return}upload.disabled=true;const c=window.Ma7alakAdminClient;const path='directory/'+crypto.randomUUID()+'.'+({"image/jpeg":'jpg',"image/png":'png',"image/webp":'webp'}[f.type]);try{const r=await c.storage.from('shop-gallery').upload(path,f,{cacheControl:'31536000',upsert:false,contentType:f.type});if(r.error)throw r.error;cover.value=c.storage.from('shop-gallery').getPublicUrl(path).data.publicUrl;cover.dispatchEvent(new Event('input',{bubbles:true}));cover.dispatchEvent(new Event('change',{bubbles:true}));label.firstChild.textContent='Uploaded. Save the shop to apply this cover.'}catch(e){alert(e.message||'Upload failed.')}finally{upload.disabled=false}}}
 window.Ma7alakDirectoryAdmin={
  fill(shop){mount();const form=document.getElementById('ma-admin-edit-form');if(!form)return;form.dataset.directoryOptions=JSON.stringify(shop.directory_options||{});shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById('m7de-'+k),value=shop.directory_options?.[k];if(!input)return;if(t==='checkbox')input.checked=value===true||String(value).toLowerCase()==='true';else input.value=value??(t==='color'?'#e3b85f':'')});profileFields.forEach(([k])=>{const input=document.getElementById('m7de-'+k);if(input)input.value=shop[k]??''})},
  collect(edit){mount();const prefix=edit?'m7de-':'m7da-',form=document.getElementById(edit?'ma-admin-edit-form':'ma-admin-shop-form');let options={};try{options=JSON.parse(form.dataset.directoryOptions||'{}')}catch{};shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById(prefix+k);if(t==='checkbox'){options[k]=input.checked;return}const v=input.value.trim();options[k]=v===''?null:t==='number'?Number(v):v;if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');if(t==='number'&&v&&!Number.isFinite(options[k]))throw Error(l+' must be a number.');if(t==='color'&&v&&!/^#[0-9a-f]{6}$/i.test(v))throw Error(l+' must be a valid color.')});if(options.latitude!=null&&(options.latitude< -90||options.latitude>90))throw Error('Latitude must be between -90 and 90.');if(options.longitude!=null&&(options.longitude< -180||options.longitude>180))throw Error('Longitude must be between -180 and 180.');if((options.latitude==null)!==(options.longitude==null))throw Error('Enter both latitude and longitude.');if(options.rating!=null&&(options.rating<0||options.rating>5))throw Error('Rating must be between 0 and 5.');if(options.review_count!=null&&(!Number.isInteger(options.review_count)||options.review_count<0))throw Error('Review count must be a whole positive number.');const result={directory_options:options};profileFields.forEach(([k,l,t])=>{const v=document.getElementById(prefix+k).value.trim();if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');result[k]=v||null});return result}
@@ -19262,6 +19262,7 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
   let globalPreviewChannel=null;
   let globalPreviewReady=false;
   let pendingGlobalMessage=null;
+  const lastGoodDraftBySlug=new Map();
 
   try{
     if("BroadcastChannel" in window){
@@ -19287,10 +19288,89 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     ).trim();
   }
 
+
+  const PROFILE_DIRECT_FIELDS={
+    about_text:"m7de-about_text",
+    tiktok_url:"m7de-tiktok_url",
+    instagram_url:"m7de-instagram_url",
+    whatsapp_url:"m7de-whatsapp_url",
+    address_text:"m7de-address_text",
+    map_embed_url:"m7de-map_embed_url",
+    menu_image_url:"m7de-menu_image_url"
+  };
+
+  function directOptionsSnapshot(form,seed){
+    const options={...(seed||{})};
+    if(!form)return options;
+
+    form.querySelectorAll("[id^='m7de-']").forEach(el=>{
+      let key=String(el.id||"").slice(5);
+      if(
+        !key||
+        el.type==="file"||
+        key.startsWith("about-service-")||
+        Object.values(PROFILE_DIRECT_FIELDS).includes(el.id)
+      )return;
+
+      key=key.replace(/-/g,"_");
+
+      const aboutAliases={
+        about_title_color_direct:"about_title_color",
+        about_title_size_direct:"about_title_font_size",
+        about_title_font_direct:"about_title_font_style",
+        about_title_animation_direct:"about_title_animation",
+        about_arabic_color_direct:"about_arabic_color",
+        about_arabic_size_direct:"about_arabic_font_size",
+        about_arabic_font_direct:"about_arabic_font_style",
+        about_arabic_animation_direct:"about_arabic_animation"
+      };
+      key=aboutAliases[key]||key;
+      options[key]=valueOf(el);
+    });
+
+    form.querySelectorAll("[data-m7cd-key]").forEach(el=>{
+      const key=String(el.dataset.m7cdKey||"").trim();
+      if(key)options[key]=valueOf(el);
+    });
+
+    const availabilityBox=form.querySelector(".m7-availability-extra-box");
+    if(availabilityBox){
+      options.availability_extra_rows=Array.from(
+        availabilityBox.querySelectorAll(".m7-availability-extra-row")
+      ).map(row=>({
+        days:String(row.querySelector("[data-avail-extra-days]")?.value||"").trim(),
+        time:String(row.querySelector("[data-avail-extra-time]")?.value||"").trim()
+      })).filter(row=>row.days||row.time);
+    }
+
+    const services=[];
+    for(let index=1;index<=4;index++){
+      const label=String(document.getElementById("m7de-about-service-"+index+"-label")?.value||"").trim();
+      const icon=String(document.getElementById("m7de-about-service-"+index+"-icon")?.value||"sparkle").trim();
+      if(label)services.push({label,icon});
+    }
+    if(form.querySelector("[id^='m7de-about-service-']")){
+      options.about_services=services;
+    }
+
+    form.querySelectorAll("[data-m7ats-row]").forEach(row=>{
+      const name=String(row.dataset.m7atsRow||"").trim();
+      if(!name)return;
+      const color=row.querySelector("[data-m7ats-color]");
+      const colorKey=String(color?.dataset?.colorKey||"").trim();
+      if(colorKey)options[colorKey]=valueOf(color);
+      options["about_"+name+"_font_style"]=valueOf(row.querySelector("[data-m7ats-font]"));
+      options["about_"+name+"_font_size"]=valueOf(row.querySelector("[data-m7ats-size]"));
+    });
+
+    return options;
+  }
+
   function currentDraft(){
     const form=document.getElementById("ma-admin-edit-form");
     let options={};
     let collected={};
+    const slug=selectedSlug();
 
     try{
       const existing=JSON.parse(form?.dataset?.directoryOptions||"{}");
@@ -19319,6 +19399,11 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
             ...collected.directory_options
           };
         }
+
+        lastGoodDraftBySlug.set(slug,{
+          ...collected,
+          directory_options:{...options}
+        });
       }
     }catch(_){
       /*
@@ -19326,16 +19411,16 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
          collect() may correctly reject the draft. Keep preview alive by
          reading mounted controls directly until the value becomes valid.
       */
-      document
-        .querySelectorAll(
-          "#ma-admin-edit-form [id^='m7de-']"
-        )
-        .forEach(el=>{
-          const key=String(el.id||"").slice(5);
-          if(!key)return;
-          options[key]=valueOf(el);
-        });
+      const last=lastGoodDraftBySlug.get(slug);
+      if(last){
+        collected={...last};
+        options={...(last.directory_options||options)};
+      }
     }
+
+    /* Overlay every mounted control even when a different field is midway
+       through an invalid value. Save validation is intentionally unchanged. */
+    options=directOptionsSnapshot(form,options);
 
     const profile={
       ...(collected&&typeof collected==="object"?collected:{}),
@@ -19378,6 +19463,11 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
         ""
       ).trim()
     };
+
+    Object.entries(PROFILE_DIRECT_FIELDS).forEach(([key,id])=>{
+      const el=document.getElementById(id);
+      if(el)profile[key]=String(el.value||"").trim();
+    });
 
     delete profile.directory_options;
     profile.directory_options=options;

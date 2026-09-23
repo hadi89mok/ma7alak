@@ -935,6 +935,28 @@
     apply(next);
   }
 
+
+  function receiveBridgePreview(message){
+    if(!message||message.type!=="MA7ALAK_DESIGN_PREVIEW")return;
+
+    const current=slug();
+    const incoming=String(
+      message.shop_slug||message.shopSlug||""
+    ).trim().toLowerCase();
+
+    if(incoming&&current&&incoming!==current)return;
+
+    const next=message.directory_options;
+    if(!next||typeof next!=="object"||Array.isArray(next))return;
+
+    receivePreview({
+      detail:{
+        shop_slug:incoming||current,
+        directory_options:next
+      }
+    });
+  }
+
   function observe(){
     resizeObserver?.disconnect();
     storyObserver?.disconnect();
@@ -977,6 +999,8 @@
   window.addEventListener("ma7alak:profile-design-preview",receivePreview);
   window.addEventListener("ma7alak:profile-design-saved",receiveSaved);
   window.addEventListener("ma7alak:profile-draft-preview",receivePreview);
+  window.addEventListener("message",event=>receiveBridgePreview(event?.data));
+  window.addEventListener("shoufhon:design-preview",event=>receiveBridgePreview(event?.detail));
   window.addEventListener("ma7alak:story-uploaded",event=>{
     const eventSlug=String(event?.detail?.shop_slug||event?.detail?.shopSlug||"").trim().toLowerCase();
     if(!eventSlug||!slug()||eventSlug===slug())triggerStoryBurst();
