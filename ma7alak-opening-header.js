@@ -399,6 +399,209 @@
 
 })();
 
+/* Homepage Stories live inside the Opening Header and share follow/story state with the rest of ShoufHon. */
+(function(){
+  "use strict";
+  if(window.__shoufhonHomeStoriesTray)return;
+  window.__shoufhonHomeStoriesTray=true;
+  if(location.pathname.replace(/\/+$/,'') && !/^\/(?:home|index)?$/i.test(location.pathname.replace(/\/+$/,'')))return;
+  const url="https://wdtaiuwtqdepzdamgsrs.supabase.co";
+  const key="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+  let client,slugs=[],owner=null,rows=[],profiles=new Map(),timer=0,version=0,channel=null,playing=[],index=0,mediaTimer=0,viewerOpen=false;
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const path=s=>'/'+encodeURIComponent(s);
+  function db(){return client||(client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||window.Ma7alakSupabase?.client||window.supabase?.createClient?.(url,key));}
+  function mount(){
+    const host=document.getElementById('ma7alak-opening-header-root');
+    if(!host)return null;
+    let root=document.getElementById('shoufhon-home-stories');
+    if(!root){
+      root=document.createElement('section');
+      root.id='shoufhon-home-stories';
+      root.hidden=true;
+      root.setAttribute('aria-label','Stories from shops you follow');
+    }
+    if(!document.getElementById('shoufhon-home-stories-style')){
+      const style=document.createElement('style');
+      style.id='shoufhon-home-stories-style';
+      style.textContent=`
+#shoufhon-home-stories{box-sizing:border-box;width:100%;max-width:100%;margin:0 auto 8px;padding:11px 12px 10px;position:relative;z-index:20;overflow:hidden;border:1px solid rgba(217,164,65,.20);border-radius:20px;background:linear-gradient(180deg,rgba(21,18,14,.96),rgba(8,8,8,.97));box-shadow:0 10px 28px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.025);color:#f7dfaa;font:600 12px Arial,sans-serif}
+#shoufhon-home-stories[hidden]{display:none!important}
+#shoufhon-home-stories .shs-title{font-size:14px;font-weight:900;margin:0 0 10px 2px;letter-spacing:.2px}
+#shoufhon-home-stories .shs-list{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:3px 2px 5px;scrollbar-width:none}
+#shoufhon-home-stories .shs-list::-webkit-scrollbar{display:none}
+#shoufhon-home-stories .shs-item{flex:0 0 70px;width:70px;display:flex;align-items:center;flex-direction:column;gap:6px;text-align:center;text-decoration:none;color:#f6e5c4;scroll-snap-align:start;touch-action:manipulation;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#shoufhon-home-stories .shs-ring{position:relative;width:66px;height:66px;padding:3px;border-radius:50%;box-sizing:border-box;background:#33251a;isolation:isolate;box-shadow:0 0 0 1px rgba(217,164,65,.20),0 0 15px rgba(217,164,65,.12)}
+#shoufhon-home-stories .shs-ring::before{content:"";position:absolute;inset:0;z-index:0;border-radius:50%;background:conic-gradient(from 0deg,#e3b85f,#fff1b0,#e3b85f,transparent 82%,#e3b85f)}
+#shoufhon-home-stories .shs-unseen .shs-ring::before{animation:shoufhonHomeStorySpin 2.2s linear infinite;-webkit-animation:shoufhonHomeStorySpin 2.2s linear infinite;will-change:transform}
+#shoufhon-home-stories .shs-seen .shs-ring::before{background:#68635e;animation:none!important;-webkit-animation:none!important}
+#shoufhon-home-stories .shs-ring img,#shoufhon-home-stories .shs-fallback{position:relative;z-index:1;display:grid;place-items:center;width:100%;height:100%;object-fit:cover;border:3px solid #100c0a;box-sizing:border-box;border-radius:50%;background:#35231a;color:#fff;font-size:21px}
+#shoufhon-home-stories .shs-plus{position:absolute;z-index:3;right:-3px;bottom:0;background:#dca746;color:#1b1008;border:2px solid #100c0a;border-radius:50%;height:22px;width:22px;line-height:18px;font-size:20px;font-weight:900}
+#shoufhon-home-stories .shs-name{max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px}
+@keyframes shoufhonHomeStorySpin{to{transform:rotate(360deg)}}@-webkit-keyframes shoufhonHomeStorySpin{to{-webkit-transform:rotate(360deg)}}
+html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;overscroll-behavior:none!important}
+#shoufhon-story-viewer{position:fixed;inset:0;z-index:2147483647;background:#000;display:grid;place-items:center;color:#fff;touch-action:none;overscroll-behavior:none}
+#shoufhon-story-viewer[hidden]{display:none}
+#shoufhon-story-viewer .shv-frame{position:relative;width:min(100vw,460px);height:100dvh;overflow:hidden;background:#000}
+#shoufhon-story-viewer .shv-content{position:absolute;inset:0}
+#shoufhon-story-viewer .shv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#shoufhon-story-viewer .shv-top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 12px 12px;z-index:5;background:linear-gradient(#000b,transparent)}
+#shoufhon-story-viewer .shv-bars{display:flex;gap:3px;margin-bottom:10px}
+#shoufhon-story-viewer .shv-bars i{flex:1;height:3px;border-radius:4px;background:#fff6}
+#shoufhon-story-viewer .shv-bars i.done{background:#fff}
+#shoufhon-story-viewer .shv-close{float:right;color:white;background:#0009;border:1px solid #ffffff35;border-radius:50%;width:40px;height:40px;font-size:25px;touch-action:manipulation}
+#shoufhon-story-viewer .shv-name{display:block;padding-top:9px;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#shoufhon-story-viewer .shv-nav{position:absolute;z-index:4;top:78px;bottom:0;width:38%;border:0;background:transparent;color:transparent}
+#shoufhon-story-viewer .shv-prev{left:0}#shoufhon-story-viewer .shv-next{right:0}
+@media(max-width:600px){#shoufhon-home-stories{margin-bottom:7px;padding:10px 10px 9px;border-radius:18px}#shoufhon-home-stories .shs-list{gap:10px}}
+`;
+      document.head.appendChild(style);
+    }
+    const hero=host.querySelector('.ma7alak-ultra-hero');
+    if(root.parentNode!==host || (hero && root.nextElementSibling!==hero))host.insertBefore(root,hero||host.firstChild);
+    return root;
+  }
+  function item(slug,name,image,storyId,upload){
+    const href='#';
+    const safeImage=/^https:\/\//i.test(image)?image:'';
+    const stateClass=upload?'':(hasUnseen(slug)?' shs-unseen':' shs-seen');
+    return `<a class="shs-item${stateClass}" href="${href}" data-slug="${esc(slug)}" data-upload="${upload?'1':'0'}" aria-label="${esc(upload?'Add to your story':'View '+name+' story')}"><span class="shs-ring">${safeImage?`<img src="${esc(safeImage)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="shs-fallback">${esc(name.slice(0,1).toUpperCase())}</span>`}${upload?'<span class="shs-plus" aria-hidden="true">+</span>':''}</span><span class="shs-name" dir="auto">${esc(upload?'Your story':name)}</span></a>`;
+  }
+  function seenStoryTime(slug){try{return new Date(localStorage.getItem('ma7alak_story_seen_'+slug)||0).getTime()||0}catch(_){return 0}}
+  function hasUnseen(slug){const last=seenStoryTime(slug);return rows.filter(r=>r.shop_slug===slug).some(r=>new Date(r.created_at||r.expires_at||0).getTime()>last)}
+  function markStoriesSeen(slug){
+    const list=rows.filter(r=>r.shop_slug===slug);if(!list.length)return;
+    const latest=list.reduce((value,item)=>new Date(item.created_at||0).getTime()>new Date(value||0).getTime()?item.created_at:value,'');
+    if(latest)try{localStorage.setItem('ma7alak_story_seen_'+slug,latest)}catch(_){}
+    render();
+  }
+  function stopMedia(){clearTimeout(mediaTimer);document.querySelector('#shoufhon-story-viewer video')?.pause();}
+  function exitViewerFullscreen(){
+    try{
+      const active=document.fullscreenElement||document.webkitFullscreenElement;if(!active)return;
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==='function'){const result=exit.call(document);if(result&&typeof result.catch==='function')result.catch(()=>{})}
+    }catch(_){}
+  }
+  function closeViewer(fromHistory){
+    if(!viewerOpen)return;viewerOpen=false;stopMedia();
+    document.getElementById('shoufhon-story-viewer')?.remove();
+    document.documentElement.classList.remove('shoufhon-story-open');document.body.classList.remove('shoufhon-story-open');
+    exitViewerFullscreen();
+    if(!fromHistory&&history.state?.shoufhonStoryViewer)history.back();
+  }
+  function next(){if(index+1>=playing.length){closeViewer();return}index++;showMedia()}
+  function showMedia(){
+    stopMedia();const story=playing[index];if(!story||new Date(story.expires_at).getTime()<=Date.now()){next();return}
+    const viewer=document.getElementById('shoufhon-story-viewer');if(!viewer)return;
+    const urlValue=/^https:\/\//i.test(story.storage_path||'')?story.storage_path:db().storage.from('shop-stories').getPublicUrl(story.storage_path).data.publicUrl;
+    if(!/^https:\/\//i.test(urlValue||'')){next();return}
+    const media=viewer.querySelector('.shv-content');media.replaceChildren();
+    const element=document.createElement(story.media_type==='video'?'video':'img');element.className='shv-media';element.src=urlValue;
+    if(element.tagName==='VIDEO'){element.autoplay=true;element.playsInline=true;element.controls=false;element.onended=next;element.onerror=next;element.play().catch(()=>{element.controls=true;});mediaTimer=setTimeout(next,30000)}
+    else{element.onerror=next;mediaTimer=setTimeout(next,6000)}
+    media.appendChild(element);
+    const profile=profiles.get(story.shop_slug)||{};
+    viewer.querySelector('.shv-name').textContent=profile.shop_name||story.shop_slug;
+    viewer.querySelector('.shv-bars').innerHTML=playing.map((_,i)=>'<i class="'+(i<=index?'done':'')+'"></i>').join('');
+  }
+  function openViewer(slug){
+    playing=rows.filter(r=>r.shop_slug===slug&&new Date(r.expires_at).getTime()>Date.now()).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    if(!playing.length){render();return}
+    const seenAt=seenStoryTime(slug);
+    const unseenIndex=playing.findIndex(r=>new Date(r.created_at||0).getTime()>seenAt);
+    index=unseenIndex>=0?unseenIndex:0;
+    markStoriesSeen(slug);
+    const viewer=document.createElement('div');viewer.id='shoufhon-story-viewer';viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');
+    viewer.innerHTML='<div class="shv-frame"><div class="shv-content"></div><div class="shv-top"><div class="shv-bars"></div><button class="shv-close" type="button" aria-label="Close story">×</button><b class="shv-name"></b></div><button class="shv-nav shv-prev" type="button" aria-label="Previous story">Previous</button><button class="shv-nav shv-next" type="button" aria-label="Next story">Next</button></div>';
+    document.body.appendChild(viewer);viewerOpen=true;
+    document.documentElement.classList.add('shoufhon-story-open');document.body.classList.add('shoufhon-story-open');
+    try{history.pushState({...history.state,shoufhonStoryViewer:true},'')}catch(_){}
+    viewer.querySelector('.shv-close').onclick=()=>closeViewer();
+    viewer.querySelector('.shv-prev').onclick=()=>{index=Math.max(0,index-1);showMedia()};
+    viewer.querySelector('.shv-next').onclick=next;
+    let touchX=0;
+    viewer.addEventListener('touchstart',e=>{touchX=e.touches[0]?.clientX||0},{passive:true});
+    viewer.addEventListener('touchend',e=>{const dx=(e.changedTouches[0]?.clientX||0)-touchX;if(Math.abs(dx)>65){if(dx<0)next();else{index=Math.max(0,index-1);showMedia()}}},{passive:true});
+    try{
+      const request=viewer.requestFullscreen||viewer.webkitRequestFullscreen;
+      if(typeof request==='function'){const result=request.call(viewer,{navigationUI:'hide'});if(result&&typeof result.catch==='function')result.catch(()=>{})}
+    }catch(_){}
+    showMedia();
+  }
+  function openOwnerUploader(){
+    if(!owner)return;
+    const send=()=>window.postMessage({type:'MA7ALAK_OPEN_STORY_UPLOADER',shopSlug:owner.shop_slug,__ma7alakOpenStoryNow:true},location.origin);
+    if([...document.scripts].some(s=>/story-upload-panel\.js/.test(s.src))){send();return}
+    const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@7f7ee00edfc312858c31ff72eb78170499f9bcc6/story-upload-panel.js';script.onload=send;script.onerror=()=>console.warn('Story uploader could not load');document.head.appendChild(script);
+  }
+  function render(){
+    const root=mount();if(!root)return;
+    const byShop=new Map();rows.forEach(r=>{if(!byShop.has(r.shop_slug))byShop.set(r.shop_slug,r)});
+    const cards=[];
+    if(owner)cards.push(item(owner.shop_slug,owner.shop_name||'Your shop',owner.profile_image_url||'',byShop.get(owner.shop_slug)?.id,true));
+    slugs.forEach(slug=>{
+      if(slug===owner?.shop_slug)return;
+      const story=byShop.get(slug);if(!story)return;
+      const p=profiles.get(slug)||{};cards.push(item(slug,p.shop_name||slug,p.profile_image_url||'',story.id,false));
+    });
+    if(!cards.length){root.hidden=true;root.replaceChildren();return}
+    root.hidden=false;root.innerHTML='<h2 class="shs-title">Stories</h2><div class="shs-list">'+cards.join('')+'</div>';
+  }
+  async function refresh(){
+    if(document.hidden)return;const c=db();if(!c)return;const turn=++version;
+    try{
+      const user=(await c.auth.getUser()).data?.user;
+      let nextOwner=null;
+      if(user){const o=await c.from('shop_owners').select('shop_slug').eq('user_id',user.id).limit(1).maybeSingle();if(!o.error&&o.data?.shop_slug)nextOwner={shop_slug:o.data.shop_slug};}
+      const wanted=[...new Set([...slugs,...(nextOwner?[nextOwner.shop_slug]:[])])].slice(0,100);
+      let nextRows=[],nextProfiles=new Map();
+      if(wanted.length){
+        const [s,p]=await Promise.all([c.from('shop_stories').select('id,shop_slug,media_type,storage_path,expires_at,created_at').in('shop_slug',wanted).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(500),c.from('shop_profiles').select('shop_slug,shop_name,profile_image_url').in('shop_slug',wanted)]);
+        if(s.error||p.error)throw s.error||p.error;
+        nextRows=s.data||[];nextProfiles=new Map((p.data||[]).map(x=>[x.shop_slug,x]));
+      }
+      if(turn!==version)return;
+      owner=nextOwner?{...nextOwner,...nextProfiles.get(nextOwner.shop_slug)}:null;rows=nextRows;profiles=nextProfiles;render();
+    }catch(e){console.warn('ShoufHon homepage stories:',e);}
+  }
+  let rootBindTries=0;
+  function bindStoryTray(){
+    const root=mount();
+    if(!root){if(rootBindTries++<100)setTimeout(bindStoryTray,100);return}
+    if(root.dataset.shsBound==='1')return;
+    root.dataset.shsBound='1';
+    root.addEventListener('click',e=>{
+      const a=e.target.closest('.shs-item');if(!a)return;
+      e.preventDefault();e.stopPropagation();
+      if(a.dataset.upload==='1')openOwnerUploader();else openViewer(a.dataset.slug);
+    });
+    render();
+  }
+  function scheduleRefresh(){clearTimeout(window.__shoufhonHomeStoryRefreshTimer);window.__shoufhonHomeStoryRefreshTimer=setTimeout(refresh,50)}
+  window.addEventListener('ma7alak:following-state',e=>{slugs=Array.isArray(e.detail?.slugs)?e.detail.slugs.filter(x=>typeof x==='string'&&x.length<150):[];scheduleRefresh()});
+  window.addEventListener('ma7alak:follow-change',scheduleRefresh);
+  window.addEventListener('ma7alak:follow-changed',scheduleRefresh);
+  window.addEventListener('storage',e=>{if(String(e.key||'').startsWith('ma7alak_story_seen_'))render()});
+  window.addEventListener('message',e=>{if(['MA7ALAK_FOLLOW_CHANGED','MA7ALAK_FOLLOW_STATE_CHANGED','MA7ALAK_STORY_UPLOADED'].includes(e.data?.type))scheduleRefresh()});
+  function start(){
+    slugs=Array.isArray(window.Ma7alakFollowingState?.slugs)?window.Ma7alakFollowingState.slugs:[];
+    bindStoryTray();refresh();
+    window.addEventListener('popstate',()=>closeViewer(true));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
+    timer=setInterval(refresh,60000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+    const c=db();
+    if(c?.channel)channel=c.channel('shoufhon-home-stories')
+      .on('postgres_changes',{event:'*',schema:'public',table:'shop_stories'},scheduleRefresh)
+      .on('postgres_changes',{event:'*',schema:'public',table:'shop_profiles'},scheduleRefresh)
+      .subscribe();
+    try{c?.auth?.onAuthStateChange?.(()=>setTimeout(refresh,0))}catch(_){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+
 /* Route every opening-header “Add your shop” action to the new plan page. */
 (function(){
   function sync(){document.querySelectorAll('#ma7alak-opening-header-root a[href*="dhyf-mhlk-"]').forEach(function(link){link.href="https://shoufhon.com/add-shop-";link.onclick=function(e){e.preventDefault();window.top.location.href="https://shoufhon.com/add-shop-"}})}
