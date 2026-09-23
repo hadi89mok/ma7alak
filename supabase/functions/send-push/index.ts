@@ -124,9 +124,12 @@ Deno.serve(async (req: Request) => {
     const title = body.title || "ShoufHon";
     const message = body.body || "New update on ShoufHon";
     const targetUrl = body.url || "https://shoufhon.com/";
+    /*
+       Keep the system notification identity branded as ShoufHon.
+       Shop-specific art can still be supplied separately as image.
+    */
     const icon =
-      body.icon ||
-      "https://6aa2c9b0ea08b9137fd5ada9.imgix.net/sandbox/Gemini_Generated_Image_ds8wfsds8wfsds8w.jfif";
+      "https://shoufhon.com/pwa-icon-192.png";
     const image = body.image || null;
     const type = body.type || "";
     const shopSlug = body.shop_slug || "";
