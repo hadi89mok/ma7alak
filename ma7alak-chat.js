@@ -1,5 +1,5 @@
 /* =========================================================
- SHOUFHON LIVE CHAT V9 — STORY REPLIES + MESSAGE REACTIONS
+ SHOUFHON LIVE CHAT V10 — VOICE + MEDIA + STORY REPLIES + REACTIONS
  - keeps avatars/unread/report/message acceptance/delete controls
  - Story replies stay inside the existing viewer↔shop conversation
  - WhatsApp-style long-press reactions with realtime counts
@@ -8,9 +8,9 @@
 ========================================================= */
 (function(){
 "use strict";
-if(window.__MA7ALAK_CHAT_V9__)return;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
+if(window.__MA7ALAK_CHAT_V10__)return;window.__MA7ALAK_CHAT_V10__=true;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
 const CHAT_SCRIPT_SRC=document.currentScript?.src||"";
-let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null,inboxLiveFallbackTimer=null,inboxWakeHandler=null;
+let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null,inboxLiveFallbackTimer=null,inboxWakeHandler=null,activeRecorder=null,activeMicStream=null,voiceTimer=null,voiceStartedAt=0,voiceChunks=[],voiceDraft=null,recordingDiscard=false,pendingMedia=null,pendingMediaUrl="",composerBusy=false;const CHAT_MEDIA_BUCKET="chat-media";const chatMediaSignedCache=new Map();
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 async function vr(){for(let i=0;i<100&&!window.Ma7alakAccount;i++)await sleep(50);if(!window.Ma7alakAccount)throw new Error("ShoufHon account system is not ready.");await window.Ma7alakAccount.ready();client=window.Ma7alakAccount.client;user=window.Ma7alakAccount.user;mode="viewer"}
@@ -34,8 +34,43 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 @media(max-width:600px){#m7-chat-shell{padding:0;align-items:stretch;justify-content:stretch;background:#100e0d}#m7-chat{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0;box-shadow:none}#m7-chat-head{padding-top:max(12px,env(safe-area-inset-top));min-height:calc(64px + env(safe-area-inset-top))}#m7-chat-body{padding:12px}.m7-msg{max-width:86%}#m7-chat-shell.m7-inbox-shell{padding:0 14px 14px;align-items:flex-start;justify-content:center;background:#0009}#m7-chat.m7-inbox-panel{width:calc(100% - 28px);height:min(500px,calc(100dvh - 104px));max-height:min(500px,calc(100dvh - 104px));margin-top:max(78px,calc(env(safe-area-inset-top) + 68px));border:1px solid #db9b4659;border-radius:22px;box-shadow:0 24px 70px #000b}#m7-chat.m7-inbox-panel #m7-chat-head{padding-top:12px;min-height:64px}.m7-convo{min-height:68px;box-sizing:border-box}}
 @supports not (height:100dvh){@media(max-width:600px){#m7-chat{height:100vh;max-height:100vh}}}
 `;document.head.appendChild(s)}
+function chatMediaCss(){
+  if(document.getElementById("m7c-v10-media-css"))return;
+  const s=document.createElement("style");
+  s.id="m7c-v10-media-css";
+  s.textContent=[
+    "#m7-chat-send{display:block!important;padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;background:#171310;border-top:1px solid #34261e}",
+    ".m7-compose-row{display:flex;align-items:center;gap:7px}",
+    ".m7-compose-tool{width:42px;height:42px;flex:0 0 42px;border:1px solid #4a382b!important;border-radius:50%!important;background:#241c17!important;color:#f2c36f!important;padding:0!important;display:grid;place-items:center;font-size:21px;font-weight:900;transition:transform .12s ease,background .12s ease}",
+    ".m7-compose-tool:active{transform:scale(.91)}.m7-compose-tool:disabled{opacity:.42;cursor:not-allowed}",
+    "#m7-chat-input{height:42px;box-sizing:border-box;padding:10px 12px!important;border-radius:18px!important}",
+    ".m7-send-button{width:44px;height:42px;flex:0 0 44px;padding:0!important;border-radius:15px!important;background:linear-gradient(135deg,#efbd66,#c9822e)!important;color:#160f09!important;font-size:19px;font-weight:950;display:grid;place-items:center;box-shadow:0 6px 16px #0004}",
+    ".m7-send-button:disabled{opacity:.45}",
+    "#m7-compose-preview,#m7-voice-recording{margin:0 0 8px;padding:9px;border:1px solid #4c3829;border-radius:15px;background:linear-gradient(145deg,#201914,#100d0b);box-sizing:border-box}",
+    "#m7-compose-preview[hidden],#m7-voice-recording[hidden]{display:none!important}",
+    ".m7-compose-preview-inner{display:flex;align-items:center;gap:10px;min-width:0}",
+    ".m7-compose-thumb{width:56px;height:56px;flex:0 0 56px;border-radius:12px;overflow:hidden;background:#0b0908;border:1px solid #ffffff18;display:grid;place-items:center}",
+    ".m7-compose-thumb img,.m7-compose-thumb video{width:100%;height:100%;display:block;object-fit:cover}",
+    ".m7-compose-preview-copy{min-width:0;flex:1}.m7-compose-preview-copy b{display:block;color:#f7d48f;font-size:12px}.m7-compose-preview-copy small{display:block;color:#9f958c;font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".m7-compose-remove{width:34px;height:34px;flex:0 0 34px;border:0;border-radius:50%;background:#3d211e;color:#ffc0b8;font-size:19px;display:grid;place-items:center}",
+    ".m7-record-row{display:flex;align-items:center;gap:9px}.m7-record-dot{width:10px;height:10px;border-radius:50%;background:#ff5147;box-shadow:0 0 12px #ff514780;animation:m7RecPulse 1s ease-in-out infinite}.m7-record-time{min-width:40px;font-weight:900;color:#fff}.m7-record-wave{min-width:0;flex:1;height:28px;display:flex;align-items:center;justify-content:center;gap:3px;overflow:hidden}.m7-record-wave i{width:3px;border-radius:5px;background:#d99a45;animation:m7Wave .85s ease-in-out infinite alternate}.m7-record-wave i:nth-child(2n){animation-delay:-.35s}.m7-record-wave i:nth-child(3n){animation-delay:-.6s}",
+    ".m7-record-cancel,.m7-record-stop{min-height:36px;border:0;border-radius:11px;padding:0 10px;font-size:10px;font-weight:900}.m7-record-cancel{background:#312925;color:#c9bdb4}.m7-record-stop{background:#d99a45;color:#170f08}",
+    ".m7-voice-draft{display:flex;align-items:center;gap:9px}.m7-voice-draft audio{min-width:0;flex:1;height:36px}.m7-voice-draft strong{font-size:11px;color:#f2c36f;white-space:nowrap}",
+    ".m7-msg.m7-msg-media{padding:8px;min-width:190px}.m7-msg.mine.m7-msg-media{padding-right:34px}",
+    ".m7-chat-photo{display:block;width:min(280px,68vw);max-height:330px;border:0;border-radius:13px;overflow:hidden;padding:0;background:#0b0908;cursor:pointer}.m7-chat-photo img{display:block;width:100%;height:auto;max-height:330px;object-fit:cover}",
+    ".m7-chat-video{display:block;width:min(300px,72vw);max-height:360px;border-radius:13px;background:#000}",
+    ".m7-media-caption{margin:7px 3px 1px;white-space:pre-wrap;font-size:13px;color:#fff}",
+    ".m7-voice-bubble{width:min(285px,70vw);display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:9px;align-items:center;padding:5px 2px}.m7-voice-play{width:40px;height:40px;border:0;border-radius:50%;background:#f0b85c;color:#1c1208;display:grid;place-items:center;font-size:17px;padding-left:2px}.m7-voice-main{min-width:0}.m7-voice-wave{height:23px;display:flex;align-items:center;gap:2px;opacity:.8;pointer-events:none}.m7-voice-wave i{display:block;width:2px;border-radius:3px;background:#f3d197}.m7-voice-range{width:100%;height:14px;margin:-19px 0 0;opacity:.01;display:block;cursor:pointer}.m7-voice-time{font-size:10px;color:#f1dbc0;opacity:.82;min-width:33px;text-align:right}.m7-voice-audio{display:none}",
+    "#m7-chat-media-viewer{position:fixed;inset:0;z-index:2147483647;background:#000e;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}.m7-media-viewer-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}.m7-media-viewer-close{position:absolute;right:15px;top:max(15px,env(safe-area-inset-top));width:44px;height:44px;border:1px solid #ffffff32;border-radius:50%;background:#111d;color:#fff;font-size:25px}",
+    ".m7-media-loading{padding:10px;border-radius:12px;background:#17120f;color:#c7b9ac;font-size:11px;text-align:center}",
+    "@keyframes m7RecPulse{50%{transform:scale(1.28);opacity:.55}}@keyframes m7Wave{from{height:6px}to{height:24px}}",
+    "@media(max-width:600px){#m7-chat-send{padding-bottom:max(9px,env(safe-area-inset-bottom))!important}.m7-compose-tool{width:40px;height:40px;flex-basis:40px}.m7-send-button{width:42px;height:40px;flex-basis:42px}.m7-chat-photo{width:min(285px,74vw)}.m7-chat-video{width:min(300px,76vw)}.m7-voice-bubble{width:min(285px,74vw)}}",
+    "@media(prefers-reduced-motion:reduce){.m7-record-dot,.m7-record-wave i{animation:none!important}}"
+  ].join("");
+  document.head.appendChild(s);
+}
 function av(url,name){return url?`<img class="m7-avatar" src="${esc(url)}" alt="">`:`<div class="m7-avatar fallback">${esc((name||"?").slice(0,1).toUpperCase())}</div>`}
-function shell(title,avatar,back){css();close(true);let x=document.createElement("div");x.id="m7-chat-shell";x.innerHTML=`<div id="m7-chat"><div id="m7-chat-head"><button class="m7c-icon" id="m7-back" style="display:${back?"block":"none"}">‹</button><div class="m7-head-person">${av(avatar,title)}<div id="m7-chat-title">${esc(title)}</div></div><button class="m7c-icon" id="m7-report" title="Report">⚑</button><button class="m7c-icon" id="m7-block-user" title="Block user" style="display:none">🚫</button><button class="m7c-icon" id="m7-delete-convo" title="Delete conversation" style="display:none">🗑</button><button class="m7c-icon" id="m7-close">✕</button></div><div id="m7-chat-body"><div class="m7-loading">Loading…</div></div></div>`;document.body.appendChild(x);x.querySelector("#m7-close").onclick=()=>close();x.onclick=e=>{if(e.target===x)close()};return x}
+function shell(title,avatar,back){css();chatMediaCss();close(true);let x=document.createElement("div");x.id="m7-chat-shell";x.innerHTML=`<div id="m7-chat"><div id="m7-chat-head"><button class="m7c-icon" id="m7-back" style="display:${back?"block":"none"}">‹</button><div class="m7-head-person">${av(avatar,title)}<div id="m7-chat-title">${esc(title)}</div></div><button class="m7c-icon" id="m7-report" title="Report">⚑</button><button class="m7c-icon" id="m7-block-user" title="Block user" style="display:none">🚫</button><button class="m7c-icon" id="m7-delete-convo" title="Delete conversation" style="display:none">🗑</button><button class="m7c-icon" id="m7-close">✕</button></div><div id="m7-chat-body"><div class="m7-loading">Loading…</div></div></div>`;document.body.appendChild(x);x.querySelector("#m7-close").onclick=()=>close();x.onclick=e=>{if(e.target===x)close()};return x}
 function bindShopProfileLink(url,slug){
   const node=document.querySelector("#m7-chat-head .m7-head-person");
   if(!node)return;
@@ -61,7 +96,7 @@ function closeReactionPicker(){
   if(reactionPicker){reactionPicker.remove();reactionPicker=null}
   if(reactionPickerOutside){document.removeEventListener("pointerdown",reactionPickerOutside,true);reactionPickerOutside=null}
 }
-function close(remove=true){closeReactionPicker();clearInterval(inboxClockTimer);inboxClockTimer=null;clearTimeout(inboxRefreshTimer);inboxRefreshTimer=null;clearInterval(inboxLiveFallbackTimer);inboxLiveFallbackTimer=null;if(inboxWakeHandler){window.removeEventListener("ma7alak:page-wake",inboxWakeHandler);inboxWakeHandler=null}if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
+function close(remove=true){closeReactionPicker();resetChatComposerDrafts();clearInterval(inboxClockTimer);inboxClockTimer=null;clearTimeout(inboxRefreshTimer);inboxRefreshTimer=null;clearInterval(inboxLiveFallbackTimer);inboxLiveFallbackTimer=null;if(inboxWakeHandler){window.removeEventListener("ma7alak:page-wake",inboxWakeHandler);inboxWakeHandler=null}if(channel&&client)try{client.removeChannel(channel)}catch(_){}channel=null;if(settingsChannel&&client)try{client.removeChannel(settingsChannel)}catch(_){}settingsChannel=null;if(remove)document.getElementById("m7-chat-shell")?.remove()}
 const tm=v=>{try{return new Date(v).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}catch(_){return""}};
 function inboxRelativeTime(value){
   const time=new Date(value||0).getTime();
@@ -510,9 +545,155 @@ async function sendStoryReply(input){
   }catch(e){console.error("Story reply send:",e);return{ok:false,error:e?.message||"Could not send Story reply."}}
 }
 function loadError(b,e){if(!b)return;console.error("ShoufHon chat load error:",e);b.innerHTML=`<div class="m7-error">Could not load this conversation.<br><small>${esc(e?.message||"Please close Messages and try again.")}</small></div>`}
-async function deleteMessage(id,c){if(!id||!c)return;if(!confirm("Delete this message?"))return;let r=await client.rpc("ma7alak_delete_my_message",{p_message_id:id});if(r.error){alert(r.error.message);return}await messages(c)}
-async function deleteConversation(c,back){if(!c?.id)return;if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;let r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});if(r.error){alert(r.error.message);return false}dispatchEvent(new Event("ma7alak:messages-read"));if(typeof back==="function")await back();else close();return true}
-async function messages(c){let b=document.getElementById("m7-chat-body");if(!b)return false;if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}try{let r=await Promise.race([client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))]);if(!b.isConnected)return false;if(r.error)throw r.error;b.innerHTML=(r.data||[]).map(m=>{let mine=sameId(m.sender_id,user?.id),card=storyCardHtml(m);return `<div class="m7-msg ${mine?"mine":""}" data-message-id="${esc(m.id)}">${card}<div class="m7-msg-text">${esc(m.body)}</div>${mine?`<button class="m7-msg-delete" type="button" data-delete-message="${esc(m.id)}" title="Delete message">×</button>`:""}<div class="m7-msg-time">${tm(m.created_at)}</div><div class="m7-msg-reactions" data-reactions-for="${esc(m.id)}"></div></div>`}).join("")||'<div class="m7-empty">No messages yet.</div>';wireStoryCards(b);b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});wireMessageReactionGestures(b,c);await refreshReactionsOnly(c);b.scrollTop=b.scrollHeight;client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));return true}catch(e){loadError(b,e);return false}}
+const CHAT_MEDIA_DEFAULT_BODY={voice:"Voice message",image:"Photo",video:"Video"};
+function chatMediaCtx(m){let x=m&&m.context;if(!x)return{};if(typeof x==="string"){try{x=JSON.parse(x)}catch(_){return{}}}return x&&typeof x==="object"?x:{}}
+function chatMediaType(m){const t=String(m?.message_type||"").toLowerCase();return t==="voice"||t==="image"||t==="video"?t:""}
+function formatDuration(seconds){seconds=Math.max(0,Math.round(Number(seconds)||0));const m=Math.floor(seconds/60),s=seconds%60;return m+":"+String(s).padStart(2,"0")}
+function formatBytes(bytes){bytes=Math.max(0,Number(bytes)||0);if(bytes<1024)return bytes+" B";if(bytes<1048576)return (bytes/1024).toFixed(bytes<10240?1:0)+" KB";return (bytes/1048576).toFixed(bytes<10485760?1:0)+" MB"}
+function mediaBaseMime(value){return String(value||"").split(";")[0].trim().toLowerCase()}
+function mediaExt(mime,name){mime=mediaBaseMime(mime);const map={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","audio/webm":"webm","audio/ogg":"ogg","audio/mp4":"m4a","audio/mpeg":"mp3","audio/wav":"wav","audio/aac":"aac","audio/x-m4a":"m4a"};if(map[mime])return map[mime];const m=String(name||"").match(/\.([a-z0-9]{1,6})$/i);return m?m[1].toLowerCase():"bin"}
+function mediaRandomId(){try{return crypto.randomUUID()}catch(_){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2)}}
+function chatMediaPath(c,mime,name){return String(c.id)+"/"+String(user.id)+"/"+Date.now()+"-"+mediaRandomId()+"."+mediaExt(mime,name)}
+async function signedChatMediaUrl(path){path=String(path||"").trim();if(!path)return"";const cached=chatMediaSignedCache.get(path);if(cached&&cached.expires>Date.now()+60000)return cached.url;const r=await client.storage.from(CHAT_MEDIA_BUCKET).createSignedUrl(path,3600);if(r.error)throw r.error;const url=String(r.data?.signedUrl||"");if(url)chatMediaSignedCache.set(path,{url,expires:Date.now()+3500000});return url}
+async function signedChatMediaMap(rows){const entries=(rows||[]).filter(m=>chatMediaType(m)).map(m=>[String(m.id),String(chatMediaCtx(m).storage_path||"")]).filter(x=>x[1]);const out=new Map();await Promise.all(entries.map(async pair=>{try{out.set(pair[0],await signedChatMediaUrl(pair[1]))}catch(e){console.warn("Chat media URL:",e);out.set(pair[0],"")}}));return out}
+function chatMediaCaption(m,type){const body=String(m?.body||"").trim();return body&&body!==CHAT_MEDIA_DEFAULT_BODY[type]?body:""}
+function voiceWaveHtml(){const h=[8,14,20,11,24,16,9,19,13,23,10,17,22,12,18,8,21,15,10,19,24,12,17,9];return h.map(v=>"<i style=\"height:"+v+"px\"></i>").join("")}
+function chatMediaHtml(m,url){
+  const type=chatMediaType(m);if(!type)return"";
+  const ctx=chatMediaCtx(m),caption=chatMediaCaption(m,type);
+  if(!url)return "<div class=\"m7-media-loading\">Media unavailable</div>"+(caption?"<div class=\"m7-media-caption\">"+esc(caption)+"</div>":"");
+  if(type==="image")return "<button class=\"m7-chat-photo\" type=\"button\" data-chat-photo=\""+esc(url)+"\" aria-label=\"Open photo\"><img src=\""+esc(url)+"\" alt=\"\" loading=\"lazy\" decoding=\"async\"></button>"+(caption?"<div class=\"m7-media-caption\">"+esc(caption)+"</div>":"");
+  if(type==="video")return "<video class=\"m7-chat-video\" controls playsinline preload=\"metadata\" src=\""+esc(url)+"\"></video>"+(caption?"<div class=\"m7-media-caption\">"+esc(caption)+"</div>":"");
+  const duration=Math.max(0,Number(ctx.duration)||0);
+  return "<div class=\"m7-voice-bubble\" data-voice-bubble><button type=\"button\" class=\"m7-voice-play\" aria-label=\"Play voice message\">▶</button><div class=\"m7-voice-main\"><div class=\"m7-voice-wave\" aria-hidden=\"true\">"+voiceWaveHtml()+"</div><input class=\"m7-voice-range\" type=\"range\" min=\"0\" max=\"100\" value=\"0\" step=\"0.1\" aria-label=\"Voice message progress\"></div><span class=\"m7-voice-time\" data-duration=\""+duration+"\">"+formatDuration(duration)+"</span><audio class=\"m7-voice-audio\" preload=\"metadata\" src=\""+esc(url)+"\"></audio></div>";
+}
+function openChatPhoto(url){document.getElementById("m7-chat-media-viewer")?.remove();const v=document.createElement("div");v.id="m7-chat-media-viewer";v.innerHTML="<button type=\"button\" class=\"m7-media-viewer-close\" aria-label=\"Close\">×</button><img class=\"m7-media-viewer-img\" src=\""+esc(url)+"\" alt=\"\">";document.body.appendChild(v);const done=()=>v.remove();v.querySelector(".m7-media-viewer-close").onclick=done;v.onclick=e=>{if(e.target===v)done()}}
+function wireChatMediaMessages(root){
+  root.querySelectorAll("[data-chat-photo]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();openChatPhoto(btn.dataset.chatPhoto)});
+  root.querySelectorAll("[data-voice-bubble]").forEach(w=>{const audio=w.querySelector(".m7-voice-audio"),play=w.querySelector(".m7-voice-play"),range=w.querySelector(".m7-voice-range"),time=w.querySelector(".m7-voice-time");if(!audio||!play||!range||!time)return;const defaultDuration=Math.max(0,Number(time.dataset.duration)||0);const sync=()=>{const dur=Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:defaultDuration;const cur=Math.max(0,Number(audio.currentTime)||0);range.value=dur?String(Math.min(100,cur/dur*100)):"0";time.textContent=formatDuration(audio.paused&&cur===0?dur:cur)};audio.addEventListener("loadedmetadata",sync);audio.addEventListener("timeupdate",sync);audio.addEventListener("ended",()=>{audio.currentTime=0;play.textContent="▶";sync()});audio.addEventListener("pause",()=>{if(!audio.ended)play.textContent="▶"});audio.addEventListener("play",()=>{play.textContent="❚❚"});play.onclick=async e=>{e.preventDefault();e.stopPropagation();if(audio.paused){root.querySelectorAll(".m7-voice-audio").forEach(other=>{if(other!==audio&&!other.paused)other.pause()});try{await audio.play()}catch(err){console.warn("Voice playback:",err)}}else audio.pause()};range.oninput=()=>{const dur=Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:defaultDuration;if(dur)audio.currentTime=dur*(Number(range.value)||0)/100};sync()});
+}
+function revokeObjectUrl(value){try{if(value)URL.revokeObjectURL(value)}catch(_){}}
+function stopMicTracks(){if(activeMicStream){try{activeMicStream.getTracks().forEach(t=>t.stop())}catch(_){}activeMicStream=null}}
+function clearVoiceTimer(){clearInterval(voiceTimer);voiceTimer=null}
+function resetChatComposerDrafts(){recordingDiscard=true;clearVoiceTimer();if(activeRecorder&&activeRecorder.state!=="inactive"){try{activeRecorder.ondataavailable=null;activeRecorder.onstop=null;activeRecorder.stop()}catch(_){}}activeRecorder=null;stopMicTracks();voiceChunks=[];voiceStartedAt=0;if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;composerBusy=false}
+function setComposerBusy(busy,label){composerBusy=!!busy;const form=document.getElementById("m7-chat-send");if(!form)return;form.classList.toggle("busy",composerBusy);form.querySelectorAll("button,input").forEach(el=>{if(el.id!=="m7-chat-input"||composerBusy)el.disabled=composerBusy});const send=form.querySelector(".m7-send-button");if(send){send.dataset.normal=send.dataset.normal||send.textContent;send.textContent=composerBusy?(label||"…"):(send.dataset.normal||"➤")}}
+function renderComposerState(){
+  const form=document.getElementById("m7-chat-send");if(!form)return;
+  const preview=document.getElementById("m7-compose-preview"),record=document.getElementById("m7-voice-recording"),input=document.getElementById("m7-chat-input"),mediaBtn=document.getElementById("m7-chat-media"),micBtn=document.getElementById("m7-chat-mic"),send=form.querySelector(".m7-send-button");
+  const recording=!!(activeRecorder&&activeRecorder.state==="recording");
+  form.classList.toggle("is-recording",recording);form.classList.toggle("has-media",!!pendingMedia);form.classList.toggle("has-voice-draft",!!voiceDraft);
+  if(record)record.hidden=!recording;
+  if(preview){preview.hidden=!(pendingMedia||voiceDraft);if(pendingMedia){const isImage=pendingMedia.type==="image";const visual=isImage?"<img src=\""+esc(pendingMediaUrl)+"\" alt=\"\">":"<video src=\""+esc(pendingMediaUrl)+"\" muted playsinline preload=\"metadata\"></video>";preview.innerHTML="<div class=\"m7-compose-preview-inner\"><div class=\"m7-compose-thumb\">"+visual+"</div><div class=\"m7-compose-preview-copy\"><b>"+(isImage?"Photo":"Video")+"</b><small>"+esc(pendingMedia.name||"Media")+" · "+formatBytes(pendingMedia.blob.size)+"</small></div><button class=\"m7-compose-remove\" type=\"button\" data-remove-draft aria-label=\"Remove\">×</button></div>"}else if(voiceDraft){preview.innerHTML="<div class=\"m7-voice-draft\"><strong>Voice · "+formatDuration(voiceDraft.duration)+"</strong><audio controls preload=\"metadata\" src=\""+esc(voiceDraft.url)+"\"></audio><button class=\"m7-compose-remove\" type=\"button\" data-remove-draft aria-label=\"Discard voice\">×</button></div>"}}
+  if(input){input.disabled=recording||!!voiceDraft||composerBusy;input.placeholder=pendingMedia?"Add a caption…":"Type a message..."}
+  if(mediaBtn)mediaBtn.disabled=recording||!!voiceDraft||composerBusy;
+  if(micBtn){micBtn.disabled=!!pendingMedia||!!voiceDraft||composerBusy;micBtn.textContent=recording?"■":"🎤";micBtn.title=recording?"Stop recording":"Voice message"}
+  if(send)send.disabled=recording||composerBusy;
+  form.querySelector("[data-remove-draft]")?.addEventListener("click",()=>{if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;renderComposerState()},{once:true});
+}
+async function compressChatImage(file){if(!file||!String(file.type||"").startsWith("image/"))return file;if(file.size<=2097152||file.type==="image/gif")return file;let url="";try{url=URL.createObjectURL(file);const img=new Image();img.decoding="async";await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});const max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth||1,img.naturalHeight||1)),w=Math.max(1,Math.round((img.naturalWidth||1)*scale)),h=Math.max(1,Math.round((img.naturalHeight||1)*scale)),canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(img,0,0,w,h);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.82));if(blob&&blob.size>0&&blob.size<file.size)return blob}catch(e){console.warn("Image compression:",e)}finally{revokeObjectUrl(url)}return file}
+function voiceMimeChoice(){if(!window.MediaRecorder)return"";const list=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"];for(const x of list){try{if(MediaRecorder.isTypeSupported(x))return x}catch(_){}}return""}
+async function startVoiceRecording(){
+  if(composerBusy||activeRecorder?.state==="recording")return;
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){alert("Voice messages are not supported by this browser.");return}
+  if(pendingMedia){alert("Remove the selected media first.");return}
+  if(voiceDraft){alert("Send or discard the current voice message first.");return}
+  try{
+    recordingDiscard=false;voiceChunks=[];
+    activeMicStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const choice=voiceMimeChoice(),opts=choice?{mimeType:choice,audioBitsPerSecond:64000}:{audioBitsPerSecond:64000};
+    activeRecorder=new MediaRecorder(activeMicStream,opts);voiceStartedAt=Date.now();
+    activeRecorder.ondataavailable=e=>{if(e.data&&e.data.size)voiceChunks.push(e.data)};
+    activeRecorder.onstop=()=>{
+      const duration=Math.max(1,(Date.now()-voiceStartedAt)/1000);const rec=activeRecorder;activeRecorder=null;clearVoiceTimer();stopMicTracks();
+      if(recordingDiscard){recordingDiscard=false;voiceChunks=[];renderComposerState();return}
+      const mime=mediaBaseMime(rec?.mimeType||choice||voiceChunks[0]?.type||"audio/webm")||"audio/webm";
+      const blob=new Blob(voiceChunks,{type:mime});voiceChunks=[];
+      if(blob.size<700){alert("Voice message was too short. Try again.");renderComposerState();return}
+      if(blob.size>10485760){alert("Voice message is too large.");renderComposerState();return}
+      const url=URL.createObjectURL(blob);voiceDraft={blob:blob,mime:mime,duration:duration,url:url};renderComposerState();
+    };
+    activeRecorder.start(250);renderComposerState();
+    const timerEl=document.getElementById("m7-record-time");
+    clearVoiceTimer();voiceTimer=setInterval(()=>{const seconds=(Date.now()-voiceStartedAt)/1000;if(timerEl)timerEl.textContent=formatDuration(seconds);if(seconds>=120)stopVoiceRecording(false)},250);
+  }catch(e){stopMicTracks();activeRecorder=null;clearVoiceTimer();console.warn("Microphone:",e);alert("Microphone permission is required to send voice messages.");renderComposerState()}
+}
+function stopVoiceRecording(discard){if(!activeRecorder||activeRecorder.state==="inactive")return;recordingDiscard=!!discard;try{activeRecorder.stop()}catch(_){stopMicTracks();activeRecorder=null;clearVoiceTimer();renderComposerState()}}
+async function chooseChatMedia(file){
+  if(!file)return;
+  let kind="";if(String(file.type||"").startsWith("image/"))kind="image";else if(["video/mp4","video/webm","video/quicktime"].includes(mediaBaseMime(file.type)))kind="video";else{alert("Choose a photo or MP4/WebM/MOV video.");return}
+  let blob=file;if(kind==="image")blob=await compressChatImage(file);
+  if(kind==="image"&&blob.size>8388608){alert("Photo must be 8 MB or smaller.");return}
+  if(kind==="video"&&blob.size>26214400){alert("Video must be 25 MB or smaller.");return}
+  if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);
+  pendingMedia={type:kind,blob:blob,mime:mediaBaseMime(blob.type||file.type),name:file.name||kind};pendingMediaUrl=URL.createObjectURL(blob);renderComposerState();
+}
+async function uploadChatMedia(c,type,blob,mime,name,context,body){
+  const path=chatMediaPath(c,mime,name);setComposerBusy(true,"…");
+  try{
+    const up=await client.storage.from(CHAT_MEDIA_BUCKET).upload(path,blob,{contentType:mediaBaseMime(mime),upsert:false,cacheControl:"3600"});if(up.error)throw up.error;
+    const ctx=Object.assign({},context||{},{storage_path:path,mime_type:mediaBaseMime(mime),size:blob.size,original_name:String(name||"").slice(0,180)});
+    const r=await client.rpc("ma7alak_send_media_message",{p_conversation_id:c.id,p_message_type:type,p_storage_path:path,p_body:String(body||"").trim()||null,p_context:ctx});
+    if(r.error){await client.storage.from(CHAT_MEDIA_BUCKET).remove([path]).catch(()=>{});throw r.error}
+    await messages(c);return true;
+  }catch(e){console.error("Send media:",e);alert(friendlyChatError(e));return false}finally{setComposerBusy(false);renderComposerState()}
+}
+async function sendPendingMedia(c){if(!pendingMedia)return false;const input=document.getElementById("m7-chat-input"),caption=String(input?.value||"").trim();const item=pendingMedia;const ok=await uploadChatMedia(c,item.type,item.blob,item.mime,item.name,{},caption);if(ok){if(input)input.value="";revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;renderComposerState()}return ok}
+async function sendVoiceDraft(c){if(!voiceDraft)return false;const item=voiceDraft;const ok=await uploadChatMedia(c,"voice",item.blob,item.mime,"voice."+mediaExt(item.mime),{duration:Number(item.duration.toFixed(2))},"");if(ok){revokeObjectUrl(item.url);voiceDraft=null;renderComposerState()}return ok}
+function blockedComposer(){return mode==="owner"&&document.getElementById("m7-block-user")?.dataset.blocked==="1"}
+async function sendTextFromComposer(c){const i=document.getElementById("m7-chat-input"),t=String(i?.value||"").trim();if(!t)return false;i.value="";try{const r=await client.rpc("ma7alak_send_message",{p_conversation_id:c.id,p_body:t});if(r.error){i.value=t;throw r.error}return true}catch(e){alert(friendlyChatError(e));if(String(e?.message||"").includes("CHAT_BLOCKED")&&mode==="owner")applyConversationBlockUi(true);return false}}
+function wireChatComposer(c){
+  const form=document.getElementById("m7-chat-send");if(!form)return;
+  const picker=document.getElementById("m7-chat-media-input"),media=document.getElementById("m7-chat-media"),mic=document.getElementById("m7-chat-mic"),stop=document.getElementById("m7-record-stop"),cancel=document.getElementById("m7-record-cancel");
+  media.onclick=()=>{if(!composerBusy)picker.click()};
+  picker.onchange=async()=>{const file=picker.files?.[0]||null;picker.value="";if(file)await chooseChatMedia(file)};
+  mic.onclick=()=>{if(activeRecorder?.state==="recording")stopVoiceRecording(false);else startVoiceRecording()};
+  stop.onclick=()=>stopVoiceRecording(false);cancel.onclick=()=>stopVoiceRecording(true);
+  form.onsubmit=async e=>{e.preventDefault();if(composerBusy)return;if(blockedComposer()){alert("Unblock this user before sending a message.");return}if(activeRecorder?.state==="recording")return;if(voiceDraft){await sendVoiceDraft(c);return}if(pendingMedia){await sendPendingMedia(c);return}await sendTextFromComposer(c)};
+  renderComposerState();
+}
+async function cleanupConversationMedia(c){try{const r=await client.from("ma7alak_messages").select("message_type,context").eq("conversation_id",c.id).in("message_type",["voice","image","video"]);if(r.error)throw r.error;const paths=[...new Set((r.data||[]).map(m=>String(chatMediaCtx(m).storage_path||"").trim()).filter(Boolean))];if(paths.length){const del=await client.storage.from(CHAT_MEDIA_BUCKET).remove(paths);if(del.error)console.warn("Conversation media cleanup:",del.error)}}catch(e){console.warn("Conversation media cleanup:",e)}}
+async function deleteMessage(id,c){
+  if(!id||!c)return;
+  if(!confirm("Delete this message?"))return;
+  const r=await client.rpc("ma7alak_delete_my_message_v2",{p_message_id:id});
+  if(r.error){alert(r.error.message);return}
+  const path=String(r.data?.storage_path||"").trim();
+  if(path){const del=await client.storage.from(CHAT_MEDIA_BUCKET).remove([path]);if(del.error)console.warn("Delete media file:",del.error);chatMediaSignedCache.delete(path)}
+  await messages(c);
+}
+async function deleteConversation(c,back){
+  if(!c?.id)return false;
+  if(!confirm("Delete this entire conversation and all its messages? This cannot be undone."))return false;
+  await cleanupConversationMedia(c);
+  const r=await client.rpc("ma7alak_delete_conversation",{p_conversation_id:c.id});
+  if(r.error){alert(r.error.message);return false}
+  dispatchEvent(new Event("ma7alak:messages-read"));
+  if(typeof back==="function")await back();else close();
+  return true;
+}
+async function messages(c){
+  const b=document.getElementById("m7-chat-body");if(!b)return false;
+  if(!c||c.id==null){loadError(b,new Error("Conversation not found."));return false}
+  try{
+    const r=await Promise.race([
+      client.from("ma7alak_messages").select("*").eq("conversation_id",c.id).order("created_at"),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Message loading timed out. Please try again.")),12000))
+    ]);
+    if(!b.isConnected)return false;if(r.error)throw r.error;
+    const rows=r.data||[],mediaUrls=await signedChatMediaMap(rows);
+    if(!b.isConnected)return false;
+    b.innerHTML=rows.map(m=>{
+      const mine=sameId(m.sender_id,user?.id),card=storyCardHtml(m),type=chatMediaType(m),media=type?chatMediaHtml(m,mediaUrls.get(String(m.id))||""):"";
+      const text=!type?"<div class=\"m7-msg-text\">"+esc(m.body)+"</div>":"";
+      return "<div class=\"m7-msg "+(mine?"mine ":"")+(type?"m7-msg-media":"")+"\" data-message-id=\""+esc(m.id)+"\">"+card+media+text+(mine?"<button class=\"m7-msg-delete\" type=\"button\" data-delete-message=\""+esc(m.id)+"\" title=\"Delete message\">×</button>":"")+"<div class=\"m7-msg-time\">"+tm(m.created_at)+"</div><div class=\"m7-msg-reactions\" data-reactions-for=\""+esc(m.id)+"\"></div></div>";
+    }).join("")||"<div class=\"m7-empty\">No messages yet.</div>";
+    wireStoryCards(b);wireChatMediaMessages(b);
+    b.querySelectorAll("[data-delete-message]").forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();deleteMessage(btn.dataset.deleteMessage,c)});
+    wireMessageReactionGestures(b,c);await refreshReactionsOnly(c);b.scrollTop=b.scrollHeight;
+    client.rpc("ma7alak_mark_conversation_read",{p_conversation_id:c.id}).then(()=>dispatchEvent(new Event("ma7alak:messages-read"))).catch(e=>console.warn("Mark read failed:",e));
+    return true;
+  }catch(e){loadError(b,e);return false}
+}
 function friendlyChatError(error){
   const message=String(error?.message||error||"");
   if(message.includes("CHAT_BLOCKED"))return "This chat is blocked.";
@@ -550,7 +731,7 @@ function applyConversationBlockUi(blocked){
       input.disabled=!!blocked;
       input.placeholder=blocked?"User blocked":"Type a message...";
     }
-    if(send)send.disabled=!!blocked;
+    if(send)send.disabled=!!blocked;const mediaButton=document.getElementById("m7-chat-media"),micButton=document.getElementById("m7-chat-mic");if(mediaButton)mediaButton.disabled=!!blocked;if(micButton)micButton.disabled=!!blocked;
   }
 }
 async function syncConversationBlock(c){
@@ -662,7 +843,7 @@ async function convo(c,title,avatar,back,shopProfile){
 
   document.getElementById("m7-chat").insertAdjacentHTML(
     "beforeend",
-    `<form id="m7-chat-send"><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button>Send</button></form>`
+    `<form id="m7-chat-send"><input id="m7-chat-media-input" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" hidden><div id="m7-compose-preview" hidden></div><div id="m7-voice-recording" hidden><div class="m7-record-row"><span class="m7-record-dot" aria-hidden="true"></span><span class="m7-record-time" id="m7-record-time">0:00</span><span class="m7-record-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><button class="m7-record-cancel" id="m7-record-cancel" type="button">Cancel</button><button class="m7-record-stop" id="m7-record-stop" type="button">Stop</button></div></div><div class="m7-compose-row"><button class="m7-compose-tool" id="m7-chat-media" type="button" aria-label="Send photo or video" title="Photo or video">＋</button><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button class="m7-compose-tool" id="m7-chat-mic" type="button" aria-label="Voice message" title="Voice message">🎤</button><button class="m7-send-button" type="submit" aria-label="Send">➤</button></div></form>`
   );
 
   await Promise.all([
@@ -672,53 +853,7 @@ async function convo(c,title,avatar,back,shopProfile){
       : Promise.resolve(false)
   ]);
 
-  const form=document.getElementById("m7-chat-send");
-
-  if(form){
-    form.onsubmit=async e=>{
-      e.preventDefault();
-
-      if(
-        mode==="owner" &&
-        document.getElementById("m7-block-user")?.dataset.blocked==="1"
-      ){
-        alert("Unblock this user before sending a message.");
-        return;
-      }
-
-      const i=document.getElementById("m7-chat-input");
-      const t=i?.value.trim();
-      if(!t)return;
-
-      i.value="";
-
-      try{
-        const r=await client.rpc(
-          "ma7alak_send_message",
-          {
-            p_conversation_id:c.id,
-            p_body:t
-          }
-        );
-
-        if(r.error){
-          alert(friendlyChatError(r.error));
-          i.value=t;
-
-          if(
-            String(r.error.message||"").includes("CHAT_BLOCKED") &&
-            mode==="owner"
-          ){
-            applyConversationBlockUi(true);
-          }
-        }
-      }
-      catch(error){
-        alert(friendlyChatError(error));
-        i.value=t;
-      }
-    };
-  }
+  wireChatComposer(c);
 
   channel=
     client
