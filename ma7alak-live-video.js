@@ -57,7 +57,7 @@ function ensureCss(){
   document.head.appendChild(s);
 }
 
-function ownerState(){ownerSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||window.Ma7alakOwnerAuth?.shop?.shop_slug||"").trim().toLowerCase()}
+function ownerState(){ownerSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||window.Ma7alakOwnerAuth?.shop?.shop_slug||window.Ma7alakLiveOffers?.ownerSlug||"").trim().toLowerCase()}
 async function loadOwnerEnt(){ownerState();ownerEnt=null;if(!ownerSlug||!c)return;try{const r=await c.from("shop_live_entitlements").select("enabled,active_limit,max_duration_hours").eq("shop_slug",ownerSlug).maybeSingle();if(!r.error)ownerEnt=r.data||null}catch(_){}}
 function liveFresh(x){if(!x||x.status!=="live")return false;return new Date(x.last_heartbeat_at||0).getTime()>Date.now()-120000&&new Date(x.expires_at||0).getTime()>Date.now()}
 
@@ -84,14 +84,33 @@ function injectIntoRoot(root,list){
 }
 function injectOwnerButton(){
   ownerState();if(!ownerSlug)return;
+  const attach=bar=>{
+    if(!bar)return;
+    let btn=bar.querySelector(".m7lv-owner-go");
+    const live=streams.find(x=>String(x.shop_slug).toLowerCase()===ownerSlug);
+    if(!btn){
+      btn=document.createElement("button");
+      btn.type="button";
+      btn.className="m7lv-owner-go";
+      bar.appendChild(btn);
+    }
+    btn.disabled=!ownerEnt?.enabled;
+    btn.textContent=live?"🔴 Resume Live":"📹 Go Live";
+    btn.onclick=()=>{
+      if(!ownerEnt?.enabled)return;
+      preflight();
+    };
+  };
+
   document.querySelectorAll('[data-ma7alak-live="shop"]').forEach(root=>{
-    const slug=String(root.dataset.shopSlug||currentPathSlug()).toLowerCase();if(slug!==ownerSlug)return;
-    const bar=root.querySelector(".m7lo-owner");if(!bar)return;
-    let btn=bar.querySelector(".m7lv-owner-go"),live=streams.find(x=>String(x.shop_slug).toLowerCase()===ownerSlug);
-    if(!btn){btn=document.createElement("button");btn.type="button";btn.className="m7lv-owner-go";bar.appendChild(btn)}
-    btn.disabled=!ownerEnt?.enabled;btn.textContent=live?"🔴 Live Active":"📹 Go Live";
-    btn.onclick=()=>{if(!ownerEnt?.enabled)return;if(live)openViewer(live.id);else preflight()}
+    const slug=String(root.dataset.shopSlug||currentPathSlug()).toLowerCase();
+    if(slug===ownerSlug)attach(root.querySelector(".m7lo-owner"));
   });
+
+  /* The manual Hostinger shop widget lives inside an iframe.
+     Its + button opens the real Live & Offers owner panel in
+     the top-level page. Put Go Live inside that management panel too. */
+  document.querySelectorAll("#m7lo-overlay .m7lo-shop-panel .m7lo-owner").forEach(attach);
 }
 function inject(){
   document.querySelectorAll('[data-ma7alak-live="home"]').forEach(root=>injectIntoRoot(root,streams));
