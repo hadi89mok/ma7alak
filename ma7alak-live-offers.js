@@ -314,10 +314,28 @@ async function load(){
 }
 function media(x,cl="m7lo-media"){if(!x.media_url)return"";return x.media_type==="video"?`<video class="${cl}" src="${esc(x.media_url)}" muted autoplay loop playsinline preload="metadata"></video>`:`<img class="${cl}" src="${esc(x.media_url)}" alt="">`}
 function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length;return`<article class="m7lo-card" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count">▣ View all ${count}</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
-function section(list,shopMode,manage){let has=list.length;return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div><div class="m7lo-sub">${has?(has===1?"1 update happening now":`${has} updates — swipe to see more`):"Nothing live right now — new updates will appear here"}</div></div>${has?`<div class="m7lo-grid">${list.map(x=>card(x,manage)).join("")}</div>`:`<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`}</div>`}
+function videoLiveRows(shopSlug){
+  try{
+    const rows=Array.isArray(window.ShoufHonLiveVideo?.items)?window.ShoufHonLiveVideo.items:[];
+    const slug=String(shopSlug||"").trim().toLowerCase();
+    return slug?rows.filter(x=>String(x?.shop_slug||"").trim().toLowerCase()===slug):rows.slice();
+  }catch(_){return[]}
+}
+function section(list,shopMode,manage,shopSlug=""){
+  const videoCount=videoLiveRows(shopSlug).length;
+  const total=list.length+videoCount;
+  const has=total>0;
+  const sub=has
+    ? (videoCount&&list.length
+        ? `${total} live updates · ${videoCount} video live`
+        : videoCount
+          ? (videoCount===1?"🔴 1 shop is video live now":`🔴 ${videoCount} video lives happening now`)
+          : (list.length===1?"1 update happening now":`${list.length} updates — swipe to see more`))
+    : "Nothing live right now — new updates will appear here";
+  return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div><div class="m7lo-sub">${sub}</div></div>${list.length?`<div class="m7lo-grid">${list.map(x=>card(x,manage)).join("")}</div>`:(has?"":`<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`)}</div>`}
 function ownerBar(list){let lim=Math.max(0,Number(ent?.active_limit||0)),used=list.length,pct=lim?Math.min(100,used/lim*100):0,en=!!ent?.enabled;return`<div class="m7lo-owner"><div><strong>⚡ Live & Offers</strong><small>${en?`${used} / ${lim} active slots · tap EDIT or END below`:`مش مفعّل لهالمحل`}</small><div class="m7lo-slots"><i style="width:${pct}%"></i></div></div><button class="m7lo-btn" data-m7-create ${!en||used>=lim?"disabled":""}>${en&&used>=lim?"Slots Full":"＋ Add"}</button></div>`}
 function bind(root){$all('[data-m7-id]',root).forEach(el=>el.onclick=e=>{if(!e.target.closest('[data-m7-edit],[data-m7-end],[data-m7-media]'))view(el.dataset.m7Id)});$all('[data-m7-end]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();endPost(b.dataset.m7End)});$all('[data-m7-edit]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();editor(b.dataset.m7Edit)});$all('[data-m7-media]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();mediaManager(b.dataset.m7Media)});$("[data-m7-create]",root)?.addEventListener("click",creator)}
-function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$all('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false);bind(r)});$all('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list;r.style.display=(!list.length&&!own)?"none":"";r.innerHTML=(own?ownerBar(management):"")+section(list,true,own);bind(r);m7loApplyDesign(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
+function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$all('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false,"");bind(r)});$all('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list,videoCount=videoLiveRows(s).length;r.style.display=(!list.length&&!own&&!videoCount)?"none":"";r.innerHTML=(own?ownerBar(management):"")+section(list,true,own,s);bind(r);m7loApplyDesign(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
 function timers(){$all('[data-m7-start]').forEach(e=>{let x=[...items,...ownerItems].find(q=>String(q.id)===e.dataset.m7Start);if(x)e.textContent=startText(x)});$all('[data-m7-endtime]').forEach(e=>e.textContent="Ends in "+remain(e.dataset.m7Endtime));if(items.some(x=>new Date(x.ends_at)<=new Date()))load()}
 function lock(){if(document.documentElement.classList.contains("m7lo-locked"))return;lockedY=scrollY;document.documentElement.classList.add("m7lo-locked");Object.assign(document.body.style,{position:"fixed",top:`-${lockedY}px`,left:"0",right:"0",width:"100%"})}
 function unlock(){document.documentElement.classList.remove("m7lo-locked");["position","top","left","right","width"].forEach(k=>document.body.style[k]="");scrollTo(0,lockedY)}
@@ -455,7 +473,16 @@ function removeLocalPost(id){
   ownerItems=ownerItems.filter(x=>String(x.id)!==key);
   commitLocalLiveState();
 }
-function publicData(shop){let list=shop?items.filter(x=>String(x.shop_slug).toLowerCase()===String(shop).toLowerCase()):items;return list.map(x=>({...x}))}
+function publicData(shop){
+  const slug=String(shop||"").trim().toLowerCase();
+  const list=slug?items.filter(x=>String(x.shop_slug).toLowerCase()===slug):items;
+  let video=[];
+  try{
+    video=(Array.isArray(window.ShoufHonLiveVideo?.bridgeItems)?window.ShoufHonLiveVideo.bridgeItems:[]);
+    if(slug)video=video.filter(x=>String(x?.shop_slug||"").trim().toLowerCase()===slug);
+  }catch(_){video=[]}
+  return [...list.map(x=>({...x})),...video.map(x=>({...x}))];
+}
 async function ensureProfileOptions(shopSlug){
   let s=String(shopSlug||"").trim().toLowerCase();
   if(!s)return{};
@@ -702,6 +729,7 @@ async function init(){
   window.Ma7alakLiveOffers={
     refresh:load,
     open:view,
+    close:close,
     create:creator,
     edit:editor,
     media:mediaManager,
@@ -730,6 +758,12 @@ async function init(){
     lastRenderSignature="";
     await identity();
     await load();
+  });
+
+  addEventListener("shoufhon:live-video-state",()=>{
+    lastRenderSignature="";
+    render();
+    broadcast();
   });
 
   let wakeSyncing=false,lastWakeSyncAt=0;
