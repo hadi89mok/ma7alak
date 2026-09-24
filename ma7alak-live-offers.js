@@ -348,7 +348,7 @@ function ownerBar(list){
   const used=list.length;
   const pct=lim?Math.min(100,used/lim*100):0;
   const offersEnabled=!!ent?.enabled;
-  const videoEnabled=offersEnabled&&!!ent?.video_live_enabled;
+  const videoEnabled=!!ent?.video_live_enabled;
   const activeVideo=videoLiveRows(currentOwnerSlug())[0];
   const offerText=offersEnabled?`${used}/${lim} active offers`:"Offers disabled";
   const videoText=videoEnabled?(activeVideo?"Video Live active":"Video Live ready"):"Video Live disabled";
@@ -845,7 +845,7 @@ init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
   if(window.__SHOUFHON_LIVE_VIDEO_LOADER__)return;
   window.__SHOUFHON_LIVE_VIDEO_LOADER__=true;
   var s=document.createElement("script");
-  s.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@2d05521169b1cf277fa496cc2f33f4a6cdcab71b/ma7alak-live-video.js";
+  s.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@7653444b85e83d9041aaf102dfab87e4ff2791f3/ma7alak-live-video.js";
   s.async=true;
   s.onerror=function(){console.error("SHOUFHON Live Video: failed to load");};
   document.head.appendChild(s);
