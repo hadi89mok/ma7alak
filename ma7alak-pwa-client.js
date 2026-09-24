@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.24.5";
+  const VERSION="2026.09.24.6";
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
@@ -458,12 +458,18 @@
 
       <span class="m7p-copy">
         <b>Install ShoufHon</b>
-        <span data-m7p-subtitle>Faster access · opens like an app</span>
+        <span data-m7p-subtitle>Faster access · direct app experience</span>
       </span>
 
       <span class="m7p-actions">
-        <button class="m7p-install" type="button">Install</button>
+        <button class="m7p-install" type="button">Install app</button>
         <button class="m7p-close" type="button" aria-label="Not now">×</button>
+      </span>
+
+      <span class="m7p-benefits" aria-label="App benefits">
+        <span class="m7p-benefit"><i aria-hidden="true">⚡</i><span>Faster access</span></span>
+        <span class="m7p-benefit"><i aria-hidden="true">↗</i><span>Direct app</span></span>
+        <span class="m7p-benefit"><i aria-hidden="true">●</i><span>Notifications</span></span>
       </span>
 
       <p class="m7p-help" data-m7p-help></p>
@@ -573,11 +579,11 @@
     if(mode==="native"){
       if(subtitle){
         subtitle.textContent=
-          "Faster access · opens like an app";
+          "Faster access · direct app experience";
       }
 
       if(button){
-        button.textContent="Install";
+        button.textContent="Install app";
       }
     }
     else if(mode==="ios"){
@@ -1138,4 +1144,275 @@
   }
 
   window.addEventListener("pageshow",forcePwaChrome);
+})();
+
+
+/* =========================================================
+   SHOUFHON PWA INSTALL CARD PREMIUM V2
+   Bigger, clearer, animated mobile install prompt.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_PWA_INSTALL_CARD_PREMIUM_V2__)return;
+  window.__SHOUFHON_PWA_INSTALL_CARD_PREMIUM_V2__=true;
+
+  const style=document.createElement("style");
+  style.id="shoufhon-pwa-install-card-premium-v2";
+  style.textContent=`
+    #m7-pwa-install-card{
+      width:min(440px,calc(100vw - 20px))!important;
+      grid-template-columns:58px minmax(0,1fr) auto!important;
+      gap:11px 13px!important;
+      padding:14px!important;
+      border:1px solid rgba(224,177,82,.58)!important;
+      border-radius:23px!important;
+      background:
+        radial-gradient(circle at 12% 0%,rgba(217,164,65,.13),transparent 34%),
+        radial-gradient(circle at 90% 115%,rgba(112,38,24,.13),transparent 42%),
+        linear-gradient(155deg,rgba(20,17,13,.985),rgba(7,8,9,.985))!important;
+      box-shadow:
+        0 22px 55px rgba(0,0,0,.58),
+        0 0 0 1px rgba(255,255,255,.022) inset,
+        0 0 28px rgba(217,164,65,.08)!important;
+      overflow:hidden!important;
+      isolation:isolate!important;
+      transition:
+        opacity .20s ease,
+        transform .28s cubic-bezier(.2,.82,.22,1.12)!important;
+    }
+
+    #m7-pwa-install-card::before{
+      content:""!important;
+      position:absolute!important;
+      inset:-1px!important;
+      z-index:-1!important;
+      pointer-events:none!important;
+      border-radius:inherit!important;
+      background:
+        linear-gradient(
+          110deg,
+          transparent 0 38%,
+          rgba(255,229,168,.09) 48%,
+          rgba(239,191,96,.22) 50%,
+          rgba(255,229,168,.07) 52%,
+          transparent 62% 100%
+        )!important;
+      transform:translateX(-120%)!important;
+      animation:m7pInstallSweep 4.8s ease-in-out infinite!important;
+    }
+
+    #m7-pwa-install-card::after{
+      content:""!important;
+      position:absolute!important;
+      left:11%!important;
+      right:11%!important;
+      top:0!important;
+      height:1px!important;
+      pointer-events:none!important;
+      background:linear-gradient(90deg,transparent,rgba(255,224,157,.72),transparent)!important;
+      box-shadow:0 0 11px rgba(217,164,65,.20)!important;
+    }
+
+    #m7-pwa-install-card.show{
+      transform:translateX(-50%) translateY(0) scale(1)!important;
+    }
+
+    #m7-pwa-install-card .m7p-icon{
+      width:56px!important;
+      height:56px!important;
+      border-radius:16px!important;
+      border:1px solid rgba(226,180,86,.56)!important;
+      background:#090706!important;
+      box-shadow:
+        0 8px 20px rgba(0,0,0,.34),
+        0 0 18px rgba(217,164,65,.10)!important;
+    }
+
+    #m7-pwa-install-card .m7p-copy b{
+      margin:0 0 4px!important;
+      font-size:17px!important;
+      line-height:1.05!important;
+      letter-spacing:-.22px!important;
+      font-weight:950!important;
+      color:#fffaf0!important;
+    }
+
+    #m7-pwa-install-card .m7p-copy span{
+      color:rgba(255,255,255,.62)!important;
+      font-size:10.5px!important;
+      line-height:1.35!important;
+      font-weight:700!important;
+    }
+
+    #m7-pwa-install-card .m7p-actions{
+      gap:8px!important;
+    }
+
+    #m7-pwa-install-card .m7p-install{
+      min-height:44px!important;
+      padding:0 16px!important;
+      border-radius:13px!important;
+      background:
+        linear-gradient(135deg,#f7d98c 0%,#e7b957 52%,#d79a33 100%)!important;
+      color:#191008!important;
+      font-size:12px!important;
+      font-weight:950!important;
+      letter-spacing:-.1px!important;
+      box-shadow:
+        0 8px 18px rgba(181,117,30,.22),
+        inset 0 1px 0 rgba(255,255,255,.48)!important;
+      transition:transform .14s ease,filter .14s ease,box-shadow .14s ease!important;
+      white-space:nowrap!important;
+    }
+
+    #m7-pwa-install-card .m7p-install:active{
+      transform:scale(.95)!important;
+      filter:brightness(.96)!important;
+      box-shadow:
+        0 4px 10px rgba(181,117,30,.16),
+        inset 0 1px 0 rgba(255,255,255,.34)!important;
+    }
+
+    #m7-pwa-install-card .m7p-close{
+      width:36px!important;
+      height:36px!important;
+      border:1px solid rgba(255,255,255,.06)!important;
+      background:rgba(255,255,255,.055)!important;
+      color:rgba(255,255,255,.70)!important;
+      font-size:20px!important;
+    }
+
+    #m7-pwa-install-card .m7p-benefits{
+      grid-column:1/-1!important;
+      display:grid!important;
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:7px!important;
+      margin-top:1px!important;
+    }
+
+    #m7-pwa-install-card .m7p-benefit{
+      min-width:0!important;
+      min-height:32px!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:5px!important;
+      padding:5px 7px!important;
+      border:1px solid rgba(217,164,65,.13)!important;
+      border-radius:10px!important;
+      background:rgba(255,255,255,.027)!important;
+      color:rgba(255,243,216,.74)!important;
+      font-size:8.5px!important;
+      line-height:1!important;
+      font-weight:820!important;
+      white-space:nowrap!important;
+    }
+
+    #m7-pwa-install-card .m7p-benefit i{
+      width:18px!important;
+      height:18px!important;
+      flex:0 0 18px!important;
+      display:grid!important;
+      place-items:center!important;
+      border-radius:6px!important;
+      background:rgba(217,164,65,.10)!important;
+      color:#efc66e!important;
+      font-style:normal!important;
+      font-size:10px!important;
+      line-height:1!important;
+    }
+
+    #m7-pwa-install-card .m7p-benefit:nth-child(3) i{
+      color:#71df94!important;
+      text-shadow:0 0 7px rgba(113,223,148,.25)!important;
+    }
+
+    #m7-pwa-install-card .m7p-help{
+      grid-column:1/-1!important;
+      margin-top:0!important;
+      border:1px solid rgba(217,164,65,.14)!important;
+      border-radius:12px!important;
+      background:rgba(255,255,255,.035)!important;
+      font-size:10px!important;
+    }
+
+    @keyframes m7pInstallSweep{
+      0%,68%{transform:translateX(-120%)}
+      88%,100%{transform:translateX(120%)}
+    }
+
+    @media(max-width:390px){
+      #m7-pwa-install-card{
+        width:calc(100vw - 14px)!important;
+        grid-template-columns:52px minmax(0,1fr) auto!important;
+        gap:9px 10px!important;
+        padding:11px!important;
+        border-radius:20px!important;
+      }
+
+      #m7-pwa-install-card .m7p-icon{
+        width:50px!important;
+        height:50px!important;
+        border-radius:14px!important;
+      }
+
+      #m7-pwa-install-card .m7p-copy b{
+        font-size:15px!important;
+      }
+
+      #m7-pwa-install-card .m7p-copy span{
+        font-size:9.2px!important;
+      }
+
+      #m7-pwa-install-card .m7p-install{
+        min-height:40px!important;
+        padding:0 11px!important;
+        font-size:11px!important;
+      }
+
+      #m7-pwa-install-card .m7p-close{
+        width:32px!important;
+        height:32px!important;
+        font-size:18px!important;
+      }
+
+      #m7-pwa-install-card .m7p-benefits{
+        gap:5px!important;
+      }
+
+      #m7-pwa-install-card .m7p-benefit{
+        min-height:29px!important;
+        gap:4px!important;
+        padding:4px 5px!important;
+        font-size:7.6px!important;
+      }
+
+      #m7-pwa-install-card .m7p-benefit i{
+        width:16px!important;
+        height:16px!important;
+        flex-basis:16px!important;
+        font-size:9px!important;
+      }
+    }
+
+    @media(max-width:340px){
+      #m7-pwa-install-card .m7p-benefit span{
+        font-size:7px!important;
+      }
+
+      #m7-pwa-install-card .m7p-install{
+        padding:0 9px!important;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      #m7-pwa-install-card::before{
+        animation:none!important;
+        display:none!important;
+      }
+    }
+  `;
+
+  (document.head||document.documentElement).appendChild(style);
 })();
