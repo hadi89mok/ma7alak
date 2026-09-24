@@ -335,9 +335,13 @@ function section(list,shopMode,manage,shopSlug=""){
         : videos.length
           ? (videos.length===1?"🔴 1 shop is video live now":`🔴 ${videos.length} video lives happening now`)
           : (list.length===1?"1 update happening now":`${list.length} updates — swipe to see more`))
-    : "Nothing live right now — new updates will appear here";
+    : (shopMode?"":"Nothing live right now — new updates will appear here");
   const cards=[...videos.map(videoCard),...list.map(x=>card(x,manage))].join("");
-  return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div><div class="m7lo-sub">${sub}</div></div>${has?`<div class="m7lo-grid">${cards}</div>`:`<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`}</div>`}
+  const subHtml=sub?`<div class="m7lo-sub">${sub}</div>`:"";
+  const emptyHtml=shopMode
+    ? `<div class="m7lo-empty">Nothing live right now.</div>`
+    : `<div class="m7lo-empty">Nothing live right now.<br><small>New offers and updates will appear here automatically.</small></div>`;
+  return`<div class="m7lo ${has?"has":""}"><div class="m7lo-head"><div class="m7lo-kicker"><i class="m7lo-dot"></i> LIVE</div><div class="m7lo-title">${shopMode?"Happening Here":"🔥 Happening Today"}</div>${subHtml}</div>${has?`<div class="m7lo-grid">${cards}</div>`:emptyHtml}</div>`}
 function ownerActivityHtml(list,shopSlug){
   const videos=videoLiveRows(shopSlug);
   if(!videos.length&&!list.length)return "";
