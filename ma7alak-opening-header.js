@@ -1001,7 +1001,10 @@ body>.ma7alak-reel-viewer{position:fixed!important;inset:0!important;width:100vw
 #m7-live-home.m7-live-empty-state .m7-live-head{margin-bottom:0}
 #m7-live-home.m7-live-empty-state .m7-live-cards{display:none!important}
 #m7-live-home.m7-live-empty-state h2{margin-top:11px}
-#m7-live-home.m7-live-empty-state #m7-live-sub{max-width:82%;line-height:1.35}
+#m7-live-home.m7-live-empty-state #m7-live-sub{max-width:82%;line-height:1.45;color:#ffffff72}
+#m7-live-home.m7-live-empty-state .m7-live-status{color:#ffffff9a}
+#m7-live-home.m7-live-empty-state .m7-live-status i{background:#858585!important;box-shadow:none!important;animation:none!important;-webkit-animation:none!important}
+#m7-live-home.m7-live-empty-state h2{color:#f4f1ea}
 
 /* SHOUFHON LOCAL SPOTLIGHT — bundled into the same Live/Reels homepage feed. */
 #ma7alak-home-shop-spotlight{box-sizing:border-box;width:100%;margin:8px auto 0;padding:4px 3px 10px;color:#fff;font-family:Arial,"Segoe UI",sans-serif}
@@ -1271,7 +1274,7 @@ function m7StartHomeFeedData(){
 (function(sb){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 /* LIVE OFFERS */
-const liveRoot=document.getElementById("m7-live-home"),liveCards=document.getElementById("m7-live-cards"),liveSub=document.getElementById("m7-live-sub"),liveCount=document.getElementById("m7-live-count");let livePosts=[],liveSignature="",liveDirectLoading=false,liveDirectQueued=false,liveDirectRetryTimer=null,liveDirectRetryIndex=0,liveDirectChannel=null;const LIVE_TIME_ZONE="Asia/Beirut";
+const liveRoot=document.getElementById("m7-live-home"),liveCards=document.getElementById("m7-live-cards"),liveSub=document.getElementById("m7-live-sub"),liveCount=document.getElementById("m7-live-count"),liveStatus=liveRoot?.querySelector(".m7-live-status"),liveHeading=liveRoot?.querySelector("h2");let livePosts=[],liveSignature="",liveDirectLoading=false,liveDirectQueued=false,liveDirectRetryTimer=null,liveDirectRetryIndex=0,liveDirectChannel=null;const LIVE_TIME_ZONE="Asia/Beirut";
 function remain(date){let s=Math.max(0,Math.floor((new Date(date)-Date.now())/1000)),d=Math.floor(s/86400);s%=86400;let h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),q=s%60;return d?`${d}d ${h}h ${m}m`:[h,m,q].map(v=>String(v).padStart(2,"0")).join(":")}
 function started(x){let s=Math.floor((Date.now()-new Date(x.starts_at))/1000);if(s<0)return"Starts in "+remain(x.starts_at);if(s<60)return`Started ${s}s ago`;let m=Math.floor(s/60);if(m<60)return`Started ${m}m ago`;let h=Math.floor(m/60);return h<24?`Started ${h}h ${m%60}m ago`:`Started ${Math.floor(h/24)}d ago`}
 function beirutParts(value){let parts=new Intl.DateTimeFormat("en-CA",{timeZone:LIVE_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(value)),o={};parts.forEach(p=>o[p.type]=p.value);return o}
@@ -1290,12 +1293,20 @@ function renderLive(){
   liveRoot.classList.toggle("m7-live-active",n>0);
   liveRoot.classList.toggle("m7-live-empty-state",n===0);
   liveCount.textContent=`${n} ${n===1?"UPDATE":"UPDATES"}`;
+
   if(!n){
-    liveSub.textContent="Check back for new offers, events & updates";
+    if(liveStatus)liveStatus.innerHTML="<i></i> OFFLINE";
+    if(liveHeading)liveHeading.textContent="🌙 Nothing happening for now";
+    liveCount.hidden=true;
+    liveSub.textContent="Check back later for broadcasts, events & offers.";
     liveCards.innerHTML="";
     liveCards.hidden=true;
     return;
   }
+
+  if(liveStatus)liveStatus.innerHTML="<i></i> LIVE";
+  if(liveHeading)liveHeading.textContent="🔥 Happening Today";
+  liveCount.hidden=false;
   liveCards.hidden=false;
   const videoCount=livePosts.filter(x=>x?.is_video_live||x?.post_type==="video_live").length;
   liveSub.textContent=videoCount
