@@ -1224,7 +1224,7 @@ function injectNotificationCSS(){
 
 /* Offer / Event / Happening / Arrival activity:
    purple pulse around the actual shop circle. */
-.ma7alak-notification-item[data-notification-type="live"]
+.ma7alak-notification-item.highlighted[data-notification-type="live"]
 .ma7alak-notification-icon{
   border-color:rgba(177,104,255,.92);
   box-shadow:0 0 0 2px rgba(177,104,255,.10),0 0 12px rgba(177,104,255,.34);
@@ -1237,7 +1237,7 @@ function injectNotificationCSS(){
 
 /* Camera broadcast:
    green pulse so it is visually different from normal posts. */
-.ma7alak-notification-item[data-notification-type="video_live"]
+.ma7alak-notification-item.highlighted[data-notification-type="video_live"]
 .ma7alak-notification-icon{
   border-color:rgba(57,217,120,.96);
   box-shadow:0 0 0 2px rgba(57,217,120,.11),0 0 13px rgba(57,217,120,.38);
