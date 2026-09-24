@@ -69,8 +69,8 @@ async function refresh(){
     streams=(r.data||[]).filter(liveFresh);
     const slugs=[...new Set(streams.map(x=>String(x.shop_slug||"").toLowerCase()).filter(Boolean))];profiles=new Map();
     if(slugs.length){const p=await c.from("shop_profiles").select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url").in("shop_slug",slugs);(p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug).toLowerCase(),x))}
-    inject();
     emitLiveState();
+    inject();
   }finally{refreshBusy=false}
 }
 function cardHtml(x){
