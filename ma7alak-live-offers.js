@@ -759,3 +759,21 @@ async function init(){
 }
 init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
 })();
+
+
+/* =========================================================
+   SHOUFHON LIVE VIDEO LOADER
+   Keeps the existing Live & Offers install line as the single
+   Hostinger entry point for realtime Agora broadcasting.
+   ========================================================= */
+(function(){
+  "use strict";
+  if(window.self!==window.top)return;
+  if(window.__SHOUFHON_LIVE_VIDEO_LOADER__)return;
+  window.__SHOUFHON_LIVE_VIDEO_LOADER__=true;
+  var s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@e9922fb81c88637ec5bf83bd33fa7179d108e64a/ma7alak-live-video.js";
+  s.async=true;
+  s.onerror=function(){console.error("SHOUFHON Live Video: failed to load");};
+  document.head.appendChild(s);
+})();
