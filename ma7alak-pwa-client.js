@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.24.3";
+  const VERSION="2026.09.24.4";
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
@@ -177,7 +177,7 @@
       el.content=content;
     }
 
-    meta("theme-color","#d9a441");
+    meta("theme-color","#050403");
     meta("mobile-web-app-capable","yes");
     meta("apple-mobile-web-app-capable","yes");
     meta(
@@ -1003,4 +1003,80 @@
     },
     checkInstallAssets:verifyAssets
   };
+})();
+
+
+/* =========================================================
+   SHOUFHON PWA TOP EDGE POLISH V1
+   ---------------------------------------------------------
+   Keeps display-mode: standalone so Android's navigation bar stays
+   system-controlled. The top system/status area now blends into the
+   ShoufHon dark UI instead of showing the old gold strip.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_PWA_TOP_EDGE_POLISH_V1__)return;
+  window.__SHOUFHON_PWA_TOP_EDGE_POLISH_V1__=true;
+
+  function setMeta(name,content){
+    let el=document.querySelector('meta[name="'+name+'"]');
+    if(!el){
+      el=document.createElement("meta");
+      el.name=name;
+      (document.head||document.documentElement).appendChild(el);
+    }
+    el.content=content;
+    return el;
+  }
+
+  function ensureViewportFit(){
+    let viewport=document.querySelector('meta[name="viewport"]');
+    if(!viewport){
+      viewport=document.createElement("meta");
+      viewport.name="viewport";
+      viewport.content="width=device-width, initial-scale=1, viewport-fit=cover";
+      (document.head||document.documentElement).appendChild(viewport);
+      return;
+    }
+
+    const parts=String(viewport.content||"")
+      .split(",")
+      .map(function(v){return v.trim();})
+      .filter(Boolean)
+      .filter(function(v){return !/^viewport-fit\s*=/.test(v);});
+
+    if(!parts.some(function(v){return /^width\s*=/.test(v);})){
+      parts.unshift("width=device-width");
+    }
+    if(!parts.some(function(v){return /^initial-scale\s*=/.test(v);})){
+      parts.push("initial-scale=1");
+    }
+    parts.push("viewport-fit=cover");
+    viewport.content=parts.join(", ");
+  }
+
+  function installEdgeCSS(){
+    if(document.getElementById("shoufhon-pwa-top-edge-polish-v1"))return;
+    const s=document.createElement("style");
+    s.id="shoufhon-pwa-top-edge-polish-v1";
+    s.textContent=`
+      html,body{
+        background-color:#050403!important;
+      }
+
+      @media (display-mode:standalone){
+        html,body{
+          background:#050403!important;
+          min-height:100dvh!important;
+        }
+      }
+    `;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  setMeta("theme-color","#050403");
+  setMeta("color-scheme","dark");
+  ensureViewportFit();
+  installEdgeCSS();
 })();
