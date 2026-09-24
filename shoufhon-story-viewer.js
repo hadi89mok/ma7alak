@@ -39,6 +39,7 @@
   let storyReplyVoiceStartedAt=0;
   let storyReplyVoiceTimer=0;
   let storyReplyVoiceDiscard=false;
+  let replyKeyboardLockOffset=0;
 
   const esc=value=>String(value??"").replace(
     /[&<>"']/g,
@@ -416,8 +417,8 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-mic-time.visible{display:block}
 #${ROOT_ID} .ssv-media-input{display:none!important}
 #${ROOT_ID} .ssv-reply{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
-#${ROOT_ID} .ssv-reply input{min-width:0;flex:1;height:44px;border:1px solid #ffffff32;border-radius:999px;background:#0d0d0dc9;color:#fff;padding:0 15px;font-size:16px;outline:0}
-#${ROOT_ID} .ssv-reply input:focus{border-color:#d9a441}
+#${ROOT_ID} .ssv-reply-text{min-width:0;flex:1;height:44px;border:1px solid #ffffff32;border-radius:999px;background:#0d0d0dc9;color:#fff;padding:0 15px;font-size:16px;outline:0}
+#${ROOT_ID} .ssv-reply-text:focus{border-color:#d9a441}
 #${ROOT_ID} .ssv-send{height:44px;min-width:54px;padding:0 14px;border:0;border-radius:999px;background:#d9a441;color:#160f08;font-weight:950;cursor:pointer;touch-action:manipulation}
 #${ROOT_ID} .ssv-send:disabled,#${ROOT_ID} .ssv-like:disabled{opacity:.55;cursor:default}
 #${ROOT_ID} .ssv-feedback{position:absolute;z-index:25;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 62px));transform:translateX(-50%);max-width:calc(100% - 30px);padding:8px 11px;border-radius:999px;background:#17120fee;border:1px solid #d9a44155;color:#f2d093;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .16s ease}
@@ -436,6 +437,51 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     );
   }
 
+  function storyReplyVisibleBottom(){
+    const candidates=[];
+
+    function addWindow(win){
+      if(!win)return;
+
+      try{
+        const vv=win.visualViewport;
+        if(vv){
+          const bottom=Number(vv.offsetTop||0)+Number(vv.height||0);
+          if(Number.isFinite(bottom)&&bottom>0)candidates.push(bottom);
+        }
+      }catch(_){}
+
+      try{
+        const inner=Number(win.innerHeight||0);
+        if(Number.isFinite(inner)&&inner>0)candidates.push(inner);
+      }catch(_){}
+
+      try{
+        const keyboard=win.navigator?.virtualKeyboard;
+        const box=keyboard?.boundingRect;
+        const y=Number(box?.y);
+        const height=Number(box?.height);
+        if(Number.isFinite(y)&&Number.isFinite(height)&&height>0&&y>0){
+          candidates.push(y);
+        }
+      }catch(_){}
+    }
+
+    addWindow(window);
+
+    try{
+      if(window.parent&&window.parent!==window)addWindow(window.parent);
+    }catch(_){}
+
+    try{
+      if(window.top&&window.top!==window&&window.top!==window.parent)addWindow(window.top);
+    }catch(_){}
+
+    return candidates.length
+      ? Math.min(...candidates)
+      : Number(window.innerHeight||0);
+  }
+
   function syncVisualViewport(){
     if(!root||root.hidden)return;
 
@@ -446,7 +492,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     const input=
       root.querySelector(
-        ".ssv-reply input"
+        ".ssv-reply-text"
       );
 
     if(!reply)return;
@@ -456,6 +502,8 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       document.activeElement===input;
 
     if(!focused){
+      replyKeyboardLockOffset=0;
+
       root.style.setProperty(
         "--ssv-keyboard-offset",
         "0px"
@@ -469,26 +517,20 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     }
 
     /*
-      Match the working shop-page Story viewer:
-      keep the Story fullscreen and move only the reply control by the
-      exact amount hidden below VisualViewport.
+      Reset before measuring. This avoids accumulating an old offset across
+      Android keyboard animation frames.
     */
-    root.classList.remove(
-      "is-keyboard-open"
-    );
-
     root.style.setProperty(
       "--ssv-keyboard-offset",
       "0px"
     );
 
-    const vv=
-      window.visualViewport;
+    root.classList.add(
+      "is-keyboard-open"
+    );
 
     const visibleBottom=
-      vv
-        ? Number(vv.offsetTop||0)+Number(vv.height||0)
-        : Number(window.innerHeight||0);
+      storyReplyVisibleBottom();
 
     const rect=
       reply.getBoundingClientRect();
@@ -499,21 +541,88 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
         Math.ceil(
           rect.bottom-
           visibleBottom+
-          10
+          14
         )
       );
 
-    if(offset<8){
-      offset=0;
+    const frame=
+      root.querySelector(
+        ".ssv-frame"
+      );
+
+    const frameRect=
+      frame?.getBoundingClientRect?.()||
+      root.getBoundingClientRect();
+
+    const layoutHeight=
+      Math.max(
+        Number(frameRect.height||0),
+        Number(window.innerHeight||0)
+      );
+
+    const measuredKeyboard=
+      layoutHeight>0 &&
+      visibleBottom<(layoutHeight-80);
+
+    const androidMobile=
+      /Android/i.test(
+        String(navigator.userAgent||"")
+      ) &&
+      Math.min(
+        Number(window.innerWidth||9999),
+        Number(frameRect.width||9999)
+      )<=900;
+
+    /*
+      Samsung/Brave can leave VisualViewport at full height while the IME
+      overlays the Story. In that case use the same conservative fallback
+      that already works on the shop-profile Story viewer.
+    */
+    if(
+      androidMobile &&
+      !measuredKeyboard &&
+      layoutHeight>0
+    ){
+      offset=
+        Math.max(
+          offset,
+          Math.round(
+            layoutHeight*.50
+          )
+        );
     }
+
+    if(offset<8)offset=0;
+
+    const maxOffset=
+      Math.max(
+        0,
+        Math.floor(
+          rect.bottom-70
+        )
+      );
+
+    offset=
+      Math.min(
+        offset,
+        maxOffset
+      );
+
+    /*
+      Never let a later bad Android viewport reading push the reply bar
+      downward while the keyboard is still open.
+    */
+    offset=
+      Math.max(
+        replyKeyboardLockOffset,
+        offset
+      );
+
+    replyKeyboardLockOffset=offset;
 
     root.style.setProperty(
       "--ssv-keyboard-offset",
       offset+"px"
-    );
-
-    root.classList.add(
-      "is-keyboard-open"
     );
 
     if(
@@ -523,10 +632,15 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       try{
         input.scrollIntoView({
           block:"nearest",
-          inline:"nearest"
+          inline:"nearest",
+          behavior:"instant"
         });
       }
-      catch(_){}
+      catch(_){
+        try{
+          input.scrollIntoView(false);
+        }catch(__){}
+      }
     }
   }
 
@@ -1622,8 +1736,11 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
             <span class="ssv-mic-time" aria-live="polite">0:00</span>
 
             <input
+              class="ssv-reply-text"
+              type="text"
               maxlength="2000"
               autocomplete="off"
+              enterkeyhint="send"
               placeholder="Reply to story…"
               aria-label="Reply to Story"
             >
@@ -1772,7 +1889,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     const replyInput=
       root.querySelector(
-        ".ssv-reply input"
+        ".ssv-reply-text"
       );
 
     replyInput.setAttribute(
@@ -1783,17 +1900,23 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     replyInput.addEventListener(
       "focus",
       ()=>{
+        replyKeyboardLockOffset=0;
         pauseStoryPlayback();
         scheduleVisualViewportSync();
-        setTimeout(scheduleVisualViewportSync,60);
-        setTimeout(scheduleVisualViewportSync,180);
-        setTimeout(scheduleVisualViewportSync,360);
+        [40,100,180,300,460].forEach(delay=>{
+          setTimeout(()=>{
+            if(document.activeElement===replyInput){
+              scheduleVisualViewportSync();
+            }
+          },delay);
+        });
       }
     );
 
     replyInput.addEventListener(
       "blur",
       ()=>{
+        replyKeyboardLockOffset=0;
         resumeStoryPlayback();
         scheduleVisualViewportSync();
       }
@@ -2575,7 +2698,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     root
       .querySelector(
-        ".ssv-reply input"
+        ".ssv-reply-text"
       )
       .disabled=
         (
@@ -3004,7 +3127,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
     const input=
       root.querySelector(
-        ".ssv-reply input"
+        ".ssv-reply-text"
       );
 
     const send=
@@ -3388,7 +3511,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     if(
       document.activeElement===
       root.querySelector(
-        ".ssv-reply input"
+        ".ssv-reply-text"
       )
     ){
       pauseStoryPlayback();
@@ -3837,6 +3960,19 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       {passive:true}
     );
   }
+
+  try{
+    const keyboard=navigator.virtualKeyboard;
+    if(
+      keyboard &&
+      typeof keyboard.addEventListener==="function"
+    ){
+      keyboard.addEventListener(
+        "geometrychange",
+        scheduleVisualViewportSync
+      );
+    }
+  }catch(_){}
 
   window.addEventListener(
     "resize",
