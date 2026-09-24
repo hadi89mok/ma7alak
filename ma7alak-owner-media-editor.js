@@ -259,7 +259,26 @@
     const style=document.createElement("style");
     style.id="m7-owner-media-editor-style";
     style.textContent=`
-      #m7-owner-media-edit{display:none;min-height:34px;padding:0 10px;border:1px solid var(--m7-media-edit-frame,#d9a441);border-radius:999px;background:var(--m7-media-edit-bg,#17130f);color:var(--m7-media-edit-frame,#f0ca6b);font:900 9px/1 Arial,"Segoe UI",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      #m7-media-showcase .m7-media-head{position:relative!important;width:calc(100% + 12px)!important;margin-left:-6px!important;margin-bottom:8px!important;padding:13px 13px 12px!important;border-radius:19px 19px 12px 12px!important;border-color:color-mix(in srgb,var(--m7-photo,#f2caed) 48%,transparent)!important;background:linear-gradient(180deg,color-mix(in srgb,var(--m7-media-header-bg,#100e0c) 92%,transparent),color-mix(in srgb,var(--m7-media-header-bg,#100e0c) 74%,transparent))!important;box-shadow:0 10px 25px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)!important}
+      #m7-media-showcase .m7-media-head:after{content:"";position:absolute;left:16px;right:16px;bottom:-5px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--m7-photo,#f2caed) 36%,transparent),transparent);pointer-events:none}
+      #m7-media-showcase .m7-media-heading-row{align-items:center!important}
+      #m7-owner-media-tools{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0}
+      #m7-owner-media-tools .m7-media-counts{padding:0!important;text-align:right!important}
+      #m7-media-showcase .m7-media-filters{margin-top:10px!important;gap:6px!important}
+      #m7-media-showcase .m7-media-filter{min-height:32px!important;border-radius:9px!important;background:color-mix(in srgb,var(--m7-media-button-bg,#17130f) 88%,transparent)!important}
+      #m7-media-showcase .m7-media-filter.active{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px color-mix(in srgb,var(--m7-media-button-active-frame,#f2caed) 18%,transparent)!important}
+      #m7-media-showcase .m7-media-hero{margin-top:0!important}
+      #m7-owner-media-edit{display:none;align-items:center;gap:5px;min-height:31px;padding:0 9px;border:1px solid color-mix(in srgb,var(--m7-media-edit-frame,#d9a441) 72%,transparent);border-radius:10px;background:color-mix(in srgb,var(--m7-media-edit-bg,#17130f) 88%,transparent);color:var(--m7-media-edit-frame,#f0ca6b);font:900 8px/1 Arial,"Segoe UI",sans-serif;letter-spacing:.15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035);touch-action:manipulation;-webkit-tap-highlight-color:transparent;outline:none}
+      #m7-owner-media-edit .m7ome-icon{font-size:12px;line-height:1}
+      #m7-owner-media-edit:active{transform:scale(.97)}
+      @media(max-width:520px){
+        #m7-media-showcase .m7-media-head{padding:11px 10px 10px!important;margin-bottom:7px!important;border-radius:17px 17px 11px 11px!important}
+        #m7-owner-media-tools{gap:5px}
+        #m7-owner-media-tools .m7-media-counts{font-size:7px!important;max-width:72px;white-space:normal!important;line-height:1.2!important}
+        #m7-owner-media-edit{min-height:30px;padding:0 8px;font-size:7.5px}
+        #m7-media-showcase .m7-media-title{font-size:24px!important}
+        #m7-media-showcase .m7-media-symbol{width:33px!important;height:33px!important;flex-basis:33px!important}
+      }
       #m7-owner-media-edit.visible{display:inline-flex;align-items:center;gap:5px}
       #m7-owner-media-sheet{position:fixed!important;inset:0!important;width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(58px,calc(env(safe-area-inset-top) + 46px)) 12px max(24px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
@@ -333,11 +352,17 @@
       syncFrameMotion();
     }
 
+    const counts=heading.querySelector(".m7-media-counts");
+    const tools=document.createElement("div");
+    tools.id="m7-owner-media-tools";
+    if(counts)tools.appendChild(counts);
+
     const edit=document.createElement("button");
     edit.id="m7-owner-media-edit";
     edit.type="button";
-    edit.innerHTML="✎ Edit Media";
-    heading.appendChild(edit);
+    edit.innerHTML='<span class="m7ome-icon" aria-hidden="true">✎</span><span>Edit</span>';
+    tools.appendChild(edit);
+    heading.appendChild(tools);
     edit.addEventListener("click",openEditor);
 
     const sheet=document.createElement("div");
