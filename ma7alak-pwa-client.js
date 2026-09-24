@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.24.6";
+  const VERSION="2026.09.24.7";
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
@@ -1022,6 +1022,16 @@
 (function(){
   "use strict";
 
+  function isStandalonePwa(){
+    return (
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator.standalone===true
+    );
+  }
+
+  /* IMPORTANT: never touch normal browser / Hostinger pages. */
+  if(!isStandalonePwa())return;
+
   if(window.__SHOUFHON_PWA_TOP_EDGE_POLISH_V1__)return;
   window.__SHOUFHON_PWA_TOP_EDGE_POLISH_V1__=true;
 
@@ -1067,10 +1077,6 @@
     const s=document.createElement("style");
     s.id="shoufhon-pwa-top-edge-polish-v1";
     s.textContent=`
-      html,body{
-        background-color:#050403!important;
-      }
-
       @media (display-mode:standalone){
         html,body{
           background:#050403!important;
@@ -1095,7 +1101,17 @@
 (function(){
   "use strict";
 
+  function isStandalonePwa(){
+    return (
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator.standalone===true
+    );
+  }
+
   function forcePwaChrome(){
+    /* Never alter the normal website or Hostinger embed canvas. */
+    if(!isStandalonePwa())return;
+
     const head=document.head||document.documentElement;
     if(!head)return;
 
