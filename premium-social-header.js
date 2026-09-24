@@ -4647,3 +4647,506 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 }`;
   (document.head||document.documentElement).appendChild(style);
 })();
+
+
+/* =========================================================
+   SHOUFHON HEADER + STICKY ANALYTICS POLISH V1
+   ---------------------------------------------------------
+   - Keeps the existing ShoufHon header design/functionality.
+   - Header becomes materially smaller after scrolling.
+   - Existing homepage live stats are promoted into a premium
+     fixed glass bar directly under the header.
+   - Header + analytics shrink together.
+   - Existing analytics IDs / Supabase logic are NOT rewritten.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_HEADER_STATS_POLISH_V1__)return;
+  window.__SHOUFHON_HEADER_STATS_POLISH_V1__=true;
+
+  const COMPACT_CLASS="shoufhon-fixed-ui-compact";
+  const READY_CLASS="shoufhon-sticky-stats-ready";
+  const STATS_CLASS="shoufhon-sticky-analytics";
+
+  function installPolishCSS(){
+    if(document.getElementById("shoufhon-header-stats-polish-v1"))return;
+
+    const style=document.createElement("style");
+    style.id="shoufhon-header-stats-polish-v1";
+    style.textContent=`
+/* ---------- premium stats bar ---------- */
+#ma7alak-live-stats.${STATS_CLASS}{
+  position:fixed!important;
+  z-index:2147482990!important;
+  top:calc(max(8px,env(safe-area-inset-top)) + 67px)!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:translateX(-50%)!important;
+  width:min(560px,calc(100vw - 58px))!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  pointer-events:none!important;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important;
+  transition:
+    top .24s cubic-bezier(.2,.75,.2,1),
+    width .24s cubic-bezier(.2,.75,.2,1),
+    opacity .2s ease,
+    transform .24s cubic-bezier(.2,.75,.2,1)!important;
+  will-change:top,width,transform;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel{
+  position:relative!important;
+  width:100%!important;
+  min-height:49px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  padding:7px 12px!important;
+  border:1px solid rgba(220,168,74,.34)!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 14% -45%,rgba(217,164,65,.19),transparent 41%),
+    radial-gradient(circle at 84% 140%,rgba(104,32,23,.20),transparent 46%),
+    linear-gradient(180deg,rgba(24,22,19,.94),rgba(9,10,11,.96))!important;
+  box-shadow:
+    0 13px 34px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.025) inset,
+    0 1px 0 rgba(255,233,190,.055) inset,
+    0 0 24px rgba(217,164,65,.045)!important;
+  backdrop-filter:blur(18px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(135%)!important;
+  transition:
+    min-height .24s ease,
+    padding .24s ease,
+    border-radius .24s ease,
+    box-shadow .24s ease,
+    background .24s ease!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  top:0!important;
+  left:16%!important;
+  right:16%!important;
+  height:1px!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,transparent,rgba(255,221,151,.10),rgba(236,183,83,.72),rgba(255,221,151,.10),transparent)!important;
+  box-shadow:0 0 12px rgba(217,164,65,.16)!important;
+  pointer-events:none!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:linear-gradient(105deg,transparent 0 41%,rgba(255,255,255,.022) 48%,transparent 55% 100%)!important;
+  transform:translateX(-28%)!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-item{
+  position:relative!important;
+  flex:1 1 0!important;
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  padding:2px 8px!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-divider{
+  width:1px!important;
+  height:27px!important;
+  flex:0 0 1px!important;
+  opacity:.9!important;
+  background:linear-gradient(180deg,transparent,rgba(217,164,65,.27),rgba(255,255,255,.07),transparent)!important;
+  transition:height .24s ease,opacity .24s ease!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon{
+  width:26px!important;
+  height:26px!important;
+  flex:0 0 26px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid rgba(217,164,65,.14)!important;
+  border-radius:9px!important;
+  background:linear-gradient(145deg,rgba(217,164,65,.10),rgba(255,255,255,.018))!important;
+  color:#e9bb63!important;
+  font-size:0!important;
+  line-height:1!important;
+  filter:none!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 12px rgba(0,0,0,.16)!important;
+  transition:width .24s ease,height .24s ease,flex-basis .24s ease,border-radius .24s ease!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon svg{
+  width:15px!important;
+  height:15px!important;
+  display:block!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  fill:none!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+  transition:width .24s ease,height .24s ease!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-text{
+  min-width:0!important;
+  text-align:left!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-number{
+  color:#fff8eb!important;
+  font-size:17px!important;
+  font-weight:850!important;
+  line-height:1!important;
+  letter-spacing:-.2px!important;
+  text-shadow:0 1px 6px rgba(0,0,0,.36)!important;
+  transition:font-size .24s ease!important;
+}
+
+#ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-label{
+  margin-top:3px!important;
+  color:rgba(255,238,205,.58)!important;
+  font-size:8px!important;
+  font-weight:760!important;
+  line-height:1.05!important;
+  letter-spacing:.32px!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+  text-shadow:none!important;
+  transition:font-size .24s ease,margin .24s ease,opacity .24s ease!important;
+}
+
+/* ---------- compact scroll state: header ---------- */
+html.${COMPACT_CLASS} #ma7alak-social-header{
+  top:max(6px,env(safe-area-inset-top))!important;
+  min-height:52px!important;
+  padding-top:3px!important;
+  padding-bottom:3px!important;
+  border-radius:19px!important;
+  border-color:rgba(217,164,65,.31)!important;
+  background:
+    linear-gradient(180deg,rgba(20,20,21,.975),rgba(7,8,9,.97))!important;
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.54),
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 0 19px rgba(217,164,65,.045)!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-social-header::before{
+  opacity:.54!important;
+}
+
+/* ---------- compact scroll state: stats ---------- */
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS}{
+  top:calc(max(6px,env(safe-area-inset-top)) + 57px)!important;
+  width:min(470px,calc(100vw - 88px))!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel{
+  min-height:31px!important;
+  padding:3px 8px!important;
+  border-radius:999px!important;
+  border-color:rgba(217,164,65,.27)!important;
+  background:
+    radial-gradient(circle at 18% -80%,rgba(217,164,65,.13),transparent 43%),
+    linear-gradient(180deg,rgba(19,18,17,.965),rgba(7,8,9,.975))!important;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.47),
+    inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-item{
+  gap:4px!important;
+  padding:1px 5px!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon{
+  width:18px!important;
+  height:18px!important;
+  flex-basis:18px!important;
+  border-radius:6px!important;
+  background:rgba(217,164,65,.065)!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon svg{
+  width:11px!important;
+  height:11px!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-number{
+  font-size:13px!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-label{
+  margin-top:1px!important;
+  font-size:6.8px!important;
+  letter-spacing:.22px!important;
+  opacity:.80!important;
+}
+
+html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-divider{
+  height:18px!important;
+  opacity:.65!important;
+}
+
+/* Leave real page content below the two-piece fixed stack at page start. */
+body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
+  padding-top:145px!important;
+}
+
+/* ---------- phone tuning ---------- */
+@media(max-width:900px){
+  body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
+    padding-top:126px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS}{
+    top:calc(max(8px,env(safe-area-inset-top)) + 66px)!important;
+    width:calc(100vw - 58px)!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel{
+    min-height:46px!important;
+    padding:6px 8px!important;
+    border-radius:16px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-item{
+    gap:5px!important;
+    padding:1px 5px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon{
+    width:23px!important;
+    height:23px!important;
+    flex-basis:23px!important;
+    border-radius:8px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-icon svg{
+    width:13px!important;
+    height:13px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-number{
+    font-size:15px!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-label{
+    font-size:7.2px!important;
+  }
+
+  /* The current logo uses an intentional crop/zoom trick.
+     Compact it without changing the actual logo asset. */
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-brand{
+    width:64px!important;
+    min-width:64px!important;
+    height:46px!important;
+    margin-left:0!important;
+    padding:4px 4px 4px 6px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-logo{
+    width:53px!important;
+    max-width:53px!important;
+    height:38px!important;
+    transform:translateY(9px) scale(3.35)!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-nav{
+    height:42px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-nav-item,
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-following,
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-likes-slot,
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-notification-slot{
+    min-width:33px!important;
+    width:33px!important;
+    height:42px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-nav-icon,
+  html.${COMPACT_CLASS} #ma7alak-social-header .ma7alak-header-nav-icon svg{
+    width:19px!important;
+    height:19px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-reels .ma7alak-header-nav-icon,
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-reels .ma7alak-header-nav-icon svg{
+    width:21px!important;
+    height:21px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-story-likes-button,
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-notification-bell{
+    width:31px!important;
+    height:31px!important;
+    min-width:31px!important;
+    min-height:31px!important;
+    border-radius:10px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-owner.visible{
+    width:38px!important;
+    min-width:38px!important;
+    flex-basis:38px!important;
+    margin-right:5px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-owner .ma7alak-owner-avatar-wrap{
+    width:35px!important;
+    height:35px!important;
+    flex:0 0 35px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-social-header #ma7alak-header-menu-button{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    flex-basis:34px!important;
+    border-radius:11px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS}{
+    top:calc(max(6px,env(safe-area-inset-top)) + 56px)!important;
+    width:calc(100vw - 88px)!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-panel{
+    min-height:30px!important;
+    padding:3px 6px!important;
+    border-radius:999px!important;
+  }
+}
+
+@media(max-width:390px){
+  #ma7alak-live-stats.${STATS_CLASS}{
+    width:calc(100vw - 44px)!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS}{
+    width:calc(100vw - 72px)!important;
+  }
+
+  #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-label{
+    font-size:6.7px!important;
+  }
+
+  html.${COMPACT_CLASS} #ma7alak-live-stats.${STATS_CLASS} .ma7alak-live-label{
+    font-size:6.2px!important;
+  }
+}
+
+/* Reduced motion: keep state change, remove flourish. */
+@media(prefers-reduced-motion:reduce){
+  #ma7alak-live-stats.${STATS_CLASS},
+  #ma7alak-live-stats.${STATS_CLASS} *,
+  html.${COMPACT_CLASS} #ma7alak-social-header{
+    transition:none!important;
+  }
+}
+`;
+    (document.head||document.documentElement).appendChild(style);
+  }
+
+  function usersIcon(){
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+  }
+  function shopIcon(){
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M5 13v7h14v-7"/><path d="M9 20v-5h6v5"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>';
+  }
+  function eyeIcon(){
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>';
+  }
+
+  function upgradeStatsIcons(stats){
+    const icons=stats.querySelectorAll(".ma7alak-live-icon");
+    if(icons[0])icons[0].innerHTML=usersIcon();
+    if(icons[1])icons[1].innerHTML=shopIcon();
+    if(icons[2])icons[2].innerHTML=eyeIcon();
+  }
+
+  function prepareStats(){
+    const stats=document.getElementById("ma7alak-live-stats");
+    if(!stats)return false;
+
+    installPolishCSS();
+
+    stats.classList.add(STATS_CLASS);
+    stats.setAttribute("aria-label","ShoufHon live activity");
+
+    /*
+      Move only the existing DOM node. This preserves the existing
+      numbers, IDs and Supabase updater references while removing its
+      old place in normal page flow.
+    */
+    if(stats.parentNode!==document.body){
+      document.body.appendChild(stats);
+    }
+
+    upgradeStatsIcons(stats);
+
+    document.body.classList.add(READY_CLASS);
+    return true;
+  }
+
+  let scrollTick=false;
+  function applyScrollState(){
+    scrollTick=false;
+    const compact=window.scrollY>110;
+    document.documentElement.classList.toggle(COMPACT_CLASS,compact);
+  }
+
+  function onScroll(){
+    if(scrollTick)return;
+    scrollTick=true;
+    requestAnimationFrame(applyScrollState);
+  }
+
+  function boot(){
+    installPolishCSS();
+    prepareStats();
+    applyScrollState();
+
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("pageshow",function(){
+      prepareStats();
+      applyScrollState();
+    });
+    window.addEventListener("resize",applyScrollState,{passive:true});
+
+    /*
+      Hostinger/custom-code blocks can mount after the header. Observe
+      only until the stats node appears, then disconnect.
+    */
+    if(!document.getElementById("ma7alak-live-stats")){
+      const observer=new MutationObserver(function(){
+        if(prepareStats()){
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.documentElement,{childList:true,subtree:true});
+      setTimeout(function(){observer.disconnect();},12000);
+    }
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else{
+    boot();
+  }
+})();
