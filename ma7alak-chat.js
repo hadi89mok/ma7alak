@@ -651,7 +651,7 @@ function wireChatComposer(c){
   form.onsubmit=async e=>{e.preventDefault();if(composerBusy)return;if(blockedComposer()){alert("Unblock this user before sending a message.");return}if(activeRecorder?.state==="recording")return;if(voiceDraft){await sendVoiceDraft(c);return}if(pendingMedia){await sendPendingMedia(c);return}await sendTextFromComposer(c)};
   renderComposerState();
 }
-async function cleanupConversationMedia(c){try{const r=await client.from("ma7alak_messages").select("message_type,context").eq("conversation_id",c.id).in("message_type",["voice","image","video"]);if(r.error)throw r.error;const paths=[...new Set((r.data||[]).map(m=>String(chatMediaCtx(m).storage_path||"").trim()).filter(Boolean))];if(paths.length){const del=await client.storage.from(CHAT_MEDIA_BUCKET).remove(paths);if(del.error)console.warn("Conversation media cleanup:",del.error)}}catch(e){console.warn("Conversation media cleanup:",e)}}
+async function cleanupConversationMedia(c){try{const r=await client.from("ma7alak_messages").select("message_type,context").eq("conversation_id",c.id).in("message_type",["voice","image","video"]);if(r.error)throw r.error;const mine=String(user?.id||"");const paths=[...new Set((r.data||[]).map(m=>String(chatMediaCtx(m).storage_path||"").trim()).filter(p=>p&&p.split("/")[1]===mine))];if(paths.length){const del=await client.storage.from(CHAT_MEDIA_BUCKET).remove(paths);if(del.error)console.warn("Conversation media cleanup:",del.error)}}catch(e){console.warn("Conversation media cleanup:",e)}}
 async function deleteMessage(id,c){
   if(!id||!c)return;
   if(!confirm("Delete this message?"))return;
