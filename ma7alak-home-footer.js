@@ -690,3 +690,43 @@ body.m7hf-home-mounted{background:#050403!important}
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reconnect()});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
+
+
+/* =========================================================
+   SHOUFHON FOOTER BOTTOM GAP FIX V1
+   ---------------------------------------------------------
+   Removes the artificial 84–92px space below the footer card.
+   Only the real device safe-area is retained.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_FOOTER_BOTTOM_GAP_FIX_V1__)return;
+  window.__SHOUFHON_FOOTER_BOTTOM_GAP_FIX_V1__=true;
+
+  const style=document.createElement("style");
+  style.id="shoufhon-footer-bottom-gap-fix-v1";
+  style.textContent=`
+    #shoufhon-home-footer{
+      margin-bottom:0!important;
+      padding-bottom:max(6px,env(safe-area-inset-bottom))!important;
+    }
+
+    html.m7hf-home-mounted,
+    body.m7hf-home-mounted{
+      margin-bottom:0!important;
+      padding-bottom:0!important;
+    }
+
+    body.m7hf-home-mounted > #shoufhon-home-footer:last-of-type{
+      margin-bottom:0!important;
+    }
+
+    @media(max-width:700px){
+      #shoufhon-home-footer{
+        padding-bottom:max(6px,env(safe-area-inset-bottom))!important;
+      }
+    }
+  `;
+  (document.head||document.documentElement).appendChild(style);
+})();
