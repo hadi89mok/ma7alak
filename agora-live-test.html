@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#050505">
+  <title>ShoufHon Live Test</title>
+  <style>
+    :root{color-scheme:dark}
+    *{box-sizing:border-box}
+    body{margin:0;background:#050505;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100dvh}
+    .app{max-width:760px;margin:0 auto;padding:16px}
+    .brand{font-size:24px;font-weight:900;margin:6px 0 4px}
+    .sub{color:#aaa;margin:0 0 14px;font-size:14px}
+    .stage{position:relative;background:#111;border:1px solid #222;border-radius:20px;overflow:hidden;aspect-ratio:9/16;max-height:72dvh}
+    #local,#remote{width:100%;height:100%;background:#0b0b0b}
+    #local>div,#remote>div{width:100%!important;height:100%!important}
+    .badge{position:absolute;top:12px;left:12px;z-index:5;background:#e11d48;color:#fff;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;display:none}
+    .status{position:absolute;left:12px;right:12px;bottom:12px;z-index:5;background:rgba(0,0,0,.68);backdrop-filter:blur(10px);padding:10px 12px;border-radius:12px;font-size:13px}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    button{appearance:none;border:0;border-radius:14px;min-height:52px;padding:12px 14px;font-size:16px;font-weight:900;cursor:pointer}
+    .host{background:#ef4444;color:#fff}
+    .watch{background:#fff;color:#111}
+    .leave{background:#222;color:#fff;grid-column:1/-1;display:none}
+    .note{color:#8f8f8f;font-size:12px;line-height:1.45;margin-top:10px}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="brand">ShoufHon Live Test</div>
+  <p class="sub">Phone = Go Live · PC = Watch Live</p>
+  <section class="stage">
+    <div id="local"></div>
+    <div id="remote"></div>
+    <div id="badge" class="badge">● LIVE</div>
+    <div id="status" class="status">Ready.</div>
+  </section>
+  <div class="actions">
+    <button id="hostBtn" class="host">🔴 GO LIVE</button>
+    <button id="watchBtn" class="watch">👀 WATCH LIVE</button>
+    <button id="leaveBtn" class="leave">Leave</button>
+  </div>
+  <div class="note">Temporary test page. The token expires automatically.</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4.24.8/AgoraRTC_N-production.js"></script>
+<script>
+const APP_ID="9f6a0618a20e4cecb534969714768475";
+const TOKEN="007eJxTYFj0JeHi9sPPMhSkjRVmBFd7+x2e+Pjr1VlbZTbIWDvqTK5TYLBMM0s0MDO0SDQySDVJTk1OMjU2sTSzNDc0MTezMDE3DaramtUQyMiQ9VSDkZEBAkF8IYbijPzStIz8PN2czLJU3ZLU4hIGBgBQCySy";
+const CHANNEL="shoufhon-live-test";
+const statusEl=document.getElementById("status");
+const badge=document.getElementById("badge");
+const hostBtn=document.getElementById("hostBtn");
+const watchBtn=document.getElementById("watchBtn");
+const leaveBtn=document.getElementById("leaveBtn");
+const localEl=document.getElementById("local");
+const remoteEl=document.getElementById("remote");
+let client=null,localAudioTrack=null,localVideoTrack=null,role=null;
+
+function setStatus(x){statusEl.textContent=x}
+function setJoinedUI(joined){
+  hostBtn.style.display=joined?"none":"";
+  watchBtn.style.display=joined?"none":"";
+  leaveBtn.style.display=joined?"block":"none";
+}
+async function makeClient(nextRole){
+  role=nextRole;
+  client=AgoraRTC.createClient({mode:"live",codec:"vp8"});
+  await client.setClientRole(nextRole);
+  client.on("user-published",async(user,mediaType)=>{
+    await client.subscribe(user,mediaType);
+    if(mediaType==="video"){remoteEl.innerHTML="";user.videoTrack.play(remoteEl);setStatus("Live video connected.");}
+    if(mediaType==="audio") user.audioTrack.play();
+  });
+  client.on("user-unpublished",(user,mediaType)=>{if(mediaType==="video"&&role==="audience"){remoteEl.innerHTML="";setStatus("Host stopped video.");}});
+  client.on("user-left",()=>{if(role==="audience"){remoteEl.innerHTML="";setStatus("Host left the live.");}});
+  client.on("connection-state-change",(cur)=>{
+    if(cur==="RECONNECTING") setStatus("Connection weak — reconnecting…");
+    if(cur==="CONNECTED"&&role==="host") setStatus("You are LIVE.");
+  });
+  await client.join(APP_ID,CHANNEL,TOKEN,null);
+}
+async function goLive(){
+  try{
+    setStatus("Opening camera + microphone…");
+    await makeClient("host");
+    [localAudioTrack,localVideoTrack]=await AgoraRTC.createMicrophoneAndCameraTracks({}, {encoderConfig:"720p_3",optimizationMode:"motion"});
+    localEl.style.display="block";remoteEl.style.display="none";
+    localVideoTrack.play(localEl);
+    await client.publish([localAudioTrack,localVideoTrack]);
+    badge.style.display="block";setJoinedUI(true);setStatus("You are LIVE. Keep this page open.");
+  }catch(err){console.error(err);setStatus("Could not go live: "+(err?.message||err));await cleanup();}
+}
+async function watchLive(){
+  try{
+    setStatus("Connecting to live…");
+    localEl.style.display="none";remoteEl.style.display="block";
+    await makeClient("audience");
+    setJoinedUI(true);setStatus("Connected. Waiting for the phone host…");
+  }catch(err){console.error(err);setStatus("Could not watch: "+(err?.message||err));await cleanup();}
+}
+async function cleanup(){
+  try{localAudioTrack?.stop();localAudioTrack?.close();}catch(_){}
+  try{localVideoTrack?.stop();localVideoTrack?.close();}catch(_){}
+  localAudioTrack=null;localVideoTrack=null;
+  try{if(client) await client.leave();}catch(_){}
+  client=null;role=null;localEl.innerHTML="";remoteEl.innerHTML="";
+  localEl.style.display="block";remoteEl.style.display="block";badge.style.display="none";setJoinedUI(false);setStatus("Ready.");
+}
+hostBtn.onclick=goLive;watchBtn.onclick=watchLive;leaveBtn.onclick=cleanup;
+</script>
+</body>
+</html>
