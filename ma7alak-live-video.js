@@ -243,7 +243,11 @@ async function renderChatRow(row){
   if(!overlay||!row?.message)return;
   const list=$("#m7lv-chat-list",overlay);if(!list)return;
   const isHost=row.sender_role==="host";
-  const identity=isHost?hostChatIdentity():await resolveViewerProfile(row.user_id);
+  const fallback=isHost?hostChatIdentity():await resolveViewerProfile(row.user_id);
+  const identity={
+    name:String(row.sender_name||fallback.name||"Viewer"),
+    avatar:String(row.sender_avatar||fallback.avatar||"")
+  };
   if(!overlay||!list.isConnected)return;
   const d=document.createElement("div");d.className="m7lv-msg"+(isHost?" host":"");
   const av=document.createElement("div");av.className="m7lv-msg-avatar";
@@ -263,7 +267,7 @@ async function renderChatRow(row){
 async function loadRecentChat(){
   if(!activeStream||!c)return;
   try{
-    const r=await c.from("shop_live_chat_messages").select("id,stream_id,user_id,sender_role,message,created_at").eq("stream_id",activeStream.id).order("created_at",{ascending:true}).limit(40);
+    const r=await c.from("shop_live_chat_messages").select("id,stream_id,user_id,sender_role,sender_name,sender_avatar,message,created_at").eq("stream_id",activeStream.id).order("created_at",{ascending:true}).limit(40);
     if(r.error)return;
     const list=$("#m7lv-chat-list",overlay);if(list)list.innerHTML="";
     for(const row of (r.data||[]))await renderChatRow(row);
