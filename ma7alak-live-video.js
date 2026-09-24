@@ -214,7 +214,7 @@ function preflight(){
   if($("#m7lv-preflight"))return;
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
   const p=document.createElement("div");p.id="m7lv-preflight";const shop=window.Ma7alakOwnerAuth?.shop||{};
-  const allowed=!!ownerEnt?.enabled&&!!ownerEnt?.video_live_enabled;
+  const allowed=!!ownerEnt?.video_live_enabled;
   p.innerHTML=`<div class="m7lv-sheet"><div class="m7lv-sheet-mark">● SHOUFHON VIDEO LIVE</div><h2>Ready to go live?</h2><p>Rear camera starts first. While live you get one clean control rail for camera, mic, pause, flash and End Live. Comments appear directly over the video.</p><input id="m7lv-title" maxlength="80" placeholder="Add a short live title (optional)"><div class="m7lv-sheet-actions"><button class="m7lv-cancel" type="button">Cancel</button><button class="m7lv-start" type="button" ${allowed?"":"disabled"}>${allowed?"Start Live":"Live disabled"}</button></div><div class="m7lv-pre-status">${allowed?"":"Video Live is disabled for this shop in Admin."}</div></div>`;document.body.appendChild(p);
   const cancel=$(".m7lv-cancel",p),start=$(".m7lv-start",p),st=$(".m7lv-pre-status",p);cancel.onclick=closePreflight;start.onclick=async()=>{start.disabled=true;st.textContent="Preparing secure live session…";try{const title=$("#m7lv-title",p).value.trim()||`${shop.shop_name||ownerSlug} is live`;await startHost(title)}catch(err){st.textContent=friendlyError(err);start.disabled=false}}
 }
