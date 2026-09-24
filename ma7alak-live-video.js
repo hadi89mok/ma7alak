@@ -73,6 +73,10 @@ async function refresh(){
     const slugs=[...new Set(streams.map(x=>String(x.shop_slug||"").toLowerCase()).filter(Boolean))];profiles=new Map();
     if(slugs.length){const p=await c.from("shop_profiles").select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url").in("shop_slug",slugs);(p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug).toLowerCase(),x))}
     emitLiveState();
+    if(overlay&&mode==="audience"&&activeStream&&!streams.some(x=>String(x.id)===String(activeStream.id))){
+      setStatus("Live ended.");
+      setTimeout(()=>cleanupOverlay(false),650);
+    }
   }finally{refreshBusy=false}
 }
 function cardHtml(x){
@@ -339,22 +343,45 @@ async function startHost(title){
   await loadAgora();const start=await api("start",{shop_slug:ownerSlug,title}),stream={...start.stream,shop_slug:ownerSlug,title:start.stream?.title||title};createOverlay(stream,true);activeStream=stream;hostUid=Number(start.uid)||0;
   try{
     rtcClient=window.AgoraRTC.createClient({mode:"live",codec:"vp8"});await rtcClient.setClientRole("host");wireRtcEvents();await rtcClient.join(start.app_id,start.stream.channel_name,start.token,hostUid);
-    [localAudio,localVideo]=await window.AgoraRTC.createMicrophoneAndCameraTracks({}, {encoderConfig:"720p_3",optimizationMode:"motion"});await tryRear();localVideo.play($("#m7lv-local",overlay));await rtcClient.publish([localAudio,localVideo]);await setupRoom("host");await api("activate",{stream_id:stream.id});activeStream.status="live";setStatus("You are LIVE.");await acquireWake();heartbeatTimer=setInterval(()=>api("heartbeat",{stream_id:stream.id}).catch(()=>{}),30000);wireHostControls();await refresh();
+    [localAudio,localVideo]=await window.AgoraRTC.createMicrophoneAndCameraTracks({}, {encoderConfig:"720p_3",optimizationMode:"motion"});await tryRear();localVideo.play($("#m7lv-local",overlay));await rtcClient.publish([localAudio,localVideo]);await setupRoom("host");await api("activate",{stream_id:stream.id});activeStream.status="live";setStatus("You are LIVE.");await acquireWake();heartbeatTimer=setInterval(async()=>{
+      try{await api("heartbeat",{stream_id:stream.id})}
+      catch(err){
+        const code=String(err?.code||err?.message||"");
+        if(code==="MONTHLY_LIVE_LIMIT_REACHED"||code==="VIDEO_LIVE_NOT_ENABLED"||code==="LIVE_NOT_ENABLED"){
+          setStatus(friendlyError(err));
+          setTimeout(()=>cleanupOverlay(false),1200);
+        }
+      }
+    },30000);wireHostControls();await refresh();
   }catch(err){try{await api("fail",{stream_id:stream.id})}catch(_){}setStatus(friendlyError(err));setTimeout(()=>cleanupOverlay(false),2200);throw err}
 }
-function wireHostControls(){const bind=(id,fn)=>{const e=$(id,overlay);if(e)e.onclick=fn};bind("#m7lv-switch",switchCamera);bind("#m7lv-switch-f",switchCamera);bind("#m7lv-mute",toggleMic);bind("#m7lv-mute-f",toggleMic);bind("#m7lv-pause",toggleVideo);bind("#m7lv-pause-f",toggleVideo);bind("#m7lv-torch",toggleTorch);bind("#m7lv-torch-f",toggleTorch);bind("#m7lv-full-f",fullscreen);bind("#m7lv-end",endLive)}
+function wireHostControls(){const bind=(id,fn)=>{const e=$(id,overlay);if(e)e.onclick=fn};bind("#m7lv-switch",switchCamera);bind("#m7lv-mute",toggleMic);bind("#m7lv-pause",toggleVideo);bind("#m7lv-torch",toggleTorch);bind("#m7lv-end",endLive)}
 
 async function openViewer(id){
   if(overlay)return;const base=streams.find(x=>String(x.id)===String(id));if(!base)return;await loadAgora();let join;try{join=await api("join",{stream_id:id})}catch(err){alert(friendlyError(err));await refresh();return}
   const stream={...base,...join.stream};createOverlay(stream,false);hostUid=Number(join.uid)||0;
   try{
-    rtcClient=window.AgoraRTC.createClient({mode:"live",codec:"vp8"});await rtcClient.setClientRole("audience");wireRtcEvents();rtcClient.on("user-published",async(user,mediaType)=>{try{await rtcClient.subscribe(user,mediaType);if(mediaType==="video"){user.videoTrack.play($("#m7lv-remote",overlay));setStatus("Live video connected.")}if(mediaType==="audio")user.audioTrack.play()}catch(_){}});rtcClient.on("user-unpublished",(user,mediaType)=>{if(mediaType==="video")setStatus("Host paused video.")});rtcClient.on("user-left",()=>{setStatus("Host left the live.");setTimeout(()=>cleanupOverlay(false),1700)});await rtcClient.join(join.app_id,stream.channel_name,join.token,hostUid);await setupRoom("audience");await acquireWake();const heart=$("#m7lv-heart-view",overlay),full=$("#m7lv-full-view",overlay);if(heart)heart.onclick=sendHeart;if(full)full.onclick=fullscreen;setStatus("Connected. Waiting for video…");
+    rtcClient=window.AgoraRTC.createClient({mode:"live",codec:"vp8"});await rtcClient.setClientRole("audience");wireRtcEvents();rtcClient.on("user-published",async(user,mediaType)=>{try{await rtcClient.subscribe(user,mediaType);if(mediaType==="video"){user.videoTrack.play($("#m7lv-remote",overlay));setStatus("Live video connected.")}if(mediaType==="audio")user.audioTrack.play()}catch(_){}});rtcClient.on("user-unpublished",(user,mediaType)=>{if(mediaType==="video")setStatus("Host paused video.")});rtcClient.on("user-left",()=>{setStatus("Host left the live.");setTimeout(()=>cleanupOverlay(false),1700)});await rtcClient.join(join.app_id,stream.channel_name,join.token,hostUid);await setupRoom("audience");await acquireWake();setStatus("Connected. Waiting for video…");
   }catch(err){setStatus(friendlyError(err));setTimeout(()=>cleanupOverlay(false),1800)}
 }
 
-async function endLive(){if(leaving)return;if(!confirm("End this live video now?"))return;leaving=true;setStatus("Ending live…");try{await roomChannel?.send({type:"broadcast",event:"live-ended",payload:{}})}catch(_){}try{await api("end",{stream_id:activeStream?.id})}catch(_){}await cleanupOverlay(false);leaving=false;await refresh()}
+async function endLive(){if(leaving)return;if(!confirm("End this live video now?"))return;leaving=true;setStatus("Ending live…");try{await api("end",{stream_id:activeStream?.id})}catch(_){}await cleanupOverlay(false);leaving=false;await refresh()}
 async function cleanupOverlay(popHistory=true){
-  if(!overlay)return;clearInterval(heartbeatTimer);heartbeatTimer=null;try{localAudio?.stop();localAudio?.close()}catch(_){}try{localVideo?.stop();localVideo?.close()}catch(_){}localAudio=null;localVideo=null;try{if(rtcClient)await rtcClient.leave()}catch(_){}rtcClient=null;try{if(roomChannel)await c.removeChannel(roomChannel)}catch(_){}roomChannel=null;await releaseWake();overlay.remove();overlay=null;mode="";activeStream=null;hostUid=0;micMuted=false;videoPaused=false;torchOn=false;cameraFacing="environment";qualityProfile="720p_3";unlock();if(popHistory&&pushedHistory){pushedHistory=false;try{history.back()}catch(_){}}else pushedHistory=false;
+  if(!overlay)return;
+  clearInterval(heartbeatTimer);heartbeatTimer=null;
+  try{localAudio?.stop();localAudio?.close()}catch(_){}
+  try{localVideo?.stop();localVideo?.close()}catch(_){}
+  localAudio=null;localVideo=null;
+  try{if(rtcClient)await rtcClient.leave()}catch(_){}rtcClient=null;
+  try{if(roomChannel)await c.removeChannel(roomChannel)}catch(_){}roomChannel=null;
+  try{if(chatChannel)await c.removeChannel(chatChannel)}catch(_){}chatChannel=null;
+  try{if(reactionChannel)await c.removeChannel(reactionChannel)}catch(_){}reactionChannel=null;
+  unbindLiveViewport();chatProfileCache.clear();
+  await releaseWake();
+  overlay.remove();overlay=null;mode="";activeStream=null;hostUid=0;
+  micMuted=false;videoPaused=false;torchOn=false;cameraFacing="environment";qualityProfile="720p_3";
+  unlock();
+  if(popHistory&&pushedHistory){pushedHistory=false;try{history.back()}catch(_){}}else pushedHistory=false;
 }
 window.addEventListener("popstate",()=>{if(!overlay)return;if(mode==="host"){history.pushState({m7lv:true},"",location.href);pushedHistory=true}else{pushedHistory=false;cleanupOverlay(false)}});
 window.addEventListener("pagehide",()=>{if(mode!=="host"||!activeStream)return;try{const token=window.Ma7alakAccount?.session?.access_token||"";fetch(FN_URL,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY,...(token?{authorization:"Bearer "+token}:{})},body:JSON.stringify({action:"end",stream_id:activeStream.id}),keepalive:true,credentials:"omit"})}catch(_){}});
