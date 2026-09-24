@@ -130,10 +130,71 @@ function inject(){
 function loadAgora(){if(window.AgoraRTC)return Promise.resolve(window.AgoraRTC);if(window.__M7LV_AGORA_PROMISE__)return window.__M7LV_AGORA_PROMISE__;window.__M7LV_AGORA_PROMISE__=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=AGORA_SDK;s.async=true;s.onload=()=>resolve(window.AgoraRTC);s.onerror=()=>reject(new Error("Agora SDK failed to load."));document.head.appendChild(s)});return window.__M7LV_AGORA_PROMISE__}
 function lock(){document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}function unlock(){document.documentElement.style.overflow="";document.body.style.overflow=""}
 
-function overlayBase(stream,host){
-  const p=profiles.get(String(stream.shop_slug||ownerSlug).toLowerCase())||window.Ma7alakOwnerAuth?.shop||{},name=p.shop_name||p.arabic_name||stream.shop_slug||"ShoufHon Live";
-  return `<div class="m7lv-app"><div class="m7lv-top"><div class="m7lv-brand"><strong>${esc(name)}</strong><small>${esc(stream.title||"Live now")}</small></div><div class="m7lv-top-actions"><div class="m7lv-pill"><i id="m7lv-qdot" class="m7lv-qdot"></i><span id="m7lv-qtext">Checking…</span></div><div class="m7lv-pill">👥 <span id="m7lv-count">0</span></div>${host?"":'<button id="m7lv-close" class="m7lv-close" type="button">×</button>'}</div></div><div id="m7lv-stage" class="m7lv-stage"><div id="m7lv-local"></div><div id="m7lv-remote"></div><div class="m7lv-shade"></div><div class="m7lv-live-badge">● LIVE</div>${host?`<div class="m7lv-floating"><button class="m7lv-round" id="m7lv-switch-f" type="button">🔄</button><button class="m7lv-round" id="m7lv-mute-f" type="button">🎤</button><button class="m7lv-round" id="m7lv-pause-f" type="button">🎥</button><button class="m7lv-round" id="m7lv-torch-f" type="button">🔦</button><button class="m7lv-round" id="m7lv-full-f" type="button">⛶</button></div>`:""}<div id="m7lv-status" class="m7lv-status">${host?"Starting camera…":"Connecting to live…"}</div></div>${host?`<div class="m7lv-controls"><button class="m7lv-ctrl" id="m7lv-switch" type="button"><b>🔄</b><span>Camera</span></button><button class="m7lv-ctrl" id="m7lv-mute" type="button"><b>🎤</b><span>Mute</span></button><button class="m7lv-ctrl" id="m7lv-pause" type="button"><b>🎥</b><span>Pause</span></button><button class="m7lv-ctrl" id="m7lv-torch" type="button"><b>🔦</b><span>Flash</span></button><button class="m7lv-ctrl end" id="m7lv-end" type="button"><b>⏹</b><span>End</span></button></div>`:`<div class="m7lv-controls" style="grid-template-columns:1fr 1fr"><button class="m7lv-ctrl" id="m7lv-heart-view" type="button"><b>❤️</b><span>Heart</span></button><button class="m7lv-ctrl" id="m7lv-full-view" type="button"><b>⛶</b><span>Fullscreen</span></button></div>`}<div class="m7lv-chat"><div id="m7lv-chat-list" class="m7lv-chat-list"></div><div class="m7lv-send ${host?"host":""}"><input id="m7lv-chat-input" maxlength="160" placeholder="Write a message…">${host?"":'<button class="heart" id="m7lv-heart-chat" type="button">❤️</button>'}<button id="m7lv-send" type="button">Send</button></div></div></div>`;
+function viewerCanInteract(){return !!window.Ma7alakAccount?.session?.user}
+function currentViewerIdentity(){
+  const p=window.Ma7alakAccount?.profile||{},u=window.Ma7alakAccount?.user||{};
+  return {
+    user_id:String(u?.id||""),
+    name:String(p.display_name||u?.user_metadata?.full_name||u?.user_metadata?.name||"ShoufHon User"),
+    avatar:String(p.avatar_url||u?.user_metadata?.avatar_url||u?.user_metadata?.picture||"")
+  };
 }
+function overlayBase(stream,host){
+  const p=profiles.get(String(stream.shop_slug||ownerSlug).toLowerCase())||window.Ma7alakOwnerAuth?.shop||{};
+  const name=p.shop_name||p.arabic_name||stream.shop_slug||"ShoufHon Live";
+  const avatar=p.profile_image_url||"";
+  const initial=(name.charAt(0)||"S").toUpperCase();
+  const interactive=host||viewerCanInteract();
+  const composer=interactive
+    ? `<div class="m7lv-composer"><div class="m7lv-input-wrap"><input id="m7lv-chat-input" maxlength="160" autocomplete="off" placeholder="${host?"Talk to your viewers…":"Say something…"}"></div><button id="m7lv-send" class="m7lv-send-btn" type="button">Send</button></div>`
+    : `<button id="m7lv-login-chat" class="m7lv-guest-login" type="button">Log in to chat & react</button>`;
+  const viewerReaction=!host&&interactive?`<button class="m7lv-react-btn" id="m7lv-heart-view" type="button" aria-label="Send heart"><b>❤</b></button>`:"";
+  const hostControls=host?`<div class="m7lv-host-controls">
+      <button class="m7lv-host-btn" id="m7lv-switch" type="button"><b>↻</b><span>Flip</span></button>
+      <button class="m7lv-host-btn" id="m7lv-mute" type="button"><b>🎤</b><span>Mic</span></button>
+      <button class="m7lv-host-btn" id="m7lv-pause" type="button"><b>▣</b><span>Pause</span></button>
+      <button class="m7lv-host-btn" id="m7lv-torch" type="button"><b>⚡</b><span>Flash</span></button>
+      <button class="m7lv-host-btn m7lv-host-end" id="m7lv-end" type="button"><b>■</b><span>End</span></button>
+    </div>`:"";
+  return `<div class="m7lv-app">
+    <div id="m7lv-stage" class="m7lv-stage"><div id="m7lv-local"></div><div id="m7lv-remote"></div><div class="m7lv-shade"></div></div>
+    <div class="m7lv-topbar">
+      <div class="m7lv-shophead">
+        <div class="m7lv-shop-avatar">${avatar?`<img src="${esc(avatar)}" alt="">`:esc(initial)}</div>
+        <div class="m7lv-brand"><div class="m7lv-brand-line"><strong>${esc(name)}</strong><span class="m7lv-live-chip">LIVE</span></div><small>${esc(stream.title||"Live now")}</small></div>
+      </div>
+      <div class="m7lv-top-actions"><div class="m7lv-pill"><i id="m7lv-qdot" class="m7lv-qdot"></i><span id="m7lv-qtext">Checking…</span></div><div class="m7lv-pill">👥 <span id="m7lv-count">0</span></div>${host?"":'<button id="m7lv-close" class="m7lv-close" type="button">×</button>'}</div>
+    </div>
+    <div id="m7lv-status" class="m7lv-status">${host?"Starting camera…":"Connecting to live…"}</div>
+    ${hostControls}
+    <div id="m7lv-chat-list" class="m7lv-comments"></div>
+    ${viewerReaction}
+    ${composer}
+  </div>`;
+}
+function syncLiveViewport(){
+  if(!overlay)return;
+  const vv=window.visualViewport;
+  const h=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||0);
+  const top=Math.round(vv?.offsetTop||0);
+  if(h>0)overlay.style.height=h+"px";
+  overlay.style.top=top+"px";
+}
+function bindLiveViewport(){
+  if(viewportBound)return;
+  viewportBound=true;
+  window.visualViewport?.addEventListener("resize",syncLiveViewport);
+  window.visualViewport?.addEventListener("scroll",syncLiveViewport);
+  window.addEventListener("resize",syncLiveViewport);
+}
+function unbindLiveViewport(){
+  if(!viewportBound)return;
+  viewportBound=false;
+  window.visualViewport?.removeEventListener("resize",syncLiveViewport);
+  window.visualViewport?.removeEventListener("scroll",syncLiveViewport);
+  window.removeEventListener("resize",syncLiveViewport);
+}
+
 function setStatus(v){const e=$("#m7lv-status",overlay);if(e)e.textContent=String(v||"")}function setQuality(label,color){const t=$("#m7lv-qtext",overlay),d=$("#m7lv-qdot",overlay);if(t)t.textContent=label;if(d)d.style.background=color}
 function quality(q){if(q===1)return["Excellent","#35d07f"];if(q===2)return["Good","#75d45b"];if(q===3)return["Fair","#e8be3e"];if(q===4)return["Weak","#f18438"];if(q===5)return["Very weak","#ef4444"];if(q===6)return["Disconnected","#dc2626"];return["Checking…","#888"]}
 
@@ -142,13 +203,15 @@ function createOverlay(stream,host){
   overlay=document.createElement("div");overlay.id="m7lv-overlay";overlay.innerHTML=overlayBase(stream,host);document.body.appendChild(overlay);lock();activeStream=stream;mode=host?"host":"audience";
   if(!host){$("#m7lv-local",overlay).style.display="none";$("#m7lv-close",overlay).onclick=()=>cleanupOverlay(false)}else $("#m7lv-remote",overlay).style.display="none";
   if(!pushedHistory){try{history.pushState({m7lv:true},"",location.href);pushedHistory=true}catch(_){}}
-  wireChat();
+  bindLiveViewport();syncLiveViewport();
+  $("#m7lv-login-chat",overlay)?.addEventListener("click",()=>window.Ma7alakAccount?.open?.());
 }
 function preflight(){
   if($("#m7lv-preflight"))return;
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
   const p=document.createElement("div");p.id="m7lv-preflight";const shop=window.Ma7alakOwnerAuth?.shop||{};
-  p.innerHTML=`<div class="m7lv-sheet"><h2>🔴 Go Live</h2><p>Rear camera starts by default. You can switch camera, mute, pause video, use flash when supported, chat and see viewer count while live.</p><input id="m7lv-title" maxlength="80" placeholder="What are you showing? (optional)"><div class="m7lv-sheet-actions"><button class="m7lv-cancel" type="button">Cancel</button><button class="m7lv-start" type="button">Start Live</button></div><div class="m7lv-pre-status"></div></div>`;document.body.appendChild(p);
+  const allowed=!!ownerEnt?.enabled&&!!ownerEnt?.video_live_enabled;
+  p.innerHTML=`<div class="m7lv-sheet"><div class="m7lv-sheet-mark">● SHOUFHON VIDEO LIVE</div><h2>Ready to go live?</h2><p>Rear camera starts first. While live you get one clean control rail for camera, mic, pause, flash and End Live. Comments appear directly over the video.</p><input id="m7lv-title" maxlength="80" placeholder="Add a short live title (optional)"><div class="m7lv-sheet-actions"><button class="m7lv-cancel" type="button">Cancel</button><button class="m7lv-start" type="button" ${allowed?"":"disabled"}>${allowed?"Start Live":"Live disabled"}</button></div><div class="m7lv-pre-status">${allowed?"":"Video Live is disabled for this shop in Admin."}</div></div>`;document.body.appendChild(p);
   const cancel=$(".m7lv-cancel",p),start=$(".m7lv-start",p),st=$(".m7lv-pre-status",p);cancel.onclick=closePreflight;start.onclick=async()=>{start.disabled=true;st.textContent="Preparing secure live session…";try{const title=$("#m7lv-title",p).value.trim()||`${shop.shop_name||ownerSlug} is live`;await startHost(title)}catch(err){st.textContent=friendlyError(err);start.disabled=false}}
 }
 function closePreflight(){document.querySelector("#m7lv-preflight")?.remove()}
@@ -156,65 +219,106 @@ function closePreflight(){document.querySelector("#m7lv-preflight")?.remove()}
 function hostChatIdentity(){
   const p=profiles.get(String(activeStream?.shop_slug||ownerSlug).toLowerCase())||window.Ma7alakOwnerAuth?.shop||{};
   const slug=String(activeStream?.shop_slug||ownerSlug||"").trim();
-  return {
-    name:String(p.shop_name||p.arabic_name||slug||"Shop"),
-    avatar:String(p.profile_image_url||""),
-    host:true
-  };
+  return {name:String(p.shop_name||p.arabic_name||slug||"Shop"),avatar:String(p.profile_image_url||""),host:true};
 }
-function viewerChatIdentity(){
-  const p=window.Ma7alakAccount?.profile||{};
-  const u=window.Ma7alakAccount?.user||{};
-  return {
-    name:String(p.display_name||u.user_metadata?.full_name||"Viewer"),
-    avatar:String(p.avatar_url||u.user_metadata?.avatar_url||""),
-    host:false
-  };
+async function resolveViewerProfile(userId){
+  const id=String(userId||"");
+  if(!id)return{name:"Viewer",avatar:""};
+  const me=currentViewerIdentity();
+  if(me.user_id===id)return{name:me.name,avatar:me.avatar};
+  if(chatProfileCache.has(id))return chatProfileCache.get(id);
+  let value={name:"Viewer",avatar:""};
+  try{
+    const r=await c.from("viewer_profiles").select("display_name,avatar_url").eq("user_id",id).maybeSingle();
+    if(!r.error&&r.data)value={name:String(r.data.display_name||"Viewer"),avatar:String(r.data.avatar_url||"")};
+  }catch(_){}
+  chatProfileCache.set(id,value);
+  return value;
+}
+async function renderChatRow(row){
+  if(!overlay||!row?.message)return;
+  const list=$("#m7lv-chat-list",overlay);if(!list)return;
+  const isHost=row.sender_role==="host";
+  const identity=isHost?hostChatIdentity():await resolveViewerProfile(row.user_id);
+  if(!overlay||!list.isConnected)return;
+  const d=document.createElement("div");d.className="m7lv-msg"+(isHost?" host":"");
+  const av=document.createElement("div");av.className="m7lv-msg-avatar";
+  if(identity.avatar){
+    const img=document.createElement("img");img.src=identity.avatar;img.alt="";img.loading="lazy";
+    img.onerror=()=>{img.remove();av.textContent=(identity.name.charAt(0)||"?").toUpperCase()};av.appendChild(img);
+  }else av.textContent=(identity.name.charAt(0)||"?").toUpperCase();
+  const body=document.createElement("div");body.className="m7lv-msg-body";
+  const meta=document.createElement("div");meta.className="m7lv-msg-meta";
+  const nm=document.createElement("span");nm.className="m7lv-msg-name";nm.textContent=identity.name;meta.appendChild(nm);
+  if(isHost){const tag=document.createElement("span");tag.className="m7lv-host-tag";tag.textContent="LIVE HOST";meta.appendChild(tag)}
+  const txt=document.createElement("span");txt.className="m7lv-msg-text";txt.textContent=String(row.message).slice(0,160);
+  body.append(meta,txt);d.append(av,body);list.appendChild(d);
+  while(list.children.length>40)list.firstChild.remove();
+  requestAnimationFrame(()=>{list.scrollTop=list.scrollHeight});
+}
+async function loadRecentChat(){
+  if(!activeStream||!c)return;
+  try{
+    const r=await c.from("shop_live_chat_messages").select("id,stream_id,user_id,sender_role,message,created_at").eq("stream_id",activeStream.id).order("created_at",{ascending:true}).limit(40);
+    if(r.error)return;
+    const list=$("#m7lv-chat-list",overlay);if(list)list.innerHTML="";
+    for(const row of (r.data||[]))await renderChatRow(row);
+  }catch(_){}
+}
+async function setupInteractions(){
+  if(!activeStream||!c)return;
+  try{if(chatChannel)await c.removeChannel(chatChannel)}catch(_){}
+  try{if(reactionChannel)await c.removeChannel(reactionChannel)}catch(_){}
+  await loadRecentChat();
+  chatChannel=c.channel("m7lv-chat:"+activeStream.id)
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"shop_live_chat_messages",filter:"stream_id=eq."+activeStream.id},payload=>renderChatRow(payload.new))
+    .subscribe();
+  reactionChannel=c.channel("m7lv-react:"+activeStream.id)
+    .on("postgres_changes",{event:"*",schema:"public",table:"shop_live_reactions",filter:"stream_id=eq."+activeStream.id},()=>spawnHeart())
+    .subscribe();
+  wireChat();
 }
 async function setupRoom(nextRole){
   roomClientKey=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()).replace(/-/g,"").slice(0,18);
-  roomChannel=c.channel("m7lv:"+activeStream.id,{config:{broadcast:{self:true},presence:{key:roomClientKey}}});
-  roomChannel
-    .on("presence",{event:"sync"},updateCount)
-    .on("broadcast",{event:"chat"},({payload})=>addMessage(payload,payload?.sender===roomClientKey))
-    .on("broadcast",{event:"heart"},()=>spawnHeart())
-    .on("broadcast",{event:"live-ended"},()=>{if(mode==="audience"){setStatus("Live ended.");setTimeout(()=>cleanupOverlay(false),1800)}})
-    .subscribe(async status=>{if(status==="SUBSCRIBED"){try{const id=nextRole==="host"?hostChatIdentity():viewerChatIdentity();await roomChannel.track({role:nextRole,name:id.name,avatar:id.avatar,joined_at:new Date().toISOString()})}catch(_){}updateCount()}});
+  roomChannel=c.channel("m7lv:"+activeStream.id,{config:{presence:{key:roomClientKey}}});
+  roomChannel.on("presence",{event:"sync"},updateCount).subscribe(async status=>{
+    if(status==="SUBSCRIBED"){
+      try{
+        const id=nextRole==="host"?hostChatIdentity():currentViewerIdentity();
+        await roomChannel.track({role:nextRole,name:id.name||"Viewer",avatar:id.avatar||"",joined_at:new Date().toISOString()});
+      }catch(_){}
+      updateCount();
+    }
+  });
+  await setupInteractions();
 }
 function updateCount(){if(!roomChannel||!overlay)return;let count=0;try{Object.values(roomChannel.presenceState()).flat().forEach(p=>{if(p?.role==="audience")count++})}catch(_){}const e=$("#m7lv-count",overlay);if(e)e.textContent=String(count)}
-function addMessage(payload,self){
-  if(!overlay||!payload?.text)return;
-  const list=$("#m7lv-chat-list",overlay);if(!list)return;
-  const isHost=!!payload.host;
-  const name=String(payload.name||"Viewer");
-  const avatar=String(payload.avatar||"");
-  const d=document.createElement("div");
-  d.className="m7lv-msg"+(isHost?" host":(self?" me":""));
-  const av=document.createElement("div");av.className="m7lv-msg-avatar";
-  if(avatar){
-    const img=document.createElement("img");img.src=avatar;img.alt="";img.loading="lazy";img.onerror=()=>{av.textContent=(name.charAt(0)||"?").toUpperCase();img.remove()};av.appendChild(img);
-  }else av.textContent=(name.charAt(0)||"?").toUpperCase();
-  const body=document.createElement("div");body.className="m7lv-msg-body";
-  const meta=document.createElement("div");meta.className="m7lv-msg-meta";
-  const nm=document.createElement("span");nm.className="m7lv-msg-name";nm.textContent=name;meta.appendChild(nm);
-  if(isHost){const tag=document.createElement("span");tag.className="m7lv-host-tag";tag.textContent="LIVE HOST";meta.appendChild(tag)}
-  const txt=document.createElement("span");txt.className="m7lv-msg-text";txt.textContent=String(payload.text).slice(0,160);
-  body.append(meta,txt);d.append(av,body);list.appendChild(d);list.scrollTop=list.scrollHeight;
-  while(list.children.length>60)list.firstChild.remove();
+function spawnHeart(){if(!overlay)return;const stage=$("#m7lv-stage",overlay);if(!stage)return;const h=document.createElement("div");h.className="m7lv-heart";h.textContent=["❤","💛","💚","💙","💜"][Math.floor(Math.random()*5)];h.style.right=(18+Math.random()*56)+"px";stage.appendChild(h);setTimeout(()=>h.remove(),1600)}
+async function sendHeart(){
+  if(mode==="host"||!viewerCanInteract()||!activeStream)return;
+  try{await c.rpc("shoufhon_live_react",{p_stream_id:activeStream.id})}catch(_){}
 }
-function spawnHeart(){if(!overlay)return;const stage=$("#m7lv-stage",overlay);if(!stage)return;const h=document.createElement("div");h.className="m7lv-heart";h.textContent=["❤️","💛","💚","💙","💜"][Math.floor(Math.random()*5)];h.style.right=(18+Math.random()*80)+"px";stage.appendChild(h);setTimeout(()=>h.remove(),1750)}
-async function sendHeart(){if(mode==="host")return;spawnHeart();try{await roomChannel?.send({type:"broadcast",event:"heart",payload:{sender:roomClientKey}})}catch(_){}}
 function wireChat(){
-  const input=$("#m7lv-chat-input",overlay),send=$("#m7lv-send",overlay),heart=$("#m7lv-heart-chat",overlay);
+  const input=$("#m7lv-chat-input",overlay),send=$("#m7lv-send",overlay),heart=$("#m7lv-heart-view",overlay);
+  const canSend=mode==="host"||viewerCanInteract();
   const go=async()=>{
-    const text=String(input?.value||"").trim();if(!text||!roomChannel)return;
+    if(!canSend||!activeStream)return;
+    const text=String(input?.value||"").trim();if(!text)return;
     input.value="";
-    const identity=mode==="host"?hostChatIdentity():viewerChatIdentity();
-    try{await roomChannel.send({type:"broadcast",event:"chat",payload:{sender:roomClientKey,name:identity.name,avatar:identity.avatar,host:identity.host,text}})}catch(_){}
+    const user=window.Ma7alakAccount?.session?.user;
+    if(!user?.id){window.Ma7alakAccount?.open?.();return}
+    try{
+      const r=await c.from("shop_live_chat_messages").insert({stream_id:activeStream.id,user_id:user.id,message:text});
+      if(r.error)throw r.error;
+    }catch(err){setStatus(String(err?.message||"Could not send message."))}
   };
   if(send)send.onclick=go;
-  if(heart&&mode!=="host")heart.onclick=sendHeart;
-  if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}});
+  if(heart&&viewerCanInteract())heart.onclick=sendHeart;
+  if(input){
+    input.addEventListener("focus",()=>setTimeout(syncLiveViewport,80));
+    input.addEventListener("blur",()=>setTimeout(syncLiveViewport,100));
+    input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go()}});
+  }
 }
 
 async function acquireWake(){if(!("wakeLock" in navigator))return;try{wakeLock=await navigator.wakeLock.request("screen")}catch(_){}}async function releaseWake(){try{await wakeLock?.release()}catch(_){}wakeLock=null}
