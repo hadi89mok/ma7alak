@@ -586,13 +586,19 @@ async function sendStoryMediaReply(payload){
     const storyId=String(payload.story_id||payload.storyId||"").trim();
     const requestedSlug=String(payload.shop_slug||payload.shopSlug||"").trim().toLowerCase();
     const type=String(payload.message_type||payload.type||"").trim().toLowerCase();
-    const blob=payload.blob||payload.file||null;
-    const mime=mediaBaseMime(payload.mime_type||payload.mime||blob?.type||"");
-    const originalName=String(payload.original_name||payload.name||blob?.name||type||"media").slice(0,180);
+    const originalBlob=payload.blob||payload.file||null;
+    const originalName=String(payload.original_name||payload.name||originalBlob?.name||type||"media").slice(0,180);
 
     if(!storyId)return{ok:false,error:"Story is unavailable."};
     if(!["voice","image","video"].includes(type))return{ok:false,error:"Unsupported Story reply media."};
-    if(!blob||typeof blob.size!=="number"||blob.size<=0)return{ok:false,error:"Media is empty."};
+    if(!originalBlob||typeof originalBlob.size!=="number"||originalBlob.size<=0)return{ok:false,error:"Media is empty."};
+
+    let blob=originalBlob;
+    if(type==="image"){
+      blob=await compressChatImage(originalBlob);
+    }
+
+    const mime=mediaBaseMime(payload.mime_type||payload.mime||blob?.type||originalBlob?.type||"");
 
     if(type==="image"&&blob.size>8388608)return{ok:false,error:"Photo must be 8 MB or smaller."};
     if(type==="video"&&blob.size>26214400)return{ok:false,error:"Video must be 25 MB or smaller."};
