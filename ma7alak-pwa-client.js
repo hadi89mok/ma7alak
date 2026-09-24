@@ -9,7 +9,9 @@
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
-    "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@56a7a66e1c4f69f4036f59b0b7c2b486a0130d2e/shoufhon-content-protection.js";
+    resolveSiblingScript(
+      "shoufhon-content-protection.js"
+    );
   const DISMISS_KEY="shoufhon_pwa_install_dismissed_session_v2";
 
   let deferredPrompt=null;
