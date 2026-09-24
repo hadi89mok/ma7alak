@@ -1,7 +1,7 @@
 /* =========================================================
  SHOUFHON OWNER SOCIAL HEART V6
  - owner-only activity heart
- - live Realtime + safe 2s fallback refresh
+ - live Realtime + adaptive recovery fallback refresh
  - signed follower/story/shop-like identity + circular avatar enrichment
  - shop-owner follows show the follower shop identity and open that shop
  - anonymous activity says Someone, never Guest
@@ -11,7 +11,7 @@
 (function(){
 "use strict";
 if(window.__M7_OWNER_SOCIAL_V6__)return;window.__M7_OWNER_SOCIAL_V6__=true;
-let c=null,owner=null,rows=[],ch=null,loading=false,poll=null,lastSig="",clock=null;
+let c=null,owner=null,rows=[],ch=null,loading=false,poll=null,lastSig="",clock=null,realtimeHealthy=false;
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const heartSVG=`<svg viewBox="0 0 24 24" width="25" height="25" fill="none" aria-hidden="true"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.3 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const actorUserId=x=>String(x?.actor_user_id||x?.user_id||x?.viewer_user_id||x?.liked_by_user_id||x?.follower_user_id||x?.actor_id||"").trim();
@@ -56,8 +56,9 @@ function refreshTimes(){document.querySelectorAll("#m7sn-list [data-m7-time]").f
 async function enrichViewerIdentity(input){const list=Array.isArray(input)?input:[],needsViewer=x=>!(x?.type==="follow"&&String(x?.actor_username||"").toLowerCase().startsWith("shop:")),ids=[...new Set(list.filter(needsViewer).map(actorUserId).filter(Boolean))];if(!ids.length)return list;try{const r=await c.from("viewer_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);if(r.error)return list;const map=new Map((r.data||[]).map(p=>[String(p.user_id),p]));return list.map(x=>{if(!needsViewer(x))return x;const p=map.get(actorUserId(x));if(!p)return x;return {...x,actor_name:String(p.display_name||p.username||x.actor_name||"").trim(),actor_avatar:String(p.avatar_url||x.actor_avatar||"").trim()}})}catch(_){return list}}
 async function load(force=false){if(loading||!c)return;loading=true;try{const r=await c.rpc("ma7alak_get_my_owner_notifications");if(r.error){console.warn("SHOUFHON owner activity:",r.error);return}let next=await enrichViewerIdentity(r.data||[]);const ownerUid=String(owner?.user_id||owner?.id||"");if(ownerUid)next=next.filter(x=>actorUserId(x)!==ownerUid);const sig=next.map(x=>[x.id,x.created_at,x.seen,actorUserId(x),x.actor_name,x.actor_avatar].join("|")).join(";");if(force||sig!==lastSig){lastSig=sig;rows=next;render()}}finally{loading=false}}
 async function markSeen(){const b=document.getElementById("m7-heart-badge");if(b)b.style.display="none";rows=rows.map(x=>({...x,seen:true}));render();try{await c.rpc("ma7alak_mark_my_owner_notifications_seen")}catch(_){}}
-function subscribe(){if(ch)try{c.removeChannel(ch)}catch(_){}ch=c.channel("m7-owner-social-v6-"+owner.shop_slug).on("postgres_changes",{event:"INSERT",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).on("postgres_changes",{event:"UPDATE",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).subscribe(status=>{if(status==="SUBSCRIBED")load(true)})}
-function startFallback(){if(poll)clearInterval(poll);poll=setInterval(()=>{if(document.visibilityState==="visible")load(false)},2000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")load(true)})}
+function restartFallback(){if(poll)clearInterval(poll);const delay=realtimeHealthy?30000:2000;poll=setInterval(()=>{if(document.visibilityState==="visible")load(false)},delay)}
+function subscribe(){if(ch)try{c.removeChannel(ch)}catch(_){}ch=c.channel("m7-owner-social-v6-"+owner.shop_slug).on("postgres_changes",{event:"INSERT",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).on("postgres_changes",{event:"UPDATE",schema:"public",table:"ma7alak_owner_notifications",filter:"shop_slug=eq."+owner.shop_slug},()=>setTimeout(()=>load(true),40)).subscribe(status=>{const healthy=status==="SUBSCRIBED";if(healthy!==realtimeHealthy){realtimeHealthy=healthy;restartFallback()}if(healthy)load(true)})}
+function startFallback(){restartFallback();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")load(true)})}
 function startClock(){if(clock)clearInterval(clock);clock=setInterval(()=>{if(document.visibilityState==="visible")refreshTimes()},15000)}
 installShopLikeBridge();
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ready,{once:true});else ready();
