@@ -5150,3 +5150,104 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
     boot();
   }
 })();
+
+
+/* =========================================================
+   SHOUFHON HOMEPAGE STORY STRIP CLEANUP V1
+   ---------------------------------------------------------
+   Removes only the large wrapper/background behind the homepage
+   Story circles. Story avatars/rings/labels themselves are untouched.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_STORY_STRIP_CLEANUP_V1__)return;
+  window.__SHOUFHON_STORY_STRIP_CLEANUP_V1__=true;
+
+  const host=(location.hostname||"").toLowerCase().replace(/^www\./,"");
+  const path=(location.pathname||"/").replace(/\/+$/,"")||"/";
+  if(host!=="shoufhon.com"||path!=="/")return;
+
+  function installCSS(){
+    if(document.getElementById("shoufhon-story-strip-cleanup-v1"))return;
+    const s=document.createElement("style");
+    s.id="shoufhon-story-strip-cleanup-v1";
+    s.textContent=`
+      .shoufhon-story-strip-clean,
+      .shoufhon-story-strip-clean::before,
+      .shoufhon-story-strip-clean::after{
+        background:transparent!important;
+        background-color:transparent!important;
+        background-image:none!important;
+        box-shadow:none!important;
+        -webkit-box-shadow:none!important;
+        border-color:transparent!important;
+        outline-color:transparent!important;
+        backdrop-filter:none!important;
+        -webkit-backdrop-filter:none!important;
+        filter:none!important;
+      }
+    `;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function findYourStoryLabel(){
+    const walker=document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
+    let node;
+    while((node=walker.nextNode())){
+      const text=String(node.nodeValue||"").replace(/\s+/g," ").trim().toLowerCase();
+      if(text==="your story"||text.includes("your story")){
+        return node.parentElement;
+      }
+    }
+    return null;
+  }
+
+  function clean(){
+    if(!document.body)return false;
+    const label=findYourStoryLabel();
+    if(!label)return false;
+
+    const vw=Math.max(document.documentElement.clientWidth||0,window.innerWidth||0);
+    let el=label.parentElement;
+    let cleaned=0;
+
+    for(let depth=0;el&&el!==document.body&&el!==document.documentElement&&depth<7;depth++,el=el.parentElement){
+      const r=el.getBoundingClientRect();
+      const wideEnough=r.width>=Math.min(260,vw*.55);
+      const storyBandHeight=r.height>=85&&r.height<=300;
+
+      if(wideEnough&&storyBandHeight){
+        el.classList.add("shoufhon-story-strip-clean");
+        cleaned++;
+        if(cleaned>=2)break;
+      }
+    }
+    return cleaned>0;
+  }
+
+  function boot(){
+    installCSS();
+    clean();
+
+    const mo=new MutationObserver(function(){
+      if(clean()){
+        setTimeout(function(){mo.disconnect();},800);
+      }
+    });
+    mo.observe(document.body,{childList:true,subtree:true});
+    setTimeout(function(){mo.disconnect();},10000);
+
+    window.addEventListener("pageshow",clean);
+    window.addEventListener("ma7alak:page-wake",clean);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else{
+    boot();
+  }
+})();
