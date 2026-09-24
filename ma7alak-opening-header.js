@@ -453,7 +453,7 @@
       const style=document.createElement('style');
       style.id='shoufhon-home-stories-style';
       style.textContent=`
-#shoufhon-home-stories{box-sizing:border-box;width:min(1180px,calc(100% - 18px));max-width:100%;margin:0 auto 8px;padding:4px 2px 9px;position:relative;z-index:20;overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none;color:#f7dfaa;font:600 12px Arial,sans-serif}
+#shoufhon-home-stories{box-sizing:border-box;width:min(1180px,calc(100% - 18px));max-width:100%;margin:0 auto 8px;padding:4px 2px 9px;position:relative;z-index:20;overflow:visible;border:0!important;border-radius:0;background:transparent!important;background-image:none!important;box-shadow:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;color:#f7dfaa;font:600 12px Arial,sans-serif}
 #shoufhon-home-stories[hidden]{display:none!important}
 #shoufhon-home-stories::after{content:"";display:block;height:1px;margin:5px 8px 0;background:linear-gradient(90deg,transparent,rgba(217,164,65,.26),transparent);pointer-events:none}
 #shoufhon-home-stories .shs-list{display:flex;align-items:flex-start;gap:13px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:7px 5px 9px;scrollbar-width:none}
@@ -507,7 +507,7 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
 #shoufhon-story-viewer .shv-name{display:block;padding-top:9px;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #shoufhon-story-viewer .shv-nav{position:absolute;z-index:4;top:78px;bottom:0;width:38%;border:0;background:transparent;color:transparent}
 #shoufhon-story-viewer .shv-prev{left:0}#shoufhon-story-viewer .shv-next{right:0}
-@media(max-width:600px){#shoufhon-home-stories{margin-bottom:7px;padding:10px 10px 9px;border-radius:18px}#shoufhon-home-stories .shs-list{gap:10px}}
+@media(max-width:600px){#shoufhon-home-stories{margin-bottom:7px;padding:10px 10px 9px;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;border:0!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#shoufhon-home-stories .shs-list{gap:10px;background:transparent!important;box-shadow:none!important}}
 `;
       document.head.appendChild(style);
     }
@@ -2246,4 +2246,40 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",m7Mount,{once:true});else m7Mount();
+})();
+
+/* =========================================================
+   SHOUFHON STORY TRAY PARENT BACKGROUND FIX V2
+========================================================= */
+(function(){
+  "use strict";
+  if((location.hostname||"").replace(/^www\./,"")!=="shoufhon.com")return;
+  if(((location.pathname||"/").replace(/\/+$/,"")||"/")!=="/")return;
+
+  const s=document.createElement("style");
+  s.id="shoufhon-story-tray-parent-fix-v2";
+  s.textContent=`
+    #shoufhon-home-stories,
+    #shoufhon-home-stories::before,
+    #shoufhon-home-stories .shs-list{
+      background:transparent!important;
+      background-color:transparent!important;
+      background-image:none!important;
+      box-shadow:none!important;
+      -webkit-box-shadow:none!important;
+      border-color:transparent!important;
+      outline:none!important;
+      filter:none!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+    }
+
+    #ma7alak-opening-header-root::before{
+      content:none!important;
+      display:none!important;
+      background:none!important;
+      box-shadow:none!important;
+    }
+  `;
+  (document.head||document.documentElement).appendChild(s);
 })();
