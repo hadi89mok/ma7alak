@@ -116,6 +116,12 @@ function injectOwnerButton(){
 function inject(){
   document.querySelectorAll('[data-ma7alak-live="home"]').forEach(root=>injectIntoRoot(root,streams));
   document.querySelectorAll('[data-ma7alak-live="shop"]').forEach(root=>{const slug=String(root.dataset.shopSlug||currentPathSlug()).toLowerCase(),list=streams.filter(x=>String(x.shop_slug).toLowerCase()===slug);if(list.length)root.style.display="";injectIntoRoot(root,list)});
+  document.querySelectorAll('#m7lo-overlay .m7lo-shop-panel[data-shop-slug]').forEach(panel=>{
+    const slug=String(panel.dataset.shopSlug||"").trim().toLowerCase();
+    const list=streams.filter(x=>String(x.shop_slug||"").trim().toLowerCase()===slug);
+    const section=panel.querySelector(".m7lo");
+    if(section)injectIntoRoot(section,list);
+  });
   injectOwnerButton();
 }
 
