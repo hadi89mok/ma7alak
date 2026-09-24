@@ -5,7 +5,7 @@
   if(window.__MA7ALAK_PWA_CLIENT__)return;
   window.__MA7ALAK_PWA_CLIENT__=true;
 
-  const VERSION="2026.09.24.4";
+  const VERSION="2026.09.24.5";
   const PWA_CLIENT_SCRIPT_SRC=
     String(document.currentScript?.src||"");
   const CONTENT_PROTECTION_URL=
@@ -1079,4 +1079,63 @@
   setMeta("color-scheme","dark");
   ensureViewportFit();
   installEdgeCSS();
+})();
+
+
+/* =========================================================
+   SHOUFHON PWA STATUS BAR FORCE V2
+   Keeps standalone mode; Android bottom navigation remains system UI.
+========================================================= */
+(function(){
+  "use strict";
+
+  function forcePwaChrome(){
+    const head=document.head||document.documentElement;
+    if(!head)return;
+
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(el){
+      el.remove();
+    });
+
+    const theme=document.createElement("meta");
+    theme.name="theme-color";
+    theme.content="#050403";
+    head.appendChild(theme);
+
+    let viewport=document.querySelector('meta[name="viewport"]');
+    if(!viewport){
+      viewport=document.createElement("meta");
+      viewport.name="viewport";
+      viewport.content="width=device-width, initial-scale=1, viewport-fit=cover";
+      head.appendChild(viewport);
+    }else{
+      const bits=String(viewport.content||"")
+        .split(",")
+        .map(function(v){return v.trim();})
+        .filter(Boolean)
+        .filter(function(v){return !/^viewport-fit\s*=/.test(v);});
+
+      if(!bits.some(function(v){return /^width\s*=/.test(v);})){
+        bits.unshift("width=device-width");
+      }
+      if(!bits.some(function(v){return /^initial-scale\s*=/.test(v);})){
+        bits.push("initial-scale=1");
+      }
+      bits.push("viewport-fit=cover");
+      viewport.content=bits.join(", ");
+    }
+
+    document.documentElement.style.backgroundColor="#050403";
+    if(document.body){
+      document.body.style.backgroundColor="#050403";
+    }
+  }
+
+  forcePwaChrome();
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",forcePwaChrome,{once:true});
+  }
+
+  window.addEventListener("pageshow",forcePwaChrome);
 })();
