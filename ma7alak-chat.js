@@ -140,8 +140,13 @@ function storyMediaUrl(path){path=String(path||"").trim();while(path.startsWith(
 function cleanPath(path){path=String(path||"");while(path.length>1&&path.endsWith("/"))path=path.slice(0,-1);return path}
 function storyExpired(ctx){const x=ctx&&ctx.story_expires_at;if(!x)return false;const t=new Date(x).getTime();return Number.isFinite(t)&&t<=Date.now()}
 function storyCardHtml(m){
-  if(String(m?.message_type||"")!=="story_reply")return"";
-  const ctx=storyCtx(m),storyId=String(m?.reply_story_id??ctx.story_id??"").trim(),slug=String(ctx.shop_slug||"").trim(),shopUrl=String(ctx.shop_url||"").trim(),expires=String(ctx.story_expires_at||"").trim(),mediaType=String(ctx.media_type||"").trim().toLowerCase(),storagePath=String(ctx.storage_path||"").trim(),status=String(ctx.status_text||"").trim(),shopName=String(ctx.shop_name||slug||"Story").trim(),expired=storyExpired(ctx),mediaUrl=storyMediaUrl(storagePath),imageUrl=mediaType==="image"?mediaUrl:"";
+  const ctx=storyCtx(m);
+  const isStoryReply=
+    String(m?.message_type||"")==="story_reply" ||
+    ctx.story_reply===true ||
+    String(ctx.story_reply||"").toLowerCase()==="true";
+  if(!isStoryReply)return"";
+  const storyId=String(m?.reply_story_id??ctx.story_id??"").trim(),slug=String(ctx.shop_slug||"").trim(),shopUrl=String(ctx.shop_url||"").trim(),expires=String(ctx.story_expires_at||"").trim(),mediaType=String(ctx.story_media_type||ctx.media_type||"").trim().toLowerCase(),storagePath=String(ctx.story_storage_path||ctx.storage_path||"").trim(),status=String(ctx.story_status_text||ctx.status_text||"").trim(),shopName=String(ctx.shop_name||slug||"Story").trim(),expired=storyExpired(ctx),mediaUrl=storyMediaUrl(storagePath),imageUrl=mediaType==="image"?mediaUrl:"";
   const visual=mediaType==="video"&&mediaUrl
     ? '<video muted playsinline preload="none" data-story-video-preview data-story-video-src="'+esc(mediaUrl)+'"></video><span class="m7-story-card-play" aria-hidden="true">▶</span>'
     : (imageUrl?'<span class="m7-story-card-fallback" aria-hidden="true">▧</span><img loading="lazy" decoding="async" data-story-thumb src="'+esc(imageUrl)+'" alt="">':'<span class="m7-story-card-fallback" aria-hidden="true">▧</span>');
@@ -566,6 +571,153 @@ async function sendStoryReply(input){
   }catch(e){console.error("Story reply send:",e);return{ok:false,error:e?.message||"Could not send Story reply."}}
 }
 function loadError(b,e){if(!b)return;console.error("ShoufHon chat load error:",e);b.innerHTML=`<div class="m7-error">Could not load this conversation.<br><small>${esc(e?.message||"Please close Messages and try again.")}</small></div>`}
+
+async function sendStoryMediaReply(payload){
+  payload=payload&&typeof payload==="object"?payload:{};
+
+  try{
+    await vr();
+
+    if(!user){
+      window.Ma7alakAccount?.open?.();
+      return{ok:false,login_required:true,error:"Sign in with Google to reply."};
+    }
+
+    const storyId=String(payload.story_id||payload.storyId||"").trim();
+    const requestedSlug=String(payload.shop_slug||payload.shopSlug||"").trim().toLowerCase();
+    const type=String(payload.message_type||payload.type||"").trim().toLowerCase();
+    const blob=payload.blob||payload.file||null;
+    const mime=mediaBaseMime(payload.mime_type||payload.mime||blob?.type||"");
+    const originalName=String(payload.original_name||payload.name||blob?.name||type||"media").slice(0,180);
+
+    if(!storyId)return{ok:false,error:"Story is unavailable."};
+    if(!["voice","image","video"].includes(type))return{ok:false,error:"Unsupported Story reply media."};
+    if(!blob||typeof blob.size!=="number"||blob.size<=0)return{ok:false,error:"Media is empty."};
+
+    if(type==="image"&&blob.size>8388608)return{ok:false,error:"Photo must be 8 MB or smaller."};
+    if(type==="video"&&blob.size>26214400)return{ok:false,error:"Video must be 25 MB or smaller."};
+    if(type==="voice"&&blob.size>10485760)return{ok:false,error:"Voice message must be 10 MB or smaller."};
+
+    const storyResult=
+      await client
+        .from("shop_stories")
+        .select("id,shop_slug,media_type,storage_path,status_text,expires_at,created_at")
+        .eq("id",storyId)
+        .maybeSingle();
+
+    if(storyResult.error)throw storyResult.error;
+
+    const story=storyResult.data||null;
+
+    if(!story)return{ok:false,error:"This Story has expired or was deleted."};
+
+    const expiresAt=new Date(story.expires_at||0).getTime();
+    if(Number.isFinite(expiresAt)&&expiresAt<=Date.now()){
+      return{ok:false,error:"This Story has expired or was deleted."};
+    }
+
+    const slug=String(story.shop_slug||requestedSlug||"").trim().toLowerCase();
+    if(!slug)return{ok:false,error:"Story shop is unavailable."};
+    if(requestedSlug&&slug!==requestedSlug)return{ok:false,error:"Story shop mismatch."};
+
+    const ownSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim().toLowerCase();
+    if(ownSlug&&slug===ownSlug)return{ok:false,error:"You cannot reply to your own Story."};
+    if(!(await accepts(slug)))return{ok:false,error:"This shop is not accepting messages right now."};
+
+    const conversationResult=
+      await client.rpc(
+        "ma7alak_start_conversation",
+        {p_shop_slug:slug}
+      );
+
+    if(conversationResult.error)throw conversationResult.error;
+
+    const conversation=
+      Array.isArray(conversationResult.data)
+        ? conversationResult.data[0]
+        : conversationResult.data;
+
+    if(!conversation?.id)return{ok:false,error:"Could not open this conversation."};
+
+    let shopName=slug;
+    try{
+      const shop=
+        await client
+          .from("shop_profiles")
+          .select("shop_name")
+          .eq("shop_slug",slug)
+          .maybeSingle();
+      if(!shop.error&&shop.data?.shop_name)shopName=String(shop.data.shop_name);
+    }catch(_){}
+
+    const path=chatMediaPath(conversation,mime,originalName);
+    const upload=
+      await client
+        .storage
+        .from(CHAT_MEDIA_BUCKET)
+        .upload(
+          path,
+          blob,
+          {
+            contentType:mime,
+            upsert:false,
+            cacheControl:"3600"
+          }
+        );
+
+    if(upload.error)throw upload.error;
+
+    const context={
+      story_reply:true,
+      story_id:String(story.id),
+      shop_slug:slug,
+      story_expires_at:String(story.expires_at||""),
+      story_media_type:String(story.media_type||""),
+      story_storage_path:String(story.storage_path||""),
+      story_status_text:String(story.status_text||""),
+      story_created_at:String(story.created_at||""),
+      shop_name:shopName,
+      shop_url:"https://www.shoufhon.com/"+encodeURIComponent(slug),
+      duration:type==="voice"?Math.max(0,Number(payload.duration)||0):undefined,
+      original_name:originalName
+    };
+
+    Object.keys(context).forEach(key=>context[key]===undefined&&delete context[key]);
+
+    const sent=
+      await client.rpc(
+        "ma7alak_send_media_message",
+        {
+          p_conversation_id:conversation.id,
+          p_message_type:type,
+          p_storage_path:path,
+          p_body:null,
+          p_context:context
+        }
+      );
+
+    if(sent.error){
+      try{
+        await client.storage.from(CHAT_MEDIA_BUCKET).remove([path]);
+      }catch(_){}
+      throw sent.error;
+    }
+
+    dispatchEvent(new Event("ma7alak:messages-read"));
+
+    return{
+      ok:true,
+      message:Array.isArray(sent.data)?sent.data[0]:sent.data
+    };
+  }
+  catch(e){
+    console.error("Story media reply send:",e);
+    const msg=String(e?.message||"");
+    if(msg.includes("CHAT_BLOCKED"))return{ok:false,error:"This shop has blocked this chat."};
+    if(msg.includes("SHOP_NOT_ACCEPTING_MESSAGES"))return{ok:false,error:"This shop is not accepting messages right now."};
+    return{ok:false,error:msg||"Could not send Story reply."};
+  }
+}
 const CHAT_MEDIA_DEFAULT_BODY={voice:"Voice message",image:"Photo",video:"Video"};
 function chatMediaCtx(m){let x=m&&m.context;if(!x)return{};if(typeof x==="string"){try{x=JSON.parse(x)}catch(_){return{}}}return x&&typeof x==="object"?x:{}}
 function chatMediaType(m){const t=String(m?.message_type||"").toLowerCase();return t==="voice"||t==="image"||t==="video"?t:""}
@@ -1422,6 +1574,6 @@ async function ownerInbox(){
     );
   }
 }
-window.Ma7alakChat={openShop,openInbox:viewerInbox,openViewerInbox:viewerInbox,openOwnerInbox:ownerInbox,sendStoryReply,openStoryFromMessage,close};
+window.Ma7alakChat={openShop,openInbox:viewerInbox,openViewerInbox:viewerInbox,openOwnerInbox:ownerInbox,sendStoryReply,sendStoryMediaReply,openStoryFromMessage,close};
 addEventListener("ma7alak:open-chat",e=>openShop(e.detail?.shop_slug));addEventListener("ma7alak:open-messages",viewerInbox);addEventListener("ma7alak:open-owner-messages",ownerInbox);
 })();
