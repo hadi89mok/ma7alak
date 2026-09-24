@@ -867,6 +867,9 @@ async function startVoiceRecording(c){
 
       if(voiceGesture?.cancelled){
         stopMicTracks();
+        voiceGesture=null;
+        voiceLocked=false;
+        activeVoiceConversation=null;
         return;
       }
 
