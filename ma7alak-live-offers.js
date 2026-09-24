@@ -610,9 +610,17 @@ async function refreshOwnerStateForShop(shopSlug){
   await identity();
   return currentOwnerSlug()===String(shopSlug||"").trim().toLowerCase();
 }
+function trustedBridgeSource(source){
+  if(!source)return false;
+  if(source===window)return true;
+  try{
+    return [...document.querySelectorAll("iframe")].some(frame=>frame.contentWindow===source);
+  }catch(_){return false}
+}
 function bridge(){
   addEventListener("message",e=>{
-    const d=e.data||{},s=String(d.shopSlug||"").trim().toLowerCase();
+    if(!trustedBridgeSource(e.source))return;
+    const d=e.data||{},s=String(d.shopSlug||"").trim().toLowerCase().replace(/[^a-z0-9-]/g,"").slice(0,60);
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){
       send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
@@ -827,7 +835,7 @@ async function init(){
 
   addEventListener("ma7alak:page-wake",wakeSync);
   addEventListener("message",event=>{
-    if(event.data?.type==="MA7ALAK_PAGE_WAKE")wakeSync();
+    if(event.data?.type==="MA7ALAK_PAGE_WAKE"&&trustedBridgeSource(event.source))wakeSync();
   });
   addEventListener("pageshow",wakeSync);
   document.addEventListener("visibilitychange",()=>{
