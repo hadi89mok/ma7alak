@@ -410,12 +410,6 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
 #${ROOT_ID} .ssv-like{width:44px;height:44px;flex:0 0 44px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#090909b8;color:#fff;display:grid;place-items:center;font-size:23px;cursor:pointer;touch-action:manipulation}
 #${ROOT_ID} .ssv-like.is-liked{color:#ff3e55;border-color:#ff5b6c88;background:#2b0d12cc}
-#${ROOT_ID} .ssv-reply-tool{width:42px;height:42px;flex:0 0 42px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#0d0d0dc9;color:#f0c46c;display:grid;place-items:center;font-size:19px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#${ROOT_ID} .ssv-reply-tool:disabled{opacity:.48;cursor:default}
-#${ROOT_ID} .ssv-mic.is-recording{color:#fff;background:#9e211f;border-color:#ff6b63;box-shadow:0 0 0 3px #ff3d3430,0 0 18px #ff3d344c}
-#${ROOT_ID} .ssv-mic-time{display:none;min-width:38px;color:#ffb2ad;font-size:10px;font-weight:900;text-align:center}
-#${ROOT_ID} .ssv-mic-time.visible{display:block}
-#${ROOT_ID} .ssv-media-input{display:none!important}
 #${ROOT_ID} .ssv-reply{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
 #${ROOT_ID} .ssv-reply-text{min-width:0;flex:1;height:44px;border:1px solid #ffffff32;border-radius:999px;background:#0d0d0dc9;color:#fff;padding:0 15px;font-size:16px;outline:0}
 #${ROOT_ID} .ssv-reply-text:focus{border-color:#d9a441}
@@ -1708,34 +1702,6 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           <form class="ssv-reply">
 
             <input
-              class="ssv-media-input"
-              type="file"
-              accept="image/*,video/mp4,video/webm,video/quicktime"
-              aria-hidden="true"
-              tabindex="-1"
-            >
-
-            <button
-              type="button"
-              class="ssv-reply-tool ssv-media-pick"
-              aria-label="Send photo or video"
-              title="Photo or video"
-            >
-              +
-            </button>
-
-            <button
-              type="button"
-              class="ssv-reply-tool ssv-mic"
-              aria-label="Voice message"
-              title="Voice message"
-            >
-              🎤
-            </button>
-
-            <span class="ssv-mic-time" aria-live="polite">0:00</span>
-
-            <input
               class="ssv-reply-text"
               type="text"
               maxlength="2000"
@@ -1831,61 +1797,6 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           event.stopPropagation();
           replyCurrent();
         };
-
-    const storyMediaInput=
-      root.querySelector(
-        ".ssv-media-input"
-      );
-
-    const storyMediaButton=
-      root.querySelector(
-        ".ssv-media-pick"
-      );
-
-    const storyMicButton=
-      root.querySelector(
-        ".ssv-mic"
-      );
-
-    if(storyMediaButton&&storyMediaInput){
-      storyMediaButton.onclick=
-        event=>{
-          event.preventDefault();
-          event.stopPropagation();
-          if(storyReplyBusy||storyReplyRecorder?.state==="recording")return;
-          storyMediaInput.click();
-        };
-
-      storyMediaInput.onchange=
-        async ()=>{
-          const file=
-            storyMediaInput.files?.[0]||
-            null;
-
-          storyMediaInput.value="";
-
-          if(file){
-            await sendStoryReplyFile(file);
-          }
-        };
-    }
-
-    if(storyMicButton){
-      storyMicButton.onclick=
-        async event=>{
-          event.preventDefault();
-          event.stopPropagation();
-
-          if(storyReplyBusy)return;
-
-          if(storyReplyRecorder?.state==="recording"){
-            stopStoryReplyVoice(false);
-          }
-          else{
-            await startStoryReplyVoice();
-          }
-        };
-    }
 
     const replyInput=
       root.querySelector(
