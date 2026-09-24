@@ -11,7 +11,7 @@
   "display_override": ["standalone"],
   "orientation": "portrait-primary",
   "background_color": "#090503",
-  "theme_color": "#d9a441",
+  "theme_color": "#050403",
   "prefer_related_applications": false,
   "categories": ["shopping", "lifestyle", "social"],
   "icons": [
