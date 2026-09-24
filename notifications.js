@@ -1222,6 +1222,49 @@ function injectNotificationCSS(){
 
 }
 
+/* Offer / Event / Happening / Arrival activity:
+   purple pulse around the actual shop circle. */
+.ma7alak-notification-item[data-notification-type="live"]
+.ma7alak-notification-icon{
+  border-color:rgba(177,104,255,.92);
+  box-shadow:0 0 0 2px rgba(177,104,255,.10),0 0 12px rgba(177,104,255,.34);
+  animation:ma7alakActivityIconPulse 1.55s ease-in-out infinite;
+  -webkit-animation:ma7alakActivityIconPulse 1.55s ease-in-out infinite;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+  will-change:box-shadow,border-color;
+}
+
+/* Camera broadcast:
+   green pulse so it is visually different from normal posts. */
+.ma7alak-notification-item[data-notification-type="video_live"]
+.ma7alak-notification-icon{
+  border-color:rgba(57,217,120,.96);
+  box-shadow:0 0 0 2px rgba(57,217,120,.11),0 0 13px rgba(57,217,120,.38);
+  animation:ma7alakCameraLiveIconPulse 1.25s ease-in-out infinite;
+  -webkit-animation:ma7alakCameraLiveIconPulse 1.25s ease-in-out infinite;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+  will-change:box-shadow,border-color;
+}
+
+@keyframes ma7alakActivityIconPulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(177,104,255,.08),0 0 8px rgba(177,104,255,.24)}
+  50%{box-shadow:0 0 0 5px rgba(177,104,255,.09),0 0 18px rgba(177,104,255,.55)}
+}
+@-webkit-keyframes ma7alakActivityIconPulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(177,104,255,.08),0 0 8px rgba(177,104,255,.24)}
+  50%{box-shadow:0 0 0 5px rgba(177,104,255,.09),0 0 18px rgba(177,104,255,.55)}
+}
+@keyframes ma7alakCameraLiveIconPulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(57,217,120,.08),0 0 8px rgba(57,217,120,.28)}
+  50%{box-shadow:0 0 0 6px rgba(57,217,120,.08),0 0 20px rgba(57,217,120,.65)}
+}
+@-webkit-keyframes ma7alakCameraLiveIconPulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(57,217,120,.08),0 0 8px rgba(57,217,120,.28)}
+  50%{box-shadow:0 0 0 6px rgba(57,217,120,.08),0 0 20px rgba(57,217,120,.65)}
+}
+
 
 /* =========================================================
    TEXT
@@ -1310,38 +1353,45 @@ function injectNotificationCSS(){
 */
 .ma7alak-notification-item[data-notification-type="live"]
 .ma7alak-notification-unread-dot{
-
   width:11px;
-
   height:11px;
-
-  background:#39d978;
-
-  box-shadow:
-    0 0 0 3px rgba(57,217,120,.12),
-    0 0 12px rgba(57,217,120,.56);
-
-  animation:
-    ma7alakLiveNotificationDotPulse
-    1.25s
-    ease-in-out
-    infinite;
-
-  -webkit-animation:
-    ma7alakLiveNotificationDotPulse
-    1.25s
-    ease-in-out
-    infinite;
-
+  background:#b168ff;
+  box-shadow:0 0 0 3px rgba(177,104,255,.11),0 0 12px rgba(177,104,255,.55);
+  animation:ma7alakLiveUpdateDotPulse 1.35s ease-in-out infinite;
+  -webkit-animation:ma7alakLiveUpdateDotPulse 1.35s ease-in-out infinite;
   transform-origin:center;
   -webkit-transform-origin:center;
-
   animation-play-state:running;
   -webkit-animation-play-state:running;
-
   will-change:transform,box-shadow,opacity;
   -webkit-backface-visibility:hidden;
   backface-visibility:hidden;
+}
+
+.ma7alak-notification-item[data-notification-type="video_live"]
+.ma7alak-notification-unread-dot{
+  width:11px;
+  height:11px;
+  background:#39d978;
+  box-shadow:0 0 0 3px rgba(57,217,120,.12),0 0 12px rgba(57,217,120,.56);
+  animation:ma7alakLiveNotificationDotPulse 1.25s ease-in-out infinite;
+  -webkit-animation:ma7alakLiveNotificationDotPulse 1.25s ease-in-out infinite;
+  transform-origin:center;
+  -webkit-transform-origin:center;
+  animation-play-state:running;
+  -webkit-animation-play-state:running;
+  will-change:transform,box-shadow,opacity;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+}
+
+@keyframes ma7alakLiveUpdateDotPulse{
+  0%,100%{transform:scale(.88);opacity:.78;box-shadow:0 0 0 2px rgba(177,104,255,.09),0 0 8px rgba(177,104,255,.38)}
+  50%{transform:scale(1.20);opacity:1;box-shadow:0 0 0 6px rgba(177,104,255,.09),0 0 18px rgba(177,104,255,.78)}
+}
+@-webkit-keyframes ma7alakLiveUpdateDotPulse{
+  0%,100%{-webkit-transform:scale(.88);opacity:.78;box-shadow:0 0 0 2px rgba(177,104,255,.09),0 0 8px rgba(177,104,255,.38)}
+  50%{-webkit-transform:scale(1.20);opacity:1;box-shadow:0 0 0 6px rgba(177,104,255,.09),0 0 18px rgba(177,104,255,.78)}
 }
 
 
@@ -2729,6 +2779,74 @@ function markAllCurrentLivesAsSeen(){
   saveLiveNotificationState(state);
 }
 
+const MA7ALAK_VIDEO_LIVE_NOTIFICATION_STATE_KEY =
+  "ma7alak_video_live_notification_state_v1";
+
+function getVideoLiveNotificationState(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(MA7ALAK_VIDEO_LIVE_NOTIFICATION_STATE_KEY)||"null");
+    if(!parsed||typeof parsed!=="object")throw new Error("EMPTY_VIDEO_LIVE_STATE");
+    return {
+      initialized:Boolean(parsed.initialized),
+      seenByShop:parsed.seenByShop&&typeof parsed.seenByShop==="object" ? parsed.seenByShop : {}
+    };
+  }catch(error){
+    return {initialized:false,seenByShop:{}};
+  }
+}
+
+function saveVideoLiveNotificationState(state){
+  try{
+    localStorage.setItem(
+      MA7ALAK_VIDEO_LIVE_NOTIFICATION_STATE_KEY,
+      JSON.stringify({
+        initialized:Boolean(state&&state.initialized),
+        seenByShop:state&&state.seenByShop&&typeof state.seenByShop==="object" ? state.seenByShop : {}
+      })
+    );
+  }catch(error){}
+}
+
+function markVideoLiveNotificationAsSeen(shopSlug,streamId){
+  const slug=String(shopSlug||"").trim();
+  const id=String(streamId||"").trim();
+  if(!slug||!id)return;
+  const state=getVideoLiveNotificationState();
+  state.initialized=true;
+  state.seenByShop[slug]=id;
+  saveVideoLiveNotificationState(state);
+}
+
+function markAllCurrentVideoLivesAsSeen(){
+  const rows=notifications.filter(function(notification){return notification&&notification.type==="video_live";});
+  if(!rows.length)return;
+  const state=getVideoLiveNotificationState();
+  state.initialized=true;
+  rows.forEach(function(notification){
+    const slug=String(notification.shop_slug||"").trim();
+    const id=String(notification.id||"").trim();
+    if(slug&&id)state.seenByShop[slug]=id;
+  });
+  saveVideoLiveNotificationState(state);
+}
+
+async function openExactVideoLiveFromNotification(streamId){
+  const id=String(streamId||"").trim();
+  if(!id)return false;
+  try{
+    if(window.ShoufHonLiveVideo&&typeof window.ShoufHonLiveVideo.open==="function"){
+      await window.ShoufHonLiveVideo.open(id);
+      return true;
+    }
+  }catch(error){}
+  try{
+    window.postMessage({type:"MA7ALAK_LIVE_OFFERS_VIEW",id:"video:"+id},"*");
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
 async function openExactLiveFromNotification(postId){
   const id=String(postId||"").trim();
   if(!id)return false;
@@ -3265,6 +3383,62 @@ async function loadNotifications(){
     }
 
     /* -------------------------------------------------------
+       CAMERA VIDEO LIVE — LATEST ACTIVE BROADCAST PER SHOP
+    ------------------------------------------------------- */
+
+    const videoHeartbeatCutoff =
+      new Date(Date.now() - 120000).toISOString();
+
+    const {
+      data:directVideoLives,
+      error:directVideoLivesError
+    } = await client
+      .from("shop_live_streams")
+      .select("id,shop_slug,title,status,started_at,created_at,last_heartbeat_at,expires_at")
+      .eq("status","live")
+      .gt("last_heartbeat_at",videoHeartbeatCutoff)
+      .gt("expires_at",liveNow)
+      .order("started_at",{ascending:false});
+
+    let videoLiveNotifications=[];
+
+    if(!directVideoLivesError){
+      const latestVideoByShop=new Map();
+
+      (directVideoLives||[]).forEach(function(row){
+        const slug=String(row&&row.shop_slug?row.shop_slug:"").trim();
+        if(!slug||!followedShopSlugs.has(slug)||latestVideoByShop.has(slug))return;
+        latestVideoByShop.set(slug,row);
+      });
+
+      const videoState=getVideoLiveNotificationState();
+
+      if(!videoState.initialized){
+        videoState.initialized=true;
+        latestVideoByShop.forEach(function(row,slug){
+          videoState.seenByShop[slug]=String(row.id||"");
+        });
+        saveVideoLiveNotificationState(videoState);
+      }
+
+      videoLiveNotifications=Array.from(latestVideoByShop.entries()).map(function(entry){
+        const slug=entry[0],row=entry[1],id=String(row.id||"");
+        return {
+          ...row,
+          key:"video_live:"+slug,
+          type:"video_live",
+          id:id,
+          shop_slug:slug,
+          shop_name:String(getShopName(slug)||slug).trim(),
+          created_at:row.started_at||row.created_at||liveNow,
+          seen:String(videoState.seenByShop[slug]||"")===id
+        };
+      });
+    }else{
+      console.error("ShoufHon notifications video live:",directVideoLivesError);
+    }
+
+    /* -------------------------------------------------------
        COMBINE + SORT
     ------------------------------------------------------- */
 
@@ -3275,6 +3449,9 @@ async function loadNotifications(){
         )
         .concat(
           liveNotifications
+        )
+        .concat(
+          videoLiveNotifications
         )
         .sort(
           function(a,b){
@@ -4335,6 +4512,38 @@ else{
    RENDER
 ========================================================= */
 
+function notificationActivityText(notification){
+  const type=String(notification&&notification.type||"story");
+  if(type==="video_live")return "is now live!";
+  if(type==="live"){
+    switch(String(notification&&notification.post_type||"").toLowerCase()){
+      case "offer":return "listed an offer!";
+      case "event":return "listed an event!";
+      case "happening":return "has something happening now!";
+      case "arrival":return "added a new arrival!";
+      default:return "posted a new update!";
+    }
+  }
+  if(type==="reel")return "added a new Reel";
+  return "added a new story";
+}
+
+function notificationFallbackEmoji(notification){
+  const type=String(notification&&notification.type||"story");
+  if(type==="video_live")return "🟢";
+  if(type==="reel")return "▶️";
+  if(type==="live"){
+    switch(String(notification&&notification.post_type||"").toLowerCase()){
+      case "offer":return "🏷️";
+      case "event":return "📅";
+      case "happening":return "●";
+      case "arrival":return "✨";
+      default:return "💜";
+    }
+  }
+  return "🔥";
+}
+
 function renderNotifications(){
 
   const list =
@@ -4414,9 +4623,18 @@ function renderNotifications(){
           const isLive =
             notification.type === "live";
 
+          const isVideoLive =
+            notification.type === "video_live";
+
+          const activityText =
+            notificationActivityText(notification);
+
+          const fallbackEmoji =
+            notificationFallbackEmoji(notification);
+
 
           const shopName =
-            (isReel || isLive) && notification.shop_name
+            (isReel || isLive || isVideoLive) && notification.shop_name
               ? notification.shop_name
               : getShopName(
                   notification.shop_slug
@@ -4462,7 +4680,7 @@ function renderNotifications(){
                   if(!this.parentElement.querySelector('.fallback-emoji')){
                     this.parentElement.insertAdjacentHTML(
                       'beforeend',
-                      '<span class=&quot;fallback-emoji&quot;>${isLive ? "🟢" : (isReel ? "▶️" : "🔥")}</span>'
+                      '<span class=&quot;fallback-emoji&quot;>${fallbackEmoji}</span>'
                     );
                   }
                 "
@@ -4478,7 +4696,7 @@ function renderNotifications(){
               <span
                 class="fallback-emoji"
               >
-                ${isLive ? "🟢" : (isReel ? "▶️" : "🔥")}
+                ${fallbackEmoji}
               </span>
 
             `;
@@ -4498,6 +4716,7 @@ function renderNotifications(){
               data-notification-type="${escapeAttribute(notification.type || "story")}"
               data-notification-id="${escapeAttribute(String(notification.id || ""))}"
               data-notification-created-at="${escapeAttribute(notification.created_at || "")}"
+              data-live-post-type="${escapeAttribute(notification.post_type || "")}"
               data-shop-slug="${escapeAttribute(notification.shop_slug || "")}"
               data-shop-url="${escapeAttribute(notification.shop_url || "")}"
             >
@@ -4523,7 +4742,7 @@ function renderNotifications(){
                     ${escapeHtml(shopName)}
                   </strong>
 
-                  ${isLive ? "is now live!" : (isReel ? "added a new Reel" : "added a new story")}
+                  ${escapeHtml(activityText)}
 
                 </p>
 
@@ -4638,6 +4857,16 @@ function renderNotifications(){
 
             }
             else if(
+              notificationType === "video_live"
+            ){
+
+              contentOpened =
+                await openExactVideoLiveFromNotification(
+                  notificationId
+                );
+
+            }
+            else if(
               notificationType === "live"
             ){
 
@@ -4716,6 +4945,16 @@ function renderNotifications(){
             ){
 
               markReelFingerprintAsSeen(
+                notificationId
+              );
+
+            }
+            else if(
+              notificationType === "video_live"
+            ){
+
+              markVideoLiveNotificationAsSeen(
+                shopSlug,
                 notificationId
               );
 
@@ -4945,6 +5184,8 @@ async function markAllCurrentNotificationsAsSeen(){
     markAllCurrentReelsAsSeen();
 
     markAllCurrentLivesAsSeen();
+
+    markAllCurrentVideoLivesAsSeen();
 
 
     notifications =
@@ -5248,6 +5489,20 @@ async function setupRealtime(){
             event:"INSERT",
             schema:"public",
             table:"shop_live_posts"
+          },
+          async function(){
+
+            await loadNotifications();
+
+          }
+        )
+
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"shop_live_streams"
           },
           async function(){
 
