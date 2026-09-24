@@ -1,5 +1,5 @@
 /* =========================================================
- SHOUFHON LIVE CHAT V10 — VOICE + MEDIA + STORY REPLIES + REACTIONS
+ SHOUFHON LIVE CHAT V10.2 — WHATSAPP VOICE + MEDIA + TEXT STORY REPLIES + REACTIONS
  - keeps avatars/unread/report/message acceptance/delete controls
  - Story replies stay inside the existing viewer↔shop conversation
  - WhatsApp-style long-press reactions with realtime counts
@@ -10,7 +10,7 @@
 "use strict";
 if(window.__MA7ALAK_CHAT_V10__)return;window.__MA7ALAK_CHAT_V10__=true;window.__MA7ALAK_CHAT_V9__=true;window.__MA7ALAK_CHAT_V8__=true;window.__MA7ALAK_CHAT_V7__=true;
 const CHAT_SCRIPT_SRC=document.currentScript?.src||"";
-let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null,inboxLiveFallbackTimer=null,inboxWakeHandler=null,activeRecorder=null,activeMicStream=null,voiceTimer=null,voiceStartedAt=0,voiceChunks=[],voiceDraft=null,recordingDiscard=false,pendingMedia=null,pendingMediaUrl="",composerBusy=false;const CHAT_MEDIA_BUCKET="chat-media";const chatMediaSignedCache=new Map();
+let client,user,mode="viewer",channel=null,settingsChannel=null,reactionPicker=null,reactionPickerOutside=null,sharedStoryViewerPromise=null,inboxClockTimer=null,inboxRefreshTimer=null,inboxLiveFallbackTimer=null,inboxWakeHandler=null,activeRecorder=null,activeMicStream=null,voiceTimer=null,voiceStartedAt=0,voiceChunks=[],voiceDraft=null,recordingDiscard=false,pendingMedia=null,pendingMediaUrl="",composerBusy=false,voiceGesture=null,voiceLocked=false,voiceStartPromise=null,activeVoiceConversation=null;const CHAT_MEDIA_BUCKET="chat-media";const chatMediaSignedCache=new Map();
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 async function vr(){for(let i=0;i<100&&!window.Ma7alakAccount;i++)await sleep(50);if(!window.Ma7alakAccount)throw new Error("ShoufHon account system is not ready.");await window.Ma7alakAccount.ready();client=window.Ma7alakAccount.client;user=window.Ma7alakAccount.user;mode="viewer"}
@@ -53,8 +53,10 @@ function chatMediaCss(){
     ".m7-compose-thumb img,.m7-compose-thumb video{width:100%;height:100%;display:block;object-fit:cover}",
     ".m7-compose-preview-copy{min-width:0;flex:1}.m7-compose-preview-copy b{display:block;color:#f7d48f;font-size:12px}.m7-compose-preview-copy small{display:block;color:#9f958c;font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
     ".m7-compose-remove{width:34px;height:34px;flex:0 0 34px;border:0;border-radius:50%;background:#3d211e;color:#ffc0b8;font-size:19px;display:grid;place-items:center}",
-    ".m7-record-row{display:flex;align-items:center;gap:9px}.m7-record-dot{width:10px;height:10px;border-radius:50%;background:#ff5147;box-shadow:0 0 12px #ff514780;animation:m7RecPulse 1s ease-in-out infinite}.m7-record-time{min-width:40px;font-weight:900;color:#fff}.m7-record-wave{min-width:0;flex:1;height:28px;display:flex;align-items:center;justify-content:center;gap:3px;overflow:hidden}.m7-record-wave i{width:3px;border-radius:5px;background:#d99a45;animation:m7Wave .85s ease-in-out infinite alternate}.m7-record-wave i:nth-child(2n){animation-delay:-.35s}.m7-record-wave i:nth-child(3n){animation-delay:-.6s}",
-    ".m7-record-cancel,.m7-record-stop{min-height:36px;border:0;border-radius:11px;padding:0 10px;font-size:10px;font-weight:900}.m7-record-cancel{background:#312925;color:#c9bdb4}.m7-record-stop{background:#d99a45;color:#170f08}",
+    "#m7-voice-recording{padding:8px 9px!important;border-color:#503529!important;background:linear-gradient(145deg,#221714,#110d0b)!important;box-shadow:inset 0 1px 0 #ffffff0a}",
+    ".m7-record-row{display:flex;align-items:center;gap:8px;min-height:40px}.m7-record-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#ff4f48;box-shadow:0 0 12px #ff514780;animation:m7RecPulse 1s ease-in-out infinite}.m7-record-time{min-width:38px;font:900 12px/1 Arial;color:#fff;font-variant-numeric:tabular-nums}.m7-record-hint{min-width:0;flex:1;color:#b9ada4;font:800 10px/1.2 Arial;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7-record-wave{width:54px;flex:0 0 54px;height:25px;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden}.m7-record-wave i{width:2px;border-radius:5px;background:#d99a45;animation:m7Wave .85s ease-in-out infinite alternate}.m7-record-wave i:nth-child(2n){animation-delay:-.35s}.m7-record-wave i:nth-child(3n){animation-delay:-.6s}",
+    ".m7-record-cancel,.m7-record-stop{display:none;min-height:34px;border:0;border-radius:999px;padding:0 11px;font-size:10px;font-weight:950}.m7-record-cancel{background:#312925;color:#e4d7ce}.m7-record-stop{background:#d99a45;color:#170f08}.voice-locked .m7-record-cancel,.voice-locked .m7-record-stop{display:inline-flex;align-items:center;justify-content:center}.voice-locked .m7-record-wave{display:none}.voice-locked .m7-record-hint{color:#efbd66}",
+    "#m7-chat-mic{touch-action:none!important;user-select:none;-webkit-user-select:none}#m7-chat-mic.is-recording{background:#84251f!important;color:#fff!important;border-color:#ff6c62!important;box-shadow:0 0 0 3px #ff3d3427,0 0 18px #ff3d3438!important;transform:scale(1.04)}",
     ".m7-voice-draft{display:flex;align-items:center;gap:9px}.m7-voice-draft audio{min-width:0;flex:1;height:36px}.m7-voice-draft strong{font-size:11px;color:#f2c36f;white-space:nowrap}",
     ".m7-msg.m7-msg-media{padding:6px 7px;min-width:0;max-width:min(320px,86vw)}.m7-msg.mine.m7-msg-media{padding-right:30px}.m7-msg.m7-msg-media .m7-msg-time{margin-top:2px;padding-left:2px;font-size:9px}.m7-msg.m7-msg-media .m7-msg-reactions{position:absolute;left:9px;bottom:-13px;margin:0;z-index:6}.m7-msg.m7-msg-media.has-reactions{margin-bottom:13px}.m7-msg.m7-msg-media .m7-reaction-pill{min-height:24px;padding:2px 7px;font-size:12px}",
     ".m7-chat-photo{display:block;width:min(272px,72vw);max-height:330px;border:0;border-radius:12px;overflow:hidden;padding:0;background:#0b0908;cursor:pointer;touch-action:manipulation}.m7-chat-photo img{display:block;width:100%;height:auto;max-height:330px;object-fit:cover}",
@@ -64,7 +66,7 @@ function chatMediaCss(){
     "#m7-chat-media-viewer{position:fixed;inset:0;z-index:2147483647;background:#000e;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}.m7-media-viewer-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}.m7-media-viewer-close{position:absolute;right:15px;top:max(15px,env(safe-area-inset-top));width:44px;height:44px;border:1px solid #ffffff32;border-radius:50%;background:#111d;color:#fff;font-size:25px}",
     ".m7-media-loading{padding:10px;border-radius:12px;background:#17120f;color:#c7b9ac;font-size:11px;text-align:center}",
     "@keyframes m7RecPulse{50%{transform:scale(1.28);opacity:.55}}@keyframes m7Wave{from{height:6px}to{height:24px}}",
-    "@media(max-width:600px){#m7-chat-send{padding-bottom:max(9px,env(safe-area-inset-bottom))!important}.m7-compose-tool{width:40px;height:40px;flex-basis:40px}.m7-send-button{width:42px;height:40px;flex-basis:42px}.m7-chat-photo{width:min(276px,76vw)}.m7-chat-video{width:min(286px,78vw)}.m7-voice-bubble{width:min(268px,76vw)}}",
+    "@media(max-width:600px){#m7-chat-send{padding-bottom:max(9px,env(safe-area-inset-bottom))!important}.m7-compose-tool{width:40px;height:40px;flex-basis:40px}.m7-send-button{width:42px;height:40px;flex-basis:42px}.m7-chat-photo{width:min(276px,76vw)}.m7-chat-video{width:min(286px,78vw)}.m7-voice-bubble{width:min(268px,76vw)}.m7-record-hint{font-size:9px}.m7-record-wave{width:42px;flex-basis:42px}.voice-locked .m7-record-hint{font-size:10px}}",
     "@media(prefers-reduced-motion:reduce){.m7-record-dot,.m7-record-wave i{animation:none!important}}"
   ].join("");
   document.head.appendChild(s);
@@ -797,49 +799,462 @@ function wireChatMediaMessages(root){
 function revokeObjectUrl(value){try{if(value)URL.revokeObjectURL(value)}catch(_){}}
 function stopMicTracks(){if(activeMicStream){try{activeMicStream.getTracks().forEach(t=>t.stop())}catch(_){}activeMicStream=null}}
 function clearVoiceTimer(){clearInterval(voiceTimer);voiceTimer=null}
-function resetChatComposerDrafts(){recordingDiscard=true;clearVoiceTimer();if(activeRecorder&&activeRecorder.state!=="inactive"){try{activeRecorder.ondataavailable=null;activeRecorder.onstop=null;activeRecorder.stop()}catch(_){}}activeRecorder=null;stopMicTracks();voiceChunks=[];voiceStartedAt=0;if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;composerBusy=false}
+function resetChatComposerDrafts(){recordingDiscard=true;clearVoiceTimer();if(activeRecorder&&activeRecorder.state!=="inactive"){try{activeRecorder.ondataavailable=null;activeRecorder.onstop=null;activeRecorder.stop()}catch(_){}}activeRecorder=null;stopMicTracks();voiceChunks=[];voiceStartedAt=0;voiceGesture=null;voiceLocked=false;voiceStartPromise=null;activeVoiceConversation=null;if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;composerBusy=false}
 function setComposerBusy(busy,label){composerBusy=!!busy;const form=document.getElementById("m7-chat-send");if(!form)return;form.classList.toggle("busy",composerBusy);form.querySelectorAll("button,input").forEach(el=>{if(el.id!=="m7-chat-input"||composerBusy)el.disabled=composerBusy});const send=form.querySelector(".m7-send-button");if(send){send.dataset.normal=send.dataset.normal||send.textContent;send.textContent=composerBusy?(label||"…"):(send.dataset.normal||"➤")}}
 function renderComposerState(){
   const form=document.getElementById("m7-chat-send");if(!form)return;
-  const preview=document.getElementById("m7-compose-preview"),record=document.getElementById("m7-voice-recording"),input=document.getElementById("m7-chat-input"),mediaBtn=document.getElementById("m7-chat-media"),micBtn=document.getElementById("m7-chat-mic"),send=form.querySelector(".m7-send-button");
+  const preview=document.getElementById("m7-compose-preview"),record=document.getElementById("m7-voice-recording"),input=document.getElementById("m7-chat-input"),mediaBtn=document.getElementById("m7-chat-media"),micBtn=document.getElementById("m7-chat-mic"),send=form.querySelector(".m7-send-button"),hint=document.getElementById("m7-record-hint");
   const recording=!!(activeRecorder&&activeRecorder.state==="recording");
-  form.classList.toggle("is-recording",recording);form.classList.toggle("has-media",!!pendingMedia);form.classList.toggle("has-voice-draft",!!voiceDraft);
-  if(record)record.hidden=!recording;
-  if(preview){preview.hidden=!(pendingMedia||voiceDraft);if(pendingMedia){const isImage=pendingMedia.type==="image";const visual=isImage?"<img src=\""+esc(pendingMediaUrl)+"\" alt=\"\">":"<video src=\""+esc(pendingMediaUrl)+"\" muted playsinline preload=\"metadata\"></video>";preview.innerHTML="<div class=\"m7-compose-preview-inner\"><div class=\"m7-compose-thumb\">"+visual+"</div><div class=\"m7-compose-preview-copy\"><b>"+(isImage?"Photo":"Video")+"</b><small>"+esc(pendingMedia.name||"Media")+" · "+formatBytes(pendingMedia.blob.size)+"</small></div><button class=\"m7-compose-remove\" type=\"button\" data-remove-draft aria-label=\"Remove\">×</button></div>"}else if(voiceDraft){preview.innerHTML="<div class=\"m7-voice-draft\"><strong>Voice · "+formatDuration(voiceDraft.duration)+"</strong><audio controls preload=\"metadata\" src=\""+esc(voiceDraft.url)+"\"></audio><button class=\"m7-compose-remove\" type=\"button\" data-remove-draft aria-label=\"Discard voice\">×</button></div>"}}
-  if(input){input.disabled=recording||!!voiceDraft||composerBusy;input.placeholder=pendingMedia?"Add a caption…":"Type a message..."}
-  if(mediaBtn)mediaBtn.disabled=recording||!!voiceDraft||composerBusy;
-  if(micBtn){micBtn.disabled=!!pendingMedia||!!voiceDraft||composerBusy;micBtn.textContent=recording?"■":"🎤";micBtn.title=recording?"Stop recording":"Voice message"}
-  if(send)send.disabled=recording||composerBusy;
-  form.querySelector("[data-remove-draft]")?.addEventListener("click",()=>{if(voiceDraft?.url)revokeObjectUrl(voiceDraft.url);voiceDraft=null;if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;renderComposerState()},{once:true});
+  const voiceActive=recording||!!voiceStartPromise;
+  form.classList.toggle("is-recording",voiceActive);
+  form.classList.toggle("voice-locked",voiceActive&&voiceLocked);
+  form.classList.toggle("has-media",!!pendingMedia);
+  form.classList.remove("has-voice-draft");
+  if(record)record.hidden=!voiceActive;
+  if(hint){
+    hint.textContent=voiceLocked
+      ?"Locked · tap Send when finished"
+      :"← Slide left to cancel · ↑ Lock";
+  }
+  if(preview){
+    preview.hidden=!pendingMedia;
+    if(pendingMedia){
+      const isImage=pendingMedia.type==="image";
+      const visual=isImage?"<img src=\""+esc(pendingMediaUrl)+"\" alt=\"\">":"<video src=\""+esc(pendingMediaUrl)+"\" muted playsinline preload=\"metadata\"></video>";
+      preview.innerHTML="<div class=\"m7-compose-preview-inner\"><div class=\"m7-compose-thumb\">"+visual+"</div><div class=\"m7-compose-preview-copy\"><b>"+(isImage?"Photo":"Video")+"</b><small>"+esc(pendingMedia.name||"Media")+" · "+formatBytes(pendingMedia.blob.size)+"</small></div><button class=\"m7-compose-remove\" type=\"button\" data-remove-draft aria-label=\"Remove\">×</button></div>";
+    }
+  }
+  if(input){input.disabled=voiceActive||composerBusy;input.placeholder=pendingMedia?"Add a caption…":"Type a message..."}
+  if(mediaBtn)mediaBtn.disabled=voiceActive||composerBusy;
+  if(micBtn){
+    micBtn.disabled=!!pendingMedia||composerBusy;
+    micBtn.classList.toggle("is-recording",voiceActive);
+    micBtn.textContent="🎤";
+    micBtn.title=voiceActive?(voiceLocked?"Recording locked":"Recording · slide left to cancel"):"Voice message";
+  }
+  if(send)send.disabled=voiceActive||composerBusy;
+  form.querySelector("[data-remove-draft]")?.addEventListener("click",()=>{if(pendingMediaUrl)revokeObjectUrl(pendingMediaUrl);pendingMediaUrl="";pendingMedia=null;renderComposerState()},{once:true});
 }
 async function compressChatImage(file){if(!file||!String(file.type||"").startsWith("image/"))return file;if(file.size<=2097152||file.type==="image/gif")return file;let url="";try{url=URL.createObjectURL(file);const img=new Image();img.decoding="async";await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});const max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth||1,img.naturalHeight||1)),w=Math.max(1,Math.round((img.naturalWidth||1)*scale)),h=Math.max(1,Math.round((img.naturalHeight||1)*scale)),canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(img,0,0,w,h);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.82));if(blob&&blob.size>0&&blob.size<file.size)return blob}catch(e){console.warn("Image compression:",e)}finally{revokeObjectUrl(url)}return file}
 function voiceMimeChoice(){if(!window.MediaRecorder)return"";const list=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"];for(const x of list){try{if(MediaRecorder.isTypeSupported(x))return x}catch(_){}}return""}
-async function startVoiceRecording(){
-  if(composerBusy||activeRecorder?.state==="recording")return;
-  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){alert("Voice messages are not supported by this browser.");return}
-  if(pendingMedia){alert("Remove the selected media first.");return}
-  if(voiceDraft){alert("Send or discard the current voice message first.");return}
-  try{
-    recordingDiscard=false;voiceChunks=[];
-    activeMicStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-    const choice=voiceMimeChoice(),opts=choice?{mimeType:choice,audioBitsPerSecond:64000}:{audioBitsPerSecond:64000};
-    activeRecorder=new MediaRecorder(activeMicStream,opts);voiceStartedAt=Date.now();
-    activeRecorder.ondataavailable=e=>{if(e.data&&e.data.size)voiceChunks.push(e.data)};
-    activeRecorder.onstop=()=>{
-      const duration=Math.max(1,(Date.now()-voiceStartedAt)/1000);const rec=activeRecorder;activeRecorder=null;clearVoiceTimer();stopMicTracks();
-      if(recordingDiscard){recordingDiscard=false;voiceChunks=[];renderComposerState();return}
-      const mime=mediaBaseMime(rec?.mimeType||choice||voiceChunks[0]?.type||"audio/webm")||"audio/webm";
-      const blob=new Blob(voiceChunks,{type:mime});voiceChunks=[];
-      if(blob.size<700){alert("Voice message was too short. Try again.");renderComposerState();return}
-      if(blob.size>10485760){alert("Voice message is too large.");renderComposerState();return}
-      const url=URL.createObjectURL(blob);voiceDraft={blob:blob,mime:mime,duration:duration,url:url};renderComposerState();
-    };
-    activeRecorder.start(250);renderComposerState();
-    const timerEl=document.getElementById("m7-record-time");
-    clearVoiceTimer();voiceTimer=setInterval(()=>{const seconds=(Date.now()-voiceStartedAt)/1000;if(timerEl)timerEl.textContent=formatDuration(seconds);if(seconds>=120)stopVoiceRecording(false)},250);
-  }catch(e){stopMicTracks();activeRecorder=null;clearVoiceTimer();console.warn("Microphone:",e);alert("Microphone permission is required to send voice messages.");renderComposerState()}
+async function startVoiceRecording(c){
+  if(composerBusy||activeRecorder?.state==="recording"||voiceStartPromise)return voiceStartPromise;
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    alert("Voice messages are not supported by this browser.");
+    return;
+  }
+  if(pendingMedia){
+    alert("Remove the selected media first.");
+    return;
+  }
+
+  activeVoiceConversation=c||activeVoiceConversation;
+  recordingDiscard=false;
+  voiceChunks=[];
+
+  voiceStartPromise=(async()=>{
+    try{
+      renderComposerState();
+
+      activeMicStream=
+        await navigator.mediaDevices.getUserMedia({
+          audio:{
+            echoCancellation:true,
+            noiseSuppression:true,
+            autoGainControl:true
+          }
+        });
+
+      if(voiceGesture?.cancelled){
+        stopMicTracks();
+        return;
+      }
+
+      const choice=voiceMimeChoice();
+      const opts=choice
+        ? {mimeType:choice,audioBitsPerSecond:64000}
+        : {audioBitsPerSecond:64000};
+
+      activeRecorder=
+        new MediaRecorder(
+          activeMicStream,
+          opts
+        );
+
+      voiceStartedAt=Date.now();
+
+      activeRecorder.ondataavailable=e=>{
+        if(e.data&&e.data.size){
+          voiceChunks.push(e.data);
+        }
+      };
+
+      activeRecorder.onstop=async()=>{
+        const rec=activeRecorder;
+        const conversation=activeVoiceConversation;
+        const duration=Math.max(0,(Date.now()-voiceStartedAt)/1000);
+        const discard=recordingDiscard;
+
+        activeRecorder=null;
+        clearVoiceTimer();
+        stopMicTracks();
+        voiceStartedAt=0;
+
+        const mime=
+          mediaBaseMime(
+            rec?.mimeType||
+            choice||
+            voiceChunks[0]?.type||
+            "audio/webm"
+          )||
+          "audio/webm";
+
+        const blob=
+          new Blob(
+            voiceChunks,
+            {type:mime}
+          );
+
+        voiceChunks=[];
+        recordingDiscard=false;
+
+        const finish=()=>{
+          voiceGesture=null;
+          voiceLocked=false;
+          activeVoiceConversation=null;
+          renderComposerState();
+        };
+
+        if(discard){
+          finish();
+          return;
+        }
+
+        if(blob.size<700||duration<.35){
+          finish();
+          alert("Voice message was too short. Try again.");
+          return;
+        }
+
+        if(blob.size>10485760){
+          finish();
+          alert("Voice message is too large.");
+          return;
+        }
+
+        if(!conversation?.id){
+          finish();
+          alert("Conversation is not ready. Try again.");
+          return;
+        }
+
+        try{
+          await uploadChatMedia(
+            conversation,
+            "voice",
+            blob,
+            mime,
+            "voice."+mediaExt(mime),
+            {duration:Number(duration.toFixed(2))},
+            ""
+          );
+        }finally{
+          finish();
+        }
+      };
+
+      activeRecorder.start(250);
+      renderComposerState();
+
+      const timerEl=
+        document.getElementById(
+          "m7-record-time"
+        );
+
+      clearVoiceTimer();
+
+      voiceTimer=
+        setInterval(()=>{
+          const seconds=
+            Math.max(
+              0,
+              (
+                Date.now()-
+                voiceStartedAt
+              )/
+              1000
+            );
+
+          if(timerEl){
+            timerEl.textContent=
+              formatDuration(seconds);
+          }
+
+          if(seconds>=120){
+            voiceLocked=true;
+            stopVoiceRecording(false);
+          }
+        },250);
+
+      /*
+        Permission prompts can finish after the finger is already released.
+        Honor the gesture decision once recording actually starts.
+      */
+      if(voiceGesture?.pendingAction==="cancel"){
+        stopVoiceRecording(true);
+      }
+      else if(voiceGesture?.pendingAction==="send"){
+        stopVoiceRecording(false);
+      }
+    }
+    catch(e){
+      stopMicTracks();
+      activeRecorder=null;
+      clearVoiceTimer();
+      voiceChunks=[];
+      voiceStartedAt=0;
+      voiceGesture=null;
+      voiceLocked=false;
+      activeVoiceConversation=null;
+      console.warn("Microphone:",e);
+      alert("Microphone permission is required to send voice messages.");
+      renderComposerState();
+    }
+    finally{
+      voiceStartPromise=null;
+      renderComposerState();
+    }
+  })();
+
+  return voiceStartPromise;
 }
-function stopVoiceRecording(discard){if(!activeRecorder||activeRecorder.state==="inactive")return;recordingDiscard=!!discard;try{activeRecorder.stop()}catch(_){stopMicTracks();activeRecorder=null;clearVoiceTimer();renderComposerState()}}
+
+function stopVoiceRecording(discard){
+  recordingDiscard=!!discard;
+
+  if(!activeRecorder||activeRecorder.state==="inactive"){
+    if(voiceGesture){
+      voiceGesture.pendingAction=discard?"cancel":"send";
+    }
+    return;
+  }
+
+  try{
+    activeRecorder.stop();
+  }
+  catch(_){
+    stopMicTracks();
+    activeRecorder=null;
+    clearVoiceTimer();
+    voiceChunks=[];
+    voiceStartedAt=0;
+    voiceGesture=null;
+    voiceLocked=false;
+    activeVoiceConversation=null;
+    renderComposerState();
+  }
+}
+
+function voiceGestureCancel(){
+  if(voiceGesture){
+    voiceGesture.cancelled=true;
+    voiceGesture.pendingAction="cancel";
+  }
+
+  voiceLocked=false;
+  try{navigator.vibrate?.(18)}catch(_){}
+  stopVoiceRecording(true);
+  renderComposerState();
+}
+
+function voiceGestureLock(){
+  if(!voiceGesture||voiceGesture.cancelled)return;
+  voiceGesture.locked=true;
+  voiceLocked=true;
+  try{navigator.vibrate?.(12)}catch(_){}
+  renderComposerState();
+}
+
+function wireWhatsAppMic(mic,c){
+  if(!mic||mic.dataset.m7VoiceGesture==="1")return;
+  mic.dataset.m7VoiceGesture="1";
+
+  const MOVE_CANCEL=72;
+  const MOVE_LOCK=72;
+  const TAP_LOCK_MS=320;
+
+  mic.addEventListener(
+    "pointerdown",
+    event=>{
+      if(
+        composerBusy||
+        pendingMedia||
+        blockedComposer()
+      ){
+        return;
+      }
+
+      if(activeRecorder?.state==="recording"){
+        if(voiceLocked){
+          return;
+        }
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      voiceGesture={
+        pointerId:event.pointerId,
+        startX:event.clientX,
+        startY:event.clientY,
+        startedAt:Date.now(),
+        locked:false,
+        cancelled:false,
+        pendingAction:""
+      };
+
+      voiceLocked=false;
+      activeVoiceConversation=c;
+
+      try{
+        mic.setPointerCapture(
+          event.pointerId
+        );
+      }catch(_){}
+
+      startVoiceRecording(c);
+      renderComposerState();
+    },
+    {passive:false}
+  );
+
+  mic.addEventListener(
+    "pointermove",
+    event=>{
+      const gesture=voiceGesture;
+
+      if(
+        !gesture||
+        gesture.pointerId!==event.pointerId||
+        gesture.cancelled||
+        gesture.locked
+      ){
+        return;
+      }
+
+      const dx=
+        event.clientX-
+        gesture.startX;
+
+      const dy=
+        event.clientY-
+        gesture.startY;
+
+      if(
+        dx<=-MOVE_CANCEL &&
+        Math.abs(dx)>=Math.abs(dy)*.65
+      ){
+        event.preventDefault();
+        voiceGestureCancel();
+        return;
+      }
+
+      if(
+        dy<=-MOVE_LOCK &&
+        Math.abs(dy)>=Math.abs(dx)*.65
+      ){
+        event.preventDefault();
+        voiceGestureLock();
+      }
+    },
+    {passive:false}
+  );
+
+  mic.addEventListener(
+    "pointerup",
+    event=>{
+      const gesture=voiceGesture;
+
+      if(
+        !gesture||
+        gesture.pointerId!==event.pointerId
+      ){
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      try{
+        mic.releasePointerCapture(
+          event.pointerId
+        );
+      }catch(_){}
+
+      if(gesture.cancelled){
+        return;
+      }
+
+      if(
+        gesture.locked||
+        voiceLocked
+      ){
+        voiceGestureLock();
+        return;
+      }
+
+      const elapsed=
+        Date.now()-
+        gesture.startedAt;
+
+      /*
+        Quick tap = hands-free locked recording.
+        Hold and release = send, like WhatsApp.
+      */
+      if(elapsed<TAP_LOCK_MS){
+        voiceGestureLock();
+        return;
+      }
+
+      gesture.pendingAction="send";
+      stopVoiceRecording(false);
+    },
+    {passive:false}
+  );
+
+  mic.addEventListener(
+    "pointercancel",
+    event=>{
+      const gesture=voiceGesture;
+
+      if(
+        !gesture||
+        gesture.pointerId!==event.pointerId
+      ){
+        return;
+      }
+
+      if(
+        gesture.locked||
+        voiceLocked
+      ){
+        return;
+      }
+
+      voiceGestureCancel();
+    },
+    {passive:true}
+  );
+
+  mic.addEventListener(
+    "contextmenu",
+    event=>{
+      event.preventDefault();
+    }
+  );
+}
+
 async function chooseChatMedia(file){
   if(!file)return;
   let kind="";if(String(file.type||"").startsWith("image/"))kind="image";else if(["video/mp4","video/webm","video/quicktime"].includes(mediaBaseMime(file.type)))kind="video";else{alert("Choose a photo or MP4/WebM/MOV video.");return}
@@ -866,11 +1281,35 @@ async function sendTextFromComposer(c){const i=document.getElementById("m7-chat-
 function wireChatComposer(c){
   const form=document.getElementById("m7-chat-send");if(!form)return;
   const picker=document.getElementById("m7-chat-media-input"),media=document.getElementById("m7-chat-media"),mic=document.getElementById("m7-chat-mic"),stop=document.getElementById("m7-record-stop"),cancel=document.getElementById("m7-record-cancel");
-  media.onclick=()=>{if(!composerBusy)picker.click()};
+
+  media.onclick=()=>{if(!composerBusy&&!activeRecorder&&!voiceStartPromise)picker.click()};
   picker.onchange=async()=>{const file=picker.files?.[0]||null;picker.value="";if(file)await chooseChatMedia(file)};
-  mic.onclick=()=>{if(activeRecorder?.state==="recording")stopVoiceRecording(false);else startVoiceRecording()};
-  stop.onclick=()=>stopVoiceRecording(false);cancel.onclick=()=>stopVoiceRecording(true);
-  form.onsubmit=async e=>{e.preventDefault();if(composerBusy)return;if(blockedComposer()){alert("Unblock this user before sending a message.");return}if(activeRecorder?.state==="recording")return;if(voiceDraft){await sendVoiceDraft(c);return}if(pendingMedia){await sendPendingMedia(c);return}await sendTextFromComposer(c)};
+
+  wireWhatsAppMic(mic,c);
+
+  stop.onclick=event=>{
+    event.preventDefault();
+    if(!activeRecorder&&voiceStartPromise){
+      if(voiceGesture)voiceGesture.pendingAction="send";
+      return;
+    }
+    stopVoiceRecording(false);
+  };
+
+  cancel.onclick=event=>{
+    event.preventDefault();
+    voiceGestureCancel();
+  };
+
+  form.onsubmit=async e=>{
+    e.preventDefault();
+    if(composerBusy)return;
+    if(blockedComposer()){alert("Unblock this user before sending a message.");return}
+    if(activeRecorder?.state==="recording"||voiceStartPromise)return;
+    if(pendingMedia){await sendPendingMedia(c);return}
+    await sendTextFromComposer(c);
+  };
+
   renderComposerState();
 }
 async function cleanupConversationMedia(c){try{const r=await client.from("ma7alak_messages").select("message_type,context").eq("conversation_id",c.id).in("message_type",["voice","image","video"]);if(r.error)throw r.error;const mine=String(user?.id||"");const paths=[...new Set((r.data||[]).map(m=>String(chatMediaCtx(m).storage_path||"").trim()).filter(p=>p&&p.split("/")[1]===mine))];if(paths.length){const del=await client.storage.from(CHAT_MEDIA_BUCKET).remove(paths);if(del.error)console.warn("Conversation media cleanup:",del.error)}}catch(e){console.warn("Conversation media cleanup:",e)}}
@@ -1065,7 +1504,7 @@ async function convo(c,title,avatar,back,shopProfile){
 
   document.getElementById("m7-chat").insertAdjacentHTML(
     "beforeend",
-    `<form id="m7-chat-send"><input id="m7-chat-media-input" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" hidden><div id="m7-compose-preview" hidden></div><div id="m7-voice-recording" hidden><div class="m7-record-row"><span class="m7-record-dot" aria-hidden="true"></span><span class="m7-record-time" id="m7-record-time">0:00</span><span class="m7-record-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><button class="m7-record-cancel" id="m7-record-cancel" type="button">Cancel</button><button class="m7-record-stop" id="m7-record-stop" type="button">Stop</button></div></div><div class="m7-compose-row"><button class="m7-compose-tool" id="m7-chat-media" type="button" aria-label="Send photo or video" title="Photo or video">＋</button><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button class="m7-compose-tool" id="m7-chat-mic" type="button" aria-label="Voice message" title="Voice message">🎤</button><button class="m7-send-button" type="submit" aria-label="Send">➤</button></div></form>`
+    `<form id="m7-chat-send"><input id="m7-chat-media-input" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" hidden><div id="m7-compose-preview" hidden></div><div id="m7-voice-recording" hidden><div class="m7-record-row"><span class="m7-record-dot" aria-hidden="true"></span><span class="m7-record-time" id="m7-record-time">0:00</span><span class="m7-record-hint" id="m7-record-hint">← Slide left to cancel · ↑ Lock</span><span class="m7-record-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><button class="m7-record-cancel" id="m7-record-cancel" type="button">Cancel</button><button class="m7-record-stop" id="m7-record-stop" type="button">Send</button></div></div><div class="m7-compose-row"><button class="m7-compose-tool" id="m7-chat-media" type="button" aria-label="Send photo or video" title="Photo or video">＋</button><input id="m7-chat-input" maxlength="2000" placeholder="Type a message..." autocomplete="off"><button class="m7-compose-tool" id="m7-chat-mic" type="button" aria-label="Voice message" title="Voice message">🎤</button><button class="m7-send-button" type="submit" aria-label="Send">➤</button></div></form>`
   );
 
   await Promise.all([
@@ -1580,6 +2019,6 @@ async function ownerInbox(){
     );
   }
 }
-window.Ma7alakChat={openShop,openInbox:viewerInbox,openViewerInbox:viewerInbox,openOwnerInbox:ownerInbox,sendStoryReply,sendStoryMediaReply,openStoryFromMessage,close};
+window.Ma7alakChat={openShop,openInbox:viewerInbox,openViewerInbox:viewerInbox,openOwnerInbox:ownerInbox,sendStoryReply,openStoryFromMessage,close};
 addEventListener("ma7alak:open-chat",e=>openShop(e.detail?.shop_slug));addEventListener("ma7alak:open-messages",viewerInbox);addEventListener("ma7alak:open-owner-messages",ownerInbox);
 })();
