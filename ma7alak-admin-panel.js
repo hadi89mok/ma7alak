@@ -5159,12 +5159,12 @@ function inject(){
     .m7la-toggle{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:15px!important;padding:14px!important;border:1px solid #ffffff13!important;border-radius:16px!important;background:#ffffff08!important}.m7la-toggle strong,.m7la-toggle small{display:block!important}.m7la-toggle small{color:#ffffff83!important;margin-top:4px!important;font-size:11px!important}.m7la-toggle input{width:24px!important;height:24px!important;accent-color:#dda348!important}
     .m7la-field{display:block!important;margin-top:14px!important}.m7la-field span{display:block!important;margin-bottom:7px!important;font-size:12px!important;font-weight:900!important}.m7la-field input{width:100%!important;box-sizing:border-box!important;padding:13px!important;border:1px solid #ffffff1a!important;border-radius:13px!important;background:#090807!important;color:#fff!important;font-size:16px!important}
     #m7-live-admin-save{width:100%!important;margin-top:16px!important;padding:14px!important;border:0!important;border-radius:14px!important;background:linear-gradient(135deg,#f0ba64,#c47b28)!important;color:#1a1008!important;font-weight:950!important;font-size:15px!important}
-    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-posts{display:grid!important;gap:9px!important;margin-top:17px!important}.m7la-posts-title{font-size:13px!important;font-weight:950!important;color:#efb967!important}.m7la-post{display:grid!important;grid-template-columns:1fr auto!important;gap:10px!important;align-items:center!important;padding:11px!important;border:1px solid #ffffff13!important;border-radius:14px!important;background:#ffffff07!important}.m7la-post strong,.m7la-post small{display:block!important}.m7la-post strong{overflow-wrap:anywhere!important}.m7la-post small{margin-top:4px!important;color:#ffffff78!important;font-size:10px!important}.m7la-delete{border:1px solid #ff777755!important;border-radius:10px!important;padding:9px 10px!important;background:#6d2020!important;color:#fff!important;font-weight:900!important}.m7la-empty{padding:16px!important;border:1px dashed #ffffff1c!important;border-radius:13px!important;text-align:center!important;color:#ffffff76!important;font-size:11px!important}
+    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-video-box{margin-top:14px!important;padding:13px!important;border:1px solid #ff4f7040!important;border-radius:16px!important;background:linear-gradient(145deg,#1a0d11,#0d0d0d)!important}.m7la-video-box .m7la-toggle{margin:0 0 11px!important}.m7la-hint{display:block!important;margin-top:6px!important;color:#ffffff72!important;font-size:10px!important}.m7la-video-usage{margin-top:9px!important;padding:9px 11px!important;border-radius:11px!important;background:#ffffff07!important;color:#ffb2c0!important;font-size:11px!important;font-weight:800!important}.m7la-posts{display:grid!important;gap:9px!important;margin-top:17px!important}.m7la-posts-title{font-size:13px!important;font-weight:950!important;color:#efb967!important}.m7la-post{display:grid!important;grid-template-columns:1fr auto!important;gap:10px!important;align-items:center!important;padding:11px!important;border:1px solid #ffffff13!important;border-radius:14px!important;background:#ffffff07!important}.m7la-post strong,.m7la-post small{display:block!important}.m7la-post strong{overflow-wrap:anywhere!important}.m7la-post small{margin-top:4px!important;color:#ffffff78!important;font-size:10px!important}.m7la-delete{border:1px solid #ff777755!important;border-radius:10px!important;padding:9px 10px!important;background:#6d2020!important;color:#fff!important;font-weight:900!important}.m7la-empty{padding:16px!important;border:1px dashed #ffffff1c!important;border-radius:13px!important;text-align:center!important;color:#ffffff76!important;font-size:11px!important}
   `;
   document.head.appendChild(style);
   const overlay=document.createElement("div");
   overlay.id="m7-live-admin-overlay";
-  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers</strong><small>Turn owner access on or off for this shop.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><button id="m7-live-admin-save" type="button">Save Live & Offers Access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-posts"><div class="m7la-posts-title">Shop Live / Offers</div><div id="m7-live-admin-posts"><div class="m7la-empty">Loading offers…</div></div></div></section>`;
+  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers posts</strong><small>Offers, events, arrivals and updates.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><div class="m7la-video-box"><label class="m7la-toggle"><div><strong>Allow Video Live</strong><small>Controls whether this shop owner can start a camera broadcast.</small></div><input id="m7-live-admin-video-enabled" type="checkbox"></label><label class="m7la-field"><span>Video Live minutes / month</span><input id="m7-live-admin-video-minutes" type="number" min="0" max="1000000" step="1" inputmode="numeric"><small class="m7la-hint">0 = unlimited. Any positive number is enforced automatically.</small></label><div id="m7-live-admin-video-usage" class="m7la-video-usage">Loading monthly usage…</div></div><button id="m7-live-admin-save" type="button">Save access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-posts"><div class="m7la-posts-title">Active offers</div><div id="m7-live-admin-posts"><div class="m7la-empty">Loading offers…</div></div></div></section>`;
   document.body.appendChild(overlay);
   const close=()=>overlay.classList.remove("active");
   document.getElementById("m7-live-admin-close").onclick=close;
@@ -5186,6 +5186,8 @@ async function open(slug,name){
   document.getElementById("m7-live-admin-shop").textContent=activeShop.name+"  /"+activeShop.slug;
   document.getElementById("m7-live-admin-enabled").disabled=true;
   document.getElementById("m7-live-admin-limit").disabled=true;
+  document.getElementById("m7-live-admin-video-enabled").disabled=true;
+  document.getElementById("m7-live-admin-video-minutes").disabled=true;
   document.getElementById("m7-live-admin-save").disabled=true;
   status("Loading access…",false);
   document.getElementById("m7-live-admin-overlay").classList.add("active");
@@ -5194,11 +5196,15 @@ async function open(slug,name){
   const row=Array.isArray(result.data)?result.data[0]:result.data;
   document.getElementById("m7-live-admin-enabled").checked=!!row?.enabled;
   document.getElementById("m7-live-admin-limit").value=Number(row?.active_limit??0);
+  document.getElementById("m7-live-admin-video-enabled").checked=!!row?.video_live_enabled;
+  document.getElementById("m7-live-admin-video-minutes").value=Number(row?.video_live_monthly_minutes??0);
   document.getElementById("m7-live-admin-enabled").disabled=false;
   document.getElementById("m7-live-admin-limit").disabled=false;
+  document.getElementById("m7-live-admin-video-enabled").disabled=false;
+  document.getElementById("m7-live-admin-video-minutes").disabled=false;
   document.getElementById("m7-live-admin-save").disabled=false;
-  status(row?.enabled?"Access is currently ON.":"Access is currently OFF.",false);
-  await loadPosts();
+  status("Access loaded.",false);
+  await Promise.all([loadPosts(),loadVideoUsage()]);
 }
 
 window.Ma7alakAdminOpenLiveOffers = async function(slug,name){
@@ -5219,6 +5225,19 @@ window.Ma7alakDisableLegacyLiveDecorator = function(){
 function postState(row){
   if(row.status!=="active")return String(row.status||"ended");
   return new Date(row.ends_at)>new Date()?"active":"expired";
+}
+
+async function loadVideoUsage(){
+  const box=document.getElementById("m7-live-admin-video-usage");
+  if(!box||!activeShop||!sb)return;
+  box.textContent="Loading monthly usage…";
+  const result=await sb.rpc("ma7alak_admin_get_video_live_usage",{p_shop_slug:activeShop.slug});
+  if(result.error){box.textContent="Could not load monthly Video Live usage.";return}
+  const row=Array.isArray(result.data)?result.data[0]:result.data;
+  const used=Number(row?.used_minutes||0),limit=Number(row?.monthly_minutes||0);
+  box.textContent=limit>0
+    ? `Used this month: ${used} / ${limit} min · ${Math.max(0,limit-used)} min left`
+    : `Used this month: ${used} min · Unlimited monthly allowance`;
 }
 
 async function loadPosts(){
@@ -5301,13 +5320,26 @@ async function save(){
   const button=document.getElementById("m7-live-admin-save");
   const enabled=document.getElementById("m7-live-admin-enabled").checked;
   const limit=Number(document.getElementById("m7-live-admin-limit").value);
+  const videoEnabled=document.getElementById("m7-live-admin-video-enabled").checked;
+  const monthlyMinutes=Number(document.getElementById("m7-live-admin-video-minutes").value);
+
   if(!Number.isInteger(limit)||limit<0||limit>100){status("Offer limit must be a whole number from 0 to 100.",true);return}
+  if(!Number.isInteger(monthlyMinutes)||monthlyMinutes<0||monthlyMinutes>1000000){status("Monthly Video Live minutes must be a whole number from 0 to 1000000.",true);return}
+
   button.disabled=true;
   status("Saving…",false);
-  const result=await sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled});
+
+  const [offersResult,videoResult]=await Promise.all([
+    sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled}),
+    sb.rpc("ma7alak_admin_set_video_live_entitlement",{p_shop_slug:activeShop.slug,p_video_live_enabled:videoEnabled,p_monthly_minutes:monthlyMinutes})
+  ]);
+
   button.disabled=false;
-  if(result.error){status(result.error.message||"Could not save Live & Offers access.",true);return}
-  status((enabled?"Access ON":"Access OFF")+" · "+limit+" active offer slot"+(limit===1?"":"s")+" saved.",false);
+  if(offersResult.error){status(offersResult.error.message||"Could not save Live & Offers access.",true);return}
+  if(videoResult.error){status(videoResult.error.message||"Could not save Video Live access.",true);return}
+
+  status(`Saved · Offers ${enabled?"ON":"OFF"} · Video Live ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
+  await loadVideoUsage();
 }
 
 function decorate(){
