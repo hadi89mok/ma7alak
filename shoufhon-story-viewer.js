@@ -1,8 +1,8 @@
-/* SHOUFHON SHARED STORY VIEWER V1 */
+/* SHOUFHON SHARED STORY VIEWER V2 — story time + media/voice replies */
 (function ShoufHonSharedStoryViewer(){
   "use strict";
-  if(window.__SHOUFHON_SHARED_STORY_VIEWER_V1__)return;
-  window.__SHOUFHON_SHARED_STORY_VIEWER_V1__=true;
+  if(window.__SHOUFHON_SHARED_STORY_VIEWER_V2__)return;
+  window.__SHOUFHON_SHARED_STORY_VIEWER_V2__=true;
 
   const SCRIPT_SRC=document.currentScript?.src||"";
   const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
@@ -30,6 +30,15 @@
   let storyChannel=null;
   let touchX=0;
   let touchY=0;
+
+  /* Homepage/shared Story reply media state. */
+  let storyReplyBusy=false;
+  let storyReplyRecorder=null;
+  let storyReplyMicStream=null;
+  let storyReplyVoiceChunks=[];
+  let storyReplyVoiceStartedAt=0;
+  let storyReplyVoiceTimer=0;
+  let storyReplyVoiceDiscard=false;
 
   const esc=value=>String(value??"").replace(
     /[&<>"']/g,
@@ -383,6 +392,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-shop-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 #${ROOT_ID} .ssv-copy{min-width:0;flex:1}
 #${ROOT_ID} .ssv-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:900}
+#${ROOT_ID} .ssv-time{display:block;margin-top:2px;color:#d7d7d7;font-size:10px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #${ROOT_ID} .ssv-status{display:block;margin-top:2px;color:#c4c4c4;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #${ROOT_ID} .ssv-owner-views{display:none;align-items:center;gap:5px;padding:7px 9px;border:1px solid #ffffff2a;border-radius:999px;background:#0007;color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
 #${ROOT_ID}.is-owner .ssv-owner-views{display:inline-flex}
@@ -399,6 +409,12 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID}.is-logged-out .ssv-bottom{justify-content:flex-end}
 #${ROOT_ID} .ssv-like{width:44px;height:44px;flex:0 0 44px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#090909b8;color:#fff;display:grid;place-items:center;font-size:23px;cursor:pointer;touch-action:manipulation}
 #${ROOT_ID} .ssv-like.is-liked{color:#ff3e55;border-color:#ff5b6c88;background:#2b0d12cc}
+#${ROOT_ID} .ssv-reply-tool{width:42px;height:42px;flex:0 0 42px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#0d0d0dc9;color:#f0c46c;display:grid;place-items:center;font-size:19px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#${ROOT_ID} .ssv-reply-tool:disabled{opacity:.48;cursor:default}
+#${ROOT_ID} .ssv-mic.is-recording{color:#fff;background:#9e211f;border-color:#ff6b63;box-shadow:0 0 0 3px #ff3d3430,0 0 18px #ff3d344c}
+#${ROOT_ID} .ssv-mic-time{display:none;min-width:38px;color:#ffb2ad;font-size:10px;font-weight:900;text-align:center}
+#${ROOT_ID} .ssv-mic-time.visible{display:block}
+#${ROOT_ID} .ssv-media-input{display:none!important}
 #${ROOT_ID} .ssv-reply{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
 #${ROOT_ID} .ssv-reply input{min-width:0;flex:1;height:44px;border:1px solid #ffffff32;border-radius:999px;background:#0d0d0dc9;color:#fff;padding:0 15px;font-size:16px;outline:0}
 #${ROOT_ID} .ssv-reply input:focus{border-color:#d9a441}
@@ -533,6 +549,949 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       );
   }
 
+  function storyTimeAgo(value){
+    const time=
+      new Date(
+        value||
+        0
+      ).getTime();
+
+    if(!Number.isFinite(time)||time<=0){
+      return "";
+    }
+
+    const seconds=
+      Math.max(
+        0,
+        Math.floor(
+          (Date.now()-time)/
+          1000
+        )
+      );
+
+    if(seconds<10)return "Just now";
+    if(seconds<60)return seconds+"s ago";
+
+    const minutes=Math.floor(seconds/60);
+    if(minutes<60)return minutes+"m ago";
+
+    const hours=Math.floor(minutes/60);
+    if(hours<24)return hours+"h ago";
+
+    const days=Math.floor(hours/24);
+    if(days===1)return "Yesterday";
+    return days+"d ago";
+  }
+
+  function storyReplyFormatDuration(value){
+    const seconds=
+      Math.max(
+        0,
+        Math.round(
+          Number(value)||
+          0
+        )
+      );
+
+    return (
+      Math.floor(seconds/60)+
+      ":"+
+      String(seconds%60).padStart(2,"0")
+    );
+  }
+
+  function storyReplyMime(value){
+    return String(value||"")
+      .split(";")[0]
+      .trim()
+      .toLowerCase();
+  }
+
+  function storyReplyExt(mime,name){
+    const map={
+      "image/jpeg":"jpg",
+      "image/png":"png",
+      "image/webp":"webp",
+      "image/gif":"gif",
+      "video/mp4":"mp4",
+      "video/webm":"webm",
+      "video/quicktime":"mov",
+      "audio/webm":"webm",
+      "audio/ogg":"ogg",
+      "audio/mp4":"m4a",
+      "audio/mpeg":"mp3",
+      "audio/wav":"wav",
+      "audio/aac":"aac",
+      "audio/x-m4a":"m4a"
+    };
+
+    const clean=
+      storyReplyMime(mime);
+
+    if(map[clean])return map[clean];
+
+    const match=
+      String(name||"")
+        .match(
+          /\.([a-z0-9]{1,6})$/i
+        );
+
+    return match
+      ? match[1].toLowerCase()
+      : "bin";
+  }
+
+  function storyReplyRandomId(){
+    try{
+      return crypto.randomUUID();
+    }
+    catch(_){
+      return (
+        Date.now().toString(36)+
+        "-"+
+        Math.random().toString(36).slice(2)
+      );
+    }
+  }
+
+  function setStoryReplyBusy(value){
+    storyReplyBusy=!!value;
+
+    if(!root)return;
+
+    root
+      .querySelectorAll(
+        ".ssv-reply button,.ssv-reply input"
+      )
+      .forEach(
+        element=>{
+          if(
+            element.classList.contains("ssv-media-input")
+          ){
+            element.disabled=storyReplyBusy;
+            return;
+          }
+
+          if(
+            element.classList.contains("ssv-mic") &&
+            storyReplyRecorder?.state==="recording"
+          ){
+            element.disabled=false;
+            return;
+          }
+
+          element.disabled=storyReplyBusy;
+        }
+      );
+  }
+
+  function stopStoryReplyMicTracks(){
+    if(!storyReplyMicStream)return;
+
+    try{
+      storyReplyMicStream
+        .getTracks()
+        .forEach(
+          track=>track.stop()
+        );
+    }
+    catch(_){}
+
+    storyReplyMicStream=null;
+  }
+
+  function clearStoryReplyVoiceTimer(){
+    clearInterval(
+      storyReplyVoiceTimer
+    );
+
+    storyReplyVoiceTimer=0;
+  }
+
+  function resetStoryReplyVoiceUi(){
+    if(!root)return;
+
+    const mic=
+      root.querySelector(
+        ".ssv-mic"
+      );
+
+    const timer=
+      root.querySelector(
+        ".ssv-mic-time"
+      );
+
+    mic?.classList.remove(
+      "is-recording"
+    );
+
+    if(mic){
+      mic.textContent="🎤";
+      mic.setAttribute(
+        "aria-label",
+        "Voice message"
+      );
+    }
+
+    timer?.classList.remove(
+      "visible"
+    );
+
+    if(timer){
+      timer.textContent="0:00";
+    }
+  }
+
+  function discardStoryReplyVoice(){
+    storyReplyVoiceDiscard=true;
+    clearStoryReplyVoiceTimer();
+
+    if(
+      storyReplyRecorder &&
+      storyReplyRecorder.state!=="inactive"
+    ){
+      try{
+        storyReplyRecorder.stop();
+      }
+      catch(_){}
+    }
+
+    storyReplyRecorder=null;
+    storyReplyVoiceChunks=[];
+    storyReplyVoiceStartedAt=0;
+    stopStoryReplyMicTracks();
+    resetStoryReplyVoiceUi();
+  }
+
+  async function storyReplyConversation(){
+    const c=
+      getClient();
+
+    const story=
+      stories[currentIndex];
+
+    if(!c||!story){
+      throw new Error(
+        "Story is unavailable."
+      );
+    }
+
+    const auth=
+      await c.auth.getUser();
+
+    const signedUser=
+      auth?.data?.user||
+      null;
+
+    if(!signedUser){
+      currentSignedIn=false;
+      renderHeader();
+      window.Ma7alakAccount?.open?.();
+      const error=new Error(
+        "Sign in with Google to reply."
+      );
+      error.login_required=true;
+      throw error;
+    }
+
+    if(currentOwner){
+      throw new Error(
+        "You cannot reply to your own Story."
+      );
+    }
+
+    const slug=
+      String(
+        story.shop_slug||
+        profile?.shop_slug||
+        ""
+      ).trim();
+
+    if(!slug){
+      throw new Error(
+        "Story shop is unavailable."
+      );
+    }
+
+    const acceptsResult=
+      await c.rpc(
+        "ma7alak_shop_accepts_messages",
+        {
+          p_shop_slug:slug
+        }
+      );
+
+    if(
+      !acceptsResult.error &&
+      acceptsResult.data===false
+    ){
+      throw new Error(
+        "This shop is not accepting messages right now."
+      );
+    }
+
+    const conversationResult=
+      await c.rpc(
+        "ma7alak_start_conversation",
+        {
+          p_shop_slug:slug
+        }
+      );
+
+    if(conversationResult.error){
+      const message=
+        String(
+          conversationResult.error.message||
+          ""
+        );
+
+      if(message.includes("CHAT_BLOCKED")){
+        throw new Error(
+          "This shop has blocked this chat."
+        );
+      }
+
+      throw conversationResult.error;
+    }
+
+    const conversation=
+      Array.isArray(
+        conversationResult.data
+      )
+        ? conversationResult.data[0]
+        : conversationResult.data;
+
+    if(!conversation?.id){
+      throw new Error(
+        "Could not open this conversation."
+      );
+    }
+
+    return {
+      client:c,
+      user:signedUser,
+      story:story,
+      slug:slug,
+      conversation:conversation
+    };
+  }
+
+  async function compressStoryReplyImage(file){
+    if(
+      !file ||
+      !String(file.type||"").startsWith("image/") ||
+      file.size<=2097152 ||
+      file.type==="image/gif"
+    ){
+      return file;
+    }
+
+    let url="";
+
+    try{
+      url=URL.createObjectURL(file);
+
+      const image=new Image();
+      image.decoding="async";
+
+      await new Promise(
+        (resolve,reject)=>{
+          image.onload=resolve;
+          image.onerror=reject;
+          image.src=url;
+        }
+      );
+
+      const max=1600;
+      const scale=
+        Math.min(
+          1,
+          max/
+          Math.max(
+            image.naturalWidth||1,
+            image.naturalHeight||1
+          )
+        );
+
+      const canvas=
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width=
+        Math.max(
+          1,
+          Math.round(
+            (image.naturalWidth||1)*
+            scale
+          )
+        );
+
+      canvas.height=
+        Math.max(
+          1,
+          Math.round(
+            (image.naturalHeight||1)*
+            scale
+          )
+        );
+
+      const context=
+        canvas.getContext(
+          "2d",
+          {alpha:false}
+        );
+
+      context.drawImage(
+        image,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const blob=
+        await new Promise(
+          resolve=>
+            canvas.toBlob(
+              resolve,
+              "image/webp",
+              .82
+            )
+        );
+
+      if(
+        blob &&
+        blob.size>0 &&
+        blob.size<file.size
+      ){
+        return blob;
+      }
+    }
+    catch(error){
+      console.warn(
+        "Story reply image compression:",
+        error
+      );
+    }
+    finally{
+      try{
+        if(url)URL.revokeObjectURL(url);
+      }
+      catch(_){}
+    }
+
+    return file;
+  }
+
+  function storyReplyContext(story,extra){
+    return {
+      story_reply:true,
+      story_id:String(story?.id||""),
+      shop_slug:String(story?.shop_slug||profile?.shop_slug||""),
+      story_expires_at:String(story?.expires_at||""),
+      story_media_type:String(story?.media_type||""),
+      story_storage_path:String(story?.storage_path||""),
+      story_status_text:String(story?.status_text||""),
+      story_created_at:String(story?.created_at||""),
+      shop_name:String(profile?.shop_name||""),
+      shop_url:String(profile?.shop_url||""),
+      ...(extra&&typeof extra==="object"?extra:{})
+    };
+  }
+
+  async function uploadStoryReplyMedia(type,blob,mime,name,extra){
+    if(storyReplyBusy)return false;
+
+    setStoryReplyBusy(true);
+    pauseStoryPlayback();
+
+    let uploadedPath="";
+
+    try{
+      const state=
+        await storyReplyConversation();
+
+      const cleanMime=
+        storyReplyMime(
+          mime||
+          blob?.type
+        );
+
+      const path=
+        String(
+          state.conversation.id
+        )+
+        "/"+
+        String(
+          state.user.id
+        )+
+        "/"+
+        Date.now()+
+        "-"+
+        storyReplyRandomId()+
+        "."+
+        storyReplyExt(
+          cleanMime,
+          name
+        );
+
+      uploadedPath=path;
+
+      const upload=
+        await state.client
+          .storage
+          .from(
+            "chat-media"
+          )
+          .upload(
+            path,
+            blob,
+            {
+              contentType:cleanMime,
+              upsert:false,
+              cacheControl:"3600"
+            }
+          );
+
+      if(upload.error){
+        throw upload.error;
+      }
+
+      const context=
+        storyReplyContext(
+          state.story,
+          extra
+        );
+
+      const sent=
+        await state.client.rpc(
+          "ma7alak_send_media_message",
+          {
+            p_conversation_id:
+              state.conversation.id,
+            p_message_type:
+              type,
+            p_storage_path:
+              path,
+            p_body:
+              null,
+            p_context:
+              context
+          }
+        );
+
+      if(sent.error){
+        try{
+          await state.client
+            .storage
+            .from(
+              "chat-media"
+            )
+            .remove(
+              [path]
+            );
+        }
+        catch(_){}
+
+        throw sent.error;
+      }
+
+      try{
+        window.dispatchEvent(
+          new Event(
+            "ma7alak:messages-read"
+          )
+        );
+      }
+      catch(_){}
+
+      flash(
+        type==="voice"
+          ? "Voice sent ✓"
+          : type==="image"
+            ? "Photo sent ✓"
+            : "Video sent ✓"
+      );
+
+      return true;
+    }
+    catch(error){
+      console.warn(
+        "Story media reply:",
+        error
+      );
+
+      flash(
+        error?.message||
+        "Could not send media."
+      );
+
+      return false;
+    }
+    finally{
+      setStoryReplyBusy(false);
+      resumeStoryPlayback();
+    }
+  }
+
+  async function sendStoryReplyFile(file){
+    if(!file)return false;
+
+    let type="";
+    const mime=
+      storyReplyMime(
+        file.type
+      );
+
+    if(
+      String(file.type||"")
+        .startsWith("image/")
+    ){
+      type="image";
+    }
+    else if(
+      [
+        "video/mp4",
+        "video/webm",
+        "video/quicktime"
+      ].includes(mime)
+    ){
+      type="video";
+    }
+    else{
+      flash(
+        "Choose a photo or MP4/WebM/MOV video."
+      );
+      return false;
+    }
+
+    let blob=file;
+
+    if(type==="image"){
+      blob=
+        await compressStoryReplyImage(
+          file
+        );
+    }
+
+    if(
+      type==="image" &&
+      blob.size>8388608
+    ){
+      flash(
+        "Photo must be 8 MB or smaller."
+      );
+      return false;
+    }
+
+    if(
+      type==="video" &&
+      blob.size>26214400
+    ){
+      flash(
+        "Video must be 25 MB or smaller."
+      );
+      return false;
+    }
+
+    return uploadStoryReplyMedia(
+      type,
+      blob,
+      storyReplyMime(
+        blob.type||
+        file.type
+      ),
+      file.name||
+      type,
+      {
+        original_name:
+          String(
+            file.name||
+            ""
+          ).slice(0,180)
+      }
+    );
+  }
+
+  function storyReplyVoiceMimeChoice(){
+    if(!window.MediaRecorder)return "";
+
+    const choices=[
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/mp4",
+      "audio/ogg;codecs=opus"
+    ];
+
+    for(const choice of choices){
+      try{
+        if(
+          MediaRecorder.isTypeSupported(
+            choice
+          )
+        ){
+          return choice;
+        }
+      }
+      catch(_){}
+    }
+
+    return "";
+  }
+
+  async function startStoryReplyVoice(){
+    if(
+      storyReplyBusy ||
+      storyReplyRecorder?.state==="recording"
+    ){
+      return;
+    }
+
+    if(
+      !navigator.mediaDevices?.getUserMedia ||
+      !window.MediaRecorder
+    ){
+      flash(
+        "Voice messages are not supported by this browser."
+      );
+      return;
+    }
+
+    try{
+      /*
+        Validate login/ownership/message availability before asking for mic.
+      */
+      await storyReplyConversation();
+
+      storyReplyVoiceDiscard=false;
+      storyReplyVoiceChunks=[];
+
+      storyReplyMicStream=
+        await navigator.mediaDevices.getUserMedia(
+          {
+            audio:{
+              echoCancellation:true,
+              noiseSuppression:true,
+              autoGainControl:true
+            }
+          }
+        );
+
+      const choice=
+        storyReplyVoiceMimeChoice();
+
+      const options=
+        choice
+          ? {
+              mimeType:choice,
+              audioBitsPerSecond:64000
+            }
+          : {
+              audioBitsPerSecond:64000
+            };
+
+      storyReplyRecorder=
+        new MediaRecorder(
+          storyReplyMicStream,
+          options
+        );
+
+      storyReplyVoiceStartedAt=
+        Date.now();
+
+      storyReplyRecorder.ondataavailable=
+        event=>{
+          if(
+            event.data &&
+            event.data.size
+          ){
+            storyReplyVoiceChunks.push(
+              event.data
+            );
+          }
+        };
+
+      storyReplyRecorder.onstop=
+        async ()=>{
+          const recorder=
+            storyReplyRecorder;
+
+          storyReplyRecorder=null;
+          clearStoryReplyVoiceTimer();
+          stopStoryReplyMicTracks();
+
+          const discard=
+            storyReplyVoiceDiscard;
+
+          storyReplyVoiceDiscard=false;
+
+          const duration=
+            Math.max(
+              1,
+              (
+                Date.now()-
+                storyReplyVoiceStartedAt
+              )/
+              1000
+            );
+
+          storyReplyVoiceStartedAt=0;
+
+          const mime=
+            storyReplyMime(
+              recorder?.mimeType||
+              choice||
+              storyReplyVoiceChunks[0]?.type||
+              "audio/webm"
+            )||
+            "audio/webm";
+
+          const blob=
+            new Blob(
+              storyReplyVoiceChunks,
+              {type:mime}
+            );
+
+          storyReplyVoiceChunks=[];
+          resetStoryReplyVoiceUi();
+
+          if(discard){
+            resumeStoryPlayback();
+            return;
+          }
+
+          if(blob.size<700){
+            flash(
+              "Voice message was too short."
+            );
+            resumeStoryPlayback();
+            return;
+          }
+
+          if(blob.size>10485760){
+            flash(
+              "Voice message is too large."
+            );
+            resumeStoryPlayback();
+            return;
+          }
+
+          await uploadStoryReplyMedia(
+            "voice",
+            blob,
+            mime,
+            "voice."+
+            storyReplyExt(mime),
+            {
+              duration:
+                Number(
+                  duration.toFixed(2)
+                )
+            }
+          );
+        };
+
+      storyReplyRecorder.start(
+        250
+      );
+
+      pauseStoryPlayback();
+
+      const mic=
+        root?.querySelector(
+          ".ssv-mic"
+        );
+
+      const timer=
+        root?.querySelector(
+          ".ssv-mic-time"
+        );
+
+      mic?.classList.add(
+        "is-recording"
+      );
+
+      if(mic){
+        mic.textContent="■";
+        mic.setAttribute(
+          "aria-label",
+          "Stop and send voice message"
+        );
+      }
+
+      timer?.classList.add(
+        "visible"
+      );
+
+      clearStoryReplyVoiceTimer();
+
+      storyReplyVoiceTimer=
+        setInterval(
+          ()=>{
+            const seconds=
+              Math.max(
+                0,
+                (
+                  Date.now()-
+                  storyReplyVoiceStartedAt
+                )/
+                1000
+              );
+
+            if(timer){
+              timer.textContent=
+                storyReplyFormatDuration(
+                  seconds
+                );
+            }
+
+            if(seconds>=120){
+              stopStoryReplyVoice(
+                false
+              );
+            }
+          },
+          250
+        );
+    }
+    catch(error){
+      stopStoryReplyMicTracks();
+      storyReplyRecorder=null;
+      clearStoryReplyVoiceTimer();
+      resetStoryReplyVoiceUi();
+
+      console.warn(
+        "Story voice reply:",
+        error
+      );
+
+      flash(
+        error?.message||
+        "Microphone permission is required."
+      );
+    }
+  }
+
+  function stopStoryReplyVoice(discard){
+    if(
+      !storyReplyRecorder ||
+      storyReplyRecorder.state==="inactive"
+    ){
+      return;
+    }
+
+    storyReplyVoiceDiscard=
+      !!discard;
+
+    try{
+      storyReplyRecorder.stop();
+    }
+    catch(_){
+      discardStoryReplyVoice();
+    }
+  }
+
   function ensureRoot(){
     injectStyle();
 
@@ -584,6 +1543,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
             <div class="ssv-copy">
               <b class="ssv-name"></b>
+              <span class="ssv-time"></span>
               <span class="ssv-status"></span>
             </div>
 
@@ -632,6 +1592,34 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           </button>
 
           <form class="ssv-reply">
+
+            <input
+              class="ssv-media-input"
+              type="file"
+              accept="image/*,video/mp4,video/webm,video/quicktime"
+              aria-hidden="true"
+              tabindex="-1"
+            >
+
+            <button
+              type="button"
+              class="ssv-reply-tool ssv-media-pick"
+              aria-label="Send photo or video"
+              title="Photo or video"
+            >
+              +
+            </button>
+
+            <button
+              type="button"
+              class="ssv-reply-tool ssv-mic"
+              aria-label="Voice message"
+              title="Voice message"
+            >
+              🎤
+            </button>
+
+            <span class="ssv-mic-time" aria-live="polite">0:00</span>
 
             <input
               maxlength="2000"
@@ -726,6 +1714,61 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           event.stopPropagation();
           replyCurrent();
         };
+
+    const storyMediaInput=
+      root.querySelector(
+        ".ssv-media-input"
+      );
+
+    const storyMediaButton=
+      root.querySelector(
+        ".ssv-media-pick"
+      );
+
+    const storyMicButton=
+      root.querySelector(
+        ".ssv-mic"
+      );
+
+    if(storyMediaButton&&storyMediaInput){
+      storyMediaButton.onclick=
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          if(storyReplyBusy||storyReplyRecorder?.state==="recording")return;
+          storyMediaInput.click();
+        };
+
+      storyMediaInput.onchange=
+        async ()=>{
+          const file=
+            storyMediaInput.files?.[0]||
+            null;
+
+          storyMediaInput.value="";
+
+          if(file){
+            await sendStoryReplyFile(file);
+          }
+        };
+    }
+
+    if(storyMicButton){
+      storyMicButton.onclick=
+        async event=>{
+          event.preventDefault();
+          event.stopPropagation();
+
+          if(storyReplyBusy)return;
+
+          if(storyReplyRecorder?.state==="recording"){
+            stopStoryReplyVoice(false);
+          }
+          else{
+            await startStoryReplyVoice();
+          }
+        };
+    }
 
     const replyInput=
       root.querySelector(
@@ -1073,6 +2116,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
     }
 
     stopMedia();
+    discardStoryReplyVoice();
 
     loadToken++;
 
@@ -1476,6 +2520,15 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
       )
       .textContent=
         name;
+
+    root
+      .querySelector(
+        ".ssv-time"
+      )
+      .textContent=
+        storyTimeAgo(
+          story.created_at
+        );
 
     root
       .querySelector(
@@ -2120,6 +3173,10 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 
   function showCurrent(){
     stopMedia();
+
+    if(storyReplyRecorder?.state==="recording"){
+      discardStoryReplyVoice();
+    }
 
     let story=
       stories[
