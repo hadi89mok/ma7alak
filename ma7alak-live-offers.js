@@ -384,7 +384,7 @@ function openShopPanel(slug){
   if(old)old.remove();else lock();
   let d=document.createElement("div");
   d.id="m7lo-overlay";
-  d.innerHTML=`<div id="m7lo-panel" class="m7lo-shop-panel"><button class="m7lo-close">×</button>${own?ownerBar(management):""}${section(management,true,own)}</div>`;
+  d.innerHTML=`<div id="m7lo-panel" class="m7lo-shop-panel" data-shop-slug="${esc(shopSlug)}"><button class="m7lo-close">×</button>${own?ownerBar(management):""}${section(management,true,own,shopSlug)}</div>`;
   document.body.appendChild(d);
   $(".m7lo-close",d).onclick=close;
   d.onclick=e=>{if(e.target===d)close()};
