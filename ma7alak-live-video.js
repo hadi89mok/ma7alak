@@ -70,7 +70,6 @@ async function refresh(){
     const slugs=[...new Set(streams.map(x=>String(x.shop_slug||"").toLowerCase()).filter(Boolean))];profiles=new Map();
     if(slugs.length){const p=await c.from("shop_profiles").select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url").in("shop_slug",slugs);(p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug).toLowerCase(),x))}
     emitLiveState();
-    inject();
   }finally{refreshBusy=false}
 }
 function cardHtml(x){
@@ -255,17 +254,27 @@ window.addEventListener("pagehide",()=>{if(mode!=="host"||!activeStream)return;t
 
 async function subscribeStreams(){if(streamSub){try{await c.removeChannel(streamSub)}catch(_){}}streamSub=c.channel("m7lv-stream-table").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_streams"},()=>setTimeout(refresh,120)).subscribe()}
 function bridgeVideoItems(){
-  return streams.map(x=>({
-    id:"video:"+x.id,
-    stream_id:x.id,
-    shop_slug:x.shop_slug,
-    title:x.title||"Video live now",
-    status:"active",
-    post_type:"video_live",
-    is_video_live:true,
-    starts_at:x.started_at||new Date().toISOString(),
-    ends_at:x.expires_at||new Date(Date.now()+4*60*60*1000).toISOString()
-  }));
+  return streams.map(x=>{
+    const p=profiles.get(String(x.shop_slug||"").trim().toLowerCase())||{};
+    return {
+      id:"video:"+x.id,
+      stream_id:x.id,
+      shop_slug:x.shop_slug,
+      shop_name:p.shop_name||p.arabic_name||x.shop_slug,
+      profile_image_url:p.profile_image_url||null,
+      shop_url:p.shop_url||("/"+encodeURIComponent(x.shop_slug||"")),
+      title:x.title||"Video live now",
+      description:"Live video broadcast",
+      status:"active",
+      post_type:"video_live",
+      is_video_live:true,
+      media_url:p.profile_image_url||null,
+      media_type:p.profile_image_url?"image":null,
+      starts_at:x.started_at||new Date().toISOString(),
+      ends_at:x.expires_at||new Date(Date.now()+4*60*60*1000).toISOString(),
+      created_at:x.started_at||new Date().toISOString()
+    };
+  });
 }
 function emitLiveState(){
   try{window.dispatchEvent(new CustomEvent("shoufhon:live-video-state",{detail:{items:streams.slice()}}))}catch(_){}
@@ -278,6 +287,26 @@ window.ShoufHonLiveVideo={
   get bridgeItems(){return bridgeVideoItems()}
 };
 
-async function boot(){ensureCss();if(!await ready())return;await loadOwnerEnt();await refresh();await subscribeStreams();window.addEventListener("ma7alak:owner-auth-change",async()=>{await loadOwnerEnt();inject();emitLiveState()});const obs=new MutationObserver(()=>{clearTimeout(injectTimer);injectTimer=setTimeout(inject,80)});obs.observe(document.body,{subtree:true,childList:true});setInterval(()=>{ownerState();inject();refresh()},15000)}
+async function boot(){
+  ensureCss();
+  if(!await ready())return;
+  await loadOwnerEnt();
+  await refresh();
+  await subscribeStreams();
+
+  window.addEventListener("ma7alak:owner-auth-change",async()=>{
+    await loadOwnerEnt();
+    emitLiveState();
+  });
+
+  window.addEventListener("focus",()=>{if(!document.hidden)refresh()});
+  window.addEventListener("pageshow",()=>{if(!document.hidden)refresh()});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+
+  /* Realtime is the primary path. This is only a quiet recovery poll.
+     Do not watch the whole DOM: the old MutationObserver caused the
+     homepage Live cards to be constantly removed/reinserted while scrolling. */
+  setInterval(()=>{if(!document.hidden)refresh()},30000);
+}
 boot();
 })();
