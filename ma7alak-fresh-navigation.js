@@ -166,13 +166,43 @@
     );
   }
 
-  window.ma7alakFreshNavigate=function(url){
+  function safeInternalNavigationUrl(value){
     try{
-      location.assign(
-        new URL(url,location.href).href
-      );
+      const parsed=
+        new URL(
+          String(value||""),
+          location.href
+        );
+
+      if(
+        parsed.protocol!=="https:" &&
+        parsed.protocol!=="http:"
+      ){
+        return "";
+      }
+
+      if(parsed.origin!==location.origin){
+        return "";
+      }
+
+      return parsed.href;
     }catch(_){
-      location.assign(url);
+      return "";
     }
+  }
+
+  window.ma7alakFreshNavigate=function(url){
+    const target=
+      safeInternalNavigationUrl(url);
+
+    if(!target){
+      console.warn(
+        "ShoufHon blocked unsafe navigation target."
+      );
+      return false;
+    }
+
+    location.assign(target);
+    return true;
   };
 })();
