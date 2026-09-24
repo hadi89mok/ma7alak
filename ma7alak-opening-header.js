@@ -566,7 +566,7 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     render();
   }
   function sharedViewerUrl(){
-    return "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@7b5d372c267dc1ab1ce36c6df761ee46ce364df5/shoufhon-story-viewer.js";
+    return "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@926cb9b9f89e1b16619795128dbb84346756e80d/shoufhon-story-viewer.js";
   }
 
   function ensureSharedViewer(){
