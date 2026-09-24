@@ -19,6 +19,87 @@
   const TYPE_ACK="SHOUFHON_SHOP_CONTEXT_ACK";
   const EVENT_NAME="shoufhon:shop-context";
 
+  /* =======================================================
+     SHOUFHON HOSTINGER EMBED TRANSPARENCY FIX V2
+     Hostinger Custom Embed canvases can fall back to an opaque
+     white document/background on mobile Chrome. Keep the iframe
+     canvas transparent without changing the actual widget/card.
+  ======================================================= */
+  function forceThisDocumentTransparent(){
+    try{
+      const id="shoufhon-embed-transparent-v2";
+      if(!document.getElementById(id)){
+        const s=document.createElement("style");
+        s.id=id;
+        s.textContent=`
+          html,body{
+            background:transparent!important;
+            background-color:transparent!important;
+          }
+        `;
+        (document.head||document.documentElement).appendChild(s);
+      }
+      if(document.documentElement){
+        document.documentElement.style.setProperty("background","transparent","important");
+        document.documentElement.style.setProperty("background-color","transparent","important");
+      }
+      if(document.body){
+        document.body.style.setProperty("background","transparent","important");
+        document.body.style.setProperty("background-color","transparent","important");
+      }
+    }catch(_){}
+  }
+
+  function isNearlyWhite(value){
+    const m=String(value||"").match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+    if(!m)return false;
+    const r=Number(m[1]),g=Number(m[2]),b=Number(m[3]),a=m[4]===undefined?1:Number(m[4]);
+    return a>.65&&r>232&&g>232&&b>232;
+  }
+
+  function cleanEmbedFrame(frame){
+    if(!frame)return;
+    try{
+      frame.style.setProperty("background","transparent","important");
+      frame.style.setProperty("background-color","transparent","important");
+
+      const doc=frame.contentDocument;
+      if(doc){
+        if(doc.documentElement){
+          doc.documentElement.style.setProperty("background","transparent","important");
+          doc.documentElement.style.setProperty("background-color","transparent","important");
+        }
+        if(doc.body){
+          doc.body.style.setProperty("background","transparent","important");
+          doc.body.style.setProperty("background-color","transparent","important");
+        }
+      }
+    }catch(_){}
+
+    /*
+      Hostinger sometimes paints the element directly wrapping the iframe.
+      Only clear wrappers that are actually near-white, so dark/custom
+      section backgrounds are left alone.
+    */
+    try{
+      let node=frame.parentElement;
+      for(let i=0;node&&i<3;i++,node=node.parentElement){
+        const cs=getComputedStyle(node);
+        if(isNearlyWhite(cs.backgroundColor)){
+          node.style.setProperty("background","transparent","important");
+          node.style.setProperty("background-color","transparent","important");
+          node.style.setProperty("background-image","none","important");
+        }
+      }
+    }catch(_){}
+  }
+
+  function cleanPageEmbedFrames(){
+    try{
+      document.querySelectorAll("iframe").forEach(cleanEmbedFrame);
+    }catch(_){}
+  }
+
   function normalize(value){
     let slug=String(value||"").trim().toLowerCase();
     try{slug=decodeURIComponent(slug)}catch(_){}
@@ -347,12 +428,23 @@
 
     scheduleDesignRealtime();
 
+    cleanPageEmbedFrames();
+    let transparentPasses=0;
+    const transparentTimer=setInterval(function(){
+      cleanPageEmbedFrames();
+      transparentPasses++;
+      if(transparentPasses>=32)clearInterval(transparentTimer);
+    },250);
+    window.addEventListener("pageshow",cleanPageEmbedFrames);
+    window.addEventListener("load",cleanPageEmbedFrames,{once:true});
+
     return;
   }
 
   /* =======================================================
      EMBED CLIENT
   ======================================================= */
+  forceThisDocumentTransparent();
   if(window.__SHOUFHON_SHOP_CONTEXT_CLIENT_V1__)return;
   window.__SHOUFHON_SHOP_CONTEXT_CLIENT_V1__=true;
 
