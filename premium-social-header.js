@@ -5274,3 +5274,207 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
     boot();
   }
 })();
+
+
+/* =========================================================
+   SHOUFHON HOME PLATFORM WORD + COMPACT MENU
+========================================================= */
+(function shoufHonHomePlatformAndCompactMenu(){
+  "use strict";
+  if(window.self!==window.top)return;
+  if(window.__SHOUFHON_HOME_PLATFORM_COMPACT_MENU__)return;
+  window.__SHOUFHON_HOME_PLATFORM_COMPACT_MENU__=true;
+
+  function addCss(){
+    if(document.getElementById("shoufhon-platform-compact-menu-css"))return;
+    const s=document.createElement("style");
+    s.id="shoufhon-platform-compact-menu-css";
+    s.textContent=`
+      /* Homepage: make only "منصة" feel special, without changing the rest of the line. */
+      .shoufhon-platform-word{
+        position:relative!important;
+        display:inline-block!important;
+        margin-inline:2px!important;
+        font-size:1.15em!important;
+        line-height:1!important;
+        font-weight:950!important;
+        color:#f0c66f!important;
+        letter-spacing:.01em!important;
+        transform-origin:50% 70%!important;
+        text-shadow:
+          0 0 10px rgba(240,198,111,.18),
+          0 2px 8px rgba(0,0,0,.20)!important;
+        animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
+        -webkit-animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
+        will-change:transform;
+      }
+      .shoufhon-platform-word::after{
+        content:"";
+        position:absolute;
+        left:12%;
+        right:12%;
+        bottom:-4px;
+        height:2px;
+        border-radius:999px;
+        background:linear-gradient(90deg,transparent,rgba(240,198,111,.72),transparent);
+        opacity:.58;
+        transform:scaleX(.7);
+        transform-origin:center;
+        animation:shoufhonPlatformGlow 3.8s ease-in-out infinite!important;
+        -webkit-animation:shoufhonPlatformGlow 3.8s ease-in-out infinite!important;
+        pointer-events:none;
+      }
+      @keyframes shoufhonPlatformWiggle{
+        0%,68%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+        72%{transform:translate3d(-1px,-1px,0) rotate(-3deg) scale(1.025)}
+        76%{transform:translate3d(1px,0,0) rotate(3deg) scale(1.06)}
+        80%{transform:translate3d(-1px,0,0) rotate(-2deg) scale(1.035)}
+        84%{transform:translate3d(0,0,0) rotate(1deg) scale(1.015)}
+        88%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+      }
+      @-webkit-keyframes shoufhonPlatformWiggle{
+        0%,68%,100%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+        72%{-webkit-transform:translate3d(-1px,-1px,0) rotate(-3deg) scale(1.025)}
+        76%{-webkit-transform:translate3d(1px,0,0) rotate(3deg) scale(1.06)}
+        80%{-webkit-transform:translate3d(-1px,0,0) rotate(-2deg) scale(1.035)}
+        84%{-webkit-transform:translate3d(0,0,0) rotate(1deg) scale(1.015)}
+        88%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+      }
+      @keyframes shoufhonPlatformGlow{
+        0%,68%,100%{opacity:.38;transform:scaleX(.62)}
+        77%{opacity:.9;transform:scaleX(1)}
+        88%{opacity:.48;transform:scaleX(.72)}
+      }
+      @-webkit-keyframes shoufhonPlatformGlow{
+        0%,68%,100%{opacity:.38;-webkit-transform:scaleX(.62)}
+        77%{opacity:.9;-webkit-transform:scaleX(1)}
+        88%{opacity:.48;-webkit-transform:scaleX(.72)}
+      }
+
+      /* Header three-lines menu: same design, just a little tighter and cleaner. */
+      #ma7alak-header-menu-panel{
+        width:238px!important;
+        padding:6px!important;
+        border-radius:18px!important;
+      }
+      .ma7alak-header-menu-link{
+        min-height:50px!important;
+        padding:6px 7px!important;
+        gap:8px!important;
+        border-radius:11px!important;
+      }
+      .ma7alak-header-menu-icon{
+        width:34px!important;
+        height:34px!important;
+        flex:0 0 34px!important;
+        border-radius:10px!important;
+        font-size:16px!important;
+      }
+      .ma7alak-header-menu-main{
+        font-size:13px!important;
+      }
+      .ma7alak-header-menu-sub{
+        margin-top:2px!important;
+        font-size:8.6px!important;
+      }
+      .ma7alak-header-menu-chevron{
+        width:14px!important;
+        height:14px!important;
+        flex-basis:14px!important;
+        font-size:18px!important;
+      }
+      #ma7alak-header-menu-panel .ma7alak-header-menu-logout,
+      #ma7alak-header-menu-panel #m7a-header-logout{
+        margin-top:4px!important;
+        min-height:52px!important;
+      }
+      .ma7alak-header-menu-link:not(:last-child)::after{
+        left:43px!important;
+        right:8px!important;
+      }
+      @media(max-width:900px){
+        #ma7alak-header-menu-panel{
+          width:min(238px,calc(100vw - 24px))!important;
+          top:calc(100% + 6px)!important;
+        }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
+  function isHome(){
+    const p=(String(location.pathname||"/").replace(/\/+$/,"")||"/");
+    return p==="/";
+  }
+
+  function enhancePlatformWord(){
+    if(!isHome()||!document.body)return true;
+    if(document.querySelector(".shoufhon-platform-word"))return true;
+
+    const walker=document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node){
+          const text=String(node.nodeValue||"");
+          const parent=node.parentElement;
+          if(!parent||parent.closest("script,style,noscript,#ma7alak-social-header"))return NodeFilter.FILTER_REJECT;
+          return /مش\s*بس\s*صفحة/.test(text)&&text.includes("منصة")
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+      }
+    );
+
+    const node=walker.nextNode();
+    if(!node)return false;
+
+    const value=String(node.nodeValue||"");
+    const index=value.indexOf("منصة");
+    if(index<0)return false;
+
+    const frag=document.createDocumentFragment();
+    if(index>0)frag.appendChild(document.createTextNode(value.slice(0,index)));
+
+    const word=document.createElement("span");
+    word.className="shoufhon-platform-word";
+    word.textContent="منصة";
+    word.setAttribute("aria-label","منصة");
+    frag.appendChild(word);
+
+    const rest=value.slice(index+"منصة".length);
+    if(rest)frag.appendChild(document.createTextNode(rest));
+
+    node.parentNode?.replaceChild(frag,node);
+    return true;
+  }
+
+  function boot(){
+    addCss();
+    if(!isHome())return;
+    if(enhancePlatformWord())return;
+
+    let tries=0;
+    const timer=setInterval(()=>{
+      tries++;
+      if(enhancePlatformWord()||tries>80)clearInterval(timer);
+    },250);
+
+    const observer=new MutationObserver(()=>{
+      if(enhancePlatformWord())observer.disconnect();
+    });
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+    setTimeout(()=>observer.disconnect(),20000);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else{
+    boot();
+  }
+
+  window.addEventListener("pageshow",()=>{
+    addCss();
+    if(isHome())enhancePlatformWord();
+  });
+})();
