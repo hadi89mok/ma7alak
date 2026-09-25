@@ -5319,6 +5319,10 @@ function inject(){
           <span>Active offer limit<small>0 = locked. The owner sees the Premium / VIP access popup.</small></span>
           <input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric">
         </label>
+        <label class="m7la-limit-row">
+          <span>Media per offer<small>Photos + videos allowed inside each offer. 0 = text-only offer.</small></span>
+          <input id="m7-live-admin-media-limit" type="number" min="0" max="20" step="1" inputmode="numeric">
+        </label>
       </div>
 
       <div class="m7la-access-item">
@@ -5345,7 +5349,7 @@ function inject(){
   overlay.onclick=e=>{if(e.target===overlay)close()};
   document.getElementById("m7-live-admin-save").onclick=()=>save(false);
 
-  ["m7-live-admin-enabled","m7-live-admin-limit","m7-live-admin-video-enabled","m7-live-admin-video-minutes"].forEach(id=>{
+  ["m7-live-admin-enabled","m7-live-admin-limit","m7-live-admin-media-limit","m7-live-admin-video-enabled","m7-live-admin-video-minutes"].forEach(id=>{
     document.getElementById(id)?.addEventListener("change",()=>save(true));
   });
 }
@@ -5364,6 +5368,7 @@ async function open(slug,name){
   document.getElementById("m7-live-admin-shop").textContent=activeShop.name+"  /"+activeShop.slug;
   document.getElementById("m7-live-admin-enabled").disabled=true;
   document.getElementById("m7-live-admin-limit").disabled=true;
+  document.getElementById("m7-live-admin-media-limit").disabled=true;
   document.getElementById("m7-live-admin-video-enabled").disabled=true;
   document.getElementById("m7-live-admin-video-minutes").disabled=true;
   document.getElementById("m7-live-admin-save").disabled=true;
@@ -5374,10 +5379,12 @@ async function open(slug,name){
   const row=Array.isArray(result.data)?result.data[0]:result.data;
   document.getElementById("m7-live-admin-enabled").checked=!!row?.enabled;
   document.getElementById("m7-live-admin-limit").value=Number(row?.active_limit??0);
+  document.getElementById("m7-live-admin-media-limit").value=Number(row?.media_per_offer_limit??8);
   document.getElementById("m7-live-admin-video-enabled").checked=!!row?.video_live_enabled;
   document.getElementById("m7-live-admin-video-minutes").value=Number(row?.video_live_monthly_minutes??0);
   document.getElementById("m7-live-admin-enabled").disabled=false;
   document.getElementById("m7-live-admin-limit").disabled=false;
+  document.getElementById("m7-live-admin-media-limit").disabled=false;
   document.getElementById("m7-live-admin-video-enabled").disabled=false;
   document.getElementById("m7-live-admin-video-minutes").disabled=false;
   document.getElementById("m7-live-admin-save").disabled=false;
@@ -5509,10 +5516,12 @@ async function save(auto=false){
   const button=document.getElementById("m7-live-admin-save");
   const enabled=document.getElementById("m7-live-admin-enabled").checked;
   const limit=Number(document.getElementById("m7-live-admin-limit").value);
+  const mediaLimit=Number(document.getElementById("m7-live-admin-media-limit").value);
   const videoEnabled=document.getElementById("m7-live-admin-video-enabled").checked;
   const monthlyMinutes=Number(document.getElementById("m7-live-admin-video-minutes").value);
 
   if(!Number.isInteger(limit)||limit<0||limit>100){status("Offer limit must be a whole number from 0 to 100.",true);return}
+  if(!Number.isInteger(mediaLimit)||mediaLimit<0||mediaLimit>20){status("Media per offer must be a whole number from 0 to 20.",true);return}
   if(!Number.isInteger(monthlyMinutes)||monthlyMinutes<0||monthlyMinutes>1000000){status("Monthly Video LIVE minutes must be a whole number from 0 to 1000000.",true);return}
 
   liveAccessSaving=true;
@@ -5527,12 +5536,13 @@ async function save(auto=false){
       p_enabled:enabled,
       p_active_limit:limit,
       p_video_live_enabled:videoEnabled,
-      p_monthly_minutes:monthlyMinutes
+      p_monthly_minutes:monthlyMinutes,
+      p_media_per_offer_limit:mediaLimit
     });
 
     if(accessResult.error)throw accessResult.error;
 
-    status(`Live now · Offers ${enabled?"ON":"OFF"} · ${limit} slot${limit===1?"":"s"} · Camera LIVE ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
+    status(`Live now · Offers ${enabled?"ON":"OFF"} · ${limit} slot${limit===1?"":"s"} · ${mediaLimit} media/offer · Camera LIVE ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
     await loadVideoUsage();
 
     try{
@@ -5540,6 +5550,7 @@ async function save(auto=false){
         shop_slug:activeShop.slug,
         enabled,
         active_limit:limit,
+        media_per_offer_limit:mediaLimit,
         video_live_enabled:videoEnabled,
         video_live_monthly_minutes:monthlyMinutes
       }}));
