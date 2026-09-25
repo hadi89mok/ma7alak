@@ -23,6 +23,9 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 let root=null;
 let slug="";
 let known=false;
+let directOwnerKnown=false;
+let directOwner=false;
+let directOwnerSlug="";
 let state={
   owner:false,
   broadcastLive:false,
@@ -167,8 +170,14 @@ body{overflow:hidden}
   min-width:84px;min-height:42px;padding:0 12px;border:1px solid color-mix(in srgb,var(--m7a) 48%,transparent);
   border-radius:13px;background:linear-gradient(135deg,color-mix(in srgb,var(--m7a) 88%,#fff 12%),color-mix(in srgb,var(--m7a) 82%,#8a5516 18%));
   color:#171008;font-size:10px;font-weight:950;white-space:nowrap;
-  box-shadow:0 8px 18px rgba(0,0,0,.18)
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+  display:grid;place-items:center;align-self:center;line-height:1
 }
+.m7slp-cta.icon{min-width:42px;width:42px;height:42px;padding:0;border-radius:50%;font-size:23px;font-weight:700}
+.m7slp-cta.edit{position:relative;z-index:4;cursor:pointer;background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
+.m7slp-view.owner-active{cursor:pointer}
+.m7slp-view.owner-active:active{transform:scale(.995)}
+
 .m7slp-cta.live{border-color:rgba(255,80,110,.52);background:linear-gradient(135deg,#f5365b,#bd1637);color:#fff}
 .m7slp-cta.ghost{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.55);box-shadow:none}
 .m7slp-owner{
@@ -197,7 +206,7 @@ body{overflow:hidden}
   .m7slp-view{grid-template-columns:64px minmax(0,1fr) auto;gap:9px;padding:8px 9px;min-height:84px}
   .m7slp-thumb{width:64px;height:64px;border-radius:14px}
   .m7slp-title{font-size:14px}.m7slp-sub{font-size:8px}.m7slp-meta{font-size:7px}
-  .m7slp-cta{min-width:74px;min-height:38px;padding:0 10px;font-size:9px}
+  .m7slp-cta{min-width:72px;min-height:38px;padding:0 10px;font-size:9px}.m7slp-cta.icon{min-width:38px;width:38px;height:38px;padding:0;font-size:21px}
   .m7slp-owner{padding:9px}
   .m7slp-owner-main{grid-template-columns:1fr}
   .m7slp-owner-actions{width:100%}.m7slp-owner-actions button{flex:1}
@@ -220,55 +229,86 @@ function viewerMarkup(){
   const live=!!state.broadcastLive;
   const hasOffers=offers>0;
   const canOpen=live||hasOffers;
-  let kicker,title,sub,meta,cta,chip="";
+  let kicker,title,sub,meta,cta,ctaClass="icon",chip="";
   if(live){
     kicker='<span class="m7slp-kicker live"><i></i> VIDEO LIVE</span>';
     title="Live now at "+name;
-    sub=state.stream?.title||"Watch the shop live and see what is happening now";
-    meta=hasOffers?'<b>'+offers+'</b> active '+(offers===1?"offer":"offers"):"Broadcasting now";
-    cta="Watch Live";
+    sub=state.stream?.title||"Watch what is happening right now";
+    meta=hasOffers?offers+" active "+(offers===1?"offer":"offers")+" during this live":"Broadcasting now";
+    cta="Watch";
+    ctaClass="live";
     chip='<span class="m7slp-live-chip"><i></i> LIVE</span>';
   }else if(hasOffers){
     kicker='<span class="m7slp-kicker"><i></i> HAPPENING NOW</span>';
     title=offers===1?"1 live offer / update":offers+" live offers / updates";
     sub="See what "+name+" has happening right now";
-    meta="Offers and updates are separate from video Live";
-    cta="View";
+    meta="Tap the card for details";
+    cta="›";
+    ctaClass="icon";
   }else{
     kicker='<span class="m7slp-kicker">○ CURRENT STATUS</span>';
     title="Nothing live right now";
     sub="Check back soon for offers, events and live broadcasts";
     meta="No active offers or broadcast";
-    cta="Offline";
+    cta="—";
+    ctaClass="ghost icon";
   }
-  return '<button class="m7slp-view '+(canOpen?"can-open":"")+'" type="button" '+(canOpen?'data-action="primary"':'aria-disabled="true"')+'>'+
+  return '<div class="m7slp-view '+(canOpen?"can-open":"")+'" '+(canOpen?'data-action="primary" role="button" tabindex="0"':'aria-disabled="true"')+'>'+
     '<span class="m7slp-thumb">'+(img?'<img src="'+esc(img)+'" alt="">':'<span class="m7slp-thumb-placeholder">S</span>')+chip+'</span>'+
-    '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+meta+'</span></span>'+
-    '<span class="m7slp-cta '+(live?"live":(!canOpen?"ghost":""))+'">'+esc(cta)+'</span>'+
-  '</button>';
+    '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
+    '<span class="m7slp-cta '+ctaClass+'">'+esc(cta)+'</span>'+
+  '</div>';
+}
+
+function ownerActiveMarkup(){
+  const live=!!state.broadcastLive;
+  const offers=offerUsed();
+  const img=imageUrl();
+  const name=shopName();
+  const kicker=live
+    ? '<span class="m7slp-kicker live"><i></i> OWNER · VIDEO LIVE</span>'
+    : '<span class="m7slp-kicker"><i></i> OWNER · HAPPENING NOW</span>';
+  const title=live
+    ? "You are live at "+name
+    : (offers===1?"1 active offer / update":offers+" active offers / updates");
+  const sub=live
+    ? "Tap the card to resume your broadcast"
+    : "Tap the card to preview exactly what visitors see";
+  const meta=live
+    ? (offers?offers+" active "+(offers===1?"offer":"offers")+" · Edit to manage content":"Edit to manage your live content")
+    : "Edit text, media, timing or end an update";
+  const chip=live?'<span class="m7slp-live-chip"><i></i> LIVE</span>':"";
+  return '<div class="m7slp-view can-open owner-active" data-action="primary" role="button" tabindex="0">'+
+    '<span class="m7slp-thumb">'+(img?'<img src="'+esc(img)+'" alt="">':'<span class="m7slp-thumb-placeholder">S</span>')+chip+'</span>'+
+    '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
+    '<button class="m7slp-cta edit" type="button" data-action="manage">Edit</button>'+
+  '</div>';
 }
 
 function ownerMarkup(){
   const live=!!state.broadcastLive;
   const used=offerUsed();
+
+  if(live||used>0)return ownerActiveMarkup();
+
   const lim=offerLimit();
   const pct=lim?Math.min(100,used/lim*100):0;
   const canVideo=videoEnabled();
   const canOffer=offersEnabled()&&(!lim||used<lim);
-  const title=live?"You are LIVE":"Ready to go live";
-  const sub=live?"Resume your broadcast controls, chat and viewers.":(canVideo?"Start a broadcast or publish an offer.":"Video Live is disabled for this shop.");
-  return '<div class="m7slp-owner '+(live?"is-live":"")+'">'+
+  const title="Ready to go live";
+  const sub=canVideo?"Start a broadcast or publish an offer.":"Video Live is disabled for this shop.";
+  return '<div class="m7slp-owner">'+
     '<div class="m7slp-owner-tag">♛ SHOP OWNER CONTROLS</div>'+
     '<div class="m7slp-owner-main">'+
       '<div class="m7slp-owner-state"><i></i><div><strong>'+esc(title)+'</strong><small>'+esc(sub)+'</small></div></div>'+
       '<div class="m7slp-owner-actions">'+
-        '<button class="m7slp-go" type="button" data-action="go" '+(canVideo?"":"disabled")+'>'+(live?"● Resume Live":"▣ Go Live")+'</button>'+
+        '<button class="m7slp-go" type="button" data-action="go" '+(canVideo?"":"disabled")+'>▣ Go Live</button>'+
         '<button class="m7slp-add" type="button" data-action="add" '+(canOffer?"":"disabled")+'>'+(offersEnabled()&&lim&&used>=lim?"Slots Full":"＋ Add Offer")+'</button>'+
       '</div>'+
     '</div>'+
     '<div class="m7slp-owner-bottom">'+
       '<div class="m7slp-slots"><div class="m7slp-slots-line"><span>Active offer slots</span><b>'+(offersEnabled()?(lim?used+"/"+lim:String(used)):"—")+'</b></div><div class="m7slp-progress"><i style="width:'+pct+'%"></i></div></div>'+
-      '<div class="m7slp-owner-badge">'+(live?"● Broadcast active":(canVideo?"○ Broadcast ready":"○ Video Live off"))+'</div>'+
+      '<div class="m7slp-owner-badge">'+(canVideo?"○ Broadcast ready":"○ Video Live off")+'</div>'+
     '</div>'+
   '</div>';
 }
@@ -292,7 +332,18 @@ function primary(){
   if(offerUsed()>0)return post("MA7ALAK_LIVE_OFFERS_OPEN_SHOP");
 }
 function bind(){
-  $('[data-action="primary"]',root)?.addEventListener("click",primary);
+  const primaryEl=$('[data-action="primary"]',root);
+  primaryEl?.addEventListener("click",e=>{
+    if(e.target.closest('[data-action="manage"]'))return;
+    primary();
+  });
+  primaryEl?.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){e.preventDefault();primary()}
+  });
+  $('[data-action="manage"]',root)?.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    post("MA7ALAK_LIVE_OWNER_MANAGE");
+  });
   $('[data-action="go"]',root)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();post("MA7ALAK_LIVE_VIDEO_GO")});
   $('[data-action="add"]',root)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();post("MA7ALAK_LIVE_OFFERS_CREATE")});
 }
@@ -309,7 +360,7 @@ function onState(data){
   known=true;
   state={
     ...state,
-    owner:!!data.owner,
+    owner:(directOwnerKnown?(directOwner&&directOwnerSlug===slug):!!data.owner),
     broadcastLive:!!data.broadcastLive,
     stream:data.stream&&typeof data.stream==="object"?data.stream:null,
     items:Array.isArray(data.items)?data.items:[],
@@ -375,12 +426,20 @@ window.addEventListener("message",event=>{
   if(d.type==="MA7ALAK_LIVE_OFFERS_STATE"){onState(d);return}
   if(d.type==="MA7ALAK_PAGE_WAKE"){requestState();return}
   if(d.type==="MA7ALAK_OWNER_STATE"){
-    const ownerSlug=String(d.shopSlug||"").trim().toLowerCase();
-    if(ownerSlug&&ownerSlug===slug){
-      state.owner=!!d.isOwner;
-      known=true;
-      render();
+    directOwnerKnown=true;
+    directOwner=!!d.isOwner;
+    directOwnerSlug=String(d.shopSlug||"").trim().toLowerCase();
+    state.owner=directOwner&&directOwnerSlug===slug;
+    if(d.shop&&typeof d.shop==="object"){
+      state.shop={
+        ...state.shop,
+        name:String(d.shop.shop_name||d.shop.arabic_name||state.shop?.name||""),
+        profile_image_url:String(d.shop.profile_image_url||state.shop?.profile_image_url||""),
+        shop_url:String(d.shop.shop_url||state.shop?.shop_url||"")
+      };
     }
+    known=true;
+    render();
   }
   if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
     const ds=String(d.shop_slug||d.shopSlug||"").trim().toLowerCase();
