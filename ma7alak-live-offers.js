@@ -929,22 +929,93 @@ function mediaManager(id){
 async function refreshManager(postId,message){await load();mediaManager(postId);const st=$("#m7lo-manager-status");if(st&&message)st.textContent=message}
 async function addMedia(x,files,captions=[]){
   const st=$("#m7lo-manager-status");
+  const uploaded=[];
+  let committed=false;
+
   try{
     const existing=(x.media||[]).length;
     if(!files.length)return;
     if(existing+files.length>8)throw new Error(`You can add ${Math.max(0,8-existing)} more file(s).`);
-    const uploaded=[];
-    for(const file of files)uploaded.push(await uploadLiveFile(file,String(x.id),st));
+
+    for(const file of files){
+      uploaded.push(
+        await uploadLiveFile(
+          file,
+          String(x.id),
+          st
+        )
+      );
+    }
+
     const rows=uploaded.map((m,i)=>({
-      post_id:Number(x.id),shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,
-      sort_order:existing+i,is_cover:existing===0&&i===0,caption:String(captions[i]||"").trim().slice(0,300)||null,created_by:session.user.id
+      post_id:Number(x.id),
+      shop_slug:ownerSlug,
+      media_url:m.media_url,
+      storage_path:m.storage_path,
+      media_type:m.media_type,
+      sort_order:existing+i,
+      is_cover:existing===0&&i===0,
+      caption:String(captions[i]||"").trim().slice(0,300)||null,
+      created_by:session.user.id
     }));
-    const r=await c.from("shop_live_post_media").insert(rows);
+
+    const r=await c
+      .from("shop_live_post_media")
+      .insert(rows);
+
     if(r.error)throw r.error;
-    if(existing===0&&rows[0])await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:rows[0].media_url,media_type:rows[0].media_type}});
-    liveToast("Media uploaded and added to your live update.");
-    await refreshManager(x.id,"Media added.");
-  }catch(err){if(st)st.textContent=err.message||String(err)}
+    committed=true;
+
+    if(existing===0&&rows[0]){
+      const coverUpdate=
+        await c.rpc(
+          "ma7alak_update_live_post",
+          {
+            p_post_id:Number(x.id),
+            p_post:{
+              media_url:rows[0].media_url,
+              media_type:rows[0].media_type
+            }
+          }
+        );
+
+      if(coverUpdate.error){
+        throw coverUpdate.error;
+      }
+    }
+
+    liveToast(
+      "Media uploaded and added to your live update."
+    );
+
+    await refreshManager(
+      x.id,
+      "Media added."
+    );
+  }catch(err){
+    /*
+       If Storage succeeded but the DB step failed, remove those just-uploaded
+       files so failed attempts cannot silently fill the owner's RLS quota.
+    */
+    if(!committed&&uploaded.length){
+      const paths=uploaded
+        .map(item=>String(item.storage_path||"").trim())
+        .filter(Boolean);
+
+      if(paths.length){
+        c.storage
+          .from(BUCKET)
+          .remove(paths)
+          .catch(()=>{});
+      }
+    }
+
+    if(st){
+      st.textContent=
+        err.message||
+        String(err);
+    }
+  }
 }
 async function saveMediaCaption(x,m,value){
   const caption=String(value||"").trim().slice(0,300)||null;
@@ -1048,6 +1119,10 @@ async function uploadLiveFile(file,postKey,statusEl){if(file.size>50*1024*1024)t
 async function publish(e){
   e.preventDefault();
   const st=$("#m7lo-status"),btn=e.submitter;
+  const uploaded=[];
+  let createdPostId=0;
+  let mediaCommitted=false;
+
   if(btn.disabled)return;
   btn.disabled=true;pressFeedback(btn,"Publishing…");
   try{
@@ -1060,8 +1135,15 @@ async function publish(e){
     if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");
     if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);
 
-    const uploaded=[];
-    for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));
+    for(let i=0;i<files.length;i++){
+      uploaded.push(
+        await uploadLiveFile(
+          files[i],
+          `pending-${Date.now()}`,
+          st
+        )
+      );
+    }
 
     const sp=await c.from("shop_profiles").select("shop_name,profile_image_url,shop_url,directory_options").eq("shop_slug",ownerSlug).maybeSingle();
     const cover=uploaded[0]||{};
@@ -1071,6 +1153,7 @@ async function publish(e){
     const r=await c.rpc("ma7alak_create_live_post",{p_post:p});
     if(r.error)throw r.error;
     const postId=Number(r.data);
+    createdPostId=postId;
     let rows=[];
 
     if(uploaded.length){
@@ -1078,8 +1161,14 @@ async function publish(e){
         post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,
         sort_order:i,is_cover:i===0,caption:String(captions[i]||"").trim()||null,created_by:session.user.id
       }));
-      const ins=await c.from("shop_live_post_media").insert(rows);
+      const ins=await c
+        .from("shop_live_post_media")
+        .insert(rows);
+
       if(ins.error)throw ins.error;
+      mediaCommitted=true;
+    }else{
+      mediaCommitted=true;
     }
 
     const localMedia=rows.map((m,i)=>({...m,id:"local-"+postId+"-"+i}));
@@ -1088,7 +1177,39 @@ async function publish(e){
     liveToast(files.length>1?`Your update is live with ${files.length} media items.`:"Your update is now live for viewers.");
     setTimeout(()=>{close();load().catch(err=>console.warn("SHOUFHON Live refresh:",err))},900);
   }catch(err){
-    st.textContent=err.message||String(err);
+    /*
+       Roll back a failed publish cleanly:
+       - remove the just-created post if media failed after post creation
+       - remove newly uploaded Storage objects if they never became committed
+       This prevents orphan files from eventually tripping Storage RLS quota.
+    */
+    if(createdPostId&&!mediaCommitted){
+      try{
+        await c.rpc(
+          "ma7alak_end_live_post",
+          {p_post_id:Number(createdPostId)}
+        );
+      }catch(_){}
+    }
+
+    if(uploaded.length&&!mediaCommitted){
+      const paths=uploaded
+        .map(item=>String(item.storage_path||"").trim())
+        .filter(Boolean);
+
+      if(paths.length){
+        try{
+          await c.storage
+            .from(BUCKET)
+            .remove(paths);
+        }catch(_){}
+      }
+    }
+
+    st.textContent=
+      err.message||
+      String(err);
+
     btn.disabled=false;
   }
 }
@@ -1513,6 +1634,64 @@ async function init(){
   });
 }
 init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
+})();
+
+
+/* =========================================================
+   SHOUFHON LIVE OFFERS UX LOADER
+   Live Offers is installed globally, so load the shared phone UX patch
+   here too. This makes upload thumbnails/swipe UI work on BOTH homepage
+   and manual shop-owner pages instead of depending on opening-header.js.
+   ========================================================= */
+(function(){
+  "use strict";
+
+  if(window.self!==window.top)return;
+  if(window.__SHOUFHON_LIVE_OFFERS_UX_LOADER_V2__)return;
+  window.__SHOUFHON_LIVE_OFFERS_UX_LOADER_V2__=true;
+
+  let src="";
+
+  try{
+    const own=[...document.scripts]
+      .reverse()
+      .find(script=>
+        /ma7alak-live-offers\.js(?:[?#]|$)/i.test(
+          String(script.src||"")
+        )
+      );
+
+    if(own?.src){
+      src=own.src.replace(
+        /ma7alak-live-offers\.js(?=[?#]|$)/i,
+        "shoufhon-live-offers-ux.js"
+      );
+    }
+  }catch(_){}
+
+  if(!src){
+    src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/shoufhon-live-offers-ux.js";
+  }
+
+  if(
+    [...document.scripts].some(script=>
+      String(script.src||"").split("?")[0].split("#")[0]===
+      src.split("?")[0].split("#")[0]
+    )
+  ){
+    return;
+  }
+
+  const script=document.createElement("script");
+  script.src=src;
+  script.async=true;
+  script.dataset.shoufhonLiveOffersUx="1";
+  script.onerror=()=>console.error(
+    "SHOUFHON Live Offers UX: failed to load"
+  );
+
+  (document.head||document.documentElement)
+    .appendChild(script);
 })();
 
 
