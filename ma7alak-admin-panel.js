@@ -5623,8 +5623,21 @@ function mountForm(form,prefix){
   Object.entries(numericRules).forEach(([key,rules])=>{
     const input=document.getElementById(prefix+key);
     if(!input)return;
+
+    /* Keep real data fields as real number inputs. Older Studio builds could
+       turn them into generic 0–100 sliders; that is what caused an empty
+       Rating field to come back as 50 and block Save Changes. */
+    const wasRange=input.type==="range";
+    if(wasRange)input.type="number";
     input.dataset.m7studioKeepNumber='1';
     Object.entries(rules).forEach(([name,value])=>input.setAttribute(name,value));
+
+    if(key==="rating"){
+      const current=Number(input.value);
+      if(wasRange&&Number.isFinite(current)&&(current<0||current>5)){
+        input.value="";
+      }
+    }
   });
 
   const home=document.createElement('fieldset');
