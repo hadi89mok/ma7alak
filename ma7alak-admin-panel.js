@@ -3780,7 +3780,7 @@
         .select("directory_options").eq("shop_slug",slug).maybeSingle();
       if(latest.error)throw latest.error;
       if(!latest.data)throw new Error("This shop no longer exists. Reopen the shop list.");
-      for(const key of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit"]){
+      for(const key of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_media_album_item_limit"]){
         if(Object.prototype.hasOwnProperty.call(latest.data.directory_options||{},key))payload.directory_options[key]=latest.data.directory_options[key];
         else delete payload.directory_options[key];
       }
@@ -17261,11 +17261,13 @@ function ownerMediaQuotaHtml(shop){
   const photos=ownerMediaLimit(shop,"owner_media_photo_limit",6);
   const videos=ownerMediaLimit(shop,"owner_media_video_limit",2);
   const stories=ownerMediaLimit(shop,"owner_story_limit",10);
+  const albumItems=ownerMediaLimit(shop,"owner_media_album_item_limit",8);
   return '<div class="m7v4-owner-quota">'+
-    '<div class="m7v4-owner-quota-head"><div><b>Owner access & upload limits</b><small>Set how many photos, videos and active 24-hour Stories this shop owner can publish. Set 0 to disable a type.</small></div><span>OWNER ACCESS</span></div>'+
+    '<div class="m7v4-owner-quota-head"><div><b>Owner access & upload limits</b><small>Control photos, videos, active Stories, and how many existing Media items can be grouped inside one album frame. Set 0 to disable a type.</small></div><span>OWNER ACCESS</span></div>'+
     '<div class="m7v4-owner-quota-grid">'+
       '<label><span>Photo limit</span><input type="number" min="0" max="100" step="1" value="'+esc(photos)+'" data-m7v4-owner-photo-limit inputmode="numeric"></label>'+
       '<label><span>Video limit</span><input type="number" min="0" max="100" step="1" value="'+esc(videos)+'" data-m7v4-owner-video-limit inputmode="numeric"></label>'+
+      '<label><span>Album items / frame</span><input type="number" min="0" max="100" step="1" value="'+esc(albumItems)+'" data-m7v4-owner-album-limit inputmode="numeric"><small>0 = albums off. Album items still count toward Photo / Video limits.</small></label>'+
       '<label><span>Active Story limit</span><input type="number" min="0" max="100" step="1" value="'+esc(stories)+'" data-m7v4-owner-story-limit inputmode="numeric"></label>'+
     '</div>'+
     '<button type="button" data-m7v4-save-owner-media-limits>Save owner upload limits</button>'+
@@ -17276,7 +17278,8 @@ async function saveOwnerUploadLimits(
   shop,
   photos,
   videos,
-  stories
+  stories,
+  albumItems
 ){
   if(!shop){
     throw new Error("Select a shop first.");
@@ -17289,7 +17292,8 @@ async function saveOwnerUploadLimits(
         p_shop_slug:shop.shop_slug,
         p_photo_limit:photos,
         p_video_limit:videos,
-        p_story_limit:stories
+        p_story_limit:stories,
+        p_album_item_limit:albumItems
       }
     );
 
@@ -17303,7 +17307,8 @@ async function saveOwnerUploadLimits(
     {
       photo_limit:photos,
       video_limit:videos,
-      story_limit:stories
+      story_limit:stories,
+      album_item_limit:albumItems
     }
   );
 
@@ -17571,18 +17576,19 @@ window.Ma7alakAdminStudioBridge={
     const shop=selectedShop(),form=document.getElementById("ma-admin-edit-form");
     if(form&&shop){
       const options=JSON.parse(form.dataset.directoryOptions||"{}");
-      for(const k of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_story_limit"]){
+      for(const k of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_media_album_item_limit","owner_story_limit"]){
         if(Object.prototype.hasOwnProperty.call(shop.directory_options||{},k))options[k]=shop.directory_options[k];else delete options[k];
       }
       form.dataset.directoryOptions=JSON.stringify(options);
     }
   },
-  async limits(photos,videos,stories){
+  async limits(photos,videos,stories,albumItems){
     await saveOwnerUploadLimits(
       selectedShop(),
       photos,
       videos,
-      stories
+      stories,
+      albumItems
     );
   },
   async og(settings){
@@ -18013,6 +18019,7 @@ async function handleAction(key){
     if(next){
       if(!Number.isFinite(Number(shop?.directory_options?.owner_media_photo_limit)))patch.owner_media_photo_limit=6;
       if(!Number.isFinite(Number(shop?.directory_options?.owner_media_video_limit)))patch.owner_media_video_limit=2;
+      if(!Number.isFinite(Number(shop?.directory_options?.owner_media_album_item_limit)))patch.owner_media_album_item_limit=8;
     }
     await saveOwnerCapabilityPatch(
       shop,
@@ -18236,9 +18243,11 @@ function mount(){
       const workspace=root.querySelector("[data-m7v4-shop-workspace]");
       const photoInput=workspace?.querySelector("[data-m7v4-owner-photo-limit]");
       const videoInput=workspace?.querySelector("[data-m7v4-owner-video-limit]");
+      const albumInput=workspace?.querySelector("[data-m7v4-owner-album-limit]");
       const storyInput=workspace?.querySelector("[data-m7v4-owner-story-limit]");
       const photos=Math.max(0,Math.min(100,Math.round(Number(photoInput?.value)||0)));
       const videos=Math.max(0,Math.min(100,Math.round(Number(videoInput?.value)||0)));
+      const albumItems=Math.max(0,Math.min(100,Math.round(Number(albumInput?.value)||0)));
       const stories=Math.max(0,Math.min(100,Math.round(Number(storyInput?.value)||0)));
 
       saveOwnerLimits.disabled=true;
@@ -18249,7 +18258,8 @@ function mount(){
           shop,
           photos,
           videos,
-          stories
+          stories,
+          albumItems
         );
       }catch(error){
         console.error("SHOUFHON owner media limits:",error);
