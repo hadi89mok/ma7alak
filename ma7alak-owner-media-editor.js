@@ -1267,24 +1267,26 @@
       #m7-media-showcase .m7-media-head{position:relative!important;width:calc(100% + 12px)!important;margin-left:-6px!important;margin-bottom:8px!important;padding:13px 13px 12px!important;border-radius:19px 19px 12px 12px!important;border-color:color-mix(in srgb,var(--m7-photo,#f2caed) 48%,transparent)!important;background:linear-gradient(180deg,color-mix(in srgb,var(--m7-media-header-bg,#100e0c) 92%,transparent),color-mix(in srgb,var(--m7-media-header-bg,#100e0c) 74%,transparent))!important;box-shadow:0 10px 25px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)!important}
       #m7-media-showcase .m7-media-head:after{content:"";position:absolute;left:16px;right:16px;bottom:-5px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--m7-photo,#f2caed) 36%,transparent),transparent);pointer-events:none}
       #m7-media-showcase .m7-media-heading-row{align-items:center!important}
+      #m7-media-showcase{position:relative!important;overflow:visible!important}
       #m7-owner-media-tools{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0}
       #m7-owner-media-tools .m7-media-counts{padding:0!important;text-align:right!important}
       #m7-media-showcase .m7-media-filters{margin-top:10px!important;gap:6px!important}
       #m7-media-showcase .m7-media-filter{min-height:32px!important;border-radius:9px!important;background:color-mix(in srgb,var(--m7-media-button-bg,#17130f) 88%,transparent)!important}
       #m7-media-showcase .m7-media-filter.active{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px color-mix(in srgb,var(--m7-media-button-active-frame,#f2caed) 18%,transparent)!important}
       #m7-media-showcase .m7-media-hero{margin-top:0!important}
-      #m7-owner-media-edit{display:none;align-items:center;gap:5px;min-height:31px;padding:0 9px;border:1px solid color-mix(in srgb,var(--m7-media-edit-frame,#d9a441) 72%,transparent);border-radius:10px;background:color-mix(in srgb,var(--m7-media-edit-bg,#17130f) 88%,transparent);color:var(--m7-media-edit-frame,#f0ca6b);font:900 8px/1 Arial,"Segoe UI",sans-serif;letter-spacing:.15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035);touch-action:manipulation;-webkit-tap-highlight-color:transparent;outline:none}
-      #m7-owner-media-edit .m7ome-icon{font-size:12px;line-height:1}
-      #m7-owner-media-edit:active{transform:scale(.97)}
+      #m7-owner-media-edit{position:absolute!important;right:-5px!important;top:-16px!important;z-index:220!important;width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;padding:0!important;border:1px solid color-mix(in srgb,var(--m7-media-edit-frame,#d9a441) 78%,transparent)!important;border-radius:14px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--m7-media-edit-bg,#12100d) 94%,transparent),rgba(5,5,6,.98))!important;color:var(--m7-media-edit-frame,#f0ca6b)!important;display:none!important;place-items:center!important;box-shadow:0 10px 26px rgba(0,0,0,.52),0 0 0 3px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.07)!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;outline:none!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important}
+      #m7-owner-media-edit svg{width:20px;height:20px;display:block;stroke:currentColor;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--m7-media-edit-frame,#d9a441) 42%,transparent))}
+      #m7-owner-media-edit:active{transform:scale(.92)!important}
+      #m7-owner-media-edit:after{content:"EDIT";position:absolute;right:1px;bottom:-11px;padding:2px 4px;border-radius:999px;background:#080809;color:var(--m7-media-edit-frame,#f0ca6b);font:950 5.5px/1 Arial,"Segoe UI",sans-serif;letter-spacing:.7px;border:1px solid color-mix(in srgb,var(--m7-media-edit-frame,#d9a441) 28%,transparent);box-shadow:0 4px 12px rgba(0,0,0,.35);pointer-events:none}
       @media(max-width:520px){
         #m7-media-showcase .m7-media-head{padding:11px 10px 10px!important;margin-bottom:7px!important;border-radius:17px 17px 11px 11px!important}
         #m7-owner-media-tools{gap:5px}
         #m7-owner-media-tools .m7-media-counts{font-size:7px!important;max-width:72px;white-space:normal!important;line-height:1.2!important}
-        #m7-owner-media-edit{min-height:30px;padding:0 8px;font-size:7.5px}
+        #m7-owner-media-edit{right:-3px!important;top:-14px!important;width:41px!important;height:41px!important;min-width:41px!important;min-height:41px!important}
         #m7-media-showcase .m7-media-title{font-size:24px!important}
         #m7-media-showcase .m7-media-symbol{width:33px!important;height:33px!important;flex-basis:33px!important}
       }
-      #m7-owner-media-edit.visible{display:inline-flex;align-items:center;gap:5px}
+      #m7-owner-media-edit.visible{display:grid!important}
       html:has(#m7-owner-media-sheet.open),body:has(#m7-owner-media-sheet.open){margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;background:#050506!important}
       #m7-owner-media-sheet{position:fixed!important;inset:-1px!important;top:-1px!important;left:-1px!important;width:calc(100vw + 2px)!important;width:calc(100dvw + 2px)!important;height:calc(100vh + 2px)!important;height:calc(100dvh + 2px)!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(11px,env(safe-area-inset-top)) 13px max(25px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
@@ -1397,9 +1399,11 @@
     const edit=document.createElement("button");
     edit.id="m7-owner-media-edit";
     edit.type="button";
-    edit.innerHTML='<span class="m7ome-icon" aria-hidden="true">✎</span><span>Edit</span>';
-    tools.appendChild(edit);
+    edit.setAttribute("aria-label","Edit Media");
+    edit.setAttribute("title","Edit Media");
+    edit.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h6M14 17h6" stroke-width="1.9" stroke-linecap="round"/><circle cx="15" cy="7" r="2" stroke-width="1.9"/><circle cx="9" cy="12" r="2" stroke-width="1.9"/><circle cx="12" cy="17" r="2" stroke-width="1.9"/></svg>';
     heading.appendChild(tools);
+    mediaRoot?.appendChild(edit);
     edit.addEventListener("click",openEditor);
 
     const sheet=document.createElement("div");
