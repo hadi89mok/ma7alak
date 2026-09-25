@@ -1,5 +1,5 @@
 /* =========================================================
-   SHOUFHON — SHOP LIVE PANEL V9
+   SHOUFHON — SHOP LIVE PANEL V10
    Premium compact shop-page Live / Offers panel.
 
    Modes:
@@ -12,8 +12,8 @@
 (function(){
 "use strict";
 
-if(window.__SHOUFHON_SHOP_LIVE_PANEL_V9__)return;
-window.__SHOUFHON_SHOP_LIVE_PANEL_V9__=true;
+if(window.__SHOUFHON_SHOP_LIVE_PANEL_V10__)return;
+window.__SHOUFHON_SHOP_LIVE_PANEL_V10__=true;
 
 const ROOT_ID="m7-shop-live";
 const CONTEXT_SRC="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@940a075bff01ce379015e4a7cba8e3e27f3ded9c/shoufhon-shop-context.js";
@@ -91,147 +91,434 @@ function offerUsed(){
 }
 
 function ensureCss(){
-  if($("#m7slp-v9-css"))return;
+  if($("#m7slp-v10-css"))return;
   const st=document.createElement("style");
-  st.id="m7slp-v9-css";
+  st.id="m7slp-v10-css";
   st.textContent=`
 *{box-sizing:border-box}
-html,body{margin:0!important;padding:0!important;background:transparent!important;font-family:Arial,"Segoe UI",sans-serif}
+html,body{
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  font-family:Arial,"Segoe UI",sans-serif
+}
 body{overflow:hidden}
+
 #m7-shop-live{
   --m7a:#d9a441;
   --m7status:#2fe47b;
+  --m7surface:#11100e;
+  --m7edge:#d9a441;
+  --m7radius:24px;
   width:100%;
   min-width:0;
-  padding:5px 0;
+  padding:0;
   color:#fff;
 }
-#m7-shop-live button{font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+
+#m7-shop-live button{
+  font:inherit;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation
+}
+
+/* Same visual language as the unified profile shell above. */
 .m7slp{
   position:relative;
   width:92%;
   max-width:560px;
-  min-height:76px;
   margin:0 auto;
   overflow:hidden;
-  border:1px solid color-mix(in srgb,var(--m7a) 58%,transparent);
-  border-radius:18px;
+  border:1px solid color-mix(in srgb,var(--m7edge) 72%,transparent);
+  border-radius:clamp(15px,var(--m7radius),28px);
   background:
-    radial-gradient(circle at 0 0,color-mix(in srgb,var(--m7a) 11%,transparent),transparent 40%),
-    linear-gradient(145deg,rgba(20,20,18,.985),rgba(7,8,8,.99));
-  box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035);
+    radial-gradient(circle at 7% 0%,color-mix(in srgb,var(--m7a) 10%,transparent),transparent 37%),
+    linear-gradient(160deg,color-mix(in srgb,var(--m7surface) 97%,#17120c 3%),color-mix(in srgb,var(--m7surface) 95%,#050505 5%));
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.23),
+    inset 0 1px 0 rgba(255,255,255,.035);
 }
-.m7slp::after{
+
+.m7slp:before{
   content:"";
   position:absolute;
-  inset:auto -42px -64px auto;
-  width:150px;height:150px;border-radius:50%;
-  border:1px solid color-mix(in srgb,var(--m7a) 12%,transparent);
-  box-shadow:0 0 0 20px color-mix(in srgb,var(--m7a) 3%,transparent),0 0 0 42px color-mix(in srgb,var(--m7a) 2%,transparent);
-  pointer-events:none;
+  z-index:1;
+  left:18px;
+  right:18px;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--m7a) 86%,#fff 14%),transparent);
+  opacity:.78;
+  pointer-events:none
 }
-.m7slp.loading{display:grid;place-items:center;color:rgba(255,255,255,.55);font-size:10px;font-weight:850;letter-spacing:.3px}
+
+.m7slp:after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  width:128px;
+  height:128px;
+  right:-76px;
+  bottom:-82px;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--m7a) 9%,transparent);
+  box-shadow:0 0 0 20px color-mix(in srgb,var(--m7a) 2%,transparent);
+  pointer-events:none
+}
+
+.m7slp.loading{
+  min-height:48px;
+  display:grid;
+  place-items:center;
+  color:rgba(255,255,255,.48);
+  font-size:9px;
+  font-weight:850
+}
+
+/* ---------------------------------------------------------
+   VISITOR — nothing active: tiny extension of the profile.
+--------------------------------------------------------- */
+.m7slp-idle{
+  position:relative;
+  z-index:2;
+  min-height:48px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:9px;
+  align-items:center;
+  padding:8px 12px
+}
+.m7slp-idle>i{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.18);
+  box-shadow:0 0 0 4px rgba(255,255,255,.025)
+}
+.m7slp-idle-copy{min-width:0}
+.m7slp-idle strong{
+  display:block;
+  color:rgba(255,255,255,.82);
+  font-size:10px;
+  line-height:1.1
+}
+.m7slp-idle small{
+  display:block;
+  margin-top:2px;
+  color:rgba(255,255,255,.38);
+  font-size:7.5px;
+  line-height:1.2
+}
+
+/* ---------------------------------------------------------
+   ACTIVE VIEWER / OWNER SUMMARY
+--------------------------------------------------------- */
 .m7slp-view{
-  position:relative;z-index:2;
-  width:100%;min-height:76px;
-  display:grid;grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;gap:10px;
-  padding:11px 13px;
-  border:0;background:transparent;color:#fff;text-align:left;
+  position:relative;
+  z-index:2;
+  width:100%;
+  min-height:68px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  padding:9px 11px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  text-align:left
 }
 .m7slp-view.can-open{cursor:pointer}
-.m7slp-thumb{
-  position:relative;width:76px;height:76px;border-radius:17px;
-  overflow:hidden;display:grid;place-items:center;
-  border:1px solid color-mix(in srgb,var(--m7a) 55%,transparent);
-  background:linear-gradient(145deg,#1d1d1d,#0d0d0d);
-  box-shadow:0 7px 18px rgba(0,0,0,.26);
-}
-.m7slp-thumb img{width:100%;height:100%;object-fit:cover}
-.m7slp-thumb-placeholder{font-size:22px;color:var(--m7a);font-weight:950}
-.m7slp-live-chip{
-  position:absolute;left:6px;top:6px;
-  display:flex;align-items:center;gap:5px;height:22px;padding:0 7px;
-  border-radius:999px;background:linear-gradient(135deg,#f52b52,#c91438);
-  color:#fff;font-size:8px;font-weight:950;letter-spacing:.4px;
-  box-shadow:0 5px 14px rgba(227,27,65,.25)
-}
-.m7slp-live-chip i{width:6px;height:6px;border-radius:50%;background:#64f39a;box-shadow:0 0 8px rgba(100,243,154,.9)}
-.m7slp-copy{min-width:0}
-.m7slp-kicker{display:flex;align-items:center;gap:6px;margin-bottom:4px;color:var(--m7a);font-size:8px;font-weight:950;letter-spacing:.7px;text-transform:uppercase}
-.m7slp-kicker.live{color:var(--m7status)}
-.m7slp-kicker i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:m7slpPulse 1.45s ease-out infinite}
-@keyframes m7slpPulse{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.m7slp-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:15px;line-height:1.08;font-weight:950;letter-spacing:-.15px}
-.m7slp-sub{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px;color:rgba(255,255,255,.58);font-size:9px;font-weight:700}
-.m7slp-meta{display:flex;align-items:center;gap:6px;margin-top:7px;color:rgba(255,255,255,.48);font-size:8px;font-weight:850}
-.m7slp-meta b{color:#f1c26f}
-.m7slp-cta{
-  min-width:70px;min-height:36px;padding:0 10px;border:1px solid color-mix(in srgb,var(--m7a) 48%,transparent);
-  border-radius:13px;background:linear-gradient(135deg,color-mix(in srgb,var(--m7a) 88%,#fff 12%),color-mix(in srgb,var(--m7a) 82%,#8a5516 18%));
-  color:#171008;font-size:10px;font-weight:950;white-space:nowrap;
-  box-shadow:0 8px 18px rgba(0,0,0,.18);
-  display:grid;place-items:center;align-self:center;line-height:1
-}
-.m7slp-cta.icon{min-width:36px;width:36px;height:36px;padding:0;border-radius:50%;font-size:19px;font-weight:700}
-.m7slp-cta.edit{position:relative;z-index:4;cursor:pointer;background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
-.m7slp-view.owner-active{cursor:pointer;grid-template-columns:minmax(0,1fr) auto;min-height:82px}
-.m7slp-view.owner-active:active{transform:scale(.995)}
-.m7slp-owner-active-actions{position:relative;z-index:5;display:flex;align-items:center;gap:6px}
-.m7slp-owner-active-actions button{min-height:36px;padding:0 10px;border:0;border-radius:11px;font-size:9px;font-weight:950;white-space:nowrap;cursor:pointer}
-.m7slp-owner-live{background:linear-gradient(135deg,#f33156,#bf1738);color:#fff;box-shadow:0 7px 18px rgba(223,31,67,.18)}
-.m7slp-owner-live.locked{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.48);box-shadow:none}
-.m7slp-owner-edit{background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
-.m7slp-action-pressed{animation:m7slpTap .3s cubic-bezier(.2,.85,.3,1)!important;pointer-events:none}
-@keyframes m7slpTap{0%{transform:scale(1)}42%{transform:scale(.91)}76%{transform:scale(1.035)}100%{transform:scale(1)}}
+.m7slp-view:active{transform:scale(.997)}
 
-.m7slp-cta.live{border-color:rgba(255,80,110,.52);background:linear-gradient(135deg,#f5365b,#bd1637);color:#fff}
-.m7slp-cta.ghost{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.55);box-shadow:none}
-.m7slp-owner{
-  position:relative;z-index:2;
-  padding:10px 11px 11px;
+.m7slp-copy{min-width:0}
+.m7slp-kicker{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:3px;
+  color:var(--m7a);
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.65px;
+  text-transform:uppercase
 }
-.m7slp-owner-tag{display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;padding:4px 7px;border:1px solid color-mix(in srgb,var(--m7a) 34%,transparent);border-radius:999px;background:color-mix(in srgb,var(--m7a) 7%,transparent);color:#f0bf69;font-size:7.5px;font-weight:950;letter-spacing:.55px}
-.m7slp-owner-main{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
-.m7slp-owner-state{display:flex;align-items:flex-start;gap:8px;min-width:0}
-.m7slp-owner-state>i{width:8px;height:8px;flex:0 0 8px;margin-top:3px;border-radius:50%;background:var(--m7status);box-shadow:0 0 9px color-mix(in srgb,var(--m7status) 55%,transparent)}
-.m7slp-owner.is-live .m7slp-owner-state>i{background:#ff3154;box-shadow:0 0 9px rgba(255,49,84,.6)}
-.m7slp-owner-state strong{display:block;color:#fff;font-size:14px;line-height:1.1}
-.m7slp-owner-state small{display:block;margin-top:3px;color:rgba(255,255,255,.56);font-size:8px;line-height:1.25}
-.m7slp-owner-actions{display:flex;gap:7px}
-.m7slp-owner-actions button{min-height:40px;padding:0 12px;border:0;border-radius:12px;font-size:9.5px;font-weight:950;white-space:nowrap}
-.m7slp-go{background:linear-gradient(135deg,#f33156,#bf1738);color:#fff;box-shadow:0 7px 18px rgba(223,31,67,.18)}
-.m7slp-add{background:linear-gradient(135deg,#efc36f,#c98b31);color:#171008}
-.m7slp-owner-actions button:disabled{opacity:.38}
-.m7slp-owner-actions button.locked{opacity:.38;filter:saturate(.55);cursor:pointer}
-.m7slp-owner-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.065)}
-.m7slp-slots{width:150px;max-width:48%;min-width:110px}
-.m7slp-slots-line{display:flex;align-items:center;justify-content:space-between;gap:7px;color:rgba(255,255,255,.42);font-size:7px;font-weight:850}
-.m7slp-slots-line b{color:#efbe69;font-size:9px}
-.m7slp-progress{width:104px;max-width:100%;height:3px;margin-top:4px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.075)}
-.m7slp-progress i{display:block;height:100%;background:linear-gradient(90deg,#cf9136,#f2ca78)}
-.m7slp-owner-badge{padding:4px 6px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.54);font-size:6.7px;font-weight:900;white-space:nowrap}
-.m7slp-owner.is-live .m7slp-owner-badge{border-color:rgba(255,49,84,.24);background:rgba(255,49,84,.06);color:#ff8ca2}
+.m7slp-kicker.live{color:#ff6078}
+.m7slp-kicker i{
+  width:6px;height:6px;border-radius:50%;
+  background:currentColor;
+  animation:m7slpPulse 1.45s ease-out infinite
+}
+@keyframes m7slpPulse{
+  70%{box-shadow:0 0 0 7px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+.m7slp-title{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff;
+  font-size:13px;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-.1px
+}
+.m7slp-sub{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  margin-top:3px;
+  color:rgba(255,255,255,.54);
+  font-size:8px;
+  font-weight:700
+}
+.m7slp-meta{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-top:5px;
+  color:rgba(255,255,255,.38);
+  font-size:7px;
+  font-weight:850
+}
+.m7slp-meta b{color:#f1c26f}
+
+.m7slp-cta{
+  min-width:62px;
+  min-height:32px;
+  padding:0 9px;
+  border:1px solid color-mix(in srgb,var(--m7a) 48%,transparent);
+  border-radius:11px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--m7a) 88%,#fff 12%),color-mix(in srgb,var(--m7a) 82%,#8a5516 18%));
+  color:#171008;
+  font-size:8.5px;
+  font-weight:950;
+  white-space:nowrap;
+  box-shadow:0 7px 16px rgba(0,0,0,.17);
+  display:grid;
+  place-items:center
+}
+.m7slp-cta.live{
+  border-color:rgba(255,80,110,.52);
+  background:linear-gradient(135deg,#f5365b,#bd1637);
+  color:#fff
+}
+
+/* ---------------------------------------------------------
+   OWNER — compact, integrated profile controls.
+--------------------------------------------------------- */
+.m7slp-owner{
+  position:relative;
+  z-index:2;
+  padding:8px 9px 9px
+}
+.m7slp-owner-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:7px
+}
+.m7slp-owner-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 6px;
+  border:1px solid color-mix(in srgb,var(--m7a) 28%,transparent);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--m7a) 6%,transparent);
+  color:#edbd68;
+  font-size:6.4px;
+  font-weight:950;
+  letter-spacing:.55px
+}
+.m7slp-owner-mini{
+  color:rgba(255,255,255,.35);
+  font-size:6.5px;
+  font-weight:850;
+  white-space:nowrap
+}
+.m7slp-owner-main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px
+}
+.m7slp-owner-state{
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  min-width:0
+}
+.m7slp-owner-state>i{
+  width:7px;height:7px;flex:0 0 7px;
+  margin-top:3px;
+  border-radius:50%;
+  background:var(--m7status);
+  box-shadow:0 0 8px color-mix(in srgb,var(--m7status) 55%,transparent)
+}
+.m7slp-owner-state strong{
+  display:block;
+  color:#fff;
+  font-size:12px;
+  line-height:1.08
+}
+.m7slp-owner-state small{
+  display:block;
+  margin-top:3px;
+  color:rgba(255,255,255,.47);
+  font-size:7px;
+  line-height:1.25
+}
+
+.m7slp-owner-actions,
+.m7slp-owner-active-actions{
+  display:flex;
+  align-items:center;
+  gap:5px
+}
+.m7slp-owner-actions button,
+.m7slp-owner-active-actions button{
+  min-height:34px;
+  padding:0 9px;
+  border:0;
+  border-radius:10px;
+  font-size:8px;
+  font-weight:950;
+  white-space:nowrap;
+  cursor:pointer
+}
+.m7slp-go,
+.m7slp-owner-live{
+  background:linear-gradient(135deg,#ef234b,#bd1738);
+  color:#fff;
+  box-shadow:0 6px 15px rgba(223,31,67,.17)
+}
+.m7slp-add,
+.m7slp-owner-add,
+.m7slp-owner-edit{
+  background:linear-gradient(135deg,#efc36f,#c98b31);
+  color:#171008
+}
+.m7slp-owner-manage{
+  background:rgba(255,255,255,.055);
+  color:rgba(255,255,255,.78);
+  border:1px solid rgba(255,255,255,.09)!important
+}
+.m7slp-owner-actions button:disabled,
+.m7slp-owner-active-actions button:disabled{opacity:.34}
+.m7slp-owner-actions button.locked,
+.m7slp-owner-active-actions button.locked{
+  opacity:.42;
+  filter:saturate(.55)
+}
+
+.m7slp-owner-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.055)
+}
+.m7slp-slots-line{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:rgba(255,255,255,.36);
+  font-size:6.5px;
+  font-weight:850
+}
+.m7slp-slots-line b{
+  color:#efbe69;
+  font-size:7.5px
+}
+.m7slp-progress{
+  width:82px;
+  height:2px;
+  margin-top:3px;
+  border-radius:99px;
+  overflow:hidden;
+  background:rgba(255,255,255,.065)
+}
+.m7slp-progress i{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,#cf9136,#f2ca78)
+}
+.m7slp-owner-badge{
+  color:rgba(255,255,255,.34);
+  font-size:6.2px;
+  font-weight:850;
+  white-space:nowrap
+}
+
+/* Active owner card: state on left, quick actions on right. */
+.m7slp-view.owner-active{min-height:72px}
+.m7slp-view.owner-active .m7slp-title{font-size:12.5px}
+
+.m7slp-action-pressed{
+  animation:m7slpTap .3s cubic-bezier(.2,.85,.3,1)!important;
+  pointer-events:none
+}
+@keyframes m7slpTap{
+  0%{transform:scale(1)}
+  42%{transform:scale(.91)}
+  76%{transform:scale(1.035)}
+  100%{transform:scale(1)}
+}
+
 @media(max-width:420px){
   .m7slp{width:94%;border-radius:17px}
-  .m7slp-view{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 11px;min-height:72px}
-  .m7slp-title{font-size:14px}.m7slp-sub{font-size:8px}.m7slp-meta{font-size:7px}
-  .m7slp-cta{min-width:64px;min-height:34px;padding:0 9px;font-size:8.5px}.m7slp-cta.icon{min-width:34px;width:34px;height:34px;padding:0;font-size:18px}
-  .m7slp-view.owner-active{grid-template-columns:1fr;gap:9px}
-  .m7slp-owner-active-actions{width:100%}.m7slp-owner-active-actions button{flex:1}
-  .m7slp-owner{padding:9px}
+  .m7slp-view{gap:7px;padding:8px 9px;min-height:64px}
+  .m7slp-title{font-size:12px}
+  .m7slp-sub{font-size:7px}
+  .m7slp-meta{font-size:6.5px}
+  .m7slp-cta{min-width:58px;min-height:31px;padding:0 8px;font-size:8px}
+
+  .m7slp-owner{padding:7px 8px 8px}
   .m7slp-owner-main{grid-template-columns:1fr}
-  .m7slp-owner-actions{width:100%}.m7slp-owner-actions button{flex:1}
-  .m7slp-owner-state strong{font-size:13px}
+  .m7slp-owner-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .m7slp-owner-actions button{width:100%;min-height:35px}
+  .m7slp-owner-state strong{font-size:11px}
+
+  .m7slp-view.owner-active{
+    grid-template-columns:1fr;
+    gap:7px
+  }
+  .m7slp-owner-active-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr))
+  }
+  .m7slp-owner-active-actions button{
+    min-width:0;
+    width:100%;
+    padding:0 5px;
+    font-size:7.2px
+  }
 }
 `;
   document.head.appendChild(st);
 }
 
 function setTheme(){
-  const a=accent(),status=statusColor();
+  const o=state.directoryOptions||{};
+  const a=accent();
+  const status=statusColor();
+  const surface=safeHex(o.profile_shell_bg_color)||"#11100e";
+  const edge=safeHex(o.profile_shell_border_color)||a;
+  const rawRadius=Number(o.profile_shell_radius);
+  const radius=Number.isFinite(rawRadius)
+    ?Math.max(15,Math.min(28,rawRadius))
+    :22;
+
   root.style.setProperty("--m7a",a);
   root.style.setProperty("--m7status",status);
+  root.style.setProperty("--m7surface",surface);
+  root.style.setProperty("--m7edge",edge);
+  root.style.setProperty("--m7radius",radius+"px");
 }
 
 function viewerMarkup(){
@@ -240,64 +527,94 @@ function viewerMarkup(){
   const live=!!state.broadcastLive;
   const hasOffers=offers>0;
   const canOpen=live||hasOffers;
+
+  if(!canOpen){
+    return '<div class="m7slp-idle" aria-disabled="true">'+
+      '<i></i>'+
+      '<span class="m7slp-idle-copy">'+
+        '<strong>Nothing happening right now</strong>'+
+        '<small>Live broadcasts and offers from '+esc(name)+' will appear here.</small>'+
+      '</span>'+
+    '</div>';
+  }
+
   let kicker,title,sub,meta,cta="",ctaClass="";
+
   if(live){
-    kicker='<span class="m7slp-kicker live"><i></i> VIDEO LIVE</span>';
-    title="Live now at "+name;
+    kicker='<span class="m7slp-kicker live"><i></i> LIVE NOW</span>';
+    title="Live at "+name;
     sub=state.stream?.title||"Watch what is happening right now";
-    meta=hasOffers?offers+" active "+(offers===1?"offer":"offers")+" during this live":"Broadcasting now";
+    meta=hasOffers
+      ?offers+" active "+(offers===1?"offer":"offers")+" too"
+      :"Broadcasting now";
     cta="Watch";
     ctaClass="live";
-  }else if(hasOffers){
-    kicker='<span class="m7slp-kicker"><i></i> HAPPENING NOW</span>';
-    title=offers===1?"1 live offer / update":offers+" live offers / updates";
-    sub="See what "+name+" has happening right now";
-    meta="Tap to see details";
-    cta="View";
   }else{
-    kicker='<span class="m7slp-kicker">○ CURRENT STATUS</span>';
-    title="Nothing live right now";
-    sub="Check back soon for offers, events and live broadcasts";
-    meta="No active offers or broadcast";
+    kicker='<span class="m7slp-kicker"><i></i> HAPPENING NOW</span>';
+    title=offers===1
+      ?"1 active offer at "+name
+      :offers+" active offers at "+name;
+    sub="Tap to see what is happening right now";
+    meta="Open details";
+    cta="View";
   }
-  return '<div class="m7slp-view '+(canOpen?"can-open":"")+'" '+(canOpen?'data-action="primary" role="button" tabindex="0"':'aria-disabled="true"')+'>'+
-    '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
-    (canOpen?'<span class="m7slp-cta '+ctaClass+'">'+esc(cta)+'</span>':"")+
+
+  return '<div class="m7slp-view can-open" data-action="primary" role="button" tabindex="0">'+
+    '<span class="m7slp-copy">'+
+      kicker+
+      '<strong class="m7slp-title">'+esc(title)+'</strong>'+
+      '<small class="m7slp-sub">'+esc(sub)+'</small>'+
+      '<span class="m7slp-meta">'+esc(meta)+'</span>'+
+    '</span>'+
+    '<span class="m7slp-cta '+ctaClass+'">'+esc(cta)+'</span>'+
   '</div>';
 }
+
 function ownerActiveMarkup(){
   const live=!!state.broadcastLive;
   const offers=offerUsed();
   const name=shopName();
   const canVideo=videoEnabled();
+  const lim=offerLimit();
+  const offerLocked=!offersEnabled()||lim<=0;
+  const offerFull=!offerLocked&&offers>=lim;
   const firstOffer=(state.items||[]).find(x=>x&&x.id!=null)||null;
 
   const kicker=live
-    ? '<span class="m7slp-kicker live"><i></i> OWNER · VIDEO LIVE</span>'
-    : '<span class="m7slp-kicker"><i></i> OWNER · HAPPENING NOW</span>';
+    ?'<span class="m7slp-kicker live"><i></i> OWNER · LIVE NOW</span>'
+    :'<span class="m7slp-kicker"><i></i> OWNER · HAPPENING NOW</span>';
 
   const title=live
-    ? "You are live at "+name
-    : (offers===1?"1 active offer / update":offers+" active offers / updates");
+    ?("You are live at "+name)
+    :(offers===1?"1 active offer":" "+offers+" active offers");
 
   const sub=live
-    ? "Tap the card to resume your broadcast"
-    : "Tap the card to preview what visitors see";
+    ?"Tap the card to resume the live viewer"
+    :"Tap the card to preview what visitors see";
 
   const meta=live
-    ? (offers?offers+" active "+(offers===1?"offer":"offers")+" · Manage content anytime":"Your camera broadcast is active")
-    : "Edit text, media, timing or end the update";
+    ?(offers?offers+" offer"+(offers===1?"":"s")+" also active":"Broadcast active")
+    :"Offer controls are live";
 
-  const liveLabel=live?"Resume Live":(canVideo?"Go Live":"🔒 Go Live");
+  const liveLabel=live
+    ?"Resume"
+    :(canVideo?"Go Live":"🔒 Live");
 
   return '<div class="m7slp-view can-open owner-active" data-action="primary" role="button" tabindex="0">'+
-    '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
+    '<span class="m7slp-copy">'+
+      kicker+
+      '<strong class="m7slp-title">'+esc(title)+'</strong>'+
+      '<small class="m7slp-sub">'+esc(sub)+'</small>'+
+      '<span class="m7slp-meta">'+esc(meta)+'</span>'+
+    '</span>'+
     '<span class="m7slp-owner-active-actions">'+
       '<button class="m7slp-owner-live '+(!canVideo&&!live?"locked":"")+'" type="button" data-action="go">'+esc(liveLabel)+'</button>'+
-      '<button class="m7slp-owner-edit" type="button" data-action="manage" data-offer-id="'+esc(firstOffer?.id||"")+'">Edit</button>'+
+      '<button class="m7slp-owner-add '+(offerLocked?"locked":"")+'" type="button" data-action="add" '+(offerFull?"disabled":"")+'>'+(offerFull?"Full":(offerLocked?"🔒 Offer":"＋ Offer"))+'</button>'+
+      '<button class="m7slp-owner-manage" type="button" data-action="manage" data-offer-id="'+esc(firstOffer?.id||"")+'">Manage</button>'+
     '</span>'+
   '</div>';
 }
+
 function ownerMarkup(){
   const live=!!state.broadcastLive;
   const used=offerUsed();
@@ -309,34 +626,56 @@ function ownerMarkup(){
   const canVideo=videoEnabled();
   const offerLocked=!offersEnabled()||lim<=0;
   const offerFull=!offerLocked&&used>=lim;
-  const title="Ready to go live";
-  const sub=(canVideo||!offerLocked)?"Start a broadcast or publish an offer.":"Premium access is required for Live features.";
   const slotText=offersEnabled()?(used+" / "+lim):"OFF";
 
   return '<div class="m7slp-owner">'+
-    '<div class="m7slp-owner-tag">♛ SHOP OWNER CONTROLS</div>'+
+    '<div class="m7slp-owner-top">'+
+      '<div class="m7slp-owner-tag">♛ SHOP OWNER</div>'+
+      '<div class="m7slp-owner-mini">Profile activity controls</div>'+
+    '</div>'+
     '<div class="m7slp-owner-main">'+
-      '<div class="m7slp-owner-state"><i></i><div><strong>'+esc(title)+'</strong><small>'+esc(sub)+'</small></div></div>'+
+      '<div class="m7slp-owner-state">'+
+        '<i></i>'+
+        '<div>'+
+          '<strong>Ready when you are</strong>'+
+          '<small>Start a live broadcast or publish an offer.</small>'+
+        '</div>'+
+      '</div>'+
       '<div class="m7slp-owner-actions">'+
-        '<button class="m7slp-go '+(canVideo?"":"locked")+'" type="button" data-action="go">'+(canVideo?"▣ Go Live":"🔒 Go Live")+'</button>'+
+        '<button class="m7slp-go '+(canVideo?"":"locked")+'" type="button" data-action="go">'+(canVideo?"● Go Live":"🔒 Go Live")+'</button>'+
         '<button class="m7slp-add '+(offerLocked?"locked":"")+'" type="button" data-action="add" '+(offerFull?"disabled":"")+'>'+(offerFull?"Slots Full":(offerLocked?"🔒 Add Offer":"＋ Add Offer"))+'</button>'+
       '</div>'+
     '</div>'+
     '<div class="m7slp-owner-bottom">'+
-      '<div class="m7slp-slots"><div class="m7slp-slots-line"><span>Offer slots</span><b>'+esc(slotText)+'</b></div><div class="m7slp-progress"><i style="width:'+pct+'%"></i></div></div>'+
-      '<div class="m7slp-owner-badge">'+(canVideo?"○ Broadcast ready":"○ Video Live off")+'</div>'+
+      '<div>'+
+        '<div class="m7slp-slots-line"><span>Offer slots</span><b>'+esc(slotText)+'</b></div>'+
+        '<div class="m7slp-progress"><i style="width:'+pct+'%"></i></div>'+
+      '</div>'+
+      '<div class="m7slp-owner-badge">'+(canVideo?"Broadcast ready":"Video Live off")+'</div>'+
     '</div>'+
   '</div>';
 }
+
 function render(){
   if(!root)return;
   setTheme();
+
   if(!known){
-    root.innerHTML='<section class="m7slp loading">Checking live status…</section>';
+    root.innerHTML='<section class="m7slp loading">Checking activity…</section>';
     return;
   }
-  const html='<section class="m7slp">'+(state.owner?ownerMarkup():viewerMarkup())+'</section>';
+
+  const active=!!state.broadcastLive||offerUsed()>0;
+  const mode=state.owner
+    ?(active?" owner-active-shell":" owner-idle-shell")
+    :(active?" viewer-active-shell":" viewer-idle-shell");
+
+  const html='<section class="m7slp'+mode+'">'+
+    (state.owner?ownerMarkup():viewerMarkup())+
+  '</section>';
+
   if(root.innerHTML===html)return;
+
   root.innerHTML=html;
   bind();
 }
