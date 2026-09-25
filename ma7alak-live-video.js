@@ -547,39 +547,11 @@ function injectIntoRoot(root,list){
   wrap.querySelectorAll("[data-m7lv-watch]").forEach(el=>el.addEventListener("click",()=>openViewer(el.dataset.m7lvWatch)));
 }
 function injectOwnerButton(){
-  ownerState();if(!ownerSlug)return;
-  const attach=bar=>{
-    if(!bar)return;
-    let btn=bar.querySelector(".m7lv-owner-go");
-    const live=streams.find(x=>String(x.shop_slug).toLowerCase()===ownerSlug);
-    if(!btn){
-      btn=document.createElement("button");
-      btn.type="button";
-      btn.className="m7lv-owner-go";
-      bar.appendChild(btn);
-    }
-    const videoAllowed=!!ownerEnt?.video_live_enabled;
-    btn.disabled=false;
-    btn.classList.toggle("m7lv-owner-go-locked",!videoAllowed&&!live);
-    btn.textContent=live?"🔴 Resume Live":(videoAllowed?"📹 Go Live":"🔒 Go Live");
-    btn.onclick=()=>{
-      if(!videoAllowed&&!live){
-        window.ShoufHonMembershipGate?.("video");
-        return;
-      }
-      preflight();
-    };
-  };
-
-  document.querySelectorAll('[data-ma7alak-live="shop"]').forEach(root=>{
-    const slug=String(root.dataset.shopSlug||currentPathSlug()).toLowerCase();
-    if(slug===ownerSlug)attach(root.querySelector(".m7lo-owner"));
-  });
-
-  /* The manual Hostinger shop widget lives inside an iframe.
-     Its + button opens the real Live & Offers owner panel in
-     the top-level page. Put Go Live inside that management panel too. */
-  document.querySelectorAll("#m7lo-overlay .m7lo-shop-panel .m7lo-owner").forEach(attach);
+  /* Intentionally empty.
+     Video LIVE controls are rendered by their own surfaces:
+     - ma7alak-live-offers.js for the management panel
+     - shoufhon-shop-live-panel.js for manual shop pages
+     Keeping this file out of those controls prevents cross-feature state races. */
 }
 function inject(){
   document.querySelectorAll('[data-ma7alak-live="home"]').forEach(root=>injectIntoRoot(root,streams));
@@ -1397,15 +1369,26 @@ async function preflight(){
   if($("#m7lv-preflight")||setupActive)return;
   ownerState();
   await loadOwnerEnt();
-  if(!ownerEnt?.video_live_enabled){
+
+  /* Video LIVE is independent from Live Offer slots. Use the dedicated
+     owner RPC as the authoritative access + time-limit check. */
+  const liveAccess=await ownerVideoLiveAccess();
+
+  if(liveAccess){
+    if(!liveAccess.video_live_enabled){
+      window.ShoufHonMembershipGate?.("video");
+      return;
+    }
+    if(liveAccess.exhausted){
+      window.ShoufHonMembershipGate?.("video_limit",liveAccess);
+      return;
+    }
+  }else if(!ownerEnt?.video_live_enabled){
+    /* Only fall back to the row snapshot if the RPC is unavailable. */
     window.ShoufHonMembershipGate?.("video");
     return;
   }
-  const liveAccess=await ownerVideoLiveAccess();
-  if(liveAccess?.exhausted){
-    window.ShoufHonMembershipGate?.("video_limit",liveAccess);
-    return;
-  }
+
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
   ownerState();
   const shop=window.Ma7alakOwnerAuth?.shop||{},allowed=true;
