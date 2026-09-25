@@ -5289,16 +5289,23 @@
   async function mediaSnapshot(client,slug,profile){
     var results=await Promise.all([
       client.from("shop_gallery").select("id,image_url,storage_path,sort_order,is_featured,created_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("created_at",{ascending:true}),
-      client.from("shop_videos").select("id,video_url,storage_path,sort_order,created_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("created_at",{ascending:true})
+      client.from("shop_videos").select("id,video_url,storage_path,sort_order,created_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("created_at",{ascending:true}),
+      client.from("shop_media_albums").select("id,shop_slug,title,description,sort_order,created_at,updated_at").eq("shop_slug",slug).order("sort_order",{ascending:true}).order("id",{ascending:true}),
+      client.from("shop_media_album_items").select("id,album_id,shop_slug,media_type,media_id,sort_order,is_cover,created_at").eq("shop_slug",slug).order("album_id",{ascending:true}).order("sort_order",{ascending:true}).order("id",{ascending:true})
     ]);
     if(results[0].error)throw results[0].error;
     if(results[1].error)throw results[1].error;
+    if(results[2].error)throw results[2].error;
+    if(results[3].error)throw results[3].error;
     var options=profile.directory_options||{};
     return{
       photos:results[0].data||[],
       videos:results[1].data||[],
+      albums:results[2].data||[],
+      albumItems:results[3].data||[],
       photoLimit:numberLimit(options.owner_media_photo_limit,6),
-      videoLimit:numberLimit(options.owner_media_video_limit,2)
+      videoLimit:numberLimit(options.owner_media_video_limit,2),
+      albumLimit:numberLimit(options.owner_media_album_item_limit,8)
     };
   }
 
@@ -5373,6 +5380,47 @@
         for(var i=0;i<files.length;i++){
           await uploadMediaFile(client,slug,type,files[i],order+i);
         }
+      }
+      else if(op==="album-save"){
+        var albumItems=Array.isArray(data.items)?data.items:[];
+        var albumPayload=albumItems.map(function(item){
+          return{
+            media_type:item&&item.mediaType==="video"?"video":"photo",
+            media_id:Number(item&&item.mediaId)
+          };
+        });
+        var coverPayload=data.cover&&data.cover.mediaId
+          ?{
+              media_type:data.cover.mediaType==="video"?"video":"photo",
+              media_id:Number(data.cover.mediaId)
+            }
+          :null;
+        var albumId=data.albumId===null||data.albumId===undefined||data.albumId===""
+          ?null
+          :Number(data.albumId);
+
+        if(albumPayload.some(function(item){return !Number.isFinite(item.media_id)})){
+          throw new Error("One selected album item is invalid.");
+        }
+
+        var savedAlbum=await client.rpc("owner_save_media_album",{
+          p_shop_slug:slug,
+          p_album_id:Number.isFinite(albumId)?albumId:null,
+          p_title:String(data.title||"").trim(),
+          p_description:String(data.description||"").trim()||null,
+          p_items:albumPayload,
+          p_cover:coverPayload
+        });
+        if(savedAlbum.error)throw savedAlbum.error;
+      }
+      else if(op==="album-delete"){
+        var deleteAlbumId=Number(data.albumId);
+        if(!Number.isFinite(deleteAlbumId))throw new Error("Album was not found.");
+        var deleteAlbum=await client.rpc("owner_delete_media_album",{
+          p_shop_slug:slug,
+          p_album_id:deleteAlbumId
+        });
+        if(deleteAlbum.error)throw deleteAlbum.error;
       }
       else if(op==="replace"){
         var replaceType=data.mediaType==="video"?"video":"photo";
