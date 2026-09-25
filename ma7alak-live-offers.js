@@ -337,6 +337,7 @@ async function ready(){
   return false;
 }
 let identityRun=0;
+let ownerIdentityReady=false;
 async function identity(){
   if(!c)return;
 
@@ -393,6 +394,7 @@ async function identity(){
     session=nextSession;
     ownerSlug=nextSlug;
     ent=nextEnt;
+    ownerIdentityReady=true;
   }catch(err){
     if(run!==identityRun)return;
     console.warn("SHOUFHON Live owner identity refresh:",err);
@@ -401,6 +403,7 @@ async function identity(){
     session=previousSession;
     ownerSlug=previousSlug;
     ent=previousEnt;
+    ownerIdentityReady=!!previousSlug||ownerIdentityReady;
     return;
   }
 
@@ -410,6 +413,7 @@ async function identity(){
     session=previousSession;
     ownerSlug=previousSlug;
     ent=previousEnt;
+    ownerIdentityReady=true;
   }
 }
 async function ownerVideoAccess(){
@@ -780,6 +784,7 @@ function currentOwnerSlug(){
 function send(win,type,shop){
   try{
     const s=String(shop||"").trim().toLowerCase();
+    if(s&&!ownerIdentityReady)return;
     const activeOwner=currentOwnerSlug();
     const own=!!(s&&activeOwner===s);
     const offerItems=publicData(s);
