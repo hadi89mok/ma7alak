@@ -348,10 +348,16 @@ function bind(){
   $('[data-action="add"]',root)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();post("MA7ALAK_LIVE_OFFERS_CREATE")});
 }
 
+let lastStateRequestAt=0;
 function requestState(){
   if(!slug)return;
+  const now=Date.now();
+  if(now-lastStateRequestAt<250)return;
+  lastStateRequestAt=now;
   post("MA7ALAK_LIVE_OFFERS_GET");
-  post("MA7ALAK_OWNER_STATE_GET");
+
+  /* Ask for owner cosmetics once in a while, but never use it as access truth. */
+  if(!directOwnerKnown||now%5000<300)post("MA7ALAK_OWNER_STATE_GET");
 }
 
 function onState(data){
@@ -360,7 +366,7 @@ function onState(data){
   known=true;
   state={
     ...state,
-    owner:(directOwnerKnown?(directOwner&&directOwnerSlug===slug):!!data.owner),
+    owner:!!data.owner,
     broadcastLive:!!data.broadcastLive,
     stream:data.stream&&typeof data.stream==="object"?data.stream:null,
     items:Array.isArray(data.items)?data.items:[],
@@ -429,7 +435,10 @@ window.addEventListener("message",event=>{
     directOwnerKnown=true;
     directOwner=!!d.isOwner;
     directOwnerSlug=String(d.shopSlug||"").trim().toLowerCase();
-    state.owner=directOwner&&directOwnerSlug===slug;
+
+    /* Use this message only for identity cosmetics. Ownership/access itself
+       comes from MA7ALAK_LIVE_OFFERS_STATE so the panel cannot flash OFF/LOCKED
+       while header auth is still restoring after back/forward navigation. */
     if(d.shop&&typeof d.shop==="object"){
       state.shop={
         ...state.shop,
@@ -438,7 +447,6 @@ window.addEventListener("message",event=>{
         shop_url:String(d.shop.shop_url||state.shop?.shop_url||"")
       };
     }
-    if(known)render();
     post("MA7ALAK_LIVE_OFFERS_GET");
   }
   if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
