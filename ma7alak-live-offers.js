@@ -1,7 +1,7 @@
 /* SHOUFHON LIVE & OFFERS V5 — multi-media galleries + video sound + owner media manager */
 (function(){
 "use strict";if(window.__M7_LIVE_V5__)return;window.__M7_LIVE_V5__=1;
-const BUCKET="live-offers",SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";let c,session,ownerSlug="",ent=null,items=[],ownerItems=[],channel,refreshing=false,viewId=null,lockedY=0,lastRenderSignature="",profileOptions=new Map();
+const BUCKET="live-offers",SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";let c,session,ownerSlug="",ent=null,items=[],ownerItems=[],channel,refreshing=false,viewId=null,lockedY=0,lastRenderSignature="",profileOptions=new Map(),overlayHistoryActive=false,overlayHistorySeq=0;const bridgeActionBusy=new Set(),uiActionBusy=new WeakSet();
 const $=(s,r=document)=>r.querySelector(s),$all=(s,r=document)=>[...r.querySelectorAll(s)],sleep=m=>new Promise(r=>setTimeout(r,m)),esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 function resolveClient(){
   const account=window.Ma7alakAccount?.client||null;
@@ -264,6 +264,21 @@ function panelPremiumCss(){
   .m7lo-owner-v6 .m7lo-owner-actions button{flex:1}
   .m7lo-owner-meta{margin-top:10px}
 }
+
+/* 2026-09-25 UX polish */
+.m7lo-action-pressed{animation:m7loButtonTap .28s cubic-bezier(.2,.85,.3,1)!important}
+.m7lo-action-busy{pointer-events:none!important;filter:brightness(.92)!important}
+@keyframes m7loButtonTap{0%{transform:scale(1)}45%{transform:scale(.93)}75%{transform:scale(1.035)}100%{transform:scale(1)}}
+#m7lo-publish-toast{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.42);backdrop-filter:blur(7px);opacity:0;transition:opacity .18s ease;pointer-events:auto}
+#m7lo-publish-toast.show{opacity:1}.m7lo-success-card{width:min(88vw,350px);padding:24px 20px;border:1px solid rgba(231,181,91,.38);border-radius:24px;background:linear-gradient(150deg,rgba(29,24,18,.98),rgba(8,8,8,.98));box-shadow:0 28px 80px rgba(0,0,0,.55);text-align:center}.m7lo-success-icon{width:54px;height:54px;margin:0 auto 12px;display:grid;place-items:center;border-radius:50%;background:rgba(54,220,130,.13);border:1px solid rgba(54,220,130,.38);color:#6cf0a8;font-size:27px;font-weight:950}.m7lo-success-card strong{display:block;color:#fff;font-size:19px}.m7lo-success-card span{display:block;margin-top:6px;color:rgba(255,255,255,.62);font-size:11px;line-height:1.5}
+.m7lo-media-count{top:12px!important;right:12px!important;bottom:auto!important;padding:7px 9px!important;background:rgba(5,5,5,.72)!important;border:1px solid rgba(255,255,255,.22)!important;letter-spacing:.35px}.m7lo-card.is-manage .m7lo-media-count{top:auto!important;bottom:12px!important}.m7lo-media-count b{color:#f1c56e}
+#m7lo-overlay.m7lo-shop-overlay #m7lo-panel.m7lo-shop-panel.is-owner{width:min(620px,100%)!important;max-height:min(90dvh,820px)!important;padding:17px!important}.m7lo-shop-panel.is-owner .m7lo-owner-active .m7lo-card{min-height:245px!important;flex-basis:min(78%,330px)!important}.m7lo-shop-panel.is-owner .m7lo-owner-active{margin-top:13px}
+.m7lo-view{width:min(560px,100%)!important;max-height:calc(100dvh - 12px)!important;border-radius:25px!important;background:#080808!important}.m7lo-hero{height:min(63dvh,650px)!important;min-height:330px!important}.m7lo-hero .m7lo-view-media{object-fit:cover!important}.m7lo-hero:after{inset:68% 0 0!important;background:linear-gradient(transparent,rgba(8,8,8,.82))!important}.m7lo-media-progress{left:15px!important;right:58px!important;top:14px!important;gap:4px!important}.m7lo-media-progress i{height:3px!important;background:rgba(255,255,255,.32)!important}.m7lo-media-progress i.on{background:#fff!important;box-shadow:none!important}.m7lo-hero-caption{position:absolute;z-index:7;left:13px;right:13px;bottom:12px;padding:9px 11px;border-radius:12px;background:rgba(5,5,5,.62);backdrop-filter:blur(8px);color:#fff;font-size:10px;line-height:1.35}.m7lo-gallery-pill{right:12px!important;bottom:12px!important;border-color:rgba(255,255,255,.24)!important;background:rgba(5,5,5,.68)!important}
+.m7lo-view-info{position:relative;z-index:4;padding:15px 16px 17px;background:#090909}.m7lo-view-shopline{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px}.m7lo-view-avatar{width:42px;height:42px;border-radius:13px;overflow:hidden;border:1px solid rgba(235,183,94,.28);background:#17130f;display:grid;place-items:center;color:#efbf6b;font-weight:950}.m7lo-view-avatar img,.m7lo-view-avatar span{width:100%;height:100%;object-fit:cover;display:grid;place-items:center}.m7lo-view-shopcopy strong{display:block;color:#fff;font-size:13px}.m7lo-view-shopcopy span{display:flex;align-items:center;gap:5px;margin-top:3px;color:#56de91;font-size:8px;font-weight:900}.m7lo-view-shopcopy i{width:6px;height:6px;border-radius:50%;background:#36dc82}.m7lo-view-info h2{margin:13px 0 5px!important;font-size:22px!important;line-height:1.08}.m7lo-view-info .m7lo-desc{margin:6px 0!important;max-height:5.9em;overflow:auto;color:rgba(255,255,255,.68)!important}.m7lo-view-location{margin:7px 0;color:rgba(255,255,255,.62);font-size:10px}.m7lo-view-info .m7lo-price{margin-top:8px}.m7lo-view-info .m7lo-schedule{margin:10px 0!important;padding:9px 10px!important;border-radius:12px!important}.m7lo-view-info .m7lo-times{grid-template-columns:1fr 1fr!important;gap:4px 9px!important;font-size:8px!important}.m7lo-view-info .m7lo-visit{margin-top:10px!important;padding:12px!important;border-radius:13px!important}.m7lo-view-info .m7lo-dots{margin-top:9px!important}.m7lo-owner-tools{top:12px!important;left:12px!important}
+.m7lo-gallery{width:min(620px,100%)!important}.m7lo-gallery-stage{height:min(80dvh,760px)!important}.m7lo-gallery-caption{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px;padding:12px 14px!important;text-align:left!important;background:#0b0b0b}.m7lo-gallery-caption strong{color:#efc16f;font-size:10px}.m7lo-gallery-caption span{color:#fff;font-size:11px;line-height:1.35}
+.m7lo-editor-panel,.m7lo-media-manager-panel{width:min(620px,100%)!important;max-height:calc(100dvh - 18px)!important;padding:20px!important}.m7lo-panel-subtitle{margin:3px 46px 12px 0;color:rgba(255,255,255,.55);font-size:10px;line-height:1.4}.m7lo-editor-panel .m7lo-types{grid-template-columns:repeat(4,minmax(0,1fr))}.m7lo-editor-panel .m7lo-type{grid-template-columns:1fr!important;text-align:center!important}.m7lo-editor-panel .m7lo-type-icon{margin:auto}.m7lo-publish-btn{min-height:48px!important;font-size:12px!important}
+.m7lo-pending-head{margin:10px 0 7px;color:#efc16f;font-size:10px;font-weight:950}.m7lo-pending-head small{color:rgba(255,255,255,.48);font-size:8px}.m7lo-pending-media{display:grid;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:start;margin-top:7px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}.m7lo-pending-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:rgba(228,170,79,.09);color:#efc16f}.m7lo-pending-media strong{display:block;font-size:9px;color:#fff}.m7lo-pending-media small{display:block;margin-top:2px;color:rgba(255,255,255,.45);font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7lo-pending-media textarea,.m7lo-media-caption-input{width:100%;box-sizing:border-box;margin-top:6px;min-height:52px;padding:8px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#080808;color:#fff;resize:vertical;font:inherit;font-size:9px;line-height:1.35}.m7lo-media-row{grid-template-columns:64px minmax(0,1fr)!important;align-items:start!important}.m7lo-media-row>.m7lo-cover,.m7lo-media-row>.m7lo-danger{grid-column:auto!important}.m7lo-media-row-main{min-width:0}.m7lo-media-row-tools{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+@media(max-width:520px){#m7lo-overlay.m7lo-shop-overlay #m7lo-panel.m7lo-shop-panel.is-owner{max-height:92dvh!important;width:100%!important}.m7lo-shop-panel.is-owner .m7lo-owner-active .m7lo-card{flex-basis:78%!important;min-height:230px!important}.m7lo-hero{height:58dvh!important;min-height:300px!important}.m7lo-view-info{padding:13px 13px 15px}.m7lo-view-info h2{font-size:20px!important}.m7lo-editor-panel,.m7lo-media-manager-panel{padding:16px 14px 18px!important}.m7lo-editor-panel .m7lo-types{grid-template-columns:1fr 1fr}.m7lo-media-row{grid-template-columns:56px minmax(0,1fr)!important}.m7lo-gallery-stage{height:74dvh!important}}
 `;
   document.head.appendChild(s);
 }
@@ -491,7 +506,7 @@ async function load(){
     }
 
     if(ids.length){
-      const m=await c.from("shop_live_post_media").select("id,post_id,shop_slug,media_url,storage_path,media_type,sort_order,is_cover,created_at").in("post_id",ids).order("sort_order",{ascending:true}).order("id",{ascending:true});
+      const m=await c.from("shop_live_post_media").select("id,post_id,shop_slug,media_url,storage_path,media_type,sort_order,is_cover,caption,created_at").in("post_id",ids).order("sort_order",{ascending:true}).order("id",{ascending:true});
       (m.error?[]:(m.data||[])).forEach(row=>{
         const a=mediaByPost.get(String(row.post_id))||[];
         a.push(row);
@@ -525,7 +540,7 @@ async function load(){
   }
 }
 function media(x,cl="m7lo-media"){if(!x.media_url)return"";return x.media_type==="video"?`<video class="${cl}" src="${esc(x.media_url)}" muted autoplay loop playsinline preload="metadata"></video>`:`<img class="${cl}" src="${esc(x.media_url)}" alt="">`}
-function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length,hasMedia=!!x.media_url;return`<article class="m7lo-card ${hasMedia?"has-media":"no-media"}" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count">▣ View all ${count}</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
+function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length,hasMedia=!!x.media_url;return`<article class="m7lo-card ${hasMedia?"has-media":"no-media"} ${manage?"is-manage":""}" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count" aria-label="${count} media items"><b>▣</b> ${count} MEDIA</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
 function videoLiveRows(shopSlug){
   try{
     const rows=Array.isArray(window.ShoufHonLiveVideo?.bridgeItems)?window.ShoufHonLiveVideo.bridgeItems:[];
@@ -589,67 +604,195 @@ function ownerBar(list){
   </div>`;
 }
 function bind(root){
-  $all('[data-m7-video-stream]',root).forEach(el=>el.onclick=e=>{
+  $all('[data-m7-video-stream]',root).forEach(el=>el.onclick=e=>guardedUiAction(el,async()=>{
     e.preventDefault();e.stopPropagation();
     window.ShoufHonLiveVideo?.open?.(el.dataset.m7VideoStream);
+  },"Opening…"));
+
+  $all('[data-m7-id]',root).forEach(el=>el.onclick=e=>{
+    if(e.target.closest('[data-m7-edit],[data-m7-end],[data-m7-media]'))return;
+    guardedUiAction(el,async()=>view(el.dataset.m7Id),"");
   });
-  $all('[data-m7-id]',root).forEach(el=>el.onclick=e=>{if(!e.target.closest('[data-m7-edit],[data-m7-end],[data-m7-media]'))view(el.dataset.m7Id)});
-  $all('[data-m7-end]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();endPost(b.dataset.m7End)});
-  $all('[data-m7-edit]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();editor(b.dataset.m7Edit)});
-  $all('[data-m7-media]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();mediaManager(b.dataset.m7Media)});
-  $("[data-m7-create]",root)?.addEventListener("click",e=>{
+
+  $all('[data-m7-end]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();pressFeedback(b);endPost(b.dataset.m7End)});
+  $all('[data-m7-edit]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();guardedUiAction(b,async()=>editor(b.dataset.m7Edit),"Opening…")});
+  $all('[data-m7-media]',root).forEach(b=>b.onclick=e=>{e.stopPropagation();guardedUiAction(b,async()=>mediaManager(b.dataset.m7Media),"Opening…")});
+
+  $("[data-m7-create]",root)?.addEventListener("click",e=>guardedUiAction(e.currentTarget,async()=>{
     e.preventDefault();e.stopPropagation();
     if(e.currentTarget?.dataset?.m7OfferAllowed==="0"||!ent?.enabled){membershipGate("offer");return}
     creator();
-  });
-  $("[data-m7-video-live]",root)?.addEventListener("click",e=>{
+  },"Opening…"));
+
+  $("[data-m7-video-live]",root)?.addEventListener("click",e=>guardedUiAction(e.currentTarget,async()=>{
     e.preventDefault();e.stopPropagation();
-    (async()=>{
-      if(!await allowVideoLiveOrGate())return;
-      close();
-      setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
-    })().catch(err=>console.warn("SHOUFHON Video LIVE access:",err));
-  });
+    if(!await allowVideoLiveOrGate())return;
+    window.__SHOUFHON_VIDEO_ACCESS_VERIFIED_UNTIL__=Date.now()+6000;
+    close();
+    setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),90);
+  },"Opening camera…"));
 }
 function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$all('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false,"");bind(r)});$all('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list,videoCount=videoLiveRows(s).length;r.style.display=(!list.length&&!own&&!videoCount)?"none":"";r.innerHTML=own?(ownerBar(management)+ownerActivityHtml(management,s)):section(list,true,false,s);bind(r);m7loApplyDesign(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
 function timers(){$all('[data-m7-start]').forEach(e=>{let x=[...items,...ownerItems].find(q=>String(q.id)===e.dataset.m7Start);if(x)e.textContent=startText(x)});$all('[data-m7-endtime]').forEach(e=>e.textContent="Ends in "+remain(e.dataset.m7Endtime));if(items.some(x=>new Date(x.ends_at)<=new Date()))load()}
 function lock(){if(document.documentElement.classList.contains("m7lo-locked"))return;lockedY=scrollY;document.documentElement.classList.add("m7lo-locked");Object.assign(document.body.style,{position:"fixed",top:`-${lockedY}px`,left:"0",right:"0",width:"100%"})}
 function unlock(){document.documentElement.classList.remove("m7lo-locked");["position","top","left","right","width"].forEach(k=>document.body.style[k]="");scrollTo(0,lockedY)}
-function close(){let o=$("#m7lo-overlay");if(o)o.remove();viewId=null;unlock()}
+function revokeDraftUrls(root){
+  try{$all("[data-m7-object-url]",root||document).forEach(el=>{const u=el.dataset.m7ObjectUrl;if(u)URL.revokeObjectURL(u)})}catch(_){}
+}
+function removeLiveOverlay(){
+  const o=$("#m7lo-overlay");
+  if(o){revokeDraftUrls(o);o.remove()}
+  viewId=null;
+  unlock();
+}
+function armOverlayHistory(){
+  if(overlayHistoryActive)return;
+  try{
+    overlayHistorySeq++;
+    history.pushState({...history.state,m7loOverlay:true,m7loOverlaySeq:overlayHistorySeq},"",location.href);
+    overlayHistoryActive=true;
+  }catch(_){}
+}
+function mountLiveOverlay(d){
+  document.body.appendChild(d);
+  armOverlayHistory();
+}
+function close(){
+  if(overlayHistoryActive&&history.state?.m7loOverlay){
+    try{history.back();return}catch(_){}
+  }
+  overlayHistoryActive=false;
+  removeLiveOverlay();
+}
+addEventListener("popstate",()=>{
+  if(!overlayHistoryActive)return;
+  overlayHistoryActive=false;
+  removeLiveOverlay();
+});
+function pressFeedback(el,label){
+  if(!el)return;
+  el.classList.remove("m7lo-action-pressed");
+  void el.offsetWidth;
+  el.classList.add("m7lo-action-pressed");
+  if(label&&!el.dataset.m7OriginalLabel){
+    el.dataset.m7OriginalLabel=el.textContent||"";
+    el.textContent=label;
+    setTimeout(()=>{if(el?.isConnected&&el.dataset.m7OriginalLabel){el.textContent=el.dataset.m7OriginalLabel;delete el.dataset.m7OriginalLabel}},900);
+  }
+  setTimeout(()=>el?.classList?.remove("m7lo-action-pressed"),320);
+}
+async function guardedUiAction(el,task,label){
+  if(!el||uiActionBusy.has(el))return;
+  uiActionBusy.add(el);
+  pressFeedback(el,label);
+  el.classList.add("m7lo-action-busy");
+  try{await task()}finally{setTimeout(()=>{uiActionBusy.delete(el);el?.classList?.remove("m7lo-action-busy")},450)}
+}
+async function guardedBridgeAction(key,task){
+  if(bridgeActionBusy.has(key))return;
+  bridgeActionBusy.add(key);
+  try{await task()}finally{setTimeout(()=>bridgeActionBusy.delete(key),650)}
+}
 function liveToast(message){
-  let old=$("#m7lo-publish-toast");
-  if(old)old.remove();
-  let t=document.createElement("div");
+  $("#m7lo-publish-toast")?.remove();
+  const t=document.createElement("div");
   t.id="m7lo-publish-toast";
-  t.textContent=String(message||"✓ Published — You are now live!");
-  Object.assign(t.style,{
-    position:"fixed",
-    left:"50%",
-    top:"max(18px,env(safe-area-inset-top))",
-    transform:"translateX(-50%)",
-    zIndex:"2147483647",
-    maxWidth:"calc(100vw - 28px)",
-    padding:"12px 18px",
-    borderRadius:"999px",
-    background:"rgba(12,12,12,.96)",
-    color:"#fff",
-    border:"1px solid rgba(228,170,79,.55)",
-    boxShadow:"0 12px 34px rgba(0,0,0,.45)",
-    font:"800 13px/1.25 Arial,Segoe UI,sans-serif",
-    textAlign:"center",
-    pointerEvents:"none",
-    opacity:"1"
-  });
+  t.innerHTML='<div class="m7lo-success-card"><div class="m7lo-success-icon">✓</div><strong>Published successfully</strong><span>'+esc(String(message||"Your update is now live for viewers."))+'</span></div>';
   document.body.appendChild(t);
-  setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .2s ease"},1350);
-  setTimeout(()=>t.remove(),1600);
+  requestAnimationFrame(()=>t.classList.add("show"));
+  const dismiss=()=>{t.classList.remove("show");setTimeout(()=>t.remove(),220)};
+  t.addEventListener("click",dismiss,{once:true});
+  setTimeout(dismiss,1900);
 }
 function navList(){return items.filter(x=>new Date(x.ends_at)>new Date())}
 function avatarHtml(x){let name=String(x.shop_name||x.shop_slug||"Shop"),letter=esc(name.charAt(0).toUpperCase());return`<div class="m7lo-avatar">${x.profile_image_url?`<img src="${esc(x.profile_image_url)}" alt="${esc(name)}">`:`<span>${letter}</span>`}</div>`}
-function heroHtml(x){let cover=(x.media||[])[0]||{media_url:x.media_url,media_type:x.media_type},count=(x.media||[]).length||(+!!x.media_url);if(!cover?.media_url)return`<div class="m7lo-hero"></div>`;let visual=cover.media_type==="video"?`<video class="m7lo-view-media" src="${esc(cover.media_url)}" muted loop playsinline preload="metadata"></video>`:`<img class="m7lo-view-media" src="${esc(cover.media_url)}" alt="">`;return`<div class="m7lo-hero"><div class="m7lo-media-progress">${Array.from({length:Math.max(1,count)},(_,i)=>`<i class="${i===0?"on":""}"></i>`).join("")}</div>${visual}${cover.media_type==="video"?'<button class="m7lo-play" type="button">▶<small>Play with sound</small></button>':""}${count>1?`<button class="m7lo-gallery-pill" type="button">▣ View all ${count} ›</button>`:""}</div>`}
-function view(id,direction){let x=items.find(q=>String(q.id)===String(id))||ownerItems.find(q=>String(q.id)===String(id));if(!x)return;let old=$("#m7lo-overlay");if(old)old.remove();else lock();viewId=x.id;let [ic,lab]=meta(x.post_type),own=String(x.shop_slug).toLowerCase()===ownerSlug,d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel" class="m7lo-view ${direction?`m7lo-swipe-in-${direction}`:""}"><button class="m7lo-close">×</button>${own?`<div class="m7lo-owner-tools"><button data-view-edit="${esc(x.id)}">✎ Edit</button><button data-view-media="${esc(x.id)}">▣ Manage media</button></div>`:""}${heroHtml(x)}<div class="m7lo-center-card">${avatarHtml(x)}<div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div><div class="m7lo-live-label">● LIVE NOW</div><span class="m7lo-badge">${ic} ${lab}</span><h2>${esc(x.title)}</h2>${x.description?`<p class="m7lo-desc">${esc(x.description)}</p>`:""}${x.location_text?`<p class="m7lo-desc">📍 ${esc(x.location_text)}</p>`:""}${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}<div class="m7lo-schedule">${timing(x)}</div><a class="m7lo-visit" href="${esc(x.shop_url||`/${encodeURIComponent(x.shop_slug)}`)}">Visit Shop →</a><div class="m7lo-dots">${navList().map(q=>`<i class="${String(q.id)===String(x.id)?"on":""}"></i>`).join("")}</div></div></div>`;document.body.appendChild(d);m7loApplyDesign(d.querySelector("#m7lo-panel")||d,x.directory_options||((profileOptions.get(String(x.shop_slug||"").toLowerCase())||{}).directory_options||{}));$(".m7lo-close",d).onclick=close;$("[data-view-edit]",d)?.addEventListener("click",()=>editor(x.id));$("[data-view-media]",d)?.addEventListener("click",()=>mediaManager(x.id));$(".m7lo-gallery-pill",d)?.addEventListener("click",()=>openGallery(x.id,0));let play=$(".m7lo-play",d),video=$(".m7lo-view-media",d);if(play&&video)play.onclick=()=>{video.muted=false;video.controls=true;video.play().catch(()=>{});play.remove()};let sx=0,sy=0,st=0;d.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});d.addEventListener("touchend",e=>{let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-st<750&&Math.abs(dy)>65&&Math.abs(dy)>Math.abs(dx)*1.15)navigate(dy<0?1:-1)},{passive:true});d.onclick=e=>{if(e.target===d)close()}}
+function heroHtml(x){
+  const gallery=(x.media||[]).length?x.media:[x.media_url?{media_url:x.media_url,media_type:x.media_type||"image",caption:null}:null].filter(Boolean);
+  const cover=gallery[0]||null;
+  const count=gallery.length;
+  if(!cover?.media_url)return'<div class="m7lo-hero m7lo-hero-empty"></div>';
+  const visual=cover.media_type==="video"
+    ? `<video class="m7lo-view-media" src="${esc(cover.media_url)}" muted loop playsinline preload="metadata"></video>`
+    : `<img class="m7lo-view-media" src="${esc(cover.media_url)}" alt="">`;
+  const progress=count>1
+    ? `<div class="m7lo-media-progress">${gallery.map((_,i)=>`<i class="${i===0?"on":""}"></i>`).join("")}</div>`
+    : "";
+  const caption=String(cover.caption||"").trim();
+  return`<div class="m7lo-hero">${progress}${visual}${cover.media_type==="video"?'<button class="m7lo-play" type="button">▶<small>Play with sound</small></button>':""}${count>1?`<button class="m7lo-gallery-pill" type="button"><b>▣</b> 1 / ${count} · View media</button>`:""}${caption?`<div class="m7lo-hero-caption">${esc(caption)}</div>`:""}</div>`;
+}
+function view(id,direction){
+  const x=items.find(q=>String(q.id)===String(id))||ownerItems.find(q=>String(q.id)===String(id));
+  if(!x)return;
+  const old=$("#m7lo-overlay");
+  if(old){revokeDraftUrls(old);old.remove()}else lock();
+  viewId=x.id;
+  const [ic,lab]=meta(x.post_type);
+  const own=String(x.shop_slug).toLowerCase()===ownerSlug;
+  const name=String(x.shop_name||x.shop_slug||"Shop");
+  const avatar=x.profile_image_url
+    ? `<img src="${esc(x.profile_image_url)}" alt="">`
+    : `<span>${esc(name.charAt(0).toUpperCase())}</span>`;
+  const d=document.createElement("div");
+  d.id="m7lo-overlay";
+  d.innerHTML=`<div id="m7lo-panel" class="m7lo-view ${direction?`m7lo-swipe-in-${direction}`:""}">
+    <button class="m7lo-close" type="button">×</button>
+    ${own?`<div class="m7lo-owner-tools"><button data-view-edit="${esc(x.id)}">✎ Edit</button><button data-view-media="${esc(x.id)}">▣ Media</button></div>`:""}
+    ${heroHtml(x)}
+    <div class="m7lo-view-info">
+      <div class="m7lo-view-shopline">
+        <div class="m7lo-view-avatar">${avatar}</div>
+        <div class="m7lo-view-shopcopy"><strong>${esc(name)}</strong><span><i></i> LIVE NOW</span></div>
+        <span class="m7lo-badge">${ic} ${lab}</span>
+      </div>
+      <h2>${esc(x.title)}</h2>
+      ${x.description?`<p class="m7lo-desc">${esc(x.description)}</p>`:""}
+      ${x.location_text?`<p class="m7lo-view-location">📍 ${esc(x.location_text)}</p>`:""}
+      ${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}
+      <div class="m7lo-schedule">${timing(x)}</div>
+      <a class="m7lo-visit" href="${esc(x.shop_url||`/${encodeURIComponent(x.shop_slug)}`)}">Visit Shop →</a>
+      <div class="m7lo-dots">${navList().map(q=>`<i class="${String(q.id)===String(x.id)?"on":""}"></i>`).join("")}</div>
+    </div>
+  </div>`;
+  mountLiveOverlay(d);
+  m7loApplyDesign(d.querySelector("#m7lo-panel")||d,x.directory_options||((profileOptions.get(String(x.shop_slug||"").toLowerCase())||{}).directory_options||{}));
+  $(".m7lo-close",d).onclick=close;
+  $("[data-view-edit]",d)?.addEventListener("click",e=>guardedUiAction(e.currentTarget,async()=>editor(x.id),"Opening…"));
+  $("[data-view-media]",d)?.addEventListener("click",e=>guardedUiAction(e.currentTarget,async()=>mediaManager(x.id),"Opening…"));
+  $(".m7lo-gallery-pill",d)?.addEventListener("click",()=>openGallery(x.id,0));
+  const play=$(".m7lo-play",d),video=$(".m7lo-view-media",d);
+  if(play&&video)play.onclick=()=>{video.muted=false;video.controls=true;video.play().catch(()=>{});play.remove()};
+  let sx=0,sy=0,st=0;
+  d.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});
+  d.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-st<750&&Math.abs(dy)>65&&Math.abs(dy)>Math.abs(dx)*1.15)navigate(dy<0?1:-1)},{passive:true});
+  d.onclick=e=>{if(e.target===d)close()};
+}
 function navigate(dir){let a=navList(),panel=$("#m7lo-panel");if(a.length<2||panel?.dataset.m7Moving==="1")return;let i=a.findIndex(x=>String(x.id)===String(viewId));if(i<0)i=0;let next=a[(i+dir+a.length)%a.length];if(!panel)return view(next.id,dir>0?"next":"prev");panel.dataset.m7Moving="1";panel.classList.add(dir>0?"m7lo-swipe-out-up":"m7lo-swipe-out-down");setTimeout(()=>view(next.id,dir>0?"next":"prev"),220)}
-function openGallery(postId,index=0){let x=items.find(q=>String(q.id)===String(postId))||ownerItems.find(q=>String(q.id)===String(postId)),a=x?.media||[];if(!a.length)return;index=(index+a.length)%a.length;let old=$("#m7lo-overlay");if(old)old.remove();let row=a[index],d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel" class="m7lo-gallery"><button class="m7lo-close m7lo-gallery-close">×</button><div class="m7lo-media-progress">${a.map((_,i)=>`<i class="${i===index?"on":""}"></i>`).join("")}</div><div class="m7lo-gallery-stage">${row.media_type==="video"?`<video src="${esc(row.media_url)}" controls autoplay playsinline></video>`:`<img src="${esc(row.media_url)}" alt="">`}${a.length>1?'<button class="m7lo-gallery-nav m7lo-gallery-prev">‹</button><button class="m7lo-gallery-nav m7lo-gallery-next">›</button>':""}</div><div class="m7lo-gallery-caption">${index+1} / ${a.length} · ${esc(x.title)}</div></div>`;document.body.appendChild(d);$(".m7lo-close",d).onclick=()=>view(postId);$(".m7lo-gallery-prev",d)?.addEventListener("click",()=>openGallery(postId,index-1));$(".m7lo-gallery-next",d)?.addEventListener("click",()=>openGallery(postId,index+1));let sx=0;d.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});d.addEventListener("touchend",e=>{let dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)openGallery(postId,index+(dx<0?1:-1))},{passive:true})}
+function openGallery(postId,index=0){
+  const x=items.find(q=>String(q.id)===String(postId))||ownerItems.find(q=>String(q.id)===String(postId));
+  const a=x?.media||[];
+  if(!a.length)return;
+  index=(index+a.length)%a.length;
+  const old=$("#m7lo-overlay");
+  if(old){revokeDraftUrls(old);old.remove()}else lock();
+  const row=a[index],d=document.createElement("div");
+  d.id="m7lo-overlay";
+  const caption=String(row.caption||"").trim();
+  d.innerHTML=`<div id="m7lo-panel" class="m7lo-gallery">
+    <button class="m7lo-close m7lo-gallery-close">×</button>
+    ${a.length>1?`<div class="m7lo-media-progress">${a.map((_,i)=>`<i class="${i===index?"on":""}"></i>`).join("")}</div>`:""}
+    <div class="m7lo-gallery-stage">
+      ${row.media_type==="video"?`<video src="${esc(row.media_url)}" controls autoplay playsinline></video>`:`<img src="${esc(row.media_url)}" alt="">`}
+      ${a.length>1?'<button class="m7lo-gallery-nav m7lo-gallery-prev">‹</button><button class="m7lo-gallery-nav m7lo-gallery-next">›</button>':""}
+    </div>
+    <div class="m7lo-gallery-caption"><strong>${index+1} / ${a.length}</strong><span>${caption?esc(caption):esc(x.title)}</span></div>
+  </div>`;
+  mountLiveOverlay(d);
+  $(".m7lo-close",d).onclick=()=>view(postId);
+  $(".m7lo-gallery-prev",d)?.addEventListener("click",()=>openGallery(postId,index-1));
+  $(".m7lo-gallery-next",d)?.addEventListener("click",()=>openGallery(postId,index+1));
+  let sx=0;d.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+  d.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)openGallery(postId,index+(dx<0?1:-1))},{passive:true});
+}
 function openShopPanel(slug){
   let shopSlug=String(slug||"").trim().toLowerCase();
   if(!shopSlug)return;
@@ -662,7 +805,8 @@ function openShopPanel(slug){
   d.id="m7lo-overlay";
   d.className="m7lo-shop-overlay";
   d.innerHTML=`<div id="m7lo-panel" class="m7lo-shop-panel" data-shop-slug="${esc(shopSlug)}"><button class="m7lo-close">×</button>${own?(ownerBar(management)+ownerActivityHtml(management,shopSlug)):section(management,true,false,shopSlug)}</div>`;
-  document.body.appendChild(d);
+  d.querySelector("#m7lo-panel")?.classList.toggle("is-owner",own);
+  mountLiveOverlay(d);
   $(".m7lo-close",d).onclick=close;
   d.onclick=e=>{if(e.target===d)close()};
   bind(d);
@@ -683,10 +827,96 @@ function openShopPanel(slug){
   }
   timers();
 }
-function managerRow(m,i,total){let preview=m.media_type==="video"?`<video class="m7lo-media-thumb" src="${esc(m.media_url)}" muted playsinline preload="metadata"></video>`:`<img class="m7lo-media-thumb" src="${esc(m.media_url)}" alt="">`;return`<div class="m7lo-media-row" data-manager-id="${esc(m.id)}">${preview}<div><strong>${m.is_cover?"COVER":"Media "+(i+1)}</strong><div class="m7lo-sub">${m.media_type}</div><button class="m7lo-small-btn" data-move="up" ${i===0?"disabled":""}>↑</button><button class="m7lo-small-btn" data-move="down" ${i===total-1?"disabled":""}>↓</button></div><button class="m7lo-small-btn m7lo-cover" data-cover ${m.is_cover?"disabled":""}>${m.is_cover?"Cover":"Set cover"}</button><button class="m7lo-small-btn m7lo-danger" data-delete>Delete</button></div>`}
-function mediaManager(id){let x=ownerItems.find(q=>String(q.id)===String(id));if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;$("#m7lo-overlay")?.remove();lock();let a=x.media||[],d=document.createElement("div");d.id="m7lo-overlay";d.innerHTML=`<div id="m7lo-panel"><button class="m7lo-close">×</button><div class="m7lo-panel-title">Manage media</div><p class="m7lo-sub">Choose the cover, change the order, add more, or delete individual files. Maximum 8.</p><div class="m7lo-media-list">${a.map((m,i)=>managerRow(m,i,a.length)).join("")||'<div class="m7lo-empty">No media yet.</div>'}</div><label class="m7lo-file" style="display:block;margin-top:12px">＋ Add photos / videos<input id="m7lo-manager-files" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-manager-status" class="m7lo-status"></div></div>`;document.body.appendChild(d);$(".m7lo-close",d).onclick=close;$("#m7lo-manager-files",d).onchange=e=>addMedia(x,[...(e.target.files||[])]);$all('[data-manager-id]',d).forEach(row=>{let mid=row.dataset.managerId,m=a.find(q=>String(q.id)===String(mid));$("[data-cover]",row).onclick=()=>setCover(x,m);$("[data-delete]",row).onclick=()=>deleteMedia(x,m);$all('[data-move]',row).forEach(b=>b.onclick=()=>moveMedia(x,m,b.dataset.move))})}
-async function refreshManager(postId,message){await load();mediaManager(postId);let st=$("#m7lo-manager-status");if(st&&message)st.textContent=message}
-async function addMedia(x,files){let st=$("#m7lo-manager-status");try{let existing=(x.media||[]).length;if(!files.length)return;if(existing+files.length>8)throw new Error(`You can add ${Math.max(0,8-existing)} more file(s).`);let uploaded=[];for(let file of files)uploaded.push(await uploadLiveFile(file,String(x.id),st));let rows=uploaded.map((m,i)=>({post_id:Number(x.id),shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,sort_order:existing+i,is_cover:existing===0&&i===0,created_by:session.user.id})),r=await c.from("shop_live_post_media").insert(rows);if(r.error)throw r.error;if(existing===0&&rows[0])await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:rows[0].media_url,media_type:rows[0].media_type}});await refreshManager(x.id,"Media added.")}catch(err){if(st)st.textContent=err.message||String(err)}}
+function managerRow(m,i,total){
+  const preview=m.media_type==="video"
+    ? `<video class="m7lo-media-thumb" src="${esc(m.media_url)}" muted playsinline preload="metadata"></video>`
+    : `<img class="m7lo-media-thumb" src="${esc(m.media_url)}" alt="">`;
+  return`<div class="m7lo-media-row" data-manager-id="${esc(m.id)}">
+    ${preview}
+    <div class="m7lo-media-row-main">
+      <strong>${m.is_cover?"COVER":"Media "+(i+1)}</strong>
+      <div class="m7lo-sub">${m.media_type}</div>
+      <textarea class="m7lo-media-caption-input" data-caption-input maxlength="300" placeholder="Describe this photo / video…">${esc(m.caption||"")}</textarea>
+      <div class="m7lo-media-row-tools">
+        <button class="m7lo-small-btn" data-caption-save>Save description</button>
+        <button class="m7lo-small-btn" data-move="up" ${i===0?"disabled":""}>↑</button>
+        <button class="m7lo-small-btn" data-move="down" ${i===total-1?"disabled":""}>↓</button>
+      </div>
+    </div>
+    <button class="m7lo-small-btn m7lo-cover" data-cover ${m.is_cover?"disabled":""}>${m.is_cover?"Cover":"Set cover"}</button>
+    <button class="m7lo-small-btn m7lo-danger" data-delete>Delete</button>
+  </div>`;
+}
+function pendingMediaRows(files){
+  return files.map((file,i)=>`<div class="m7lo-pending-media" data-pending-index="${i}">
+    <div class="m7lo-pending-icon">${file.type.startsWith("video/")?"▶":"▧"}</div>
+    <div><strong>Media ${i+1}</strong><small>${esc(file.name)}</small><textarea maxlength="300" data-pending-caption placeholder="Optional description for this media…"></textarea></div>
+  </div>`).join("");
+}
+function mediaManager(id){
+  const x=ownerItems.find(q=>String(q.id)===String(id));
+  if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;
+  $("#m7lo-overlay")?.remove();
+  lock();
+  const a=x.media||[],d=document.createElement("div");
+  d.id="m7lo-overlay";
+  d.innerHTML=`<div id="m7lo-panel" class="m7lo-media-manager-panel">
+    <button class="m7lo-close">×</button>
+    <div class="m7lo-panel-title">Manage media</div>
+    <p class="m7lo-sub">Choose the cover, reorder files, and give each photo or video its own description. Maximum 8.</p>
+    <div class="m7lo-media-list">${a.map((m,i)=>managerRow(m,i,a.length)).join("")||'<div class="m7lo-empty">No media yet.</div>'}</div>
+    <label class="m7lo-file" style="display:block;margin-top:12px">＋ Add photos / videos<input id="m7lo-manager-files" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label>
+    <div id="m7lo-manager-draft"></div>
+    <div id="m7lo-manager-status" class="m7lo-status"></div>
+  </div>`;
+  mountLiveOverlay(d);
+  $(".m7lo-close",d).onclick=close;
+  $("#m7lo-manager-files",d).onchange=e=>{
+    const files=[...(e.target.files||[])];
+    const box=$("#m7lo-manager-draft",d);
+    if(!files.length){box.innerHTML="";return}
+    if(a.length+files.length>8){box.innerHTML='<div class="m7lo-status">You can add '+Math.max(0,8-a.length)+' more file(s).</div>';return}
+    box.innerHTML='<div class="m7lo-pending-head">Describe each selected media</div>'+pendingMediaRows(files)+'<button id="m7lo-manager-upload" class="m7lo-btn" type="button">Upload '+files.length+' media</button>';
+    $("#m7lo-manager-upload",box).onclick=e2=>guardedUiAction(e2.currentTarget,async()=>{
+      const captions=$all("[data-pending-caption]",box).map(t=>t.value.trim());
+      await addMedia(x,files,captions);
+    },"Uploading…");
+  };
+  $all('[data-manager-id]',d).forEach(row=>{
+    const mid=row.dataset.managerId,m=a.find(q=>String(q.id)===String(mid));
+    $("[data-cover]",row).onclick=()=>setCover(x,m);
+    $("[data-delete]",row).onclick=()=>deleteMedia(x,m);
+    $("[data-caption-save]",row).onclick=e=>guardedUiAction(e.currentTarget,()=>saveMediaCaption(x,m,$("[data-caption-input]",row)?.value||""),"Saving…");
+    $all('[data-move]',row).forEach(b=>b.onclick=()=>moveMedia(x,m,b.dataset.move));
+  });
+}
+async function refreshManager(postId,message){await load();mediaManager(postId);const st=$("#m7lo-manager-status");if(st&&message)st.textContent=message}
+async function addMedia(x,files,captions=[]){
+  const st=$("#m7lo-manager-status");
+  try{
+    const existing=(x.media||[]).length;
+    if(!files.length)return;
+    if(existing+files.length>8)throw new Error(`You can add ${Math.max(0,8-existing)} more file(s).`);
+    const uploaded=[];
+    for(const file of files)uploaded.push(await uploadLiveFile(file,String(x.id),st));
+    const rows=uploaded.map((m,i)=>({
+      post_id:Number(x.id),shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,
+      sort_order:existing+i,is_cover:existing===0&&i===0,caption:String(captions[i]||"").trim().slice(0,300)||null,created_by:session.user.id
+    }));
+    const r=await c.from("shop_live_post_media").insert(rows);
+    if(r.error)throw r.error;
+    if(existing===0&&rows[0])await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:rows[0].media_url,media_type:rows[0].media_type}});
+    liveToast("Media uploaded and added to your live update.");
+    await refreshManager(x.id,"Media added.");
+  }catch(err){if(st)st.textContent=err.message||String(err)}
+}
+async function saveMediaCaption(x,m,value){
+  const caption=String(value||"").trim().slice(0,300)||null;
+  const r=await c.from("shop_live_post_media").update({caption}).eq("id",Number(m.id)).eq("post_id",Number(x.id));
+  if(r.error)throw r.error;
+  m.caption=caption;
+  liveToast("Media description saved.");
+}
 async function setCover(x,m){let st=$("#m7lo-manager-status");try{st.textContent="Updating cover…";let a=await c.from("shop_live_post_media").update({is_cover:false}).eq("post_id",Number(x.id));if(a.error)throw a.error;let b=await c.from("shop_live_post_media").update({is_cover:true}).eq("id",Number(m.id)).eq("post_id",Number(x.id));if(b.error)throw b.error;let r=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:m.media_url,media_type:m.media_type}});if(r.error)throw r.error;await refreshManager(x.id,"Cover updated.")}catch(err){st.textContent=err.message||String(err)}}
 async function deleteMedia(x,m){if(!confirm("Delete this photo / video?"))return;let st=$("#m7lo-manager-status");try{let r=await c.from("shop_live_post_media").delete().eq("id",Number(m.id)).eq("post_id",Number(x.id));if(r.error)throw r.error;if(m.storage_path){let s=await c.storage.from(BUCKET).remove([m.storage_path]);if(s.error)console.warn("Media file cleanup:",s.error)}let remaining=(x.media||[]).filter(q=>String(q.id)!==String(m.id));if(m.is_cover){let next=remaining[0]||null;if(next){await c.from("shop_live_post_media").update({is_cover:true}).eq("id",Number(next.id));let u=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:next.media_url,media_type:next.media_type}});if(u.error)throw u.error}else{let u=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(x.id),p_post:{media_url:null,media_type:null}});if(u.error)throw u.error}}await refreshManager(x.id,"Media deleted.")}catch(err){st.textContent=err.message||String(err)}}
 async function moveMedia(x,m,dir){let a=(x.media||[]).slice().sort((p,q)=>p.sort_order-q.sort_order),i=a.findIndex(q=>String(q.id)===String(m.id)),j=dir==="up"?i-1:i+1;if(i<0||j<0||j>=a.length)return;let first=a[i],second=a[j],r1=await c.from("shop_live_post_media").update({sort_order:second.sort_order}).eq("id",Number(first.id)),r2=await c.from("shop_live_post_media").update({sort_order:first.sort_order}).eq("id",Number(second.id));if(r1.error||r2.error)return alert((r1.error||r2.error).message);await refreshManager(x.id,"Order updated.")}
@@ -728,15 +958,104 @@ async function endPost(id){
 
   setTimeout(load,220);
 }
-function formHtml(x){let edit=!!x;const type=x?.post_type||"offer";const types=[["offer","🏷️","OFFER","Deal / price"],["happening","●","HAPPENING NOW","Right now"],["arrival","✨","NEW ARRIVAL","Just landed"],["event","▣","EVENT","Date / activity"]];return`<div id="m7lo-panel"><button class="m7lo-close">×</button><div class="m7lo-panel-title">${edit?"Edit Live / Offer":"Add Live / Offer"}</div><div class="m7lo-types">${types.map(a=>`<button class="m7lo-type ${a[0]===type?"on":""}" data-m7-type="${a[0]}" type="button"><span class="m7lo-type-icon">${a[1]}</span><span class="m7lo-type-copy"><b>${a[2]}</b><small>${a[3]}</small></span></button>`).join("")}</div><form id="m7lo-form" class="m7lo-form"><input id="m7lo-type" type="hidden" value="${esc(type)}"><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="Title" value="${esc(x?.title||"")}"><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" placeholder="Description">${esc(x?.description||"")}</textarea><input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}"><div id="m7lo-prices" class="m7lo-two" style="display:${type==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div><div class="m7lo-two m7lo-time-row"><label class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label class="m7lo-field"><span class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>${edit?"":`<label class="m7lo-file">📷 Add up to 8 photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div>`}<button class="m7lo-btn" type="submit">${edit?"Save Changes":"⚡ Publish"}</button><div id="m7lo-status" class="m7lo-status"></div></form></div>`}
+function formHtml(x){
+  const edit=!!x,type=x?.post_type||"offer";
+  const types=[["offer","🏷️","OFFER","Deal / price"],["happening","●","HAPPENING NOW","Right now"],["arrival","✨","NEW ARRIVAL","Just landed"],["event","▣","EVENT","Date / activity"]];
+  return`<div id="m7lo-panel" class="m7lo-editor-panel">
+    <button class="m7lo-close">×</button>
+    <div class="m7lo-panel-title">${edit?"Edit Live / Offer":"Create Live / Offer"}</div>
+    <div class="m7lo-panel-subtitle">${edit?"Update what viewers see immediately.":"Publish an offer, arrival, event or happening-now update."}</div>
+    <div class="m7lo-types">${types.map(a=>`<button class="m7lo-type ${a[0]===type?"on":""}" data-m7-type="${a[0]}" type="button"><span class="m7lo-type-icon">${a[1]}</span><span class="m7lo-type-copy"><b>${a[2]}</b><small>${a[3]}</small></span></button>`).join("")}</div>
+    <form id="m7lo-form" class="m7lo-form">
+      <input id="m7lo-type" type="hidden" value="${esc(type)}">
+      <label class="m7lo-field"><span class="m7lo-label">TITLE</span><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="What are you sharing?" value="${esc(x?.title||"")}"></label>
+      <label class="m7lo-field"><span class="m7lo-label">MAIN DESCRIPTION</span><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" placeholder="Short details viewers should know…">${esc(x?.description||"")}</textarea></label>
+      <input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}">
+      <div id="m7lo-prices" class="m7lo-two" style="display:${type==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div>
+      <div class="m7lo-two m7lo-time-row"><label class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label class="m7lo-field"><span class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>
+      ${edit?"":`<label class="m7lo-file">📷 Add up to 8 photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div><div id="m7lo-new-media-draft"></div>`}
+      <button class="m7lo-btn m7lo-publish-btn" type="submit">${edit?"Save Changes":"⚡ Publish Now"}</button>
+      <div id="m7lo-status" class="m7lo-status"></div>
+    </form>
+  </div>`;
+}
 function localValue(v){let d=new Date(v);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
-function wireForm(d,x){$(".m7lo-close",d).onclick=close;$all('[data-m7-type]',d).forEach(b=>b.onclick=()=>{$all('[data-m7-type]',d).forEach(q=>q.classList.remove("on"));b.classList.add("on");$("#m7lo-type").value=b.dataset.m7Type;$("#m7lo-prices").style.display=b.dataset.m7Type==="offer"?"grid":"none"});if(x){$("#m7lo-start").value=localValue(x.starts_at);$("#m7lo-finish").value=localValue(x.ends_at);$("#m7lo-form").onsubmit=e=>saveEdit(e,x.id)}else{let h=Math.min(6,Math.max(1,Number(ent?.max_duration_hours||48))),f=new Date(Date.now()+h*3600000);$("#m7lo-finish").value=localValue(f);$("#m7lo-file").onchange=e=>{let n=e.target.files?.length||0;$("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first file becomes the cover`:""};$("#m7lo-form").onsubmit=publish}}
-function creator(){const lim=Math.max(0,Number(ent?.active_limit||0));if(!ent?.enabled||lim<=0){membershipGate("offer");return}if(ownerItems.length>=lim)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(null);document.body.appendChild(d);wireForm(d,null)}
-function editor(id){let x=ownerItems.find(q=>String(q.id)===String(id));if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(x);document.body.appendChild(d);wireForm(d,x)}
+function wireForm(d,x){
+  $(".m7lo-close",d).onclick=close;
+  $all('[data-m7-type]',d).forEach(b=>b.onclick=()=>{
+    $all('[data-m7-type]',d).forEach(q=>q.classList.remove("on"));
+    b.classList.add("on");
+    $("#m7lo-type").value=b.dataset.m7Type;
+    $("#m7lo-prices").style.display=b.dataset.m7Type==="offer"?"grid":"none";
+  });
+  if(x){
+    $("#m7lo-start").value=localValue(x.starts_at);
+    $("#m7lo-finish").value=localValue(x.ends_at);
+    $("#m7lo-form").onsubmit=e=>saveEdit(e,x.id);
+  }else{
+    const h=Math.min(6,Math.max(1,Number(ent?.max_duration_hours||48))),f=new Date(Date.now()+h*3600000);
+    $("#m7lo-finish").value=localValue(f);
+    $("#m7lo-file").onchange=e=>{
+      const files=[...(e.target.files||[])],n=files.length,box=$("#m7lo-new-media-draft");
+      $("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first media becomes the cover`:"";
+      box.innerHTML=n?'<div class="m7lo-pending-head">Add a description to each media <small>optional</small></div>'+pendingMediaRows(files):"";
+    };
+    $("#m7lo-form").onsubmit=publish;
+  }
+}
+
+function creator(){const lim=Math.max(0,Number(ent?.active_limit||0));if(!ent?.enabled||lim<=0){membershipGate("offer");return}if(ownerItems.length>=lim)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(null);mountLiveOverlay(d);wireForm(d,null)}
+function editor(id){let x=ownerItems.find(q=>String(q.id)===String(id));if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(x);mountLiveOverlay(d);wireForm(d,x)}
 function payloadBase(){let type=$("#m7lo-type").value;return{post_type:type,title:$("#m7lo-title").value.trim(),description:$("#m7lo-desc").value.trim()||null,location_text:$("#m7lo-location").value.trim()||null,starts_at:new Date($("#m7lo-start").value||Date.now()).toISOString(),ends_at:new Date($("#m7lo-finish").value).toISOString(),original_price:type==="offer"&&$("#m7lo-original").value?Number($("#m7lo-original").value):null,offer_price:type==="offer"&&$("#m7lo-offer").value?Number($("#m7lo-offer").value):null}}
 async function saveEdit(e,id){e.preventDefault();let st=$("#m7lo-status"),p=payloadBase();st.textContent="Saving…";if(new Date(p.ends_at)<=new Date(p.starts_at)){st.textContent="End time must be after start.";return}let existing=ownerItems.find(x=>String(x.id)===String(id))||items.find(x=>String(x.id)===String(id));let r=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(id),p_post:p});if(r.error){st.textContent=r.error.message;return}if(existing)upsertLocalPost({...existing,...p,id:Number(id),status:"active"});close();setTimeout(load,180)}
 async function uploadLiveFile(file,postKey,statusEl){if(file.size>50*1024*1024)throw new Error(`${file.name}: maximum file size is 50 MB.`);let mediaType=file.type.startsWith("video/")?"video":"image",ext=(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,""),path=`${ownerSlug}/${postKey}/${crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random()}.${ext}`;statusEl&&(statusEl.textContent=`Uploading ${file.name}…`);let u=await c.storage.from(BUCKET).upload(path,file,{contentType:file.type,cacheControl:"86400",upsert:false});if(u.error)throw u.error;return{media_url:c.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,media_type:mediaType,storage_path:path}}
-async function publish(e){e.preventDefault();let st=$("#m7lo-status"),btn=e.submitter;btn.disabled=true;try{await identity();if(!ownerSlug||!ent?.enabled||Number(ent?.active_limit||0)<=0)throw new Error("Live Offers access is not enabled for this shop.");let p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48),files=[...($("#m7lo-file").files||[])];if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);let uploaded=[];for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));let sp=await c.from("shop_profiles").select("shop_name,profile_image_url,shop_url,directory_options").eq("shop_slug",ownerSlug).maybeSingle(),cover=uploaded[0]||{};Object.assign(p,{shop_slug:ownerSlug,shop_name:sp.data?.shop_name||ownerSlug,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="Publishing…";let r=await c.rpc("ma7alak_create_live_post",{p_post:p});if(r.error)throw r.error;let postId=Number(r.data),rows=[];if(uploaded.length){rows=uploaded.map((m,i)=>({post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,sort_order:i,is_cover:i===0,created_by:session.user.id}));let ins=await c.from("shop_live_post_media").insert(rows);if(ins.error)throw ins.error}let localMedia=rows.map((m,i)=>({...m,id:"local-"+postId+"-"+i}));upsertLocalPost({...p,id:postId,status:"active",profile_image_url:sp.data?.profile_image_url||null,shop_url:sp.data?.shop_url||null,directory_options:sp.data?.directory_options||{},media:localMedia,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="✓ Published — You are now live!";liveToast("✓ Published — You are now live!");setTimeout(()=>{close();load().catch(err=>console.warn("SHOUFHON Live refresh:",err))},650)}catch(err){st.textContent=err.message||String(err);btn.disabled=false}}
+async function publish(e){
+  e.preventDefault();
+  const st=$("#m7lo-status"),btn=e.submitter;
+  if(btn.disabled)return;
+  btn.disabled=true;pressFeedback(btn,"Publishing…");
+  try{
+    await identity();
+    if(!ownerSlug||!ent?.enabled||Number(ent?.active_limit||0)<=0)throw new Error("Live Offers access is not enabled for this shop.");
+    const p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48);
+    const files=[...($("#m7lo-file").files||[])];
+    const captions=$all("#m7lo-new-media-draft [data-pending-caption]").map(t=>t.value.trim().slice(0,300));
+    if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");
+    if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");
+    if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);
+
+    const uploaded=[];
+    for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));
+
+    const sp=await c.from("shop_profiles").select("shop_name,profile_image_url,shop_url,directory_options").eq("shop_slug",ownerSlug).maybeSingle();
+    const cover=uploaded[0]||{};
+    Object.assign(p,{shop_slug:ownerSlug,shop_name:sp.data?.shop_name||ownerSlug,media_url:cover.media_url||null,media_type:cover.media_type||null});
+
+    st.textContent="Publishing…";
+    const r=await c.rpc("ma7alak_create_live_post",{p_post:p});
+    if(r.error)throw r.error;
+    const postId=Number(r.data);
+    let rows=[];
+
+    if(uploaded.length){
+      rows=uploaded.map((m,i)=>({
+        post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,
+        sort_order:i,is_cover:i===0,caption:String(captions[i]||"").trim()||null,created_by:session.user.id
+      }));
+      const ins=await c.from("shop_live_post_media").insert(rows);
+      if(ins.error)throw ins.error;
+    }
+
+    const localMedia=rows.map((m,i)=>({...m,id:"local-"+postId+"-"+i}));
+    upsertLocalPost({...p,id:postId,status:"active",profile_image_url:sp.data?.profile_image_url||null,shop_url:sp.data?.shop_url||null,directory_options:sp.data?.directory_options||{},media:localMedia,media_url:cover.media_url||null,media_type:cover.media_type||null});
+    st.textContent="✓ Published";
+    liveToast(files.length>1?`Your update is live with ${files.length} media items.`:"Your update is now live for viewers.");
+    setTimeout(()=>{close();load().catch(err=>console.warn("SHOUFHON Live refresh:",err))},900);
+  }catch(err){
+    st.textContent=err.message||String(err);
+    btn.disabled=false;
+  }
+}
 function sortLocalLive(list){return list.sort((a,b)=>new Date(b.starts_at||b.created_at||0)-new Date(a.starts_at||a.created_at||0))}
 function commitLocalLiveState(){
   items=sortLocalLive(activeCachedItems(items));
@@ -983,11 +1302,11 @@ function bridge(){
     }
 
     if(d.type==="MA7ALAK_LIVE_OWNER_MANAGE"){
-      (async()=>{
-        if(!await refreshOwnerStateForShop(s))return;
-        await ensureFreshLiveState();
+      guardedBridgeAction("manage:"+s,async()=>{
+        if(currentOwnerSlug()!==s&&!await refreshOwnerStateForShop(s))return;
         openShopPanel(s);
-      })().catch(err=>console.warn("SHOUFHON Live owner manage:",err));
+        ensureFreshLiveState().then(()=>{if(document.querySelector("#m7lo-overlay .m7lo-shop-panel"))openShopPanel(s)}).catch(()=>{});
+      }).catch(err=>console.warn("SHOUFHON Live owner manage:",err));
       return;
     }
 
@@ -1002,12 +1321,13 @@ function bridge(){
     }
 
     if(d.type==="MA7ALAK_LIVE_VIDEO_GO"){
-      (async()=>{
-        if(!await refreshOwnerStateForShop(s))return;
+      guardedBridgeAction("video:"+s,async()=>{
+        if(currentOwnerSlug()!==s&&!await refreshOwnerStateForShop(s))return;
         if(!await allowVideoLiveOrGate())return;
+        window.__SHOUFHON_VIDEO_ACCESS_VERIFIED_UNTIL__=Date.now()+6000;
         close();
-        setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
-      })().catch(err=>console.warn("SHOUFHON Live video start:",err));
+        setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),90);
+      }).catch(err=>console.warn("SHOUFHON Live video start:",err));
       return;
     }
 
@@ -1021,7 +1341,7 @@ function bridge(){
     }
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_CREATE"){
-      (async()=>{if(await refreshOwnerStateForShop(s))creator()})().catch(err=>console.warn("SHOUFHON Live create:",err));
+      guardedBridgeAction("create:"+s,async()=>{if(currentOwnerSlug()===s||await refreshOwnerStateForShop(s))creator()}).catch(err=>console.warn("SHOUFHON Live create:",err));
       return;
     }
 
@@ -1031,7 +1351,7 @@ function bridge(){
     }
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_EDIT"){
-      (async()=>{if(await refreshOwnerStateForShop(s))editor(d.id)})().catch(err=>console.warn("SHOUFHON Live edit:",err));
+      guardedBridgeAction("edit:"+s+":"+String(d.id||""),async()=>{if(currentOwnerSlug()===s||await refreshOwnerStateForShop(s))editor(d.id)}).catch(err=>console.warn("SHOUFHON Live edit:",err));
     }
   });
 }
