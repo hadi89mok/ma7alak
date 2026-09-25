@@ -294,27 +294,40 @@ function apply(){
     );
   }
 
+  /*
+     Never append a second explanatory empty message below the notification
+     engine. Keep exactly one compact empty state in the panel.
+  */
+  list
+    .querySelector(
+      ".m7-follow-filter-empty"
+    )
+    ?.remove();
+
   let empty=
     list.querySelector(
-      ".m7-follow-filter-empty"
+      "#ma7alak-notification-empty"
     );
 
   if(!visibleRows.length){
-    const message=
-      own
-        ? "Shop owners do not receive their own shop notifications."
-        : "No new notifications from shops you follow.";
-
     if(!empty){
       empty=document.createElement("div");
-      empty.className="m7-follow-filter-empty";
-      empty.style.cssText=
-        "padding:28px;text-align:center;color:#999";
-      list.appendChild(empty);
-    }
+      empty.id="ma7alak-notification-empty";
+      empty.innerHTML=
+        '<div class="ma7alak-notification-empty-icon">🔔</div>'+
+        '<div class="ma7alak-notification-empty-title">No notifications</div>'+
+        '<div class="ma7alak-notification-empty-text">You\'re all caught up.</div>';
 
-    if(empty.textContent!==message){
-      empty.textContent=message;
+      const more=
+        list.querySelector(
+          "#ma7alak-notification-more"
+        );
+
+      if(more){
+        more.before(empty);
+      }else{
+        list.appendChild(empty);
+      }
     }
   }else if(empty){
     empty.remove();
