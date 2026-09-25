@@ -4740,6 +4740,7 @@
   const activeFrames=new Map();
   let savedPageOverflow=null;
   let suppressNextViewerPop=false;
+  let ownerMediaScrollRestoreTimer=0;
 
   function ensureStyle(){
     if(document.getElementById("shoufhon-embed-viewer-portal-css")){
@@ -5016,7 +5017,11 @@
       shopSlug:String(data&&data.shopSlug||""),
       historyArmed:false,
       scrollX:Number(window.scrollX||0),
-      scrollY:Number(window.scrollY||0)
+      scrollY:Number(window.scrollY||0),
+      previousScrollRestoration:
+        ("scrollRestoration" in history)
+          ?String(history.scrollRestoration||"auto")
+          :""
     };
 
     activeFrames.set(frame,state);
@@ -5060,6 +5065,17 @@
     document.body.classList.add("shoufhon-embed-viewer-open");
 
     if(state.viewerKind==="owner-media-editor"){
+      /*
+         Same-document history.back() can restore an older scroll position
+         before Hostinger has finished demoting the fullscreen Media iframe.
+         Keep history restoration manual only for the lifetime of this editor.
+      */
+      try{
+        if("scrollRestoration" in history){
+          history.scrollRestoration="manual";
+        }
+      }catch(_){}
+
       try{
         const base=
           history.state &&
@@ -5129,10 +5145,35 @@
       }
 
       try{
-        window.scrollTo(
-          Number(state.scrollX||0),
-          Number(state.scrollY||0)
-        );
+        window.scrollTo({
+          left:Number(state.scrollX||0),
+          top:Number(state.scrollY||0),
+          behavior:"instant"
+        });
+      }catch(_){
+        try{
+          window.scrollTo(
+            Number(state.scrollX||0),
+            Number(state.scrollY||0)
+          );
+        }catch(__){}
+      }
+    };
+
+    const restoreHistoryScrollMode=function(){
+      if(
+        !state ||
+        state.viewerKind!=="owner-media-editor" ||
+        !("scrollRestoration" in history)
+      ){
+        return;
+      }
+
+      try{
+        history.scrollRestoration=
+          state.previousScrollRestoration==="manual"
+            ?"manual"
+            :"auto";
       }catch(_){}
     };
 
@@ -5203,10 +5244,22 @@
          owner opened it. history.back() can otherwise restore an older scroll
          position before Hostinger finishes removing the promoted iframe.
       */
+      /*
+         Everything is restored inside one visual frame while native history
+         restoration remains disabled. Re-apply a few times only to defeat
+         late Hostinger layout measurements, not browser history movement.
+      */
       restoreScroll();
       requestAnimationFrame(restoreScroll);
-      setTimeout(restoreScroll,80);
-      setTimeout(restoreScroll,220);
+      setTimeout(restoreScroll,40);
+      setTimeout(restoreScroll,120);
+      setTimeout(restoreScroll,260);
+
+      clearTimeout(ownerMediaScrollRestoreTimer);
+      ownerMediaScrollRestoreTimer=setTimeout(function(){
+        restoreScroll();
+        restoreHistoryScrollMode();
+      },520);
     }
   }
 
