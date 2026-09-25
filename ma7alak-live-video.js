@@ -120,7 +120,9 @@ function ensurePremiumCss(){
 .m7lv-owner-add-offer:disabled{opacity:.42}
 
 /* =========================================================
-   GO LIVE STUDIO — CAMERA PREVIEW BEFORE BROADCAST
+   GO LIVE STUDIO — CAMERA-FIRST PREVIEW BEFORE BROADCAST
+   The camera keeps its native framing. Controls stay compact,
+   and GO LIVE is always visible without scrolling.
 ========================================================= */
 #m7lv-preflight{
   position:fixed!important;
@@ -144,16 +146,14 @@ function ensurePremiumCss(){
   height:100dvh;
   margin:0 auto;
   overflow:hidden;
-  background:#060606;
+  background:#050505;
   font-family:Arial,"Segoe UI",sans-serif;
 }
 .m7lv-setup-stage{
   position:absolute;
   inset:0;
   overflow:hidden;
-  background:
-    radial-gradient(circle at 50% 28%,rgba(255,255,255,.055),transparent 38%),
-    #080808;
+  background:#050505;
 }
 #m7lv-setup-camera{
   position:absolute;
@@ -161,13 +161,14 @@ function ensurePremiumCss(){
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#080808;
+  background:#050505;
 }
 #m7lv-setup-camera>div{width:100%!important;height:100%!important}
 #m7lv-setup-camera video{
   width:100%!important;
   height:100%!important;
   object-fit:contain!important;
+  object-position:center top!important;
   transform:none!important;
   -webkit-transform:none!important;
 }
@@ -176,19 +177,19 @@ function ensurePremiumCss(){
   inset:0;
   pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(0,0,0,.48),rgba(0,0,0,.04) 24%,rgba(0,0,0,.02) 48%,rgba(0,0,0,.86) 100%);
+    linear-gradient(180deg,rgba(0,0,0,.52),rgba(0,0,0,.02) 19%,rgba(0,0,0,.01) 55%,rgba(0,0,0,.72) 100%);
 }
 .m7lv-setup-loading{
   position:absolute;
   z-index:3;
   left:50%;
-  top:42%;
+  top:39%;
   transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:10px;
-  color:rgba(255,255,255,.75);
+  gap:9px;
+  color:rgba(255,255,255,.76);
   font-size:11px;
   font-weight:800;
   text-align:center;
@@ -212,13 +213,13 @@ function ensurePremiumCss(){
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:9px;
-  padding:max(12px,env(safe-area-inset-top)) 12px 8px;
+  gap:8px;
+  padding:max(10px,env(safe-area-inset-top)) 10px 8px;
 }
 .m7lv-setup-topbtn,
 .m7lv-setup-tool{
   border:1px solid rgba(255,255,255,.16);
-  background:rgba(7,7,8,.48);
+  background:rgba(7,7,8,.46);
   color:#fff;
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
@@ -236,103 +237,107 @@ function ensurePremiumCss(){
 }
 .m7lv-setup-preview-chip{
   min-height:32px;
+  max-width:calc(100% - 104px);
   display:flex;
   align-items:center;
   justify-content:center;
   gap:7px;
-  padding:0 12px;
+  padding:0 11px;
   border:1px solid rgba(255,255,255,.14);
   border-radius:999px;
-  background:rgba(5,5,6,.46);
+  background:rgba(5,5,6,.44);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  color:rgba(255,255,255,.86);
+  color:rgba(255,255,255,.88);
   font-size:9px;
   font-weight:950;
-  letter-spacing:.55px;
+  letter-spacing:.45px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   box-shadow:0 8px 22px rgba(0,0,0,.18);
 }
 .m7lv-setup-preview-chip i{
   width:7px;
   height:7px;
+  flex:0 0 7px;
   border-radius:50%;
-  background:#9a9a9a;
+  background:#aaa;
   box-shadow:0 0 8px rgba(255,255,255,.28);
 }
 .m7lv-setup-tools{
   position:absolute;
   z-index:18;
-  right:10px;
-  top:50%;
-  transform:translateY(-55%);
+  right:9px;
+  top:28%;
   display:flex;
   flex-direction:column;
-  gap:9px;
+  gap:8px;
 }
 .m7lv-setup-tool{
-  width:52px;
-  min-height:52px;
+  width:50px;
+  min-height:50px;
   padding:5px 3px;
-  border-radius:18px;
+  border-radius:17px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:3px;
-  font-size:20px;
+  gap:2px;
+  font-size:19px;
 }
 .m7lv-setup-tool span{
-  max-width:46px;
+  max-width:44px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  color:rgba(255,255,255,.72);
+  color:rgba(255,255,255,.74);
   font-size:7.5px;
   font-weight:900;
 }
 .m7lv-setup-tool.on{
-  border-color:rgba(255,255,255,.54);
+  border-color:rgba(255,255,255,.58);
   background:#fff;
   color:#111;
 }
 .m7lv-setup-tool.on span{color:#111}
-.m7lv-setup-tool:disabled{opacity:.34}
+.m7lv-setup-tool:disabled{opacity:.30}
+
+/* Compact dock: never scroll this container. GO LIVE always stays visible. */
 .m7lv-setup-bottom{
   position:absolute;
   z-index:24;
-  left:9px;
-  right:9px;
-  bottom:max(9px,env(safe-area-inset-bottom));
-  max-height:min(49dvh,520px);
-  overflow:auto;
-  scrollbar-width:none;
-  padding:12px;
+  left:8px;
+  right:8px;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  overflow:visible;
+  padding:10px;
   border:1px solid rgba(255,255,255,.13);
-  border-radius:24px;
-  background:linear-gradient(180deg,rgba(15,15,16,.76),rgba(7,7,8,.91));
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(16,16,17,.76),rgba(6,6,7,.92));
   backdrop-filter:blur(22px) saturate(125%);
   -webkit-backdrop-filter:blur(22px) saturate(125%);
   box-shadow:0 18px 50px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);
 }
-.m7lv-setup-bottom::-webkit-scrollbar{display:none}
 .m7lv-setup-shop{
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:8px;
   min-width:0;
-  margin-bottom:10px;
+  min-height:34px;
+  margin-bottom:7px;
 }
 .m7lv-setup-avatar{
-  width:39px;
-  height:39px;
-  flex:0 0 39px;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
   display:grid;
   place-items:center;
   overflow:hidden;
   border:1px solid rgba(228,170,79,.60);
   border-radius:50%;
   background:#181818;
-  font-size:13px;
+  font-size:12px;
   font-weight:950;
   box-shadow:0 0 16px rgba(228,170,79,.12);
 }
@@ -344,90 +349,161 @@ function ensurePremiumCss(){
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:13px;
+  font-size:12px;
   font-weight:950;
 }
 .m7lv-setup-shopcopy small{
   display:block;
-  margin-top:2px;
-  color:rgba(255,255,255,.55);
-  font-size:8.5px;
+  margin-top:1px;
+  color:rgba(255,255,255,.52);
+  font-size:7.5px;
   font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 #m7lv-title{
   width:100%!important;
-  min-height:48px!important;
-  padding:0 13px!important;
+  min-height:42px!important;
+  padding:0 12px!important;
   border:1px solid rgba(255,255,255,.13)!important;
-  border-radius:14px!important;
+  border-radius:13px!important;
   background:rgba(255,255,255,.055)!important;
   color:#fff!important;
   outline:none!important;
-  font-size:14px!important;
+  font-size:13px!important;
   font-weight:750!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
 }
 #m7lv-title::placeholder{color:rgba(255,255,255,.43)}
-.m7lv-setup-section{
-  margin-top:11px;
+.m7lv-setup-quick{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:7px;
+  margin-top:7px;
 }
+.m7lv-setup-open,
+.m7lv-setup-reset{
+  min-height:38px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  background:rgba(255,255,255,.055);
+  color:#fff;
+  font-weight:900;
+}
+.m7lv-setup-open{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:0 10px;
+  text-align:left;
+}
+.m7lv-setup-open>strong{font-size:15px;line-height:1}
+.m7lv-setup-open>span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9px;
+  flex:1;
+}
+.m7lv-setup-open>em{
+  color:#f1c76d;
+  font-style:normal;
+  font-size:8px;
+  font-weight:950;
+  text-transform:capitalize;
+}
+.m7lv-setup-chevron{font-size:11px;transition:transform .22s ease}
+.m7lv-setup-open.open .m7lv-setup-chevron{transform:rotate(180deg)}
+.m7lv-setup-reset{
+  padding:0 10px;
+  color:rgba(255,255,255,.74);
+  font-size:8px;
+}
+.m7lv-setup-drawer{
+  max-height:0;
+  margin:0;
+  padding:0 1px;
+  overflow:hidden;
+  opacity:0;
+  transform:translateY(8px);
+  pointer-events:none;
+  transition:max-height .28s cubic-bezier(.16,1,.3,1),opacity .18s ease,transform .24s ease,margin .24s ease,padding .24s ease;
+}
+.m7lv-setup-drawer.open{
+  max-height:min(38dvh,330px);
+  margin-top:8px;
+  padding-top:8px;
+  overflow-y:auto;
+  scrollbar-width:none;
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+  border-top:1px solid rgba(255,255,255,.09);
+}
+.m7lv-setup-drawer::-webkit-scrollbar{display:none}
+.m7lv-setup-section{margin-top:9px}
+.m7lv-setup-drawer>.m7lv-setup-section:first-child{margin-top:0}
 .m7lv-setup-label{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:8px;
-  margin:0 1px 7px;
+  margin:0 1px 6px;
   color:rgba(255,255,255,.72);
   font-size:8px;
   font-weight:950;
-  letter-spacing:.65px;
+  letter-spacing:.62px;
   text-transform:uppercase;
 }
 .m7lv-setup-label em{
-  color:rgba(255,255,255,.38);
+  color:rgba(255,255,255,.36);
   font-style:normal;
   font-size:7px;
   font-weight:750;
   letter-spacing:0;
   text-transform:none;
+  text-align:right;
 }
 .m7lv-look-row{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:7px;
+  gap:6px;
 }
 .m7lv-look{
-  min-height:48px;
-  padding:6px 4px;
+  min-height:44px;
+  padding:5px 3px;
   border:1px solid rgba(255,255,255,.11);
-  border-radius:14px;
+  border-radius:13px;
   background:rgba(255,255,255,.045);
   color:#fff;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:3px;
+  gap:2px;
   font-size:8px;
   font-weight:900;
 }
-.m7lv-look b{font-size:16px;line-height:1}
+.m7lv-look b{font-size:15px;line-height:1}
 .m7lv-look[data-look="soft"] b{color:#ffc3d3}
 .m7lv-look[data-look="glow"] b{color:#f1c76d}
 .m7lv-look[data-look="warm"] b{color:#ffad66}
 .m7lv-look.active{
   border-color:rgba(255,255,255,.72);
-  background:rgba(255,255,255,.16);
-  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 8px 18px rgba(0,0,0,.18);
+  background:rgba(255,255,255,.15);
+  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 8px 18px rgba(0,0,0,.18);
 }
 .m7lv-setup-range{
   display:grid;
-  grid-template-columns:72px minmax(0,1fr) 40px;
+  grid-template-columns:66px minmax(0,1fr) 40px;
   align-items:center;
-  gap:8px;
-  min-height:34px;
+  gap:7px;
+  min-height:31px;
 }
-.m7lv-setup-range + .m7lv-setup-range{margin-top:3px}
+.m7lv-setup-range + .m7lv-setup-range{margin-top:2px}
 .m7lv-setup-range>span{
   color:rgba(255,255,255,.72);
   font-size:8.5px;
@@ -445,19 +521,21 @@ function ensurePremiumCss(){
 }
 .m7lv-setup-range.is-off{display:none}
 .m7lv-pre-status{
-  min-height:17px!important;
-  margin:9px 2px 0!important;
+  min-height:14px!important;
+  max-height:28px!important;
+  margin:6px 2px 0!important;
+  overflow:hidden!important;
   color:rgba(255,255,255,.60)!important;
-  font-size:9px!important;
-  line-height:1.35!important;
+  font-size:8.5px!important;
+  line-height:1.3!important;
   text-align:center!important;
 }
 .m7lv-start{
   width:100%;
-  min-height:53px;
-  margin-top:9px;
+  min-height:50px;
+  margin-top:6px;
   border:0;
-  border-radius:16px;
+  border-radius:15px;
   background:linear-gradient(135deg,#ff3159,#d5143d);
   color:#fff;
   font-size:14px;
@@ -465,17 +543,23 @@ function ensurePremiumCss(){
   box-shadow:0 12px 28px rgba(218,21,62,.24),inset 0 1px 0 rgba(255,255,255,.18);
 }
 .m7lv-start:disabled{opacity:.42}
-.m7lv-setup-footnote{
-  margin:7px 3px 0;
-  color:rgba(255,255,255,.36);
-  font-size:7.5px;
-  line-height:1.35;
-  text-align:center;
-}
+.m7lv-setup-footnote{display:none!important}
+
 @media(max-height:700px){
-  .m7lv-setup-bottom{max-height:56dvh}
-  .m7lv-setup-range{min-height:31px}
-  .m7lv-look{min-height:43px}
+  .m7lv-setup-topbtn{width:38px;height:38px}
+  .m7lv-setup-preview-chip{min-height:29px;font-size:8px}
+  .m7lv-setup-tools{top:25%}
+  .m7lv-setup-tool{width:46px;min-height:46px;border-radius:15px}
+  .m7lv-setup-bottom{padding:8px;border-radius:19px}
+  .m7lv-setup-shop{min-height:30px;margin-bottom:5px}
+  .m7lv-setup-avatar{width:30px;height:30px;flex-basis:30px}
+  .m7lv-setup-shopcopy small{display:none}
+  #m7lv-title{min-height:39px!important}
+  .m7lv-setup-quick{margin-top:5px}
+  .m7lv-setup-open,.m7lv-setup-reset{min-height:34px}
+  .m7lv-setup-drawer.open{max-height:29dvh}
+  .m7lv-start{min-height:46px;margin-top:5px}
+  .m7lv-pre-status{margin-top:4px!important}
 }
 
 @media(max-width:520px){
@@ -962,6 +1046,8 @@ function renderLookButtons(){
   const strength=$("#m7lv-look-strength",p),out=$("#m7lv-look-strength-value",p);
   if(strength)strength.disabled=setupLook==="natural";
   if(out)out.textContent=setupLook==="natural"?"Off":Math.round(setupLookStrength*100)+"%";
+  const label=$("#m7lv-setup-look-label",p);
+  if(label)label.textContent=setupLook.charAt(0).toUpperCase()+setupLook.slice(1);
 }
 async function applySetupLook(key=setupLook){
   const seq=++setupLookSeq;
@@ -1001,6 +1087,7 @@ async function createSetupCapture(){
     })
   ]);
   cameraFacing="environment";qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
+  await resetCameraZoom();
   playSetupPreview();
   refreshSetupCameraControls();
 }
@@ -1041,6 +1128,7 @@ async function setCameraFacing(next){
   }
   if(!switched){setupStatus("Camera switch is not supported on this phone/browser.",true);return}
   cameraFacing=next;torchOn=false;
+  await resetCameraZoom();
   if($("#m7lv-preflight"))playSetupPreview();else localPreview();
   refreshSetupCameraControls();
   setupStatus(next==="user"?"Front camera ready · using the phone's default selfie view.":"Rear camera ready · using the phone's default camera view.");
@@ -1116,6 +1204,13 @@ function preflight(){
           <div class="m7lv-setup-shopcopy"><strong>${esc(name)}</strong><small>Set up your camera before viewers can see you</small></div>
         </div>
         <input id="m7lv-title" maxlength="80" autocomplete="off" placeholder="What is this Live about? (optional)" value="${esc(existing?.title||"")}">
+        <div class="m7lv-setup-quick">
+          <button id="m7lv-setup-panel-toggle" class="m7lv-setup-open" type="button" aria-expanded="false">
+            <strong>✨</strong><span>Looks & camera</span><em id="m7lv-setup-look-label">Natural</em><b class="m7lv-setup-chevron">⌃</b>
+          </button>
+          <button id="m7lv-setup-reset" class="m7lv-setup-reset" type="button">1× camera</button>
+        </div>
+        <div id="m7lv-setup-drawer" class="m7lv-setup-drawer">
         <div class="m7lv-setup-section">
           <div class="m7lv-setup-label"><span>Looks</span><em>Applied to the outgoing Live on supported devices</em></div>
           <div class="m7lv-look-row">
@@ -1131,6 +1226,7 @@ function preflight(){
           <label class="m7lv-setup-range is-off"><span>Exposure</span><input id="m7lv-setup-exposure" type="range"><output>0.0</output></label>
           <label class="m7lv-setup-range is-off"><span>Color</span><input id="m7lv-setup-color" type="range"><output>Auto</output></label>
           <label class="m7lv-setup-range"><span>Look strength</span><input id="m7lv-look-strength" type="range" min="15" max="100" step="1" value="${Math.round(setupLookStrength*100)}" disabled><output id="m7lv-look-strength-value">Off</output></label>
+        </div>
         </div>
         <div class="m7lv-pre-status">${allowed?"Opening your camera…":"Video Live is disabled for this shop in Admin."}</div>
         <button class="m7lv-start" type="button" disabled>${allowed?(existing?"Resume Live":"Go Live"):"Live disabled"}</button>
@@ -1149,6 +1245,19 @@ function preflight(){
     if(cameraFacing!=="user")return;
     setupMirror=!setupMirror;playSetupPreview();applySetupButtonState();
     setupStatus(setupMirror?"Front preview mirrored. Viewers still see normal orientation.":"Front preview unmirrored.");
+  };
+  const drawer=$("#m7lv-setup-drawer",p),panelToggle=$("#m7lv-setup-panel-toggle",p);
+  const setSetupDrawer=open=>{
+    if(!drawer||!panelToggle)return;
+    drawer.classList.toggle("open",!!open);
+    panelToggle.classList.toggle("open",!!open);
+    panelToggle.setAttribute("aria-expanded",open?"true":"false");
+  };
+  panelToggle.onclick=()=>setSetupDrawer(!drawer.classList.contains("open"));
+  $("#m7lv-setup-reset",p).onclick=async()=>{
+    await resetCameraZoom();
+    refreshSetupCameraControls();
+    setupStatus("Camera returned to its normal 1× framing.");
   };
   $$(".m7lv-look",p).forEach(button=>button.onclick=()=>applySetupLook(button.dataset.look));
   const strength=$("#m7lv-look-strength",p);
