@@ -1769,6 +1769,18 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
       <a
         class="ma7alak-header-menu-link"
+        href="https://shoufhon.com/community-guidelines"
+      >
+        <span class="ma7alak-header-menu-icon">🛡</span>
+        <span class="ma7alak-header-menu-text">
+          <span class="ma7alak-header-menu-main">إرشادات المجتمع</span>
+          <span class="ma7alak-header-menu-sub">Safety &amp; platform rules</span>
+        </span>
+        <span class="ma7alak-header-menu-chevron" aria-hidden="true">›</span>
+      </a>
+
+      <a
+        class="ma7alak-header-menu-link"
         href="https://shoufhon.com/login"
       >
         <span class="ma7alak-header-menu-icon">↪</span>
@@ -1833,6 +1845,17 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
 
     injectHeaderCSS();
     injectHeaderHTML();
+
+    if((String(location.pathname||"/").replace(/\/+$/,"")||"/")==="/community-guidelines"){
+      if(!window.__SHOUFHON_COMMUNITY_GUIDELINES_LOADER__){
+        window.__SHOUFHON_COMMUNITY_GUIDELINES_LOADER__=true;
+        const guidelinesScript=document.createElement("script");
+        guidelinesScript.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@6fed0a98f11ad9d0858d3150ab98aeb88e7d40af/shoufhon-community-guidelines.js";
+        guidelinesScript.async=true;
+        guidelinesScript.onerror=()=>console.error("SHOUFHON Community Guidelines: page script failed to load");
+        document.head.appendChild(guidelinesScript);
+      }
+    }
 
     try{
       await loadSupabase();
