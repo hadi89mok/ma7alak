@@ -4935,7 +4935,9 @@
       ancestors:ancestors,
       viewerKind:String(data&&data.viewerKind||""),
       shopSlug:String(data&&data.shopSlug||""),
-      historyArmed:false
+      historyArmed:false,
+      scrollX:Number(window.scrollX||0),
+      scrollY:Number(window.scrollY||0)
     };
 
     activeFrames.set(frame,state);
@@ -5027,6 +5029,22 @@
 
     activeFrames.delete(frame);
 
+    const restoreScroll=function(){
+      if(
+        !state ||
+        state.viewerKind!=="owner-media-editor"
+      ){
+        return;
+      }
+
+      try{
+        window.scrollTo(
+          Number(state.scrollX||0),
+          Number(state.scrollY||0)
+        );
+      }catch(_){}
+    };
+
     if(state.historyArmed&&!fromPopstate){
       state.historyArmed=false;
       suppressNextViewerPop=true;
@@ -5081,6 +5099,16 @@
       }
 
       savedPageOverflow=null;
+
+      /*
+         Closing the owner Media editor must leave the page exactly where the
+         owner opened it. history.back() can otherwise restore an older scroll
+         position before Hostinger finishes removing the promoted iframe.
+      */
+      restoreScroll();
+      requestAnimationFrame(restoreScroll);
+      setTimeout(restoreScroll,80);
+      setTimeout(restoreScroll,220);
     }
   }
 
