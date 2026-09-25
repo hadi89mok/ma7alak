@@ -17,7 +17,7 @@ const BEAUTY_SDK="https://cdn.jsdelivr.net/npm/agora-extension-beauty-effect@1.1
 let c=null,streams=[],profiles=new Map(),ownerSlug="",ownerEnt=null,streamSub=null,refreshBusy=false,injectTimer=null;
 let overlay=null,mode="",activeStream=null,rtcClient=null,localAudio=null,localVideo=null,roomChannel=null,roomClientKey="",hostUid=0,hostRemoteUid="";
 let chatChannel=null,reactionChannel=null,chatProfileCache=new Map(),viewportBound=false,liveOffers=[];
-let micMuted=false,videoPaused=false,torchOn=false,cameraFacing="environment",wakeLock=null,heartbeatTimer=null,qualityProfile="720p_3",qualityChangedAt=0,leaving=false,pushedHistory=false,viewerOpenSeq=0,agoraWarmScheduled=false;
+let micMuted=false,videoPaused=false,torchOn=false,cameraFacing="environment",wakeLock=null,heartbeatTimer=null,qualityProfile="720p_3",qualityChangedAt=0,leaving=false,pushedHistory=false,viewerOpenSeq=0,agoraWarmScheduled=false,liveRequestedFps=30,liveActualFps=30;
 let setupActive=false,setupStarting=false,setupReady=false,setupMirror=true,setupLook="natural",setupLookStrength=.58,setupCaps={},setupPrepareSeq=0,setupLookSeq=0;
 let beautyExtension=null,beautyProcessor=null,beautyTrack=null,beautyRegistered=false;
 
@@ -490,6 +490,14 @@ function ensurePremiumCss(){
   .m7lv-comments{max-height:31%}.m7lv-featured{padding:7px}.m7lv-featured-thumb{width:42px;height:42px;flex-basis:42px}
 }
 `;
+  document.head.appendChild(s);
+}
+
+function ensureImmersiveLiveCss(){
+  if($("#m7lv-immersive-css"))return;
+  const s=document.createElement("style");
+  s.id="m7lv-immersive-css";
+  s.textContent="#m7lv-overlay .m7lv-app{width:100%!important;height:100%!important;max-width:none!important;background:#000!important}\n#m7lv-overlay .m7lv-stage{inset:0!important;background:#000!important}\n#m7lv-overlay #m7lv-local,#m7lv-overlay #m7lv-remote{inset:0!important;background:#000!important}\n#m7lv-overlay #m7lv-local video,#m7lv-overlay #m7lv-remote video{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}\n#m7lv-overlay .m7lv-stage:after{background:linear-gradient(180deg,rgba(0,0,0,.54),transparent 20%,transparent 57%,rgba(0,0,0,.72) 100%)!important}\n#m7lv-overlay .m7lv-topbar{padding:max(10px,env(safe-area-inset-top)) 10px 6px!important;align-items:flex-start!important}\n#m7lv-overlay .m7lv-shophead{max-width:min(64vw,330px)!important;padding:4px 7px 4px 4px!important;background:rgba(5,5,5,.32)!important}\n#m7lv-overlay .m7lv-shop-avatar{width:36px!important;height:36px!important}\n#m7lv-overlay .m7lv-brand strong{font-size:12.5px!important}\n#m7lv-overlay .m7lv-brand small{font-size:9px!important;max-width:180px!important}\n#m7lv-overlay .m7lv-top-actions{gap:5px!important}\n#m7lv-overlay .m7lv-pill{height:29px!important;padding:0 8px!important;background:rgba(5,5,5,.34)!important;backdrop-filter:blur(13px)!important;-webkit-backdrop-filter:blur(13px)!important}\n#m7lv-overlay .m7lv-status{top:max(58px,calc(env(safe-area-inset-top) + 45px))!important;max-width:62%!important;padding:5px 9px!important;font-size:9px!important;background:rgba(0,0,0,.32)!important;opacity:.78!important}\n#m7lv-overlay .m7lv-host-controls{right:8px!important;top:auto!important;bottom:max(82px,calc(env(safe-area-inset-bottom) + 73px))!important;transform:none!important;gap:6px!important}\n#m7lv-overlay .m7lv-host-btn{width:44px!important;height:44px!important;min-height:44px!important;border-radius:50%!important;background:rgba(5,5,5,.43)!important;backdrop-filter:blur(13px)!important;-webkit-backdrop-filter:blur(13px)!important;box-shadow:0 6px 18px rgba(0,0,0,.18)!important}\n#m7lv-overlay .m7lv-host-btn b{font-size:16px!important}\n#m7lv-overlay .m7lv-host-btn span{font-size:6.5px!important}\n#m7lv-overlay .m7lv-host-btn.on{background:#fff!important;color:#111!important}\n#m7lv-overlay .m7lv-host-end{background:rgba(66,10,21,.72)!important;border-color:rgba(255,60,98,.78)!important;color:#fff!important}\n#m7lv-overlay .m7lv-comments{left:10px!important;right:63px!important;bottom:max(70px,calc(env(safe-area-inset-bottom) + 61px))!important;max-height:30%!important;padding-top:24px!important;gap:5px!important}\n#m7lv-overlay .m7lv-msg-body{background:rgba(0,0,0,.33)!important;border-color:rgba(255,255,255,.055)!important;backdrop-filter:blur(7px)!important;-webkit-backdrop-filter:blur(7px)!important}\n#m7lv-overlay .m7lv-composer{left:9px!important;right:9px!important;bottom:max(9px,env(safe-area-inset-bottom))!important;gap:7px!important}\n#m7lv-overlay .m7lv-input-wrap{height:43px!important;border-color:rgba(255,255,255,.17)!important;background:rgba(5,5,5,.40)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}\n#m7lv-overlay .m7lv-send-btn{height:40px!important;min-width:62px!important;padding:0 13px!important;border-radius:999px!important}\n#m7lv-overlay .m7lv-guest-login{left:10px!important;right:65px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;background:rgba(5,5,5,.43)!important}\n#m7lv-overlay .m7lv-view-actions{right:8px!important;bottom:max(72px,calc(env(safe-area-inset-bottom) + 63px))!important;gap:7px!important}\n#m7lv-overlay .m7lv-action{width:46px!important;min-height:46px!important;border-radius:50%!important;background:rgba(5,5,5,.43)!important}\n#m7lv-overlay .m7lv-featured{left:10px!important;right:63px!important;bottom:max(121px,calc(env(safe-area-inset-bottom) + 112px))!important}\n#m7lv-preflight #m7lv-setup-camera video{object-fit:cover!important;object-position:center center!important}\n@media(max-width:390px){\n  #m7lv-overlay .m7lv-shophead{max-width:58vw!important}\n  #m7lv-overlay .m7lv-pill{padding:0 6px!important;font-size:8px!important}\n  #m7lv-overlay .m7lv-host-btn{width:41px!important;height:41px!important;min-height:41px!important}\n  #m7lv-overlay .m7lv-host-controls{gap:5px!important}\n}";
   document.head.appendChild(s);
 }
 
@@ -1098,6 +1106,7 @@ async function createSetupCapture(){
   cameraFacing=actualCameraFacing(localVideo,"environment");qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
   await resetCameraZoom();
   playSetupPreview();
+  syncFpsUi(localVideo);
   refreshSetupCameraControls();
 }
 function cameraSideFromLabel(label){
@@ -1158,15 +1167,51 @@ async function chooseNormalPhysicalCamera(next,track){
     return true;
   }catch(_){return false}
 }
+function preferredLiveFps(){
+  try{
+    const conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
+    const type=String(conn?.effectiveType||"").toLowerCase();
+    if(conn?.saveData||type==="slow-2g"||type==="2g"||type==="3g")return 30;
+    const cores=Number(navigator.hardwareConcurrency||0);
+    const memory=Number(navigator.deviceMemory||0);
+    if(cores>=6&&(memory===0||memory>=4))return 60;
+  }catch(_){}
+  return 30;
+}
+function cameraReportedFps(track=localVideo){
+  try{
+    const value=Number(track?.getMediaStreamTrack?.()?.getSettings?.()?.frameRate);
+    return Number.isFinite(value)&&value>0?value:0;
+  }catch(_){return 0}
+}
+function syncFpsUi(track=localVideo){
+  const reported=cameraReportedFps(track);
+  liveActualFps=reported||liveRequestedFps||30;
+  const shown=liveActualFps>=50?60:30;
+  const e=$("#m7lv-setup-fps");
+  if(e)e.textContent=shown+" FPS";
+}
 async function makePhoneDefaultCamera(next){
-  /* Start with the browser's normal logical front/rear camera. No forced
-     width, height, aspect ratio, zoom, crop, or panoramic lens. */
-  const track=await window.AgoraRTC.createCameraVideoTrack({
-    facingMode:next,
-    encoderConfig:{frameRate:30},
-    optimizationMode:"motion"
-  });
+  const preferred=preferredLiveFps();
+  let track=null;
+  try{
+    liveRequestedFps=preferred;
+    track=await window.AgoraRTC.createCameraVideoTrack({
+      facingMode:next,
+      encoderConfig:{frameRate:preferred},
+      optimizationMode:"motion"
+    });
+  }catch(err){
+    if(preferred!==60)throw err;
+    liveRequestedFps=30;
+    track=await window.AgoraRTC.createCameraVideoTrack({
+      facingMode:next,
+      encoderConfig:{frameRate:30},
+      optimizationMode:"motion"
+    });
+  }
   await chooseNormalPhysicalCamera(next,track);
+  syncFpsUi(track);
   return track;
 }
 async function setCameraFacing(next){
@@ -1199,6 +1244,7 @@ async function setCameraFacing(next){
 
       if($("#m7lv-preflight"))playSetupPreview();else localPreview();
       refreshSetupCameraControls();
+      syncFpsUi(localVideo);
       applySetupButtonState();
 
       setupStatus(cameraFacing==="user"
@@ -1250,6 +1296,7 @@ async function setCameraFacing(next){
 
     if($("#m7lv-preflight"))playSetupPreview();else localPreview();
     refreshSetupCameraControls();
+    syncFpsUi(localVideo);
     applySetupButtonState();
 
     setupStatus(cameraFacing==="user"
@@ -1273,6 +1320,7 @@ async function setCameraFacing(next){
 
       if($("#m7lv-preflight"))playSetupPreview();else localPreview();
       refreshSetupCameraControls();
+      syncFpsUi(localVideo);
       applySetupButtonState();
       setupStatus("Camera stayed on the current side. Tap Flip again.",true);
     }catch(restoreErr){
@@ -1321,7 +1369,10 @@ function createOverlay(stream,host){
   if(!host){$("#m7lv-local",overlay).style.display="none";$("#m7lv-close",overlay).onclick=()=>cleanupOverlay(false)}else $("#m7lv-remote",overlay).style.display="none";
   if(!pushedHistory){try{history.pushState({m7lv:true},"",location.href);pushedHistory=true}catch(_){}}
   bindLiveViewport();syncLiveViewport();wireLiveChrome();
-  if(host)bindPinchZoom($("#m7lv-local",overlay));
+  if(host){
+    bindPinchZoom($("#m7lv-local",overlay));
+    syncMicUi();
+  }
   $("#m7lv-login-chat",overlay)?.addEventListener("click",()=>window.Ma7alakAccount?.open?.());
 }
 function preflight(){
@@ -1341,7 +1392,7 @@ function preflight(){
       <div class="m7lv-setup-top">
         <button id="m7lv-setup-close" class="m7lv-setup-topbtn" type="button" aria-label="Close Live setup">×</button>
         <div class="m7lv-setup-preview-chip"><i></i> LIVE PREVIEW · NOT BROADCASTING</div>
-        <div class="m7lv-setup-fps">30 FPS</div>
+        <div id="m7lv-setup-fps" class="m7lv-setup-fps">AUTO FPS</div>
       </div>
       <div class="m7lv-setup-tools">
         <button id="m7lv-setup-mic" class="m7lv-setup-tool" type="button"><b>🎤</b><span>Mic</span></button>
@@ -1585,17 +1636,34 @@ async function syncEncoderOrientation(){
      Do not force portrait encoder dimensions here. */
   return;
 }
-async function toggleMic(){
-  if(!localAudio)return;
-  micMuted=!micMuted;
-  try{await localAudio.setMuted(micMuted)}catch(_){}
+function syncMicUi(){
+  const muted=!!micMuted;
   if(overlay){
-    ["#m7lv-mute","#m7lv-mute-f"].forEach(s=>$(s,overlay)?.classList.toggle("on",micMuted));
-    const f=$("#m7lv-mute-f",overlay);if(f)f.textContent=micMuted?"🔇":"🎤";
-    const b=$("#m7lv-mute b",overlay);if(b)b.textContent=micMuted?"🔇":"🎤";
+    ["#m7lv-mute","#m7lv-mute-f"].forEach(s=>{
+      const el=$(s,overlay);
+      if(!el)return;
+      el.classList.toggle("on",muted);
+      el.setAttribute("aria-pressed",muted?"true":"false");
+    });
+    const f=$("#m7lv-mute-f",overlay);if(f)f.textContent=muted?"🔇":"🎤";
+    const b=$("#m7lv-mute b",overlay);if(b)b.textContent=muted?"🔇":"🎤";
+    const label=$("#m7lv-mute span",overlay);if(label)label.textContent=muted?"Muted":"Mic";
   }
   applySetupButtonState();
+}
+async function toggleMic(){
+  if(!localAudio)return;
+  const previous=micMuted;
+  micMuted=!micMuted;
+  syncMicUi();
   setupStatus(micMuted?"Microphone muted.":"Microphone ready.");
+  try{
+    await localAudio.setMuted(micMuted);
+  }catch(err){
+    micMuted=previous;
+    syncMicUi();
+    setupStatus("Microphone change failed. Try again.",true);
+  }
 }
 async function toggleVideo(){if(!localVideo)return;videoPaused=!videoPaused;await localVideo.setEnabled(!videoPaused);["#m7lv-pause","#m7lv-pause-f"].forEach(s=>$(s,overlay)?.classList.toggle("on",videoPaused));const f=$("#m7lv-pause-f",overlay);if(f)f.textContent=videoPaused?"🚫":"🎥";setStatus(videoPaused?"Video paused. Audio is still live.":"Video resumed.")}
 async function toggleTorch(){
@@ -1645,6 +1713,8 @@ async function startHost(title){
     await rtcClient.join(start.app_id,start.stream.channel_name,start.token,hostUid);
     localPreview();
     await loadStreamOffers();
+    try{await localAudio.setMuted(!!micMuted)}catch(_){}
+    syncMicUi();
     await rtcClient.publish([localAudio,localVideo]);
     await setupRoom("host");
     await api("activate",{stream_id:stream.id});
@@ -1866,6 +1936,7 @@ window.ShoufHonLiveVideo={
 async function boot(){
   ensureCss();
   ensurePremiumCss();
+  ensureImmersiveLiveCss();
   if(!await ready())return;
   await loadOwnerEnt();
   await refresh();
