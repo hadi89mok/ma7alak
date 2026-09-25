@@ -171,7 +171,7 @@ body{overflow:hidden}
   display:grid;
   place-items:center;
   color:rgba(255,255,255,.48);
-  font-size:9px;
+  font-size:10px;
   font-weight:850
 }
 
@@ -197,15 +197,15 @@ body{overflow:hidden}
 .m7slp-idle strong{
   display:block;
   color:rgba(255,255,255,.82);
-  font-size:10px;
-  line-height:1.1
+  font-size:11.5px;
+  line-height:1.15
 }
 .m7slp-idle small{
   display:block;
   margin-top:2px;
   color:rgba(255,255,255,.38);
-  font-size:7.5px;
-  line-height:1.2
+  font-size:9px;
+  line-height:1.3
 }
 
 /* ---------------------------------------------------------
@@ -236,7 +236,7 @@ body{overflow:hidden}
   gap:5px;
   margin-bottom:3px;
   color:var(--m7a);
-  font-size:7px;
+  font-size:8px;
   font-weight:950;
   letter-spacing:.65px;
   text-transform:uppercase
@@ -257,8 +257,8 @@ body{overflow:hidden}
   text-overflow:ellipsis;
   white-space:nowrap;
   color:#fff;
-  font-size:13px;
-  line-height:1.08;
+  font-size:14px;
+  line-height:1.12;
   font-weight:950;
   letter-spacing:-.1px
 }
@@ -269,7 +269,7 @@ body{overflow:hidden}
   white-space:nowrap;
   margin-top:3px;
   color:rgba(255,255,255,.54);
-  font-size:8px;
+  font-size:9.5px;
   font-weight:700
 }
 .m7slp-meta{
@@ -278,7 +278,7 @@ body{overflow:hidden}
   gap:5px;
   margin-top:5px;
   color:rgba(255,255,255,.38);
-  font-size:7px;
+  font-size:8.5px;
   font-weight:850
 }
 .m7slp-meta b{color:#f1c26f}
@@ -291,7 +291,7 @@ body{overflow:hidden}
   border-radius:11px;
   background:linear-gradient(135deg,color-mix(in srgb,var(--m7a) 88%,#fff 12%),color-mix(in srgb,var(--m7a) 82%,#8a5516 18%));
   color:#171008;
-  font-size:8.5px;
+  font-size:9.5px;
   font-weight:950;
   white-space:nowrap;
   box-shadow:0 7px 16px rgba(0,0,0,.17);
@@ -328,13 +328,13 @@ body{overflow:hidden}
   border-radius:999px;
   background:color-mix(in srgb,var(--m7a) 6%,transparent);
   color:#edbd68;
-  font-size:6.4px;
+  font-size:7.5px;
   font-weight:950;
   letter-spacing:.55px
 }
 .m7slp-owner-mini{
   color:rgba(255,255,255,.35);
-  font-size:6.5px;
+  font-size:7.75px;
   font-weight:850;
   white-space:nowrap
 }
@@ -360,15 +360,15 @@ body{overflow:hidden}
 .m7slp-owner-state strong{
   display:block;
   color:#fff;
-  font-size:12px;
-  line-height:1.08
+  font-size:14px;
+  line-height:1.15
 }
 .m7slp-owner-state small{
   display:block;
   margin-top:3px;
   color:rgba(255,255,255,.47);
-  font-size:7px;
-  line-height:1.25
+  font-size:9px;
+  line-height:1.35
 }
 
 .m7slp-owner-actions,
@@ -383,7 +383,7 @@ body{overflow:hidden}
   padding:0 9px;
   border:0;
   border-radius:10px;
-  font-size:8px;
+  font-size:9px;
   font-weight:950;
   white-space:nowrap;
   cursor:pointer
@@ -427,12 +427,12 @@ body{overflow:hidden}
   align-items:center;
   gap:5px;
   color:rgba(255,255,255,.36);
-  font-size:6.5px;
+  font-size:8.5px;
   font-weight:850
 }
 .m7slp-slots-line b{
   color:#efbe69;
-  font-size:7.5px
+  font-size:9.5px
 }
 .m7slp-progress{
   width:82px;
@@ -449,7 +449,7 @@ body{overflow:hidden}
 }
 .m7slp-owner-badge{
   color:rgba(255,255,255,.34);
-  font-size:6.2px;
+  font-size:7.5px;
   font-weight:850;
   white-space:nowrap
 }
@@ -472,16 +472,21 @@ body{overflow:hidden}
 @media(max-width:420px){
   .m7slp{width:94%;border-radius:17px}
   .m7slp-view{gap:7px;padding:8px 9px;min-height:64px}
-  .m7slp-title{font-size:12px}
-  .m7slp-sub{font-size:7px}
-  .m7slp-meta{font-size:6.5px}
-  .m7slp-cta{min-width:58px;min-height:31px;padding:0 8px;font-size:8px}
+  .m7slp-title{font-size:13.5px}
+  .m7slp-sub{font-size:9px}
+  .m7slp-meta{font-size:8px}
+  .m7slp-cta{min-width:58px;min-height:32px;padding:0 8px;font-size:9px}
 
   .m7slp-owner{padding:7px 8px 8px}
   .m7slp-owner-main{grid-template-columns:1fr}
   .m7slp-owner-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
   .m7slp-owner-actions button{width:100%;min-height:35px}
-  .m7slp-owner-state strong{font-size:11px}
+  .m7slp-owner-state strong{font-size:13.5px}
+  .m7slp-owner-state small{font-size:8.75px}
+  .m7slp-slots-line{font-size:8.25px}
+  .m7slp-slots-line b{font-size:9.25px}
+  .m7slp-owner-mini{font-size:7.5px}
+  .m7slp-owner-badge{font-size:7.25px}
 
   .m7slp-view.owner-active{
     grid-template-columns:1fr;
@@ -496,7 +501,7 @@ body{overflow:hidden}
     min-width:0;
     width:100%;
     padding:0 5px;
-    font-size:7.2px
+    font-size:8.4px
   }
 }
 `;
