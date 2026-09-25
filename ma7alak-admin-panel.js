@@ -2639,7 +2639,7 @@
     editArea.value = shop.area || "";
     editLocation.value = shop.location || "";
     editCategory.value = shop.category || "";
-    editCategoryName.value = shop.category_name || "";
+    editCategoryName.value = shop.category_name || shop.directory_options?.shop_label || "";
     editVerified.checked = shop.verified === true;
     editFeatured.checked = shop.featured === true;
     editRed.checked = shop.featured_red === true;
@@ -3088,8 +3088,7 @@
 
       const finalCardLabel =
         categoryName ||
-        (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
-        category;
+        null;
 
       addShopButton.disabled = true;
       addShopButton.innerHTML =
@@ -3719,15 +3718,24 @@
       return;
     }
 
+    const currentManagedShop=getManagedShop(originalSlug);
+    if(!categoryName&&currentManagedShop?.is_active===true){
+      setStatus(
+        editStatus,
+        "Public shop label / work type is required while this shop is visible.",
+        "error"
+      );
+      return;
+    }
+
     const selectedTaxonomyCategory =
       (window.__MA7ALAK_V2_CATEGORIES__ || []).find(function(row){
         return row && row.category_key === category;
       });
 
     const finalCardLabel =
-      categoryName ||
-      (selectedTaxonomyCategory && selectedTaxonomyCategory.category_name) ||
-      category;
+        categoryName ||
+        null;
 
     const designStudio=
       editForm.querySelector(
@@ -4629,12 +4637,12 @@
         if(cardLabelWrap){
           cardLabelWrap.classList.remove("ma-v2-original-hidden");
           const title=cardLabelWrap.querySelector("span");
-          if(title)title.textContent="Shop Card Label";
+          if(title)title.textContent="Public shop label / work type";
           catName.placeholder="e.g. Crepes • Chocolate • Street Kiosk";
           const oldSmall=cardLabelWrap.querySelector("small");
           if(oldSmall)oldSmall.remove();
           const help=document.createElement("small");
-          help.textContent="Free text shown under the Arabic name on the public shop card. This does not change the Main Category.";
+          help.textContent="Manual visitor-facing text used by Story/Profile, Show Shops and homepage cards. Main Category stays search/filter data only.";
           cardLabelWrap.appendChild(help);
         }
 
@@ -5657,11 +5665,104 @@ function mountForm(form,prefix){
   });
 }
 window.Ma7alakDirectoryAdmin={
- fill(shop){mount();const form=document.getElementById('ma-admin-edit-form');if(!form)return;form.dataset.directoryOptions=JSON.stringify(shop.directory_options||{});shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById('m7de-'+k),value=shop.directory_options?.[k];if(!input)return;if(t==='checkbox')input.checked=value===true||String(value).toLowerCase()==='true';else input.value=value??(t==='color'?'#e3b85f':'')});profileFields.forEach(([k])=>{const input=document.getElementById('m7de-'+k);if(input)input.value=shop[k]??''})},
- collect(edit){mount();const prefix=edit?'m7de-':'m7da-',form=document.getElementById(edit?'ma-admin-edit-form':'ma-admin-shop-form');let options={};try{options=JSON.parse(form.dataset.directoryOptions||'{}')}catch{};shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById(prefix+k);if(t==='checkbox'){options[k]=input.checked;return}const v=input.value.trim();options[k]=v===''?null:t==='number'?Number(v):v;if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');if(t==='number'&&v&&!Number.isFinite(options[k]))throw Error(l+' must be a number.');if(t==='color'&&v&&!/^#[0-9a-f]{6}$/i.test(v))throw Error(l+' must be a valid color.')});if(options.latitude!=null&&(options.latitude< -90||options.latitude>90))throw Error('Latitude must be between -90 and 90.');if(options.longitude!=null&&(options.longitude< -180||options.longitude>180))throw Error('Longitude must be between -180 and 180.');if((options.latitude==null)!==(options.longitude==null))throw Error('Enter both latitude and longitude.');if(options.rating!=null){
-  if(!Number.isFinite(Number(options.rating))||Number(options.rating)<0||Number(options.rating)>5)throw Error('Rating must be between 0 and 5.');
-  options.rating=Number(options.rating);
-}if(options.review_count!=null&&(!Number.isInteger(options.review_count)||options.review_count<0))throw Error('Review count must be a whole positive number.');const result={directory_options:options};profileFields.forEach(([k,l,t])=>{const v=document.getElementById(prefix+k).value.trim();if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');result[k]=v||null});return result}
+  fill(shop){
+    mount();
+
+    const form=document.getElementById('ma-admin-edit-form');
+    if(!form)return;
+
+    const source=
+      shop?.directory_options&&typeof shop.directory_options==='object'
+        ?shop.directory_options
+        :{};
+
+    const options={...source};
+
+    /* Old Studio builds could persist rating=50 from a generic 0–100 slider.
+       Remove only an impossible rating; preserve every other directory value. */
+    if(options.rating!==undefined&&options.rating!==null&&options.rating!==''){
+      const rating=Number(options.rating);
+      if(!Number.isFinite(rating)||rating<0||rating>5){
+        delete options.rating;
+      }
+    }
+
+    form.dataset.directoryOptions=JSON.stringify(options);
+
+    shopFields.concat(homeFields).forEach(([k,l,t])=>{
+      const input=document.getElementById('m7de-'+k);
+      const value=options[k];
+
+      if(!input)return;
+
+      if(t==='checkbox'){
+        input.checked=value===true||String(value).toLowerCase()==='true';
+      }else{
+        input.value=value??(t==='color'?'#e3b85f':'');
+      }
+    });
+
+    profileFields.forEach(([k])=>{
+      const input=document.getElementById('m7de-'+k);
+      if(input)input.value=shop[k]??'';
+    });
+  },
+
+  collect(edit){
+    mount();
+
+    const prefix=edit?'m7de-':'m7da-';
+    const form=document.getElementById(edit?'ma-admin-edit-form':'ma-admin-shop-form');
+
+    let options={};
+    try{
+      options=JSON.parse(form.dataset.directoryOptions||'{}');
+    }catch{}
+
+    shopFields.concat(homeFields).forEach(([k,l,t])=>{
+      const input=document.getElementById(prefix+k);
+      if(!input)return;
+
+      if(t==='checkbox'){
+        options[k]=input.checked;
+        return;
+      }
+
+      const v=String(input.value||'').trim();
+      options[k]=v===''?null:t==='number'?Number(v):v;
+
+      if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');
+      if(t==='number'&&v&&!Number.isFinite(options[k]))throw Error(l+' must be a number.');
+      if(t==='color'&&v&&!/^#[0-9a-f]{6}$/i.test(v))throw Error(l+' must be a valid color.');
+    });
+
+    if(options.latitude!=null&&(options.latitude< -90||options.latitude>90))throw Error('Latitude must be between -90 and 90.');
+    if(options.longitude!=null&&(options.longitude< -180||options.longitude>180))throw Error('Longitude must be between -180 and 180.');
+    if((options.latitude==null)!==(options.longitude==null))throw Error('Enter both latitude and longitude.');
+
+    if(options.rating!=null){
+      const rating=Number(options.rating);
+      if(!Number.isFinite(rating)||rating<0||rating>5)throw Error('Rating must be between 0 and 5.');
+      options.rating=rating;
+    }
+
+    if(options.review_count!=null&&(!Number.isInteger(options.review_count)||options.review_count<0)){
+      throw Error('Review count must be a whole positive number.');
+    }
+
+    const result={directory_options:options};
+
+    profileFields.forEach(([k,l,t])=>{
+      const input=document.getElementById(prefix+k);
+      if(!input)return;
+
+      const v=String(input.value||'').trim();
+      if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');
+      result[k]=v||null;
+    });
+
+    return result;
+  }
 };
 const settingFields=[['title','Hero heading (Arabic or English)','text'],['subtitle','Hero subtitle','text'],['hero','Beirut background URL (blank = built-in backdrop)','url'],['logo','Eye logo URL (blank = current header logo)','url'],['search','Search placeholder','text'],['location_title','Area heading','text'],['categories_title','Categories heading','text'],['shops_title','Shops heading','text'],['cta_title','Business banner title','text'],['cta_text','Business banner subtitle','text'],['cta_button','Business button label','text'],['radius','Near me radius in km','number']];
 const fallback={title:'شوف المحلات',subtitle:'Discover what’s around you',search:'Search shops, food, services...',location_title:'Where are you looking?',categories_title:'Browse categories',shops_title:'Popular near you',cta_title:'Own a local business?',cta_text:'Add your shop and reach more people.',cta_button:'Add your shop',radius:25};
@@ -6297,32 +6398,98 @@ function iconOptions(){
 }
 function labelControls(form,prefix){
   if(!form||form.querySelector(".m7labelbox"))return;
-  const f=document.createElement("fieldset");f.className="m7da-fields m7labelbox m7fieldset";
-  f.innerHTML='<legend>Shop Label — independent from Category</legend><p>Category stays only for Show Shops filtering. This label is what visitors see above the shop name.</p><div class="m7da-grid"><label class="m7da-field">Shop Label text<input id="'+prefix+'shop_label" maxlength="32" placeholder="e.g. HIJABS, TATTOO STUDIO"></label><label class="m7da-field">Shop Label icon<select id="'+prefix+'shop_label_icon">'+iconOptions()+'</select></label><label class="m7da-field">Custom icon / emoji (optional)<input id="'+prefix+'shop_label_icon_text" maxlength="4" placeholder="e.g. ✦ or 🧕"></label></div><div class="m7labelpreview"><span data-li>⌂</span><span data-lt>SHOP</span></div>';
-  const base=form.querySelector(".m7da-fields:not(.m7da-home-fields)");base?form.insertBefore(f,base):form.appendChild(f);
-  const a=f.querySelector("#"+prefix+"shop_label"),i=f.querySelector("#"+prefix+"shop_label_icon"),t=f.querySelector("#"+prefix+"shop_label_icon_text");
+
+  const f=document.createElement("fieldset");
+  f.className="m7da-fields m7labelbox m7fieldset";
+  f.innerHTML=
+    '<legend>Public Label Style</legend>'+
+    '<p>The label text comes only from <b>Public shop label / work type</b>. These controls only change its icon/style identity.</p>'+
+    '<div class="m7da-grid">'+
+      '<label class="m7da-field">Shop Label icon<select id="'+prefix+'shop_label_icon">'+iconOptions()+'</select></label>'+
+      '<label class="m7da-field">Custom icon / emoji (optional)<input id="'+prefix+'shop_label_icon_text" maxlength="4" placeholder="e.g. ✦ or 🧕"></label>'+
+    '</div>'+
+    '<div class="m7labelpreview"><span data-li>⌂</span><span data-lt>PUBLIC LABEL</span></div>';
+
+  const base=form.querySelector(".m7da-fields:not(.m7da-home-fields)");
+  base?form.insertBefore(f,base):form.appendChild(f);
+
+  const i=f.querySelector("#"+prefix+"shop_label_icon");
+  const t=f.querySelector("#"+prefix+"shop_label_icon_text");
+  const publicText=document.getElementById(
+    prefix==="m7de-"?"ma-edit-category-name":"ma-shop-category-name"
+  );
   const sym={shop:"⌂",fashion:"♙",hijab:"◒",tattoo:"✒",piercing:"◈",cafe:"☕",food:"◉",beauty:"✦",perfume:"♢",phone:"▯",barber:"✂",gym:"↔",kiosk:"▣",star:"★",heart:"♥",sparkle:"✦",none:""};
-  const preview=()=>{f.querySelector("[data-lt]").textContent=a.value.trim()||"SHOP";f.querySelector("[data-li]").textContent=t.value.trim()||sym[i.value]||"⌂"};
-  [a,i,t].forEach(x=>{x.addEventListener("input",preview);x.addEventListener("change",preview)});f._preview=preview;preview();
+
+  const preview=()=>{
+    f.querySelector("[data-lt]").textContent=
+      publicText?.value?.trim()||"PUBLIC LABEL";
+    f.querySelector("[data-li]").textContent=
+      t?.value?.trim()||sym[i?.value]||"⌂";
+  };
+
+  [i,t,publicText].filter(Boolean).forEach(x=>{
+    x.addEventListener("input",preview);
+    x.addEventListener("change",preview);
+  });
+
+  f._preview=preview;
+  preview();
 }
-function mountLabels(){labelControls(document.getElementById("ma-admin-shop-form"),"m7da-");labelControls(document.getElementById("ma-admin-edit-form"),"m7de-")}
+
+function mountLabels(){
+  labelControls(document.getElementById("ma-admin-shop-form"),"m7da-");
+  labelControls(document.getElementById("ma-admin-edit-form"),"m7de-");
+}
 
 function patchDirectory(){
   if(patched)return;
-  const api=window.Ma7alakDirectoryAdmin;if(!api||typeof api.fill!=="function"||typeof api.collect!=="function")return;
+
+  const api=window.Ma7alakDirectoryAdmin;
+  if(!api||typeof api.fill!=="function"||typeof api.collect!=="function")return;
+
   patched=true;
-  const fill=api.fill.bind(api),collect=api.collect.bind(api);
+
+  const fill=api.fill.bind(api);
+  const collect=api.collect.bind(api);
+
   api.fill=function(shop){
-    fill(shop);mountLabels();
-    const o=shop?.directory_options&&typeof shop.directory_options==="object"?shop.directory_options:{};
-    [["shop_label",o.shop_label||""],["shop_label_icon",o.shop_label_icon||"shop"],["shop_label_icon_text",o.shop_label_icon_text||""]].forEach(x=>{const el=document.getElementById("m7de-"+x[0]);if(el)el.value=x[1]});
-    document.getElementById("m7de-shop_label")?.closest(".m7labelbox")?._preview?.();
+    fill(shop);
+    mountLabels();
+
+    const o=
+      shop?.directory_options&&typeof shop.directory_options==="object"
+        ?shop.directory_options
+        :{};
+
+    [
+      ["shop_label_icon",o.shop_label_icon||"shop"],
+      ["shop_label_icon_text",o.shop_label_icon_text||""]
+    ].forEach(x=>{
+      const el=document.getElementById("m7de-"+x[0]);
+      if(el)el.value=x[1];
+    });
+
+    document.querySelector("#ma-admin-edit-form .m7labelbox")?._preview?.();
   };
+
   api.collect=function(edit){
-    const r=collect(edit),p=edit?"m7de-":"m7da-";r.directory_options=r.directory_options&&typeof r.directory_options==="object"?r.directory_options:{};
-    r.directory_options.shop_label=document.getElementById(p+"shop_label")?.value?.trim()||null;
-    r.directory_options.shop_label_icon=document.getElementById(p+"shop_label_icon")?.value?.trim()||"shop";
-    r.directory_options.shop_label_icon_text=document.getElementById(p+"shop_label_icon_text")?.value?.trim()||null;
+    const r=collect(edit);
+    const p=edit?"m7de-":"m7da-";
+
+    r.directory_options=
+      r.directory_options&&typeof r.directory_options==="object"
+        ?r.directory_options
+        :{};
+
+    /* Retire the old duplicate text source on the next normal save. */
+    delete r.directory_options.shop_label;
+
+    r.directory_options.shop_label_icon=
+      document.getElementById(p+"shop_label_icon")?.value?.trim()||"shop";
+
+    r.directory_options.shop_label_icon_text=
+      document.getElementById(p+"shop_label_icon_text")?.value?.trim()||null;
+
     return r;
   };
 }
