@@ -175,8 +175,13 @@ body{overflow:hidden}
 }
 .m7slp-cta.icon{min-width:36px;width:36px;height:36px;padding:0;border-radius:50%;font-size:19px;font-weight:700}
 .m7slp-cta.edit{position:relative;z-index:4;cursor:pointer;background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
-.m7slp-view.owner-active{cursor:pointer}
+.m7slp-view.owner-active{cursor:pointer;grid-template-columns:minmax(0,1fr) auto;min-height:82px}
 .m7slp-view.owner-active:active{transform:scale(.995)}
+.m7slp-owner-active-actions{position:relative;z-index:5;display:flex;align-items:center;gap:6px}
+.m7slp-owner-active-actions button{min-height:36px;padding:0 10px;border:0;border-radius:11px;font-size:9px;font-weight:950;white-space:nowrap;cursor:pointer}
+.m7slp-owner-live{background:linear-gradient(135deg,#f33156,#bf1738);color:#fff;box-shadow:0 7px 18px rgba(223,31,67,.18)}
+.m7slp-owner-live.locked{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.48);box-shadow:none}
+.m7slp-owner-edit{background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
 
 .m7slp-cta.live{border-color:rgba(255,80,110,.52);background:linear-gradient(135deg,#f5365b,#bd1637);color:#fff}
 .m7slp-cta.ghost{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.55);box-shadow:none}
@@ -210,6 +215,8 @@ body{overflow:hidden}
   .m7slp-view{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 11px;min-height:72px}
   .m7slp-title{font-size:14px}.m7slp-sub{font-size:8px}.m7slp-meta{font-size:7px}
   .m7slp-cta{min-width:64px;min-height:34px;padding:0 9px;font-size:8.5px}.m7slp-cta.icon{min-width:34px;width:34px;height:34px;padding:0;font-size:18px}
+  .m7slp-view.owner-active{grid-template-columns:1fr;gap:9px}
+  .m7slp-owner-active-actions{width:100%}.m7slp-owner-active-actions button{flex:1}
   .m7slp-owner{padding:9px}
   .m7slp-owner-main{grid-template-columns:1fr}
   .m7slp-owner-actions{width:100%}.m7slp-owner-actions button{flex:1}
@@ -259,28 +266,35 @@ function viewerMarkup(){
 function ownerActiveMarkup(){
   const live=!!state.broadcastLive;
   const offers=offerUsed();
-  const img=imageUrl();
   const name=shopName();
+  const canVideo=videoEnabled();
+
   const kicker=live
     ? '<span class="m7slp-kicker live"><i></i> OWNER · VIDEO LIVE</span>'
     : '<span class="m7slp-kicker"><i></i> OWNER · HAPPENING NOW</span>';
+
   const title=live
     ? "You are live at "+name
     : (offers===1?"1 active offer / update":offers+" active offers / updates");
+
   const sub=live
     ? "Tap the card to resume your broadcast"
-    : "Tap the card to preview exactly what visitors see";
+    : "Tap the card to preview what visitors see";
+
   const meta=live
-    ? (offers?offers+" active "+(offers===1?"offer":"offers")+" · Edit to manage content":"Edit to manage your live content")
-    : "Edit text, media, timing or end an update";
-  const chip=live?'<span class="m7slp-live-chip"><i></i> LIVE</span>':"";
+    ? (offers?offers+" active "+(offers===1?"offer":"offers")+" · Manage content anytime":"Your camera broadcast is active")
+    : "Edit text, media, timing or end the update";
+
+  const liveLabel=live?"Resume Live":(canVideo?"Go Live":"🔒 Go Live");
+
   return '<div class="m7slp-view can-open owner-active" data-action="primary" role="button" tabindex="0">'+
-    '<span class="m7slp-thumb">'+(img?'<img src="'+esc(img)+'" alt="">':'<span class="m7slp-thumb-placeholder">S</span>')+chip+'</span>'+
     '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
-    '<button class="m7slp-cta edit" type="button" data-action="manage">Edit</button>'+
+    '<span class="m7slp-owner-active-actions">'+
+      '<button class="m7slp-owner-live '+(!canVideo&&!live?"locked":"")+'" type="button" data-action="go">'+esc(liveLabel)+'</button>'+
+      '<button class="m7slp-owner-edit" type="button" data-action="manage">Edit</button>'+
+    '</span>'+
   '</div>';
 }
-
 function ownerMarkup(){
   const live=!!state.broadcastLive;
   const used=offerUsed();
@@ -334,7 +348,7 @@ function primary(){
 function bind(){
   const primaryEl=$('[data-action="primary"]',root);
   primaryEl?.addEventListener("click",e=>{
-    if(e.target.closest('[data-action="manage"]'))return;
+    if(e.target.closest('[data-action="manage"],[data-action="go"]'))return;
     primary();
   });
   primaryEl?.addEventListener("keydown",e=>{
