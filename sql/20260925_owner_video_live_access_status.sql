@@ -63,5 +63,6 @@ begin
 end;
 $function$;
 
-revoke all on function public.shoufhon_owner_get_video_live_access(text) from public;
+revoke execute on function public.shoufhon_owner_get_video_live_access(text) from public;
+revoke execute on function public.shoufhon_owner_get_video_live_access(text) from anon;
 grant execute on function public.shoufhon_owner_get_video_live_access(text) to authenticated;
