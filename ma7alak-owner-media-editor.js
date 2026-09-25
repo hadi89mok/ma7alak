@@ -280,7 +280,7 @@
     const items=mediaItems();
 
     list.innerHTML=items.length
-      ?'<div class="m7om-section-title"><b>Media library</b><small>Items inside an album still count toward your photo/video limits.</small></div>'+
+      ?'<div class="m7om-section-title"><b>Media library</b><small>Hold a thumbnail to delete · Album items still count toward your limits.</small></div>'+
        items.map(x=>{
          const member=membership.get(mediaKey(x.type,x.id));
          return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'">'+
@@ -404,6 +404,7 @@
     const countEl=builder.querySelector("[data-album-count]");
     const statusBox=builder.querySelector("[data-album-builder-status]");
     const fileInput=builder.querySelector("[data-album-file]");
+    const pickButton=builder.querySelector("[data-album-pick]");
     const draftsBox=builder.querySelector("[data-album-drafts]");
     const newHead=builder.querySelector("[data-album-new-head]");
     const saveButton=builder.querySelector("[data-album-save]");
@@ -442,7 +443,31 @@
     const sync=()=>{
       chooseFallbackCover();
       const total=totalCount();
-      countEl.textContent=total+" / "+limit+" album items";
+      const remaining=Math.max(0,limit-total);
+      const uploadAllowanceLeft=Math.max(
+        0,
+        Number(snapshot.photoLimit||0)-
+        (snapshot.photos||[]).length-
+        draftFiles.length
+      );
+
+      countEl.innerHTML=
+        '<b>'+total+' / '+limit+' selected</b>'+
+        '<span>'+remaining+' album spot'+(remaining===1?"":"s")+' left</span>'+
+        (uploadAllowanceLeft<=0&&remaining>0
+          ?'<em>Photo allowance full</em>'
+          :'');
+      countEl.dataset.full=remaining<=0?"true":"false";
+
+      if(pickButton){
+        pickButton.disabled=remaining<=0||uploadAllowanceLeft<=0;
+        pickButton.textContent=remaining<=0
+          ?'✓ Album full · '+total+' / '+limit
+          :(uploadAllowanceLeft<=0
+            ?'Photo allowance full'
+            :'＋ Choose photos · '+remaining+' album spot'+(remaining===1?"":"s")+' left');
+      }
+
       if(saveButton)saveButton.disabled=total<2||total>limit;
 
       builder.querySelectorAll("[data-album-existing-choice]").forEach(card=>{
@@ -481,7 +506,12 @@
       }
 
       const albumSpace=Math.max(0,limit-totalCount());
-      const photoSpace=Math.max(0,Number(snapshot.photoLimit||0)-(snapshot.photos||[]).length);
+      const photoSpace=Math.max(
+        0,
+        Number(snapshot.photoLimit||0)-
+        (snapshot.photos||[]).length-
+        draftFiles.length
+      );
       const canAdd=Math.min(albumSpace,photoSpace);
 
       if(canAdd<=0){
@@ -919,7 +949,7 @@
       .m7om-add button:disabled{opacity:.36}
       #m7-owner-media-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
       .m7om-list{display:grid;gap:9px}.m7om-item{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(255,255,255,.025)}
-      .m7om-thumb{width:104px;height:88px;border-radius:12px;overflow:hidden;background:#000;position:relative}.m7om-thumb img,.m7om-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-thumb em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
+      .m7om-thumb{width:104px;height:88px;border-radius:12px;overflow:hidden;background:#000;position:relative;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-touch-callout:none}.m7om-thumb img,.m7om-thumb video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.m7om-thumb em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
       .m7om-copy{min-width:0}.m7om-copy b,.m7om-copy small{display:block}.m7om-copy b{font-size:12px}.m7om-copy small{font-size:8px;color:#8f8474;margin-top:4px;line-height:1.35}
       .m7om-actions{display:flex;gap:5px;align-items:center}.m7om-actions button{width:34px;height:34px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#111;color:#ddd;font-size:0;font-weight:900;touch-action:manipulation;display:grid;place-items:center}.m7om-actions button:before{font-size:13px;line-height:1}.m7om-actions [data-replace]:before{content:"↻"}.m7om-actions [data-delete]:before{content:"×"}.m7om-actions [data-delete]{color:#ff9696;border-color:rgba(255,80,80,.16)}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
@@ -935,7 +965,11 @@
       .m7om-album-device-picker>button{min-height:46px;border:1px solid rgba(217,164,65,.45);border-radius:12px;background:linear-gradient(135deg,rgba(224,174,78,.18),rgba(186,132,49,.10));color:#f2cf80;font-size:11px;font-weight:950;touch-action:manipulation}
       .m7om-album-device-picker>input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
       .m7om-album-device-picker>small{color:#8f8371;font-size:8px;line-height:1.35;text-align:center}
-      .m7om-builder-count{margin:11px 0 7px;color:#f0ca6b;font-size:10px;font-weight:900}
+      .m7om-builder-count{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:11px 0 7px;color:#f0ca6b;font-size:10px;font-weight:900}
+      .m7om-builder-count b{font-size:11px;color:#f5d88f}
+      .m7om-builder-count span{padding:4px 7px;border:1px solid rgba(217,164,65,.22);border-radius:999px;background:rgba(217,164,65,.07);color:#d9b461;font-size:8.5px}
+      .m7om-builder-count em{padding:4px 7px;border:1px solid rgba(255,104,104,.24);border-radius:999px;background:rgba(255,84,84,.06);color:#ff9d9d;font-size:8px;font-style:normal}
+      .m7om-builder-count[data-full="true"] span{color:#86dda1;border-color:rgba(94,214,130,.24);background:rgba(94,214,130,.06)}
       .m7om-builder-subhead{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:10px 1px 7px}.m7om-builder-subhead b{color:#f2d18d;font-size:10px}.m7om-builder-subhead small{max-width:68%;color:#8f8474;font-size:7.5px;line-height:1.3;text-align:right}
       .m7om-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.m7om-choice{min-width:0;padding:6px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:#111;cursor:pointer}.m7om-choice.selected{border-color:rgba(217,164,65,.72);box-shadow:0 0 0 1px rgba(217,164,65,.18) inset}.m7om-choice.removed{opacity:.46}.m7om-choice.locked{opacity:.42;cursor:not-allowed}
       .m7om-choice-thumb{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:10px;background:#000}.m7om-choice-thumb img,.m7om-choice-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-choice-thumb em{position:absolute;left:4px;bottom:4px;padding:3px 5px;border-radius:999px;background:#000c;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}
@@ -1119,12 +1153,12 @@
       });
     });
 
-    sheet.querySelector("#m7-owner-media-list").addEventListener("click",async event=>{
-      const item=event.target.closest(".m7om-item");
+    const mediaList=sheet.querySelector("#m7-owner-media-list");
+
+    const confirmMediaDelete=item=>{
       if(!item||busy)return;
-      const type=item.dataset.type,id=item.dataset.id;
-      if(event.target.closest("[data-replace]")){choose("replace",type,id);return}
-      if(!event.target.closest("[data-delete]"))return;
+      const type=item.dataset.type==="video"?"video":"photo";
+      const id=item.dataset.id;
 
       openActionConfirm({
         title:"Delete this "+type+"?",
@@ -1140,6 +1174,74 @@
           status("Deleted.","ok");
         }
       });
+    };
+
+    mediaList.addEventListener("click",event=>{
+      const item=event.target.closest(".m7om-item");
+      if(!item||busy)return;
+      const type=item.dataset.type,id=item.dataset.id;
+      if(event.target.closest("[data-replace]")){
+        choose("replace",type,id);
+        return;
+      }
+      if(event.target.closest("[data-delete]")){
+        confirmMediaDelete(item);
+      }
+    });
+
+    /*
+       Phone shortcut: hold the actual thumbnail for ~0.55s.
+       Movement cancels the gesture so vertical scrolling stays natural.
+    */
+    let mediaHoldTimer=0;
+    let mediaHoldX=0;
+    let mediaHoldY=0;
+    let mediaHoldItem=null;
+
+    const cancelMediaHold=()=>{
+      if(mediaHoldTimer){
+        clearTimeout(mediaHoldTimer);
+        mediaHoldTimer=0;
+      }
+      mediaHoldItem=null;
+    };
+
+    mediaList.addEventListener("pointerdown",event=>{
+      const thumb=event.target.closest(".m7om-thumb");
+      const item=thumb?.closest(".m7om-item");
+      if(!item||busy)return;
+      if(event.pointerType==="mouse"&&event.button!==0)return;
+
+      cancelMediaHold();
+      mediaHoldItem=item;
+      mediaHoldX=Number(event.clientX||0);
+      mediaHoldY=Number(event.clientY||0);
+
+      mediaHoldTimer=setTimeout(()=>{
+        const held=mediaHoldItem;
+        mediaHoldTimer=0;
+        mediaHoldItem=null;
+        if(!held||busy)return;
+        try{navigator.vibrate?.(24)}catch(_){}
+        confirmMediaDelete(held);
+      },550);
+    });
+
+    mediaList.addEventListener("pointermove",event=>{
+      if(!mediaHoldTimer)return;
+      const dx=Number(event.clientX||0)-mediaHoldX;
+      const dy=Number(event.clientY||0)-mediaHoldY;
+      if(Math.hypot(dx,dy)>10)cancelMediaHold();
+    });
+
+    ["pointerup","pointercancel","pointerleave"].forEach(type=>{
+      mediaList.addEventListener(type,cancelMediaHold);
+    });
+
+    mediaList.addEventListener("contextmenu",event=>{
+      if(event.target.closest(".m7om-thumb")){
+        event.preventDefault();
+      }
     });
   }
 
