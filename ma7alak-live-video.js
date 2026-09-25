@@ -168,7 +168,7 @@ function ensurePremiumCss(){
   width:100%!important;
   height:100%!important;
   object-fit:contain!important;
-  object-position:center top!important;
+  object-position:center center!important;
   transform:none!important;
   -webkit-transform:none!important;
 }
@@ -1082,56 +1082,124 @@ async function createSetupCapture(){
   }
   [localAudio,localVideo]=await Promise.all([
     window.AgoraRTC.createMicrophoneAudioTrack(),
-    window.AgoraRTC.createCameraVideoTrack({
-      facingMode:"environment"
-    })
+    makePhoneDefaultCamera("environment")
   ]);
   cameraFacing="environment";qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
   await resetCameraZoom();
   playSetupPreview();
   refreshSetupCameraControls();
 }
-function scoreCamera(cam,next){
+function cameraLabelScore(cam,next){
   const label=String(cam?.label||"").toLowerCase();
   let score=0;
+  const isFront=/front|user|face|selfie/.test(label);
+  const isRear=/back|rear|environment|world/.test(label);
+  const specialty=/ultra|ultrawide|ultra-wide|tele|telephoto|zoom|macro|depth|infrared|ir camera/.test(label);
+
   if(next==="user"){
-    if(/front|user|face|selfie/.test(label))score+=10;
-    if(/back|rear|environment|world/.test(label))score-=10;
+    if(isFront)score+=100;
+    if(isRear)score-=120;
+    if(/selfie|front camera|facing front/.test(label))score+=20;
+    if(specialty)score-=80;
   }else{
-    if(/back|rear|environment|world/.test(label))score+=10;
-    if(/front|user|face|selfie/.test(label))score-=10;
-    if(/tele|zoom/.test(label))score-=5;
-    if(/ultra/.test(label))score-=3;
-    if(/wide/.test(label)&&!/ultra/.test(label))score+=2;
+    if(isRear)score+=100;
+    if(isFront)score-=120;
+    if(/main|primary|back camera|rear camera|facing back/.test(label))score+=24;
+    if(specialty)score-=80;
+    if(/wide/.test(label)&&!/ultra/.test(label))score+=4;
   }
   return score;
 }
+async function fallbackPhysicalCamera(next,track){
+  try{
+    const cams=await window.AgoraRTC.getCameras();
+    if(!cams?.length)return false;
+    const ordered=[...cams].sort((a,b)=>cameraLabelScore(b,next)-cameraLabelScore(a,next));
+    const target=ordered[0];
+    if(!target?.deviceId)return false;
+    await track.setDevice(target.deviceId);
+    return true;
+  }catch(_){return false}
+}
+async function makePhoneDefaultCamera(next){
+  /* This deliberately asks only for the normal facing direction.
+     No width/height/aspectRatio/encoder profile is supplied, so Android/iOS
+     can choose the phone/browser's default logical front or rear camera. */
+  return window.AgoraRTC.createCameraVideoTrack({facingMode:next});
+}
 async function setCameraFacing(next){
   if(!localVideo)return;
-  setupStatus(next==="user"?"Switching to front camera…":"Switching to rear camera…");
-  let switched=false;
+  setupStatus(next==="user"?"Switching to normal selfie camera…":"Switching to normal rear camera…");
+
+  const previous=localVideo;
+  const wasLive=mode==="host"&&!!rtcClient&&!!activeStream;
+  const wantedLook=setupLook;
+  let replacement=null;
+
   try{
-    await localVideo.setDevice({facingMode:next});
-    switched=true;
-  }catch(_){}
-  if(!switched){
+    /* Beauty processing belongs to the old camera track. Detach it first so
+       the replacement camera starts with untouched native framing. */
+    await releaseBeautyProcessor();
+
+    replacement=await makePhoneDefaultCamera(next);
+
+    /* Validate the requested side. On browsers that ignore facingMode,
+       choose the best non-specialty physical camera as a fallback. */
     try{
-      const cams=await window.AgoraRTC.getCameras();
-      if(!cams?.length)throw new Error("NO_CAMERAS");
-      const current=String(localVideo.getTrackLabel?.()||"").toLowerCase();
-      const ordered=[...cams].sort((a,b)=>scoreCamera(b,next)-scoreCamera(a,next));
-      const target=ordered.find(cam=>String(cam.label||"").toLowerCase()!==current)||ordered[0];
-      if(!target)throw new Error("NO_CAMERA");
-      await localVideo.setDevice(target.deviceId);
-      switched=true;
+      const facing=String(replacement.getMediaStreamTrack?.()?.getSettings?.()?.facingMode||"").toLowerCase();
+      if(facing&&facing!==next){
+        await fallbackPhysicalCamera(next,replacement);
+      }
     }catch(_){}
+
+    if(wasLive){
+      try{await rtcClient.unpublish(previous)}catch(_){}
+    }
+
+    localVideo=replacement;
+    cameraFacing=next;
+    torchOn=false;
+    await resetCameraZoom();
+
+    if(wantedLook!=="natural"){
+      await applySetupLook(wantedLook);
+    }
+
+    if(wasLive){
+      await rtcClient.publish(localVideo);
+    }
+
+    try{previous.stop();previous.close()}catch(_){}
+    replacement=null;
+
+    if($("#m7lv-preflight"))playSetupPreview();else localPreview();
+    refreshSetupCameraControls();
+    applySetupButtonState();
+
+    setupStatus(next==="user"
+      ?"Normal selfie camera ready · native phone framing, 1×, no forced crop."
+      :"Normal rear camera ready · native phone framing, 1×, no forced crop.");
+  }catch(err){
+    try{replacement?.stop();replacement?.close()}catch(_){}
+    localVideo=previous;
+
+    /* If recreating the logical camera failed, make one final device-id
+       attempt on the existing track. */
+    const switched=await fallbackPhysicalCamera(next,localVideo);
+    if(switched){
+      cameraFacing=next;
+      torchOn=false;
+      await resetCameraZoom();
+      if(wantedLook!=="natural")await applySetupLook(wantedLook);
+      if($("#m7lv-preflight"))playSetupPreview();else localPreview();
+      refreshSetupCameraControls();
+      applySetupButtonState();
+      setupStatus(next==="user"?"Selfie camera ready.":"Rear camera ready.");
+      return;
+    }
+
+    setupStatus("This phone/browser could not switch to that camera.",true);
   }
-  if(!switched){setupStatus("Camera switch is not supported on this phone/browser.",true);return}
-  cameraFacing=next;torchOn=false;
-  await resetCameraZoom();
-  if($("#m7lv-preflight"))playSetupPreview();else localPreview();
-  refreshSetupCameraControls();
-  setupStatus(next==="user"?"Front camera ready · using the phone's default selfie view.":"Rear camera ready · using the phone's default camera view.");
 }
 async function prepareSetupPreview(p){
   const seq=++setupPrepareSeq;
