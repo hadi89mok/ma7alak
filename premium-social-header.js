@@ -5296,33 +5296,33 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
         display:inline-block!important;
         margin-inline:2px!important;
         font-size:1.15em!important;
-        line-height:1!important;
+        line-height:1.08!important;
         font-weight:950!important;
+
+        /* Hostinger text blocks can use transparent text-fill for gradients.
+           Force the actual Arabic word to stay visible. */
         color:#f0c66f!important;
-        letter-spacing:.01em!important;
+        -webkit-text-fill-color:#f0c66f!important;
+        background:none!important;
+        -webkit-background-clip:border-box!important;
+        background-clip:border-box!important;
+        opacity:1!important;
+        visibility:visible!important;
+
+        direction:rtl!important;
+        unicode-bidi:isolate!important;
+        letter-spacing:0!important;
         transform-origin:50% 70%!important;
         text-shadow:
-          0 0 10px rgba(240,198,111,.18),
-          0 2px 8px rgba(0,0,0,.20)!important;
+          0 0 9px rgba(240,198,111,.16),
+          0 2px 8px rgba(0,0,0,.18)!important;
         animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
         -webkit-animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
         will-change:transform;
       }
       .shoufhon-platform-word::after{
-        content:"";
-        position:absolute;
-        left:12%;
-        right:12%;
-        bottom:-4px;
-        height:2px;
-        border-radius:999px;
-        background:linear-gradient(90deg,transparent,rgba(240,198,111,.72),transparent);
-        opacity:.58;
-        transform:scaleX(.7);
-        transform-origin:center;
-        animation:shoufhonPlatformGlow 3.8s ease-in-out infinite!important;
-        -webkit-animation:shoufhonPlatformGlow 3.8s ease-in-out infinite!important;
-        pointer-events:none;
+        display:none!important;
+        content:none!important;
       }
       @keyframes shoufhonPlatformWiggle{
         0%,68%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
@@ -5340,17 +5340,6 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
         84%{-webkit-transform:translate3d(0,0,0) rotate(1deg) scale(1.015)}
         88%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
       }
-      @keyframes shoufhonPlatformGlow{
-        0%,68%,100%{opacity:.38;transform:scaleX(.62)}
-        77%{opacity:.9;transform:scaleX(1)}
-        88%{opacity:.48;transform:scaleX(.72)}
-      }
-      @-webkit-keyframes shoufhonPlatformGlow{
-        0%,68%,100%{opacity:.38;-webkit-transform:scaleX(.62)}
-        77%{opacity:.9;-webkit-transform:scaleX(1)}
-        88%{opacity:.48;-webkit-transform:scaleX(.72)}
-      }
-
       /* Header three-lines menu: same design, just a little tighter and cleaner. */
       #ma7alak-header-menu-panel{
         width:238px!important;
