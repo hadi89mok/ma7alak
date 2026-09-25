@@ -275,12 +275,53 @@ function membershipGateCss(){
   document.head.appendChild(s);
 }
 function closeMembershipGate(){$("#m7lo-membership-gate")?.remove()}
-function membershipGate(feature){
+function membershipGate(feature,info){
   membershipGateCss();closeMembershipGate();
+  info=info&&typeof info==="object"?info:{};
+
   const isVideo=feature==="video";
-  const copy=isVideo?{icon:"◉",kicker:"Premium feature",title:"Unlock Video LIVE",text:"Video LIVE is available to Premium and VIP shops. Upgrade your ShoufHon membership to broadcast from your camera, interact with viewers, and manage your live session in real time."}:{icon:"＋",kicker:"Premium feature",title:"Unlock Live Offers",text:"Live Offers are available to Premium and VIP shops. Upgrade your ShoufHon membership to publish offers, events, new arrivals, and what’s happening now for your customers."};
-  const d=document.createElement("div");d.id="m7lo-membership-gate";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-label",copy.title);
-  d.innerHTML='<div class="m7lo-gate-card"><button class="m7lo-gate-close" type="button" aria-label="Close">×</button><div class="m7lo-gate-icon">'+copy.icon+'</div><div class="m7lo-gate-kicker">♛ '+copy.kicker+'</div><div class="m7lo-gate-title">'+copy.title+'</div><p class="m7lo-gate-copy">'+copy.text+'</p><div class="m7lo-gate-plans"><span class="m7lo-gate-plan">◆ PREMIUM</span><span class="m7lo-gate-plan">♛ VIP</span></div><div class="m7lo-gate-actions"><a class="m7lo-gate-upgrade" href="https://shoufhon.com/add-shop-">View Premium & VIP plans</a><button class="m7lo-gate-later" type="button">Not now</button></div></div>';
+  const isTime=feature==="video_limit";
+  const limit=Math.max(0,Number(info.monthly_minutes||info.monthlyMinutes||0));
+  const used=Math.max(0,Number(info.used_minutes||info.usedMinutes||0));
+
+  const copy=isTime
+    ? {
+        icon:"⏱",
+        kicker:"LIVE time limit",
+        title:"Your LIVE time is used up",
+        text:limit>0
+          ? "You’ve used all "+limit+" included Video LIVE minutes for this month. Camera LIVE is paused until your LIVE time is refilled or your allowance is increased."
+          : "Your included Video LIVE time has been used. Camera LIVE is paused until your LIVE time is refilled or your allowance is increased.",
+        left:used>0?"USED "+used+" MIN":"TIME USED",
+        right:limit>0?"LIMIT "+limit+" MIN":"REFILL NEEDED",
+        action:"View plans / refill LIVE time"
+      }
+    : isVideo
+      ? {
+          icon:"◉",
+          kicker:"Premium feature",
+          title:"Unlock Video LIVE",
+          text:"Video LIVE is available to Premium and VIP shops. Upgrade your ShoufHon membership to broadcast from your camera, interact with viewers, and manage your live session in real time.",
+          left:"◆ PREMIUM",
+          right:"♛ VIP",
+          action:"View Premium & VIP plans"
+        }
+      : {
+          icon:"＋",
+          kicker:"Premium feature",
+          title:"Unlock Live Offers",
+          text:"Live Offers are available to Premium and VIP shops. Upgrade your ShoufHon membership to publish offers, events, new arrivals, and what’s happening now for your customers.",
+          left:"◆ PREMIUM",
+          right:"♛ VIP",
+          action:"View Premium & VIP plans"
+        };
+
+  const d=document.createElement("div");
+  d.id="m7lo-membership-gate";
+  d.setAttribute("role","dialog");
+  d.setAttribute("aria-modal","true");
+  d.setAttribute("aria-label",copy.title);
+  d.innerHTML='<div class="m7lo-gate-card"><button class="m7lo-gate-close" type="button" aria-label="Close">×</button><div class="m7lo-gate-icon">'+copy.icon+'</div><div class="m7lo-gate-kicker">♛ '+copy.kicker+'</div><div class="m7lo-gate-title">'+copy.title+'</div><p class="m7lo-gate-copy">'+copy.text+'</p><div class="m7lo-gate-plans"><span class="m7lo-gate-plan">'+copy.left+'</span><span class="m7lo-gate-plan">'+copy.right+'</span></div><div class="m7lo-gate-actions"><a class="m7lo-gate-upgrade" href="https://shoufhon.com/add-shop-">'+copy.action+'</a><button class="m7lo-gate-later" type="button">Not now</button></div></div>';
   d.addEventListener("click",e=>{if(e.target===d||e.target.closest(".m7lo-gate-close,.m7lo-gate-later"))closeMembershipGate()});
   document.body.appendChild(d);
   const onKey=e=>{if(e.key==="Escape"){closeMembershipGate();removeEventListener("keydown",onKey)}};addEventListener("keydown",onKey);
@@ -314,6 +355,33 @@ async function identity(){
     if(!e.error)ent=e.data||null;
   }
 }
+async function ownerVideoAccess(){
+  c=resolveClient()||c;
+  if(!c||!ownerSlug)return null;
+  try{
+    const r=await c.rpc("shoufhon_owner_get_video_live_access",{p_shop_slug:ownerSlug});
+    if(r.error)throw r.error;
+    const row=Array.isArray(r.data)?r.data[0]:r.data;
+    return row&&typeof row==="object"?row:null;
+  }catch(err){
+    console.warn("SHOUFHON Video LIVE quota check:",err);
+    return null;
+  }
+}
+async function allowVideoLiveOrGate(){
+  await identity();
+  if(!ent?.video_live_enabled){
+    membershipGate("video");
+    return false;
+  }
+  const access=await ownerVideoAccess();
+  if(access?.exhausted){
+    membershipGate("video_limit",access);
+    return false;
+  }
+  return true;
+}
+
 async function load(){
   if(!c||refreshing)return;
   refreshing=true;
@@ -420,26 +488,28 @@ function ownerActivityHtml(list,shopSlug){
 function ownerBar(list){
   const lim=Math.max(0,Number(ent?.active_limit||0));
   const used=list.length;
-  const pct=lim?Math.min(100,used/lim*100):0;
-  const offersEnabled=!!ent?.enabled;
+  const pct=lim>0?Math.min(100,used/lim*100):0;
+  const offersOn=!!ent?.enabled;
+  const offerAccess=offersOn&&lim>0;
+  const offerFull=offerAccess&&used>=lim;
   const videoEnabled=!!ent?.video_live_enabled;
   const activeVideo=videoLiveRows(currentOwnerSlug())[0]||null;
   const statusTitle=activeVideo?"You are LIVE":"Ready to go live";
   const statusSub=activeVideo
     ? "Your broadcast is active. Re-open it to manage camera, chat and viewers."
-    : (videoEnabled?"Start a broadcast or publish an offer for your followers.":"Video Live is disabled for this shop.");
-  const slotText=offersEnabled?(lim?`${used}/${lim}`:`${used}`):"—";
+    : ((videoEnabled||offerAccess)?"Start a broadcast or publish an offer for your followers.":"Premium access is required for Live features.");
+  const slotText=offersOn?`${used}/${lim}`:"OFF";
   return`<div class="m7lo-owner m7lo-owner-v6 ${activeVideo?"is-video-live":""}">
     <div class="m7lo-owner-mark">♛ SHOP OWNER CONTROLS</div>
     <div class="m7lo-owner-main">
       <div class="m7lo-owner-status"><i class="m7lo-owner-status-dot"></i><div><strong>${statusTitle}</strong><small>${statusSub}</small></div></div>
       <div class="m7lo-owner-actions">
         <button class="m7lo-video-btn ${!videoEnabled?"m7lo-locked-feature":""}" data-m7-video-live data-m7-video-allowed="${videoEnabled?"1":"0"}">${activeVideo?"● Resume Live":(videoEnabled?"▣ Go Live":"🔒 Go Live")}</button>
-        <button class="m7lo-btn ${!offersEnabled?"m7lo-locked-feature":""}" data-m7-create data-m7-offer-allowed="${offersEnabled?"1":"0"}" ${offersEnabled&&used>=lim&&lim>0?"disabled":""}>${offersEnabled&&lim>0&&used>=lim?"Slots Full":(offersEnabled?"＋ Add Offer":"🔒 Add Offer")}</button>
+        <button class="m7lo-btn ${!offerAccess?"m7lo-locked-feature":""}" data-m7-create data-m7-offer-allowed="${offerAccess?"1":"0"}" ${offerFull?"disabled":""}>${offerFull?"Slots Full":(offerAccess?"＋ Add Offer":"🔒 Add Offer")}</button>
       </div>
     </div>
     <div class="m7lo-owner-meta">
-      <div class="m7lo-owner-slots"><b>${slotText}</b><span>${offersEnabled?"Active offer slots":"Offers disabled"}</span><div class="m7lo-slots"><i style="width:${pct}%"></i></div></div>
+      <div class="m7lo-owner-slots"><b>${slotText}</b><span>Offer slots</span><div class="m7lo-slots"><i style="width:${pct}%"></i></div></div>
       <div class="m7lo-owner-video-state">${activeVideo?"● Broadcast active":(videoEnabled?"○ Broadcast ready":"○ Video Live off")}</div>
     </div>
   </div>`;
@@ -461,8 +531,11 @@ function bind(root){
   $("[data-m7-video-live]",root)?.addEventListener("click",e=>{
     e.preventDefault();e.stopPropagation();
     if(e.currentTarget?.dataset?.m7VideoAllowed==="0"||!ent?.video_live_enabled){membershipGate("video");return}
-    close();
-    setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
+    (async()=>{
+      if(!await allowVideoLiveOrGate())return;
+      close();
+      setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
+    })().catch(err=>console.warn("SHOUFHON Video LIVE access:",err));
   });
 }
 function render(){let ps=((location.pathname||"/").replace(/^\/+|\/+$/g,"").split("/")[0]||"").toLowerCase();$all('[data-ma7alak-live="home"]').forEach(r=>{r.innerHTML=section(items,false,false,"");bind(r)});$all('[data-ma7alak-live="shop"]').forEach(r=>{let s=String(r.dataset.shopSlug||ps).toLowerCase(),own=s===ownerSlug,list=items.filter(x=>String(x.shop_slug).toLowerCase()===s),management=own?ownerItems.filter(x=>String(x.shop_slug).toLowerCase()===s):list,videoCount=videoLiveRows(s).length;r.style.display=(!list.length&&!own&&!videoCount)?"none":"";r.innerHTML=own?(ownerBar(management)+ownerActivityHtml(management,s)):section(list,true,false,s);bind(r);m7loApplyDesign(r,(profileOptions.get(s)||{}).directory_options||{})});timers()}
@@ -585,12 +658,12 @@ async function endPost(id){
 function formHtml(x){let edit=!!x;const type=x?.post_type||"offer";const types=[["offer","🏷️","OFFER","Deal / price"],["happening","●","HAPPENING NOW","Right now"],["arrival","✨","NEW ARRIVAL","Just landed"],["event","▣","EVENT","Date / activity"]];return`<div id="m7lo-panel"><button class="m7lo-close">×</button><div class="m7lo-panel-title">${edit?"Edit Live / Offer":"Add Live / Offer"}</div><div class="m7lo-types">${types.map(a=>`<button class="m7lo-type ${a[0]===type?"on":""}" data-m7-type="${a[0]}" type="button"><span class="m7lo-type-icon">${a[1]}</span><span class="m7lo-type-copy"><b>${a[2]}</b><small>${a[3]}</small></span></button>`).join("")}</div><form id="m7lo-form" class="m7lo-form"><input id="m7lo-type" type="hidden" value="${esc(type)}"><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="Title" value="${esc(x?.title||"")}"><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" placeholder="Description">${esc(x?.description||"")}</textarea><input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}"><div id="m7lo-prices" class="m7lo-two" style="display:${type==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div><div class="m7lo-two m7lo-time-row"><label class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label class="m7lo-field"><span class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>${edit?"":`<label class="m7lo-file">📷 Add up to 8 photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div>`}<button class="m7lo-btn" type="submit">${edit?"Save Changes":"⚡ Publish"}</button><div id="m7lo-status" class="m7lo-status"></div></form></div>`}
 function localValue(v){let d=new Date(v);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
 function wireForm(d,x){$(".m7lo-close",d).onclick=close;$all('[data-m7-type]',d).forEach(b=>b.onclick=()=>{$all('[data-m7-type]',d).forEach(q=>q.classList.remove("on"));b.classList.add("on");$("#m7lo-type").value=b.dataset.m7Type;$("#m7lo-prices").style.display=b.dataset.m7Type==="offer"?"grid":"none"});if(x){$("#m7lo-start").value=localValue(x.starts_at);$("#m7lo-finish").value=localValue(x.ends_at);$("#m7lo-form").onsubmit=e=>saveEdit(e,x.id)}else{let h=Math.min(6,Math.max(1,Number(ent?.max_duration_hours||48))),f=new Date(Date.now()+h*3600000);$("#m7lo-finish").value=localValue(f);$("#m7lo-file").onchange=e=>{let n=e.target.files?.length||0;$("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first file becomes the cover`:""};$("#m7lo-form").onsubmit=publish}}
-function creator(){if(!ent?.enabled){membershipGate("offer");return}if(ownerItems.length>=Number(ent.active_limit||0))return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(null);document.body.appendChild(d);wireForm(d,null)}
+function creator(){const lim=Math.max(0,Number(ent?.active_limit||0));if(!ent?.enabled||lim<=0){membershipGate("offer");return}if(ownerItems.length>=lim)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(null);document.body.appendChild(d);wireForm(d,null)}
 function editor(id){let x=ownerItems.find(q=>String(q.id)===String(id));if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(x);document.body.appendChild(d);wireForm(d,x)}
 function payloadBase(){let type=$("#m7lo-type").value;return{post_type:type,title:$("#m7lo-title").value.trim(),description:$("#m7lo-desc").value.trim()||null,location_text:$("#m7lo-location").value.trim()||null,starts_at:new Date($("#m7lo-start").value||Date.now()).toISOString(),ends_at:new Date($("#m7lo-finish").value).toISOString(),original_price:type==="offer"&&$("#m7lo-original").value?Number($("#m7lo-original").value):null,offer_price:type==="offer"&&$("#m7lo-offer").value?Number($("#m7lo-offer").value):null}}
 async function saveEdit(e,id){e.preventDefault();let st=$("#m7lo-status"),p=payloadBase();st.textContent="Saving…";if(new Date(p.ends_at)<=new Date(p.starts_at)){st.textContent="End time must be after start.";return}let existing=ownerItems.find(x=>String(x.id)===String(id))||items.find(x=>String(x.id)===String(id));let r=await c.rpc("ma7alak_update_live_post",{p_post_id:Number(id),p_post:p});if(r.error){st.textContent=r.error.message;return}if(existing)upsertLocalPost({...existing,...p,id:Number(id),status:"active"});close();setTimeout(load,180)}
 async function uploadLiveFile(file,postKey,statusEl){if(file.size>50*1024*1024)throw new Error(`${file.name}: maximum file size is 50 MB.`);let mediaType=file.type.startsWith("video/")?"video":"image",ext=(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,""),path=`${ownerSlug}/${postKey}/${crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random()}.${ext}`;statusEl&&(statusEl.textContent=`Uploading ${file.name}…`);let u=await c.storage.from(BUCKET).upload(path,file,{contentType:file.type,cacheControl:"86400",upsert:false});if(u.error)throw u.error;return{media_url:c.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,media_type:mediaType,storage_path:path}}
-async function publish(e){e.preventDefault();let st=$("#m7lo-status"),btn=e.submitter;btn.disabled=true;try{await identity();if(!ownerSlug||!ent?.enabled)throw new Error("Live & Offers is not enabled.");let p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48),files=[...($("#m7lo-file").files||[])];if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);let uploaded=[];for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));let sp=await c.from("shop_profiles").select("shop_name,profile_image_url,shop_url,directory_options").eq("shop_slug",ownerSlug).maybeSingle(),cover=uploaded[0]||{};Object.assign(p,{shop_slug:ownerSlug,shop_name:sp.data?.shop_name||ownerSlug,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="Publishing…";let r=await c.rpc("ma7alak_create_live_post",{p_post:p});if(r.error)throw r.error;let postId=Number(r.data),rows=[];if(uploaded.length){rows=uploaded.map((m,i)=>({post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,sort_order:i,is_cover:i===0,created_by:session.user.id}));let ins=await c.from("shop_live_post_media").insert(rows);if(ins.error)throw ins.error}let localMedia=rows.map((m,i)=>({...m,id:"local-"+postId+"-"+i}));upsertLocalPost({...p,id:postId,status:"active",profile_image_url:sp.data?.profile_image_url||null,shop_url:sp.data?.shop_url||null,directory_options:sp.data?.directory_options||{},media:localMedia,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="✓ Published — You are now live!";liveToast("✓ Published — You are now live!");setTimeout(()=>{close();load().catch(err=>console.warn("SHOUFHON Live refresh:",err))},650)}catch(err){st.textContent=err.message||String(err);btn.disabled=false}}
+async function publish(e){e.preventDefault();let st=$("#m7lo-status"),btn=e.submitter;btn.disabled=true;try{await identity();if(!ownerSlug||!ent?.enabled||Number(ent?.active_limit||0)<=0)throw new Error("Live Offers access is not enabled for this shop.");let p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48),files=[...($("#m7lo-file").files||[])];if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);let uploaded=[];for(let i=0;i<files.length;i++)uploaded.push(await uploadLiveFile(files[i],`pending-${Date.now()}`,st));let sp=await c.from("shop_profiles").select("shop_name,profile_image_url,shop_url,directory_options").eq("shop_slug",ownerSlug).maybeSingle(),cover=uploaded[0]||{};Object.assign(p,{shop_slug:ownerSlug,shop_name:sp.data?.shop_name||ownerSlug,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="Publishing…";let r=await c.rpc("ma7alak_create_live_post",{p_post:p});if(r.error)throw r.error;let postId=Number(r.data),rows=[];if(uploaded.length){rows=uploaded.map((m,i)=>({post_id:postId,shop_slug:ownerSlug,media_url:m.media_url,storage_path:m.storage_path,media_type:m.media_type,sort_order:i,is_cover:i===0,created_by:session.user.id}));let ins=await c.from("shop_live_post_media").insert(rows);if(ins.error)throw ins.error}let localMedia=rows.map((m,i)=>({...m,id:"local-"+postId+"-"+i}));upsertLocalPost({...p,id:postId,status:"active",profile_image_url:sp.data?.profile_image_url||null,shop_url:sp.data?.shop_url||null,directory_options:sp.data?.directory_options||{},media:localMedia,media_url:cover.media_url||null,media_type:cover.media_type||null});st.textContent="✓ Published — You are now live!";liveToast("✓ Published — You are now live!");setTimeout(()=>{close();load().catch(err=>console.warn("SHOUFHON Live refresh:",err))},650)}catch(err){st.textContent=err.message||String(err);btn.disabled=false}}
 function sortLocalLive(list){return list.sort((a,b)=>new Date(b.starts_at||b.created_at||0)-new Date(a.starts_at||a.created_at||0))}
 function commitLocalLiveState(){
   items=sortLocalLive(activeCachedItems(items));
@@ -856,6 +929,7 @@ function bridge(){
       (async()=>{
         if(!await refreshOwnerStateForShop(s))return;
         if(!ent?.video_live_enabled){membershipGate("video");return}
+        if(!await allowVideoLiveOrGate())return;
         close();
         setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
       })().catch(err=>console.warn("SHOUFHON Live video start:",err));
