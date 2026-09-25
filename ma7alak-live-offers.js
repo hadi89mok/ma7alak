@@ -431,13 +431,26 @@ async function ownerVideoAccess(){
 }
 async function allowVideoLiveOrGate(){
   await identity();
+
+  /* Video LIVE is a separate entitlement from Live Offers.
+     The owner quota RPC is the source of truth and does not read offer slots. */
+  const access=await ownerVideoAccess();
+
+  if(access){
+    if(!access.video_live_enabled){
+      membershipGate("video");
+      return false;
+    }
+    if(access.exhausted){
+      membershipGate("video_limit",access);
+      return false;
+    }
+    return true;
+  }
+
+  /* Fallback only if the quota RPC is temporarily unavailable. */
   if(!ent?.video_live_enabled){
     membershipGate("video");
-    return false;
-  }
-  const access=await ownerVideoAccess();
-  if(access?.exhausted){
-    membershipGate("video_limit",access);
     return false;
   }
   return true;
@@ -591,7 +604,6 @@ function bind(root){
   });
   $("[data-m7-video-live]",root)?.addEventListener("click",e=>{
     e.preventDefault();e.stopPropagation();
-    if(e.currentTarget?.dataset?.m7VideoAllowed==="0"||!ent?.video_live_enabled){membershipGate("video");return}
     (async()=>{
       if(!await allowVideoLiveOrGate())return;
       close();
@@ -992,7 +1004,6 @@ function bridge(){
     if(d.type==="MA7ALAK_LIVE_VIDEO_GO"){
       (async()=>{
         if(!await refreshOwnerStateForShop(s))return;
-        if(!ent?.video_live_enabled){membershipGate("video");return}
         if(!await allowVideoLiveOrGate())return;
         close();
         setTimeout(()=>window.ShoufHonLiveVideo?.goLive?.(),0);
