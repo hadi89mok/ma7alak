@@ -697,11 +697,30 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
 
   }
 
+  function storyUploaderUrl(){
+    try{
+      const current=[...document.scripts].reverse().find(script=>
+        /ma7alak-opening-header\.js(?:[?#].*)?$/i.test(script.src||"")
+      );
+      if(current?.src){
+        return new URL(
+          current.src.replace(/ma7alak-opening-header\.js(?:[?#].*)?$/i,"story-upload-panel.js"),
+          location.href
+        ).href;
+      }
+    }catch(_){}
+    return "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/story-upload-panel.js";
+  }
+
   function openOwnerUploader(){
     if(!owner)return;
     const send=()=>window.postMessage({type:'MA7ALAK_OPEN_STORY_UPLOADER',shopSlug:owner.shop_slug,__ma7alakOpenStoryNow:true},location.origin);
     if([...document.scripts].some(s=>/story-upload-panel\.js/.test(s.src))){send();return}
-    const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@5995532fee4b27abfec30318769e6761547448d8/story-upload-panel.js';script.onload=send;script.onerror=()=>console.warn('Story uploader could not load');document.head.appendChild(script);
+    const script=document.createElement('script');
+    script.src=storyUploaderUrl();
+    script.onload=send;
+    script.onerror=()=>console.warn('Story uploader could not load');
+    document.head.appendChild(script);
   }
   function scheduleExpiry(activeRows){
     clearTimeout(expiryTimer);expiryTimer=0;
