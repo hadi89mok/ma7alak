@@ -2353,3 +2353,48 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   `;
   (document.head||document.documentElement).appendChild(s);
 })();
+
+
+/* =========================================================
+   SHOUFHON LIVE OFFERS UX — SAME-COMMIT LOADER
+   Global because Live Offers also opens from manual shop pages.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_LIVE_OFFERS_UX_LOADER_V1__)return;
+  window.__SHOUFHON_LIVE_OFFERS_UX_LOADER_V1__=true;
+
+  const ownScript=[...document.scripts]
+    .reverse()
+    .find(script=>
+      /ma7alak-opening-header\.js(?:[?#]|$)/.test(
+        String(script.src||"")
+      )
+    );
+
+  const src=ownScript?.src
+    ? ownScript.src.replace(
+        /ma7alak-opening-header\.js(?=[?#]|$)/,
+        "shoufhon-live-offers-ux.js"
+      )
+    : "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/shoufhon-live-offers-ux.js";
+
+  if(
+    [...document.scripts].some(script=>
+      String(script.src||"").split("?")[0].split("#")[0]===
+      src.split("?")[0].split("#")[0]
+    )
+  ){
+    return;
+  }
+
+  const script=document.createElement("script");
+  script.src=src;
+  script.async=true;
+  script.dataset.shoufhonLiveOffersUx="1";
+  script.onerror=()=>console.error(
+    "SHOUFHON Live Offers UX: script failed to load"
+  );
+  (document.head||document.documentElement).appendChild(script);
+})();
