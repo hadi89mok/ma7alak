@@ -73,8 +73,14 @@ function injectCss(){
   const s=document.createElement("style");
   s.id="m7cg-css";
   s.textContent=`
+  html:has(body.m7cg-page),
   body.m7cg-page{
     margin:0!important;
+    padding:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:100%!important;
+    overflow:hidden!important;
     background:#080706!important;
     color:#f7f1e8!important;
   }
@@ -84,10 +90,16 @@ function injectCss(){
     --line:rgba(228,180,89,.18);
     --muted:rgba(247,241,232,.64);
     --card:rgba(19,16,13,.86);
-    position:relative;
-    z-index:2;
+    position:fixed;
+    inset:0;
+    z-index:2147482600;
+    width:100%;
+    height:100dvh;
     min-height:100dvh;
-    overflow:hidden;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
     background:
       radial-gradient(circle at 12% 2%,rgba(224,168,67,.10),transparent 26rem),
       radial-gradient(circle at 92% 20%,rgba(178,33,56,.08),transparent 24rem),
@@ -98,7 +110,7 @@ function injectCss(){
   .m7cg-shell{
     width:min(100%,1120px);
     margin:0 auto;
-    padding:calc(92px + env(safe-area-inset-top)) 18px 54px;
+    padding:calc(var(--m7-header-h,76px) + env(safe-area-inset-top) + 22px) 18px calc(38px + env(safe-area-inset-bottom));
   }
   .m7cg-hero{
     position:relative;
@@ -147,11 +159,12 @@ function injectCss(){
     text-align:left;
   }
   .m7cg-en{
-    margin:8px 0 0;
-    color:var(--gold2);
-    font-size:clamp(17px,3vw,28px);
-    font-weight:900;
-    letter-spacing:.2px;
+    margin:20px 0 0;
+    color:#fff8ed;
+    font-size:clamp(32px,6vw,54px);
+    line-height:1.04;
+    font-weight:950;
+    letter-spacing:-1.2px;
   }
   .m7cg-intro-title{
     max-width:820px;
@@ -305,10 +318,9 @@ function injectCss(){
   }
   @keyframes m7cgSpin{to{transform:rotate(360deg)}}
   @media(max-width:720px){
-    .m7cg-shell{padding:calc(82px + env(safe-area-inset-top)) 11px 38px}
-    .m7cg-hero{padding:24px 18px;border-radius:24px}
-    .m7cg-ar{text-align:left;font-size:42px;letter-spacing:-.9px}
-    .m7cg-en{font-size:19px}
+    .m7cg-shell{padding:calc(var(--m7-header-h,76px) + env(safe-area-inset-top) + 16px) 11px calc(28px + env(safe-area-inset-bottom))}
+    .m7cg-hero{padding:22px 18px;border-radius:24px}
+    .m7cg-en{font-size:34px;letter-spacing:-.7px}
     .m7cg-grid{grid-template-columns:1fr;gap:9px}
     .m7cg-rule{min-height:0;padding:16px;border-radius:19px}
     .m7cg-section-head{align-items:start;flex-direction:column;margin-top:27px}
@@ -325,7 +337,7 @@ function root(){
   if(el)return el;
   el=document.createElement("main");
   el.id="m7cg-root";
-  document.body.appendChild(el);
+  document.body.insertBefore(el,document.body.firstChild||null);
   return el;
 }
 
@@ -341,10 +353,8 @@ function render(data){
     <div class="m7cg-shell">
       <section class="m7cg-hero">
         <div class="m7cg-eyebrow"><i></i>${esc(d.eyebrow)}</div>
-        <h1 class="m7cg-ar">${esc(d.title_ar)}</h1>
-        <div class="m7cg-en">${esc(d.title_en)}</div>
-        <h2 class="m7cg-intro-title">${esc(d.intro_title)}</h2>
-        <p class="m7cg-intro">${esc(d.intro_body)}</p>
+        <h1 class="m7cg-en">${esc(d.title_en)}</h1>
+        <p class="m7cg-intro" style="margin-top:18px">${esc(d.intro_body)}</p>
         <div class="m7cg-chips">
           <span class="m7cg-chip"><b>✓</b> Respect</span>
           <span class="m7cg-chip"><b>✓</b> Safety</span>
@@ -385,6 +395,8 @@ function render(data){
         <a class="m7cg-home" href="https://shoufhon.com/">Back to ShoufHon →</a>
       </footer>
     </div>`;
+  const page=root();
+  if(page.scrollTop!==0)page.scrollTop=0;
 }
 
 function getClient(){
