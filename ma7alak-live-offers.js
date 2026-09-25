@@ -246,6 +246,14 @@ function panelPremiumCss(){
 .m7lo-owner-v6 .m7lo-slots i{background:linear-gradient(90deg,#d79c3d,#f4ca78)}
 .m7lo-owner-video-state{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.035);color:rgba(255,255,255,.66);font-size:8px;font-weight:900;white-space:nowrap}
 .m7lo-owner-v6.is-video-live .m7lo-owner-video-state{border-color:rgba(255,49,84,.25);color:#ff8fa4;background:rgba(255,49,84,.07)}
+#m7lo-overlay.m7lo-shop-overlay #m7lo-panel.m7lo-shop-panel{overflow:auto!important}
+#m7lo-overlay.m7lo-shop-overlay .m7lo{padding:0!important;border:0!important;box-shadow:none!important;background:transparent!important}
+#m7lo-overlay.m7lo-shop-overlay .m7lo-card{border-width:0!important;box-shadow:none!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important}
+#m7lo-overlay.m7lo-shop-overlay .m7lo-card.no-media{min-height:190px!important}
+#m7lo-overlay.m7lo-shop-overlay .m7lo-card.no-media .m7lo-copy{position:absolute;left:18px;right:18px;bottom:18px}
+#m7lo-overlay.m7lo-shop-overlay .m7lo-card.no-media:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 15%,rgba(228,170,79,.08),transparent 42%);pointer-events:none}
+#m7lo-overlay.m7lo-shop-overlay .m7lo-head{padding:1px 2px 0;margin-bottom:12px}
+
 #m7lo-overlay.m7lo-shop-overlay #m7lo-panel.m7lo-shop-panel{border-color:rgba(228,170,79,.42)!important;background:
   radial-gradient(circle at 0 0,rgba(228,170,79,.07),transparent 30%),#0b0b0b!important}
 .m7lo-shop-panel>.m7lo-owner-v6{margin-top:2px}
@@ -356,7 +364,7 @@ async function load(){
   }
 }
 function media(x,cl="m7lo-media"){if(!x.media_url)return"";return x.media_type==="video"?`<video class="${cl}" src="${esc(x.media_url)}" muted autoplay loop playsinline preload="metadata"></video>`:`<img class="${cl}" src="${esc(x.media_url)}" alt="">`}
-function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length;return`<article class="m7lo-card" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count">▣ View all ${count}</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
+function card(x,manage){let [ic,lab]=meta(x.post_type),count=(x.media||[]).length,hasMedia=!!x.media_url;return`<article class="m7lo-card ${hasMedia?"has-media":"no-media"}" data-m7-id="${esc(x.id)}">${media(x)}${count>1?`<span class="m7lo-media-count">▣ View all ${count}</span>`:""}${manage?`<div class="m7lo-manage"><button class="m7lo-edit" data-m7-edit="${esc(x.id)}">EDIT</button><button class="m7lo-edit m7lo-media-btn" data-m7-media="${esc(x.id)}">MEDIA</button><button class="m7lo-end" data-m7-end="${esc(x.id)}">END</button></div>`:""}<div class="m7lo-copy"><span class="m7lo-badge">${ic} ${lab}</span><h3>${esc(x.title)}</h3><div class="m7lo-shop">${esc(x.shop_name||x.shop_slug)}</div>${x.post_type==="offer"&&(x.original_price!=null||x.offer_price!=null)?`<div class="m7lo-price">${x.original_price!=null?`<span class="m7lo-old">${money(x.original_price)}</span>`:""}${money(x.offer_price)}</div>`:""}${timing(x)}</div></article>`}
 function videoLiveRows(shopSlug){
   try{
     const rows=Array.isArray(window.ShoufHonLiveVideo?.bridgeItems)?window.ShoufHonLiveVideo.bridgeItems:[];
@@ -488,10 +496,21 @@ function openShopPanel(slug){
   $(".m7lo-close",d).onclick=close;
   d.onclick=e=>{if(e.target===d)close()};
   bind(d);
+  const designRoot=d.querySelector(".m7lo")||d.querySelector("#m7lo-panel")||d;
   m7loApplyDesign(
-    d.querySelector(".m7lo")||d.querySelector("#m7lo-panel")||d,
+    designRoot,
     (profileOptions.get(shopSlug)||{}).directory_options||{}
   );
+  if(designRoot?.classList?.contains("m7lo")){
+    designRoot.style.setProperty("border","0","important");
+    designRoot.style.setProperty("box-shadow","none","important");
+    designRoot.style.setProperty("background","transparent","important");
+    designRoot.style.setProperty("padding","0","important");
+    designRoot.querySelectorAll(".m7lo-card").forEach(cardEl=>{
+      cardEl.style.setProperty("border-width","0","important");
+      cardEl.style.setProperty("box-shadow","none","important");
+    });
+  }
   timers();
 }
 function managerRow(m,i,total){let preview=m.media_type==="video"?`<video class="m7lo-media-thumb" src="${esc(m.media_url)}" muted playsinline preload="metadata"></video>`:`<img class="m7lo-media-thumb" src="${esc(m.media_url)}" alt="">`;return`<div class="m7lo-media-row" data-manager-id="${esc(m.id)}">${preview}<div><strong>${m.is_cover?"COVER":"Media "+(i+1)}</strong><div class="m7lo-sub">${m.media_type}</div><button class="m7lo-small-btn" data-move="up" ${i===0?"disabled":""}>↑</button><button class="m7lo-small-btn" data-move="down" ${i===total-1?"disabled":""}>↓</button></div><button class="m7lo-small-btn m7lo-cover" data-cover ${m.is_cover?"disabled":""}>${m.is_cover?"Cover":"Set cover"}</button><button class="m7lo-small-btn m7lo-danger" data-delete>Delete</button></div>`}
@@ -787,6 +806,15 @@ function bridge(){
         await ensureFreshLiveState();
         if(document.querySelector("#m7lo-overlay .m7lo-shop-panel"))openShopPanel(s);
       })().catch(err=>console.warn("SHOUFHON Live shop panel refresh:",err));
+      return;
+    }
+
+    if(d.type==="MA7ALAK_LIVE_OWNER_MANAGE"){
+      (async()=>{
+        if(!await refreshOwnerStateForShop(s))return;
+        await ensureFreshLiveState();
+        openShopPanel(s);
+      })().catch(err=>console.warn("SHOUFHON Live owner manage:",err));
       return;
     }
 
