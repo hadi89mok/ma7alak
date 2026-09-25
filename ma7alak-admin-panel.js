@@ -20212,9 +20212,7 @@ function bodyMarkup(){
 
     <div class="m7cgadm-grid">
       <label class="m7cgadm-field"><span>Eyebrow</span><input id="m7cgadm-eyebrow"></label>
-      <label class="m7cgadm-field"><span>English title</span><input id="m7cgadm-title-en"></label>
-      <label class="m7cgadm-field"><span>Arabic title</span><input id="m7cgadm-title-ar" dir="rtl"></label>
-      <label class="m7cgadm-field"><span>Intro heading</span><input id="m7cgadm-intro-title"></label>
+      <label class="m7cgadm-field"><span>Page title</span><input id="m7cgadm-title-en"></label>
       <label class="m7cgadm-field full"><span>Intro text</span><textarea id="m7cgadm-intro-body"></textarea></label>
       <label class="m7cgadm-field"><span>Closing title</span><input id="m7cgadm-closing-title"></label>
       <label class="m7cgadm-field"><span>Signature</span><input id="m7cgadm-signature"></label>
@@ -20312,9 +20310,7 @@ function normalise(row){
 function fill(){
   if(!state)return;
   $("#m7cgadm-eyebrow").value=state.eyebrow;
-  $("#m7cgadm-title-ar").value=state.title_ar;
   $("#m7cgadm-title-en").value=state.title_en;
-  $("#m7cgadm-intro-title").value=state.intro_title;
   $("#m7cgadm-intro-body").value=state.intro_body;
   $("#m7cgadm-closing-title").value=state.closing_title;
   $("#m7cgadm-closing-body").value=state.closing_body;
@@ -20346,9 +20342,7 @@ function renderRules(){
 function read(){
   if(!state)state=normalise({});
   state.eyebrow=$("#m7cgadm-eyebrow")?.value.trim()||"";
-  state.title_ar=$("#m7cgadm-title-ar")?.value.trim()||"";
   state.title_en=$("#m7cgadm-title-en")?.value.trim()||"";
-  state.intro_title=$("#m7cgadm-intro-title")?.value.trim()||"";
   state.intro_body=$("#m7cgadm-intro-body")?.value.trim()||"";
   state.closing_title=$("#m7cgadm-closing-title")?.value.trim()||"";
   state.closing_body=$("#m7cgadm-closing-body")?.value.trim()||"";
@@ -20407,7 +20401,7 @@ async function save(){
   const sb=client();
   if(!sb)return status("Admin client is not ready.","err");
   read();
-  if(!state.title_ar&&!state.title_en)return status("Add at least one page title.","err");
+  if(!state.title_en)return status("Add a page title.","err");
   if(!state.rules.length)return status("Add at least one guideline.","err");
 
   const button=$("#m7cgadm-save");
@@ -20418,9 +20412,9 @@ async function save(){
     const payload={
       id:"main",
       eyebrow:state.eyebrow,
-      title_ar:state.title_ar,
+      title_ar:"",
       title_en:state.title_en,
-      intro_title:state.intro_title,
+      intro_title:"",
       intro_body:state.intro_body,
       rules:state.rules.slice(0,40),
       closing_title:state.closing_title,
