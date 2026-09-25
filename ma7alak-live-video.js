@@ -503,6 +503,19 @@ function ensureImmersiveLiveCss(){
 
 function ownerState(){ownerSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||window.Ma7alakOwnerAuth?.shop?.shop_slug||window.Ma7alakLiveOffers?.ownerSlug||"").trim().toLowerCase()}
 async function loadOwnerEnt(){ownerState();ownerEnt=null;if(!ownerSlug||!c)return;try{const r=await c.from("shop_live_entitlements").select("enabled,active_limit,max_duration_hours,video_live_enabled,video_live_monthly_minutes").eq("shop_slug",ownerSlug).maybeSingle();if(!r.error)ownerEnt=r.data||null}catch(_){}}
+async function ownerVideoLiveAccess(){
+  ownerState();
+  if(!ownerSlug||!c)return null;
+  try{
+    const r=await c.rpc("shoufhon_owner_get_video_live_access",{p_shop_slug:ownerSlug});
+    if(r.error)throw r.error;
+    const row=Array.isArray(r.data)?r.data[0]:r.data;
+    return row&&typeof row==="object"?row:null;
+  }catch(err){
+    console.warn("ShoufHon Video LIVE access check:",err);
+    return null;
+  }
+}
 function liveFresh(x){if(!x||x.status!=="live")return false;return new Date(x.last_heartbeat_at||0).getTime()>Date.now()-120000&&new Date(x.expires_at||0).getTime()>Date.now()}
 
 async function refresh(){
@@ -1388,6 +1401,11 @@ async function preflight(){
     window.ShoufHonMembershipGate?.("video");
     return;
   }
+  const liveAccess=await ownerVideoLiveAccess();
+  if(liveAccess?.exhausted){
+    window.ShoufHonMembershipGate?.("video_limit",liveAccess);
+    return;
+  }
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
   ownerState();
   const shop=window.Ma7alakOwnerAuth?.shop||{},allowed=true;
@@ -1746,6 +1764,13 @@ async function startHost(title){
     await refresh();
   }catch(err){
     try{await api("fail",{stream_id:stream.id})}catch(_){}
+    const code=String(err?.code||err?.message||"");
+    if(code==="MONTHLY_LIVE_LIMIT_REACHED"){
+      const access=await ownerVideoLiveAccess();
+      await cleanupOverlay(false);
+      window.ShoufHonMembershipGate?.("video_limit",access||{});
+      return;
+    }
     setStatus(friendlyError(err));
     setTimeout(()=>cleanupOverlay(false),2200);
     throw err;
