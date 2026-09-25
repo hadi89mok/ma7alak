@@ -5717,6 +5717,43 @@
           if(albumBatchDelete.error)throw albumBatchDelete.error;
         }
       }
+      else if(op==="feature-photo"){
+        var featurePhotoId=Number(data.id);
+        if(!Number.isFinite(featurePhotoId)){
+          throw new Error("Photo was not found.");
+        }
+
+        var featureTarget=await client
+          .from("shop_gallery")
+          .select("id")
+          .eq("shop_slug",slug)
+          .eq("id",featurePhotoId)
+          .maybeSingle();
+
+        if(featureTarget.error)throw featureTarget.error;
+        if(!featureTarget.data)throw new Error("Photo was not found.");
+
+        /*
+           Keep one featured gallery photo per shop.
+           Mark the requested photo first, then clear the flag from all others.
+        */
+        var makeFeatured=await client
+          .from("shop_gallery")
+          .update({is_featured:true})
+          .eq("shop_slug",slug)
+          .eq("id",featurePhotoId);
+
+        if(makeFeatured.error)throw makeFeatured.error;
+
+        var clearOtherFeatured=await client
+          .from("shop_gallery")
+          .update({is_featured:false})
+          .eq("shop_slug",slug)
+          .neq("id",featurePhotoId)
+          .eq("is_featured",true);
+
+        if(clearOtherFeatured.error)throw clearOtherFeatured.error;
+      }
       else if(op==="batch-delete"){
         var batchItems=Array.isArray(data.items)?data.items:[];
         var seenBatch=new Set();
