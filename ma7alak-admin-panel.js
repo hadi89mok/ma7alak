@@ -3046,7 +3046,10 @@
         );
 
       const area =
-        "";
+        normalizedText(
+          document.getElementById("ma-shop-area") &&
+          document.getElementById("ma-shop-area").value
+        );
 
       const category =
         normalizedText(
@@ -3699,7 +3702,7 @@
     const editAreaSmart = document.getElementById("ma-edit-v2-area-smart");
     const editCategorySmart = document.getElementById("ma-edit-v2-category-smart");
 
-    if(editAreaSmart && normalizedText(editAreaSmart.value)){
+    if(editAreaSmart){
       editArea.value = normalizedText(editAreaSmart.value);
     }
     if(editCategorySmart && normalizedText(editCategorySmart.value)){
@@ -4582,27 +4585,35 @@
         if(!areaInput || !catInput || byId(cityId)) return;
 
         /*
-           These original inputs become hidden after smart controls are added.
-           Never leave native `required` on hidden/managed fields because the
-           browser can cancel form submission before our save handler runs.
+           Keep the original database-backed fields as hidden plumbing.
+           Admins now use ONE Location selector instead of City + Area.
         */
-        areaInput.required = false;
+        areaInput.required=false;
         areaInput.removeAttribute("required");
-        catInput.required = false;
+        catInput.required=false;
         catInput.removeAttribute("required");
         if(catName){
-          catName.required = false;
+          catName.required=false;
           catName.removeAttribute("required");
         }
 
+        const locationWrap=document.createElement("div");
+        locationWrap.className="ma-v2-field ma-v2-location-field";
+        locationWrap.innerHTML=`<label>Location ${prefix==="ma-shop-v2"?"*":""}</label><select id="${prefix}-location-smart" class="ma-v2-smart-select"></select><small>One field only — choose the exact area, or choose the city / region itself when no smaller area applies.</small>`;
+        areaInput.closest("label").parentNode.insertBefore(locationWrap,areaInput.closest("label"));
+
+        /* Legacy city + area selectors stay mounted but invisible so old save
+           code and other admin modules remain compatible. */
         const cityWrap=document.createElement("div");
-        cityWrap.className="ma-v2-field";
-        cityWrap.innerHTML=`<label>City / Region</label><select id="${cityId}" class="ma-v2-smart-select"></select><small>Select the main Lebanon city/region. Existing shops can still be saved while this is empty.</small>`;
-        areaInput.closest("label").parentNode.insertBefore(cityWrap, areaInput.closest("label"));
+        cityWrap.className="ma-v2-field ma-v2-location-legacy";
+        cityWrap.style.display="none";
+        cityWrap.innerHTML=`<label>City / Region</label><select id="${cityId}" class="ma-v2-smart-select"></select>`;
+        areaInput.closest("label").parentNode.insertBefore(cityWrap,areaInput.closest("label"));
 
         const areaWrap=document.createElement("div");
-        areaWrap.className="ma-v2-field ma-v2-area-shop-field";
+        areaWrap.className="ma-v2-field ma-v2-area-shop-field ma-v2-location-legacy";
         areaWrap.hidden=true;
+        areaWrap.style.display="none";
         areaWrap.innerHTML=`<label>Area</label><select id="${prefix}-area-smart" class="ma-v2-smart-select"></select>`;
         areaInput.closest("label").insertAdjacentElement("afterend",areaWrap);
 
@@ -4614,26 +4625,39 @@
         areaInput.closest("label").classList.add("ma-v2-original-hidden");
         catInput.closest("label").classList.add("ma-v2-original-hidden");
 
-        /* Keep category_name visible as a completely independent card label. */
-        const cardLabelWrap = catName.closest("label");
+        const cardLabelWrap=catName.closest("label");
         if(cardLabelWrap){
           cardLabelWrap.classList.remove("ma-v2-original-hidden");
-          const title = cardLabelWrap.querySelector("span");
-          if(title) title.textContent = "Shop Card Label";
-          catName.placeholder = "e.g. Crepes • Chocolate • Street Kiosk";
-          const oldSmall = cardLabelWrap.querySelector("small");
-          if(oldSmall) oldSmall.remove();
-          const help = document.createElement("small");
-          help.textContent = "Free text shown under the Arabic name on the public shop card. This does not change the Main Category.";
+          const title=cardLabelWrap.querySelector("span");
+          if(title)title.textContent="Shop Card Label";
+          catName.placeholder="e.g. Crepes • Chocolate • Street Kiosk";
+          const oldSmall=cardLabelWrap.querySelector("small");
+          if(oldSmall)oldSmall.remove();
+          const help=document.createElement("small");
+          help.textContent="Free text shown under the Arabic name on the public shop card. This does not change the Main Category.";
           cardLabelWrap.appendChild(help);
         }
 
-        const citySel=byId(cityId), areaSel=byId(prefix+"-area-smart"), catSel=byId(prefix+"-category-smart");
+        const locationSel=byId(prefix+"-location-smart");
+        const citySel=byId(cityId);
+        const areaSel=byId(prefix+"-area-smart");
+        const catSel=byId(prefix+"-category-smart");
 
-        citySel.addEventListener("change",()=>{ renderSmartAreas(citySel,areaSel); areaInput.value=areaSel.value||""; });
-        areaSel.addEventListener("change",()=>{ areaInput.value=areaSel.value||""; });
+        citySel.required=false;
+        areaSel.required=false;
+        locationSel.required=prefix==="ma-shop-v2";
+
+        locationSel.addEventListener("change",()=>{
+          const parts=String(locationSel.value||"").split("::");
+          const city=parts[0]||"";
+          const areaName=parts.slice(1).join("::")||"";
+          citySel.value=city;
+          renderSmartAreas(citySel,areaSel,areaName);
+          areaSel.value=areaName;
+          areaInput.value=areaName;
+        });
+
         catSel.addEventListener("change",()=>{
-          /* Main category assignment only. Never overwrite the custom card label. */
           catInput.value=catSel.value||"";
         });
       }
@@ -4643,30 +4667,63 @@
     }
 
     function renderSmartAreas(citySel,areaSel,currentArea){
-      if(!citySel||!areaSel) return;
-      const rows=v2Areas.filter(a=>a.city_key===citySel.value && a.is_active!==false);
-      areaSel.innerHTML='<option value="">Choose area…</option>'+rows.map(a=>`<option value="${esc(a.area_name)}">${esc(a.area_name)}</option>`).join("");
-      areaSel.required = rows.length > 0;
-      if(currentArea) areaSel.value=currentArea;
+      if(!citySel||!areaSel)return;
+      const rows=v2Areas.filter(a=>a.city_key===citySel.value&&a.is_active!==false);
+      areaSel.innerHTML='<option value="">No smaller area</option>'+rows.map(a=>`<option value="${esc(a.area_name)}">${esc(a.area_name)}</option>`).join("");
+      areaSel.required=false;
+      areaSel.value=currentArea||"";
+    }
+
+    function locationValue(city,area){
+      return String(city||"")+(area?"::"+String(area):"::");
+    }
+
+    function renderLocationSelect(sel,currentCity,currentArea){
+      if(!sel)return;
+      const keep=currentCity!==undefined
+        ? locationValue(currentCity,currentArea)
+        : sel.value;
+
+      let html='<option value="">Choose location…</option>';
+      v2Cities.filter(x=>x.is_active!==false).forEach(city=>{
+        const cityKey=String(city.city_key||"");
+        const rows=v2Areas.filter(a=>a.is_active!==false&&a.city_key===city.city_key);
+        html+='<optgroup label="'+esc(city.city_name)+'">';
+        html+='<option value="'+esc(locationValue(cityKey,""))+'">'+esc(city.city_name)+' · whole region</option>';
+        rows.forEach(a=>{
+          html+='<option value="'+esc(locationValue(cityKey,a.area_name))+'">'+esc(a.area_name)+' · '+esc(city.city_name)+'</option>';
+        });
+        html+='</optgroup>';
+      });
+      sel.innerHTML=html;
+      if(keep&&[...sel.options].some(o=>o.value===keep))sel.value=keep;
     }
 
     function refreshSmartFields(){
       ["ma-shop-city-v2","ma-edit-city-v2"].forEach(id=>{
-        const sel=byId(id); if(!sel)return;
-        sel.required=id==="ma-shop-city-v2";
+        const sel=byId(id);if(!sel)return;
         const old=sel.value;
+        sel.required=false;
         sel.innerHTML='<option value="">Choose city / region…</option>'+v2Cities.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.city_key)}">${esc(c.city_name)}</option>`).join("");
-        if(old) sel.value=old;
+        if(old)sel.value=old;
       });
+
       ["ma-shop-v2-category-smart","ma-edit-v2-category-smart"].forEach(id=>{
-        const sel=byId(id); if(!sel)return;
+        const sel=byId(id);if(!sel)return;
         sel.required=true;
         const old=sel.value;
         sel.innerHTML='<option value="">Choose category…</option>'+v2Categories.filter(x=>x.is_active!==false).map(c=>`<option value="${esc(c.category_key)}">${esc(c.icon)} ${esc(c.category_name)}</option>`).join("");
-        if(old) sel.value=old;
+        if(old)sel.value=old;
       });
-      renderSmartAreas(byId("ma-shop-city-v2"),byId("ma-shop-v2-area-smart"));
-      renderSmartAreas(byId("ma-edit-city-v2"),byId("ma-edit-v2-area-smart"));
+
+      const addCity=byId("ma-shop-city-v2"),addArea=byId("ma-shop-v2-area-smart");
+      const editCity=byId("ma-edit-city-v2"),editAreaSel=byId("ma-edit-v2-area-smart");
+
+      renderSmartAreas(addCity,addArea,byId("ma-shop-area")?.value||"");
+      renderSmartAreas(editCity,editAreaSel,byId("ma-edit-area")?.value||"");
+
+      renderLocationSelect(byId("ma-shop-v2-location-smart"),addCity?.value||"",byId("ma-shop-area")?.value||"");
+      renderLocationSelect(byId("ma-edit-v2-location-smart"),editCity?.value||"",byId("ma-edit-area")?.value||"");
     }
 
     function renderV2Lists(){
@@ -4778,8 +4835,21 @@
       const slug=normalizedText(editOriginalSlug.value);
       const shop=shopOverride||getManagedShop(slug);
       if(!shop)return;
-      const citySel=byId("ma-edit-city-v2"), areaSel=byId("ma-edit-v2-area-smart"), catSel=byId("ma-edit-v2-category-smart");
-      if(citySel){citySel.value=shop.city||""; renderSmartAreas(citySel,areaSel,shop.area||"");}
+
+      const citySel=byId("ma-edit-city-v2");
+      const areaSel=byId("ma-edit-v2-area-smart");
+      const locationSel=byId("ma-edit-v2-location-smart");
+      const catSel=byId("ma-edit-v2-category-smart");
+
+      if(citySel){
+        citySel.value=shop.city||"";
+        renderSmartAreas(citySel,areaSel,shop.area||"");
+      }
+      if(areaSel)areaSel.value=shop.area||"";
+      if(locationSel){
+        renderLocationSelect(locationSel,shop.city||"",shop.area||"");
+        locationSel.value=locationValue(shop.city||"",shop.area||"");
+      }
       if(catSel)catSel.value=shop.category||"";
     }
 
@@ -4842,7 +4912,14 @@
     }
 
     async function bootV2(){
-      installV2Styles(); installHub(); installSmartShopFields(); bindV2Forms(); bindAreaMode(); bindActivityToggle();
+      installV2Styles();
+      if(!byId("ma-v2-location-simple-css")){
+        const locationStyle=document.createElement("style");
+        locationStyle.id="ma-v2-location-simple-css";
+        locationStyle.textContent=".ma-v2-location-field{grid-column:1/-1}.ma-v2-location-field .ma-v2-smart-select{min-height:44px;border-color:rgba(231,178,91,.28)!important;background:linear-gradient(145deg,#10100f,#090909)!important}.ma-v2-location-field small{color:rgba(255,255,255,.48)!important}.ma-v2-location-legacy{display:none!important}";
+        document.head.appendChild(locationStyle);
+      }
+      installHub(); installSmartShopFields(); bindV2Forms(); bindAreaMode(); bindActivityToggle();
       try{ await loadV2Taxonomy(); installRealtime(); }catch(err){ console.warn("SHOUFHON Admin V2 taxonomy setup needed:",err); }
       if(window.__MA7ALAK_ADMIN_WORKSPACE_V4_BUNDLE__ !== true){
         manageShopList.addEventListener("click",()=>setTimeout(syncEditSmartFields,80));
