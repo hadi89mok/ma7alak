@@ -394,7 +394,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
 #${ROOT_ID} .ssv-copy{min-width:0;flex:1}
 #${ROOT_ID} .ssv-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:900}
 #${ROOT_ID} .ssv-time{display:block;margin-top:2px;color:#d7d7d7;font-size:10px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#${ROOT_ID} .ssv-status{display:block;margin-top:2px;color:#c4c4c4;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#${ROOT_ID} .ssv-status{display:block;margin-top:2px;color:#c4c4c4;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${ROOT_ID} .ssv-profile-meta{display:block;margin-top:2px;color:#e7c98d;font-size:9px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #${ROOT_ID} .ssv-owner-views{display:none;align-items:center;gap:5px;padding:7px 9px;border:1px solid #ffffff2a;border-radius:999px;background:#0007;color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
 #${ROOT_ID}.is-owner .ssv-owner-views{display:inline-flex}
 #${ROOT_ID} .ssv-close{width:40px;height:40px;flex:0 0 40px;padding:0;border:1px solid #ffffff35;border-radius:50%;background:#0008;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
@@ -1652,6 +1652,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
             <div class="ssv-copy">
               <b class="ssv-name"></b>
               <span class="ssv-time"></span>
+              <span class="ssv-profile-meta"></span>
               <span class="ssv-status"></span>
             </div>
 
@@ -2564,6 +2565,18 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
           story.created_at
         );
 
+    const publicMeta=[
+      String(profile?.category_name||"").trim(),
+      String(profile?.location||"").trim()
+    ].filter(Boolean).join(" · ");
+
+    root
+      .querySelector(
+        ".ssv-profile-meta"
+      )
+      .textContent=
+        publicMeta;
+
     root
       .querySelector(
         ".ssv-status"
@@ -3472,7 +3485,7 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
             "shop_profiles"
           )
           .select(
-            "shop_slug,shop_name,profile_image_url,story_logo_url,shop_url"
+            "shop_slug,shop_name,profile_image_url,story_logo_url,shop_url,category_name,location"
           )
           .eq(
             "shop_slug",
@@ -3554,20 +3567,23 @@ html.ssv-open,body.ssv-open{overflow:hidden!important;overscroll-behavior:none!i
                 slug
             },
             ()=>{
-
-              if(
-                root?.hidden
-              ){
-                return;
-              }
-
-              reloadOpen(
-                slug,
-                stories[
-                  currentIndex
-                ]?.id
-              );
-
+              if(root?.hidden)return;
+              reloadOpen(slug,stories[currentIndex]?.id);
+            }
+          )
+          .on(
+            "postgres_changes",
+            {
+              event:"UPDATE",
+              schema:"public",
+              table:"shop_profiles",
+              filter:
+                "shop_slug=eq."+
+                slug
+            },
+            ()=>{
+              if(root?.hidden)return;
+              reloadOpen(slug,stories[currentIndex]?.id);
             }
           )
           .subscribe();
