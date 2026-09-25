@@ -1789,8 +1789,8 @@
       note.innerHTML="<b>One source of truth for images</b><br>The Directory and homepage automatically use the Profile image + Banner from <b>Profile & Banner</b>. There is no separate Directory cover upload.";
       form.insertBefore(note,form.firstChild.nextSibling);
 
-      addInlineCapability(form,["new","feature"]);
       hideFormRoots(form,roots);
+      addInlineCapability(form,["new","feature"]);
     }
     else if(key==="profile"){
       const roots=showRoots(form,[
