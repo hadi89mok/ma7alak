@@ -5698,6 +5698,85 @@
         });
         if(deleteAlbum.error)throw deleteAlbum.error;
       }
+      else if(op==="album-delete-batch"){
+        var albumIds=Array.isArray(data.albumIds)?data.albumIds:[];
+        albumIds=albumIds
+          .map(function(id){return Number(id)})
+          .filter(function(id,index,array){
+            return Number.isFinite(id)&&array.indexOf(id)===index;
+          });
+
+        if(!albumIds.length)throw new Error("Select at least one album.");
+        if(albumIds.length>30)throw new Error("Too many albums selected.");
+
+        for(var albumBatchIndex=0;albumBatchIndex<albumIds.length;albumBatchIndex++){
+          var albumBatchDelete=await client.rpc("owner_delete_media_album",{
+            p_shop_slug:slug,
+            p_album_id:albumIds[albumBatchIndex]
+          });
+          if(albumBatchDelete.error)throw albumBatchDelete.error;
+        }
+      }
+      else if(op==="batch-delete"){
+        var batchItems=Array.isArray(data.items)?data.items:[];
+        var seenBatch=new Set();
+        batchItems=batchItems
+          .map(function(item){
+            var mediaType=item&&item.mediaType==="video"?"video":"photo";
+            var mediaId=Number(item&&item.id);
+            return{mediaType:mediaType,id:mediaId};
+          })
+          .filter(function(item){
+            if(!Number.isFinite(item.id))return false;
+            var key=item.mediaType+":"+item.id;
+            if(seenBatch.has(key))return false;
+            seenBatch.add(key);
+            return true;
+          });
+
+        if(!batchItems.length)throw new Error("Select at least one Media item.");
+        if(batchItems.length>100)throw new Error("Too many Media items selected.");
+
+        for(var batchIndex=0;batchIndex<batchItems.length;batchIndex++){
+          var batchItem=batchItems[batchIndex];
+          var batchVideo=batchItem.mediaType==="video";
+          var batchTable=batchVideo?"shop_videos":"shop_gallery";
+          var batchBucket=batchVideo?VIDEO_BUCKET:PHOTO_BUCKET;
+
+          var batchOld=await client
+            .from(batchTable)
+            .select("id,storage_path")
+            .eq("id",batchItem.id)
+            .eq("shop_slug",slug)
+            .maybeSingle();
+
+          if(batchOld.error)throw batchOld.error;
+          if(!batchOld.data)continue;
+
+          var batchDeleted=await client
+            .from(batchTable)
+            .delete()
+            .eq("id",batchItem.id)
+            .eq("shop_slug",slug);
+
+          if(batchDeleted.error)throw batchDeleted.error;
+
+          if(batchOld.data.storage_path){
+            try{
+              await removeStorage(
+                client,
+                batchBucket,
+                batchOld.data.storage_path
+              );
+            }catch(batchCleanupError){
+              console.warn(
+                "SHOUFHON batch deleted Media cleanup:",
+                batchCleanupError
+              );
+            }
+          }
+        }
+      }
       else if(op==="replace"){
         var replaceType=data.mediaType==="video"?"video":"photo";
         var replaceVideo=replaceType==="video";
