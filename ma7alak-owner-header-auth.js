@@ -28,6 +28,32 @@ function ownerStatePayload(){
     sentAt:Date.now()
   };
 }
+function ownerRequestFrame(source){
+  if(!source||source===window)return null;
+
+  let directChild=source;
+  try{
+    let cursor=source;
+    for(let hop=0;hop<12;hop+=1){
+      if(!cursor||cursor===window)break;
+      const parentWindow=cursor.parent;
+      if(!parentWindow||parentWindow===cursor)break;
+      if(parentWindow===window){
+        directChild=cursor;
+        break;
+      }
+      cursor=parentWindow;
+    }
+  }catch(_){}
+
+  return Array.from(document.querySelectorAll("iframe")).find(frame=>{
+    try{
+      return frame.contentWindow===source||frame.contentWindow===directChild;
+    }catch(_){
+      return false;
+    }
+  })||null;
+}
 function sendOwnerState(target){
   try{target?.postMessage(ownerStatePayload(),"*")}catch(_){}
 }
@@ -76,6 +102,11 @@ async function boot(){
   window.addEventListener("message",event=>{
     const data=event?.data||{};
     if(data.type!=="MA7ALAK_OWNER_STATE_GET")return;
+
+    /* Only a window actually contained in an iframe on this ShoufHon page
+       may request owner state. Ignore popups/tabs/unrelated windows. */
+    if(!ownerRequestFrame(event.source))return;
+
     sendOwnerState(event.source);
   });
   if(path()==="/admin"){decorateAdmin().catch(console.error);readyResolve();return}
