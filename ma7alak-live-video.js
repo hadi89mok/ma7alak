@@ -1370,23 +1370,30 @@ async function preflight(){
   ownerState();
   await loadOwnerEnt();
 
-  /* Video LIVE is independent from Live Offer slots. Use the dedicated
-     owner RPC as the authoritative access + time-limit check. */
-  const liveAccess=await ownerVideoLiveAccess();
+  /* If the parent Live/Offers bridge just verified Video LIVE access,
+     reuse that result for a few seconds instead of making the owner wait
+     through the same quota RPC twice. The backend still validates again
+     when the stream actually starts. */
+  const parentVerified=Number(window.__SHOUFHON_VIDEO_ACCESS_VERIFIED_UNTIL__||0)>Date.now();
+  let liveAccess=null;
 
-  if(liveAccess){
-    if(!liveAccess.video_live_enabled){
+  if(!parentVerified){
+    liveAccess=await ownerVideoLiveAccess();
+
+    if(liveAccess){
+      if(!liveAccess.video_live_enabled){
+        window.ShoufHonMembershipGate?.("video");
+        return;
+      }
+      if(liveAccess.exhausted){
+        window.ShoufHonMembershipGate?.("video_limit",liveAccess);
+        return;
+      }
+    }else if(!ownerEnt?.video_live_enabled){
+      /* Only fall back to the row snapshot if the RPC is unavailable. */
       window.ShoufHonMembershipGate?.("video");
       return;
     }
-    if(liveAccess.exhausted){
-      window.ShoufHonMembershipGate?.("video_limit",liveAccess);
-      return;
-    }
-  }else if(!ownerEnt?.video_live_enabled){
-    /* Only fall back to the row snapshot if the RPC is unavailable. */
-    window.ShoufHonMembershipGate?.("video");
-    return;
   }
 
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
