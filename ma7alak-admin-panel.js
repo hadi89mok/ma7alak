@@ -20143,3 +20143,310 @@ ready().catch(error=>console.error("SHOUFHON Admin Workspace V4:",error));
     );
   }
 })();
+
+
+/* =========================================================
+   SHOUFHON COMMUNITY GUIDELINES ADMIN
+   Adds a dedicated editable tab inside Admin Tools.
+========================================================= */
+(function communityGuidelinesAdminAddon(){
+"use strict";
+if((String(location.pathname||"/").replace(/\/+$/,"")||"/")!=="/admin")return;
+if(window.__SHOUFHON_COMMUNITY_GUIDELINES_ADMIN__)return;
+window.__SHOUFHON_COMMUNITY_GUIDELINES_ADMIN__=true;
+
+const DEFAULT_RULE={
+  icon:"✓",
+  title:"New guideline",
+  text:"Write a clear, simple rule for viewers or shop owners.",
+  enabled:true
+};
+let state=null,loaded=false,loading=false;
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const client=()=>window.Ma7alakAdminClient||null;
+
+function css(){
+  if($("#m7cg-admin-css"))return;
+  const s=document.createElement("style");
+  s.id="m7cg-admin-css";
+  s.textContent=`
+  #m7adm-guidelines{color:#eee}
+  .m7cgadm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding:12px;border:1px solid rgba(217,170,88,.18);border-radius:14px;background:linear-gradient(135deg,rgba(217,170,88,.06),rgba(255,255,255,.018))}
+  .m7cgadm-head b{display:block;color:#f3dfbb;font-size:13px}.m7cgadm-head small{display:block;margin-top:2px;color:#8e806c;font-size:9px}
+  .m7cgadm-preview{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 11px;border:1px solid rgba(217,170,88,.28);border-radius:10px;color:#f1cb80!important;text-decoration:none!important;font-size:9px;font-weight:900;white-space:nowrap}
+  .m7cgadm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .m7cgadm-field{display:grid;gap:5px}.m7cgadm-field.full{grid-column:1/-1}.m7cgadm-field>span{color:#b7a78f;font-size:9px;font-weight:850}
+  .m7cgadm-field input,.m7cgadm-field textarea{width:100%;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:#0e0b09;color:#fff;padding:10px 11px;outline:none;font:inherit;font-size:11px}
+  .m7cgadm-field textarea{min-height:88px;resize:vertical;line-height:1.45}
+  .m7cgadm-field input:focus,.m7cgadm-field textarea:focus{border-color:rgba(217,170,88,.48);box-shadow:0 0 0 2px rgba(217,170,88,.05)}
+  .m7cgadm-publish{display:flex;align-items:center;gap:8px;margin:12px 0;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.018);color:#d8c9b3;font-size:10px;font-weight:850}
+  .m7cgadm-publish input{accent-color:#e1ad55}
+  .m7cgadm-rules-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 8px}.m7cgadm-rules-head b{color:#f2dfbd;font-size:12px}.m7cgadm-rules-head small{color:#847764;font-size:8px}
+  .m7cgadm-rules{display:grid;gap:8px}
+  .m7cgadm-rule{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.018)}
+  .m7cgadm-rule-top{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:7px;align-items:center}
+  .m7cgadm-rule-top input{width:100%;min-height:36px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#0d0b09;color:#fff;padding:7px 8px;font-size:10px}
+  .m7cgadm-rule-icon{text-align:center;font-size:16px!important}
+  .m7cgadm-rule textarea{width:100%;min-height:70px;margin-top:7px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#0d0b09;color:#fff;padding:8px;resize:vertical;font:inherit;font-size:10px;line-height:1.45}
+  .m7cgadm-rule-actions{display:flex;gap:4px}
+  .m7cgadm-mini,.m7cgadm-btn{border:1px solid rgba(217,170,88,.19);background:#19130e;color:#e8c989;border-radius:8px;font-weight:900;cursor:pointer}
+  .m7cgadm-mini{width:30px;height:30px;padding:0;font-size:11px}.m7cgadm-mini.del{color:#ff9aa9;border-color:rgba(255,90,110,.20);background:#211012}
+  .m7cgadm-rule-enabled{display:flex;align-items:center;gap:6px;margin-top:7px;color:#938673;font-size:8px;font-weight:850}.m7cgadm-rule-enabled input{accent-color:#e1ad55}
+  .m7cgadm-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .m7cgadm-btn{min-height:38px;padding:0 12px;font-size:9px}.m7cgadm-btn.primary{border:0;background:linear-gradient(135deg,#f0c66e,#bd7e2e);color:#171006}.m7cgadm-btn:disabled{opacity:.45}
+  .m7cgadm-status{min-height:18px;color:#9c8c77;font-size:9px;font-weight:800}.m7cgadm-status.ok{color:#8fe3ae}.m7cgadm-status.err{color:#ff96a8}
+  @media(max-width:650px){.m7cgadm-grid{grid-template-columns:1fr}.m7cgadm-field.full{grid-column:auto}.m7cgadm-rule-top{grid-template-columns:48px minmax(0,1fr)}.m7cgadm-rule-actions{grid-column:1/-1}.m7cgadm-head{align-items:flex-start;flex-direction:column}}
+  `;
+  document.head.appendChild(s);
+}
+
+function bodyMarkup(){
+  return `
+    <div class="m7cgadm-head">
+      <div><b>🛡 Community Guidelines</b><small>Edit the public rules page shown at /community-guidelines.</small></div>
+      <a class="m7cgadm-preview" href="/community-guidelines" target="_blank">Open page ↗</a>
+    </div>
+
+    <div class="m7cgadm-grid">
+      <label class="m7cgadm-field"><span>Eyebrow</span><input id="m7cgadm-eyebrow"></label>
+      <label class="m7cgadm-field"><span>English title</span><input id="m7cgadm-title-en"></label>
+      <label class="m7cgadm-field"><span>Arabic title</span><input id="m7cgadm-title-ar" dir="rtl"></label>
+      <label class="m7cgadm-field"><span>Intro heading</span><input id="m7cgadm-intro-title"></label>
+      <label class="m7cgadm-field full"><span>Intro text</span><textarea id="m7cgadm-intro-body"></textarea></label>
+      <label class="m7cgadm-field"><span>Closing title</span><input id="m7cgadm-closing-title"></label>
+      <label class="m7cgadm-field"><span>Signature</span><input id="m7cgadm-signature"></label>
+      <label class="m7cgadm-field full"><span>Closing text</span><textarea id="m7cgadm-closing-body"></textarea></label>
+    </div>
+
+    <label class="m7cgadm-publish"><input id="m7cgadm-published" type="checkbox"> Public page is published</label>
+
+    <div class="m7cgadm-rules-head"><div><b>Guidelines</b><small>Add, remove, hide or reorder rules.</small></div><button id="m7cgadm-add" class="m7cgadm-btn" type="button">＋ Add rule</button></div>
+    <div id="m7cgadm-rules" class="m7cgadm-rules"></div>
+
+    <div class="m7cgadm-actions">
+      <button id="m7cgadm-save" class="m7cgadm-btn primary" type="button">Save & publish changes</button>
+      <button id="m7cgadm-reload" class="m7cgadm-btn" type="button">Reload</button>
+      <div id="m7cgadm-status" class="m7cgadm-status" role="status"></div>
+    </div>
+  `;
+}
+
+function mount(){
+  css();
+  const root=$("#m7adm-v3");
+  const tabs=root?.querySelector(".m7adm-tabs");
+  const content=root?.querySelector(".m7adm-hub-content");
+  if(!root||!tabs||!content)return false;
+  if($("#m7adm-guidelines"))return true;
+
+  const tab=document.createElement("button");
+  tab.className="m7adm-tab";
+  tab.type="button";
+  tab.setAttribute("role","tab");
+  tab.setAttribute("aria-selected","false");
+  tab.dataset.target="m7adm-guidelines";
+  tab.textContent="🛡 Community Guidelines";
+  tabs.appendChild(tab);
+
+  const body=document.createElement("div");
+  body.id="m7adm-guidelines";
+  body.className="m7adm-body hidden";
+  body.hidden=true;
+  body.innerHTML=bodyMarkup();
+  content.appendChild(body);
+
+  tab.onclick=()=>{
+    const wasOpen=!body.hidden&&!body.classList.contains("hidden");
+    root.querySelectorAll(".m7adm-body").forEach(x=>{x.hidden=true;x.classList.add("hidden")});
+    root.querySelectorAll(".m7adm-tab").forEach(x=>{x.classList.remove("active");x.setAttribute("aria-selected","false")});
+    if(wasOpen)return;
+    body.hidden=false;
+    body.classList.remove("hidden");
+    tab.classList.add("active");
+    tab.setAttribute("aria-selected","true");
+    if(!loaded)load();
+  };
+
+  $("#m7cgadm-add",body).onclick=()=>{
+    read();
+    state.rules.push({...DEFAULT_RULE});
+    renderRules();
+  };
+  $("#m7cgadm-save",body).onclick=save;
+  $("#m7cgadm-reload",body).onclick=()=>load(true);
+  $("#m7cgadm-rules",body).onclick=ruleAction;
+  return true;
+}
+
+function status(message,type=""){
+  const e=$("#m7cgadm-status");
+  if(!e)return;
+  e.textContent=String(message||"");
+  e.className="m7cgadm-status"+(type?" "+type:"");
+}
+
+function normalise(row){
+  return {
+    id:"main",
+    eyebrow:String(row?.eyebrow||"ShoufHon Safety & Community"),
+    title_ar:String(row?.title_ar||"إرشادات المجتمع"),
+    title_en:String(row?.title_en||"Community Guidelines"),
+    intro_title:String(row?.intro_title||"خلّينا نخلي ShoufHon مكان محترم وآمن للكل."),
+    intro_body:String(row?.intro_body||""),
+    closing_title:String(row?.closing_title||"Keep it local. Keep it respectful."),
+    closing_body:String(row?.closing_body||""),
+    signature:String(row?.signature||"خلّي محلك ينشاف. ❤️"),
+    is_published:row?.is_published!==false,
+    rules:Array.isArray(row?.rules)?row.rules.map(r=>({
+      icon:String(r?.icon||"✓"),
+      title:String(r?.title||"Guideline"),
+      text:String(r?.text||""),
+      enabled:r?.enabled!==false
+    })):[]
+  };
+}
+
+function fill(){
+  if(!state)return;
+  $("#m7cgadm-eyebrow").value=state.eyebrow;
+  $("#m7cgadm-title-ar").value=state.title_ar;
+  $("#m7cgadm-title-en").value=state.title_en;
+  $("#m7cgadm-intro-title").value=state.intro_title;
+  $("#m7cgadm-intro-body").value=state.intro_body;
+  $("#m7cgadm-closing-title").value=state.closing_title;
+  $("#m7cgadm-closing-body").value=state.closing_body;
+  $("#m7cgadm-signature").value=state.signature;
+  $("#m7cgadm-published").checked=state.is_published;
+  renderRules();
+}
+
+function renderRules(){
+  const box=$("#m7cgadm-rules");
+  if(!box||!state)return;
+  box.innerHTML=state.rules.length?state.rules.map((r,i)=>`
+    <article class="m7cgadm-rule" data-rule="${i}">
+      <div class="m7cgadm-rule-top">
+        <input class="m7cgadm-rule-icon" data-k="icon" value="${esc(r.icon)}" maxlength="6" aria-label="Rule icon">
+        <input data-k="title" value="${esc(r.title)}" maxlength="120" aria-label="Rule title">
+        <div class="m7cgadm-rule-actions">
+          <button class="m7cgadm-mini" type="button" data-act="up" aria-label="Move up">↑</button>
+          <button class="m7cgadm-mini" type="button" data-act="down" aria-label="Move down">↓</button>
+          <button class="m7cgadm-mini del" type="button" data-act="delete" aria-label="Delete rule">×</button>
+        </div>
+      </div>
+      <textarea data-k="text" maxlength="700" aria-label="Rule text">${esc(r.text)}</textarea>
+      <label class="m7cgadm-rule-enabled"><input data-k="enabled" type="checkbox" ${r.enabled!==false?"checked":""}> Show this rule publicly</label>
+    </article>
+  `).join(""):'<div style="padding:18px;text-align:center;color:#887c69;font-size:10px">No rules yet. Tap “Add rule”.</div>';
+}
+
+function read(){
+  if(!state)state=normalise({});
+  state.eyebrow=$("#m7cgadm-eyebrow")?.value.trim()||"";
+  state.title_ar=$("#m7cgadm-title-ar")?.value.trim()||"";
+  state.title_en=$("#m7cgadm-title-en")?.value.trim()||"";
+  state.intro_title=$("#m7cgadm-intro-title")?.value.trim()||"";
+  state.intro_body=$("#m7cgadm-intro-body")?.value.trim()||"";
+  state.closing_title=$("#m7cgadm-closing-title")?.value.trim()||"";
+  state.closing_body=$("#m7cgadm-closing-body")?.value.trim()||"";
+  state.signature=$("#m7cgadm-signature")?.value.trim()||"";
+  state.is_published=!!$("#m7cgadm-published")?.checked;
+
+  $$("#m7cgadm-rules .m7cgadm-rule").forEach(card=>{
+    const i=Number(card.dataset.rule);
+    if(!state.rules[i])return;
+    state.rules[i].icon=card.querySelector('[data-k="icon"]')?.value.trim()||"✓";
+    state.rules[i].title=card.querySelector('[data-k="title"]')?.value.trim()||"Guideline";
+    state.rules[i].text=card.querySelector('[data-k="text"]')?.value.trim()||"";
+    state.rules[i].enabled=!!card.querySelector('[data-k="enabled"]')?.checked;
+  });
+  return state;
+}
+
+function ruleAction(e){
+  const b=e.target.closest("button[data-act]");
+  if(!b)return;
+  read();
+  const card=b.closest("[data-rule]");
+  const i=Number(card?.dataset.rule);
+  if(!Number.isInteger(i)||i<0||i>=state.rules.length)return;
+
+  if(b.dataset.act==="delete"){
+    if(!confirm("Delete this guideline?"))return;
+    state.rules.splice(i,1);
+  }else if(b.dataset.act==="up"&&i>0){
+    [state.rules[i-1],state.rules[i]]=[state.rules[i],state.rules[i-1]];
+  }else if(b.dataset.act==="down"&&i<state.rules.length-1){
+    [state.rules[i+1],state.rules[i]]=[state.rules[i],state.rules[i+1]];
+  }
+  renderRules();
+}
+
+async function load(){
+  if(loading)return;
+  const sb=client();
+  if(!sb){status("Waiting for verified Admin session…");return}
+  loading=true;
+  status("Loading Community Guidelines…");
+  try{
+    const r=await sb.from("community_guidelines").select("*").eq("id","main").maybeSingle();
+    if(r.error)throw r.error;
+    state=normalise(r.data||{});
+    loaded=true;
+    fill();
+    status("Loaded. Edit anything below and save.","ok");
+  }catch(err){
+    status(err?.message||"Could not load Community Guidelines.","err");
+  }finally{loading=false}
+}
+
+async function save(){
+  const sb=client();
+  if(!sb)return status("Admin client is not ready.","err");
+  read();
+  if(!state.title_ar&&!state.title_en)return status("Add at least one page title.","err");
+  if(!state.rules.length)return status("Add at least one guideline.","err");
+
+  const button=$("#m7cgadm-save");
+  button.disabled=true;
+  status("Saving Community Guidelines…");
+  try{
+    const session=await sb.auth.getSession();
+    const payload={
+      id:"main",
+      eyebrow:state.eyebrow,
+      title_ar:state.title_ar,
+      title_en:state.title_en,
+      intro_title:state.intro_title,
+      intro_body:state.intro_body,
+      rules:state.rules.slice(0,40),
+      closing_title:state.closing_title,
+      closing_body:state.closing_body,
+      signature:state.signature,
+      is_published:state.is_published,
+      updated_at:new Date().toISOString(),
+      updated_by:session?.data?.session?.user?.id||null
+    };
+    const r=await sb.from("community_guidelines").upsert(payload,{onConflict:"id"}).select("*").single();
+    if(r.error)throw r.error;
+    state=normalise(r.data);
+    fill();
+    status("Saved. The public page will use these changes.","ok");
+  }catch(err){
+    status(err?.message||"Could not save Community Guidelines.","err");
+  }finally{button.disabled=false}
+}
+
+let tries=0;
+const timer=setInterval(()=>{
+  tries++;
+  if(mount()||tries>120)clearInterval(timer);
+},250);
+
+addEventListener("ma7alak:admin-ready",()=>{
+  if(mount())load();
+});
+})();
