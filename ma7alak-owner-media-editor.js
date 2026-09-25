@@ -246,8 +246,17 @@
       '<span><b>'+limit+'</b> max / album</span>';
 
     if(albumButton){
-      albumButton.disabled=limit<2||mediaItems().length<2;
-      albumButton.textContent=limit<2?"Albums disabled by Admin":"▣ Create album";
+      const disabledByAdmin=limit<2;
+      const needsMedia=mediaItems().length<2;
+      albumButton.disabled=disabledByAdmin||needsMedia;
+      albumButton.textContent="Album";
+      albumButton.title=disabledByAdmin
+        ?"Albums disabled by Admin"
+        :(needsMedia?"Add at least 2 Media items first":"Create album");
+      albumButton.setAttribute(
+        "aria-label",
+        albumButton.title
+      );
     }
 
     albumsBox.innerHTML=albums.length
