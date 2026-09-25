@@ -1171,42 +1171,82 @@ async function makePhoneDefaultCamera(next){
 }
 async function setCameraFacing(next){
   if(!localVideo)return;
+
+  const previousSide=cameraFacing==="user"?"user":"environment";
+  if(next===previousSide)return;
+
   setupStatus(next==="user"?"Switching to selfie camera…":"Switching to main rear camera…");
 
   const previous=localVideo;
   const wasLive=mode==="host"&&!!rtcClient&&!!activeStream;
   const wantedLook=setupLook;
-  let replacement=null;
 
+  /* First choice: switch the EXISTING Agora camera track to the desired
+     physical device. Mobile browsers often refuse opening front + rear
+     cameras at the same time, so creating a second camera track while the
+     first one is still running can fail even though Flip is supported. */
   try{
     await releaseBeautyProcessor();
-    replacement=await makePhoneDefaultCamera(next);
 
-    /* Some Android browsers expose generic camera labels and omit
-       getSettings().facingMode. In that case the side is UNKNOWN, not wrong.
-       Accept the explicit facingMode request unless we can positively prove
-       that the opposite camera opened. */
-    let detected=detectCameraFacing(replacement);
-    if(detected&&detected!==next){
-      const corrected=await chooseNormalPhysicalCamera(next,replacement);
-      if(corrected)detected=detectCameraFacing(replacement);
-      if(detected&&detected!==next)throw new Error("WRONG_CAMERA_SIDE");
+    const switchedInPlace=await chooseNormalPhysicalCamera(next,previous);
+    if(switchedInPlace){
+      localVideo=previous;
+      cameraFacing=actualCameraFacing(localVideo,next);
+      torchOn=false;
+      await resetCameraZoom();
+
+      if(wantedLook!=="natural")await applySetupLook(wantedLook);
+
+      if($("#m7lv-preflight"))playSetupPreview();else localPreview();
+      refreshSetupCameraControls();
+      applySetupButtonState();
+
+      setupStatus(cameraFacing==="user"
+        ?"Selfie camera ready · mirrored preview only."
+        :"Main rear camera ready · normal direction, 1×, no mirror.");
+      return;
     }
+  }catch(err){
+    console.warn("ShoufHon Live in-place camera switch failed",err);
+  }
 
+  /* Fallback for browsers that hide/genericize device labels:
+     release the current camera FIRST, then request the other facingMode.
+     This avoids the common mobile 'camera already in use' failure. */
+  let replacementTrack=null;
+  let unpublished=false;
+
+  try{
     if(wasLive){
-      try{await rtcClient.unpublish(previous)}catch(_){}
+      try{
+        await rtcClient.unpublish(previous);
+        unpublished=true;
+      }catch(_){}
     }
 
-    localVideo=replacement;
+    try{previous.stop()}catch(_){}
+    try{previous.close()}catch(_){}
+    localVideo=null;
+
+    replacementTrack=await makePhoneDefaultCamera(next);
+
+    const detected=detectCameraFacing(replacementTrack);
+    if(detected&&detected!==next){
+      const corrected=await chooseNormalPhysicalCamera(next,replacementTrack);
+      const correctedFacing=detectCameraFacing(replacementTrack);
+      if(!corrected||correctedFacing&&correctedFacing!==next){
+        throw new Error("WRONG_CAMERA_SIDE");
+      }
+    }
+
+    localVideo=replacementTrack;
+    replacementTrack=null;
     cameraFacing=actualCameraFacing(localVideo,next);
     torchOn=false;
     await resetCameraZoom();
 
     if(wantedLook!=="natural")await applySetupLook(wantedLook);
     if(wasLive)await rtcClient.publish(localVideo);
-
-    try{previous.stop();previous.close()}catch(_){}
-    replacement=null;
 
     if($("#m7lv-preflight"))playSetupPreview();else localPreview();
     refreshSetupCameraControls();
@@ -1216,13 +1256,30 @@ async function setCameraFacing(next){
       ?"Selfie camera ready · mirrored preview only."
       :"Main rear camera ready · normal direction, 1×, no mirror.");
   }catch(err){
-    try{replacement?.stop();replacement?.close()}catch(_){}
-    localVideo=previous;
-    cameraFacing=actualCameraFacing(previous,cameraFacing);
-    if($("#m7lv-preflight"))playSetupPreview();else localPreview();
-    refreshSetupCameraControls();
-    applySetupButtonState();
-    setupStatus("Camera switch failed on this browser/device. Try Flip again.",true);
+    console.warn("ShoufHon Live camera switch fallback failed",err);
+    try{replacementTrack?.stop()}catch(_){}
+    try{replacementTrack?.close()}catch(_){}
+
+    /* Restore the camera we had before so a failed Flip never leaves the
+       owner with a dead preview/live stream. */
+    try{
+      await releaseBeautyProcessor();
+      localVideo=await makePhoneDefaultCamera(previousSide);
+      cameraFacing=actualCameraFacing(localVideo,previousSide);
+      torchOn=false;
+      await resetCameraZoom();
+      if(wantedLook!=="natural")await applySetupLook(wantedLook);
+      if(wasLive&&unpublished)await rtcClient.publish(localVideo);
+
+      if($("#m7lv-preflight"))playSetupPreview();else localPreview();
+      refreshSetupCameraControls();
+      applySetupButtonState();
+      setupStatus("Camera stayed on the current side. Tap Flip again.",true);
+    }catch(restoreErr){
+      console.warn("ShoufHon Live could not restore camera after Flip failure",restoreErr);
+      localVideo=null;
+      setupStatus("Camera needs to reopen. Close Live setup and open it again.",true);
+    }
   }
 }
 async function prepareSetupPreview(p){
