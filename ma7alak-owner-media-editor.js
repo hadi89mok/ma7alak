@@ -21,6 +21,9 @@
   let snapshot={photos:[],videos:[],albums:[],albumItems:[],photoLimit:0,videoLimit:0,albumLimit:8};
   let pending=new Map();
   let reviewUrls=[];
+  let librarySelectionMode="";
+  let librarySelected=new Set();
+  let suppressLibraryClickUntil=0;
 
   function finiteLimit(value,fallback){
     if(value===null||value===undefined||value==="")return fallback;
@@ -225,6 +228,76 @@
     return mediaItems().find(media=>mediaKey(media.type,media.id)===mediaKey(cover.media_type,cover.media_id))||null;
   }
 
+  function clearLibrarySelection(){
+    librarySelectionMode="";
+    librarySelected.clear();
+    syncLibrarySelectionUI();
+  }
+
+  function syncLibrarySelectionUI(){
+    const sheet=editorSheet();
+    const bar=document.getElementById("m7om-library-selection");
+    if(!sheet||!bar)return;
+
+    const active=!!librarySelectionMode;
+    sheet.classList.toggle("m7om-selecting",active);
+
+    document.querySelectorAll(".m7om-item").forEach(card=>{
+      const key=String(card.dataset.selectKey||"");
+      const relevant=librarySelectionMode==="media";
+      card.classList.toggle("selection-mode",relevant);
+      card.classList.toggle("delete-selected",relevant&&librarySelected.has(key));
+    });
+
+    document.querySelectorAll(".m7om-album").forEach(card=>{
+      const key=String(card.dataset.selectKey||"");
+      const relevant=librarySelectionMode==="album";
+      card.classList.toggle("selection-mode",relevant);
+      card.classList.toggle("delete-selected",relevant&&librarySelected.has(key));
+    });
+
+    bar.hidden=!active;
+    const count=librarySelected.size;
+    const countEl=bar.querySelector("[data-library-select-count]");
+    const labelEl=bar.querySelector("[data-library-select-label]");
+    const deleteButton=bar.querySelector("[data-library-select-delete]");
+
+    if(countEl)countEl.textContent=count+" selected";
+    if(labelEl){
+      labelEl.textContent=librarySelectionMode==="album"
+        ?"Albums"
+        :"Photos & videos";
+    }
+    if(deleteButton){
+      deleteButton.disabled=count===0;
+      deleteButton.textContent=count
+        ?"Delete "+count
+        :"Delete";
+    }
+  }
+
+  function startLibrarySelection(mode,key){
+    librarySelectionMode=mode;
+    librarySelected.clear();
+    if(key)librarySelected.add(key);
+    try{navigator.vibrate?.(22)}catch(_){}
+    syncLibrarySelectionUI();
+  }
+
+  function toggleLibrarySelection(mode,key){
+    if(librarySelectionMode!==mode){
+      startLibrarySelection(mode,key);
+      return;
+    }
+    if(librarySelected.has(key))librarySelected.delete(key);
+    else librarySelected.add(key);
+    if(librarySelected.size===0){
+      clearLibrarySelection();
+      return;
+    }
+    syncLibrarySelectionUI();
+  }
+
   function render(){
     const sheet=editorSheet();
     const keepScroll=sheet?.classList.contains("open")
@@ -259,7 +332,8 @@
     }
 
     albumsBox.innerHTML=albums.length
-      ? '<div class="m7om-section-title"><b>Albums</b><small>One album = one public Media frame.</small></div>'+
+      ? '<div class="m7om-section-title"><b>Albums</b><small>Tap to open · hold to select/delete.</small></div>'+
+        '<div class="m7om-album-grid">'+
         albums.map(album=>{
           const members=albumItemsFor(album.id);
           const cover=albumCover(album);
@@ -268,32 +342,40 @@
               ?'<video src="'+esc(cover.url)+'" muted playsinline preload="metadata"></video>'
               :'<img src="'+esc(cover.url)+'" alt="">')
             :'<span class="m7om-album-placeholder">▣</span>';
-          return '<article class="m7om-album" data-album-id="'+esc(album.id)+'">'+
-            '<div class="m7om-album-cover">'+coverHtml+'<em>ALBUM · '+members.length+'</em></div>'+
-            '<div class="m7om-album-copy"><b>'+esc(album.title||"Album")+'</b><small>'+esc(album.description||"Tap Edit to change items or cover.")+'</small></div>'+
-            '<div class="m7om-actions"><button type="button" data-album-edit>Edit album</button><button type="button" data-album-delete>Ungroup</button></div>'+
+          return '<article class="m7om-album" data-album-id="'+esc(album.id)+'" data-select-key="album:'+esc(album.id)+'">'+
+            '<div class="m7om-album-cover">'+coverHtml+
+              '<em>ALBUM · '+members.length+'</em>'+
+              '<span class="m7om-select-check">✓</span>'+
+            '</div>'+
+            '<div class="m7om-album-copy"><b>'+esc(album.title||"Album")+'</b><small>'+esc(album.description||"Tap to open album")+'</small></div>'+
           '</article>';
-        }).join("")
+        }).join("")+
+        '</div>'
       :"";
 
     const membership=albumMembership();
     const items=mediaItems();
 
     list.innerHTML=items.length
-      ?'<div class="m7om-section-title"><b>Media library</b><small>Hold a thumbnail to delete · Album items still count toward your limits.</small></div>'+
+      ?'<div class="m7om-section-title"><b>Media library</b><small>Hold one item, then tap more to select/deselect.</small></div>'+
+       '<div class="m7om-media-grid">'+
        items.map(x=>{
          const member=membership.get(mediaKey(x.type,x.id));
-         return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'">'+
+         const key="media:"+x.type+":"+x.id;
+         return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'" data-select-key="'+esc(key)+'">'+
            '<div class="m7om-thumb">'+
              (x.type==="video"
                ?'<video src="'+esc(x.url)+'" muted playsinline preload="metadata"></video><em>VIDEO</em>'
                :'<img src="'+esc(x.url)+'" alt=""><em>'+(x.featured?"FEATURED":"PHOTO")+'</em>')+
+             '<span class="m7om-select-check">✓</span>'+
            '</div>'+
-           '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(member?"In album · "+esc(member.albumTitle):(x.path?"Standalone · Uploaded file":"Standalone · URL media"))+'</small></div>'+
-           '<div class="m7om-actions"><button type="button" data-replace>Replace</button><button type="button" data-delete>Delete</button></div>'+
+           '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(member?"In "+esc(member.albumTitle):(x.path?"Uploaded":"URL media"))+'</small></div>'+
          '</article>';
-       }).join("")
+       }).join("")+
+       '</div>'
       :'<div class="m7om-empty">No Media yet. Add photos or videos above.</div>';
+
+    syncLibrarySelectionUI();
 
     if(sheet?.classList.contains("open")){
       requestAnimationFrame(()=>{
@@ -340,7 +422,7 @@
 
     const existingRows=album?albumItemsFor(album.id):[];
     const allMedia=mediaItems();
-    const existingMedia=existingRows
+    let existingMedia=existingRows
       .map(row=>{
         const media=allMedia.find(item=>mediaKey(item.type,item.id)===mediaKey(row.media_type,row.media_id));
         return media?{row,media,key:mediaKey(row.media_type,row.media_id)}:null;
@@ -362,22 +444,9 @@
     builder.id="m7om-album-builder";
     builder.__m7AlbumObjectUrls=draftUrls;
 
-    const existingHtml=existingMedia.length
-      ?'<div class="m7om-builder-subhead"><b>Current album</b><small>Tap an item to keep/remove it. Use Cover to choose the album cover.</small></div>'+
-       '<div class="m7om-choice-grid" data-album-existing>'+
-         existingMedia.map((entry,index)=>{
-           const media=entry.media;
-           const thumb=media.type==="video"
-             ?'<video src="'+esc(media.url)+'" muted playsinline preload="metadata"></video>'
-             :'<img src="'+esc(media.url)+'" alt="">';
-           return '<article class="m7om-choice selected" data-album-existing-choice="'+esc(entry.key)+'">'+
-             '<div class="m7om-choice-thumb">'+thumb+'<em>'+(media.type==="video"?"VIDEO":"PHOTO")+'</em></div>'+
-             '<div class="m7om-choice-meta"><b>'+(media.type==="video"?"Video ":"Photo ")+(index+1)+'</b><small>In this album</small></div>'+
-             '<button type="button" data-album-existing-cover="'+esc(entry.key)+'">'+(coverToken==="existing:"+entry.key?"★ COVER":"☆ Cover")+'</button>'+
-           '</article>';
-         }).join("")+
-       '</div>'
-      :"";
+    const existingHtml=
+      '<div class="m7om-builder-subhead" data-album-existing-head '+(existingMedia.length?"":"hidden")+'><b>Current album</b><small>Hold one image, then tap more to select/deselect for deletion.</small></div>'+
+      '<div class="m7om-choice-grid" data-album-existing></div>';
 
     builder.innerHTML=
       '<div class="m7om-album-builder-card">'+
@@ -395,6 +464,7 @@
         existingHtml+
         '<div class="m7om-builder-subhead" data-album-new-head hidden><b>New photos</b><small>Remove any mistake before saving. Choose one as the cover.</small></div>'+
         '<div class="m7om-choice-grid m7om-album-device-grid" data-album-drafts></div>'+
+        '<div class="m7om-album-selection" data-album-selection hidden><div><b data-album-select-count>0 selected</b><small>Select or deselect photos</small></div><button type="button" data-album-select-cancel>Cancel</button><button type="button" class="danger" data-album-select-delete>Delete</button></div>'+
         '<div class="m7om-builder-actions"><button type="button" data-album-cancel>Cancel</button><button type="button" class="primary" data-album-save>'+(album?"Save album":"Create album")+'</button></div>'+
         '<div class="m7om-builder-status" data-album-builder-status></div>'+
       '</div>';
@@ -406,8 +476,14 @@
     const fileInput=builder.querySelector("[data-album-file]");
     const pickButton=builder.querySelector("[data-album-pick]");
     const draftsBox=builder.querySelector("[data-album-drafts]");
+    const existingBox=builder.querySelector("[data-album-existing]");
+    const existingHead=builder.querySelector("[data-album-existing-head]");
     const newHead=builder.querySelector("[data-album-new-head]");
     const saveButton=builder.querySelector("[data-album-save]");
+    const albumSelectionBar=builder.querySelector("[data-album-selection]");
+    let albumSelectionActive=false;
+    const albumDeleteSelected=new Set();
+    let suppressAlbumClickUntil=0;
 
     const totalCount=()=>selectedExisting.size+draftFiles.length;
 
@@ -426,18 +502,48 @@
         :(draftFiles.length?"draft:0":"");
     };
 
+    const renderExisting=()=>{
+      existingHead.hidden=existingMedia.length===0;
+      existingBox.innerHTML=existingMedia.map((entry,index)=>{
+        const media=entry.media;
+        const token="existing:"+entry.key;
+        const thumb=media.type==="video"
+          ?'<video src="'+esc(media.url)+'" muted playsinline preload="metadata"></video>'
+          :'<img src="'+esc(media.url)+'" alt="">';
+        return '<article class="m7om-choice selected '+(albumDeleteSelected.has(token)?"delete-selected ":"")+'" data-album-existing-choice="'+esc(entry.key)+'" data-album-select-token="'+esc(token)+'">'+
+          '<div class="m7om-choice-thumb">'+thumb+'<em>'+(media.type==="video"?"VIDEO":"PHOTO")+'</em><span class="m7om-select-check">✓</span></div>'+
+          '<div class="m7om-choice-meta"><b>'+(media.type==="video"?"Video ":"Photo ")+(index+1)+'</b><small>Saved in this album</small></div>'+
+          '<button type="button" data-album-existing-cover="'+esc(entry.key)+'">'+(coverToken==="existing:"+entry.key?"★ COVER":"☆ Cover")+'</button>'+
+        '</article>';
+      }).join("");
+    };
+
     const renderDrafts=()=>{
       newHead.hidden=draftFiles.length===0;
-      draftsBox.innerHTML=draftFiles.map((file,index)=>
-        '<article class="m7om-choice selected m7om-device-choice" data-album-draft="'+index+'">'+
-          '<div class="m7om-choice-thumb"><img src="'+esc(draftUrls[index]||"")+'" alt=""><em>NEW</em></div>'+
+      draftsBox.innerHTML=draftFiles.map((file,index)=>{
+        const token="draft:"+index;
+        return '<article class="m7om-choice selected m7om-device-choice '+(albumDeleteSelected.has(token)?"delete-selected ":"")+'" data-album-draft="'+index+'" data-album-select-token="'+token+'">'+
+          '<div class="m7om-choice-thumb"><img src="'+esc(draftUrls[index]||"")+'" alt=""><em>NEW</em><span class="m7om-select-check">✓</span></div>'+
           '<div class="m7om-choice-meta"><b>Photo '+(index+1)+'</b><small>'+esc(file.name||"Selected photo")+' · '+esc(fileSizeText(file))+'</small></div>'+
           '<div class="m7om-device-actions">'+
             '<button type="button" data-album-draft-cover="'+index+'">'+(coverToken==="draft:"+index?"★ COVER":"☆ Cover")+'</button>'+
-            '<button type="button" class="remove" data-album-draft-remove="'+index+'" aria-label="Remove photo">×</button>'+
           '</div>'+
-        '</article>'
-      ).join("");
+        '</article>';
+      }).join("");
+    };
+
+    const syncAlbumSelection=()=>{
+      if(albumDeleteSelected.size===0)albumSelectionActive=false;
+      builder.classList.toggle("m7om-album-selecting",albumSelectionActive);
+      albumSelectionBar.hidden=!albumSelectionActive;
+      const count=albumDeleteSelected.size;
+      const countEl=albumSelectionBar.querySelector("[data-album-select-count]");
+      const del=albumSelectionBar.querySelector("[data-album-select-delete]");
+      if(countEl)countEl.textContent=count+" selected";
+      if(del){
+        del.disabled=count===0;
+        del.textContent=count?"Delete "+count:"Delete";
+      }
     };
 
     const sync=()=>{
@@ -470,21 +576,9 @@
 
       if(saveButton)saveButton.disabled=total<2||total>limit;
 
-      builder.querySelectorAll("[data-album-existing-choice]").forEach(card=>{
-        const key=card.dataset.albumExistingChoice;
-        const on=selectedExisting.has(key);
-        card.classList.toggle("selected",on);
-        card.classList.toggle("removed",!on);
-        const small=card.querySelector(".m7om-choice-meta small");
-        if(small)small.textContent=on?"In this album":"Removed from album";
-        const cover=card.querySelector("[data-album-existing-cover]");
-        if(cover){
-          cover.disabled=!on;
-          cover.textContent=coverToken==="existing:"+key?"★ COVER":"☆ Cover";
-        }
-      });
-
+      renderExisting();
       renderDrafts();
+      syncAlbumSelection();
     };
 
     builder.querySelector("[data-album-pick]")?.addEventListener("click",()=>{
@@ -555,18 +649,16 @@
         return;
       }
 
-      const existingChoice=event.target.closest("[data-album-existing-choice]");
-      if(existingChoice&&!event.target.closest("button")){
-        const key=existingChoice.dataset.albumExistingChoice;
-        if(selectedExisting.has(key))selectedExisting.delete(key);
-        else{
-          if(totalCount()>=limit){
-            statusBox.textContent="Admin limit: maximum "+limit+" items in one album.";
-            return;
-          }
-          selectedExisting.add(key);
-        }
-        statusBox.textContent="";
+      const albumChoice=event.target.closest("[data-album-select-token]");
+      if(
+        albumChoice &&
+        albumSelectionActive &&
+        !event.target.closest("button") &&
+        Date.now()>=suppressAlbumClickUntil
+      ){
+        const token=String(albumChoice.dataset.albumSelectToken||"");
+        if(albumDeleteSelected.has(token))albumDeleteSelected.delete(token);
+        else albumDeleteSelected.add(token);
         sync();
         return;
       }
@@ -583,26 +675,60 @@
         return;
       }
 
-      const draftRemove=event.target.closest("[data-album-draft-remove]");
-      if(draftRemove){
-        event.preventDefault();
-        event.stopPropagation();
-        const index=Number(draftRemove.dataset.albumDraftRemove);
-        if(!Number.isInteger(index)||!draftFiles[index])return;
-
-        const removedUrl=draftUrls[index];
-        try{if(removedUrl)URL.revokeObjectURL(removedUrl)}catch(_){}
-        draftFiles.splice(index,1);
-        draftUrls.splice(index,1);
-
-        if(coverToken.startsWith("draft:")){
-          const oldIndex=Number(coverToken.slice(6));
-          if(oldIndex===index)coverToken="";
-          else if(oldIndex>index)coverToken="draft:"+(oldIndex-1);
-        }
-
-        statusBox.textContent="";
+      if(event.target.closest("[data-album-select-cancel]")){
+        albumDeleteSelected.clear();
+        albumSelectionActive=false;
         sync();
+        return;
+      }
+
+      const deleteSelected=event.target.closest("[data-album-select-delete]");
+      if(deleteSelected&&albumDeleteSelected.size&&!busy){
+        const selectedTokens=[...albumDeleteSelected];
+        const existingKeys=selectedTokens
+          .filter(token=>token.startsWith("existing:"))
+          .map(token=>token.slice(9));
+        const draftIndexes=selectedTokens
+          .filter(token=>token.startsWith("draft:"))
+          .map(token=>Number(token.slice(6)))
+          .filter(Number.isInteger)
+          .sort((a,b)=>b-a);
+
+        openActionConfirm({
+          title:"Delete "+selectedTokens.length+" selected item"+(selectedTokens.length===1?"":"s")+"?",
+          text:existingKeys.length
+            ?"Saved photos/videos will be permanently deleted from Media. New unsaved photos will simply be removed from this album draft."
+            :"These selected new photos will be removed from this album draft.",
+          confirmText:"Delete selected",
+          danger:true,
+          onConfirm:async()=>{
+            if(existingKeys.length){
+              const payload=existingKeys.map(key=>{
+                const parts=key.split(":");
+                return{mediaType:parts[0]==="video"?"video":"photo",id:Number(parts[1])};
+              });
+              const data=await request({op:"batch-delete",items:payload});
+              applySnapshot(data);
+              existingMedia=existingMedia.filter(entry=>!existingKeys.includes(entry.key));
+              existingKeys.forEach(key=>selectedExisting.delete(key));
+              changed=true;
+              notifyMediaUpdated("batch-delete");
+            }
+
+            draftIndexes.forEach(index=>{
+              const url=draftUrls[index];
+              try{if(url)URL.revokeObjectURL(url)}catch(_){}
+              draftFiles.splice(index,1);
+              draftUrls.splice(index,1);
+            });
+
+            coverToken="";
+            albumDeleteSelected.clear();
+            albumSelectionActive=false;
+            statusBox.textContent="";
+            sync();
+          }
+        });
         return;
       }
 
@@ -672,6 +798,57 @@
       }
     });
 
+    let albumHoldTimer=0;
+    let albumHoldX=0;
+    let albumHoldY=0;
+    let albumHoldCard=null;
+
+    const cancelAlbumHold=()=>{
+      if(albumHoldTimer){
+        clearTimeout(albumHoldTimer);
+        albumHoldTimer=0;
+      }
+      albumHoldCard=null;
+    };
+
+    builder.addEventListener("pointerdown",event=>{
+      if(event.target.closest("button,input,textarea"))return;
+      const card=event.target.closest("[data-album-select-token]");
+      if(!card||busy)return;
+      if(event.pointerType==="mouse"&&event.button!==0)return;
+
+      cancelAlbumHold();
+      albumHoldCard=card;
+      albumHoldX=Number(event.clientX||0);
+      albumHoldY=Number(event.clientY||0);
+
+      albumHoldTimer=setTimeout(()=>{
+        const held=albumHoldCard;
+        albumHoldTimer=0;
+        albumHoldCard=null;
+        if(!held||busy)return;
+        albumSelectionActive=true;
+        const token=String(held.dataset.albumSelectToken||"");
+        if(token)albumDeleteSelected.add(token);
+        suppressAlbumClickUntil=Date.now()+450;
+        try{navigator.vibrate?.(22)}catch(_){}
+        sync();
+      },520);
+    });
+
+    builder.addEventListener("pointermove",event=>{
+      if(!albumHoldTimer)return;
+      const dx=Number(event.clientX||0)-albumHoldX;
+      const dy=Number(event.clientY||0)-albumHoldY;
+      if(Math.hypot(dx,dy)>10)cancelAlbumHold();
+    });
+    ["pointerup","pointercancel","pointerleave"].forEach(type=>{
+      builder.addEventListener(type,cancelAlbumHold);
+    });
+    builder.addEventListener("contextmenu",event=>{
+      if(event.target.closest("[data-album-select-token]"))event.preventDefault();
+    });
+
     sync();
   }
 
@@ -737,6 +914,7 @@
     closingEditor=true;
 
     removeAlbumBuilder();
+    clearLibrarySelection();
     editorSheet()?.classList.remove("open");
 
     if(!fromPortalBack){
@@ -948,15 +1126,17 @@
       .m7om-add [data-create-album]:before{content:"▣"}
       .m7om-add button:disabled{opacity:.36}
       #m7-owner-media-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-      .m7om-list{display:grid;gap:9px}.m7om-item{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(255,255,255,.025)}
-      .m7om-thumb{width:104px;height:88px;border-radius:12px;overflow:hidden;background:#000;position:relative;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-touch-callout:none}.m7om-thumb img,.m7om-thumb video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.m7om-thumb em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
-      .m7om-copy{min-width:0}.m7om-copy b,.m7om-copy small{display:block}.m7om-copy b{font-size:12px}.m7om-copy small{font-size:8px;color:#8f8474;margin-top:4px;line-height:1.35}
-      .m7om-actions{display:flex;gap:5px;align-items:center}.m7om-actions button{width:34px;height:34px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#111;color:#ddd;font-size:0;font-weight:900;touch-action:manipulation;display:grid;place-items:center}.m7om-actions button:before{font-size:13px;line-height:1}.m7om-actions [data-replace]:before{content:"↻"}.m7om-actions [data-delete]:before{content:"×"}.m7om-actions [data-delete]{color:#ff9696;border-color:rgba(255,80,80,.16)}
+      .m7om-list{display:grid;gap:9px}.m7om-media-grid,.m7om-album-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .m7om-item,.m7om-album{position:relative;min-width:0;padding:7px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(255,255,255,.025);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+      .m7om-item.delete-selected,.m7om-album.delete-selected{border-color:rgba(217,164,65,.82);box-shadow:0 0 0 2px rgba(217,164,65,.18) inset}
+      .m7om-thumb,.m7om-album-cover{width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#000;position:relative;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-touch-callout:none}
+      .m7om-thumb img,.m7om-thumb video,.m7om-album-cover img,.m7om-album-cover video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.m7om-thumb em,.m7om-album-cover em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
+      .m7om-copy,.m7om-album-copy{min-width:0;padding:8px 3px 4px}.m7om-copy b,.m7om-copy small,.m7om-album-copy b,.m7om-album-copy small{display:block}.m7om-copy b,.m7om-album-copy b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7om-copy small,.m7om-album-copy small{font-size:7.5px;color:#8f8474;margin-top:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .m7om-select-check{position:absolute;right:7px;top:7px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;border:2px solid rgba(255,255,255,.72);background:rgba(0,0,0,.46);color:transparent;font-size:14px;font-weight:950;opacity:0;transform:scale(.8);transition:.15s ease;pointer-events:none}.selection-mode .m7om-select-check,.m7om-album-selecting .m7om-choice .m7om-select-check{opacity:1;transform:scale(1)}.delete-selected .m7om-select-check{background:#d9a441;border-color:#f3d98e;color:#111}
+      .m7om-selection-bar{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483647;width:min(calc(100% - 20px),620px);display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid rgba(217,164,65,.42);border-radius:16px;background:rgba(10,9,8,.97);box-shadow:0 18px 50px rgba(0,0,0,.65);backdrop-filter:blur(12px)}.m7om-selection-bar[hidden]{display:none!important}.m7om-selection-bar b,.m7om-selection-bar small{display:block}.m7om-selection-bar b{font-size:12px;color:#f2d18d}.m7om-selection-bar small{margin-top:2px;font-size:7px;color:#8f8474}.m7om-selection-bar button{min-height:38px;padding:0 12px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#151515;color:#ddd;font-weight:900}.m7om-selection-bar .danger{border-color:rgba(255,95,95,.3);background:#7d2020;color:#fff}.m7om-selection-bar button:disabled{opacity:.4}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
       .m7om-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:13px 1px 7px}.m7om-section-title b{font-size:11px;color:#f2d18d}.m7om-section-title small{font-size:7px;color:#8f8474;text-align:right}
-      #m7-owner-media-albums{display:grid;gap:8px;margin-bottom:12px}.m7om-album{display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px;border:1px solid rgba(217,164,65,.20);border-radius:16px;background:linear-gradient(145deg,rgba(217,164,65,.07),rgba(255,255,255,.018))}
-      .m7om-album-cover{width:80px;height:68px;position:relative;overflow:hidden;border-radius:12px;background:#050505}.m7om-album-cover img,.m7om-album-cover video{width:100%;height:100%;object-fit:cover;display:block}.m7om-album-cover em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#050505d9;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}.m7om-album-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:24px;color:#d9a441}
-      .m7om-album-copy{min-width:0}.m7om-album-copy b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7om-album-copy small{display:block;margin-top:4px;color:#938775;font-size:8px;line-height:1.35;max-height:2.7em;overflow:hidden}
+      #m7-owner-media-albums{display:grid;gap:8px;margin-bottom:12px}.m7om-album{border-color:rgba(217,164,65,.20);background:linear-gradient(145deg,rgba(217,164,65,.07),rgba(255,255,255,.018))}.m7om-album-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:24px;color:#d9a441}
       #m7om-album-builder{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.86);overflow:auto;padding:max(12px,env(safe-area-inset-top)) 10px max(18px,env(safe-area-inset-bottom));backdrop-filter:blur(9px)}
       .m7om-album-builder-card{width:min(100%,620px);margin:0 auto;padding:14px;border:1px solid rgba(217,164,65,.34);border-radius:20px;background:#0c0b0b;box-shadow:0 24px 70px rgba(0,0,0,.7)}
       .m7om-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.m7om-builder-head b{font-size:18px}.m7om-builder-head small{display:block;margin-top:4px;color:#968a79;font-size:8px;line-height:1.4}.m7om-builder-head button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:#151515;color:#fff;font-size:22px}
@@ -974,7 +1154,8 @@
       .m7om-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.m7om-choice{min-width:0;padding:6px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:#111;cursor:pointer}.m7om-choice.selected{border-color:rgba(217,164,65,.72);box-shadow:0 0 0 1px rgba(217,164,65,.18) inset}.m7om-choice.removed{opacity:.46}.m7om-choice.locked{opacity:.42;cursor:not-allowed}
       .m7om-choice-thumb{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:10px;background:#000}.m7om-choice-thumb img,.m7om-choice-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-choice-thumb em{position:absolute;left:4px;bottom:4px;padding:3px 5px;border-radius:999px;background:#000c;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}
       .m7om-choice-meta{padding:6px 2px 2px}.m7om-choice-meta b,.m7om-choice-meta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m7om-choice-meta b{font-size:8px}.m7om-choice-meta small{margin-top:3px;color:#857a6c;font-size:6.5px}.m7om-choice [data-album-existing-cover]{width:100%;min-height:28px;margin-top:5px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}
-      .m7om-device-actions{display:grid;grid-template-columns:minmax(0,1fr) 30px;gap:5px;margin-top:5px}.m7om-device-actions button{min-height:28px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}.m7om-device-actions .remove{padding:0;border-color:rgba(255,96,96,.2);background:rgba(255,96,96,.06);color:#ff9b9b;font-size:18px;line-height:1}
+      .m7om-device-actions{display:grid;grid-template-columns:1fr;gap:5px;margin-top:5px}.m7om-device-actions button{min-height:28px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}
+      .m7om-album-selection{position:sticky;bottom:8px;z-index:8;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;margin-top:12px;padding:9px;border:1px solid rgba(217,164,65,.4);border-radius:14px;background:rgba(9,8,7,.96);box-shadow:0 14px 35px rgba(0,0,0,.5)}.m7om-album-selection[hidden]{display:none!important}.m7om-album-selection b,.m7om-album-selection small{display:block}.m7om-album-selection b{font-size:11px;color:#f0ca6b}.m7om-album-selection small{font-size:7px;color:#8f8474;margin-top:2px}.m7om-album-selection button{min-height:36px;padding:0 10px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#151515;color:#ddd;font-weight:900}.m7om-album-selection .danger{background:#7d2020;border-color:rgba(255,94,94,.28);color:#fff}
       .m7om-builder-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:12px}.m7om-builder-actions button{min-height:42px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#121212;color:#ddd;font-weight:900}.m7om-builder-actions .primary{border-color:rgba(217,164,65,.5);background:#b98d39;color:#080706}.m7om-builder-status{min-height:18px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
       #m7om-media-review{position:fixed;inset:0;z-index:2147483647;display:grid;align-items:end;background:rgba(0,0,0,.76);backdrop-filter:blur(8px);padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));overflow:auto}
       .m7om-review-card{width:min(100%,620px);max-height:min(84dvh,760px);overflow:auto;margin:auto auto 0;padding:14px;border:1px solid rgba(217,164,65,.34);border-radius:20px 20px 14px 14px;background:#0d0c0b;box-shadow:0 -18px 60px rgba(0,0,0,.65)}
@@ -983,7 +1164,7 @@
       .m7om-review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.m7om-review-item{min-width:0;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:#111;overflow:hidden}.m7om-review-thumb{width:100%;aspect-ratio:1.25/1;background:#000}.m7om-review-thumb img,.m7om-review-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-review-copy{padding:8px}.m7om-review-copy b,.m7om-review-copy small{display:block}.m7om-review-copy b{font-size:10px}.m7om-review-copy small{margin-top:3px;color:#8e8374;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .m7om-review-actions{display:grid;grid-template-columns:1fr 1.45fr;gap:8px;margin-top:12px}.m7om-review-actions button{min-height:43px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#141414;color:#ddd;font-weight:900}.m7om-review-actions .primary{border-color:rgba(217,164,65,.45);background:linear-gradient(135deg,#e0ae4e,#ba8431);color:#080706}.m7om-review-actions .primary.danger{border-color:rgba(255,88,88,.35);background:#7d2020;color:#fff}.m7om-review-status{min-height:17px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
       #m7-owner-media-status{min-height:20px;margin-top:10px;text-align:center;color:#a99b87;font-size:9px}#m7-owner-media-status[data-type="ok"]{color:#7ee3a0}#m7-owner-media-status[data-type="error"]{color:#ff8f8f}
-      @media(max-width:600px){#m7-owner-media-sheet{padding-left:8px!important;padding-right:8px!important}.m7om-card{border-radius:19px;padding:12px}.m7om-item{grid-template-columns:92px minmax(0,1fr) auto}.m7om-album{grid-template-columns:86px minmax(0,1fr) auto}.m7om-thumb{width:92px;height:82px}.m7om-album-cover{width:86px;height:74px}.m7om-actions{grid-column:auto;display:flex}.m7om-actions button{width:33px;height:33px;min-height:33px}.m7om-add{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.m7om-add button{min-height:56px;padding:6px 2px;font-size:7.4px}.m7om-choice-grid,.m7om-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.m7om-review-card{padding:12px}}
+      @media(max-width:600px){#m7-owner-media-sheet{padding-left:8px!important;padding-right:8px!important}.m7om-card{border-radius:19px;padding:12px}.m7om-media-grid,.m7om-album-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.m7om-item,.m7om-album{padding:6px}.m7om-add{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.m7om-add button{min-height:56px;padding:6px 2px;font-size:7.4px}.m7om-choice-grid,.m7om-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.m7om-review-card{padding:12px}.m7om-selection-bar{grid-template-columns:minmax(0,1fr) auto auto}.m7om-selection-bar button{padding:0 9px;font-size:8px}}
 
       /*
          The Media embed intentionally treats a selected frame animation as
@@ -1055,7 +1236,7 @@
 
     const sheet=document.createElement("div");
     sheet.id="m7-owner-media-sheet";
-    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add photos/videos normally, or create an album by selecting multiple photos directly from your phone. Admin limits are enforced.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">Photos</button><button type="button" data-add="video">Videos</button><button type="button" data-create-album>Album</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div>';
+    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add photos/videos normally, or create an album by selecting multiple photos directly from your phone. Hold any Media or album card to enter multi-select mode.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">Photos</button><button type="button" data-add="video">Videos</button><button type="button" data-create-album>Album</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div><div id="m7om-library-selection" class="m7om-selection-bar" hidden><div><b data-library-select-count>0 selected</b><small data-library-select-label>Photos & videos</small></div><button type="button" data-library-select-cancel>Cancel</button><button type="button" class="danger" data-library-select-delete>Delete</button></div>';
     document.body.appendChild(sheet);
 
     sheet.querySelector(".m7om-close").addEventListener("click",()=>closeEditor());
@@ -1125,123 +1306,149 @@
       });
     });
 
-    sheet.querySelector("#m7-owner-media-albums").addEventListener("click",async event=>{
-      if(busy)return;
-      const album=event.target.closest("[data-album-id]");
-      if(!album)return;
-      const albumId=album.dataset.albumId;
+    const albumsPanel=sheet.querySelector("#m7-owner-media-albums");
+    const mediaList=sheet.querySelector("#m7-owner-media-list");
+    const selectionBar=sheet.querySelector("#m7om-library-selection");
 
-      if(event.target.closest("[data-album-edit]")){
-        openAlbumEditor(albumId);
+    const itemForSelectionEvent=event=>{
+      const album=event.target.closest(".m7om-album");
+      if(album)return{mode:"album",card:album,key:String(album.dataset.selectKey||"")};
+      const media=event.target.closest(".m7om-item");
+      if(media)return{mode:"media",card:media,key:String(media.dataset.selectKey||"")};
+      return null;
+    };
+
+    albumsPanel.addEventListener("click",event=>{
+      if(busy)return;
+      const hit=itemForSelectionEvent(event);
+      if(!hit||hit.mode!=="album")return;
+
+      if(librarySelectionMode==="album"){
+        if(Date.now()<suppressLibraryClickUntil)return;
+        toggleLibrarySelection("album",hit.key);
         return;
       }
 
-      if(!event.target.closest("[data-album-delete]"))return;
-
-      openActionConfirm({
-        title:"Ungroup this album?",
-        text:"The album frame will be removed, but every photo/video stays safely in the Media library.",
-        confirmText:"Ungroup album",
-        onConfirm:async()=>{
-          const data=await request({op:"album-delete",albumId});
-          applySnapshot(data);
-          changed=true;
-          render();
-          notifyMediaUpdated("album-delete");
-          status("Album removed. Media items are still available.","ok");
-        }
-      });
+      openAlbumEditor(hit.card.dataset.albumId);
     });
-
-    const mediaList=sheet.querySelector("#m7-owner-media-list");
-
-    const confirmMediaDelete=item=>{
-      if(!item||busy)return;
-      const type=item.dataset.type==="video"?"video":"photo";
-      const id=item.dataset.id;
-
-      openActionConfirm({
-        title:"Delete this "+type+"?",
-        text:"This permanently removes the Media and its uploaded file. Albums containing it will update automatically.",
-        confirmText:"Delete "+type,
-        danger:true,
-        onConfirm:async()=>{
-          const data=await request({op:"delete",mediaType:type,id});
-          applySnapshot(data);
-          changed=true;
-          render();
-          notifyMediaUpdated("delete");
-          status("Deleted.","ok");
-        }
-      });
-    };
 
     mediaList.addEventListener("click",event=>{
-      const item=event.target.closest(".m7om-item");
-      if(!item||busy)return;
-      const type=item.dataset.type,id=item.dataset.id;
-      if(event.target.closest("[data-replace]")){
-        choose("replace",type,id);
+      if(busy)return;
+      const hit=itemForSelectionEvent(event);
+      if(!hit||hit.mode!=="media")return;
+
+      if(librarySelectionMode==="media"){
+        if(Date.now()<suppressLibraryClickUntil)return;
+        toggleLibrarySelection("media",hit.key);
+      }
+    });
+
+    selectionBar.querySelector("[data-library-select-cancel]")?.addEventListener("click",()=>{
+      clearLibrarySelection();
+    });
+
+    selectionBar.querySelector("[data-library-select-delete]")?.addEventListener("click",()=>{
+      if(busy||!librarySelectionMode||!librarySelected.size)return;
+      const mode=librarySelectionMode;
+      const selected=[...librarySelected];
+
+      if(mode==="album"){
+        const albumIds=selected
+          .map(key=>Number(key.replace(/^album:/,"")))
+          .filter(Number.isFinite);
+
+        openActionConfirm({
+          title:"Delete "+albumIds.length+" album"+(albumIds.length===1?"":"s")+"?",
+          text:"The album frame will be deleted. Its photos/videos will stay safely in the Media library.",
+          confirmText:"Delete album"+(albumIds.length===1?"":"s"),
+          danger:true,
+          onConfirm:async()=>{
+            const data=await request({op:"album-delete-batch",albumIds});
+            applySnapshot(data);
+            changed=true;
+            clearLibrarySelection();
+            render();
+            notifyMediaUpdated("album-delete-batch");
+            status("Album"+(albumIds.length===1?"":"s")+" deleted. Media files were kept.","ok");
+          }
+        });
         return;
       }
-      if(event.target.closest("[data-delete]")){
-        confirmMediaDelete(item);
-      }
+
+      const items=selected.map(key=>{
+        const parts=key.split(":");
+        return{
+          mediaType:parts[1]==="video"?"video":"photo",
+          id:Number(parts[2])
+        };
+      }).filter(item=>Number.isFinite(item.id));
+
+      openActionConfirm({
+        title:"Delete "+items.length+" selected item"+(items.length===1?"":"s")+"?",
+        text:"This permanently deletes the selected Media files. Any albums using them will update automatically.",
+        confirmText:"Delete selected",
+        danger:true,
+        onConfirm:async()=>{
+          const data=await request({op:"batch-delete",items});
+          applySnapshot(data);
+          changed=true;
+          clearLibrarySelection();
+          render();
+          notifyMediaUpdated("batch-delete");
+          status(items.length+" Media item"+(items.length===1?"":"s")+" deleted.","ok");
+        }
+      });
     });
 
-    /*
-       Phone shortcut: hold the actual thumbnail for ~0.55s.
-       Movement cancels the gesture so vertical scrolling stays natural.
-    */
-    let mediaHoldTimer=0;
-    let mediaHoldX=0;
-    let mediaHoldY=0;
-    let mediaHoldItem=null;
+    let libraryHoldTimer=0;
+    let libraryHoldX=0;
+    let libraryHoldY=0;
+    let libraryHoldHit=null;
 
-    const cancelMediaHold=()=>{
-      if(mediaHoldTimer){
-        clearTimeout(mediaHoldTimer);
-        mediaHoldTimer=0;
+    const cancelLibraryHold=()=>{
+      if(libraryHoldTimer){
+        clearTimeout(libraryHoldTimer);
+        libraryHoldTimer=0;
       }
-      mediaHoldItem=null;
+      libraryHoldHit=null;
     };
 
-    mediaList.addEventListener("pointerdown",event=>{
-      const thumb=event.target.closest(".m7om-thumb");
-      const item=thumb?.closest(".m7om-item");
-      if(!item||busy)return;
+    const beginLibraryHold=event=>{
+      const hit=itemForSelectionEvent(event);
+      if(!hit||busy)return;
       if(event.pointerType==="mouse"&&event.button!==0)return;
 
-      cancelMediaHold();
-      mediaHoldItem=item;
-      mediaHoldX=Number(event.clientX||0);
-      mediaHoldY=Number(event.clientY||0);
+      cancelLibraryHold();
+      libraryHoldHit=hit;
+      libraryHoldX=Number(event.clientX||0);
+      libraryHoldY=Number(event.clientY||0);
 
-      mediaHoldTimer=setTimeout(()=>{
-        const held=mediaHoldItem;
-        mediaHoldTimer=0;
-        mediaHoldItem=null;
+      libraryHoldTimer=setTimeout(()=>{
+        const held=libraryHoldHit;
+        libraryHoldTimer=0;
+        libraryHoldHit=null;
         if(!held||busy)return;
-        try{navigator.vibrate?.(24)}catch(_){}
-        confirmMediaDelete(held);
-      },550);
-    });
+        startLibrarySelection(held.mode,held.key);
+        suppressLibraryClickUntil=Date.now()+450;
+      },520);
+    };
 
-    mediaList.addEventListener("pointermove",event=>{
-      if(!mediaHoldTimer)return;
-      const dx=Number(event.clientX||0)-mediaHoldX;
-      const dy=Number(event.clientY||0)-mediaHoldY;
-      if(Math.hypot(dx,dy)>10)cancelMediaHold();
-    });
+    const moveLibraryHold=event=>{
+      if(!libraryHoldTimer)return;
+      const dx=Number(event.clientX||0)-libraryHoldX;
+      const dy=Number(event.clientY||0)-libraryHoldY;
+      if(Math.hypot(dx,dy)>10)cancelLibraryHold();
+    };
 
-    ["pointerup","pointercancel","pointerleave"].forEach(type=>{
-      mediaList.addEventListener(type,cancelMediaHold);
-    });
-
-    mediaList.addEventListener("contextmenu",event=>{
-      if(event.target.closest(".m7om-thumb")){
-        event.preventDefault();
-      }
+    [albumsPanel,mediaList].forEach(panel=>{
+      panel.addEventListener("pointerdown",beginLibraryHold);
+      panel.addEventListener("pointermove",moveLibraryHold);
+      ["pointerup","pointercancel","pointerleave"].forEach(type=>{
+        panel.addEventListener(type,cancelLibraryHold);
+      });
+      panel.addEventListener("contextmenu",event=>{
+        if(event.target.closest(".m7om-item,.m7om-album"))event.preventDefault();
+      });
     });
   }
 
