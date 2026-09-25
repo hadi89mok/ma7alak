@@ -3718,7 +3718,7 @@
       return;
     }
 
-    const currentManagedShop=getManagedShop(originalSlug);
+    const currentManagedShop=getManagedShop(slug);
     if(!categoryName&&currentManagedShop?.is_active===true){
       setStatus(
         editStatus,
@@ -3838,7 +3838,7 @@
 
       const savedProfile = await supabaseClient
         .from("shop_profiles")
-        .select("directory_options")
+        .select("directory_options,category_name,location,category,city,area")
         .eq("shop_slug",slug)
         .maybeSingle();
 
@@ -3875,6 +3875,38 @@
           "). Please try Save again."
         );
       }
+
+      /*
+         Core public identity must be confirmed from Supabase too. This keeps
+         Show Shops, homepage Spotlight and shop-page profile/location badges
+         on the exact same saved source instead of a temporary Studio draft.
+      */
+      const coreMismatches=
+        ["category_name","location","category","city","area"]
+          .filter(function(key){
+            return String(savedProfile.data[key]??"").trim() !==
+                   String(payload[key]??"").trim();
+          });
+
+      if(coreMismatches.length){
+        console.error(
+          "SHOUFHON Admin: core shop save verification failed:",
+          coreMismatches
+        );
+        throw new Error(
+          "Some shop details did not persist ("+
+          coreMismatches.join(", ")+
+          "). Please try Save again."
+        );
+      }
+
+      /*
+         The DB is now canonical. Remove the temporary cross-page preview
+         snapshot so returning to a public page cannot replay an older draft.
+      */
+      try{
+        localStorage.removeItem("ma7alak_design_live_v1:"+slug);
+      }catch(_){}
 
       /* Keep the editor snapshot aligned with the value confirmed by DB. */
       editForm.dataset.directoryOptions = JSON.stringify(savedOptions);
