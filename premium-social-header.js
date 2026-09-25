@@ -5295,14 +5295,13 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
         position:relative!important;
         display:inline-block!important;
         margin-inline:2px!important;
-        font-size:1.15em!important;
-        line-height:1.08!important;
-        font-weight:950!important;
 
-        /* Hostinger text blocks can use transparent text-fill for gradients.
-           Force the actual Arabic word to stay visible. */
-        color:#f0c66f!important;
-        -webkit-text-fill-color:#f0c66f!important;
+        /* Only a little bigger than the sentence around it. */
+        font-size:1.11em!important;
+        line-height:1.06!important;
+        font-weight:inherit!important;
+
+        /* Keep EXACTLY the same visible colour as the original sentence. */
         background:none!important;
         -webkit-background-clip:border-box!important;
         background-clip:border-box!important;
@@ -5311,34 +5310,33 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
 
         direction:rtl!important;
         unicode-bidi:isolate!important;
-        letter-spacing:0!important;
-        transform-origin:50% 70%!important;
-        text-shadow:
-          0 0 9px rgba(240,198,111,.16),
-          0 2px 8px rgba(0,0,0,.18)!important;
-        animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
-        -webkit-animation:shoufhonPlatformWiggle 3.8s cubic-bezier(.2,.8,.2,1) infinite!important;
+        letter-spacing:inherit!important;
+        transform-origin:50% 65%!important;
+
+        /* Small playful phone-safe movement. No glow, underline or colour change. */
+        animation:shoufhonPlatformMove 3.4s cubic-bezier(.2,.8,.2,1) infinite!important;
+        -webkit-animation:shoufhonPlatformMove 3.4s cubic-bezier(.2,.8,.2,1) infinite!important;
         will-change:transform;
       }
       .shoufhon-platform-word::after{
         display:none!important;
         content:none!important;
       }
-      @keyframes shoufhonPlatformWiggle{
-        0%,68%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-        72%{transform:translate3d(-1px,-1px,0) rotate(-3deg) scale(1.025)}
-        76%{transform:translate3d(1px,0,0) rotate(3deg) scale(1.06)}
-        80%{transform:translate3d(-1px,0,0) rotate(-2deg) scale(1.035)}
-        84%{transform:translate3d(0,0,0) rotate(1deg) scale(1.015)}
-        88%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+      @keyframes shoufhonPlatformMove{
+        0%,64%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+        69%{transform:translate3d(-2px,0,0) rotate(-2deg) scale(1.01)}
+        74%{transform:translate3d(2px,-1px,0) rotate(2deg) scale(1.025)}
+        79%{transform:translate3d(-1px,0,0) rotate(-1.5deg) scale(1.015)}
+        84%{transform:translate3d(1px,0,0) rotate(1deg) scale(1.008)}
+        89%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
       }
-      @-webkit-keyframes shoufhonPlatformWiggle{
-        0%,68%,100%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-        72%{-webkit-transform:translate3d(-1px,-1px,0) rotate(-3deg) scale(1.025)}
-        76%{-webkit-transform:translate3d(1px,0,0) rotate(3deg) scale(1.06)}
-        80%{-webkit-transform:translate3d(-1px,0,0) rotate(-2deg) scale(1.035)}
-        84%{-webkit-transform:translate3d(0,0,0) rotate(1deg) scale(1.015)}
-        88%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+      @-webkit-keyframes shoufhonPlatformMove{
+        0%,64%,100%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+        69%{-webkit-transform:translate3d(-2px,0,0) rotate(-2deg) scale(1.01)}
+        74%{-webkit-transform:translate3d(2px,-1px,0) rotate(2deg) scale(1.025)}
+        79%{-webkit-transform:translate3d(-1px,0,0) rotate(-1.5deg) scale(1.015)}
+        84%{-webkit-transform:translate3d(1px,0,0) rotate(1deg) scale(1.008)}
+        89%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
       }
       /* Header three-lines menu: same design, just a little tighter and cleaner. */
       #ma7alak-header-menu-panel{
@@ -5429,6 +5427,18 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
     word.className="shoufhon-platform-word";
     word.textContent="منصة";
     word.setAttribute("aria-label","منصة");
+
+    /* Preserve the original sentence colour before moving the word into its
+       own animated span. Hostinger can use transparent text-fill internally,
+       so copy the actual computed colour onto the word. */
+    try{
+      const parentStyle=getComputedStyle(node.parentElement);
+      const visibleColor=parentStyle.color||"#fff";
+      word.style.setProperty("color",visibleColor,"important");
+      word.style.setProperty("-webkit-text-fill-color",visibleColor,"important");
+      word.style.setProperty("text-shadow","inherit","important");
+    }catch(_){}
+
     frag.appendChild(word);
 
     const rest=value.slice(index+"منصة".length);
