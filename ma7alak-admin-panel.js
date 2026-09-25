@@ -16558,10 +16558,13 @@ function previewCardHtml(shop){
 
   const cover=
     previewVal(
-      "m7de-cover",
-      shop?.directory_options?.cover||
-      shop?.profile_image_url||
-      ""
+      "m7de-profile_banner_image_url",
+      shop?.directory_options?.profile_banner_image_url||
+      previewVal(
+        "ma-edit-image",
+        shop?.profile_image_url||
+        ""
+      )
     );
 
   const name=
@@ -16574,14 +16577,14 @@ function previewCardHtml(shop){
   const category=
     previewVal(
       "ma-edit-category-name",
-      shop?.category_name||shop?.category||"Category"
+      shop?.category_name||"Public shop label"
     ) ||
     "Category";
 
   const location=
     previewVal(
       "ma-edit-location",
-      shop?.location||shop?.area||"Location"
+      shop?.location||"Public location"
     ) ||
     "Location";
 
