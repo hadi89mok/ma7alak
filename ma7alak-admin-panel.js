@@ -4461,11 +4461,11 @@
       hub.className = "ma-admin-card";
       hub.innerHTML = `
         <div class="ma-v2-hero">
-          <div class="ma-v2-title"><div><h2>Directory Control</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Categories, cities/regions and areas — live across ShoufHon.</div></div><span class="ma-v2-live">● LIVE</span></div>
+          <div class="ma-v2-title"><div><h2>Directory Search Data</h2><div style="opacity:.62;font-size:12px;margin-top:4px">Search/filter structure only. Public shop labels come from each shop’s manual Public label + Public location fields.</div></div><span class="ma-v2-live">● LIVE</span></div>
           <div class="ma-v2-tabs">
             <button class="ma-v2-tab active" data-v2-tab="categories">🏷️ Categories</button>
-            <button class="ma-v2-tab" data-v2-tab="cities">📍 Cities / Regions</button>
-            <button class="ma-v2-tab" data-v2-tab="areas">🗺️ Areas <span id="ma-v2-area-state">OFF</span></button>
+            <button class="ma-v2-tab" data-v2-tab="cities">📍 Regions</button>
+            <button class="ma-v2-tab" data-v2-tab="areas">🗺️ Areas / Neighborhoods <span id="ma-v2-area-state">LIVE</span></button>
           </div>
           <div class="ma-v2-panel active" data-v2-panel="categories">
             <form id="ma-v2-category-form" class="ma-v2-form">
@@ -4484,11 +4484,11 @@
             <div id="ma-v2-city-list" class="ma-v2-list"></div>
           </div>
           <div class="ma-v2-panel" data-v2-panel="areas">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px">
-              <div><strong>Area system</strong><div style="font-size:11px;opacity:.6;margin-top:3px">OFF for now. Shops use City / Region only.</div></div>
-              <button id="ma-v2-toggle-areas" class="ma-v2-add" type="button">Start Areas</button>
+            <div style="margin-bottom:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(255,255,255,.025)">
+              <strong style="font-size:11px;color:#efc573">How this works</strong>
+              <div style="font-size:9px;opacity:.62;margin-top:3px;line-height:1.4">Regions are the parent search group (Beirut, Metn, Da7ye…). Areas are smaller places inside a region (Verdun, Sin El Fil…). They are used for filters only.</div>
             </div>
-            <div id="ma-v2-area-controls" hidden>
+            <div id="ma-v2-area-controls">
             <form id="ma-v2-area-form" class="ma-v2-form area-form">
               <select id="ma-v2-area-city" required></select>
               <input id="ma-v2-area-name" placeholder="Area e.g. Hamra" required>
@@ -5547,19 +5547,112 @@ ready().catch(console.error);
 'use strict';
 if(location.pathname.replace(/\/+$/,'')!=='/admin')return;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const shopFields=[['cover','Directory cover photo URL','url'],['story_color','Universal shop accent — Story / identity / Gallery / Videos','color'],['hours_status_text','Status pill — main text (e.g. Flexible hours)','text'],['hours_sub_text','Status pill — sub text (e.g. Request Only)','text'],['hours_accent_color','Status pill — accent color','color'],['hours_text_color','Status pill — main text color','color'],['hours_sub_color','Status pill — sub text color','color'],['hours_dot_color','Status pill — pulsing dot color','color'],['facebook_url','Facebook — URL or page name','text'],['availability_days','Availability / days — manual text','text'],['availability_time','Availability / time — manual text','text'],['price','Price level ($, $, $)','text'],['order','Display order (lower comes first)','number'],['latitude','Latitude — enables Near me','number'],['longitude','Longitude — enables Near me','number'],['rating','Verified rating, 0–5 (optional)','number'],['review_count','Actual number of reviews (optional)','number']];
+const shopFields=[['story_color','Universal shop accent — Story / identity / Gallery / Videos','color'],['hours_status_text','Status pill — main text (e.g. Flexible hours)','text'],['hours_sub_text','Status pill — sub text (e.g. Request Only)','text'],['hours_accent_color','Status pill — accent color','color'],['hours_text_color','Status pill — main text color','color'],['hours_sub_color','Status pill — sub text color','color'],['hours_dot_color','Status pill — pulsing dot color','color'],['facebook_url','Facebook — URL or page name','text'],['availability_days','Availability / days — manual text','text'],['availability_time','Availability / time — manual text','text'],['price','Price level ($, $, $)','text'],['order','Display order (lower comes first)','number'],['latitude','Latitude — enables Near me','number'],['longitude','Longitude — enables Near me','number'],['rating','Verified rating, 0–5 (optional)','number'],['review_count','Actual number of reviews (optional)','number']];
 const homeFields=[['home_spotlight_label','Homepage spotlight label','text'],['home_spotlight_about','Homepage spotlight description','textarea'],['home_spotlight_accent','Homepage spotlight accent color','color'],['home_spotlight_cta','Homepage button label','text']];
 const profileFields=[['about_text','About the shop','textarea'],['tiktok_url','TikTok — URL or @username','text'],['instagram_url','Instagram — URL or username','text'],['whatsapp_url','WhatsApp — URL or phone number','text'],['address_text','Full address','text'],['map_embed_url','Google Maps embed URL','url'],['menu_image_url','Menu image URL','url']];
 let settings={},section,client;
 function field(id,label,type,value=''){const safeValue=type==='color'&&!value?'#e3b85f':value;if(type==='checkbox')return `<label class="m7da-field m7da-check"><span><input id="${id}" type="checkbox" ${value===true||String(value).toLowerCase()==='true'?'checked':''}> ${esc(label)}</span></label>`;return `<label class="m7da-field">${esc(label)}${type==='textarea'?`<textarea id="${id}">${esc(safeValue)}</textarea>`:`<input id="${id}" type="${type}" ${type==='number'?'step="any"':''} value="${esc(safeValue)}">`}</label>`}
-function mountForm(form,prefix){if(!form)return;const existingBox=form.querySelector('.m7da-fields:not(.m7da-home-fields)');const requiredKeys=shopFields.concat(profileFields).map(([k])=>k);const missingRequired=requiredKeys.some(k=>!document.getElementById(prefix+k));if(existingBox&&!missingRequired)return;if(existingBox&&missingRequired){existingBox.remove();const oldHome=form.querySelector('.m7da-home-fields');if(oldHome)oldHome.remove();}const manualLocation=document.getElementById(prefix==='m7de-'?'ma-edit-location':'ma-shop-location');if(manualLocation){manualLocation.placeholder='e.g. Beirut, Online work only';const locSpan=manualLocation.closest('label')?.querySelector('span');if(locSpan)locSpan.textContent='Location / work type — manual';}const box=document.createElement('fieldset');box.className='m7da-fields m7da-sectioned-extras';box.innerHTML='<legend>Shop extras</legend><p class="m7da-sectioned-help">Only controls related to the section you opened are shown here.</p><div class="m7da-grid">'+shopFields.concat(profileFields).map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(box);shopFields.concat(profileFields).forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const home=document.createElement('fieldset');home.className='m7da-fields m7da-home-fields';home.innerHTML='<legend>Homepage spotlight</legend><p>These optional fields control this shop’s creative Featured / New homepage card. Featured and New status still come from the shop controls above.</p><div class="m7da-grid">'+homeFields.map(([k,l,t])=>field(prefix+k,l,t)).join('')+'</div>';form.append(home);homeFields.forEach(([k])=>{const input=document.getElementById(prefix+k);const fieldEl=input?.closest("label");if(fieldEl)fieldEl.dataset.m7ExtraKey=k});const cover=box.querySelector('#'+prefix+'cover');const upload=document.createElement('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';const label=document.createElement('label');label.className='m7da-field';label.dataset.m7ExtraKey='cover_upload';label.textContent='Or upload a cover photo (up to 8 MB)';label.append(upload);cover.parentElement.after(label);upload.onchange=async()=>{const f=upload.files?.[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8*1024*1024){alert('Choose a JPG, PNG or WebP image up to 8 MB.');return}upload.disabled=true;const c=window.Ma7alakAdminClient;const path='directory/'+crypto.randomUUID()+'.'+({"image/jpeg":'jpg',"image/png":'png',"image/webp":'webp'}[f.type]);try{const r=await c.storage.from('shop-gallery').upload(path,f,{cacheControl:'31536000',upsert:false,contentType:f.type});if(r.error)throw r.error;cover.value=c.storage.from('shop-gallery').getPublicUrl(path).data.publicUrl;cover.dispatchEvent(new Event('input',{bubbles:true}));cover.dispatchEvent(new Event('change',{bubbles:true}));label.firstChild.textContent='Uploaded. Save the shop to apply this cover.'}catch(e){alert(e.message||'Upload failed.')}finally{upload.disabled=false}}}
+function mountForm(form,prefix){
+  if(!form)return;
+
+  const existingBox=form.querySelector('.m7da-fields:not(.m7da-home-fields)');
+  const requiredKeys=shopFields.concat(profileFields).map(([k])=>k);
+  const missingRequired=requiredKeys.some(k=>!document.getElementById(prefix+k));
+
+  if(existingBox&&!missingRequired)return;
+  if(existingBox&&missingRequired){
+    existingBox.remove();
+    form.querySelector('.m7da-home-fields')?.remove();
+  }
+
+  const isEdit=prefix==='m7de-';
+  const manualLocation=document.getElementById(isEdit?'ma-edit-location':'ma-shop-location');
+  const publicLabel=document.getElementById(isEdit?'ma-edit-category-name':'ma-shop-category-name');
+
+  if(manualLocation){
+    manualLocation.placeholder='e.g. Verdun, Da7ye, Online Service';
+    const locSpan=manualLocation.closest('label')?.querySelector('span');
+    if(locSpan)locSpan.textContent='Public location / service area';
+    let help=manualLocation.closest('label')?.querySelector('.m7-public-field-help');
+    if(!help){
+      help=document.createElement('small');
+      help.className='m7-public-field-help';
+      help.textContent='Shown to visitors on Story/Profile and Show Shops cards. This is display text — it does not control search filters.';
+      manualLocation.closest('label')?.append(help);
+    }
+  }
+
+  if(publicLabel){
+    publicLabel.placeholder='e.g. Cafe · Crepes · Tattoo & Piercing';
+    const labelSpan=publicLabel.closest('label')?.querySelector('span');
+    if(labelSpan)labelSpan.textContent='Public shop label / work type';
+    let help=publicLabel.closest('label')?.querySelector('.m7-public-field-help');
+    if(!help){
+      help=document.createElement('small');
+      help.className='m7-public-field-help';
+      help.textContent='Shown publicly under the shop name. Main Category below is only for search/filtering.';
+      publicLabel.closest('label')?.append(help);
+    }
+  }
+
+  const box=document.createElement('fieldset');
+  box.className='m7da-fields m7da-sectioned-extras';
+  box.innerHTML=
+    '<legend>Shop extras</legend>'+
+    '<p class="m7da-sectioned-help">Only controls related to the section you opened are shown here.</p>'+
+    '<div class="m7da-grid">'+
+      shopFields.concat(profileFields).map(([k,l,t])=>field(prefix+k,l,t)).join('')+
+    '</div>';
+  form.append(box);
+
+  shopFields.concat(profileFields).forEach(([k])=>{
+    const input=document.getElementById(prefix+k);
+    const fieldEl=input?.closest("label");
+    if(fieldEl)fieldEl.dataset.m7ExtraKey=k;
+  });
+
+  /* Correct numeric constraints at the source so browser/Studio controls
+     cannot turn an empty rating into an invalid 50/100 value. */
+  const numericRules={
+    rating:{min:'0',max:'5',step:'0.1'},
+    review_count:{min:'0',step:'1'},
+    order:{step:'1'},
+    latitude:{min:'-90',max:'90',step:'0.000001'},
+    longitude:{min:'-180',max:'180',step:'0.000001'}
+  };
+  Object.entries(numericRules).forEach(([key,rules])=>{
+    const input=document.getElementById(prefix+key);
+    if(!input)return;
+    input.dataset.m7studioKeepNumber='1';
+    Object.entries(rules).forEach(([name,value])=>input.setAttribute(name,value));
+  });
+
+  const home=document.createElement('fieldset');
+  home.className='m7da-fields m7da-home-fields';
+  home.innerHTML=
+    '<legend>Homepage spotlight</legend>'+
+    '<p>Text and accent only. Image + banner always sync from Profile & Banner.</p>'+
+    '<div class="m7da-grid">'+
+      homeFields.map(([k,l,t])=>field(prefix+k,l,t)).join('')+
+    '</div>';
+  form.append(home);
+
+  homeFields.forEach(([k])=>{
+    const input=document.getElementById(prefix+k);
+    const fieldEl=input?.closest("label");
+    if(fieldEl)fieldEl.dataset.m7ExtraKey=k;
+  });
+}
 window.Ma7alakDirectoryAdmin={
  fill(shop){mount();const form=document.getElementById('ma-admin-edit-form');if(!form)return;form.dataset.directoryOptions=JSON.stringify(shop.directory_options||{});shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById('m7de-'+k),value=shop.directory_options?.[k];if(!input)return;if(t==='checkbox')input.checked=value===true||String(value).toLowerCase()==='true';else input.value=value??(t==='color'?'#e3b85f':'')});profileFields.forEach(([k])=>{const input=document.getElementById('m7de-'+k);if(input)input.value=shop[k]??''})},
- collect(edit){mount();const prefix=edit?'m7de-':'m7da-',form=document.getElementById(edit?'ma-admin-edit-form':'ma-admin-shop-form');let options={};try{options=JSON.parse(form.dataset.directoryOptions||'{}')}catch{};shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById(prefix+k);if(t==='checkbox'){options[k]=input.checked;return}const v=input.value.trim();options[k]=v===''?null:t==='number'?Number(v):v;if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');if(t==='number'&&v&&!Number.isFinite(options[k]))throw Error(l+' must be a number.');if(t==='color'&&v&&!/^#[0-9a-f]{6}$/i.test(v))throw Error(l+' must be a valid color.')});if(options.latitude!=null&&(options.latitude< -90||options.latitude>90))throw Error('Latitude must be between -90 and 90.');if(options.longitude!=null&&(options.longitude< -180||options.longitude>180))throw Error('Longitude must be between -180 and 180.');if((options.latitude==null)!==(options.longitude==null))throw Error('Enter both latitude and longitude.');if(options.rating!=null&&(options.rating<0||options.rating>5))throw Error('Rating must be between 0 and 5.');if(options.review_count!=null&&(!Number.isInteger(options.review_count)||options.review_count<0))throw Error('Review count must be a whole positive number.');const result={directory_options:options};profileFields.forEach(([k,l,t])=>{const v=document.getElementById(prefix+k).value.trim();if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');result[k]=v||null});return result}
+ collect(edit){mount();const prefix=edit?'m7de-':'m7da-',form=document.getElementById(edit?'ma-admin-edit-form':'ma-admin-shop-form');let options={};try{options=JSON.parse(form.dataset.directoryOptions||'{}')}catch{};shopFields.concat(homeFields).forEach(([k,l,t])=>{const input=document.getElementById(prefix+k);if(t==='checkbox'){options[k]=input.checked;return}const v=input.value.trim();options[k]=v===''?null:t==='number'?Number(v):v;if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');if(t==='number'&&v&&!Number.isFinite(options[k]))throw Error(l+' must be a number.');if(t==='color'&&v&&!/^#[0-9a-f]{6}$/i.test(v))throw Error(l+' must be a valid color.')});if(options.latitude!=null&&(options.latitude< -90||options.latitude>90))throw Error('Latitude must be between -90 and 90.');if(options.longitude!=null&&(options.longitude< -180||options.longitude>180))throw Error('Longitude must be between -180 and 180.');if((options.latitude==null)!==(options.longitude==null))throw Error('Enter both latitude and longitude.');if(options.rating!=null){
+  if(!Number.isFinite(Number(options.rating))||Number(options.rating)<0||Number(options.rating)>5)throw Error('Rating must be between 0 and 5.');
+  options.rating=Number(options.rating);
+}if(options.review_count!=null&&(!Number.isInteger(options.review_count)||options.review_count<0))throw Error('Review count must be a whole positive number.');const result={directory_options:options};profileFields.forEach(([k,l,t])=>{const v=document.getElementById(prefix+k).value.trim();if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');result[k]=v||null});return result}
 };
 const settingFields=[['title','Hero heading (Arabic or English)','text'],['subtitle','Hero subtitle','text'],['hero','Beirut background URL (blank = built-in backdrop)','url'],['logo','Eye logo URL (blank = current header logo)','url'],['search','Search placeholder','text'],['location_title','Area heading','text'],['categories_title','Categories heading','text'],['shops_title','Shops heading','text'],['cta_title','Business banner title','text'],['cta_text','Business banner subtitle','text'],['cta_button','Business button label','text'],['radius','Near me radius in km','number']];
 const fallback={title:'شوف المحلات',subtitle:'Discover what’s around you',search:'Search shops, food, services...',location_title:'Where are you looking?',categories_title:'Browse categories',shops_title:'Popular near you',cta_title:'Own a local business?',cta_text:'Add your shop and reach more people.',cta_button:'Add your shop',radius:25};
-function mount(){mountForm(document.getElementById('ma-admin-shop-form'),'m7da-');mountForm(document.getElementById('ma-admin-edit-form'),'m7de-');if(section)return;const dashboard=document.getElementById('ma-admin-dashboard');if(!dashboard)return;const style=document.createElement('style');style.textContent='.m7da-fields,#m7da-settings{margin:20px 0;padding:18px;border:1px solid #d6ac6244;border-radius:16px;background:#17130f;color:#e9d6b3}.m7da-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.m7da-field{display:flex;flex-direction:column;gap:6px;font-size:12px}.m7da-field input,.m7da-field textarea,.m7da-field select{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #d6ac6244;background:#0e0c0a;color:white;font:inherit}.m7da-field input[type=color]{padding:5px;height:48px}.m7da-fields p,#m7da-settings p{font-size:12px;color:#b9ab97}.m7da-cat{display:grid;grid-template-columns:1fr 1fr 70px;gap:8px;margin:10px 0;align-items:end}.m7da-btn{border:0;border-radius:9px;background:#e1b568;color:#201508;padding:11px 16px;cursor:pointer;margin-top:12px}.m7da-toolbar{display:flex;gap:8px;flex-wrap:wrap}';document.head.append(style);section=document.createElement('section');section.id='m7da-settings';section.innerHTML=`<h2>Show Shops — design & content</h2><p>Changes appear on the directory automatically. Manage shops, areas, cities and categories with the existing controls. Manage shop covers and details in Add Shop / Edit Shop.</p><form data-design><div class="m7da-grid">${settingFields.map(([k,l,t])=>field('m7ds-'+k,l,t,fallback[k]||'')).join('')}</div><p><label><input type="checkbox" id="m7ds-show-categories" checked> Show category tiles</label> · <label><input type="checkbox" id="m7ds-show-cta" checked> Show Add your shop banner</label></p><h3>Category tiles</h3><p>Set short labels, icons (emoji or image URL), and display order. Every active category appears in the horizontal swipe row. Keep an icon blank for the matching gold icon.</p><button type="button" class="m7da-btn" data-reload-design>Reload saved design & categories</button><div data-category-design></div><button class="m7da-btn" type="submit">Save directory design</button><p data-design-status role="status"></p></form>`;dashboard.prepend(section);section.querySelector('form').onsubmit=saveSettings;section.querySelector('[data-reload-design]').onclick=()=>{if(confirm('Reload saved settings? Unsaved design changes will be discarded.'))load()}}
+function mount(){mountForm(document.getElementById('ma-admin-shop-form'),'m7da-');mountForm(document.getElementById('ma-admin-edit-form'),'m7de-');if(section)return;const dashboard=document.getElementById('ma-admin-dashboard');if(!dashboard)return;const style=document.createElement('style');style.textContent='.m7da-fields,#m7da-settings{margin:20px 0;padding:18px;border:1px solid #d6ac6244;border-radius:16px;background:#17130f;color:#e9d6b3}.m7da-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.m7da-field{display:flex;flex-direction:column;gap:6px;font-size:12px}.m7da-field input,.m7da-field textarea,.m7da-field select{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #d6ac6244;background:#0e0c0a;color:white;font:inherit}.m7da-field input[type=color]{padding:5px;height:48px}.m7da-fields p,#m7da-settings p{font-size:12px;color:#b9ab97}.m7da-cat{display:grid;grid-template-columns:1fr 1fr 70px;gap:8px;margin:10px 0;align-items:end}.m7da-btn{border:0;border-radius:9px;background:#e1b568;color:#201508;padding:11px 16px;cursor:pointer;margin-top:12px}.m7da-toolbar{display:flex;gap:8px;flex-wrap:wrap}';document.head.append(style);section=document.createElement('section');section.id='m7da-settings';section.innerHTML=`<h2>Show Shops — design & content</h2><p>Changes appear on the directory automatically. Manage shops, areas, cities and categories with the existing controls. Shop images come from Profile & Banner. Search taxonomy is managed separately above.</p><form data-design><div class="m7da-grid">${settingFields.map(([k,l,t])=>field('m7ds-'+k,l,t,fallback[k]||'')).join('')}</div><p><label><input type="checkbox" id="m7ds-show-categories" checked> Show category tiles</label> · <label><input type="checkbox" id="m7ds-show-cta" checked> Show Add your shop banner</label></p><h3>Category tiles</h3><p>Set short labels, icons (emoji or image URL), and display order. Every active category appears in the horizontal swipe row. Keep an icon blank for the matching gold icon.</p><button type="button" class="m7da-btn" data-reload-design>Reload saved design & categories</button><div data-category-design></div><button class="m7da-btn" type="submit">Save directory design</button><p data-design-status role="status"></p></form>`;dashboard.prepend(section);section.querySelector('form').onsubmit=saveSettings;section.querySelector('[data-reload-design]').onclick=()=>{if(confirm('Reload saved settings? Unsaved design changes will be discarded.'))load()}}
 async function load(){mount();client=window.Ma7alakAdminClient;if(!client||!section)return;const r=await client.from('directory_settings').select('settings').eq('id','main').single();if(r.error){section.querySelector('[data-design-status]').textContent=r.error.message;return}settings=r.data.settings||{};settingFields.forEach(([k])=>document.getElementById('m7ds-'+k).value=settings[k]??fallback[k]??'');document.getElementById('m7ds-show-categories').checked=settings.show_categories!==false;document.getElementById('m7ds-show-cta').checked=settings.show_cta!==false;const cats=await client.from('shop_categories').select('*').eq('is_active',true).order('sort_order');if(cats.error){section.querySelector('[data-design-status]').textContent=cats.error.message;return}const order=settings.category_order||['cafe','food','beauty','clothing','services'];section.querySelector('[data-category-design]').innerHTML=(cats.data||[]).map(c=>`<div class="m7da-cat" data-cat="${esc(c.category_key)}"><label class="m7da-field">${esc(c.category_name)} — short label<input data-label value="${esc(settings.category_labels?.[c.category_key]||({cafe:'Cafés',food:'Food',beauty:'Beauty',clothing:'Fashion',services:'Services'}[c.category_key])||c.category_name)}"></label><label class="m7da-field">Icon override<input data-icon value="${esc(settings.category_icons?.[c.category_key]||'')}"></label><label class="m7da-field">Order<input data-order type="number" value="${order.includes(c.category_key)?order.indexOf(c.category_key)+1:100+c.sort_order}"></label></div>`).join('')}
 async function saveSettings(e){e.preventDefault();const b=e.currentTarget.querySelector('button'),status=section.querySelector('[data-design-status]');b.disabled=true;try{const next={...settings};settingFields.forEach(([k,l,t])=>{const v=document.getElementById('m7ds-'+k).value.trim();if(t==='url'&&v&&!/^https?:\/\//i.test(v))throw Error(l+' must be an http(s) URL.');if(v)next[k]=t==='number'?Number(v):v;else delete next[k]});if(!Number.isFinite(next.radius)||next.radius<1||next.radius>500)throw Error('Near me radius must be between 1 and 500 km.');next.show_categories=document.getElementById('m7ds-show-categories').checked;next.show_cta=document.getElementById('m7ds-show-cta').checked;const rows=[...section.querySelectorAll('[data-cat]')];next.category_order=rows.sort((a,b)=>Number(a.querySelector('[data-order]').value)-Number(b.querySelector('[data-order]').value)).map(r=>r.dataset.cat);next.category_labels={};next.category_icons={};rows.forEach(r=>{next.category_labels[r.dataset.cat]=r.querySelector('[data-label]').value.trim();next.category_icons[r.dataset.cat]=r.querySelector('[data-icon]').value.trim()});const r=await client.from('directory_settings').upsert({id:'main',settings:next});if(r.error)throw r.error;settings=next;status.textContent='Saved. The live directory will update automatically.'}catch(err){status.textContent=err.message||'Could not save.'}finally{b.disabled=false}}
 async function loadRequests(){const box=section?.querySelector('[data-requests]');if(!client||!box)return;box.textContent='Loading…';const r=await client.from('directory_requests').select('*').order('created_at',{ascending:false}).limit(100);if(r.error){box.textContent=r.error.message;return}box.innerHTML=(r.data||[]).map(x=>`<article class="m7da-request"><strong>${esc(x.shop_name)}</strong><p>${esc(x.contact)} · ${esc(x.area)}</p><p>${esc(x.details)}</p><small>${esc(new Date(x.created_at).toLocaleString())} · ${esc(x.status)}</small><div class="m7da-toolbar">${x.status==='new'?`<button class="m7da-btn" data-review="${x.id}">Mark reviewed</button>`:''}<button class="m7da-btn" data-draft="${x.id}">Prepare Add Shop form</button></div></article>`).join('')||'<p>No requests yet.</p>';box.onclick=async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.review){b.disabled=true;const u=await client.from('directory_requests').update({status:'reviewed'}).eq('id',b.dataset.review);if(u.error){b.disabled=false;alert(u.error.message)}else loadRequests()}else if(b.dataset.draft){const x=r.data.find(x=>x.id===b.dataset.draft);const form=document.getElementById('ma-admin-shop-form');const name=document.getElementById('ma-shop-name');if(name)name.value=x.shop_name;const loc=document.getElementById('ma-shop-location');if(loc)loc.value=x.area;const about=document.getElementById('m7da-about_text');if(about)about.value=x.details;form.closest('section')?.querySelector('.m7-collapsed-body')?.classList.remove('m7-collapsed-body');form.scrollIntoView({behavior:'smooth',block:'start'});name?.focus();b.textContent='Draft filled — complete required fields above'}}}
@@ -11172,8 +11265,8 @@ function ensureCss(){
   style.id="m7-hours-schedule-admin-css";
   style.textContent=`
     .m7-hours-schedule-box{
-      margin:18px 0;
-      padding:16px;
+      margin:8px 0;
+      padding:10px;
       border:1px solid rgba(217,164,65,.28);
       border-radius:16px;
       background:
@@ -11219,15 +11312,17 @@ function ensureCss(){
 
     .m7-hours-schedule-days{
       display:grid;
-      gap:7px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:6px;
     }
 
     .m7-hours-day{
       display:grid;
-      grid-template-columns:minmax(90px,1fr) minmax(95px,125px) minmax(95px,125px);
-      gap:8px;
+      grid-template-columns:minmax(78px,1fr) minmax(92px,112px) minmax(92px,112px);
+      gap:6px;
       align-items:center;
-      padding:9px;
+      min-height:52px;
+      padding:6px 7px;
       border:1px solid rgba(255,255,255,.055);
       border-radius:12px;
       background:rgba(255,255,255,.018);
@@ -11265,8 +11360,9 @@ function ensureCss(){
 
     .m7-hours-time input{
       width:100%!important;
-      min-height:36px!important;
-      padding:0 8px!important;
+      min-height:32px!important;
+      height:32px!important;
+      padding:0 7px!important;
       border:1px solid rgba(217,164,65,.16)!important;
       border-radius:9px!important;
       background:#090807!important;
@@ -11309,6 +11405,9 @@ function ensureCss(){
       line-height:1.5;
     }
 
+    @media(max-width:900px){
+      .m7-hours-schedule-days{grid-template-columns:1fr}
+    }
     @media(max-width:620px){
       .m7-hours-day{
         grid-template-columns:1fr 1fr;
