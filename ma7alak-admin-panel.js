@@ -5403,13 +5403,17 @@ async function save(auto=false){
   status(auto?"Applying live access…":"Saving access…",false);
 
   try{
-    const [offersResult,videoResult]=await Promise.all([
-      sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled}),
-      sb.rpc("ma7alak_admin_set_video_live_entitlement",{p_shop_slug:activeShop.slug,p_video_live_enabled:videoEnabled,p_monthly_minutes:monthlyMinutes})
-    ]);
+    /* One atomic DB write = one realtime entitlement state.
+       This prevents the shop panel from briefly seeing mixed old/new access. */
+    const accessResult=await sb.rpc("ma7alak_admin_set_live_access",{
+      p_shop_slug:activeShop.slug,
+      p_enabled:enabled,
+      p_active_limit:limit,
+      p_video_live_enabled:videoEnabled,
+      p_monthly_minutes:monthlyMinutes
+    });
 
-    if(offersResult.error)throw offersResult.error;
-    if(videoResult.error)throw videoResult.error;
+    if(accessResult.error)throw accessResult.error;
 
     status(`Live now · Offers ${enabled?"ON":"OFF"} · ${limit} slot${limit===1?"":"s"} · Camera LIVE ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
     await loadVideoUsage();
