@@ -18,7 +18,7 @@
   let changed=false;
   let nativeFullscreenEntered=false;
   let closingEditor=false;
-  let snapshot={photos:[],videos:[],photoLimit:0,videoLimit:0};
+  let snapshot={photos:[],videos:[],albums:[],albumItems:[],photoLimit:0,videoLimit:0,albumLimit:8};
   let pending=new Map();
 
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -137,29 +137,266 @@
     el.dataset.type=type;
   }
 
+  function mediaKey(type,id){
+    return String(type==="video"?"video":"photo")+":"+String(id);
+  }
+
+  function mediaItems(){
+    return[
+      ...snapshot.photos.map(x=>({type:"photo",id:x.id,url:x.image_url,path:x.storage_path||"",featured:x.is_featured===true,sort:Number(x.sort_order)||0})),
+      ...snapshot.videos.map(x=>({type:"video",id:x.id,url:x.video_url,path:x.storage_path||"",featured:false,sort:Number(x.sort_order)||0}))
+    ];
+  }
+
+  function albumItemsFor(albumId){
+    return (snapshot.albumItems||[])
+      .filter(item=>String(item.album_id)===String(albumId))
+      .slice()
+      .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0));
+  }
+
+  function albumMembership(){
+    const map=new Map();
+    const names=new Map((snapshot.albums||[]).map(album=>[String(album.id),String(album.title||"Album")]));
+    (snapshot.albumItems||[]).forEach(item=>{
+      map.set(mediaKey(item.media_type,item.media_id),{
+        albumId:item.album_id,
+        albumTitle:names.get(String(item.album_id))||"Album"
+      });
+    });
+    return map;
+  }
+
+  function albumCover(album){
+    const items=albumItemsFor(album.id);
+    const cover=items.find(item=>item.is_cover===true)||items[0]||null;
+    if(!cover)return null;
+    return mediaItems().find(media=>mediaKey(media.type,media.id)===mediaKey(cover.media_type,cover.media_id))||null;
+  }
+
   function render(){
     const quota=document.getElementById("m7-owner-media-quota");
     const list=document.getElementById("m7-owner-media-list");
-    if(!quota||!list)return;
+    const albumsBox=document.getElementById("m7-owner-media-albums");
+    const albumButton=document.querySelector("[data-create-album]");
+    if(!quota||!list||!albumsBox)return;
 
-    quota.innerHTML='<span><b>'+snapshot.photos.length+'</b> / '+snapshot.photoLimit+' photos</span><span><b>'+snapshot.videos.length+'</b> / '+snapshot.videoLimit+' videos</span>';
+    const albums=snapshot.albums||[];
+    const limit=Math.max(0,Number(snapshot.albumLimit)||0);
 
-    const items=[
-      ...snapshot.photos.map(x=>({type:"photo",id:x.id,url:x.image_url,path:x.storage_path||"",featured:x.is_featured===true})),
-      ...snapshot.videos.map(x=>({type:"video",id:x.id,url:x.video_url,path:x.storage_path||"",featured:false}))
-    ];
+    quota.innerHTML=
+      '<span><b>'+snapshot.photos.length+'</b> / '+snapshot.photoLimit+' photos</span>'+
+      '<span><b>'+snapshot.videos.length+'</b> / '+snapshot.videoLimit+' videos</span>'+
+      '<span><b>'+limit+'</b> max / album</span>';
 
-    list.innerHTML=items.length?items.map(x=>
-      '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'">'+
-        '<div class="m7om-thumb">'+
-          (x.type==="video"
-            ?'<video src="'+esc(x.url)+'" muted playsinline preload="metadata"></video><em>VIDEO</em>'
-            :'<img src="'+esc(x.url)+'" alt=""><em>'+(x.featured?"FEATURED":"PHOTO")+'</em>')+
+    if(albumButton){
+      albumButton.disabled=limit<2||mediaItems().length<2;
+      albumButton.textContent=limit<2?"Albums disabled by Admin":"▣ Create album";
+    }
+
+    albumsBox.innerHTML=albums.length
+      ? '<div class="m7om-section-title"><b>Albums</b><small>One album = one public Media frame.</small></div>'+
+        albums.map(album=>{
+          const members=albumItemsFor(album.id);
+          const cover=albumCover(album);
+          const coverHtml=cover
+            ?(cover.type==="video"
+              ?'<video src="'+esc(cover.url)+'" muted playsinline preload="metadata"></video>'
+              :'<img src="'+esc(cover.url)+'" alt="">')
+            :'<span class="m7om-album-placeholder">▣</span>';
+          return '<article class="m7om-album" data-album-id="'+esc(album.id)+'">'+
+            '<div class="m7om-album-cover">'+coverHtml+'<em>ALBUM · '+members.length+'</em></div>'+
+            '<div class="m7om-album-copy"><b>'+esc(album.title||"Album")+'</b><small>'+esc(album.description||"Tap Edit to change items or cover.")+'</small></div>'+
+            '<div class="m7om-actions"><button type="button" data-album-edit>Edit album</button><button type="button" data-album-delete>Ungroup</button></div>'+
+          '</article>';
+        }).join("")
+      :"";
+
+    const membership=albumMembership();
+    const items=mediaItems();
+
+    list.innerHTML=items.length
+      ?'<div class="m7om-section-title"><b>Media library</b><small>Items inside an album still count toward your photo/video limits.</small></div>'+
+       items.map(x=>{
+         const member=membership.get(mediaKey(x.type,x.id));
+         return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'">'+
+           '<div class="m7om-thumb">'+
+             (x.type==="video"
+               ?'<video src="'+esc(x.url)+'" muted playsinline preload="metadata"></video><em>VIDEO</em>'
+               :'<img src="'+esc(x.url)+'" alt=""><em>'+(x.featured?"FEATURED":"PHOTO")+'</em>')+
+           '</div>'+
+           '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(member?"In album · "+esc(member.albumTitle):(x.path?"Standalone · Uploaded file":"Standalone · URL media"))+'</small></div>'+
+           '<div class="m7om-actions"><button type="button" data-replace>Replace</button><button type="button" data-delete>Delete</button></div>'+
+         '</article>';
+       }).join("")
+      :'<div class="m7om-empty">No Media yet. Add photos or videos above.</div>';
+  }
+
+  async function refreshSnapshot(){
+    const data=await request({op:"load"});
+    snapshot=data||snapshot;
+    return snapshot;
+  }
+
+  async function openAlbumEditor(albumId=null){
+    if(busy||!allowed)return;
+
+    try{
+      busy=true;
+      status("Loading album…");
+      await refreshSnapshot();
+    }catch(error){
+      status(error?.message||"Could not load album.","error");
+      busy=false;
+      return;
+    }
+    busy=false;
+
+    const limit=Math.max(0,Number(snapshot.albumLimit)||0);
+    if(limit<2){
+      status("Albums are disabled by Admin.","error");
+      return;
+    }
+
+    const all=mediaItems();
+    if(all.length<2){
+      status("Add at least 2 photos/videos before creating an album.","error");
+      return;
+    }
+
+    const album=(snapshot.albums||[]).find(row=>String(row.id)===String(albumId))||null;
+    const existing=album?albumItemsFor(album.id):[];
+    const membership=albumMembership();
+    const selectedOrder=existing.map(item=>mediaKey(item.media_type,item.media_id));
+    const selected=new Set(selectedOrder);
+    let coverKey=existing.find(item=>item.is_cover===true)
+      ?mediaKey(existing.find(item=>item.is_cover===true).media_type,existing.find(item=>item.is_cover===true).media_id)
+      :(selectedOrder[0]||"");
+
+    document.getElementById("m7om-album-builder")?.remove();
+
+    const builder=document.createElement("div");
+    builder.id="m7om-album-builder";
+    builder.innerHTML=
+      '<div class="m7om-album-builder-card">'+
+        '<div class="m7om-builder-head"><div><b>'+(album?"Edit album":"Create album")+'</b><small>Select 2–'+limit+' existing Media items. They stay in your normal photo/video quota.</small></div><button type="button" data-album-cancel aria-label="Close">×</button></div>'+
+        '<label class="m7om-builder-field"><span>Album title</span><input data-album-title maxlength="80" value="'+esc(album?.title||"")+'" placeholder="e.g. Summer Collection"></label>'+
+        '<label class="m7om-builder-field"><span>Short description <small>optional</small></span><textarea data-album-description maxlength="300" placeholder="What is inside this album?">'+esc(album?.description||"")+'</textarea></label>'+
+        '<div class="m7om-builder-count" data-album-count></div>'+
+        '<div class="m7om-choice-grid">'+
+          all.map((media,index)=>{
+            const key=mediaKey(media.type,media.id);
+            const other=membership.get(key);
+            const locked=!!other&&(!album||String(other.albumId)!==String(album.id));
+            const thumb=media.type==="video"
+              ?'<video src="'+esc(media.url)+'" muted playsinline preload="metadata"></video>'
+              :'<img src="'+esc(media.url)+'" alt="">';
+            return '<article class="m7om-choice '+(selected.has(key)?"selected ":"")+(locked?"locked":"")+'" data-album-choice="'+esc(key)+'" data-type="'+media.type+'" data-id="'+esc(media.id)+'">'+
+              '<div class="m7om-choice-thumb">'+thumb+'<em>'+(media.type==="video"?"VIDEO":"PHOTO")+'</em></div>'+
+              '<div class="m7om-choice-meta"><b>'+(media.type==="video"?"Video ":"Photo ")+(index+1)+'</b><small>'+(locked?"Already in "+esc(other.albumTitle):"Tap to "+(selected.has(key)?"remove":"add"))+'</small></div>'+
+              (locked?'':'<button type="button" data-album-cover="'+esc(key)+'">'+(coverKey===key?"★ COVER":"☆ Cover")+'</button>')+
+            '</article>';
+          }).join("")+
         '</div>'+
-        '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(x.path?"Uploaded file":"URL media")+'</small></div>'+
-        '<div class="m7om-actions"><button type="button" data-replace>Replace</button><button type="button" data-delete>Delete</button></div>'+
-      '</article>'
-    ).join(""):'<div class="m7om-empty">No Media yet. Add photos or videos above.</div>';
+        '<div class="m7om-builder-actions"><button type="button" data-album-cancel>Cancel</button><button type="button" class="primary" data-album-save>'+(album?"Save album":"Create album")+'</button></div>'+
+        '<div class="m7om-builder-status" data-album-builder-status></div>'+
+      '</div>';
+
+    document.getElementById("m7-owner-media-sheet")?.appendChild(builder);
+
+    const countEl=builder.querySelector("[data-album-count]");
+    const sync=()=>{
+      if(!selected.has(coverKey))coverKey=selectedOrder.find(key=>selected.has(key))||"";
+      countEl.textContent=selected.size+" / "+limit+" selected";
+      builder.querySelectorAll("[data-album-choice]").forEach(card=>{
+        const key=card.dataset.albumChoice;
+        card.classList.toggle("selected",selected.has(key));
+        const small=card.querySelector(".m7om-choice-meta small");
+        if(small&&!card.classList.contains("locked"))small.textContent=selected.has(key)?"Selected · tap card to remove":"Tap to add";
+        const cover=card.querySelector("[data-album-cover]");
+        if(cover)cover.textContent=coverKey===key?"★ COVER":"☆ Cover";
+      });
+    };
+    sync();
+
+    builder.addEventListener("click",async event=>{
+      if(event.target.closest("[data-album-cancel]")){
+        builder.remove();
+        return;
+      }
+
+      const coverButton=event.target.closest("[data-album-cover]");
+      if(coverButton){
+        event.preventDefault();
+        event.stopPropagation();
+        const key=coverButton.dataset.albumCover;
+        if(!selected.has(key)){
+          if(selected.size>=limit){builder.querySelector("[data-album-builder-status]").textContent="Album limit reached.";return}
+          selected.add(key);
+          if(!selectedOrder.includes(key))selectedOrder.push(key);
+        }
+        coverKey=key;
+        sync();
+        return;
+      }
+
+      const choice=event.target.closest("[data-album-choice]");
+      if(choice&&!choice.classList.contains("locked")){
+        const key=choice.dataset.albumChoice;
+        if(selected.has(key)){
+          selected.delete(key);
+        }else{
+          if(selected.size>=limit){
+            builder.querySelector("[data-album-builder-status]").textContent="Admin limit: maximum "+limit+" items in one album.";
+            return;
+          }
+          selected.add(key);
+          if(!selectedOrder.includes(key))selectedOrder.push(key);
+        }
+        sync();
+        return;
+      }
+
+      const save=event.target.closest("[data-album-save]");
+      if(!save)return;
+
+      const title=String(builder.querySelector("[data-album-title]")?.value||"").trim();
+      const description=String(builder.querySelector("[data-album-description]")?.value||"").trim();
+      const statusBox=builder.querySelector("[data-album-builder-status]");
+
+      if(!title){statusBox.textContent="Give the album a title.";return}
+      if(selected.size<2){statusBox.textContent="Choose at least 2 Media items.";return}
+
+      const items=selectedOrder
+        .filter(key=>selected.has(key))
+        .map(key=>{
+          const [mediaType,mediaId]=key.split(":");
+          return{mediaType,mediaId:Number(mediaId)};
+        });
+
+      const [coverType,coverId]=String(coverKey||mediaKey(items[0].mediaType,items[0].mediaId)).split(":");
+
+      save.disabled=true;
+      statusBox.textContent="Saving album…";
+      try{
+        const data=await request({
+          op:"album-save",
+          albumId:album?.id||null,
+          title,
+          description,
+          items,
+          cover:{mediaType:coverType,mediaId:Number(coverId)}
+        });
+        snapshot=data||snapshot;
+        changed=true;
+        render();
+        builder.remove();
+        status(album?"Album updated.":"Album created.","ok");
+      }catch(error){
+        statusBox.textContent=error?.message||"Could not save album.";
+        save.disabled=false;
+      }
+    });
   }
 
   async function syncPermission(){
@@ -218,6 +455,7 @@
 
     closingEditor=true;
 
+    document.getElementById("m7om-album-builder")?.remove();
     editorSheet()?.classList.remove("open");
 
     if(!fromPortalBack){
@@ -299,8 +537,21 @@
       .m7om-copy{min-width:0}.m7om-copy b,.m7om-copy small{display:block}.m7om-copy b{font-size:11px}.m7om-copy small{font-size:8px;color:#8f8474;margin-top:4px}
       .m7om-actions{display:grid;gap:5px}.m7om-actions button{min-height:31px;padding:0 8px;border-radius:9px;border:1px solid rgba(255,255,255,.08);background:#111;color:#ddd;font-size:8px;font-weight:900;touch-action:manipulation}.m7om-actions [data-delete]{color:#ff9696;border-color:rgba(255,80,80,.16)}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
+      .m7om-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:13px 1px 7px}.m7om-section-title b{font-size:11px;color:#f2d18d}.m7om-section-title small{font-size:7px;color:#8f8474;text-align:right}
+      #m7-owner-media-albums{display:grid;gap:8px;margin-bottom:12px}.m7om-album{display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px;border:1px solid rgba(217,164,65,.20);border-radius:16px;background:linear-gradient(145deg,rgba(217,164,65,.07),rgba(255,255,255,.018))}
+      .m7om-album-cover{width:80px;height:68px;position:relative;overflow:hidden;border-radius:12px;background:#050505}.m7om-album-cover img,.m7om-album-cover video{width:100%;height:100%;object-fit:cover;display:block}.m7om-album-cover em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#050505d9;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}.m7om-album-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:24px;color:#d9a441}
+      .m7om-album-copy{min-width:0}.m7om-album-copy b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7om-album-copy small{display:block;margin-top:4px;color:#938775;font-size:8px;line-height:1.35;max-height:2.7em;overflow:hidden}
+      #m7om-album-builder{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.86);overflow:auto;padding:max(12px,env(safe-area-inset-top)) 10px max(18px,env(safe-area-inset-bottom));backdrop-filter:blur(9px)}
+      .m7om-album-builder-card{width:min(100%,620px);margin:0 auto;padding:14px;border:1px solid rgba(217,164,65,.34);border-radius:20px;background:#0c0b0b;box-shadow:0 24px 70px rgba(0,0,0,.7)}
+      .m7om-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.m7om-builder-head b{font-size:18px}.m7om-builder-head small{display:block;margin-top:4px;color:#968a79;font-size:8px;line-height:1.4}.m7om-builder-head button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:#151515;color:#fff;font-size:22px}
+      .m7om-builder-field{display:block;margin-top:12px}.m7om-builder-field>span{display:block;margin-bottom:5px;color:#d7c5a2;font-size:8px;font-weight:900}.m7om-builder-field input,.m7om-builder-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#060606;color:#fff;padding:10px;font:700 11px/1.35 Arial}.m7om-builder-field textarea{min-height:70px;resize:vertical}
+      .m7om-builder-count{margin:11px 0 7px;color:#f0ca6b;font-size:9px;font-weight:900}
+      .m7om-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.m7om-choice{min-width:0;padding:6px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:#111;cursor:pointer}.m7om-choice.selected{border-color:rgba(217,164,65,.72);box-shadow:0 0 0 1px rgba(217,164,65,.18) inset}.m7om-choice.locked{opacity:.42;cursor:not-allowed}
+      .m7om-choice-thumb{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:10px;background:#000}.m7om-choice-thumb img,.m7om-choice-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-choice-thumb em{position:absolute;left:4px;bottom:4px;padding:3px 5px;border-radius:999px;background:#000c;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}
+      .m7om-choice-meta{padding:6px 2px 2px}.m7om-choice-meta b,.m7om-choice-meta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m7om-choice-meta b{font-size:8px}.m7om-choice-meta small{margin-top:3px;color:#857a6c;font-size:6.5px}.m7om-choice [data-album-cover]{width:100%;min-height:28px;margin-top:5px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}
+      .m7om-builder-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:12px}.m7om-builder-actions button{min-height:42px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#121212;color:#ddd;font-weight:900}.m7om-builder-actions .primary{border-color:rgba(217,164,65,.5);background:#b98d39;color:#080706}.m7om-builder-status{min-height:18px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
       #m7-owner-media-status{min-height:20px;margin-top:10px;text-align:center;color:#a99b87;font-size:9px}#m7-owner-media-status[data-type="ok"]{color:#7ee3a0}#m7-owner-media-status[data-type="error"]{color:#ff8f8f}
-      @media(max-width:600px){#m7-owner-media-sheet{padding-left:10px!important;padding-right:10px!important}.m7om-card{border-radius:19px}.m7om-item{grid-template-columns:64px minmax(0,1fr)}.m7om-thumb{width:64px;height:62px}.m7om-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.m7om-actions button{min-height:40px}.m7om-add{grid-template-columns:1fr}.m7om-add button{min-height:50px}}
+      @media(max-width:600px){#m7-owner-media-sheet{padding-left:10px!important;padding-right:10px!important}.m7om-card{border-radius:19px}.m7om-item,.m7om-album{grid-template-columns:64px minmax(0,1fr)}.m7om-thumb,.m7om-album-cover{width:64px;height:62px}.m7om-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.m7om-actions button{min-height:40px}.m7om-add{grid-template-columns:1fr}.m7om-add button{min-height:50px}.m7om-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
       /*
          The Media embed intentionally treats a selected frame animation as
@@ -372,11 +623,12 @@
 
     const sheet=document.createElement("div");
     sheet.id="m7-owner-media-sheet";
-    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add, replace or delete Gallery photos and videos. Your Admin-set photo/video limits are enforced.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">＋ Add photos</button><button type="button" data-add="video">▶ Add videos</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div>';
+    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add photos/videos normally, or group existing Media into one clean album frame. Admin limits are enforced.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">＋ Add photos</button><button type="button" data-add="video">▶ Add videos</button><button type="button" data-create-album>▣ Create album</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div>';
     document.body.appendChild(sheet);
 
     sheet.querySelector(".m7om-close").addEventListener("click",()=>closeEditor());
     sheet.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>choose("add",b.dataset.add)));
+    sheet.querySelector("[data-create-album]")?.addEventListener("click",()=>openAlbumEditor(null));
 
     window.addEventListener("message",event=>{
       if(!trustedParentEvent(event))return;
@@ -425,6 +677,35 @@
         snapshot=data||snapshot;changed=true;render();status("Media updated.","ok");
       }catch(error){status(error?.message||"Could not update Media.","error")}
       finally{busy=false;input.value=""}
+    });
+
+    sheet.querySelector("#m7-owner-media-albums").addEventListener("click",async event=>{
+      if(busy)return;
+      const album=event.target.closest("[data-album-id]");
+      if(!album)return;
+      const albumId=album.dataset.albumId;
+
+      if(event.target.closest("[data-album-edit]")){
+        openAlbumEditor(albumId);
+        return;
+      }
+
+      if(!event.target.closest("[data-album-delete]"))return;
+      if(!confirm("Ungroup this album? The photos/videos will stay in your Media library."))return;
+
+      busy=true;
+      status("Ungrouping album…");
+      try{
+        const data=await request({op:"album-delete",albumId});
+        snapshot=data||snapshot;
+        changed=true;
+        render();
+        status("Album removed. Media items are still available.","ok");
+      }catch(error){
+        status(error?.message||"Could not remove album.","error");
+      }finally{
+        busy=false;
+      }
     });
 
     sheet.querySelector("#m7-owner-media-list").addEventListener("click",async event=>{
