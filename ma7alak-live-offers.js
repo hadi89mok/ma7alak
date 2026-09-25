@@ -995,7 +995,7 @@ init().catch(e=>console.error("SHOUFHON Live & Offers:",e));
   if(window.__SHOUFHON_LIVE_VIDEO_LOADER__)return;
   window.__SHOUFHON_LIVE_VIDEO_LOADER__=true;
   var s=document.createElement("script");
-  s.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@33262a7f2de77cf9745ee161d5b83bd993ed8a30/ma7alak-live-video.js";
+  s.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@87d1f1d1d1a9fe0020c626a33ae09a63088f0e39/ma7alak-live-video.js";
   s.async=true;
   s.onerror=function(){console.error("SHOUFHON Live Video: failed to load");};
   document.head.appendChild(s);
