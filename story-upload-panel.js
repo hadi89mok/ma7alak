@@ -1,3 +1,51 @@
+/* =========================================================
+   SHOUFHON — TRUSTED EMBED MESSAGE SOURCE
+   Prevent unrelated windows/tabs from invoking owner bridges.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.ShoufHonMessageSecurity)return;
+
+  function frameForSource(source){
+    if(!source)return null;
+    if(source===window)return null;
+
+    let directChild=source;
+    try{
+      let cursor=source;
+      for(let hop=0;hop<12;hop+=1){
+        if(!cursor||cursor===window)break;
+        const parentWindow=cursor.parent;
+        if(!parentWindow||parentWindow===cursor)break;
+        if(parentWindow===window){
+          directChild=cursor;
+          break;
+        }
+        cursor=parentWindow;
+      }
+    }catch(_){}
+
+    return Array.from(document.querySelectorAll("iframe")).find(function(frame){
+      try{
+        return frame.contentWindow===source||frame.contentWindow===directChild;
+      }catch(_){
+        return false;
+      }
+    })||null;
+  }
+
+  function isTrustedEvent(event,allowSelf=true){
+    if(!event)return false;
+    if(allowSelf&&event.source===window)return true;
+    return !!frameForSource(event.source);
+  }
+
+  window.ShoufHonMessageSecurity={
+    frameForSource:frameForSource,
+    isTrustedEvent:isTrustedEvent
+  };
+})();
+
 (function(){
 
   "use strict";
@@ -2735,6 +2783,12 @@
     function(event){
 
       if(
+        !window.ShoufHonMessageSecurity?.isTrustedEvent(event,true)
+      ){
+        return;
+      }
+
+      if(
         !event.data
       ){
 
@@ -4202,6 +4256,7 @@
   window.addEventListener(
     "message",
     event=>{
+      if(!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true))return;
       const data=event.data||{};
 
       if(data.type==="MA7ALAK_OWNER_STATE"){
@@ -4642,6 +4697,7 @@
     });
 
     window.addEventListener("message",function(event){
+      if(!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true)) return;
       if(!event.data || event.data.type!=="MA7ALAK_OPEN_REEL_UPLOADER") return;
       openPanel(String(event.data.shopSlug||"").trim()).catch(function(error){
         console.error("SHOUFHON Reel uploader:",error);
@@ -5109,13 +5165,9 @@
   }
 
   function sourceCanReply(source){
-    /*
-       Hostinger can nest Custom Embed frames. event.source may therefore be
-       a descendant window that is not one of document.querySelectorAll("iframe")
-       on the top page. Ownership + capability checks below are the real security
-       boundary, so accept any WindowProxy that can receive a reply.
-    */
-    return !!source&&typeof source.postMessage==="function";
+    if(!source||typeof source.postMessage!=="function")return false;
+    if(source===window)return true;
+    return !!window.ShoufHonMessageSecurity?.frameForSource(source);
   }
 
   async function ownerClient(){
@@ -5185,18 +5237,40 @@
     }catch(_){}
   }
 
+  function validateOwnerMediaFile(file,type){
+    if(!file)throw new Error("No file selected.");
+
+    var mime=String(file.type||"").trim().toLowerCase();
+    var allowed=type==="video"
+      ?["video/mp4","video/webm","video/quicktime"]
+      :["image/jpeg","image/png","image/webp","image/gif"];
+
+    if(allowed.indexOf(mime)<0){
+      throw new Error(
+        type==="video"
+          ?"Use MP4, WEBM or MOV video."
+          :"Use JPG, PNG, WEBP or GIF image."
+      );
+    }
+
+    var max=(type==="video"?100:12)*1024*1024;
+    var size=Number(file.size||0);
+    if(!Number.isFinite(size)||size<=0)throw new Error("The selected file is empty.");
+    if(size>max)throw new Error(String(file.name||"File")+" is too large.");
+
+    return mime;
+  }
+
   function extension(file,type){
-    var ext=String(file&&file.name||"").split(".").pop().toLowerCase().replace(/[^a-z0-9]/g,"");
-    if(ext&&ext.length<=8)return ext;
-    var mime=String(file&&file.type||"").toLowerCase();
+    var mime=validateOwnerMediaFile(file,type);
     if(type==="video"){
-      if(mime.indexOf("webm")>=0)return"webm";
-      if(mime.indexOf("quicktime")>=0)return"mov";
+      if(mime==="video/webm")return"webm";
+      if(mime==="video/quicktime")return"mov";
       return"mp4";
     }
-    if(mime.indexOf("png")>=0)return"png";
-    if(mime.indexOf("webp")>=0)return"webp";
-    if(mime.indexOf("gif")>=0)return"gif";
+    if(mime==="image/png")return"png";
+    if(mime==="image/webp")return"webp";
+    if(mime==="image/gif")return"gif";
     return"jpg";
   }
 
@@ -5230,11 +5304,7 @@
 
   async function uploadMediaFile(client,slug,type,file,sortOrder){
     var video=type==="video";
-    if(!file)throw new Error("No file selected.");
-    if(video&&String(file.type||"").indexOf("video/")!==0)throw new Error("Choose video files only.");
-    if(!video&&String(file.type||"").indexOf("image/")!==0)throw new Error("Choose image files only.");
-    var max=(video?100:12)*1024*1024;
-    if(Number(file.size||0)>max)throw new Error(String(file.name||"File")+" is too large.");
+    validateOwnerMediaFile(file,type);
 
     var bucket=video?VIDEO_BUCKET:PHOTO_BUCKET;
     var path=newMediaPath(slug,type,file);
@@ -5312,6 +5382,7 @@
         var replaceId=Number(data.id);
         var file=data.file;
         if(!Number.isFinite(replaceId)||!file)throw new Error("Replacement is incomplete.");
+        validateOwnerMediaFile(file,replaceType);
 
         var oldResult=await client
           .from(replaceTable)
@@ -5418,6 +5489,7 @@
   }
 
   window.addEventListener("message",function(event){
+    if(!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true))return;
     var data=event&&event.data||{};
     if(data.type==="SHOUFHON_OWNER_MEDIA_REQUEST"){
       handleMediaRequest(event);
