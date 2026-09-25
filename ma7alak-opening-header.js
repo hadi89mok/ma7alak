@@ -2398,3 +2398,190 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   );
   (document.head||document.documentElement).appendChild(script);
 })();
+
+
+/* =========================================================
+   SHOUFHON BACK / FORWARD FRESHNESS
+   Mobile browsers often restore the homepage from BFCache when Back is
+   pressed. That is a frozen DOM/JS snapshot, not the PWA service-worker
+   cache. Refresh live data immediately; only reload the page when the
+   Hostinger-pinned opening-header commit actually changed while away.
+========================================================= */
+(function(){
+  "use strict";
+
+  if(window.__SHOUFHON_BACK_FORWARD_FRESHNESS_V1__)return;
+  window.__SHOUFHON_BACK_FORWARD_FRESHNESS_V1__=true;
+
+  const isHomepage=()=>(
+    (location.hostname||"")
+      .replace(/^www\./,"")
+      .toLowerCase()==="shoufhon.com" &&
+    (((location.pathname||"/").replace(/\/+$/,""))||"/")==="/"
+  );
+
+  function openingHeaderSrc(root=document){
+    try{
+      return String(
+        [...root.scripts]
+          .reverse()
+          .find(script=>
+            /ma7alak-opening-header\.js(?:[?#]|$)/i.test(
+              String(script.src||"")
+            )
+          )
+          ?.src||""
+      );
+    }catch(_){
+      return "";
+    }
+  }
+
+  function normalizedHeaderVersion(src){
+    const match=String(src||"").match(
+      /\/ma7alak@([0-9a-f]{40})\/ma7alak-opening-header\.js/i
+    );
+
+    return match
+      ? match[1].toLowerCase()
+      : "";
+  }
+
+  function forceHomepageDataWake(){
+    if(!isHomepage())return;
+
+    try{
+      localStorage.removeItem(
+        "ma7alak-live-public-cache-v1"
+      );
+    }catch(_){}
+
+    try{
+      window.Ma7alakLiveOffers
+        ?.refresh
+        ?.();
+    }catch(_){}
+
+    try{
+      window.postMessage(
+        {
+          type:"MA7ALAK_LIVE_OFFERS_GET",
+          shopSlug:""
+        },
+        "*"
+      );
+    }catch(_){}
+
+    try{
+      window.dispatchEvent(
+        new CustomEvent(
+          "ma7alak:page-wake",
+          {
+            detail:{
+              force:true,
+              reason:"back-forward"
+            }
+          }
+        )
+      );
+    }catch(_){}
+  }
+
+  async function reloadOnlyIfHostingerVersionChanged(){
+    if(!isHomepage())return false;
+
+    const currentSrc=openingHeaderSrc();
+    const currentVersion=
+      normalizedHeaderVersion(currentSrc);
+
+    if(!currentVersion)return false;
+
+    try{
+      const url=
+        location.origin+
+        "/?shh_fresh="+
+        Date.now();
+
+      const response=
+        await fetch(
+          url,
+          {
+            cache:"no-store",
+            credentials:"same-origin"
+          }
+        );
+
+      if(!response.ok)return false;
+
+      const html=await response.text();
+      const freshDocument=
+        new DOMParser().parseFromString(
+          html,
+          "text/html"
+        );
+
+      const freshSrc=
+        openingHeaderSrc(freshDocument);
+
+      const freshVersion=
+        normalizedHeaderVersion(freshSrc);
+
+      if(
+        freshVersion &&
+        freshVersion!==currentVersion
+      ){
+        location.reload();
+        return true;
+      }
+    }catch(error){
+      console.warn(
+        "SHOUFHON freshness check:",
+        error
+      );
+    }
+
+    return false;
+  }
+
+  window.addEventListener(
+    "pageshow",
+    event=>{
+      if(!isHomepage())return;
+
+      let backForward=
+        !!event.persisted;
+
+      try{
+        const nav=
+          performance
+            .getEntriesByType("navigation")
+            ?.[0];
+
+        if(nav?.type==="back_forward"){
+          backForward=true;
+        }
+      }catch(_){}
+
+      if(!backForward)return;
+
+      /*
+         Make stale Live/Reels/Spotlight data disappear immediately while
+         a no-cache version check runs in parallel.
+      */
+      forceHomepageDataWake();
+
+      setTimeout(
+        forceHomepageDataWake,
+        900
+      );
+
+      setTimeout(
+        forceHomepageDataWake,
+        1900
+      );
+
+      reloadOnlyIfHostingerVersionChanged();
+    },
+    true
+  );
+})();
