@@ -958,7 +958,7 @@ async function ensureBeautyProcessor(){
 }
 function renderLookButtons(){
   const p=$("#m7lv-preflight");if(!p)return;
-  $(".m7lv-look",p).forEach(b=>b.classList.toggle("active",b.dataset.look===setupLook));
+  $$(".m7lv-look",p).forEach(b=>b.classList.toggle("active",b.dataset.look===setupLook));
   const strength=$("#m7lv-look-strength",p),out=$("#m7lv-look-strength-value",p);
   if(strength)strength.disabled=setupLook==="natural";
   if(out)out.textContent=setupLook==="natural"?"Off":Math.round(setupLookStrength*100)+"%";
@@ -1155,7 +1155,7 @@ function preflight(){
     setupMirror=!setupMirror;playSetupPreview();applySetupButtonState();
     setupStatus(setupMirror?"Front preview mirrored. Viewers still see normal orientation.":"Front preview unmirrored.");
   };
-  $(".m7lv-look",p).forEach(button=>button.onclick=()=>applySetupLook(button.dataset.look));
+  $$(".m7lv-look",p).forEach(button=>button.onclick=()=>applySetupLook(button.dataset.look));
   const strength=$("#m7lv-look-strength",p);
   if(strength)strength.oninput=()=>{
     setupLookStrength=Math.max(.15,Math.min(1,Number(strength.value)/100));
