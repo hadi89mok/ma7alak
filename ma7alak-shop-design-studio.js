@@ -248,8 +248,14 @@
       #ma-admin-edit-card[data-studio-tab="directory"] .m7studio-directory-note{margin:0 0 7px!important;padding:8px 10px!important}
       #ma-admin-edit-card[data-studio-tab="directory"] .m7da-home-fields,
       #ma-admin-edit-card[data-studio-tab="directory"] .m7-card-designer-box,
-      #ma-admin-edit-card[data-studio-tab="directory"] .m7da-sectioned-extras{margin:0 0 7px!important;padding:10px!important}
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7da-sectioned-extras,
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7labelbox{margin:0 0 7px!important;padding:10px!important}
 
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7labelbox .m7da-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7labelpreview{margin-top:7px!important;min-height:40px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-availability-extra-box{margin:7px 0!important;padding:9px!important}
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7ds-section-title{margin:9px 0 6px!important;padding:6px 8px!important}
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7ds-vip-note{margin-top:7px!important;padding:8px!important}
 
       /*
          Desktop only: the public/site header lives above the Studio. Keep the
@@ -1759,6 +1765,7 @@
       const roots=showRoots(form,[
         "#ma-edit-location",
         "#ma-edit-category-name",
+        ".m7labelbox",
         ".m7-card-designer-box",
         ".m7da-home-fields",
         ".m7da-sectioned-extras"
@@ -1786,7 +1793,7 @@
 
       const note=document.createElement("div");
       note.className="m7studio-hub-note m7studio-directory-note";
-      note.innerHTML="<b>One source of truth for images</b><br>The Directory and homepage automatically use the Profile image + Banner from <b>Profile & Banner</b>. There is no separate Directory cover upload.";
+      note.innerHTML="<b>Shop Directory source of truth</b><br><b>Public shop label / work type</b> is the visitor-facing label. Main Category, Region and Area are search/filter data only. Directory + homepage images automatically use the Profile image and Banner from <b>Profile & Banner</b>; there is no separate Directory image source.";
       form.insertBefore(note,form.firstChild.nextSibling);
 
       hideFormRoots(form,roots);
@@ -1794,7 +1801,6 @@
     }
     else if(key==="profile"){
       const roots=showRoots(form,[
-        ".m7labelbox",
         ".m7-design-studio"
       ]);
 
