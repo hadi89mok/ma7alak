@@ -190,12 +190,11 @@ let refreshTimer = null;
 
 
 /*
-   Controls whether the panel shows:
-
-   FALSE = latest 6 notifications
+   Compact phone-first notification list:
+   FALSE = latest 5 notifications
    TRUE  = all notifications
 */
-
+const NOTIFICATION_PREVIEW_LIMIT = 5;
 let showAllNotifications = false;
 
 
@@ -1073,6 +1072,26 @@ function injectNotificationCSS(){
 
 }
 
+#ma7alak-notification-more{
+  width:calc(100% - 8px);
+  min-height:38px;
+  margin:7px 4px 4px;
+  padding:0 12px;
+  border:1px solid rgba(217,164,65,.24);
+  border-radius:12px;
+  background:rgba(217,164,65,.065);
+  color:#e8c77e;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#ma7alak-notification-more:active{
+  transform:scale(.985);
+  background:rgba(217,164,65,.11);
+}
+
 
 /* =========================================================
    NOTIFICATION
@@ -1514,7 +1533,7 @@ function injectNotificationCSS(){
 #ma7alak-notification-empty{
 
   padding:
-    42px 20px;
+    28px 18px;
 
   text-align:center;
 
@@ -1597,16 +1616,18 @@ function injectNotificationCSS(){
     right:10px;
 
     width:
-      calc(100vw - 20px);
-
-    height:
       min(
-        620px,
-        calc(100vh - 80px)
+        360px,
+        calc(100vw - 20px)
       );
 
+    height:auto;
+
     max-height:
-      calc(100vh - 80px);
+      min(
+        470px,
+        calc(100dvh - 82px)
+      );
 
     border-radius:20px;
 
@@ -4597,7 +4618,12 @@ function renderNotifications(){
 
 
   const visibleNotifications =
-    notifications;
+    showAllNotifications
+      ? notifications
+      : notifications.slice(
+          0,
+          NOTIFICATION_PREVIEW_LIMIT
+        );
 
 
   list.innerHTML =
@@ -4769,8 +4795,54 @@ function renderNotifications(){
       .join("");
 
 
-  /* All loaded notifications stay in the fixed-height list.
-     Older items are reached by scrolling inside the panel. */
+  if(
+    notifications.length >
+    NOTIFICATION_PREVIEW_LIMIT
+  ){
+    const hiddenCount =
+      Math.max(
+        0,
+        notifications.length -
+        NOTIFICATION_PREVIEW_LIMIT
+      );
+
+    list.insertAdjacentHTML(
+      "beforeend",
+      '<button id="ma7alak-notification-more" type="button">' +
+        (
+          showAllNotifications
+            ? "Show first 5"
+            : "Show " +
+              hiddenCount +
+              " more notification" +
+              (hiddenCount===1 ? "" : "s")
+        ) +
+      "</button>"
+    );
+
+    const moreButton =
+      document.getElementById(
+        "ma7alak-notification-more"
+      );
+
+    if(moreButton){
+      moreButton.addEventListener(
+        "click",
+        function(event){
+          event.preventDefault();
+          event.stopPropagation();
+
+          showAllNotifications =
+            !showAllNotifications;
+
+          renderNotifications();
+        }
+      );
+    }
+  }
+
+
+  /* Keep the panel compact: five newest rows first, then explicit Show more. */
 
   list
     .querySelectorAll(
@@ -5235,6 +5307,10 @@ function openNotifications(){
 
   notificationsOpen =
     true;
+
+  /* Every fresh open starts compact at the newest five. */
+  showAllNotifications =
+    false;
 
 
   /*
