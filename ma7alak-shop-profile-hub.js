@@ -1492,7 +1492,6 @@ window.addEventListener(
       const cardLabel =
         String(
           shop.category_name ||
-          shop.category ||
           ""
         ).trim();
 
@@ -1645,7 +1644,6 @@ window.addEventListener(
     const cardLabel =
       String(
         draft.category_name ||
-        draft.category ||
         ""
       ).trim();
 
