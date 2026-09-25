@@ -689,6 +689,73 @@ window.addEventListener(
 );
 
 
+
+/* =========================================================
+   SHOUFHON PROFILE HUB — PUBLIC IDENTITY COPY
+   Manual display fields are the public source of truth:
+   category_name = public work type / label
+   location      = public location / service area
+   Structured category/city/area remain search data only.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__M7_PUBLIC_IDENTITY_COPY_SYNC__)return;
+  window.__M7_PUBLIC_IDENTITY_COPY_SYNC__=true;
+
+  const SLUG=String(window.__MA7ALAK_EXACT_HUB_SLUG__||"").trim().toLowerCase();
+
+  function apply(profile){
+    const p=profile&&typeof profile==="object"?profile:{};
+    const label=String(p.category_name||"").trim();
+    const location=String(p.location||"").trim();
+
+    const categoryText=document.getElementById("ma7alak-shop-category-text");
+    if(categoryText){
+      categoryText.textContent=label||"Local shop";
+    }
+
+    /* The compact identity may have an optional public-location node on some
+       manual shop layouts. Update it when present without inventing one. */
+    [
+      "ma7alak-shop-location-text",
+      "ma7alak-shop-public-location",
+      "ma7alak-profile-location"
+    ].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.textContent=location||"";
+    });
+  }
+
+  async function load(){
+    const client=window.__MA7ALAK_EXACT_HUB_REST_CLIENT__||window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
+    if(!SLUG||!client)return;
+    try{
+      const r=await client.from("shop_profiles")
+        .select("shop_slug,category_name,location")
+        .eq("shop_slug",SLUG)
+        .maybeSingle();
+      if(!r.error&&r.data)apply(r.data);
+    }catch(error){
+      console.warn("[ShoufHon Hub] public identity copy:",error);
+    }
+  }
+
+  load();
+
+  if(typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__==="function"){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_REFRESH__(load);
+  }
+
+  if(typeof window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__==="function"){
+    window.__MA7ALAK_PROFILE_HUB_REGISTER_PREVIEW__(message=>{
+      if(message&&message.profile&&typeof message.profile==="object"){
+        apply(message.profile);
+      }
+    });
+  }
+})();
+
+
 /* =========================================================
    PAGE DESIGN STUDIO — HUB TYPOGRAPHY
    About keeps its own typography control.
