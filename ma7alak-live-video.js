@@ -545,10 +545,15 @@ function injectOwnerButton(){
       btn.className="m7lv-owner-go";
       bar.appendChild(btn);
     }
-    btn.disabled=!ownerEnt?.enabled;
-    btn.textContent=live?"🔴 Resume Live":"📹 Go Live";
+    const videoAllowed=!!ownerEnt?.video_live_enabled;
+    btn.disabled=false;
+    btn.classList.toggle("m7lv-owner-go-locked",!videoAllowed&&!live);
+    btn.textContent=live?"🔴 Resume Live":(videoAllowed?"📹 Go Live":"🔒 Go Live");
     btn.onclick=()=>{
-      if(!ownerEnt?.enabled)return;
+      if(!videoAllowed&&!live){
+        window.ShoufHonMembershipGate?.("video");
+        return;
+      }
       preflight();
     };
   };
@@ -1375,11 +1380,17 @@ function createOverlay(stream,host){
   }
   $("#m7lv-login-chat",overlay)?.addEventListener("click",()=>window.Ma7alakAccount?.open?.());
 }
-function preflight(){
+async function preflight(){
   if($("#m7lv-preflight")||setupActive)return;
+  ownerState();
+  await loadOwnerEnt();
+  if(!ownerEnt?.video_live_enabled){
+    window.ShoufHonMembershipGate?.("video");
+    return;
+  }
   try{window.Ma7alakLiveOffers?.close?.()}catch(_){}
   ownerState();
-  const shop=window.Ma7alakOwnerAuth?.shop||{},allowed=!!ownerEnt?.video_live_enabled;
+  const shop=window.Ma7alakOwnerAuth?.shop||{},allowed=true;
   const name=String(shop.shop_name||shop.arabic_name||ownerSlug||"Your shop"),avatar=String(shop.profile_image_url||"");
   const initial=(name.charAt(0)||"S").toUpperCase();
   const existing=streams.find(x=>String(x.shop_slug||"").toLowerCase()===ownerSlug);
