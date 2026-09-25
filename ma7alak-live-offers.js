@@ -716,6 +716,7 @@ async function ensureProfileOptions(shopSlug){
   }
   return{};
 }
+const bridgeShopSlugs=new Map();
 function currentOwnerSlug(){
   return String(window.Ma7alakOwnerAuth?.owner?.shop_slug||ownerSlug||"").trim().toLowerCase();
 }
@@ -759,11 +760,11 @@ function send(win,type,shop){
 function broadcast(){
   const allItems=publicData("");
   try{window.postMessage({type:"MA7ALAK_LIVE_OFFERS_UPDATED",items:allItems},"*")}catch(_){}
-  const activeOwner=currentOwnerSlug();
   document.querySelectorAll("iframe").forEach(f=>{
     try{
-      send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE","");
-      if(activeOwner)send(f.contentWindow,"MA7ALAK_LIVE_OFFERS_STATE",activeOwner);
+      const win=f.contentWindow;
+      const requested=String(bridgeShopSlugs.get(win)||"").trim().toLowerCase();
+      if(requested)send(win,"MA7ALAK_LIVE_OFFERS_STATE",requested);
     }catch(_){}
   });
 }
@@ -820,11 +821,12 @@ function bridge(){
     const d=e.data||{},s=String(d.shopSlug||"").trim().toLowerCase().replace(/[^a-z0-9-]/g,"").slice(0,60);
 
     if(d.type==="MA7ALAK_LIVE_OFFERS_GET"){
-      send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
+      if(s)bridgeShopSlugs.set(e.source,s);
+      if(s)send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
       (async()=>{
         await ensureFreshLiveState();
         if(s)await ensureProfileOptions(s);
-        send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
+        if(s)send(e.source,"MA7ALAK_LIVE_OFFERS_STATE",s);
       })().catch(err=>console.warn("SHOUFHON Live state refresh:",err));
       return;
     }
