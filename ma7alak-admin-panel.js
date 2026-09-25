@@ -5147,29 +5147,90 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 
 function inject(){
   if(document.getElementById("m7-live-admin-css"))return;
+
   const style=document.createElement("style");
   style.id="m7-live-admin-css";
   style.textContent=`
     .ma-shop-action.live-offers{background:linear-gradient(135deg,#f0b34f,#b66b20)!important;color:#1a1008!important}
-    #m7-live-admin-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none!important;align-items:center!important;justify-content:center!important;padding:14px!important;background:rgba(4,4,4,.9)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font-family:Arial,"Segoe UI",sans-serif!important;color:#fff!important}
+    #m7-live-admin-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none!important;align-items:center!important;justify-content:center!important;padding:14px!important;background:rgba(4,4,4,.88)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font-family:Arial,"Segoe UI",sans-serif!important;color:#fff!important}
     #m7-live-admin-overlay.active{display:flex!important}
-    #m7-live-admin-panel{position:relative!important;width:min(470px,100%)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;box-sizing:border-box!important;padding:22px!important;border:1px solid rgba(231,164,67,.42)!important;border-radius:24px!important;background:linear-gradient(160deg,#21150e,#0f0e0d)!important;box-shadow:0 30px 90px #000!important}
-    #m7-live-admin-close{position:absolute!important;right:12px!important;top:11px!important;width:38px!important;height:38px!important;border:1px solid #ffffff18!important;border-radius:50%!important;background:#ffffff0d!important;color:#fff!important;font-size:24px!important}
-    .m7la-title{margin:2px 45px 4px 0!important;font-size:23px!important;font-weight:950!important}.m7la-shop{color:#eeb767!important;font-size:12px!important;margin-bottom:18px!important;overflow-wrap:anywhere!important}
-    .m7la-toggle{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:15px!important;padding:14px!important;border:1px solid #ffffff13!important;border-radius:16px!important;background:#ffffff08!important}.m7la-toggle strong,.m7la-toggle small{display:block!important}.m7la-toggle small{color:#ffffff83!important;margin-top:4px!important;font-size:11px!important}.m7la-toggle input{width:24px!important;height:24px!important;accent-color:#dda348!important}
-    .m7la-field{display:block!important;margin-top:14px!important}.m7la-field span{display:block!important;margin-bottom:7px!important;font-size:12px!important;font-weight:900!important}.m7la-field input{width:100%!important;box-sizing:border-box!important;padding:13px!important;border:1px solid #ffffff1a!important;border-radius:13px!important;background:#090807!important;color:#fff!important;font-size:16px!important}
-    #m7-live-admin-save{width:100%!important;margin-top:16px!important;padding:14px!important;border:0!important;border-radius:14px!important;background:linear-gradient(135deg,#f0ba64,#c47b28)!important;color:#1a1008!important;font-weight:950!important;font-size:15px!important}
-    #m7-live-admin-status{min-height:20px!important;margin-top:11px!important;font-size:12px!important;color:#eeb767!important}.m7la-video-box{margin-top:14px!important;padding:13px!important;border:1px solid #ff4f7040!important;border-radius:16px!important;background:linear-gradient(145deg,#1a0d11,#0d0d0d)!important}.m7la-video-box .m7la-toggle{margin:0 0 11px!important}.m7la-hint{display:block!important;margin-top:6px!important;color:#ffffff72!important;font-size:10px!important}.m7la-video-usage{margin-top:9px!important;padding:9px 11px!important;border-radius:11px!important;background:#ffffff07!important;color:#ffb2c0!important;font-size:11px!important;font-weight:800!important}.m7la-posts{display:grid!important;gap:9px!important;margin-top:17px!important}.m7la-posts-title{font-size:13px!important;font-weight:950!important;color:#efb967!important}.m7la-post{display:grid!important;grid-template-columns:1fr auto!important;gap:10px!important;align-items:center!important;padding:11px!important;border:1px solid #ffffff13!important;border-radius:14px!important;background:#ffffff07!important}.m7la-post strong,.m7la-post small{display:block!important}.m7la-post strong{overflow-wrap:anywhere!important}.m7la-post small{margin-top:4px!important;color:#ffffff78!important;font-size:10px!important}.m7la-delete{border:1px solid #ff777755!important;border-radius:10px!important;padding:9px 10px!important;background:#6d2020!important;color:#fff!important;font-weight:900!important}.m7la-empty{padding:16px!important;border:1px dashed #ffffff1c!important;border-radius:13px!important;text-align:center!important;color:#ffffff76!important;font-size:11px!important}
+    #m7-live-admin-panel{position:relative!important;width:min(500px,100%)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;box-sizing:border-box!important;padding:20px!important;border:1px solid rgba(231,164,67,.38)!important;border-radius:23px!important;background:radial-gradient(circle at 10% 0%,rgba(231,164,67,.08),transparent 34%),linear-gradient(160deg,#1b130e,#0d0d0d)!important;box-shadow:0 30px 90px #000!important}
+    #m7-live-admin-close{position:absolute!important;right:12px!important;top:11px!important;width:36px!important;height:36px!important;border:1px solid #ffffff18!important;border-radius:50%!important;background:#ffffff0d!important;color:#fff!important;font-size:22px!important}
+    .m7la-title{margin:2px 45px 4px 0!important;font-size:21px!important;font-weight:950!important}
+    .m7la-shop{color:#eeb767!important;font-size:11px!important;margin-bottom:14px!important;overflow-wrap:anywhere!important}
+    .m7la-access-card{padding:12px!important;border:1px solid rgba(238,183,103,.18)!important;border-radius:17px!important;background:rgba(255,255,255,.025)!important}
+    .m7la-access-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-bottom:9px!important}
+    .m7la-access-head strong{font-size:12px!important;color:#f4d394!important}.m7la-access-head small{color:#ffffff66!important;font-size:8px!important}
+    .m7la-access-item{padding:11px!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:13px!important;background:rgba(0,0,0,.18)!important}
+    .m7la-access-item+.m7la-access-item{margin-top:8px!important}
+    .m7la-access-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+    .m7la-access-copy{min-width:0!important}.m7la-access-copy strong{display:block!important;font-size:12px!important;color:#fff!important}.m7la-access-copy small{display:block!important;margin-top:3px!important;color:#ffffff78!important;font-size:9px!important;line-height:1.3!important}
+    .m7la-switch{position:relative!important;width:44px!important;height:24px!important;flex:0 0 44px!important;appearance:none!important;-webkit-appearance:none!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:999px!important;background:#292929!important;outline:none!important;cursor:pointer!important;transition:.18s ease!important}
+    .m7la-switch:before{content:""!important;position:absolute!important;width:18px!important;height:18px!important;left:2px!important;top:2px!important;border-radius:50%!important;background:#8b8b8b!important;box-shadow:0 2px 7px rgba(0,0,0,.35)!important;transition:.18s ease!important}
+    .m7la-switch:checked{border-color:rgba(226,172,82,.55)!important;background:linear-gradient(135deg,#7c5427,#c58b39)!important}
+    .m7la-switch:checked:before{left:22px!important;background:#ffe3a7!important}
+    .m7la-limit-row{display:grid!important;grid-template-columns:minmax(0,1fr) 112px!important;align-items:center!important;gap:10px!important;margin-top:9px!important;padding-top:8px!important;border-top:1px solid rgba(255,255,255,.06)!important}
+    .m7la-limit-row span{font-size:9px!important;color:#d8c8ad!important;font-weight:850!important}.m7la-limit-row small{display:block!important;margin-top:2px!important;color:#ffffff58!important;font-size:7.5px!important;line-height:1.25!important}
+    .m7la-limit-row input{width:100%!important;min-height:37px!important;padding:0 9px!important;border:1px solid #ffffff18!important;border-radius:10px!important;background:#090807!important;color:#fff!important;font-size:13px!important;font-weight:900!important;text-align:center!important}
+    .m7la-video-usage{margin-top:8px!important;padding:8px 9px!important;border-radius:10px!important;background:#ffffff06!important;color:#efc47b!important;font-size:9px!important;font-weight:850!important}
+    #m7-live-admin-save{width:100%!important;margin-top:12px!important;padding:12px!important;border:0!important;border-radius:12px!important;background:linear-gradient(135deg,#f0ba64,#c47b28)!important;color:#1a1008!important;font-weight:950!important;font-size:13px!important}
+    #m7-live-admin-status{min-height:18px!important;margin-top:8px!important;font-size:10px!important;color:#eeb767!important}
+    .m7la-posts{display:grid!important;gap:8px!important;margin-top:14px!important}.m7la-posts-title{font-size:11px!important;font-weight:950!important;color:#efb967!important}
+    .m7la-post{display:grid!important;grid-template-columns:1fr auto!important;gap:9px!important;align-items:center!important;padding:9px!important;border:1px solid #ffffff10!important;border-radius:12px!important;background:#ffffff05!important}.m7la-post strong,.m7la-post small{display:block!important}.m7la-post strong{overflow-wrap:anywhere!important;font-size:11px!important}.m7la-post small{margin-top:3px!important;color:#ffffff70!important;font-size:8px!important}
+    .m7la-delete{border:1px solid #ff777744!important;border-radius:9px!important;padding:8px 9px!important;background:#5d1c1c!important;color:#fff!important;font-weight:900!important;font-size:9px!important}
+    .m7la-empty{padding:13px!important;border:1px dashed #ffffff18!important;border-radius:11px!important;text-align:center!important;color:#ffffff70!important;font-size:9px!important}
+    @media(max-width:520px){#m7-live-admin-panel{padding:16px!important}.m7la-limit-row{grid-template-columns:minmax(0,1fr) 94px!important}}
   `;
   document.head.appendChild(style);
+
   const overlay=document.createElement("div");
   overlay.id="m7-live-admin-overlay";
-  overlay.innerHTML=`<section id="m7-live-admin-panel"><button id="m7-live-admin-close" type="button" aria-label="Close">×</button><div class="m7la-title">⚡ Live & Offers Access</div><div id="m7-live-admin-shop" class="m7la-shop"></div><label class="m7la-toggle"><div><strong>Allow Live & Offers posts</strong><small>Offers, events, arrivals and updates.</small></div><input id="m7-live-admin-enabled" type="checkbox"></label><label class="m7la-field"><span>Maximum active offers</span><input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric"></label><div class="m7la-video-box"><label class="m7la-toggle"><div><strong>Allow Video Live</strong><small>Controls whether this shop owner can start a camera broadcast.</small></div><input id="m7-live-admin-video-enabled" type="checkbox"></label><label class="m7la-field"><span>Video Live minutes / month</span><input id="m7-live-admin-video-minutes" type="number" min="0" max="1000000" step="1" inputmode="numeric"><small class="m7la-hint">0 = unlimited. Any positive number is enforced automatically.</small></label><div id="m7-live-admin-video-usage" class="m7la-video-usage">Loading monthly usage…</div></div><button id="m7-live-admin-save" type="button">Save access</button><div id="m7-live-admin-status" aria-live="polite"></div><div class="m7la-posts"><div class="m7la-posts-title">Active offers</div><div id="m7-live-admin-posts"><div class="m7la-empty">Loading offers…</div></div></div></section>`;
+  overlay.innerHTML=`<section id="m7-live-admin-panel">
+    <button id="m7-live-admin-close" type="button" aria-label="Close">×</button>
+    <div class="m7la-title">⚡ Live & Offers</div>
+    <div id="m7-live-admin-shop" class="m7la-shop"></div>
+
+    <section class="m7la-access-card">
+      <div class="m7la-access-head"><div><strong>Access & Limits</strong><small>Changes publish instantly to the shop.</small></div></div>
+
+      <div class="m7la-access-item">
+        <div class="m7la-access-top">
+          <div class="m7la-access-copy"><strong>Live Offers</strong><small>Offers, events, arrivals and shop updates.</small></div>
+          <input id="m7-live-admin-enabled" class="m7la-switch" type="checkbox" aria-label="Live Offers on or off">
+        </div>
+        <label class="m7la-limit-row">
+          <span>Active offer limit<small>0 = locked. The owner sees the Premium / VIP access popup.</small></span>
+          <input id="m7-live-admin-limit" type="number" min="0" max="100" step="1" inputmode="numeric">
+        </label>
+      </div>
+
+      <div class="m7la-access-item">
+        <div class="m7la-access-top">
+          <div class="m7la-access-copy"><strong>Video camera broadcast</strong><small>Allows the shop owner to start a camera LIVE.</small></div>
+          <input id="m7-live-admin-video-enabled" class="m7la-switch" type="checkbox" aria-label="Video Live on or off">
+        </div>
+        <label class="m7la-limit-row">
+          <span>LIVE minutes / month<small>0 = unlimited while Video LIVE is ON.</small></span>
+          <input id="m7-live-admin-video-minutes" type="number" min="0" max="1000000" step="1" inputmode="numeric">
+        </label>
+        <div id="m7-live-admin-video-usage" class="m7la-video-usage">Loading monthly usage…</div>
+      </div>
+    </section>
+
+    <button id="m7-live-admin-save" type="button">Save access</button>
+    <div id="m7-live-admin-status" aria-live="polite"></div>
+    <div class="m7la-posts"><div class="m7la-posts-title">Active offers</div><div id="m7-live-admin-posts"><div class="m7la-empty">Loading offers…</div></div></div>
+  </section>`;
   document.body.appendChild(overlay);
+
   const close=()=>overlay.classList.remove("active");
   document.getElementById("m7-live-admin-close").onclick=close;
   overlay.onclick=e=>{if(e.target===overlay)close()};
-  document.getElementById("m7-live-admin-save").onclick=save;
+  document.getElementById("m7-live-admin-save").onclick=()=>save(false);
+
+  ["m7-live-admin-enabled","m7-live-admin-limit","m7-live-admin-video-enabled","m7-live-admin-video-minutes"].forEach(id=>{
+    document.getElementById(id)?.addEventListener("change",()=>save(true));
+  });
 }
 
 function status(message,error){
@@ -5235,8 +5296,11 @@ async function loadVideoUsage(){
   if(result.error){box.textContent="Could not load monthly Video Live usage.";return}
   const row=Array.isArray(result.data)?result.data[0]:result.data;
   const used=Number(row?.used_minutes||0),limit=Number(row?.monthly_minutes||0);
+  const left=Math.max(0,limit-used);
   box.textContent=limit>0
-    ? `Used this month: ${used} / ${limit} min · ${Math.max(0,limit-used)} min left`
+    ? (left>0
+        ? `Used this month: ${used} / ${limit} min · ${left} min left`
+        : `LIVE time used up · ${used} / ${limit} min · refill or increase the allowance`)
     : `Used this month: ${used} min · Unlimited monthly allowance`;
 }
 
@@ -5315,8 +5379,16 @@ async function deletePost(id,button){
   await loadPosts();
 }
 
-async function save(){
+let liveAccessSaving=false;
+let liveAccessSaveQueued=false;
+
+async function save(auto=false){
   if(!activeShop||!sb)return;
+  if(liveAccessSaving){
+    liveAccessSaveQueued=true;
+    return;
+  }
+
   const button=document.getElementById("m7-live-admin-save");
   const enabled=document.getElementById("m7-live-admin-enabled").checked;
   const limit=Number(document.getElementById("m7-live-admin-limit").value);
@@ -5324,22 +5396,43 @@ async function save(){
   const monthlyMinutes=Number(document.getElementById("m7-live-admin-video-minutes").value);
 
   if(!Number.isInteger(limit)||limit<0||limit>100){status("Offer limit must be a whole number from 0 to 100.",true);return}
-  if(!Number.isInteger(monthlyMinutes)||monthlyMinutes<0||monthlyMinutes>1000000){status("Monthly Video Live minutes must be a whole number from 0 to 1000000.",true);return}
+  if(!Number.isInteger(monthlyMinutes)||monthlyMinutes<0||monthlyMinutes>1000000){status("Monthly Video LIVE minutes must be a whole number from 0 to 1000000.",true);return}
 
+  liveAccessSaving=true;
   button.disabled=true;
-  status("Saving…",false);
+  status(auto?"Applying live access…":"Saving access…",false);
 
-  const [offersResult,videoResult]=await Promise.all([
-    sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled}),
-    sb.rpc("ma7alak_admin_set_video_live_entitlement",{p_shop_slug:activeShop.slug,p_video_live_enabled:videoEnabled,p_monthly_minutes:monthlyMinutes})
-  ]);
+  try{
+    const [offersResult,videoResult]=await Promise.all([
+      sb.rpc("ma7alak_admin_set_live_entitlement",{p_shop_slug:activeShop.slug,p_active_limit:limit,p_enabled:enabled}),
+      sb.rpc("ma7alak_admin_set_video_live_entitlement",{p_shop_slug:activeShop.slug,p_video_live_enabled:videoEnabled,p_monthly_minutes:monthlyMinutes})
+    ]);
 
-  button.disabled=false;
-  if(offersResult.error){status(offersResult.error.message||"Could not save Live & Offers access.",true);return}
-  if(videoResult.error){status(videoResult.error.message||"Could not save Video Live access.",true);return}
+    if(offersResult.error)throw offersResult.error;
+    if(videoResult.error)throw videoResult.error;
 
-  status(`Saved · Offers ${enabled?"ON":"OFF"} · Video Live ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
-  await loadVideoUsage();
+    status(`Live now · Offers ${enabled?"ON":"OFF"} · ${limit} slot${limit===1?"":"s"} · Camera LIVE ${videoEnabled?"ON":"OFF"} · ${monthlyMinutes===0?"Unlimited":monthlyMinutes+" min/month"}`,false);
+    await loadVideoUsage();
+
+    try{
+      window.dispatchEvent(new CustomEvent("shoufhon:admin-live-access-saved",{detail:{
+        shop_slug:activeShop.slug,
+        enabled,
+        active_limit:limit,
+        video_live_enabled:videoEnabled,
+        video_live_monthly_minutes:monthlyMinutes
+      }}));
+    }catch(_){}
+  }catch(err){
+    status(err?.message||"Could not save Live & Offers access.",true);
+  }finally{
+    button.disabled=false;
+    liveAccessSaving=false;
+    if(liveAccessSaveQueued){
+      liveAccessSaveQueued=false;
+      setTimeout(()=>save(true),0);
+    }
+  }
 }
 
 function decorate(){
