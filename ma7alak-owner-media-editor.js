@@ -45,6 +45,11 @@
     return null;
   }
 
+  function trustedParentEvent(event){
+    const target=pageTarget();
+    return !!(event&&target&&event.source===target);
+  }
+
   function portal(open){
     try{
       pageTarget()?.postMessage({
@@ -374,6 +379,7 @@
     sheet.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>choose("add",b.dataset.add)));
 
     window.addEventListener("message",event=>{
+      if(!trustedParentEvent(event))return;
       const data=event&&event.data||{};
       if(
         data.type!=="SHOUFHON_EMBED_VIEWER_BACK" ||
@@ -438,6 +444,7 @@
   }
 
   window.addEventListener("message",event=>{
+    if(!trustedParentEvent(event))return;
     const data=event.data||{};
     if(data.type==="MA7ALAK_OWNER_STATE"){
       const incoming=String(data.shopSlug||"").trim().toLowerCase();
