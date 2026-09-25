@@ -4808,6 +4808,43 @@
         visibility:visible!important;
       }
 
+      /*
+         Edit Media must cover the physical phone viewport, not merely the
+         Hostinger embed rectangle. Keep this special rule scoped to Media so
+         Story/other viewers retain their existing portal behavior.
+      */
+      .shoufhon-owner-media-editor-host{
+        overflow:hidden!important;
+        width:100vw!important;
+        width:100dvw!important;
+        height:100vh!important;
+        height:100dvh!important;
+        background:#050506!important;
+      }
+
+      iframe.shoufhon-owner-media-editor-frame{
+        position:fixed!important;
+        inset:0!important;
+        top:0!important;
+        left:0!important;
+        right:0!important;
+        bottom:0!important;
+        width:100vw!important;
+        width:100dvw!important;
+        height:100vh!important;
+        height:100dvh!important;
+        max-width:none!important;
+        max-height:none!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        border-radius:0!important;
+        background:#050506!important;
+        z-index:2147483647!important;
+        transform:none!important;
+        -webkit-transform:none!important;
+      }
+
       .shoufhon-embed-viewer-ancestor{
         overflow:visible!important;
         transform:none!important;
@@ -4831,6 +4868,7 @@
         overflow:hidden!important;
         overscroll-behavior:none!important;
         touch-action:none!important;
+        background:#000!important;
         transform:none!important;
         -webkit-transform:none!important;
         filter:none!important;
@@ -4970,6 +5008,12 @@
 
     host.classList.add("shoufhon-embed-viewer-host");
     frame.classList.add("shoufhon-embed-viewer-frame");
+
+    if(state.viewerKind==="owner-media-editor"){
+      host.classList.add("shoufhon-owner-media-editor-host");
+      frame.classList.add("shoufhon-owner-media-editor-frame");
+    }
+
     document.documentElement.classList.add("shoufhon-embed-viewer-open");
     document.body.classList.add("shoufhon-embed-viewer-open");
 
@@ -5049,6 +5093,11 @@
       state.historyArmed=false;
       suppressNextViewerPop=true;
       try{history.back()}catch(_){suppressNextViewerPop=false}
+    }
+
+    if(state.viewerKind==="owner-media-editor"){
+      frame.classList.remove("shoufhon-owner-media-editor-frame");
+      state.host?.classList.remove("shoufhon-owner-media-editor-host");
     }
 
     if(!state.frameHadClass){
@@ -5407,6 +5456,156 @@
 
         for(var i=0;i<files.length;i++){
           await uploadMediaFile(client,slug,type,files[i],order+i);
+        }
+      }
+      else if(op==="album-save-device"){
+        var deviceAlbumItems=Array.isArray(data.items)?data.items:[];
+        var deviceAlbumFiles=Array.isArray(data.files)?data.files:[];
+        var deviceAlbumId=data.albumId===null||data.albumId===undefined||data.albumId===""
+          ?null
+          :Number(data.albumId);
+
+        var deviceExistingPayload=deviceAlbumItems.map(function(item){
+          return{
+            media_type:item&&item.mediaType==="video"?"video":"photo",
+            media_id:Number(item&&item.mediaId)
+          };
+        });
+
+        if(deviceExistingPayload.some(function(item){return !Number.isFinite(item.media_id)})){
+          throw new Error("One current album item is invalid.");
+        }
+
+        if(!Number.isFinite(deviceAlbumId))deviceAlbumId=null;
+
+        var deviceTotal=deviceExistingPayload.length+deviceAlbumFiles.length;
+        if(deviceTotal<2)throw new Error("Choose at least 2 photos for the album.");
+        if(deviceTotal>snapshot.albumLimit){
+          throw new Error("Admin limit: maximum "+snapshot.albumLimit+" items in one album.");
+        }
+
+        if(snapshot.photos.length+deviceAlbumFiles.length>snapshot.photoLimit){
+          throw new Error(
+            "Admin photo limit: "+snapshot.photoLimit+
+            ". Current: "+snapshot.photos.length+
+            ". New album photos: "+deviceAlbumFiles.length+"."
+          );
+        }
+
+        deviceAlbumFiles.forEach(function(file){
+          validateOwnerMediaFile(file,"photo");
+        });
+
+        var deviceUploadedPaths=[];
+        var deviceUploadedRows=[];
+        var devicePhotoOrder=Math.max.apply(
+          Math,
+          [-1].concat(snapshot.photos.map(function(row){return Number(row.sort_order)||0}))
+        )+1;
+
+        try{
+          for(var deviceIndex=0;deviceIndex<deviceAlbumFiles.length;deviceIndex++){
+            var deviceUploaded=await uploadMediaFile(
+              client,
+              slug,
+              "photo",
+              deviceAlbumFiles[deviceIndex],
+              devicePhotoOrder+deviceIndex
+            );
+            deviceUploadedPaths.push(String(deviceUploaded.path||""));
+          }
+
+          if(deviceUploadedPaths.length){
+            var uploadedLookup=await client
+              .from("shop_gallery")
+              .select("id,storage_path,sort_order")
+              .eq("shop_slug",slug)
+              .in("storage_path",deviceUploadedPaths);
+
+            if(uploadedLookup.error)throw uploadedLookup.error;
+
+            var rowsByPath=new Map(
+              (uploadedLookup.data||[]).map(function(row){
+                return[String(row.storage_path||""),row];
+              })
+            );
+
+            deviceUploadedRows=deviceUploadedPaths.map(function(path){
+              return rowsByPath.get(String(path||""))||null;
+            });
+
+            if(deviceUploadedRows.some(function(row){return !row||!Number.isFinite(Number(row.id))})){
+              throw new Error("One uploaded album photo could not be linked.");
+            }
+          }
+
+          var deviceNewPayload=deviceUploadedRows.map(function(row){
+            return{media_type:"photo",media_id:Number(row.id)};
+          });
+
+          var deviceFullPayload=deviceExistingPayload.concat(deviceNewPayload);
+          var deviceCover=null;
+
+          if(
+            data.coverExisting &&
+            Number.isFinite(Number(data.coverExisting.mediaId))
+          ){
+            var requestedCover={
+              media_type:data.coverExisting.mediaType==="video"?"video":"photo",
+              media_id:Number(data.coverExisting.mediaId)
+            };
+            var requestedExists=deviceFullPayload.some(function(item){
+              return item.media_type===requestedCover.media_type &&
+                Number(item.media_id)===Number(requestedCover.media_id);
+            });
+            if(requestedExists)deviceCover=requestedCover;
+          }
+
+          if(
+            !deviceCover &&
+            Number.isInteger(Number(data.coverNewIndex)) &&
+            deviceUploadedRows[Number(data.coverNewIndex)]
+          ){
+            deviceCover={
+              media_type:"photo",
+              media_id:Number(deviceUploadedRows[Number(data.coverNewIndex)].id)
+            };
+          }
+
+          if(!deviceCover&&deviceFullPayload.length){
+            deviceCover=deviceFullPayload[0];
+          }
+
+          var deviceSavedAlbum=await client.rpc("owner_save_media_album",{
+            p_shop_slug:slug,
+            p_album_id:deviceAlbumId,
+            p_title:String(data.title||"").trim(),
+            p_description:String(data.description||"").trim()||null,
+            p_items:deviceFullPayload,
+            p_cover:deviceCover
+          });
+
+          if(deviceSavedAlbum.error)throw deviceSavedAlbum.error;
+        }catch(deviceAlbumError){
+          /*
+             A failed album save must not leave orphan phone uploads behind.
+             Only paths created by this request are removed.
+          */
+          for(var rollbackIndex=0;rollbackIndex<deviceUploadedPaths.length;rollbackIndex++){
+            var rollbackPath=deviceUploadedPaths[rollbackIndex];
+            if(!rollbackPath)continue;
+            try{
+              await client
+                .from("shop_gallery")
+                .delete()
+                .eq("shop_slug",slug)
+                .eq("storage_path",rollbackPath);
+            }catch(_){}
+            try{
+              await removeStorage(client,PHOTO_BUCKET,rollbackPath);
+            }catch(_){}
+          }
+          throw deviceAlbumError;
         }
       }
       else if(op==="album-save"){
