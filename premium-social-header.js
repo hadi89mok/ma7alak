@@ -1850,7 +1850,7 @@ body.ma7alak-premium-homepage #ma7alak-header-theme-backdrop{
       if(!window.__SHOUFHON_COMMUNITY_GUIDELINES_LOADER__){
         window.__SHOUFHON_COMMUNITY_GUIDELINES_LOADER__=true;
         const guidelinesScript=document.createElement("script");
-        guidelinesScript.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@8d954edc91b06bf9403603351f6efb06dacb18a1/shoufhon-community-guidelines.js";
+        guidelinesScript.src="https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@74115292d3b6a239ba0775310f65a05f76d2e30e/shoufhon-community-guidelines.js";
         guidelinesScript.async=true;
         guidelinesScript.onerror=()=>console.error("SHOUFHON Community Guidelines: page script failed to load");
         document.head.appendChild(guidelinesScript);
