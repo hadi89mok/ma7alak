@@ -378,6 +378,7 @@ function ensurePremiumCss(){
 .m7lv-setup-panel[data-mode="beauty"] .m7lv-shared-strength,
 .m7lv-setup-panel[data-mode="effects"] .m7lv-shared-strength{display:grid}
 .m7lv-setup-range{
+  display:grid;
   grid-template-columns:66px minmax(0,1fr) 42px;
   align-items:center;
   gap:7px;
