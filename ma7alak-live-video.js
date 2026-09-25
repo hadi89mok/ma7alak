@@ -120,9 +120,7 @@ function ensurePremiumCss(){
 .m7lv-owner-add-offer:disabled{opacity:.42}
 
 /* =========================================================
-   GO LIVE STUDIO — CAMERA-FIRST PREVIEW BEFORE BROADCAST
-   The camera keeps its native framing. Controls stay compact,
-   and GO LIVE is always visible without scrolling.
+   GO LIVE STUDIO — SIMPLE CAMERA-FIRST PREVIEW
 ========================================================= */
 #m7lv-preflight{
   position:fixed!important;
@@ -149,12 +147,7 @@ function ensurePremiumCss(){
   background:#050505;
   font-family:Arial,"Segoe UI",sans-serif;
 }
-.m7lv-setup-stage{
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  background:#050505;
-}
+.m7lv-setup-stage{position:absolute;inset:0;overflow:hidden;background:#050505}
 #m7lv-setup-camera{
   position:absolute;
   inset:0;
@@ -162,6 +155,7 @@ function ensurePremiumCss(){
   height:100%;
   overflow:hidden;
   background:#050505;
+  touch-action:none;
 }
 #m7lv-setup-camera>div{width:100%!important;height:100%!important}
 #m7lv-setup-camera video{
@@ -176,68 +170,51 @@ function ensurePremiumCss(){
   position:absolute;
   inset:0;
   pointer-events:none;
-  background:
-    linear-gradient(180deg,rgba(0,0,0,.52),rgba(0,0,0,.02) 19%,rgba(0,0,0,.01) 55%,rgba(0,0,0,.72) 100%);
+  background:linear-gradient(180deg,rgba(0,0,0,.50),rgba(0,0,0,.02) 19%,rgba(0,0,0,.01) 55%,rgba(0,0,0,.78) 100%);
 }
 .m7lv-setup-loading{
   position:absolute;
   z-index:3;
   left:50%;
-  top:39%;
+  top:40%;
   transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:9px;
-  color:rgba(255,255,255,.76);
+  color:rgba(255,255,255,.78);
   font-size:11px;
   font-weight:800;
   text-align:center;
   pointer-events:none;
 }
 .m7lv-setup-spinner{
-  width:30px;
-  height:30px;
-  border:3px solid rgba(255,255,255,.16);
-  border-top-color:#fff;
-  border-radius:50%;
+  width:30px;height:30px;border:3px solid rgba(255,255,255,.16);border-top-color:#fff;border-radius:50%;
   animation:m7StudioSpin .8s linear infinite;
 }
 @keyframes m7StudioSpin{to{transform:rotate(360deg)}}
 .m7lv-setup-top{
   position:absolute;
-  z-index:20;
-  left:0;
-  right:0;
-  top:0;
-  display:flex;
+  z-index:30;
+  left:0;right:0;top:0;
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) auto;
   align-items:center;
-  justify-content:space-between;
   gap:8px;
   padding:max(10px,env(safe-area-inset-top)) 10px 8px;
 }
-.m7lv-setup-topbtn,
-.m7lv-setup-tool{
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(7,7,8,.46);
-  color:#fff;
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  box-shadow:0 8px 22px rgba(0,0,0,.20);
-}
 .m7lv-setup-topbtn{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  padding:0;
-  border-radius:50%;
-  font-size:20px;
-  line-height:1;
+  width:42px;height:42px;display:grid;place-items:center;padding:0;
+  border:1px solid rgba(255,255,255,.16);border-radius:50%;
+  background:rgba(7,7,8,.44);color:#fff;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 8px 22px rgba(0,0,0,.20);
+  font-size:20px;line-height:1;
 }
 .m7lv-setup-preview-chip{
+  justify-self:center;
   min-height:32px;
-  max-width:calc(100% - 104px);
+  max-width:100%;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -245,126 +222,197 @@ function ensurePremiumCss(){
   padding:0 11px;
   border:1px solid rgba(255,255,255,.14);
   border-radius:999px;
-  background:rgba(5,5,6,.44);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  color:rgba(255,255,255,.88);
-  font-size:9px;
-  font-weight:950;
-  letter-spacing:.45px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  box-shadow:0 8px 22px rgba(0,0,0,.18);
+  background:rgba(5,5,6,.42);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:rgba(255,255,255,.90);
+  font-size:9px;font-weight:950;letter-spacing:.45px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.m7lv-setup-preview-chip i{
-  width:7px;
-  height:7px;
-  flex:0 0 7px;
-  border-radius:50%;
-  background:#aaa;
-  box-shadow:0 0 8px rgba(255,255,255,.28);
+.m7lv-setup-preview-chip i{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#aaa;box-shadow:0 0 8px rgba(255,255,255,.28)}
+.m7lv-setup-fps{
+  min-height:34px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 10px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:999px;
+  background:rgba(5,5,6,.42);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:rgba(255,255,255,.84);
+  font-size:9px;font-weight:950;
+  white-space:nowrap;
 }
 .m7lv-setup-tools{
   position:absolute;
-  z-index:18;
-  right:9px;
-  top:28%;
+  z-index:24;
+  right:10px;
+  top:31%;
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:9px;
 }
 .m7lv-setup-tool{
-  width:50px;
-  min-height:50px;
-  padding:5px 3px;
-  border-radius:17px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  font-size:19px;
+  width:48px;min-height:48px;padding:4px 3px;
+  border:1px solid rgba(255,255,255,.15);border-radius:50%;
+  background:rgba(7,7,8,.46);color:#fff;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:0 8px 22px rgba(0,0,0,.20);
 }
-.m7lv-setup-tool span{
-  max-width:44px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:rgba(255,255,255,.74);
-  font-size:7.5px;
-  font-weight:900;
-}
-.m7lv-setup-tool.on{
-  border-color:rgba(255,255,255,.58);
-  background:#fff;
-  color:#111;
-}
+.m7lv-setup-tool b{font-size:17px;line-height:1}
+.m7lv-setup-tool span{font-size:7px;font-weight:900;color:rgba(255,255,255,.72)}
+.m7lv-setup-tool.on{border-color:rgba(255,255,255,.56);background:#fff;color:#111}
 .m7lv-setup-tool.on span{color:#111}
-.m7lv-setup-tool:disabled{opacity:.30}
-
-/* Compact dock: never scroll this container. GO LIVE always stays visible. */
-.m7lv-setup-bottom{
+.m7lv-setup-tool:disabled{opacity:.28}
+.m7lv-pinch-hint{
   position:absolute;
-  z-index:24;
-  left:8px;
-  right:8px;
-  bottom:max(8px,env(safe-area-inset-bottom));
-  overflow:visible;
-  padding:10px;
-  border:1px solid rgba(255,255,255,.13);
+  z-index:20;
+  left:50%;
+  bottom:268px;
+  transform:translateX(-50%);
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(0,0,0,.34);
+  color:rgba(255,255,255,.70);
+  font-size:8px;font-weight:850;
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+.m7lv-studio-actions{
+  position:absolute;
+  z-index:28;
+  left:12px;right:12px;
+  bottom:176px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:18px;
+  transition:bottom .24s cubic-bezier(.16,1,.3,1);
+}
+.m7lv-setup.panel-open .m7lv-studio-actions{bottom:325px}
+.m7lv-studio-action{
+  width:58px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  font-size:9px;font-weight:850;
+  text-shadow:0 2px 9px rgba(0,0,0,.8);
+}
+.m7lv-studio-action b{
+  width:45px;height:45px;
+  display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:50%;
+  background:rgba(5,5,6,.38);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 22px rgba(0,0,0,.18);
+  font-size:20px;
+  line-height:1;
+}
+.m7lv-studio-action.active b{background:#fff;color:#111}
+.m7lv-setup-panel{
+  position:absolute;
+  z-index:29;
+  left:9px;right:9px;
+  bottom:159px;
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(10px);
+  padding:0 12px;
+  border:1px solid transparent;
   border-radius:22px;
-  background:linear-gradient(180deg,rgba(16,16,17,.76),rgba(6,6,7,.92));
+  background:linear-gradient(180deg,rgba(18,18,19,.80),rgba(7,7,8,.94));
   backdrop-filter:blur(22px) saturate(125%);
   -webkit-backdrop-filter:blur(22px) saturate(125%);
-  box-shadow:0 18px 50px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);
+  transition:max-height .26s cubic-bezier(.16,1,.3,1),opacity .18s ease,transform .22s ease,padding .22s ease,border-color .22s ease;
 }
-.m7lv-setup-shop{
+.m7lv-setup-panel.open{
+  max-height:165px;
+  overflow:auto;
+  opacity:1;
+  pointer-events:auto;
+  transform:none;
+  padding:10px 12px 11px;
+  border-color:rgba(255,255,255,.13);
+  scrollbar-width:none;
+}
+.m7lv-setup-panel::-webkit-scrollbar{display:none}
+.m7lv-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.m7lv-panel-head strong{font-size:11px;font-weight:950}
+.m7lv-panel-close{
+  width:28px;height:28px;border:1px solid rgba(255,255,255,.12);border-radius:50%;
+  background:rgba(255,255,255,.06);color:#fff;font-size:16px;line-height:1;
+}
+.m7lv-panel-section{display:none}
+.m7lv-panel-section.show{display:block}
+.m7lv-look-row{
   display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-  min-height:34px;
-  margin-bottom:7px;
+  gap:7px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding:1px 0 3px;
 }
+.m7lv-look-row::-webkit-scrollbar{display:none}
+.m7lv-look{
+  flex:0 0 70px;
+  min-height:48px;
+  padding:6px 4px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+  color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:8px;font-weight:900;
+}
+.m7lv-look b{font-size:16px;line-height:1}
+.m7lv-look[data-look="soft"] b{color:#ffc3d3}
+.m7lv-look[data-look="glow"] b{color:#f1c76d}
+.m7lv-look[data-look="warm"] b{color:#ffad66}
+.m7lv-look[data-look="vivid"] b{color:#9bdcff}
+.m7lv-look[data-look="clean"] b{color:#dcfce7}
+.m7lv-look.active{border-color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.m7lv-shared-strength{display:none;margin-top:6px}
+.m7lv-setup-panel[data-mode="beauty"] .m7lv-shared-strength,
+.m7lv-setup-panel[data-mode="effects"] .m7lv-shared-strength{display:grid}
+.m7lv-setup-range{
+  grid-template-columns:66px minmax(0,1fr) 42px;
+  align-items:center;
+  gap:7px;
+  min-height:32px;
+}
+.m7lv-setup-range + .m7lv-setup-range{margin-top:3px}
+.m7lv-setup-range>span{color:rgba(255,255,255,.74);font-size:8.5px;font-weight:850}
+.m7lv-setup-range output{color:rgba(255,255,255,.56);font-size:8px;font-weight:850;text-align:right}
+.m7lv-setup-range input[type="range"]{width:100%;accent-color:#f1c66e}
+.m7lv-setup-range.is-off{display:none!important}
+.m7lv-setup-bottom{
+  position:absolute;
+  z-index:30;
+  left:8px;right:8px;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  padding:9px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(16,16,17,.70),rgba(6,6,7,.91));
+  backdrop-filter:blur(22px) saturate(125%);
+  -webkit-backdrop-filter:blur(22px) saturate(125%);
+  box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.m7lv-setup-shop{display:flex;align-items:center;gap:8px;min-width:0;min-height:32px;margin-bottom:6px}
 .m7lv-setup-avatar{
-  width:34px;
-  height:34px;
-  flex:0 0 34px;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  border:1px solid rgba(228,170,79,.60);
-  border-radius:50%;
-  background:#181818;
-  font-size:12px;
-  font-weight:950;
-  box-shadow:0 0 16px rgba(228,170,79,.12);
+  width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;overflow:hidden;
+  border:1px solid rgba(228,170,79,.58);border-radius:50%;background:#181818;font-size:12px;font-weight:950;
 }
 .m7lv-setup-avatar img{width:100%;height:100%;object-fit:cover}
 .m7lv-setup-shopcopy{min-width:0}
-.m7lv-setup-shopcopy strong{
-  display:block;
-  max-width:72vw;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:12px;
-  font-weight:950;
-}
-.m7lv-setup-shopcopy small{
-  display:block;
-  margin-top:1px;
-  color:rgba(255,255,255,.52);
-  font-size:7.5px;
-  font-weight:800;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+.m7lv-setup-shopcopy strong{display:block;max-width:72vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:950}
+.m7lv-setup-shopcopy small{display:block;margin-top:1px;color:rgba(255,255,255,.50);font-size:7px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #m7lv-title{
   width:100%!important;
-  min-height:42px!important;
+  min-height:40px!important;
   padding:0 12px!important;
   border:1px solid rgba(255,255,255,.13)!important;
   border-radius:13px!important;
@@ -373,170 +421,25 @@ function ensurePremiumCss(){
   outline:none!important;
   font-size:13px!important;
   font-weight:750!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
 }
 #m7lv-title::placeholder{color:rgba(255,255,255,.43)}
-.m7lv-setup-quick{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:7px;
-  margin-top:7px;
-}
-.m7lv-setup-open,
-.m7lv-setup-reset{
-  min-height:38px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:12px;
-  background:rgba(255,255,255,.055);
-  color:#fff;
-  font-weight:900;
-}
-.m7lv-setup-open{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:0 10px;
-  text-align:left;
-}
-.m7lv-setup-open>strong{font-size:15px;line-height:1}
-.m7lv-setup-open>span{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:9px;
-  flex:1;
-}
-.m7lv-setup-open>em{
-  color:#f1c76d;
-  font-style:normal;
-  font-size:8px;
-  font-weight:950;
-  text-transform:capitalize;
-}
-.m7lv-setup-chevron{font-size:11px;transition:transform .22s ease}
-.m7lv-setup-open.open .m7lv-setup-chevron{transform:rotate(180deg)}
-.m7lv-setup-reset{
-  padding:0 10px;
-  color:rgba(255,255,255,.74);
-  font-size:8px;
-}
-.m7lv-setup-drawer{
-  max-height:0;
-  margin:0;
-  padding:0 1px;
-  overflow:hidden;
-  opacity:0;
-  transform:translateY(8px);
-  pointer-events:none;
-  transition:max-height .28s cubic-bezier(.16,1,.3,1),opacity .18s ease,transform .24s ease,margin .24s ease,padding .24s ease;
-}
-.m7lv-setup-drawer.open{
-  max-height:min(38dvh,330px);
-  margin-top:8px;
-  padding-top:8px;
-  overflow-y:auto;
-  scrollbar-width:none;
-  opacity:1;
-  transform:none;
-  pointer-events:auto;
-  border-top:1px solid rgba(255,255,255,.09);
-}
-.m7lv-setup-drawer::-webkit-scrollbar{display:none}
-.m7lv-setup-section{margin-top:9px}
-.m7lv-setup-drawer>.m7lv-setup-section:first-child{margin-top:0}
-.m7lv-setup-label{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin:0 1px 6px;
-  color:rgba(255,255,255,.72);
-  font-size:8px;
-  font-weight:950;
-  letter-spacing:.62px;
-  text-transform:uppercase;
-}
-.m7lv-setup-label em{
-  color:rgba(255,255,255,.36);
-  font-style:normal;
-  font-size:7px;
-  font-weight:750;
-  letter-spacing:0;
-  text-transform:none;
-  text-align:right;
-}
-.m7lv-look-row{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:6px;
-}
-.m7lv-look{
-  min-height:44px;
-  padding:5px 3px;
-  border:1px solid rgba(255,255,255,.11);
-  border-radius:13px;
-  background:rgba(255,255,255,.045);
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  font-size:8px;
-  font-weight:900;
-}
-.m7lv-look b{font-size:15px;line-height:1}
-.m7lv-look[data-look="soft"] b{color:#ffc3d3}
-.m7lv-look[data-look="glow"] b{color:#f1c76d}
-.m7lv-look[data-look="warm"] b{color:#ffad66}
-.m7lv-look.active{
-  border-color:rgba(255,255,255,.72);
-  background:rgba(255,255,255,.15);
-  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 8px 18px rgba(0,0,0,.18);
-}
-.m7lv-setup-range{
-  display:grid;
-  grid-template-columns:66px minmax(0,1fr) 40px;
-  align-items:center;
-  gap:7px;
-  min-height:31px;
-}
-.m7lv-setup-range + .m7lv-setup-range{margin-top:2px}
-.m7lv-setup-range>span{
-  color:rgba(255,255,255,.72);
-  font-size:8.5px;
-  font-weight:850;
-}
-.m7lv-setup-range output{
-  color:rgba(255,255,255,.52);
-  font-size:8px;
-  font-weight:850;
-  text-align:right;
-}
-.m7lv-setup-range input[type="range"]{
-  width:100%;
-  accent-color:#f1c66e;
-}
-.m7lv-setup-range.is-off{display:none}
 .m7lv-pre-status{
-  min-height:14px!important;
-  max-height:28px!important;
-  margin:6px 2px 0!important;
+  min-height:12px!important;
+  max-height:24px!important;
+  margin:4px 2px 0!important;
   overflow:hidden!important;
   color:rgba(255,255,255,.60)!important;
-  font-size:8.5px!important;
-  line-height:1.3!important;
+  font-size:8px!important;
+  line-height:1.25!important;
   text-align:center!important;
 }
 .m7lv-start{
   width:100%;
-  min-height:50px;
-  margin-top:6px;
+  min-height:49px;
+  margin-top:5px;
   border:0;
-  border-radius:15px;
-  background:linear-gradient(135deg,#ff3159,#d5143d);
+  border-radius:999px;
+  background:linear-gradient(135deg,#ff4164,#e01a45);
   color:#fff;
   font-size:14px;
   font-weight:950;
@@ -544,22 +447,35 @@ function ensurePremiumCss(){
 }
 .m7lv-start:disabled{opacity:.42}
 .m7lv-setup-footnote{display:none!important}
-
-@media(max-height:700px){
-  .m7lv-setup-topbtn{width:38px;height:38px}
-  .m7lv-setup-preview-chip{min-height:29px;font-size:8px}
-  .m7lv-setup-tools{top:25%}
-  .m7lv-setup-tool{width:46px;min-height:46px;border-radius:15px}
-  .m7lv-setup-bottom{padding:8px;border-radius:19px}
-  .m7lv-setup-shop{min-height:30px;margin-bottom:5px}
-  .m7lv-setup-avatar{width:30px;height:30px;flex-basis:30px}
+.m7lv-zoom-indicator{
+  position:absolute;
+  z-index:60;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  min-width:56px;
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+  text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .18s ease;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.m7lv-zoom-indicator.show{opacity:1}
+.m7lv-app.is-host #m7lv-local{touch-action:none}
+@media(max-height:720px){
   .m7lv-setup-shopcopy small{display:none}
-  #m7lv-title{min-height:39px!important}
-  .m7lv-setup-quick{margin-top:5px}
-  .m7lv-setup-open,.m7lv-setup-reset{min-height:34px}
-  .m7lv-setup-drawer.open{max-height:29dvh}
-  .m7lv-start{min-height:46px;margin-top:5px}
-  .m7lv-pre-status{margin-top:4px!important}
+  .m7lv-setup-tools{top:27%}
+  .m7lv-studio-actions{bottom:164px;gap:12px}
+  .m7lv-setup.panel-open .m7lv-studio-actions{bottom:298px}
+  .m7lv-setup-panel{bottom:149px}.m7lv-setup-panel.open{max-height:145px}
+  .m7lv-pinch-hint{bottom:247px}
+  .m7lv-start{min-height:45px}
 }
 
 @media(max-width:520px){
@@ -974,6 +890,79 @@ async function resetCameraZoom(){
     }
   }catch(_){}
 }
+function showZoomIndicator(target,value){
+  const stage=target?.closest?.(".m7lv-setup-stage")||target?.closest?.(".m7lv-stage");
+  if(!stage)return;
+  let badge=$(".m7lv-zoom-indicator",stage);
+  if(!badge){
+    badge=document.createElement("div");
+    badge.className="m7lv-zoom-indicator";
+    stage.appendChild(badge);
+  }
+  badge.textContent=Number(value).toFixed(value<2?1:0)+"×";
+  badge.classList.add("show");
+  clearTimeout(badge._m7hide);
+  badge._m7hide=setTimeout(()=>badge.classList.remove("show"),650);
+}
+function bindPinchZoom(target){
+  if(!target||target.dataset.m7PinchZoom==="1")return;
+  target.dataset.m7PinchZoom="1";
+  target.style.touchAction="none";
+
+  let startDistance=0,startZoom=1,desiredZoom=null,busy=false;
+
+  const distance=touches=>{
+    if(!touches||touches.length<2)return 0;
+    const dx=touches[0].clientX-touches[1].clientX;
+    const dy=touches[0].clientY-touches[1].clientY;
+    return Math.hypot(dx,dy);
+  };
+  const flush=async()=>{
+    if(busy||desiredZoom==null)return;
+    busy=true;
+    const value=desiredZoom;
+    desiredZoom=null;
+    try{
+      const track=cameraMediaTrack(),caps=track?.getCapabilities?.()||{},range=rangeCaps(caps.zoom);
+      if(range){
+        const zoom=Math.max(range.min,Math.min(range.max,value));
+        await track.applyConstraints({advanced:[{zoom}]});
+        showZoomIndicator(target,zoom);
+      }
+    }catch(_){}
+    busy=false;
+    if(desiredZoom!=null)requestAnimationFrame(flush);
+  };
+
+  target.addEventListener("touchstart",e=>{
+    if(e.touches.length!==2)return;
+    const track=cameraMediaTrack(),caps=track?.getCapabilities?.()||{},range=rangeCaps(caps.zoom);
+    if(!range)return;
+    startDistance=distance(e.touches);
+    const current=Number(track.getSettings?.().zoom);
+    startZoom=Number.isFinite(current)?current:Math.max(range.min,Math.min(1,range.max));
+    showZoomIndicator(target,startZoom);
+    e.preventDefault();
+  },{passive:false});
+
+  target.addEventListener("touchmove",e=>{
+    if(e.touches.length!==2||!startDistance)return;
+    const track=cameraMediaTrack(),caps=track?.getCapabilities?.()||{},range=rangeCaps(caps.zoom);
+    if(!range)return;
+    const d=distance(e.touches);
+    if(!d)return;
+    const factor=d/startDistance;
+    desiredZoom=Math.max(range.min,Math.min(range.max,startZoom*factor));
+    requestAnimationFrame(flush);
+    e.preventDefault();
+  },{passive:false});
+
+  const finish=e=>{
+    if((e.touches?.length||0)<2)startDistance=0;
+  };
+  target.addEventListener("touchend",finish,{passive:true});
+  target.addEventListener("touchcancel",finish,{passive:true});
+}
 function refreshSetupCameraControls(){
   const p=$("#m7lv-preflight");if(!p)return;
   const track=cameraMediaTrack();
@@ -993,7 +982,6 @@ function refreshSetupCameraControls(){
     input.value=String(value);
     if(out)out.textContent=formatter(value);
   };
-  bindRange("#m7lv-setup-zoom","zoom",v=>Number(v).toFixed(v<2?1:0)+"×");
   bindRange("#m7lv-setup-exposure","exposureCompensation",v=>(v>0?"+":"")+Number(v).toFixed(1));
   bindRange("#m7lv-setup-color","colorTemperature",v=>Math.round(Number(v))+"K");
   applySetupButtonState();
@@ -1017,6 +1005,8 @@ function beautyPresetOptions(key,strength){
   if(key==="soft")return{lighteningContrastLevel:1,lighteningLevel:.16+.18*s,smoothnessLevel:.24+.42*s,sharpnessLevel:.08+.12*s,rednessLevel:.10+.12*s};
   if(key==="glow")return{lighteningContrastLevel:2,lighteningLevel:.22+.34*s,smoothnessLevel:.18+.28*s,sharpnessLevel:.14+.24*s,rednessLevel:.10+.15*s};
   if(key==="warm")return{lighteningContrastLevel:1,lighteningLevel:.12+.15*s,smoothnessLevel:.15+.24*s,sharpnessLevel:.10+.17*s,rednessLevel:.24+.34*s};
+  if(key==="vivid")return{lighteningContrastLevel:2,lighteningLevel:.12+.18*s,smoothnessLevel:.08+.12*s,sharpnessLevel:.28+.34*s,rednessLevel:.12+.12*s};
+  if(key==="clean")return{lighteningContrastLevel:1,lighteningLevel:.20+.20*s,smoothnessLevel:.12+.18*s,sharpnessLevel:.20+.24*s,rednessLevel:.08+.08*s};
   return null;
 }
 function loadBeautyExtension(){
@@ -1067,7 +1057,7 @@ function renderLookButtons(){
 }
 async function applySetupLook(key=setupLook){
   const seq=++setupLookSeq;
-  setupLook=["natural","soft","glow","warm"].includes(key)?key:"natural";
+  setupLook=["natural","soft","glow","warm","vivid","clean"].includes(key)?key:"natural";
   renderLookButtons();
   if(setupLook==="natural"){
     try{await beautyProcessor?.disable?.()}catch(_){}
@@ -1166,7 +1156,11 @@ async function chooseNormalPhysicalCamera(next,track){
 async function makePhoneDefaultCamera(next){
   /* Start with the browser's normal logical front/rear camera. No forced
      width, height, aspect ratio, zoom, crop, or panoramic lens. */
-  const track=await window.AgoraRTC.createCameraVideoTrack({facingMode:next});
+  const track=await window.AgoraRTC.createCameraVideoTrack({
+    facingMode:next,
+    encoderConfig:{frameRate:30},
+    optimizationMode:"motion"
+  });
   await chooseNormalPhysicalCamera(next,track);
   return track;
 }
@@ -1267,6 +1261,7 @@ function createOverlay(stream,host){
   if(!host){$("#m7lv-local",overlay).style.display="none";$("#m7lv-close",overlay).onclick=()=>cleanupOverlay(false)}else $("#m7lv-remote",overlay).style.display="none";
   if(!pushedHistory){try{history.pushState({m7lv:true},"",location.href);pushedHistory=true}catch(_){}}
   bindLiveViewport();syncLiveViewport();wireLiveChrome();
+  if(host)bindPinchZoom($("#m7lv-local",overlay));
   $("#m7lv-login-chat",overlay)?.addEventListener("click",()=>window.Ma7alakAccount?.open?.());
 }
 function preflight(){
@@ -1286,12 +1281,41 @@ function preflight(){
       <div class="m7lv-setup-top">
         <button id="m7lv-setup-close" class="m7lv-setup-topbtn" type="button" aria-label="Close Live setup">×</button>
         <div class="m7lv-setup-preview-chip"><i></i> LIVE PREVIEW · NOT BROADCASTING</div>
-        <button id="m7lv-setup-flip" class="m7lv-setup-topbtn" type="button" aria-label="Flip camera">↻</button>
+        <div class="m7lv-setup-fps">30 FPS</div>
       </div>
       <div class="m7lv-setup-tools">
         <button id="m7lv-setup-mic" class="m7lv-setup-tool" type="button"><b>🎤</b><span>Mic</span></button>
         <button id="m7lv-setup-flash" class="m7lv-setup-tool" type="button"><b>⚡</b><span>Flash</span></button>
-        <button id="m7lv-setup-mirror" class="m7lv-setup-tool" type="button"><b>⇋</b><span>Mirror</span></button>
+      </div>
+      <div class="m7lv-pinch-hint">Pinch with two fingers to zoom</div>
+      <div class="m7lv-studio-actions">
+        <button id="m7lv-setup-flip" class="m7lv-studio-action" type="button"><b>↻</b><span>Flip</span></button>
+        <button id="m7lv-setup-beauty" class="m7lv-studio-action" type="button"><b>✿</b><span>Beauty</span></button>
+        <button id="m7lv-setup-effects" class="m7lv-studio-action" type="button"><b>✨</b><span>Effects</span></button>
+        <button id="m7lv-setup-adjust" class="m7lv-studio-action" type="button"><b>☼</b><span>Adjust</span></button>
+      </div>
+      <div id="m7lv-setup-panel" class="m7lv-setup-panel" data-mode="">
+        <div class="m7lv-panel-head"><strong id="m7lv-panel-title">Beauty</strong><button id="m7lv-panel-close" class="m7lv-panel-close" type="button" aria-label="Close controls">×</button></div>
+        <div class="m7lv-panel-section" data-panel="beauty">
+          <div class="m7lv-look-row">
+            <button class="m7lv-look active" data-look="natural" type="button"><b>◉</b><span>Off</span></button>
+            <button class="m7lv-look" data-look="soft" type="button"><b>✿</b><span>Soft</span></button>
+            <button class="m7lv-look" data-look="glow" type="button"><b>✦</b><span>Glow</span></button>
+          </div>
+        </div>
+        <div class="m7lv-panel-section" data-panel="effects">
+          <div class="m7lv-look-row">
+            <button class="m7lv-look active" data-look="natural" type="button"><b>◉</b><span>None</span></button>
+            <button class="m7lv-look" data-look="warm" type="button"><b>☀</b><span>Warm</span></button>
+            <button class="m7lv-look" data-look="vivid" type="button"><b>◆</b><span>Vivid</span></button>
+            <button class="m7lv-look" data-look="clean" type="button"><b>◇</b><span>Clean</span></button>
+          </div>
+        </div>
+        <div class="m7lv-panel-section" data-panel="adjust">
+          <label class="m7lv-setup-range is-off"><span>Exposure</span><input id="m7lv-setup-exposure" type="range"><output>0.0</output></label>
+          <label class="m7lv-setup-range is-off"><span>Color</span><input id="m7lv-setup-color" type="range"><output>Auto</output></label>
+        </div>
+        <label class="m7lv-setup-range m7lv-shared-strength"><span>Strength</span><input id="m7lv-look-strength" type="range" min="15" max="100" step="1" value="${Math.round(setupLookStrength*100)}" disabled><output id="m7lv-look-strength-value">Off</output></label>
       </div>
       <div class="m7lv-setup-bottom">
         <div class="m7lv-setup-shop">
@@ -1299,30 +1323,6 @@ function preflight(){
           <div class="m7lv-setup-shopcopy"><strong>${esc(name)}</strong><small>Set up your camera before viewers can see you</small></div>
         </div>
         <input id="m7lv-title" maxlength="80" autocomplete="off" placeholder="What is this Live about? (optional)" value="${esc(existing?.title||"")}">
-        <div class="m7lv-setup-quick">
-          <button id="m7lv-setup-panel-toggle" class="m7lv-setup-open" type="button" aria-expanded="false">
-            <strong>✨</strong><span>Looks & camera</span><em id="m7lv-setup-look-label">Natural</em><b class="m7lv-setup-chevron">⌃</b>
-          </button>
-          <button id="m7lv-setup-reset" class="m7lv-setup-reset" type="button">1× camera</button>
-        </div>
-        <div id="m7lv-setup-drawer" class="m7lv-setup-drawer">
-        <div class="m7lv-setup-section">
-          <div class="m7lv-setup-label"><span>Looks</span><em>Applied to the outgoing Live on supported devices</em></div>
-          <div class="m7lv-look-row">
-            <button class="m7lv-look active" data-look="natural" type="button"><b>◉</b><span>Natural</span></button>
-            <button class="m7lv-look" data-look="soft" type="button"><b>✿</b><span>Soft</span></button>
-            <button class="m7lv-look" data-look="glow" type="button"><b>✦</b><span>Glow</span></button>
-            <button class="m7lv-look" data-look="warm" type="button"><b>☀</b><span>Warm</span></button>
-          </div>
-        </div>
-        <div class="m7lv-setup-section">
-          <div class="m7lv-setup-label"><span>Camera tune</span><em>Only controls supported by this camera are shown</em></div>
-          <label class="m7lv-setup-range"><span>Zoom</span><input id="m7lv-setup-zoom" type="range"><output>1.0×</output></label>
-          <label class="m7lv-setup-range is-off"><span>Exposure</span><input id="m7lv-setup-exposure" type="range"><output>0.0</output></label>
-          <label class="m7lv-setup-range is-off"><span>Color</span><input id="m7lv-setup-color" type="range"><output>Auto</output></label>
-          <label class="m7lv-setup-range"><span>Look strength</span><input id="m7lv-look-strength" type="range" min="15" max="100" step="1" value="${Math.round(setupLookStrength*100)}" disabled><output id="m7lv-look-strength-value">Off</output></label>
-        </div>
-        </div>
         <div class="m7lv-pre-status">${allowed?"Opening your camera…":"Video Live is disabled for this shop in Admin."}</div>
         <button class="m7lv-start" type="button" disabled>${allowed?(existing?"Resume Live":"Go Live"):"Live disabled"}</button>
         <div class="m7lv-setup-footnote">ShoufHon now keeps the phone camera's native framing. Selfie preview is mirrored like a normal phone camera; viewers receive the normal orientation.</div>
@@ -1336,24 +1336,28 @@ function preflight(){
   $("#m7lv-setup-flip",p).onclick=()=>setCameraFacing(cameraFacing==="environment"?"user":"environment");
   $("#m7lv-setup-mic",p).onclick=()=>toggleMic();
   $("#m7lv-setup-flash",p).onclick=()=>toggleTorch();
-  $("#m7lv-setup-mirror",p).onclick=()=>{
-    if(cameraFacing!=="user")return;
-    setupMirror=!setupMirror;playSetupPreview();applySetupButtonState();
-    setupStatus(setupMirror?"Front preview mirrored. Viewers still see normal orientation.":"Front preview unmirrored.");
+  const studio=$(".m7lv-setup",p),panel=$("#m7lv-setup-panel",p);
+  const openStudioPanel=mode=>{
+    if(!studio||!panel)return;
+    panel.dataset.mode=mode;
+    panel.classList.add("open");
+    studio.classList.add("panel-open");
+    $$(".m7lv-panel-section",panel).forEach(section=>section.classList.toggle("show",section.dataset.panel===mode));
+    const title=$("#m7lv-panel-title",panel);
+    if(title)title.textContent=mode==="beauty"?"Beauty":mode==="effects"?"Effects":"Adjust camera";
+    ["beauty","effects","adjust"].forEach(key=>$("#m7lv-setup-"+key,p)?.classList.toggle("active",key===mode));
   };
-  const drawer=$("#m7lv-setup-drawer",p),panelToggle=$("#m7lv-setup-panel-toggle",p);
-  const setSetupDrawer=open=>{
-    if(!drawer||!panelToggle)return;
-    drawer.classList.toggle("open",!!open);
-    panelToggle.classList.toggle("open",!!open);
-    panelToggle.setAttribute("aria-expanded",open?"true":"false");
+  const closeStudioPanel=()=>{
+    if(!studio||!panel)return;
+    panel.classList.remove("open");
+    studio.classList.remove("panel-open");
+    ["beauty","effects","adjust"].forEach(key=>$("#m7lv-setup-"+key,p)?.classList.remove("active"));
   };
-  panelToggle.onclick=()=>setSetupDrawer(!drawer.classList.contains("open"));
-  $("#m7lv-setup-reset",p).onclick=async()=>{
-    await resetCameraZoom();
-    refreshSetupCameraControls();
-    setupStatus("Camera returned to its normal 1× framing.");
-  };
+  $("#m7lv-setup-beauty",p).onclick=()=>openStudioPanel("beauty");
+  $("#m7lv-setup-effects",p).onclick=()=>openStudioPanel("effects");
+  $("#m7lv-setup-adjust",p).onclick=()=>openStudioPanel("adjust");
+  $("#m7lv-panel-close",p).onclick=closeStudioPanel;
+  bindPinchZoom($("#m7lv-setup-camera",p));
   $$(".m7lv-look",p).forEach(button=>button.onclick=()=>applySetupLook(button.dataset.look));
   const strength=$("#m7lv-look-strength",p);
   if(strength)strength.oninput=()=>{
@@ -1375,7 +1379,6 @@ function preflight(){
     };
     input.onchange=()=>applyCameraConstraint(key,input.value);
   };
-  bindTune("#m7lv-setup-zoom","zoom");
   bindTune("#m7lv-setup-exposure","exposureCompensation");
   bindTune("#m7lv-setup-color","colorTemperature");
 
