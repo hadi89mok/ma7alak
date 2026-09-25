@@ -17333,7 +17333,7 @@ window.Ma7alakAdminStudioBridge={
   preview(tab){
     const panel=document.getElementById("ma-admin-edit-card");if(!panel)return;
     const old=panel.dataset.m7v4PreviewMode;
-    panel.dataset.m7v4PreviewMode=({hours:"hours",advanced:"card",details:"details",about:"about"})[tab]||"design";
+    panel.dataset.m7v4PreviewMode=({hours:"hours",directory:"card",details:"details",about:"about"})[tab]||"design";
     refreshEditPreview(panel);panel.dataset.m7v4PreviewMode=old;
   },
   textStyle(key){
