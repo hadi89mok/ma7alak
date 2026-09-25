@@ -724,6 +724,39 @@
     });
   }
 
+  window.addEventListener("shoufhon:media-profile-options",event=>{
+    const detail=event?.detail||{};
+    if(
+      detail.shopSlug &&
+      slug &&
+      String(detail.shopSlug)!==String(slug)
+    ){
+      return;
+    }
+
+    const options=
+      detail.directory_options&&
+      typeof detail.directory_options==="object"
+        ?detail.directory_options
+        :{};
+
+    const number=(key,fallback)=>{
+      const value=Number(options[key]);
+      return Number.isFinite(value)
+        ?Math.max(0,Math.min(100,Math.round(value)))
+        :fallback;
+    };
+
+    snapshot.photoLimit=
+      number("owner_media_photo_limit",snapshot.photoLimit||6);
+    snapshot.videoLimit=
+      number("owner_media_video_limit",snapshot.videoLimit||2);
+    snapshot.albumLimit=
+      number("owner_media_album_item_limit",snapshot.albumLimit??8);
+
+    if(editorOpen())render();
+  });
+
   window.addEventListener("message",event=>{
     if(!trustedParentEvent(event))return;
     const data=event.data||{};
