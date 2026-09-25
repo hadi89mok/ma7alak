@@ -182,6 +182,8 @@ body{overflow:hidden}
 .m7slp-owner-live{background:linear-gradient(135deg,#f33156,#bf1738);color:#fff;box-shadow:0 7px 18px rgba(223,31,67,.18)}
 .m7slp-owner-live.locked{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.48);box-shadow:none}
 .m7slp-owner-edit{background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
+.m7slp-action-pressed{animation:m7slpTap .3s cubic-bezier(.2,.85,.3,1)!important;pointer-events:none}
+@keyframes m7slpTap{0%{transform:scale(1)}42%{transform:scale(.91)}76%{transform:scale(1.035)}100%{transform:scale(1)}}
 
 .m7slp-cta.live{border-color:rgba(255,80,110,.52);background:linear-gradient(135deg,#f5365b,#bd1637);color:#fff}
 .m7slp-cta.ghost{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.55);box-shadow:none}
@@ -268,6 +270,7 @@ function ownerActiveMarkup(){
   const offers=offerUsed();
   const name=shopName();
   const canVideo=videoEnabled();
+  const firstOffer=(state.items||[]).find(x=>x&&x.id!=null)||null;
 
   const kicker=live
     ? '<span class="m7slp-kicker live"><i></i> OWNER · VIDEO LIVE</span>'
@@ -291,7 +294,7 @@ function ownerActiveMarkup(){
     '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
     '<span class="m7slp-owner-active-actions">'+
       '<button class="m7slp-owner-live '+(!canVideo&&!live?"locked":"")+'" type="button" data-action="go">'+esc(liveLabel)+'</button>'+
-      '<button class="m7slp-owner-edit" type="button" data-action="manage">Edit</button>'+
+      '<button class="m7slp-owner-edit" type="button" data-action="manage" data-offer-id="'+esc(firstOffer?.id||"")+'">Edit</button>'+
     '</span>'+
   '</div>';
 }
@@ -345,6 +348,21 @@ function primary(){
   if(state.broadcastLive)return post("MA7ALAK_LIVE_VIDEO_OPEN_SHOP");
   if(offerUsed()>0)return post("MA7ALAK_LIVE_OFFERS_OPEN_SHOP");
 }
+const actionBusy=new Set();
+function pressAction(button,label){
+  if(!button)return false;
+  const key=String(button.dataset.action||"action");
+  if(actionBusy.has(key))return false;
+  actionBusy.add(key);
+  const old=button.textContent||"";
+  button.classList.add("m7slp-action-pressed");
+  if(label)button.textContent=label;
+  setTimeout(()=>{
+    actionBusy.delete(key);
+    if(button?.isConnected){button.classList.remove("m7slp-action-pressed");if(label)button.textContent=old}
+  },900);
+  return true;
+}
 function bind(){
   const primaryEl=$('[data-action="primary"]',root);
   primaryEl?.addEventListener("click",e=>{
@@ -354,12 +372,29 @@ function bind(){
   primaryEl?.addEventListener("keydown",e=>{
     if(e.key==="Enter"||e.key===" "){e.preventDefault();primary()}
   });
+
   $('[data-action="manage"]',root)?.addEventListener("click",e=>{
     e.preventDefault();e.stopPropagation();
-    post("MA7ALAK_LIVE_OWNER_MANAGE");
+    const b=e.currentTarget;
+    if(!pressAction(b,"Opening…"))return;
+    const offerId=String(b.dataset.offerId||"").trim();
+    if(offerId)post("MA7ALAK_LIVE_OFFERS_EDIT",{id:offerId});
+    else post("MA7ALAK_LIVE_OWNER_MANAGE");
   });
-  $('[data-action="go"]',root)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();post("MA7ALAK_LIVE_VIDEO_GO")});
-  $('[data-action="add"]',root)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();post("MA7ALAK_LIVE_OFFERS_CREATE")});
+
+  $('[data-action="go"]',root)?.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    const b=e.currentTarget;
+    if(!pressAction(b,"Opening…"))return;
+    post("MA7ALAK_LIVE_VIDEO_GO");
+  });
+
+  $('[data-action="add"]',root)?.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    const b=e.currentTarget;
+    if(!pressAction(b,"Opening…"))return;
+    post("MA7ALAK_LIVE_OFFERS_CREATE");
+  });
 }
 
 let lastStateRequestAt=0;
