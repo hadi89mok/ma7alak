@@ -11,6 +11,9 @@ if(cleanPath!=="/community-guidelines")return;
 if(window.__SHOUFHON_COMMUNITY_GUIDELINES_PAGE__)return;
 window.__SHOUFHON_COMMUNITY_GUIDELINES_PAGE__=true;
 
+const SUPABASE_URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
+const SUPABASE_KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
+
 const DEFAULTS={
   eyebrow:"ShoufHon Safety & Community",
   title_ar:"إرشادات المجتمع",
@@ -389,21 +392,54 @@ function getClient(){
     window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
     window.Ma7alakSupabaseBootstrap?.client||
     window.__MA7ALAK_LIVE_FALLBACK_SUPABASE__||
+    window.__SHOUFHON_GUIDELINES_PUBLIC_CLIENT__||
     null;
 }
 
-async function waitClient(){
-  for(let i=0;i<80;i++){
-    const c=getClient();
-    if(c)return c;
-    await new Promise(r=>setTimeout(r,125));
+async function ensurePublicClient(){
+  let existing=getClient();
+  if(existing)return existing;
+
+  if(!window.supabase||typeof window.supabase.createClient!=="function"){
+    await new Promise((resolve,reject)=>{
+      const found=document.querySelector('script[data-m7cg-supabase="1"]');
+      if(found){
+        found.addEventListener("load",resolve,{once:true});
+        found.addEventListener("error",reject,{once:true});
+        return;
+      }
+      const s=document.createElement("script");
+      s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      s.async=true;
+      s.dataset.m7cgSupabase="1";
+      s.onload=resolve;
+      s.onerror=()=>reject(new Error("Could not load Supabase."));
+      document.head.appendChild(s);
+    });
   }
-  return null;
+
+  existing=getClient();
+  if(existing)return existing;
+
+  if(window.supabase?.createClient){
+    window.__SHOUFHON_GUIDELINES_PUBLIC_CLIENT__=window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+      {
+        auth:{
+          persistSession:false,
+          autoRefreshToken:false,
+          detectSessionInUrl:false
+        }
+      }
+    );
+  }
+  return window.__SHOUFHON_GUIDELINES_PUBLIC_CLIENT__||null;
 }
 
 async function load(){
   renderLoading();
-  const c=await waitClient();
+  const c=await ensurePublicClient();
   if(!c){render(DEFAULTS);return}
   try{
     const r=await c.from("community_guidelines").select("*").eq("id","main").maybeSingle();
