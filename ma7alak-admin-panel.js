@@ -16012,7 +16012,7 @@ function previewIdentityHtml(shop,mode){
   const category=
     previewVal(
       "ma-edit-category-name",
-      shop.category_name||shop.category||"Category"
+      shop.category_name||"Public shop label"
     ) ||
     "Category";
 
@@ -16041,7 +16041,7 @@ function previewIdentityHtml(shop,mode){
   const location=
     previewVal(
       "ma-edit-location",
-      shop.location||shop.area||"Location"
+      shop.location||"Public location"
     ) ||
     "Location";
 
@@ -17255,7 +17255,7 @@ function renderList(){
   }
 
   list.innerHTML=rows.map(shop=>{
-    const meta=[shop.category_name||shop.category,shop.location||shop.area].filter(Boolean).map(esc).join(" · ");
+    const meta=[shop.category_name,shop.location].filter(Boolean).map(esc).join(" · ");
     return '<article class="m7v4-shop" data-m7v4-slug="'+esc(shop.shop_slug)+'">'+
       shopImage(shop,"")+
       '<div class="m7v4-shop-info">'+
