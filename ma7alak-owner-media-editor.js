@@ -1283,122 +1283,6 @@
     input.click();
   }
 
-  function installPublicViewerPolish(){
-    const viewer=document.getElementById("m7-media-viewer");
-    const stage=document.getElementById("m7v-stage");
-    const image=document.getElementById("m7v-image");
-    const video=document.getElementById("m7v-video");
-    const oldType=document.getElementById("m7v-type");
-    const oldCounter=document.getElementById("m7v-counter");
-    const oldHint=document.getElementById("m7v-hint");
-    const close=document.getElementById("m7v-close");
-
-    if(!viewer||!stage||!image||!oldType||!oldCounter||!oldHint)return;
-    if(viewer.dataset.m7ProfessionalViewer==="1")return;
-    viewer.dataset.m7ProfessionalViewer="1";
-
-    if(close){
-      close.setAttribute("aria-hidden","true");
-      close.setAttribute("tabindex","-1");
-    }
-
-    const hud=document.createElement("div");
-    hud.id="m7v-pro-hud";
-    hud.innerHTML=
-      '<div class="m7v-pro-title" data-m7v-pro-title>Media</div>'+
-      '<div class="m7v-pro-meta" data-m7v-pro-meta>PHOTO · 1 OF 1</div>';
-
-    const swipe=document.createElement("div");
-    swipe.id="m7v-pro-swipe";
-    swipe.innerHTML='<span aria-hidden="true">↔</span><b>Swipe</b>';
-
-    viewer.appendChild(hud);
-    viewer.appendChild(swipe);
-
-    const titleEl=hud.querySelector("[data-m7v-pro-title]");
-    const metaEl=hud.querySelector("[data-m7v-pro-meta]");
-
-    const sync=()=>{
-      const rawType=String(oldType.textContent||"").trim().toUpperCase();
-      const rawCounter=String(oldCounter.textContent||"").trim();
-      const rawHint=String(oldHint.textContent||"").trim();
-      const albumMode=rawType.includes("ALBUM");
-      const mediaType=rawType.includes("VIDEO")?"VIDEO":"PHOTO";
-
-      const countParts=rawCounter
-        .split("/")
-        .map(value=>String(value||"").trim())
-        .filter(Boolean);
-
-      const current=countParts[0]||"1";
-      const total=countParts[1]||"1";
-
-      let albumTitle=rawHint
-        .replace(/\s*·\s*SWIPE\s*$/i,"")
-        .replace(/^SWIPE$/i,"")
-        .trim();
-
-      titleEl.textContent=albumMode
-        ?(albumTitle||"Album")
-        :"Media";
-
-      metaEl.textContent=
-        mediaType+" · "+current+" OF "+total;
-
-      swipe.hidden=Number(total)<=1;
-
-      const activeImage=
-        image.classList.contains("active") &&
-        String(image.currentSrc||image.src||"");
-
-      if(activeImage){
-        stage.style.setProperty(
-          "--m7v-bg",
-          "url("+JSON.stringify(activeImage)+")"
-        );
-        viewer.classList.add("m7v-pro-photo");
-        viewer.classList.remove("m7v-pro-video");
-      }else{
-        stage.style.removeProperty("--m7v-bg");
-        viewer.classList.remove("m7v-pro-photo");
-        viewer.classList.toggle(
-          "m7v-pro-video",
-          !!video?.classList.contains("active")
-        );
-      }
-    };
-
-    const textObserver=new MutationObserver(sync);
-    [oldType,oldCounter,oldHint].forEach(node=>{
-      textObserver.observe(node,{
-        childList:true,
-        subtree:true,
-        characterData:true
-      });
-    });
-
-    const mediaObserver=new MutationObserver(sync);
-    mediaObserver.observe(image,{
-      attributes:true,
-      attributeFilter:["src","class"]
-    });
-
-    if(video){
-      mediaObserver.observe(video,{
-        attributes:true,
-        attributeFilter:["src","class"]
-      });
-    }
-
-    mediaObserver.observe(viewer,{
-      attributes:true,
-      attributeFilter:["class","aria-hidden"]
-    });
-
-    image.addEventListener("load",sync,{passive:true});
-    sync();
-  }
-
   function inject(){
     const existing=document.getElementById("m7-owner-media-edit");
     if(existing){
@@ -1436,24 +1320,6 @@
         #m7-media-showcase .m7-media-symbol{width:33px!important;height:33px!important;flex-basis:33px!important}
       }
       #m7-owner-media-edit.visible{display:flex!important}
-
-      /* PUBLIC MEDIA VIEWER — CLEAN PHONE-FIRST PRESENTATION */
-      #m7-media-viewer .m7v-close,
-      #m7-media-viewer .m7v-top,
-      #m7-media-viewer .m7v-hint{display:none!important}
-      #m7-media-viewer .m7v-stage{padding:0!important;background:#050505!important;isolation:isolate!important}
-      #m7-media-viewer .m7v-stage:before{content:"";position:absolute;inset:-11%;z-index:0;pointer-events:none;background-image:var(--m7v-bg,none);background-size:cover;background-position:center;filter:blur(32px) brightness(.33) saturate(1.08);-webkit-filter:blur(32px) brightness(.33) saturate(1.08);transform:scale(1.12);opacity:.94}
-      #m7-media-viewer .m7v-stage:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.46) 0%,rgba(0,0,0,.03) 26%,rgba(0,0,0,.03) 74%,rgba(0,0,0,.52) 100%)}
-      #m7-media-viewer .m7v-image,
-      #m7-media-viewer .m7v-video{position:relative!important;z-index:2!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;background:transparent!important}
-      #m7v-pro-hud{position:absolute;top:max(14px,env(safe-area-inset-top));left:14px;right:14px;z-index:90;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none;font-family:Arial,"Segoe UI",sans-serif}
-      #m7v-pro-hud>div{min-height:38px;display:flex;align-items:center;border:1px solid rgba(var(--m7-view-rgb,217,164,65),.28);background:rgba(8,8,9,.62);backdrop-filter:blur(14px) saturate(125%);-webkit-backdrop-filter:blur(14px) saturate(125%);box-shadow:0 8px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05)}
-      .m7v-pro-title{max-width:65%;padding:0 13px;border-radius:13px;color:var(--m7-view-light,#f5d58d);font-size:10px;font-weight:950;letter-spacing:.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .m7v-pro-meta{padding:0 11px;border-radius:999px;color:rgba(255,255,255,.84);font-size:8.5px;font-weight:900;letter-spacing:.75px;white-space:nowrap}
-      #m7v-pro-swipe{position:absolute;left:50%;bottom:max(17px,env(safe-area-inset-bottom));z-index:90;transform:translateX(-50%);display:flex;align-items:center;gap:7px;min-height:32px;padding:0 11px;border:1px solid rgba(255,255,255,.11);border-radius:999px;background:rgba(7,7,8,.52);color:rgba(255,255,255,.72);font:850 7.5px/1 Arial,"Segoe UI",sans-serif;letter-spacing:1px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:none}
-      #m7v-pro-swipe[hidden]{display:none!important}
-      #m7v-pro-swipe span{color:var(--m7-view-light,#f2cf80);font-size:13px;line-height:1}
-      @media(max-width:520px){#m7v-pro-hud{left:10px;right:10px;top:max(10px,env(safe-area-inset-top))}.m7v-pro-title{max-width:62%;font-size:9.5px}.m7v-pro-meta{font-size:8px}#m7v-pro-swipe{bottom:max(14px,env(safe-area-inset-bottom))}}
 
       html:has(#m7-owner-media-sheet.open),body:has(#m7-owner-media-sheet.open){margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;background:#050506!important}
       #m7-owner-media-sheet{position:fixed!important;inset:-1px!important;top:-1px!important;left:-1px!important;width:calc(100vw + 2px)!important;width:calc(100dvw + 2px)!important;height:calc(100vh + 2px)!important;height:calc(100dvh + 2px)!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(11px,env(safe-area-inset-top)) 13px max(25px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
@@ -1540,9 +1406,6 @@
       #m7-media-showcase.m7-media-effects-paused .photo::after,#m7-media-showcase.m7-media-effects-paused .video::after,#m7-media-showcase.m7-media-effects-paused .m7-media-frame-layer{animation-play-state:paused!important;-webkit-animation-play-state:paused!important}
     `;
     document.head.appendChild(style);
-
-    installPublicViewerPolish();
-    setTimeout(installPublicViewerPolish,250);
 
     /* Stop decorative frame work while this embed is off-screen or hidden. */
     const mediaRoot=document.getElementById("m7-media-showcase");
