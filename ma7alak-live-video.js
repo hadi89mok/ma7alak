@@ -16,7 +16,7 @@ const AGORA_SDK="https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4.24.8/AgoraRTC_N
 let c=null,streams=[],profiles=new Map(),ownerSlug="",ownerEnt=null,streamSub=null,refreshBusy=false,injectTimer=null;
 let overlay=null,mode="",activeStream=null,rtcClient=null,localAudio=null,localVideo=null,roomChannel=null,roomClientKey="",hostUid=0,hostRemoteUid="";
 let chatChannel=null,reactionChannel=null,chatProfileCache=new Map(),viewportBound=false,liveOffers=[];
-let micMuted=false,videoPaused=false,torchOn=false,cameraFacing="environment",wakeLock=null,heartbeatTimer=null,qualityProfile="720p_3",qualityChangedAt=0,leaving=false,pushedHistory=false;
+let micMuted=false,videoPaused=false,torchOn=false,cameraFacing="environment",wakeLock=null,heartbeatTimer=null,qualityProfile="720p_3",qualityChangedAt=0,leaving=false,pushedHistory=false,viewerOpenSeq=0,agoraWarmScheduled=false;
 
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -142,6 +142,9 @@ async function refresh(){
     const slugs=[...new Set(streams.map(x=>String(x.shop_slug||"").toLowerCase()).filter(Boolean))];profiles=new Map();
     if(slugs.length){const p=await c.from("shop_profiles").select("shop_slug,shop_name,arabic_name,profile_image_url,shop_url").in("shop_slug",slugs);(p.error?[]:(p.data||[])).forEach(x=>profiles.set(String(x.shop_slug).toLowerCase(),x))}
     emitLiveState();
+    /* If at least one Video Live is visible, warm the Agora SDK quietly.
+       Opening the viewer still happens only after a real user tap. */
+    warmLiveViewerDependencies();
     if(overlay&&mode==="audience"&&activeStream&&!streams.some(x=>String(x.id)===String(activeStream.id))){
       setStatus("Live ended.");
       setTimeout(()=>cleanupOverlay(false),650);
@@ -200,7 +203,21 @@ function inject(){
   injectOwnerButton();
 }
 
-function loadAgora(){if(window.AgoraRTC)return Promise.resolve(window.AgoraRTC);if(window.__M7LV_AGORA_PROMISE__)return window.__M7LV_AGORA_PROMISE__;window.__M7LV_AGORA_PROMISE__=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=AGORA_SDK;s.async=true;s.onload=()=>resolve(window.AgoraRTC);s.onerror=()=>reject(new Error("Agora SDK failed to load."));document.head.appendChild(s)});return window.__M7LV_AGORA_PROMISE__}
+function loadAgora(){if(window.AgoraRTC)return Promise.resolve(window.AgoraRTC);if(window.__M7LV_AGORA_PROMISE__)return window.__M7LV_AGORA_PROMISE__;window.__M7LV_AGORA_PROMISE__=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=AGORA_SDK;s.async=true;s.crossOrigin="anonymous";s.onload=()=>resolve(window.AgoraRTC);s.onerror=()=>{window.__M7LV_AGORA_PROMISE__=null;reject(new Error("Agora SDK failed to load."))};document.head.appendChild(s)});return window.__M7LV_AGORA_PROMISE__}
+function warmLiveViewerDependencies(){
+  if(!streams.length||window.AgoraRTC||window.__M7LV_AGORA_PROMISE__||agoraWarmScheduled)return;
+  agoraWarmScheduled=true;
+  const warm=()=>{
+    agoraWarmScheduled=false;
+    if(!streams.length||window.AgoraRTC||window.__M7LV_AGORA_PROMISE__)return;
+    loadAgora().catch(()=>{});
+  };
+  if(typeof window.requestIdleCallback==="function"){
+    window.requestIdleCallback(warm,{timeout:900});
+  }else{
+    setTimeout(warm,160);
+  }
+}
 function lock(){document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}function unlock(){document.documentElement.style.overflow="";document.body.style.overflow=""}
 
 function viewerCanInteract(){return !!window.Ma7alakAccount?.session?.user}
@@ -642,16 +659,141 @@ async function startHost(title){
 function wireHostControls(){const bind=(id,fn)=>{const e=$(id,overlay);if(e)e.onclick=fn};bind("#m7lv-switch",switchCamera);bind("#m7lv-mute",toggleMic);bind("#m7lv-pause",toggleVideo);bind("#m7lv-torch",toggleTorch);bind("#m7lv-end",endLive)}
 
 async function openViewer(id){
-  if(overlay)return;const base=streams.find(x=>String(x.id)===String(id));if(!base)return;await loadAgora();let join;try{join=await api("join",{stream_id:id})}catch(err){alert(friendlyError(err));await refresh();return}
-  const stream={...base,...join.stream};createOverlay(stream,false);hostUid=Number(join.uid)||0;await loadStreamOffers();
+  if(overlay)return;
+  const base=streams.find(x=>String(x.id)===String(id));
+  if(!base)return;
+
+  /*
+     Open the real Live room immediately on the user's tap.
+     Agora SDK loading + secure join-token request happen behind this UI,
+     so a normal 1–2 second network connection never feels like a dead tap.
+  */
+  const openSeq=++viewerOpenSeq;
+  createOverlay(base,false);
+  const openedOverlay=overlay;
+  setStatus("Connecting to live…");
+  setQuality("Connecting…","#e8be3e");
+
+  /* Offers can load while Agora/token work is happening. */
+  const offersPromise=loadStreamOffers().catch(()=>{});
+
+  let AgoraRTC,join;
   try{
-    rtcClient=window.AgoraRTC.createClient({mode:"live",codec:"vp8"});await rtcClient.setClientRole("audience");wireRtcEvents();rtcClient.on("user-published",async(user,mediaType)=>{try{await rtcClient.subscribe(user,mediaType);if(mediaType==="video"){hostRemoteUid=String(user.uid);user.videoTrack.play($("#m7lv-remote",overlay),{fit:"cover",mirror:false});setStatus("Live video connected.");updateRtcViewerCount()}if(mediaType==="audio")user.audioTrack.play()}catch(_){}});rtcClient.on("user-unpublished",(user,mediaType)=>{if(mediaType==="video"&&String(user.uid)===hostRemoteUid)setStatus("Host paused video.")});rtcClient.on("user-left",user=>{updateViewerCount();if(hostRemoteUid&&String(user.uid)===hostRemoteUid){setStatus("Host left the live.");setTimeout(()=>cleanupOverlay(false),1700)}});await rtcClient.join(join.app_id,stream.channel_name,join.token,hostUid);await setupRoom("audience");await acquireWake();setStatus("Connected. Waiting for video…");
-  }catch(err){setStatus(friendlyError(err));setTimeout(()=>cleanupOverlay(false),1800)}
+    [AgoraRTC,join]=await Promise.all([
+      loadAgora(),
+      api("join",{stream_id:id})
+    ]);
+  }catch(err){
+    if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+    setStatus(friendlyError(err));
+    setQuality("Unavailable","#ef4444");
+    refresh().catch(()=>{});
+    setTimeout(()=>{
+      if(openSeq===viewerOpenSeq&&overlay===openedOverlay){
+        cleanupOverlay(false);
+      }
+    },1450);
+    return;
+  }
+
+  if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+
+  const stream={...base,...join.stream};
+  activeStream=stream;
+  hostUid=Number(join.uid)||0;
+  setStatus("Joining live…");
+
+  try{
+    const thisClient=AgoraRTC.createClient({mode:"live",codec:"vp8"});
+    rtcClient=thisClient;
+    await thisClient.setClientRole("audience");
+
+    if(openSeq!==viewerOpenSeq||overlay!==openedOverlay){
+      try{await thisClient.leave()}catch(_){}
+      if(rtcClient===thisClient)rtcClient=null;
+      return;
+    }
+
+    wireRtcEvents();
+
+    thisClient.on("user-published",async(user,mediaType)=>{
+      try{
+        await thisClient.subscribe(user,mediaType);
+        if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+
+        if(mediaType==="video"){
+          const remote=$("#m7lv-remote",openedOverlay);
+          if(!remote)return;
+          hostRemoteUid=String(user.uid);
+          user.videoTrack.play(remote,{fit:"cover",mirror:false});
+          setStatus("Live video connected.");
+          updateRtcViewerCount();
+        }
+
+        if(mediaType==="audio"){
+          user.audioTrack.play();
+        }
+      }catch(_){}
+    });
+
+    thisClient.on("user-unpublished",(user,mediaType)=>{
+      if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+      if(mediaType==="video"&&String(user.uid)===hostRemoteUid){
+        setStatus("Host paused video.");
+      }
+    });
+
+    thisClient.on("user-left",user=>{
+      if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+      updateViewerCount();
+      if(hostRemoteUid&&String(user.uid)===hostRemoteUid){
+        setStatus("Host left the live.");
+        setTimeout(()=>{
+          if(openSeq===viewerOpenSeq&&overlay===openedOverlay){
+            cleanupOverlay(false);
+          }
+        },1700);
+      }
+    });
+
+    await thisClient.join(
+      join.app_id,
+      stream.channel_name,
+      join.token,
+      hostUid
+    );
+
+    if(openSeq!==viewerOpenSeq||overlay!==openedOverlay){
+      try{await thisClient.leave()}catch(_){}
+      if(rtcClient===thisClient)rtcClient=null;
+      return;
+    }
+
+    await offersPromise;
+    await setupRoom("audience");
+
+    if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+
+    await acquireWake();
+    setStatus("Connected. Waiting for video…");
+  }catch(err){
+    if(openSeq!==viewerOpenSeq||overlay!==openedOverlay)return;
+    setStatus(friendlyError(err));
+    setQuality("Connection issue","#ef4444");
+    setTimeout(()=>{
+      if(openSeq===viewerOpenSeq&&overlay===openedOverlay){
+        cleanupOverlay(false);
+      }
+    },1800);
+  }
 }
 
 async function endLive(){if(leaving)return;if(!confirm("End this live video now?"))return;leaving=true;setStatus("Ending live…");try{await api("end",{stream_id:activeStream?.id})}catch(_){}await cleanupOverlay(false);leaving=false;await refresh()}
 async function cleanupOverlay(popHistory=true){
   if(!overlay)return;
+  /* Cancels any in-flight audience join so a fast Close can never reopen
+     or continue wiring a viewer after the panel has already disappeared. */
+  viewerOpenSeq++;
   clearInterval(heartbeatTimer);heartbeatTimer=null;
   try{localAudio?.stop();localAudio?.close()}catch(_){}
   try{localVideo?.stop();localVideo?.close()}catch(_){}
