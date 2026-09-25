@@ -857,13 +857,27 @@ async function setupPresence(){
   }catch(_){roomChannel=null}
 }
 
+function actualCameraFacing(track=localVideo){
+  try{
+    const media=track?.getMediaStreamTrack?.();
+    const settings=media?.getSettings?.()||{};
+    const facing=String(settings.facingMode||"").toLowerCase();
+    if(facing==="user"||facing==="environment")return facing;
+    const label=String(track?.getTrackLabel?.()||media?.label||"").toLowerCase();
+    if(/front|selfie|facing front|user/.test(label))return"user";
+    if(/back|rear|facing back|environment|world/.test(label))return"environment";
+  }catch(_){}
+  return cameraFacing==="user"?"user":"environment";
+}
 function localPreview(){
   if(!localVideo||!overlay)return;
   try{
     const target=$("#m7lv-local",overlay);
     if(!target)return;
     target.innerHTML="";
-    localVideo.play(target,{fit:"contain",mirror:cameraFacing==="user"});
+    const actual=actualCameraFacing(localVideo);
+    cameraFacing=actual;
+    localVideo.play(target,{fit:"contain",mirror:actual==="user"});
   }catch(_){}
 }
 
@@ -943,7 +957,9 @@ function playSetupPreview(){
   if(!localVideo||!target)return;
   try{
     target.innerHTML="";
-    localVideo.play(target,{fit:"contain",mirror:cameraFacing==="user"&&setupMirror});
+    const actual=actualCameraFacing(localVideo);
+    cameraFacing=actual;
+    localVideo.play(target,{fit:"contain",mirror:actual==="user"&&setupMirror});
   }catch(_){}
 }
 async function resetCameraZoom(){
@@ -1084,52 +1100,79 @@ async function createSetupCapture(){
     window.AgoraRTC.createMicrophoneAudioTrack(),
     makePhoneDefaultCamera("environment")
   ]);
-  cameraFacing="environment";qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
+  cameraFacing=actualCameraFacing(localVideo);qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
   await resetCameraZoom();
   playSetupPreview();
   refreshSetupCameraControls();
 }
+function cameraSideFromLabel(label){
+  const s=String(label||"").toLowerCase();
+  if(/front|selfie|facing front|user/.test(s))return"user";
+  if(/back|rear|facing back|environment|world/.test(s))return"environment";
+  return"";
+}
+function cameraSpecialty(label){
+  return /ultra\s*-?\s*wide|ultrawide|telephoto|\btele\b|macro|depth|infrared|\bir\b|zoom camera/.test(String(label||"").toLowerCase());
+}
+function cameraNumericHint(label,next){
+  const s=String(label||"").toLowerCase();
+  const m=s.match(/camera2?\s*[-_: ]?\s*(\d+)/);
+  if(!m)return 0;
+  const n=Number(m[1]);
+  /* Chromium/Android commonly exposes the primary rear as camera 0 and
+     primary front as camera 1. This is only a tie-breaker, never the only
+     way we decide which side a camera belongs to. */
+  if(next==="environment"&&n===0)return 18;
+  if(next==="user"&&n===1)return 18;
+  return 0;
+}
 function cameraLabelScore(cam,next){
   const label=String(cam?.label||"").toLowerCase();
+  const side=cameraSideFromLabel(label);
   let score=0;
-  const isFront=/front|user|face|selfie/.test(label);
-  const isRear=/back|rear|environment|world/.test(label);
-  const specialty=/ultra|ultrawide|ultra-wide|tele|telephoto|zoom|macro|depth|infrared|ir camera/.test(label);
 
-  if(next==="user"){
-    if(isFront)score+=100;
-    if(isRear)score-=120;
-    if(/selfie|front camera|facing front/.test(label))score+=20;
-    if(specialty)score-=80;
-  }else{
-    if(isRear)score+=100;
-    if(isFront)score-=120;
-    if(/main|primary|back camera|rear camera|facing back/.test(label))score+=24;
-    if(specialty)score-=80;
-    if(/wide/.test(label)&&!/ultra/.test(label))score+=4;
-  }
+  if(side===next)score+=120;
+  else if(side&&side!==next)score-=180;
+
+  if(cameraSpecialty(label))score-=100;
+  if(/main|primary/.test(label))score+=35;
+  if(next==="environment"&&/back camera|rear camera|facing back/.test(label))score+=25;
+  if(next==="user"&&/front camera|selfie|facing front/.test(label))score+=25;
+  score+=cameraNumericHint(label,next);
   return score;
 }
-async function fallbackPhysicalCamera(next,track){
+async function chooseNormalPhysicalCamera(next,track){
   try{
     const cams=await window.AgoraRTC.getCameras();
     if(!cams?.length)return false;
-    const ordered=[...cams].sort((a,b)=>cameraLabelScore(b,next)-cameraLabelScore(a,next));
+
+    /* Only force a physical device when labels clearly identify the side.
+       If a browser hides/genericizes labels, keep its logical facingMode
+       choice rather than guessing and risking the opposite camera. */
+    const sideMatches=cams.filter(cam=>cameraSideFromLabel(cam.label)===next);
+    if(!sideMatches.length)return false;
+
+    const normal=sideMatches.filter(cam=>!cameraSpecialty(cam.label));
+    const pool=normal.length?normal:sideMatches;
+    const ordered=[...pool].sort((a,b)=>cameraLabelScore(b,next)-cameraLabelScore(a,next));
     const target=ordered[0];
     if(!target?.deviceId)return false;
-    await track.setDevice(target.deviceId);
+
+    const current=String(track?.getMediaStreamTrack?.()?.getSettings?.()?.deviceId||"");
+    if(current!==String(target.deviceId))await track.setDevice(target.deviceId);
     return true;
   }catch(_){return false}
 }
 async function makePhoneDefaultCamera(next){
-  /* This deliberately asks only for the normal facing direction.
-     No width/height/aspectRatio/encoder profile is supplied, so Android/iOS
-     can choose the phone/browser's default logical front or rear camera. */
-  return window.AgoraRTC.createCameraVideoTrack({facingMode:next});
+  /* Start with the browser's normal logical front/rear camera. No forced
+     width, height, aspect ratio, zoom, crop, or panoramic lens. */
+  const track=await window.AgoraRTC.createCameraVideoTrack({facingMode:next});
+  await chooseNormalPhysicalCamera(next,track);
+  return track;
 }
 async function setCameraFacing(next){
   if(!localVideo)return;
-  setupStatus(next==="user"?"Switching to normal selfie camera…":"Switching to normal rear camera…");
+  setupStatus(next==="user"?"Switching to selfie camera…":"Switching to main rear camera…");
 
   const previous=localVideo;
   const wasLive=mode==="host"&&!!rtcClient&&!!activeStream;
@@ -1137,37 +1180,33 @@ async function setCameraFacing(next){
   let replacement=null;
 
   try{
-    /* Beauty processing belongs to the old camera track. Detach it first so
-       the replacement camera starts with untouched native framing. */
     await releaseBeautyProcessor();
-
     replacement=await makePhoneDefaultCamera(next);
 
-    /* Validate the requested side. On browsers that ignore facingMode,
-       choose the best non-specialty physical camera as a fallback. */
-    try{
-      const facing=String(replacement.getMediaStreamTrack?.()?.getSettings?.()?.facingMode||"").toLowerCase();
-      if(facing&&facing!==next){
-        await fallbackPhysicalCamera(next,replacement);
+    /* Trust the camera that actually opened. This prevents a rear camera
+       from ever being treated as a mirrored selfie camera, or vice versa. */
+    const actual=actualCameraFacing(replacement);
+    if(actual!==next){
+      const corrected=await chooseNormalPhysicalCamera(next,replacement);
+      if(corrected){
+        const correctedFacing=actualCameraFacing(replacement);
+        if(correctedFacing!==next)throw new Error("WRONG_CAMERA_SIDE");
+      }else{
+        throw new Error("WRONG_CAMERA_SIDE");
       }
-    }catch(_){}
+    }
 
     if(wasLive){
       try{await rtcClient.unpublish(previous)}catch(_){}
     }
 
     localVideo=replacement;
-    cameraFacing=next;
+    cameraFacing=actualCameraFacing(localVideo);
     torchOn=false;
     await resetCameraZoom();
 
-    if(wantedLook!=="natural"){
-      await applySetupLook(wantedLook);
-    }
-
-    if(wasLive){
-      await rtcClient.publish(localVideo);
-    }
+    if(wantedLook!=="natural")await applySetupLook(wantedLook);
+    if(wasLive)await rtcClient.publish(localVideo);
 
     try{previous.stop();previous.close()}catch(_){}
     replacement=null;
@@ -1176,29 +1215,17 @@ async function setCameraFacing(next){
     refreshSetupCameraControls();
     applySetupButtonState();
 
-    setupStatus(next==="user"
-      ?"Normal selfie camera ready · native phone framing, 1×, no forced crop."
-      :"Normal rear camera ready · native phone framing, 1×, no forced crop.");
+    setupStatus(cameraFacing==="user"
+      ?"Selfie camera ready · mirrored preview only."
+      :"Main rear camera ready · normal direction, 1×, no mirror.");
   }catch(err){
     try{replacement?.stop();replacement?.close()}catch(_){}
     localVideo=previous;
-
-    /* If recreating the logical camera failed, make one final device-id
-       attempt on the existing track. */
-    const switched=await fallbackPhysicalCamera(next,localVideo);
-    if(switched){
-      cameraFacing=next;
-      torchOn=false;
-      await resetCameraZoom();
-      if(wantedLook!=="natural")await applySetupLook(wantedLook);
-      if($("#m7lv-preflight"))playSetupPreview();else localPreview();
-      refreshSetupCameraControls();
-      applySetupButtonState();
-      setupStatus(next==="user"?"Selfie camera ready.":"Rear camera ready.");
-      return;
-    }
-
-    setupStatus("This phone/browser could not switch to that camera.",true);
+    cameraFacing=actualCameraFacing(previous);
+    if($("#m7lv-preflight"))playSetupPreview();else localPreview();
+    refreshSetupCameraControls();
+    applySetupButtonState();
+    setupStatus("Could not switch cameras without changing to the wrong lens.",true);
   }
 }
 async function prepareSetupPreview(p){
@@ -1495,7 +1522,6 @@ async function syncEncoderOrientation(){
      Do not force portrait encoder dimensions here. */
   return;
 }
-async function tryRear(){if(!localVideo)return;try{await localVideo.setDevice({facingMode:"environment"});cameraFacing="environment"}catch(_){}}
 async function toggleMic(){
   if(!localAudio)return;
   micMuted=!micMuted;
