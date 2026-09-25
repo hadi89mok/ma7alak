@@ -4845,6 +4845,32 @@
         -webkit-transform:none!important;
       }
 
+      /*
+         OWNER MEDIA ISOLATION
+         Hostinger's fixed global header / Live panel can use equally high
+         z-index values. Hiding every sibling outside the active embed path is
+         more reliable than another z-index fight and is fully reversible.
+      */
+      body.shoufhon-owner-media-editor-open >
+      *:not(.shoufhon-embed-viewer-ancestor):not(.shoufhon-owner-media-editor-host){
+        visibility:hidden!important;
+        pointer-events:none!important;
+      }
+
+      body.shoufhon-owner-media-editor-open
+      .shoufhon-embed-viewer-ancestor >
+      *:not(.shoufhon-embed-viewer-ancestor):not(.shoufhon-owner-media-editor-host){
+        visibility:hidden!important;
+        pointer-events:none!important;
+      }
+
+      body.shoufhon-owner-media-editor-open
+      .shoufhon-owner-media-editor-host,
+      body.shoufhon-owner-media-editor-open
+      .shoufhon-owner-media-editor-host *{
+        visibility:visible!important;
+      }
+
       .shoufhon-embed-viewer-ancestor{
         overflow:visible!important;
         transform:none!important;
@@ -4933,6 +4959,21 @@
     })||null;
   }
 
+  function syncOwnerMediaIsolation(){
+    const open=Array.from(activeFrames.values()).some(function(state){
+      return state&&state.viewerKind==="owner-media-editor";
+    });
+
+    document.documentElement.classList.toggle(
+      "shoufhon-owner-media-editor-open",
+      open
+    );
+    document.body.classList.toggle(
+      "shoufhon-owner-media-editor-open",
+      open
+    );
+  }
+
   function openFrame(source,data){
     const frame=frameForSource(source);
 
@@ -4979,6 +5020,7 @@
     };
 
     activeFrames.set(frame,state);
+    syncOwnerMediaIsolation();
 
     if(savedPageOverflow===null){
       const htmlOverflow=document.documentElement.style.overflow;
@@ -5044,6 +5086,8 @@
       if(activeFrames.size===0){
         document.documentElement.classList.remove("shoufhon-embed-viewer-open");
         document.body.classList.remove("shoufhon-embed-viewer-open");
+        document.documentElement.classList.remove("shoufhon-owner-media-editor-open");
+        document.body.classList.remove("shoufhon-owner-media-editor-open");
         if(savedPageOverflow){
           const restoreOverflow=function(node,value,priority){
             if(value)node.style.setProperty("overflow",value,priority||"");
@@ -5067,11 +5111,14 @@
       if(activeFrames.size===0){
         document.documentElement.classList.remove("shoufhon-embed-viewer-open");
         document.body.classList.remove("shoufhon-embed-viewer-open");
+        document.documentElement.classList.remove("shoufhon-owner-media-editor-open");
+        document.body.classList.remove("shoufhon-owner-media-editor-open");
       }
       return;
     }
 
     activeFrames.delete(frame);
+    syncOwnerMediaIsolation();
 
     const restoreScroll=function(){
       if(
@@ -5117,6 +5164,8 @@
     if(activeFrames.size===0){
       document.documentElement.classList.remove("shoufhon-embed-viewer-open");
       document.body.classList.remove("shoufhon-embed-viewer-open");
+      document.documentElement.classList.remove("shoufhon-owner-media-editor-open");
+      document.body.classList.remove("shoufhon-owner-media-editor-open");
 
       if(savedPageOverflow){
         const restoreOverflow=function(node,value,priority){
