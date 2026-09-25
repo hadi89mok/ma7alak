@@ -228,6 +228,18 @@
     return mediaItems().find(media=>mediaKey(media.type,media.id)===mediaKey(cover.media_type,cover.media_id))||null;
   }
 
+  function selectedLibraryMedia(){
+    if(librarySelectionMode!=="media")return[];
+    const all=mediaItems();
+    return [...librarySelected].map(key=>{
+      const parts=String(key||"").split(":");
+      const type=parts[1]==="video"?"video":"photo";
+      const id=Number(parts[2]);
+      if(!Number.isFinite(id))return null;
+      return all.find(item=>item.type===type&&Number(item.id)===id)||null;
+    }).filter(Boolean);
+  }
+
   function clearLibrarySelection(){
     librarySelectionMode="";
     librarySelected.clear();
@@ -261,6 +273,11 @@
     const countEl=bar.querySelector("[data-library-select-count]");
     const labelEl=bar.querySelector("[data-library-select-label]");
     const deleteButton=bar.querySelector("[data-library-select-delete]");
+    const featureButton=bar.querySelector("[data-library-select-feature]");
+    const albumButton=bar.querySelector("[data-library-select-album]");
+    const selectedMedia=selectedLibraryMedia();
+    const selectedPhotos=selectedMedia.filter(item=>item.type==="photo");
+    const mediaMode=librarySelectionMode==="media";
 
     if(countEl)countEl.textContent=count+" selected";
     if(labelEl){
@@ -268,6 +285,26 @@
         ?"Albums"
         :"Photos & videos";
     }
+
+    if(featureButton){
+      featureButton.hidden=!mediaMode;
+      const onePhoto=selectedMedia.length===1&&selectedPhotos.length===1;
+      const alreadyFeatured=onePhoto&&selectedPhotos[0].featured===true;
+      featureButton.disabled=!onePhoto||alreadyFeatured;
+      featureButton.textContent=alreadyFeatured?"★ Featured":"☆ Feature";
+    }
+
+    if(albumButton){
+      albumButton.hidden=!mediaMode;
+      const albumLimit=Math.max(0,Number(snapshot.albumLimit)||0);
+      const onlyPhotos=selectedMedia.length===selectedPhotos.length;
+      const validCount=selectedPhotos.length>=2&&selectedPhotos.length<=albumLimit;
+      albumButton.disabled=!onlyPhotos||!validCount;
+      albumButton.textContent=validCount
+        ?"Create Album"
+        :"Album";
+    }
+
     if(deleteButton){
       deleteButton.disabled=count===0;
       deleteButton.textContent=count
@@ -307,7 +344,6 @@
     const quota=document.getElementById("m7-owner-media-quota");
     const list=document.getElementById("m7-owner-media-list");
     const albumsBox=document.getElementById("m7-owner-media-albums");
-    const albumButton=document.querySelector("[data-create-album]");
     if(!quota||!list||!albumsBox)return;
 
     const albums=snapshot.albums||[];
@@ -317,19 +353,6 @@
       '<span><b>'+snapshot.photos.length+'</b> / '+snapshot.photoLimit+' photos</span>'+
       '<span><b>'+snapshot.videos.length+'</b> / '+snapshot.videoLimit+' videos</span>'+
       '<span><b>'+limit+'</b> max / album</span>';
-
-    if(albumButton){
-      const disabledByAdmin=limit<2;
-      albumButton.disabled=disabledByAdmin;
-      albumButton.textContent="Album";
-      albumButton.title=disabledByAdmin
-        ?"Albums disabled by Admin"
-        :"Create a photo album from your device";
-      albumButton.setAttribute(
-        "aria-label",
-        albumButton.title
-      );
-    }
 
     albumsBox.innerHTML=albums.length
       ? '<div class="m7om-section-title"><b>Albums</b><small>Tap to open · hold to select/delete.</small></div>'+
@@ -356,24 +379,31 @@
     const membership=albumMembership();
     const items=mediaItems();
 
-    list.innerHTML=items.length
-      ?'<div class="m7om-section-title"><b>Media library</b><small>Hold one item, then tap more to select/deselect.</small></div>'+
-       '<div class="m7om-media-grid">'+
-       items.map(x=>{
-         const member=membership.get(mediaKey(x.type,x.id));
-         const key="media:"+x.type+":"+x.id;
-         return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'" data-select-key="'+esc(key)+'">'+
-           '<div class="m7om-thumb">'+
-             (x.type==="video"
-               ?'<video src="'+esc(x.url)+'" muted playsinline preload="metadata"></video><em>VIDEO</em>'
-               :'<img src="'+esc(x.url)+'" alt=""><em>'+(x.featured?"FEATURED":"PHOTO")+'</em>')+
-             '<span class="m7om-select-check">✓</span>'+
-           '</div>'+
-           '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(member?"In "+esc(member.albumTitle):(x.path?"Uploaded":"URL media"))+'</small></div>'+
-         '</article>';
-       }).join("")+
-       '</div>'
-      :'<div class="m7om-empty">No Media yet. Add photos or videos above.</div>';
+    list.innerHTML=
+      '<div class="m7om-section-title">'+
+        '<b>Media library</b>'+
+        '<div class="m7om-section-tools">'+
+          '<small>Hold one item, then tap more to select.</small>'+
+          '<button type="button" data-media-add-menu>＋ Add Media</button>'+
+        '</div>'+
+      '</div>'+
+      (items.length
+        ?'<div class="m7om-media-grid">'+
+         items.map(x=>{
+           const member=membership.get(mediaKey(x.type,x.id));
+           const key="media:"+x.type+":"+x.id;
+           return '<article class="m7om-item" data-type="'+x.type+'" data-id="'+esc(x.id)+'" data-select-key="'+esc(key)+'">'+
+             '<div class="m7om-thumb">'+
+               (x.type==="video"
+                 ?'<video src="'+esc(x.url)+'" muted playsinline preload="metadata"></video><em>VIDEO</em>'
+                 :'<img src="'+esc(x.url)+'" alt=""><em>'+(x.featured?"FEATURED":"PHOTO")+'</em>')+
+               '<span class="m7om-select-check">✓</span>'+
+             '</div>'+
+             '<div class="m7om-copy"><b>'+(x.type==="video"?"Video":"Photo")+'</b><small>'+(member?"In "+esc(member.albumTitle):(x.path?"Uploaded":"URL media"))+'</small></div>'+
+           '</article>';
+         }).join("")+
+         '</div>'
+        :'<div class="m7om-empty">No Media yet. Tap Add Media to upload your first photo or video.</div>');
 
     syncLibrarySelectionUI();
 
@@ -452,7 +482,7 @@
       '<div class="m7om-album-builder-card">'+
         '<div class="m7om-builder-head"><div><b>'+(album?"Edit album":"Create album")+'</b><small>'+(album
           ?"Add more photos directly from your phone, or remove current album items."
-          :"Choose 2–"+limit+" photos directly from your phone/device. You do not need to add them to Media first.")+'</small></div><button type="button" data-album-cancel aria-label="Close">×</button></div>'+
+          :"Choose 2–"+limit+" photos directly from your phone/device. You do not need to add them to Media first.")+'</small></div></div>'+
         '<label class="m7om-builder-field"><span>Album title</span><input data-album-title maxlength="80" value="'+esc(album?.title||"")+'" placeholder="e.g. Summer Collection"></label>'+
         '<label class="m7om-builder-field"><span>Short description <small>optional</small></span><textarea data-album-description maxlength="300" placeholder="What is inside this album?">'+esc(album?.description||"")+'</textarea></label>'+
         '<div class="m7om-album-device-picker">'+
@@ -852,6 +882,115 @@
     sync();
   }
 
+  function openAlbumFromSelection(){
+    const selected=selectedLibraryMedia().filter(item=>item.type==="photo");
+    const allSelected=selectedLibraryMedia();
+    const limit=Math.max(0,Number(snapshot.albumLimit)||0);
+
+    if(
+      librarySelectionMode!=="media" ||
+      selected.length<2 ||
+      selected.length!==allSelected.length
+    ){
+      status("Select at least 2 photos only to create an album.","error");
+      return;
+    }
+
+    if(selected.length>limit){
+      status("Admin limit: maximum "+limit+" photos in one album.","error");
+      return;
+    }
+
+    removeReview();
+
+    const sheet=editorSheet();
+    if(!sheet)return;
+
+    const review=document.createElement("div");
+    review.id="m7om-media-review";
+
+    review.innerHTML=
+      '<div class="m7om-review-card m7om-create-album-card">'+
+        '<div class="m7om-review-head"><div><b>Create album</b><small>'+selected.length+' selected photos will be grouped into one album.</small></div></div>'+
+        '<label class="m7om-builder-field"><span>Album name</span><input data-selected-album-title maxlength="80" placeholder="e.g. Summer Collection"></label>'+
+        '<label class="m7om-builder-field"><span>Description <small>optional</small></span><textarea data-selected-album-description maxlength="300" placeholder="What is inside this album?"></textarea></label>'+
+        '<div class="m7om-selected-album-preview">'+
+          selected.map((item,index)=>
+            '<div class="m7om-selected-album-photo">'+
+              '<img src="'+esc(item.url)+'" alt="">'+
+              '<span>'+(index+1)+'</span>'+
+            '</div>'
+          ).join("")+
+        '</div>'+
+        '<div class="m7om-review-actions">'+
+          '<button type="button" data-review-cancel>Cancel</button>'+
+          '<button type="button" class="primary" data-create-selected-album>Create album</button>'+
+        '</div>'+
+        '<div class="m7om-review-status" data-review-status></div>'+
+      '</div>';
+
+    sheet.appendChild(review);
+
+    review.addEventListener("click",async event=>{
+      if(event.target.closest("[data-review-cancel]")){
+        removeReview();
+        return;
+      }
+
+      const create=event.target.closest("[data-create-selected-album]");
+      if(!create||busy)return;
+
+      const title=String(
+        review.querySelector("[data-selected-album-title]")?.value||""
+      ).trim();
+      const description=String(
+        review.querySelector("[data-selected-album-description]")?.value||""
+      ).trim();
+
+      const statusBox=review.querySelector("[data-review-status]");
+
+      if(!title){
+        statusBox.textContent="Give the album a name.";
+        return;
+      }
+
+      create.disabled=true;
+      busy=true;
+      statusBox.textContent="Creating album…";
+
+      try{
+        const items=selected.map(item=>({
+          mediaType:"photo",
+          mediaId:Number(item.id)
+        }));
+
+        const cover=items[0]||null;
+
+        const data=await request({
+          op:"album-save",
+          albumId:null,
+          title,
+          description,
+          items,
+          cover
+        });
+
+        applySnapshot(data);
+        changed=true;
+        clearLibrarySelection();
+        render();
+        notifyMediaUpdated("album-create");
+        removeReview();
+        status("Album created from selected photos.","ok");
+      }catch(error){
+        statusBox.textContent=error?.message||"Could not create album.";
+        create.disabled=false;
+      }finally{
+        busy=false;
+      }
+    });
+  }
+
   async function syncPermission(){
     if(!owner){allowed=false;document.getElementById("m7-owner-media-edit")?.classList.remove("visible");return}
     try{
@@ -976,7 +1115,7 @@
         '<div class="m7om-review-head">'+
           '<div><b>'+(replacing?"Confirm replacement":"Confirm "+(type==="video"?"videos":"photos"))+'</b>'+
           '<small>'+(replacing?"Check the new file before replacing the current Media.":"Review what you selected before anything is uploaded.")+'</small></div>'+
-          '<button type="button" data-review-cancel aria-label="Close">×</button>'+
+          ''+
         '</div>'+
         '<div class="m7om-review-grid">'+
           files.map((file,index)=>
@@ -1031,7 +1170,7 @@
     review.id="m7om-media-review";
     review.innerHTML=
       '<div class="m7om-review-card compact">'+
-        '<div class="m7om-review-head"><div><b>'+esc(title)+'</b><small>'+esc(text)+'</small></div><button type="button" data-review-cancel aria-label="Close">×</button></div>'+
+        '<div class="m7om-review-head"><div><b>'+esc(title)+'</b><small>'+esc(text)+'</small></div></div>'+
         '<div class="m7om-review-actions">'+
           '<button type="button" data-review-cancel>Cancel</button>'+
           '<button type="button" class="primary '+(danger?"danger":"")+'" data-review-confirm>'+esc(confirmText)+'</button>'+
@@ -1060,6 +1199,42 @@
       }finally{
         busy=false;
       }
+    });
+  }
+
+  function openAddMediaMenu(){
+    if(busy||!allowed)return;
+    removeReview();
+
+    const sheet=editorSheet();
+    if(!sheet)return;
+
+    const review=document.createElement("div");
+    review.id="m7om-media-review";
+    review.innerHTML=
+      '<div class="m7om-review-card compact">'+
+        '<div class="m7om-review-head"><div><b>Add Media</b><small>Choose what you want to upload from your phone.</small></div></div>'+
+        '<div class="m7om-add-media-menu">'+
+          '<button type="button" data-add-media-kind="photo"><span>▧</span><b>Photos</b></button>'+
+          '<button type="button" data-add-media-kind="video"><span>▶</span><b>Videos</b></button>'+
+        '</div>'+
+        '<div class="m7om-review-actions single-cancel"><button type="button" data-review-cancel>Cancel</button></div>'+
+      '</div>';
+
+    sheet.appendChild(review);
+
+    review.addEventListener("click",event=>{
+      if(event.target.closest("[data-review-cancel]")){
+        removeReview();
+        return;
+      }
+
+      const option=event.target.closest("[data-add-media-kind]");
+      if(!option)return;
+
+      const type=option.dataset.addMediaKind==="video"?"video":"photo";
+      removeReview();
+      choose("add",type);
     });
   }
 
@@ -1115,16 +1290,8 @@
       #m7-owner-media-sheet.open{display:block!important}
       #m7-owner-media-sheet:fullscreen,#m7-owner-media-sheet:-webkit-full-screen{width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;background:#050506!important}
       .m7om-card{width:min(100%,640px);margin:0 auto;padding:15px;border:1px solid rgba(217,164,65,.30);border-radius:22px;background:linear-gradient(155deg,#15120f,#080809 72%);box-shadow:0 24px 70px rgba(0,0,0,.62)}
-      .m7om-head{display:flex;gap:10px;align-items:flex-start;position:relative;padding-right:48px}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
-      .m7om-close{position:fixed!important;right:max(12px,env(safe-area-inset-right))!important;top:max(10px,env(safe-area-inset-top))!important;z-index:2147483647!important;width:42px!important;height:42px!important;border-radius:50%!important;border:1px solid rgba(217,164,65,.38)!important;background:rgba(10,10,11,.94)!important;color:#fff!important;font-size:27px!important;line-height:1!important;display:grid!important;place-items:center!important;box-shadow:0 8px 24px rgba(0,0,0,.48)!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+      .m7om-head{display:flex;gap:10px;align-items:flex-start;position:relative}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
       #m7-owner-media-quota{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}#m7-owner-media-quota span{padding:7px 9px;border:1px solid rgba(217,164,65,.20);border-radius:999px;background:rgba(217,164,65,.065);color:#aa9e8a;font-size:8px}#m7-owner-media-quota b{color:#f0ca6b;font-size:10px}
-      .m7om-add{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:13px;padding:6px;border:1px solid rgba(217,164,65,.13);border-radius:16px;background:rgba(255,255,255,.018)}
-      .m7om-add button{min-width:0;min-height:58px;padding:7px 4px;border:1px solid rgba(217,164,65,.22);border-radius:12px;background:linear-gradient(180deg,rgba(217,164,65,.09),rgba(217,164,65,.035));color:#f0ca6b;font-weight:900;font-size:8px;touch-action:manipulation;display:grid;place-items:center;align-content:center;gap:4px}
-      .m7om-add button:before{display:block;font-size:19px;line-height:1}
-      .m7om-add [data-add="photo"]:before{content:"▧"}
-      .m7om-add [data-add="video"]:before{content:"▶"}
-      .m7om-add [data-create-album]:before{content:"▣"}
-      .m7om-add button:disabled{opacity:.36}
       #m7-owner-media-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
       .m7om-list{display:grid;gap:9px}.m7om-media-grid,.m7om-album-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
       .m7om-item,.m7om-album{position:relative;min-width:0;padding:7px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(255,255,255,.025);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
@@ -1133,9 +1300,9 @@
       .m7om-thumb img,.m7om-thumb video,.m7om-album-cover img,.m7om-album-cover video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.m7om-thumb em,.m7om-album-cover em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
       .m7om-copy,.m7om-album-copy{min-width:0;padding:8px 3px 4px}.m7om-copy b,.m7om-copy small,.m7om-album-copy b,.m7om-album-copy small{display:block}.m7om-copy b,.m7om-album-copy b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7om-copy small,.m7om-album-copy small{font-size:7.5px;color:#8f8474;margin-top:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .m7om-select-check{position:absolute;right:7px;top:7px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;border:2px solid rgba(255,255,255,.72);background:rgba(0,0,0,.46);color:transparent;font-size:14px;font-weight:950;opacity:0;transform:scale(.8);transition:.15s ease;pointer-events:none}.selection-mode .m7om-select-check,.m7om-album-selecting .m7om-choice .m7om-select-check{opacity:1;transform:scale(1)}.delete-selected .m7om-select-check{background:#d9a441;border-color:#f3d98e;color:#111}
-      .m7om-selection-bar{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483647;width:min(calc(100% - 20px),620px);display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid rgba(217,164,65,.42);border-radius:16px;background:rgba(10,9,8,.97);box-shadow:0 18px 50px rgba(0,0,0,.65);backdrop-filter:blur(12px)}.m7om-selection-bar[hidden]{display:none!important}.m7om-selection-bar b,.m7om-selection-bar small{display:block}.m7om-selection-bar b{font-size:12px;color:#f2d18d}.m7om-selection-bar small{margin-top:2px;font-size:7px;color:#8f8474}.m7om-selection-bar button{min-height:38px;padding:0 12px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#151515;color:#ddd;font-weight:900}.m7om-selection-bar .danger{border-color:rgba(255,95,95,.3);background:#7d2020;color:#fff}.m7om-selection-bar button:disabled{opacity:.4}
+      .m7om-selection-bar{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483647;width:min(calc(100% - 20px),620px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;align-items:center;padding:10px;border:1px solid rgba(217,164,65,.42);border-radius:16px;background:rgba(10,9,8,.97);box-shadow:0 18px 50px rgba(0,0,0,.65);backdrop-filter:blur(12px)}.m7om-selection-bar[hidden]{display:none!important}.m7om-selection-copy{grid-column:1/-1}.m7om-selection-bar b,.m7om-selection-bar small{display:block}.m7om-selection-bar b{font-size:12px;color:#f2d18d}.m7om-selection-bar small{margin-top:2px;font-size:7px;color:#8f8474}.m7om-selection-bar button{min-width:0;min-height:38px;padding:0 7px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#151515;color:#ddd;font-size:8px;font-weight:900;white-space:nowrap}.m7om-selection-bar button[hidden]{display:none!important}.m7om-selection-bar [data-library-select-feature]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar [data-library-select-album]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar .danger{border-color:rgba(255,95,95,.3);background:#7d2020;color:#fff}.m7om-selection-bar button:disabled{opacity:.38}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
-      .m7om-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:13px 1px 7px}.m7om-section-title b{font-size:11px;color:#f2d18d}.m7om-section-title small{font-size:7px;color:#8f8474;text-align:right}
+      .m7om-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 1px 7px}.m7om-section-title b{font-size:11px;color:#f2d18d}.m7om-section-title small{font-size:7px;color:#8f8474;text-align:right}.m7om-section-tools{display:flex;align-items:center;gap:7px}.m7om-section-tools button{min-height:31px;padding:0 9px;border:1px solid rgba(217,164,65,.28);border-radius:9px;background:rgba(217,164,65,.07);color:#e9c66f;font-size:8px;font-weight:900;white-space:nowrap}
       #m7-owner-media-albums{display:grid;gap:8px;margin-bottom:12px}.m7om-album{border-color:rgba(217,164,65,.20);background:linear-gradient(145deg,rgba(217,164,65,.07),rgba(255,255,255,.018))}.m7om-album-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:24px;color:#d9a441}
       #m7om-album-builder{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.86);overflow:auto;padding:max(12px,env(safe-area-inset-top)) 10px max(18px,env(safe-area-inset-bottom));backdrop-filter:blur(9px)}
       .m7om-album-builder-card{width:min(100%,620px);margin:0 auto;padding:14px;border:1px solid rgba(217,164,65,.34);border-radius:20px;background:#0c0b0b;box-shadow:0 24px 70px rgba(0,0,0,.7)}
@@ -1162,9 +1329,10 @@
       .m7om-review-card.compact{max-width:460px;margin:auto}
       .m7om-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.m7om-review-head b{font-size:17px}.m7om-review-head small{display:block;margin-top:4px;color:#968a79;font-size:8px;line-height:1.4}.m7om-review-head>button{width:34px;height:34px;flex:0 0 34px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:#171717;color:#fff;font-size:21px}
       .m7om-review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.m7om-review-item{min-width:0;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:#111;overflow:hidden}.m7om-review-thumb{width:100%;aspect-ratio:1.25/1;background:#000}.m7om-review-thumb img,.m7om-review-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-review-copy{padding:8px}.m7om-review-copy b,.m7om-review-copy small{display:block}.m7om-review-copy b{font-size:10px}.m7om-review-copy small{margin-top:3px;color:#8e8374;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .m7om-review-actions{display:grid;grid-template-columns:1fr 1.45fr;gap:8px;margin-top:12px}.m7om-review-actions button{min-height:43px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#141414;color:#ddd;font-weight:900}.m7om-review-actions .primary{border-color:rgba(217,164,65,.45);background:linear-gradient(135deg,#e0ae4e,#ba8431);color:#080706}.m7om-review-actions .primary.danger{border-color:rgba(255,88,88,.35);background:#7d2020;color:#fff}.m7om-review-status{min-height:17px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
+      .m7om-review-actions{display:grid;grid-template-columns:1fr 1.45fr;gap:8px;margin-top:12px}.m7om-review-actions.single-cancel{grid-template-columns:1fr}.m7om-review-actions button{min-height:43px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#141414;color:#ddd;font-weight:900}.m7om-review-actions .primary{border-color:rgba(217,164,65,.45);background:linear-gradient(135deg,#e0ae4e,#ba8431);color:#080706}.m7om-review-actions .primary.danger{border-color:rgba(255,88,88,.35);background:#7d2020;color:#fff}.m7om-review-status{min-height:17px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
+      .m7om-add-media-menu{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.m7om-add-media-menu button{min-height:88px;border:1px solid rgba(217,164,65,.22);border-radius:14px;background:rgba(217,164,65,.06);color:#f1cb72;font-weight:900}.m7om-add-media-menu button span,.m7om-add-media-menu button b{display:block}.m7om-add-media-menu button span{font-size:24px;margin-bottom:6px}.m7om-selected-album-preview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}.m7om-selected-album-photo{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#000}.m7om-selected-album-photo img{width:100%;height:100%;object-fit:cover;display:block}.m7om-selected-album-photo span{position:absolute;right:4px;bottom:4px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#000c;color:#f0ca6b;font-size:7px;font-weight:900}
       #m7-owner-media-status{min-height:20px;margin-top:10px;text-align:center;color:#a99b87;font-size:9px}#m7-owner-media-status[data-type="ok"]{color:#7ee3a0}#m7-owner-media-status[data-type="error"]{color:#ff8f8f}
-      @media(max-width:600px){#m7-owner-media-sheet{padding-left:8px!important;padding-right:8px!important}.m7om-card{border-radius:19px;padding:12px}.m7om-media-grid,.m7om-album-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.m7om-item,.m7om-album{padding:6px}.m7om-add{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.m7om-add button{min-height:56px;padding:6px 2px;font-size:7.4px}.m7om-choice-grid,.m7om-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.m7om-review-card{padding:12px}.m7om-selection-bar{grid-template-columns:minmax(0,1fr) auto auto}.m7om-selection-bar button{padding:0 9px;font-size:8px}}
+      @media(max-width:600px){#m7-owner-media-sheet{padding-left:8px!important;padding-right:8px!important}.m7om-card{border-radius:19px;padding:12px}.m7om-media-grid,.m7om-album-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.m7om-item,.m7om-album{padding:6px}.m7om-choice-grid,.m7om-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.m7om-review-card{padding:12px}.m7om-selection-bar{grid-template-columns:repeat(4,minmax(0,1fr))}.m7om-selection-bar button{padding:0 5px;font-size:7.6px}.m7om-section-tools small{display:none}.m7om-selected-album-preview{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
       /*
          The Media embed intentionally treats a selected frame animation as
@@ -1236,12 +1404,8 @@
 
     const sheet=document.createElement("div");
     sheet.id="m7-owner-media-sheet";
-    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Add photos/videos normally, or create an album by selecting multiple photos directly from your phone. Hold any Media or album card to enter multi-select mode.</small></div><button type="button" class="m7om-close" aria-label="Close">×</button></div><div id="m7-owner-media-quota"></div><div class="m7om-add"><button type="button" data-add="photo">Photos</button><button type="button" data-add="video">Videos</button><button type="button" data-create-album>Album</button></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div><div id="m7om-library-selection" class="m7om-selection-bar" hidden><div><b data-library-select-count>0 selected</b><small data-library-select-label>Photos & videos</small></div><button type="button" data-library-select-cancel>Cancel</button><button type="button" class="danger" data-library-select-delete>Delete</button></div>';
+    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Hold a photo or album to select. Use Add Media for new uploads. Use your phone Back button to close.</small></div></div><div id="m7-owner-media-quota"></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div><div id="m7om-library-selection" class="m7om-selection-bar" hidden><div class="m7om-selection-copy"><b data-library-select-count>0 selected</b><small data-library-select-label>Photos & videos</small></div><button type="button" data-library-select-cancel>Cancel</button><button type="button" data-library-select-feature hidden>☆ Feature</button><button type="button" data-library-select-album hidden>Create Album</button><button type="button" class="danger" data-library-select-delete>Delete</button></div>';
     document.body.appendChild(sheet);
-
-    sheet.querySelector(".m7om-close").addEventListener("click",()=>closeEditor());
-    sheet.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>choose("add",b.dataset.add)));
-    sheet.querySelector("[data-create-album]")?.addEventListener("click",()=>openAlbumEditor(null));
 
     window.addEventListener("message",event=>{
       if(!trustedParentEvent(event))return;
@@ -1335,6 +1499,12 @@
 
     mediaList.addEventListener("click",event=>{
       if(busy)return;
+
+      if(event.target.closest("[data-media-add-menu]")){
+        openAddMediaMenu();
+        return;
+      }
+
       const hit=itemForSelectionEvent(event);
       if(!hit||hit.mode!=="media")return;
 
@@ -1347,6 +1517,37 @@
 
     selectionBar.querySelector("[data-library-select-cancel]")?.addEventListener("click",()=>{
       clearLibrarySelection();
+    });
+
+    selectionBar.querySelector("[data-library-select-feature]")?.addEventListener("click",async()=>{
+      if(busy||librarySelectionMode!=="media")return;
+
+      const selected=selectedLibraryMedia();
+      if(selected.length!==1||selected[0].type!=="photo")return;
+      if(selected[0].featured===true)return;
+
+      busy=true;
+      try{
+        const data=await request({
+          op:"feature-photo",
+          id:Number(selected[0].id)
+        });
+        applySnapshot(data);
+        changed=true;
+        clearLibrarySelection();
+        render();
+        notifyMediaUpdated("feature");
+        status("Featured gallery photo updated.","ok");
+      }catch(error){
+        status(error?.message||"Could not feature this photo.","error");
+      }finally{
+        busy=false;
+      }
+    });
+
+    selectionBar.querySelector("[data-library-select-album]")?.addEventListener("click",()=>{
+      if(busy||librarySelectionMode!=="media")return;
+      openAlbumFromSelection();
     });
 
     selectionBar.querySelector("[data-library-select-delete]")?.addEventListener("click",()=>{
