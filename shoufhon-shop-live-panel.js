@@ -439,7 +439,7 @@ window.addEventListener("message",event=>{
       };
     }
     if(known)render();
-    requestState();
+    post("MA7ALAK_LIVE_OFFERS_GET");
   }
   if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
     const ds=String(d.shop_slug||d.shopSlug||"").trim().toLowerCase();
