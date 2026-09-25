@@ -22,8 +22,9 @@ create table if not exists public.community_guidelines (
 
 alter table public.community_guidelines enable row level security;
 
-grant select on table public.community_guidelines to anon, authenticated;
-grant insert, update, delete on table public.community_guidelines to authenticated;
+revoke insert, update, delete on table public.community_guidelines from anon;
+grant select on table public.community_guidelines to anon;
+grant select, insert, update, delete on table public.community_guidelines to authenticated;
 grant all on table public.community_guidelines to service_role;
 
 drop policy if exists "community_guidelines_public_read" on public.community_guidelines;
