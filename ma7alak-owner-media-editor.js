@@ -1323,7 +1323,8 @@
       const hit=itemForSelectionEvent(event);
       if(!hit||hit.mode!=="album")return;
 
-      if(librarySelectionMode==="album"){
+      if(librarySelectionMode){
+        if(librarySelectionMode!=="album")return;
         if(Date.now()<suppressLibraryClickUntil)return;
         toggleLibrarySelection("album",hit.key);
         return;
@@ -1337,7 +1338,8 @@
       const hit=itemForSelectionEvent(event);
       if(!hit||hit.mode!=="media")return;
 
-      if(librarySelectionMode==="media"){
+      if(librarySelectionMode){
+        if(librarySelectionMode!=="media")return;
         if(Date.now()<suppressLibraryClickUntil)return;
         toggleLibrarySelection("media",hit.key);
       }
