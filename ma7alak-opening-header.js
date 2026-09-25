@@ -712,15 +712,44 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
     return "https://cdn.jsdelivr.net/gh/hadi89mok/ma7alak@main/story-upload-panel.js";
   }
 
+  let ownerToolsBridgePromise=null;
+
+  function ensureOwnerToolsBridge(){
+    if(
+      [...document.scripts].some(
+        script=>/story-upload-panel\.js/.test(
+          String(script.src||"")
+        )
+      )
+    ){
+      return Promise.resolve(true);
+    }
+
+    if(ownerToolsBridgePromise){
+      return ownerToolsBridgePromise;
+    }
+
+    ownerToolsBridgePromise=
+      new Promise(resolve=>{
+        const script=document.createElement("script");
+        script.src=storyUploaderUrl();
+        script.async=true;
+        script.onload=()=>resolve(true);
+        script.onerror=()=>{
+          ownerToolsBridgePromise=null;
+          console.warn("Owner tools bridge could not load");
+          resolve(false);
+        };
+        document.head.appendChild(script);
+      });
+
+    return ownerToolsBridgePromise;
+  }
+
   function openOwnerUploader(){
     if(!owner)return;
     const send=()=>window.postMessage({type:'MA7ALAK_OPEN_STORY_UPLOADER',shopSlug:owner.shop_slug,__ma7alakOpenStoryNow:true},location.origin);
-    if([...document.scripts].some(s=>/story-upload-panel\.js/.test(s.src))){send();return}
-    const script=document.createElement('script');
-    script.src=storyUploaderUrl();
-    script.onload=send;
-    script.onerror=()=>console.warn('Story uploader could not load');
-    document.head.appendChild(script);
+    ensureOwnerToolsBridge().then(ok=>{if(ok)send()});
   }
   function scheduleExpiry(activeRows){
     clearTimeout(expiryTimer);expiryTimer=0;
@@ -769,7 +798,9 @@ html.shoufhon-story-open,body.shoufhon-story-open{overflow:hidden!important;over
         nextRows=s.data||[];nextProfiles=new Map((p.data||[]).map(x=>[x.shop_slug,x]));
       }
       if(turn!==version)return;
-      owner=nextOwner?{...nextOwner,...nextProfiles.get(nextOwner.shop_slug)}:null;rows=nextRows;profiles=nextProfiles;render();
+      owner=nextOwner?{...nextOwner,...nextProfiles.get(nextOwner.shop_slug)}:null;rows=nextRows;profiles=nextProfiles;
+      if(owner)ensureOwnerToolsBridge();
+      render();
     }catch(e){console.warn('ShoufHon homepage stories:',e);}
   }
   let rootBindTries=0;
