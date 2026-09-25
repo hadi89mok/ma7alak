@@ -774,17 +774,21 @@ async function setupPresence(){
   }catch(_){roomChannel=null}
 }
 
-function actualCameraFacing(track=localVideo){
+function detectCameraFacing(track=localVideo){
   try{
     const media=track?.getMediaStreamTrack?.();
     const settings=media?.getSettings?.()||{};
     const facing=String(settings.facingMode||"").toLowerCase();
     if(facing==="user"||facing==="environment")return facing;
+
     const label=String(track?.getTrackLabel?.()||media?.label||"").toLowerCase();
     if(/front|selfie|facing front|user/.test(label))return"user";
     if(/back|rear|facing back|environment|world/.test(label))return"environment";
   }catch(_){}
-  return cameraFacing==="user"?"user":"environment";
+  return"";
+}
+function actualCameraFacing(track=localVideo,fallback=cameraFacing){
+  return detectCameraFacing(track)||(fallback==="user"?"user":"environment");
 }
 function localPreview(){
   if(!localVideo||!overlay)return;
@@ -792,7 +796,7 @@ function localPreview(){
     const target=$("#m7lv-local",overlay);
     if(!target)return;
     target.innerHTML="";
-    const actual=actualCameraFacing(localVideo);
+    const actual=actualCameraFacing(localVideo,cameraFacing);
     cameraFacing=actual;
     localVideo.play(target,{fit:"contain",mirror:actual==="user"});
   }catch(_){}
@@ -874,7 +878,7 @@ function playSetupPreview(){
   if(!localVideo||!target)return;
   try{
     target.innerHTML="";
-    const actual=actualCameraFacing(localVideo);
+    const actual=actualCameraFacing(localVideo,cameraFacing);
     cameraFacing=actual;
     localVideo.play(target,{fit:"contain",mirror:actual==="user"&&setupMirror});
   }catch(_){}
@@ -1091,7 +1095,7 @@ async function createSetupCapture(){
     window.AgoraRTC.createMicrophoneAudioTrack(),
     makePhoneDefaultCamera("environment")
   ]);
-  cameraFacing=actualCameraFacing(localVideo);qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
+  cameraFacing=actualCameraFacing(localVideo,"environment");qualityProfile="device-default";micMuted=false;torchOn=false;setupMirror=true;
   await resetCameraZoom();
   playSetupPreview();
   refreshSetupCameraControls();
@@ -1178,17 +1182,15 @@ async function setCameraFacing(next){
     await releaseBeautyProcessor();
     replacement=await makePhoneDefaultCamera(next);
 
-    /* Trust the camera that actually opened. This prevents a rear camera
-       from ever being treated as a mirrored selfie camera, or vice versa. */
-    const actual=actualCameraFacing(replacement);
-    if(actual!==next){
+    /* Some Android browsers expose generic camera labels and omit
+       getSettings().facingMode. In that case the side is UNKNOWN, not wrong.
+       Accept the explicit facingMode request unless we can positively prove
+       that the opposite camera opened. */
+    let detected=detectCameraFacing(replacement);
+    if(detected&&detected!==next){
       const corrected=await chooseNormalPhysicalCamera(next,replacement);
-      if(corrected){
-        const correctedFacing=actualCameraFacing(replacement);
-        if(correctedFacing!==next)throw new Error("WRONG_CAMERA_SIDE");
-      }else{
-        throw new Error("WRONG_CAMERA_SIDE");
-      }
+      if(corrected)detected=detectCameraFacing(replacement);
+      if(detected&&detected!==next)throw new Error("WRONG_CAMERA_SIDE");
     }
 
     if(wasLive){
@@ -1196,7 +1198,7 @@ async function setCameraFacing(next){
     }
 
     localVideo=replacement;
-    cameraFacing=actualCameraFacing(localVideo);
+    cameraFacing=actualCameraFacing(localVideo,next);
     torchOn=false;
     await resetCameraZoom();
 
@@ -1216,11 +1218,11 @@ async function setCameraFacing(next){
   }catch(err){
     try{replacement?.stop();replacement?.close()}catch(_){}
     localVideo=previous;
-    cameraFacing=actualCameraFacing(previous);
+    cameraFacing=actualCameraFacing(previous,cameraFacing);
     if($("#m7lv-preflight"))playSetupPreview();else localPreview();
     refreshSetupCameraControls();
     applySetupButtonState();
-    setupStatus("Could not switch cameras without changing to the wrong lens.",true);
+    setupStatus("Camera switch failed on this browser/device. Try Flip again.",true);
   }
 }
 async function prepareSetupPreview(p){
