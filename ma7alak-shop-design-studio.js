@@ -11,16 +11,17 @@
   window.__SHOUFHON_FULLSCREEN_SHOP_STUDIO_V1__=true;
 
   const TABS=[
-    ["details","✎","Details","Shop name, Arabic name, category, area, location and page link"],
-    ["profile","♙","Profile & Banner","Circle, image, banner, identity, shell, stats, Follow / Message, colors and typography"],
+    ["details","✎","Details","Shop identity plus structured category and location data used for search/filtering"],
+    ["directory","⌂","Shop Directory","Public label/location, Show Shops card, homepage card and directory presentation"],
+    ["profile","♙","Profile & Banner","Circle, profile image and banner — the image source used across Profile, Show Shops and homepage"],
     ["animations","✦","VIP / Story Animations","Story glow, bursts and motion together with optional VIP rings, particles and branded effects"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
     ["uploads","↑","Uploads","Photos, videos, reels, offers and owner upload limits in one place"],
-    ["publishing","✓","Access & Visibility","Shop visibility, verification, directory badges and publishing controls"],
-    ["about","●","About / Hub","ABOUT + HUB: description, services, social links, location, colors, typography and effects"],
-    ["hours","◷","Hours","Status pill, colors, typography, weekly schedule and availability"],
-    ["advanced","⚙","Global","Global preset, universal accent, motion, typography and Directory Card design"]
+    ["publishing","✓","Access & Visibility","Visibility, verification and identity access controls"],
+    ["about","●","About / Hub","ABOUT + HUB: description, services, social links, address, colors, typography and effects"],
+    ["hours","◷","Hours","Compact weekly opening schedule and availability"],
+    ["advanced","⚙","Global","Global preset, universal accent, motion and typography"]
   ];
 
   let activeTab="profile";
@@ -210,6 +211,46 @@
       #ma-admin-edit-card .m7studio-global-extras .m7studio-field-hidden{display:none!important}
       .m7v4-actions-studio{grid-template-columns:1fr!important}
 
+      /* Compact Hours — 2 columns on desktop, one on phones. */
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-schedule-box{margin:0 0 7px!important;padding:10px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-schedule-head{margin-bottom:7px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-schedule-days{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-day{min-height:50px!important;padding:6px 7px!important;gap:6px!important;grid-template-columns:minmax(74px,1fr) 106px 106px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-time{gap:2px!important;font-size:7px!important}
+      #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-time input{height:31px!important;min-height:31px!important;font-size:11px!important}
+
+      /* Compact Access & Visibility instead of giant full-width bars. */
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7studio-manager-dock{padding:0 5px 24px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-action{min-height:60px!important;padding:8px 9px!important;border-radius:12px!important;grid-template-columns:32px minmax(0,1fr) auto!important;gap:8px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-icon{width:32px!important;height:32px!important;min-width:32px!important;font-size:13px!important;border-radius:9px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-copy b{font-size:9px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-copy small{margin-top:2px!important;font-size:7.5px!important;line-height:1.25!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-side{gap:5px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-state-label{font-size:7px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-switch{transform:scale(.82)!important;transform-origin:right center!important}
+
+      /* OG design becomes a compact settings block instead of filling the page. */
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-settings{margin-top:8px!important;padding:10px!important;border-radius:13px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-head{margin-bottom:8px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid label{font-size:8px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid input,
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid select{min-height:34px!important;height:34px!important;font-size:11px!important}
+
+      /* VIP/story controls: switches stay compact cards, never tall gold bars. */
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7studio-compact-check{min-height:48px!important;height:auto!important;padding:7px 9px!important;margin:0 0 6px!important}
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7studio-check-state{min-width:40px!important;height:24px!important}
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7ds-pane[data-m7ds-pane="vip"]{padding:9px!important}
+      #ma-admin-edit-card[data-studio-tab="animations"] .m7ds-pane[data-m7ds-pane="vip"] .m7ds-grid{gap:6px!important}
+
+      /* Shop Directory: manual public copy + card controls are one compact workflow. */
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7studio-directory-note{margin:0 0 7px!important;padding:8px 10px!important}
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7da-home-fields,
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7-card-designer-box,
+      #ma-admin-edit-card[data-studio-tab="directory"] .m7da-sectioned-extras{margin:0 0 7px!important;padding:10px!important}
+
+
       /*
          Desktop only: the public/site header lives above the Studio. Keep the
          Studio chrome out of that click zone and give Save its own fixed dock.
@@ -339,6 +380,10 @@
       }
 
       @media(max-width:820px){
+        #ma-admin-edit-card[data-studio-tab="hours"] .m7-hours-schedule-days{grid-template-columns:1fr!important}
+        #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-actions{grid-template-columns:1fr!important}
+        #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
         #ma-admin-edit-card.m7studio-fullscreen{display:flex!important;overflow:hidden!important}
         .m7studio-topbar{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;gap:8px;padding:10px;padding-top:max(10px,env(safe-area-inset-top))}
         .m7studio-title{grid-column:1/3;grid-row:1}
@@ -445,7 +490,13 @@
       if(!input.__m7studioCompactBound){input.__m7studioCompactBound=true;input.addEventListener("change",sync)}
     });
     scope.querySelectorAll('input[type="number"]').forEach(input=>{
-      if(input.dataset.m7studioKeepNumber==="1")return;
+      if(
+        input.dataset.m7studioKeepNumber==="1"||
+        /(?:rating|review_count|latitude|longitude|(?:^|[-_])order)$/i.test(String(input.id||""))
+      ){
+        input.dataset.m7studioKeepNumber="1";
+        return;
+      }
       const wrap=fieldWrapper(input);if(!wrap||wrap.classList.contains("m7studio-field-hidden"))return;
       const value=Number(input.value)||0;
       if(!input.hasAttribute("min"))input.min=String(Math.min(0,value));
@@ -1404,7 +1455,7 @@
     if(key==="publishing"){
       dock.append(host);const render=()=>{
         host.innerHTML=window.Ma7alakAdminStudioBridge?.publishing()||"Select a shop first.";
-        ["owner-profile-edit","owner-media-edit","owner-about-edit"].forEach(action=>host.querySelector('[data-m7v4-action="'+action+'"]')?.remove());
+        ["owner-profile-edit","owner-media-edit","owner-about-edit","new","feature"].forEach(action=>host.querySelector('[data-m7v4-action="'+action+'"]')?.remove());
         host.querySelector(".m7v4-owner-quota")?.remove();
         updateOgPreview(host);compactStudioControls(host);
       };render();
@@ -1693,8 +1744,53 @@
       hideFormRoots(form,[]);showManagerDock(panel,key);
     }
     else if(key==="details"){
-      const roots=showRoots(form,["#ma-edit-name","#ma-edit-arabic","#ma-edit-slug","#ma-edit-url","#ma-edit-location","#ma-edit-area","#ma-edit-category","#ma-edit-category-name","#ma-edit-city-v2","#ma-edit-v2-area-smart","#ma-edit-v2-category-smart"]);
+      const roots=showRoots(form,[
+        "#ma-edit-name","#ma-edit-arabic","#ma-edit-slug","#ma-edit-url",
+        "#ma-edit-v2-location-smart","#ma-edit-v2-category-smart",
+        "#ma-edit-city-v2","#ma-edit-v2-area-smart","#ma-edit-category"
+      ]);
       roots.forEach(root=>root.classList.remove("m7studio-profile-core"));
+
+      /* Public copy belongs in Shop Directory, not in structured search data. */
+      fieldWrapper(document.getElementById("ma-edit-location"))?.classList.add("m7studio-field-hidden");
+      fieldWrapper(document.getElementById("ma-edit-category-name"))?.classList.add("m7studio-field-hidden");
+    }
+    else if(key==="directory"){
+      const roots=showRoots(form,[
+        "#ma-edit-location",
+        "#ma-edit-category-name",
+        ".m7-card-designer-box",
+        ".m7da-home-fields",
+        ".m7da-sectioned-extras"
+      ]);
+
+      markExtras("");
+      if(extras){
+        extras.classList.add("m7studio-global-extras");
+        filterFields(
+          extras,
+          id=>/m7de-(price|order|latitude|longitude|rating|review_count)$/.test(id)
+        );
+      }
+
+      /* The core form block may also contain taxonomy fields. Hide them here:
+         Directory shows only the manual visitor-facing label/location. */
+      const coreRoot=directFormChild(form,document.getElementById("ma-edit-location"));
+      if(coreRoot){
+        const allowed=new Set(["ma-edit-location","ma-edit-category-name"]);
+        coreRoot.querySelectorAll("input[id],select[id],textarea[id]").forEach(input=>{
+          const wrap=fieldWrapper(input);
+          if(wrap)wrap.classList.toggle("m7studio-field-hidden",!allowed.has(input.id));
+        });
+      }
+
+      const note=document.createElement("div");
+      note.className="m7studio-hub-note m7studio-directory-note";
+      note.innerHTML="<b>One source of truth for images</b><br>The Directory and homepage automatically use the Profile image + Banner from <b>Profile & Banner</b>. There is no separate Directory cover upload.";
+      form.insertBefore(note,form.firstChild.nextSibling);
+
+      addInlineCapability(form,["new","feature"]);
+      hideFormRoots(form,roots);
     }
     else if(key==="profile"){
       const roots=showRoots(form,[
@@ -1863,15 +1959,13 @@
     else{
       const roots=showRoots(form,[
         ".m7-design-studio",
-        ".m7-card-designer-box",
-        ".m7da-home-fields",
         ".m7da-sectioned-extras"
       ]);
 
       showPanes(form,["motion","typography"]);
       /* story_color is the real saved Universal Accent field. */
       markExtras("");
-      if(extras){extras.classList.add("m7studio-global-extras");filterFields(extras,id=>/m7de-(story_color|cover|price|order|latitude|longitude|rating|review_count)$/.test(id))}
+      if(extras){extras.classList.add("m7studio-global-extras");filterFields(extras,id=>/m7de-story_color$/.test(id))}
 
       filterFields(
         design?.querySelector('[data-m7ds-pane="typography"]'),
