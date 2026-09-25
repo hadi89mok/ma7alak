@@ -1321,6 +1321,189 @@
       }
       #m7-owner-media-edit.visible{display:flex!important}
 
+      /*
+         PUBLIC MEDIA VIEWER — SAFE VISUAL PASS
+         CSS only. Do not replace/hide the viewer itself, alter its JS,
+         touch history/back handling, or interfere with image/video loading.
+      */
+      #m7-media-viewer{
+        background:
+          radial-gradient(circle at 50% 38%,
+            rgba(var(--m7-view-rgb,217,164,65),.10),
+            rgba(9,8,9,.98) 43%,
+            #020202 100%)!important;
+      }
+
+      /* The phone/browser Back action remains the close path. */
+      #m7-media-viewer #m7v-close{
+        display:none!important;
+      }
+
+      /*
+         Let the original media element use the whole viewport.
+         contain keeps the complete photo/video visible without cropping.
+      */
+      #m7-media-viewer #m7v-stage{
+        inset:0!important;
+        width:100%!important;
+        height:100%!important;
+        padding:0!important;
+        background:transparent!important;
+      }
+
+      #m7-media-viewer #m7v-image,
+      #m7-media-viewer #m7v-video{
+        width:100%!important;
+        height:100%!important;
+        max-width:100%!important;
+        max-height:100%!important;
+        object-fit:contain!important;
+        object-position:center center!important;
+      }
+
+      /*
+         Existing working viewer text, reorganized as one top HUD:
+         left = what is being viewed
+         right = position in the current Media/album set.
+      */
+      #m7-media-viewer .m7v-top{
+        top:max(12px,env(safe-area-inset-top))!important;
+        left:12px!important;
+        right:12px!important;
+        width:auto!important;
+        transform:none!important;
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr) auto!important;
+        align-items:center!important;
+        gap:8px!important;
+        pointer-events:none!important;
+      }
+
+      #m7-media-viewer .m7v-type,
+      #m7-media-viewer .m7v-counter{
+        min-height:38px!important;
+        margin:0!important;
+        border:1px solid rgba(var(--m7-view-rgb,217,164,65),.26)!important;
+        background:linear-gradient(
+          180deg,
+          rgba(17,15,14,.78),
+          rgba(7,7,8,.68)
+        )!important;
+        backdrop-filter:blur(14px) saturate(120%)!important;
+        -webkit-backdrop-filter:blur(14px) saturate(120%)!important;
+        box-shadow:
+          0 7px 24px rgba(0,0,0,.26),
+          inset 0 1px 0 rgba(255,255,255,.055)!important;
+      }
+
+      #m7-media-viewer .m7v-type{
+        min-width:0!important;
+        justify-content:flex-start!important;
+        padding:0 13px!important;
+        border-radius:12px!important;
+        color:var(--m7-view-light,#f5d58d)!important;
+        font-size:9.5px!important;
+        font-weight:950!important;
+        line-height:1!important;
+        letter-spacing:1.05px!important;
+        white-space:nowrap!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+      }
+
+      #m7-media-viewer .m7v-counter{
+        min-width:66px!important;
+        padding:0 11px!important;
+        border-radius:12px!important;
+        color:rgba(255,255,255,.88)!important;
+        font-size:9px!important;
+        font-weight:950!important;
+        line-height:1!important;
+        letter-spacing:.8px!important;
+        white-space:nowrap!important;
+      }
+
+      /*
+         The existing hint already contains:
+         - normal Media: SWIPE
+         - album: <album name> · SWIPE
+         Move it under the top HUD so album context is obvious.
+      */
+      #m7-media-viewer .m7v-hint{
+        top:calc(max(12px,env(safe-area-inset-top)) + 46px)!important;
+        bottom:auto!important;
+        left:13px!important;
+        right:13px!important;
+        width:auto!important;
+        max-width:none!important;
+        min-height:24px!important;
+        transform:none!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:flex-start!important;
+        padding:0 10px!important;
+        border:0!important;
+        border-radius:8px!important;
+        background:linear-gradient(
+          90deg,
+          rgba(5,5,6,.46),
+          rgba(5,5,6,.16),
+          transparent
+        )!important;
+        color:rgba(255,255,255,.58)!important;
+        font-size:7.5px!important;
+        font-weight:900!important;
+        letter-spacing:1.15px!important;
+        line-height:1!important;
+        text-align:left!important;
+        white-space:nowrap!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        backdrop-filter:blur(6px)!important;
+        -webkit-backdrop-filter:blur(6px)!important;
+        pointer-events:none!important;
+      }
+
+      /* Preserve native video controls above the visual chrome. */
+      #m7-media-viewer .m7v-video{
+        position:relative!important;
+        z-index:2!important;
+      }
+
+      @media(max-width:520px){
+        #m7-media-viewer .m7v-top{
+          top:max(9px,env(safe-area-inset-top))!important;
+          left:9px!important;
+          right:9px!important;
+          gap:7px!important;
+        }
+
+        #m7-media-viewer .m7v-type,
+        #m7-media-viewer .m7v-counter{
+          min-height:36px!important;
+        }
+
+        #m7-media-viewer .m7v-type{
+          padding:0 11px!important;
+          font-size:9px!important;
+        }
+
+        #m7-media-viewer .m7v-counter{
+          min-width:61px!important;
+          padding:0 9px!important;
+          font-size:8.5px!important;
+        }
+
+        #m7-media-viewer .m7v-hint{
+          top:calc(max(9px,env(safe-area-inset-top)) + 43px)!important;
+          left:10px!important;
+          right:10px!important;
+          min-height:22px!important;
+          padding:0 8px!important;
+          font-size:7px!important;
+        }
+      }
+
       html:has(#m7-owner-media-sheet.open),body:has(#m7-owner-media-sheet.open){margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;background:#050506!important}
       #m7-owner-media-sheet{position:fixed!important;inset:-1px!important;top:-1px!important;left:-1px!important;width:calc(100vw + 2px)!important;width:calc(100dvw + 2px)!important;height:calc(100vh + 2px)!important;height:calc(100dvh + 2px)!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(11px,env(safe-area-inset-top)) 13px max(25px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
