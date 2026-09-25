@@ -1470,9 +1470,10 @@
     const photos=value("[data-m7v4-owner-photo-limit]");
     const videos=value("[data-m7v4-owner-video-limit]");
     const stories=value("[data-m7v4-owner-story-limit]");
-    await window.Ma7alakAdminStudioBridge?.limits(photos,videos,stories);
+    const albumItems=value("[data-m7v4-owner-album-limit]");
+    await window.Ma7alakAdminStudioBridge?.limits(photos,videos,stories,albumItems);
     const form=document.getElementById("ma-admin-edit-form");
-    form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos,owner_story_limit:stories});
+    form.dataset.directoryOptions=JSON.stringify({...JSON.parse(form.dataset.directoryOptions||"{}"),owner_media_photo_limit:photos,owner_media_video_limit:videos,owner_media_album_item_limit:albumItems,owner_story_limit:stories});
   }
   function renderUploadPermissions(host,note){
     host.replaceChildren(publishingFragment(["owner-media-edit"],true));
