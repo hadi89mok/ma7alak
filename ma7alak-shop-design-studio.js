@@ -258,6 +258,37 @@
       #ma-admin-edit-card[data-studio-tab="animations"] .m7ds-vip-note{margin-top:7px!important;padding:8px!important}
 
       /*
+         SIMPLE CONTROL UI — one compact rule-set for every Studio tab.
+         Numbers stay small number boxes. Colors are real swatches, not
+         full-width bars. This also keeps OG/VIP/Hours/Media/Directory controls
+         dense enough to scan without removing any setting.
+      */
+      #ma-admin-edit-card.m7studio-fullscreen fieldset{padding:11px!important;margin-bottom:8px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7-design-studio>.m7ds-pane{padding:10px!important;margin-bottom:8px!important}
+      #ma-admin-edit-card.m7studio-fullscreen input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+      #ma-admin-edit-card.m7studio-fullscreen select{min-height:35px!important;height:35px!important;padding-top:5px!important;padding-bottom:5px!important}
+      #ma-admin-edit-card.m7studio-fullscreen textarea{min-height:72px!important;padding:8px!important}
+      #ma-admin-edit-card.m7studio-fullscreen input[type="number"]{width:min(112px,100%)!important;max-width:112px!important;justify-self:start!important;padding:0 9px!important}
+      #ma-admin-edit-card.m7studio-fullscreen input[type="color"]{width:44px!important;min-width:44px!important;max-width:44px!important;height:34px!important;min-height:34px!important;padding:3px!important;border-radius:8px!important;justify-self:start!important;cursor:pointer!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-range-value{display:none!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-range-field{display:block!important}
+      #ma-admin-edit-card.m7studio-fullscreen button:not(.m7studio-tab):not(.m7studio-top-btn):not(.m7studio-desktop-save-button){min-height:34px}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-grid,
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-grid{gap:6px!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin:9px 0 6px!important;padding:6px 8px!important}
+
+      /* Account & Publishing / OG badge: compact dashboard controls. */
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-settings{padding:8px!important;margin-top:7px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid{grid-template-columns:repeat(4,minmax(120px,1fr))!important;gap:6px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid label{min-width:0!important;padding:0!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid input:not([type="color"]):not([type="checkbox"]):not([type="radio"]),
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid select{width:100%!important;max-width:none!important;min-height:34px!important;height:34px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid input[type="number"]{width:88px!important;max-width:88px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-og-grid input[type="color"]{width:44px!important;height:34px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-action{min-height:58px!important;padding:8px 10px!important}
+      #ma-admin-edit-card[data-studio-tab="publishing"] .m7v4-action small{margin-top:2px!important}
+
+      /*
          Desktop only: the public/site header lives above the Studio. Keep the
          Studio chrome out of that click zone and give Save its own fixed dock.
          Mobile keeps the existing two-row top bar unchanged.
@@ -486,6 +517,12 @@
 
   function compactStudioControls(scope){
     if(!scope)return;
+
+    /*
+       Keep switches compact, but NEVER turn ordinary numeric settings into
+       giant sliders. The old conversion made every Studio tab waste space
+       and could also change the meaning of values such as ratings.
+    */
     scope.querySelectorAll('input[type="checkbox"]').forEach(input=>{
       const wrap=fieldWrapper(input);if(!wrap||wrap.classList.contains("m7studio-field-hidden"))return;
       wrap.classList.add("m7studio-compact-check");
@@ -495,25 +532,24 @@
       sync();
       if(!input.__m7studioCompactBound){input.__m7studioCompactBound=true;input.addEventListener("change",sync)}
     });
+
+    /*
+       If this Admin page was already touched by an older Studio build in the
+       same session, restore only sliders that OUR old converter created.
+       Native range controls are left alone.
+    */
+    scope.querySelectorAll(".m7studio-range-field").forEach(wrap=>{
+      const input=wrap.querySelector('input[type="range"]');
+      const output=wrap.querySelector(":scope > .m7studio-range-value");
+      if(!input||!output)return;
+      input.type="number";
+      input.dataset.m7studioKeepNumber="1";
+      output.remove();
+      wrap.classList.remove("m7studio-range-field");
+    });
+
     scope.querySelectorAll('input[type="number"]').forEach(input=>{
-      if(
-        input.dataset.m7studioKeepNumber==="1"||
-        /(?:rating|review_count|latitude|longitude|(?:^|[-_])order)$/i.test(String(input.id||""))
-      ){
-        input.dataset.m7studioKeepNumber="1";
-        return;
-      }
-      const wrap=fieldWrapper(input);if(!wrap||wrap.classList.contains("m7studio-field-hidden"))return;
-      const value=Number(input.value)||0;
-      if(!input.hasAttribute("min"))input.min=String(Math.min(0,value));
-      if(!input.hasAttribute("max"))input.max=String(Math.max(100,Math.ceil(Math.abs(value)*2)||100));
-      if(!input.hasAttribute("step"))input.step=String(Number.isInteger(value)?1:.1);
-      input.type="range";wrap.classList.add("m7studio-range-field");
-      let output=wrap.querySelector(":scope > .m7studio-range-value");
-      if(!output){output=document.createElement("output");output.className="m7studio-range-value";wrap.append(output)}
-      const suffix=/speed/i.test(input.id)?"s":/%|opacity|glow|intensity|blur|shadow/i.test(input.id)?"%":"";
-      const sync=()=>{output.value=input.value+suffix;output.textContent=input.value+suffix};sync();
-      if(!input.__m7studioRangeBound){input.__m7studioRangeBound=true;input.addEventListener("input",sync);input.addEventListener("change",sync)}
+      input.dataset.m7studioKeepNumber="1";
     });
   }
 
