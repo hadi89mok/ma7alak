@@ -356,8 +356,6 @@
   function patchUploadPreviews(input){
     if(!input?.isConnected)return;
 
-    clearPreviewUrls(input);
-
     const files=[...(input.files||[])];
     if(!files.length)return;
 
@@ -371,15 +369,40 @@
       ...box.querySelectorAll(".m7lo-pending-media")
     ];
 
-    const urls=[];
+    if(!rows.length)return;
+
+    const previous=previewUrls.get(input)||[];
+    const urls=previous.slice();
 
     rows.forEach((row,index)=>{
       const file=files[index];
       if(!file)return;
 
-      const old=row.querySelector(".m7lo-pending-icon,.shh-pending-thumb");
+      const fingerprint=[
+        file.name,
+        file.size,
+        file.lastModified
+      ].join("|");
+
+      const current=row.querySelector(".shh-pending-thumb");
+
+      if(
+        current&&
+        current.dataset.shhFileFingerprint===fingerprint
+      ){
+        return;
+      }
+
+      if(urls[index]){
+        try{URL.revokeObjectURL(urls[index])}catch(_){}
+      }
+
+      const old=row.querySelector(
+        ".m7lo-pending-icon,.shh-pending-thumb"
+      );
+
       const url=URL.createObjectURL(file);
-      urls.push(url);
+      urls[index]=url;
 
       let preview;
 
@@ -396,6 +419,7 @@
       }
 
       preview.className="shh-pending-thumb";
+      preview.dataset.shhFileFingerprint=fingerprint;
       preview.src=url;
 
       if(old)old.replaceWith(preview);
@@ -403,6 +427,19 @@
     });
 
     previewUrls.set(input,urls);
+  }
+
+  function patchAnyPendingUploadPreviews(){
+    ["m7lo-file","m7lo-manager-files"].forEach(id=>{
+      const input=document.getElementById(id);
+
+      if(
+        input instanceof HTMLInputElement&&
+        input.files?.length
+      ){
+        patchUploadPreviews(input);
+      }
+    });
   }
 
   document.addEventListener("change",event=>{
@@ -415,8 +452,17 @@
       return;
     }
 
+    clearPreviewUrls(input);
+
+    /*
+       The Live Offers script creates the description rows in its own
+       change handler. Run after that DOM work, then MutationObserver/scan
+       acts as a fallback so the thumbnail appears immediately.
+    */
     requestAnimationFrame(()=>{
+      patchUploadPreviews(input);
       setTimeout(()=>patchUploadPreviews(input),0);
+      setTimeout(()=>patchUploadPreviews(input),60);
     });
   },true);
 
@@ -428,6 +474,7 @@
 
   function scan(){
     cleanDetachedPreviewUrls();
+    patchAnyPendingUploadPreviews();
     patchViewer();
     patchHomepageOwnerButtons();
   }
@@ -489,8 +536,31 @@
     .shh-offer-swipe-hero{
       touch-action:pan-y;
     }
-    .shh-offer-swipe-hero .m7lo-hero-caption{
-      right:13px!important;
+    .shh-offer-swipe-hero .m7lo-hero-caption,
+    #m7lo-overlay .m7lo-hero-caption{
+      left:12px!important;
+      right:12px!important;
+      bottom:12px!important;
+      padding:11px 13px!important;
+      border:1px solid rgba(255,255,255,.10)!important;
+      border-radius:13px!important;
+      background:rgba(3,3,3,.80)!important;
+      color:#fff!important;
+      font-size:13px!important;
+      line-height:1.48!important;
+      font-weight:750!important;
+      letter-spacing:.01em!important;
+      text-shadow:0 1px 2px rgba(0,0,0,.72)!important;
+      -webkit-font-smoothing:antialiased!important;
+      backdrop-filter:blur(10px)!important;
+    }
+    #m7lo-overlay .m7lo-view-info .m7lo-desc{
+      color:rgba(255,255,255,.92)!important;
+      font-size:13px!important;
+      line-height:1.5!important;
+      font-weight:680!important;
+      letter-spacing:.005em!important;
+      -webkit-font-smoothing:antialiased!important;
     }
     .shh-media-enter-next .shh-offer-media{
       animation:shhMediaNext .22s ease-out;
@@ -547,12 +617,20 @@
         top:max(56px,calc(env(safe-area-inset-top) + 48px));
         right:10px;
       }
-      .shh-offer-swipe-hero .m7lo-hero-caption{
+      .shh-offer-swipe-hero .m7lo-hero-caption,
+      #m7lo-overlay .m7lo-hero-caption{
         left:10px!important;
         right:10px!important;
         bottom:10px!important;
-        max-height:4.5em!important;
+        padding:10px 12px!important;
+        max-height:5.4em!important;
         overflow:auto!important;
+        font-size:12.5px!important;
+        line-height:1.48!important;
+      }
+      #m7lo-overlay .m7lo-view-info .m7lo-desc{
+        font-size:12.5px!important;
+        line-height:1.5!important;
       }
       .shh-pending-thumb{
         width:68px;
