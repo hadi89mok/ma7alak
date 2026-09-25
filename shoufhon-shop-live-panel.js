@@ -109,13 +109,13 @@ body{overflow:hidden}
 #m7-shop-live button{font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .m7slp{
   position:relative;
-  width:95%;
-  max-width:620px;
-  min-height:94px;
+  width:92%;
+  max-width:560px;
+  min-height:76px;
   margin:0 auto;
   overflow:hidden;
   border:1px solid color-mix(in srgb,var(--m7a) 58%,transparent);
-  border-radius:22px;
+  border-radius:18px;
   background:
     radial-gradient(circle at 0 0,color-mix(in srgb,var(--m7a) 11%,transparent),transparent 40%),
     linear-gradient(145deg,rgba(20,20,18,.985),rgba(7,8,8,.99));
@@ -133,10 +133,10 @@ body{overflow:hidden}
 .m7slp.loading{display:grid;place-items:center;color:rgba(255,255,255,.55);font-size:10px;font-weight:850;letter-spacing:.3px}
 .m7slp-view{
   position:relative;z-index:2;
-  width:100%;min-height:94px;
-  display:grid;grid-template-columns:76px minmax(0,1fr) auto;
-  align-items:center;gap:11px;
-  padding:10px 11px;
+  width:100%;min-height:76px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:10px;
+  padding:11px 13px;
   border:0;background:transparent;color:#fff;text-align:left;
 }
 .m7slp-view.can-open{cursor:pointer}
@@ -162,18 +162,18 @@ body{overflow:hidden}
 .m7slp-kicker.live{color:var(--m7status)}
 .m7slp-kicker i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:m7slpPulse 1.45s ease-out infinite}
 @keyframes m7slpPulse{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.m7slp-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:16px;line-height:1.08;font-weight:950;letter-spacing:-.15px}
+.m7slp-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:15px;line-height:1.08;font-weight:950;letter-spacing:-.15px}
 .m7slp-sub{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px;color:rgba(255,255,255,.58);font-size:9px;font-weight:700}
 .m7slp-meta{display:flex;align-items:center;gap:6px;margin-top:7px;color:rgba(255,255,255,.48);font-size:8px;font-weight:850}
 .m7slp-meta b{color:#f1c26f}
 .m7slp-cta{
-  min-width:84px;min-height:42px;padding:0 12px;border:1px solid color-mix(in srgb,var(--m7a) 48%,transparent);
+  min-width:70px;min-height:36px;padding:0 10px;border:1px solid color-mix(in srgb,var(--m7a) 48%,transparent);
   border-radius:13px;background:linear-gradient(135deg,color-mix(in srgb,var(--m7a) 88%,#fff 12%),color-mix(in srgb,var(--m7a) 82%,#8a5516 18%));
   color:#171008;font-size:10px;font-weight:950;white-space:nowrap;
   box-shadow:0 8px 18px rgba(0,0,0,.18);
   display:grid;place-items:center;align-self:center;line-height:1
 }
-.m7slp-cta.icon{min-width:42px;width:42px;height:42px;padding:0;border-radius:50%;font-size:23px;font-weight:700}
+.m7slp-cta.icon{min-width:36px;width:36px;height:36px;padding:0;border-radius:50%;font-size:19px;font-weight:700}
 .m7slp-cta.edit{position:relative;z-index:4;cursor:pointer;background:linear-gradient(135deg,#f0c36d,#c98a31);color:#171008}
 .m7slp-view.owner-active{cursor:pointer}
 .m7slp-view.owner-active:active{transform:scale(.995)}
@@ -196,17 +196,20 @@ body{overflow:hidden}
 .m7slp-go{background:linear-gradient(135deg,#f33156,#bf1738);color:#fff;box-shadow:0 7px 18px rgba(223,31,67,.18)}
 .m7slp-add{background:linear-gradient(135deg,#efc36f,#c98b31);color:#171008}
 .m7slp-owner-actions button:disabled{opacity:.38}
-.m7slp-owner-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
-.m7slp-slots{min-width:0}.m7slp-slots-line{display:flex;align-items:center;justify-content:space-between;gap:8px;color:rgba(255,255,255,.48);font-size:7.5px;font-weight:850}.m7slp-slots-line b{color:#efbe69;font-size:10px}
-.m7slp-progress{height:4px;margin-top:5px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.08)}.m7slp-progress i{display:block;height:100%;background:linear-gradient(90deg,#cf9136,#f2ca78)}
-.m7slp-owner-badge{padding:5px 7px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.58);font-size:7px;font-weight:900;white-space:nowrap}
+.m7slp-owner-actions button.locked{opacity:.38;filter:saturate(.55);cursor:pointer}
+.m7slp-owner-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.065)}
+.m7slp-slots{width:150px;max-width:48%;min-width:110px}
+.m7slp-slots-line{display:flex;align-items:center;justify-content:space-between;gap:7px;color:rgba(255,255,255,.42);font-size:7px;font-weight:850}
+.m7slp-slots-line b{color:#efbe69;font-size:9px}
+.m7slp-progress{width:104px;max-width:100%;height:3px;margin-top:4px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.075)}
+.m7slp-progress i{display:block;height:100%;background:linear-gradient(90deg,#cf9136,#f2ca78)}
+.m7slp-owner-badge{padding:4px 6px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.54);font-size:6.7px;font-weight:900;white-space:nowrap}
 .m7slp-owner.is-live .m7slp-owner-badge{border-color:rgba(255,49,84,.24);background:rgba(255,49,84,.06);color:#ff8ca2}
 @media(max-width:420px){
-  .m7slp{width:96%;border-radius:19px}
-  .m7slp-view{grid-template-columns:64px minmax(0,1fr) auto;gap:9px;padding:8px 9px;min-height:84px}
-  .m7slp-thumb{width:64px;height:64px;border-radius:14px}
+  .m7slp{width:94%;border-radius:17px}
+  .m7slp-view{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 11px;min-height:72px}
   .m7slp-title{font-size:14px}.m7slp-sub{font-size:8px}.m7slp-meta{font-size:7px}
-  .m7slp-cta{min-width:72px;min-height:38px;padding:0 10px;font-size:9px}.m7slp-cta.icon{min-width:38px;width:38px;height:38px;padding:0;font-size:21px}
+  .m7slp-cta{min-width:64px;min-height:34px;padding:0 9px;font-size:8.5px}.m7slp-cta.icon{min-width:34px;width:34px;height:34px;padding:0;font-size:18px}
   .m7slp-owner{padding:9px}
   .m7slp-owner-main{grid-template-columns:1fr}
   .m7slp-owner-actions{width:100%}.m7slp-owner-actions button{flex:1}
@@ -224,12 +227,11 @@ function setTheme(){
 
 function viewerMarkup(){
   const offers=offerUsed();
-  const img=imageUrl();
   const name=shopName();
   const live=!!state.broadcastLive;
   const hasOffers=offers>0;
   const canOpen=live||hasOffers;
-  let kicker,title,sub,meta,cta,ctaClass="icon",chip="";
+  let kicker,title,sub,meta,cta="",ctaClass="";
   if(live){
     kicker='<span class="m7slp-kicker live"><i></i> VIDEO LIVE</span>';
     title="Live now at "+name;
@@ -237,29 +239,23 @@ function viewerMarkup(){
     meta=hasOffers?offers+" active "+(offers===1?"offer":"offers")+" during this live":"Broadcasting now";
     cta="Watch";
     ctaClass="live";
-    chip='<span class="m7slp-live-chip"><i></i> LIVE</span>';
   }else if(hasOffers){
     kicker='<span class="m7slp-kicker"><i></i> HAPPENING NOW</span>';
     title=offers===1?"1 live offer / update":offers+" live offers / updates";
     sub="See what "+name+" has happening right now";
-    meta="Tap the card for details";
-    cta="›";
-    ctaClass="icon";
+    meta="Tap to see details";
+    cta="View";
   }else{
     kicker='<span class="m7slp-kicker">○ CURRENT STATUS</span>';
     title="Nothing live right now";
     sub="Check back soon for offers, events and live broadcasts";
     meta="No active offers or broadcast";
-    cta="—";
-    ctaClass="ghost icon";
   }
   return '<div class="m7slp-view '+(canOpen?"can-open":"")+'" '+(canOpen?'data-action="primary" role="button" tabindex="0"':'aria-disabled="true"')+'>'+
-    '<span class="m7slp-thumb">'+(img?'<img src="'+esc(img)+'" alt="">':'<span class="m7slp-thumb-placeholder">S</span>')+chip+'</span>'+
     '<span class="m7slp-copy">'+kicker+'<strong class="m7slp-title">'+esc(title)+'</strong><small class="m7slp-sub">'+esc(sub)+'</small><span class="m7slp-meta">'+esc(meta)+'</span></span>'+
-    '<span class="m7slp-cta '+ctaClass+'">'+esc(cta)+'</span>'+
+    (canOpen?'<span class="m7slp-cta '+ctaClass+'">'+esc(cta)+'</span>':"")+
   '</div>';
 }
-
 function ownerActiveMarkup(){
   const live=!!state.broadcastLive;
   const offers=offerUsed();
@@ -292,27 +288,29 @@ function ownerMarkup(){
   if(live||used>0)return ownerActiveMarkup();
 
   const lim=offerLimit();
-  const pct=lim?Math.min(100,used/lim*100):0;
+  const pct=lim>0?Math.min(100,used/lim*100):0;
   const canVideo=videoEnabled();
-  const canOffer=offersEnabled()&&(!lim||used<lim);
+  const offerLocked=!offersEnabled()||lim<=0;
+  const offerFull=!offerLocked&&used>=lim;
   const title="Ready to go live";
-  const sub=canVideo?"Start a broadcast or publish an offer.":"Video Live is disabled for this shop.";
+  const sub=(canVideo||!offerLocked)?"Start a broadcast or publish an offer.":"Premium access is required for Live features.";
+  const slotText=offersEnabled()?(used+" / "+lim):"OFF";
+
   return '<div class="m7slp-owner">'+
     '<div class="m7slp-owner-tag">♛ SHOP OWNER CONTROLS</div>'+
     '<div class="m7slp-owner-main">'+
       '<div class="m7slp-owner-state"><i></i><div><strong>'+esc(title)+'</strong><small>'+esc(sub)+'</small></div></div>'+
       '<div class="m7slp-owner-actions">'+
-        '<button class="m7slp-go" type="button" data-action="go" '+(canVideo?"":"disabled")+'>▣ Go Live</button>'+
-        '<button class="m7slp-add" type="button" data-action="add" '+(canOffer?"":"disabled")+'>'+(offersEnabled()&&lim&&used>=lim?"Slots Full":"＋ Add Offer")+'</button>'+
+        '<button class="m7slp-go '+(canVideo?"":"locked")+'" type="button" data-action="go">'+(canVideo?"▣ Go Live":"🔒 Go Live")+'</button>'+
+        '<button class="m7slp-add '+(offerLocked?"locked":"")+'" type="button" data-action="add" '+(offerFull?"disabled":"")+'>'+(offerFull?"Slots Full":(offerLocked?"🔒 Add Offer":"＋ Add Offer"))+'</button>'+
       '</div>'+
     '</div>'+
     '<div class="m7slp-owner-bottom">'+
-      '<div class="m7slp-slots"><div class="m7slp-slots-line"><span>Active offer slots</span><b>'+(offersEnabled()?(lim?used+"/"+lim:String(used)):"—")+'</b></div><div class="m7slp-progress"><i style="width:'+pct+'%"></i></div></div>'+
+      '<div class="m7slp-slots"><div class="m7slp-slots-line"><span>Offer slots</span><b>'+esc(slotText)+'</b></div><div class="m7slp-progress"><i style="width:'+pct+'%"></i></div></div>'+
       '<div class="m7slp-owner-badge">'+(canVideo?"○ Broadcast ready":"○ Video Live off")+'</div>'+
     '</div>'+
   '</div>';
 }
-
 function render(){
   if(!root)return;
   setTheme();
@@ -320,7 +318,9 @@ function render(){
     root.innerHTML='<section class="m7slp loading">Checking live status…</section>';
     return;
   }
-  root.innerHTML='<section class="m7slp">'+(state.owner?ownerMarkup():viewerMarkup())+'</section>';
+  const html='<section class="m7slp">'+(state.owner?ownerMarkup():viewerMarkup())+'</section>';
+  if(root.innerHTML===html)return;
+  root.innerHTML=html;
   bind();
 }
 
@@ -356,7 +356,7 @@ function requestState(){
 
 function onState(data){
   const incoming=String(data.shopSlug||"").trim().toLowerCase();
-  if(incoming&&incoming!==slug)return;
+  if(!incoming||incoming!==slug)return;
   known=true;
   state={
     ...state,
@@ -438,8 +438,8 @@ window.addEventListener("message",event=>{
         shop_url:String(d.shop.shop_url||state.shop?.shop_url||"")
       };
     }
-    known=true;
-    render();
+    if(known)render();
+    requestState();
   }
   if(d.type==="MA7ALAK_DESIGN_PREVIEW"){
     const ds=String(d.shop_slug||d.shopSlug||"").trim().toLowerCase();
