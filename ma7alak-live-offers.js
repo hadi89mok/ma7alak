@@ -889,29 +889,35 @@ function pendingMediaRows(files){
     <div><strong>Media ${i+1}</strong><small>${esc(file.name)}</small><textarea maxlength="300" data-pending-caption placeholder="Optional description for this media…"></textarea></div>
   </div>`).join("");
 }
+function offerMediaLimit(){
+  const raw=Number(ent?.media_per_offer_limit??8);
+  if(!Number.isFinite(raw))return 8;
+  return Math.max(0,Math.min(20,Math.floor(raw)));
+}
 function mediaManager(id){
   const x=ownerItems.find(q=>String(q.id)===String(id));
   if(!x||String(x.shop_slug).toLowerCase()!==ownerSlug)return;
   $("#m7lo-overlay")?.remove();
   lock();
-  const a=x.media||[],d=document.createElement("div");
+  const a=x.media||[],limit=offerMediaLimit(),d=document.createElement("div");
   d.id="m7lo-overlay";
   d.innerHTML=`<div id="m7lo-panel" class="m7lo-media-manager-panel">
     <button class="m7lo-close">×</button>
     <div class="m7lo-panel-title">Manage media</div>
-    <p class="m7lo-sub">Choose the cover, reorder files, and give each photo or video its own description. Maximum 8.</p>
+    <p class="m7lo-sub">Choose the cover, reorder files, and give each photo or video its own description. Maximum ${limit}.</p>
     <div class="m7lo-media-list">${a.map((m,i)=>managerRow(m,i,a.length)).join("")||'<div class="m7lo-empty">No media yet.</div>'}</div>
-    <label class="m7lo-file" style="display:block;margin-top:12px">＋ Add photos / videos<input id="m7lo-manager-files" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label>
+    ${limit>0&&a.length<limit?`<label class="m7lo-file" style="display:block;margin-top:12px">＋ Add photos / videos · ${a.length}/${limit}<input id="m7lo-manager-files" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label>`:`<div class="m7lo-status" style="margin-top:12px">${limit<=0?"Media uploads are disabled for this shop.":"Media limit reached · "+a.length+"/"+limit}</div>`}
     <div id="m7lo-manager-draft"></div>
     <div id="m7lo-manager-status" class="m7lo-status"></div>
   </div>`;
   mountLiveOverlay(d);
   $(".m7lo-close",d).onclick=close;
-  $("#m7lo-manager-files",d).onchange=e=>{
+  const managerFiles=$("#m7lo-manager-files",d);
+  if(managerFiles)managerFiles.onchange=e=>{
     const files=[...(e.target.files||[])];
     const box=$("#m7lo-manager-draft",d);
     if(!files.length){box.innerHTML="";return}
-    if(a.length+files.length>8){box.innerHTML='<div class="m7lo-status">You can add '+Math.max(0,8-a.length)+' more file(s).</div>';return}
+    if(a.length+files.length>limit){box.innerHTML='<div class="m7lo-status">You can add '+Math.max(0,limit-a.length)+' more file(s).</div>';return}
     box.innerHTML='<div class="m7lo-pending-head">Describe each selected media</div>'+pendingMediaRows(files)+'<button id="m7lo-manager-upload" class="m7lo-btn" type="button">Upload '+files.length+' media</button>';
     $("#m7lo-manager-upload",box).onclick=e2=>guardedUiAction(e2.currentTarget,async()=>{
       const captions=$all("[data-pending-caption]",box).map(t=>t.value.trim());
@@ -934,8 +940,10 @@ async function addMedia(x,files,captions=[]){
 
   try{
     const existing=(x.media||[]).length;
+    const limit=offerMediaLimit();
     if(!files.length)return;
-    if(existing+files.length>8)throw new Error(`You can add ${Math.max(0,8-existing)} more file(s).`);
+    if(limit<=0)throw new Error("Media uploads are disabled for this shop.");
+    if(existing+files.length>limit)throw new Error(`You can add ${Math.max(0,limit-existing)} more file(s).`);
 
     for(const file of files){
       uploaded.push(
@@ -1066,7 +1074,7 @@ async function endPost(id){
   setTimeout(load,220);
 }
 function formHtml(x){
-  const edit=!!x,type=x?.post_type||"offer";
+  const edit=!!x,type=x?.post_type||"offer",mediaLimit=offerMediaLimit();
   const types=[["offer","🏷️","OFFER","Deal / price"],["happening","●","HAPPENING NOW","Right now"],["arrival","✨","NEW ARRIVAL","Just landed"],["event","▣","EVENT","Date / activity"]];
   return`<div id="m7lo-panel" class="m7lo-editor-panel">
     <button class="m7lo-close">×</button>
@@ -1080,7 +1088,7 @@ function formHtml(x){
       <input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}">
       <div id="m7lo-prices" class="m7lo-two" style="display:${type==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div>
       <div class="m7lo-two m7lo-time-row"><label class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label class="m7lo-field"><span class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>
-      ${edit?"":`<label class="m7lo-file">📷 Add up to 8 photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div><div id="m7lo-new-media-draft"></div>`}
+      ${edit?"":(mediaLimit>0?`<label class="m7lo-file">📷 Add up to ${mediaLimit} photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div><div id="m7lo-new-media-draft"></div>`:`<div class="m7lo-status">Media uploads are disabled for this shop.</div>`)}
       <button class="m7lo-btn m7lo-publish-btn" type="submit">${edit?"Save Changes":"⚡ Publish Now"}</button>
       <div id="m7lo-status" class="m7lo-status"></div>
     </form>
@@ -1102,8 +1110,15 @@ function wireForm(d,x){
   }else{
     const h=Math.min(6,Math.max(1,Number(ent?.max_duration_hours||48))),f=new Date(Date.now()+h*3600000);
     $("#m7lo-finish").value=localValue(f);
-    $("#m7lo-file").onchange=e=>{
-      const files=[...(e.target.files||[])],n=files.length,box=$("#m7lo-new-media-draft");
+    const createFiles=$("#m7lo-file");
+    if(createFiles)createFiles.onchange=e=>{
+      const files=[...(e.target.files||[])],n=files.length,box=$("#m7lo-new-media-draft"),limit=offerMediaLimit();
+      if(n>limit){
+        $("#m7lo-file-name").textContent=`Maximum ${limit} media item${limit===1?"":"s"} per offer.`;
+        box.innerHTML="";
+        e.target.value="";
+        return;
+      }
       $("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first media becomes the cover`:"";
       box.innerHTML=n?'<div class="m7lo-pending-head">Add a description to each media <small>optional</small></div>'+pendingMediaRows(files):"";
     };
@@ -1128,10 +1143,11 @@ async function publish(e){
   try{
     await identity();
     if(!ownerSlug||!ent?.enabled||Number(ent?.active_limit||0)<=0)throw new Error("Live Offers access is not enabled for this shop.");
-    const p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48);
-    const files=[...($("#m7lo-file").files||[])];
+    const p=payloadBase(),start=new Date(p.starts_at),finish=new Date(p.ends_at),max=Number(ent.max_duration_hours||48),mediaLimit=offerMediaLimit();
+    const fileInput=$("#m7lo-file");
+    const files=[...(fileInput?.files||[])];
     const captions=$all("#m7lo-new-media-draft [data-pending-caption]").map(t=>t.value.trim().slice(0,300));
-    if(files.length>8)throw new Error("You can upload up to 8 photos / videos per offer.");
+    if(files.length>mediaLimit)throw new Error(`You can upload up to ${mediaLimit} photos / videos per offer.`);
     if(!finish.getTime()||finish<=start)throw new Error("End time must be after start.");
     if(finish-start>max*3600000)throw new Error(`Maximum duration is ${max} hours.`);
 
