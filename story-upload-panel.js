@@ -5742,6 +5742,90 @@
         });
         if(savedAlbum.error)throw savedAlbum.error;
       }
+      else if(op==="album-remove-items"){
+        var removeAlbumId=Number(data.albumId);
+        var removeAlbumItems=Array.isArray(data.items)?data.items:[];
+
+        if(!Number.isFinite(removeAlbumId)){
+          throw new Error("Album was not found.");
+        }
+
+        var removeKeys=new Set(
+          removeAlbumItems
+            .map(function(item){
+              var type=item&&item.mediaType==="video"?"video":"photo";
+              var id=Number(item&&item.mediaId);
+              return Number.isFinite(id)?type+":"+id:"";
+            })
+            .filter(Boolean)
+        );
+
+        if(!removeKeys.size){
+          throw new Error("Select at least one album item.");
+        }
+
+        var removeAlbumRow=await client
+          .from("shop_media_albums")
+          .select("id,title,description")
+          .eq("shop_slug",slug)
+          .eq("id",removeAlbumId)
+          .maybeSingle();
+
+        if(removeAlbumRow.error)throw removeAlbumRow.error;
+        if(!removeAlbumRow.data)throw new Error("Album was not found.");
+
+        var removeAlbumRows=await client
+          .from("shop_media_album_items")
+          .select("media_type,media_id,sort_order,is_cover")
+          .eq("album_id",removeAlbumId)
+          .order("sort_order",{ascending:true});
+
+        if(removeAlbumRows.error)throw removeAlbumRows.error;
+
+        var remainingAlbumRows=(removeAlbumRows.data||[]).filter(function(row){
+          var key=(row.media_type==="video"?"video":"photo")+":"+Number(row.media_id);
+          return !removeKeys.has(key);
+        });
+
+        /*
+           Albums are grouping only. If fewer than two items remain, remove the
+           album frame entirely and leave every Media file untouched.
+        */
+        if(remainingAlbumRows.length<2){
+          var autoUngroupAlbum=await client.rpc("owner_delete_media_album",{
+            p_shop_slug:slug,
+            p_album_id:removeAlbumId
+          });
+          if(autoUngroupAlbum.error)throw autoUngroupAlbum.error;
+        }else{
+          var remainingPayload=remainingAlbumRows.map(function(row){
+            return{
+              media_type:row.media_type==="video"?"video":"photo",
+              media_id:Number(row.media_id)
+            };
+          });
+
+          var remainingCoverRow=
+            remainingAlbumRows.find(function(row){return row.is_cover===true})||
+            remainingAlbumRows[0];
+
+          var remainingCover={
+            media_type:remainingCoverRow.media_type==="video"?"video":"photo",
+            media_id:Number(remainingCoverRow.media_id)
+          };
+
+          var saveReducedAlbum=await client.rpc("owner_save_media_album",{
+            p_shop_slug:slug,
+            p_album_id:removeAlbumId,
+            p_title:String(removeAlbumRow.data.title||"").trim(),
+            p_description:String(removeAlbumRow.data.description||"").trim()||null,
+            p_items:remainingPayload,
+            p_cover:remainingCover
+          });
+
+          if(saveReducedAlbum.error)throw saveReducedAlbum.error;
+        }
+      }
       else if(op==="album-delete"){
         var deleteAlbumId=Number(data.albumId);
         if(!Number.isFinite(deleteAlbumId))throw new Error("Album was not found.");
