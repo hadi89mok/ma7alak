@@ -282,7 +282,7 @@
     if(countEl)countEl.textContent=count+" selected";
     if(labelEl){
       labelEl.textContent=librarySelectionMode==="album"
-        ?"Albums"
+        ?"Albums · media stays in library"
         :"Photos & videos";
     }
 
@@ -306,10 +306,13 @@
     }
 
     if(deleteButton){
+      const albumMode=librarySelectionMode==="album";
       deleteButton.disabled=count===0;
-      deleteButton.textContent=count
-        ?"Delete "+count
-        :"Delete";
+      deleteButton.classList.toggle("danger",!albumMode);
+      deleteButton.classList.toggle("ungroup",albumMode);
+      deleteButton.textContent=albumMode
+        ?(count>1?"Ungroup "+count:"Ungroup Album")
+        :(count?"Delete "+count:"Delete");
     }
   }
 
@@ -494,7 +497,7 @@
         existingHtml+
         '<div class="m7om-builder-subhead" data-album-new-head hidden><b>New photos</b><small>Remove any mistake before saving. Choose one as the cover.</small></div>'+
         '<div class="m7om-choice-grid m7om-album-device-grid" data-album-drafts></div>'+
-        '<div class="m7om-album-selection" data-album-selection hidden><div><b data-album-select-count>0 selected</b><small>Select or deselect photos</small></div><button type="button" data-album-select-cancel>Cancel</button><button type="button" class="danger" data-album-select-delete>Delete</button></div>'+
+        '<div class="m7om-album-selection" data-album-selection hidden><div><b data-album-select-count>0 selected</b><small>Remove from this album · files stay in Media</small></div><button type="button" data-album-select-cancel>Cancel</button><button type="button" class="remove-from-album" data-album-select-delete>Remove</button></div>'+
         '<div class="m7om-builder-actions"><button type="button" data-album-cancel>Cancel</button><button type="button" class="primary" data-album-save>'+(album?"Save album":"Create album")+'</button></div>'+
         '<div class="m7om-builder-status" data-album-builder-status></div>'+
       '</div>';
@@ -572,7 +575,9 @@
       if(countEl)countEl.textContent=count+" selected";
       if(del){
         del.disabled=count===0;
-        del.textContent=count?"Delete "+count:"Delete";
+        del.textContent=count
+          ?("Remove "+count)
+          :"Remove";
       }
     };
 
@@ -725,24 +730,49 @@
           .sort((a,b)=>b-a);
 
         openActionConfirm({
-          title:"Delete "+selectedTokens.length+" selected item"+(selectedTokens.length===1?"":"s")+"?",
+          title:"Remove "+selectedTokens.length+" item"+(selectedTokens.length===1?"":"s")+" from album?",
           text:existingKeys.length
-            ?"Saved photos/videos will be permanently deleted from Media. New unsaved photos will simply be removed from this album draft."
-            :"These selected new photos will be removed from this album draft.",
-          confirmText:"Delete selected",
-          danger:true,
+            ?"The selected saved Media will leave this album and return to the normal Media library. The actual files will not be deleted."
+            :"The selected new photos will only be removed from this album draft.",
+          confirmText:"Remove from album",
+          danger:false,
           onConfirm:async()=>{
-            if(existingKeys.length){
+            if(existingKeys.length&&album?.id){
               const payload=existingKeys.map(key=>{
                 const parts=key.split(":");
-                return{mediaType:parts[0]==="video"?"video":"photo",id:Number(parts[1])};
+                return{
+                  mediaType:parts[0]==="video"?"video":"photo",
+                  mediaId:Number(parts[1])
+                };
               });
-              const data=await request({op:"batch-delete",items:payload});
+
+              const data=await request({
+                op:"album-remove-items",
+                albumId:Number(album.id),
+                items:payload
+              });
+
               applySnapshot(data);
-              existingMedia=existingMedia.filter(entry=>!existingKeys.includes(entry.key));
-              existingKeys.forEach(key=>selectedExisting.delete(key));
               changed=true;
-              notifyMediaUpdated("batch-delete");
+
+              const albumStillExists=(snapshot.albums||[]).some(
+                row=>String(row.id)===String(album.id)
+              );
+
+              if(!albumStillExists){
+                notifyMediaUpdated("album-ungroup");
+                removeAlbumBuilder();
+                render();
+                status("Album ungrouped. Its photos/videos are back in the Media library.","ok");
+                return;
+              }
+
+              existingMedia=existingMedia.filter(
+                entry=>!existingKeys.includes(entry.key)
+              );
+              existingKeys.forEach(key=>selectedExisting.delete(key));
+              notifyMediaUpdated("album-items-removed");
+              render();
             }
 
             draftIndexes.forEach(index=>{
@@ -755,8 +785,10 @@
             coverToken="";
             albumDeleteSelected.clear();
             albumSelectionActive=false;
-            statusBox.textContent="";
             sync();
+            statusBox.textContent=
+              selectedTokens.length+" item"+(selectedTokens.length===1?"":"s")+
+              " removed from this album. Media files were kept.";
           }
         });
         return;
@@ -1302,7 +1334,7 @@
       .m7om-thumb img,.m7om-thumb video,.m7om-album-cover img,.m7om-album-cover video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.m7om-thumb em,.m7om-album-cover em{position:absolute;left:5px;bottom:5px;padding:4px 6px;border-radius:999px;background:#000c;color:#e7c36d;font:900 6px/1 Arial;font-style:normal}
       .m7om-copy,.m7om-album-copy{min-width:0;padding:8px 3px 4px}.m7om-copy b,.m7om-copy small,.m7om-album-copy b,.m7om-album-copy small{display:block}.m7om-copy b,.m7om-album-copy b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m7om-copy small,.m7om-album-copy small{font-size:7.5px;color:#8f8474;margin-top:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .m7om-select-check{position:absolute;right:7px;top:7px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;border:2px solid rgba(255,255,255,.72);background:rgba(0,0,0,.46);color:transparent;font-size:14px;font-weight:950;opacity:0;transform:scale(.8);transition:.15s ease;pointer-events:none}.selection-mode .m7om-select-check,.m7om-album-selecting .m7om-choice .m7om-select-check{opacity:1;transform:scale(1)}.delete-selected .m7om-select-check{background:#d9a441;border-color:#f3d98e;color:#111}
-      .m7om-selection-bar{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483647;width:min(calc(100% - 20px),620px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;align-items:center;padding:10px;border:1px solid rgba(217,164,65,.42);border-radius:16px;background:rgba(10,9,8,.97);box-shadow:0 18px 50px rgba(0,0,0,.65);backdrop-filter:blur(12px)}.m7om-selection-bar[hidden]{display:none!important}.m7om-selection-copy{grid-column:1/-1}.m7om-selection-bar b,.m7om-selection-bar small{display:block}.m7om-selection-bar b{font-size:12px;color:#f2d18d}.m7om-selection-bar small{margin-top:2px;font-size:7px;color:#8f8474}.m7om-selection-bar button{min-width:0;min-height:38px;padding:0 7px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#151515;color:#ddd;font-size:8px;font-weight:900;white-space:nowrap}.m7om-selection-bar button[hidden]{display:none!important}.m7om-selection-bar [data-library-select-feature]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar [data-library-select-album]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar .danger{border-color:rgba(255,95,95,.3);background:#7d2020;color:#fff}.m7om-selection-bar button:disabled{opacity:.38}
+      .m7om-selection-bar{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483647;width:min(calc(100% - 20px),620px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;align-items:center;padding:10px;border:1px solid rgba(217,164,65,.42);border-radius:16px;background:rgba(10,9,8,.97);box-shadow:0 18px 50px rgba(0,0,0,.65);backdrop-filter:blur(12px)}.m7om-selection-bar[hidden]{display:none!important}.m7om-selection-copy{grid-column:1/-1}.m7om-selection-bar b,.m7om-selection-bar small{display:block}.m7om-selection-bar b{font-size:12px;color:#f2d18d}.m7om-selection-bar small{margin-top:2px;font-size:7px;color:#8f8474}.m7om-selection-bar button{min-width:0;min-height:38px;padding:0 7px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#151515;color:#ddd;font-size:8px;font-weight:900;white-space:nowrap}.m7om-selection-bar button[hidden]{display:none!important}.m7om-selection-bar [data-library-select-feature]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar [data-library-select-album]{color:#f2cf7b;border-color:rgba(217,164,65,.3);background:rgba(217,164,65,.08)}.m7om-selection-bar .danger{border-color:rgba(255,95,95,.3);background:#7d2020;color:#fff}.m7om-selection-bar .ungroup{border-color:rgba(217,164,65,.4);background:rgba(217,164,65,.12);color:#f2cf7b}.m7om-selection-bar button:disabled{opacity:.38}
       .m7om-empty{padding:25px;text-align:center;border:1px dashed rgba(217,164,65,.20);border-radius:16px;color:#8e8373;font-size:9px}
       .m7om-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 1px 7px}.m7om-section-title b{font-size:11px;color:#f2d18d}.m7om-section-title small{font-size:7px;color:#8f8474;text-align:right}.m7om-section-tools{display:flex;align-items:center;gap:7px}.m7om-section-tools button{min-height:31px;padding:0 9px;border:1px solid rgba(217,164,65,.28);border-radius:9px;background:rgba(217,164,65,.07);color:#e9c66f;font-size:8px;font-weight:900;white-space:nowrap}
       #m7-owner-media-albums{display:grid;gap:8px;margin-bottom:12px}.m7om-album{border-color:rgba(217,164,65,.20);background:linear-gradient(145deg,rgba(217,164,65,.07),rgba(255,255,255,.018))}.m7om-album-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:24px;color:#d9a441}
@@ -1324,7 +1356,7 @@
       .m7om-choice-thumb{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:10px;background:#000}.m7om-choice-thumb img,.m7om-choice-thumb video{width:100%;height:100%;object-fit:cover;display:block}.m7om-choice-thumb em{position:absolute;left:4px;bottom:4px;padding:3px 5px;border-radius:999px;background:#000c;color:#f0ca6b;font:900 6px/1 Arial;font-style:normal}
       .m7om-choice-meta{padding:6px 2px 2px}.m7om-choice-meta b,.m7om-choice-meta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m7om-choice-meta b{font-size:8px}.m7om-choice-meta small{margin-top:3px;color:#857a6c;font-size:6.5px}.m7om-choice [data-album-existing-cover]{width:100%;min-height:28px;margin-top:5px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}
       .m7om-device-actions{display:grid;grid-template-columns:1fr;gap:5px;margin-top:5px}.m7om-device-actions button{min-height:28px;border:1px solid rgba(217,164,65,.2);border-radius:8px;background:rgba(217,164,65,.07);color:#d9b461;font-size:7px;font-weight:900}
-      .m7om-album-selection{position:sticky;bottom:8px;z-index:8;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;margin-top:12px;padding:9px;border:1px solid rgba(217,164,65,.4);border-radius:14px;background:rgba(9,8,7,.96);box-shadow:0 14px 35px rgba(0,0,0,.5)}.m7om-album-selection[hidden]{display:none!important}.m7om-album-selection b,.m7om-album-selection small{display:block}.m7om-album-selection b{font-size:11px;color:#f0ca6b}.m7om-album-selection small{font-size:7px;color:#8f8474;margin-top:2px}.m7om-album-selection button{min-height:36px;padding:0 10px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#151515;color:#ddd;font-weight:900}.m7om-album-selection .danger{background:#7d2020;border-color:rgba(255,94,94,.28);color:#fff}
+      .m7om-album-selection{position:sticky;bottom:8px;z-index:8;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;margin-top:12px;padding:9px;border:1px solid rgba(217,164,65,.4);border-radius:14px;background:rgba(9,8,7,.96);box-shadow:0 14px 35px rgba(0,0,0,.5)}.m7om-album-selection[hidden]{display:none!important}.m7om-album-selection b,.m7om-album-selection small{display:block}.m7om-album-selection b{font-size:11px;color:#f0ca6b}.m7om-album-selection small{font-size:7px;color:#8f8474;margin-top:2px}.m7om-album-selection button{min-height:36px;padding:0 10px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#151515;color:#ddd;font-weight:900}.m7om-album-selection .remove-from-album{border-color:rgba(217,164,65,.38);background:rgba(217,164,65,.12);color:#f2cf7b}
       .m7om-builder-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:12px}.m7om-builder-actions button{min-height:42px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#121212;color:#ddd;font-weight:900}.m7om-builder-actions .primary{border-color:rgba(217,164,65,.5);background:#b98d39;color:#080706}.m7om-builder-status{min-height:18px;padding-top:7px;text-align:center;color:#ff9b91;font-size:8px}
       #m7om-media-review{position:fixed;inset:0;z-index:2147483647;display:grid;align-items:end;background:rgba(0,0,0,.76);backdrop-filter:blur(8px);padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));overflow:auto}
       .m7om-review-card{width:min(100%,620px);max-height:min(84dvh,760px);overflow:auto;margin:auto auto 0;padding:14px;border:1px solid rgba(217,164,65,.34);border-radius:20px 20px 14px 14px;background:#0d0c0b;box-shadow:0 -18px 60px rgba(0,0,0,.65)}
@@ -1565,18 +1597,18 @@
           .filter(Number.isFinite);
 
         openActionConfirm({
-          title:"Delete "+albumIds.length+" album"+(albumIds.length===1?"":"s")+"?",
-          text:"The album frame will be deleted. Its photos/videos will stay safely in the Media library.",
-          confirmText:"Delete album"+(albumIds.length===1?"":"s"),
-          danger:true,
+          title:"Ungroup "+albumIds.length+" album"+(albumIds.length===1?"":"s")+"?",
+          text:"The album grouping will disappear and every photo/video inside it will return to the normal Media library. Nothing is deleted.",
+          confirmText:albumIds.length===1?"Ungroup album":"Ungroup albums",
+          danger:false,
           onConfirm:async()=>{
             const data=await request({op:"album-delete-batch",albumIds});
             applySnapshot(data);
             changed=true;
             clearLibrarySelection();
             render();
-            notifyMediaUpdated("album-delete-batch");
-            status("Album"+(albumIds.length===1?"":"s")+" deleted. Media files were kept.","ok");
+            notifyMediaUpdated("album-ungroup");
+            status("Album"+(albumIds.length===1?"":"s")+" ungrouped. Media returned to the library.","ok");
           }
         });
         return;
