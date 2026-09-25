@@ -336,23 +336,80 @@ async function ready(){
   }
   return false;
 }
+let identityRun=0;
 async function identity(){
-  session=window.Ma7alakAccount?.session||null;
-  ownerSlug="";
-  ent=null;
   if(!c)return;
 
-  const bridgedSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim().toLowerCase();
-  if(bridgedSlug)ownerSlug=bridgedSlug;
+  const run=++identityRun;
+  const previousSlug=ownerSlug;
+  const previousEnt=ent;
+  const previousSession=session;
 
-  if(!ownerSlug&&session?.user){
-    const o=await c.from("shop_owners").select("shop_slug").eq("user_id",session.user.id).limit(1).maybeSingle();
-    if(!o.error&&o.data?.shop_slug)ownerSlug=String(o.data.shop_slug).toLowerCase();
+  let nextSession=window.Ma7alakAccount?.session||null;
+  let nextSlug=String(window.Ma7alakOwnerAuth?.owner?.shop_slug||"").trim().toLowerCase();
+  let authSettled=false;
+
+  try{
+    /* Account/header objects can temporarily be empty while navigating back
+       to a shop page. Ask Supabase directly before deciding the owner logged out. */
+    if(!nextSession?.user){
+      const auth=await c.auth.getSession();
+      if(run!==identityRun)return;
+      if(!auth?.error){
+        authSettled=true;
+        nextSession=auth?.data?.session||null;
+      }
+    }else{
+      authSettled=true;
+    }
+
+    if(!nextSlug&&nextSession?.user){
+      const o=await c.from("shop_owners")
+        .select("shop_slug")
+        .eq("user_id",nextSession.user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if(run!==identityRun)return;
+      if(o.error)throw o.error;
+      nextSlug=String(o.data?.shop_slug||"").trim().toLowerCase();
+    }
+
+    let nextEnt=null;
+    if(nextSlug){
+      const e=await c.from("shop_live_entitlements")
+        .select("*")
+        .eq("shop_slug",nextSlug)
+        .maybeSingle();
+
+      if(run!==identityRun)return;
+      if(e.error)throw e.error;
+      nextEnt=e.data||null;
+    }
+
+    if(run!==identityRun)return;
+
+    /* Commit only once the whole identity + entitlement snapshot is ready. */
+    session=nextSession;
+    ownerSlug=nextSlug;
+    ent=nextEnt;
+  }catch(err){
+    if(run!==identityRun)return;
+    console.warn("SHOUFHON Live owner identity refresh:",err);
+
+    /* Keep the last known-good owner state through transient page/auth races. */
+    session=previousSession;
+    ownerSlug=previousSlug;
+    ent=previousEnt;
+    return;
   }
 
-  if(ownerSlug){
-    const e=await c.from("shop_live_entitlements").select("*").eq("shop_slug",ownerSlug).maybeSingle();
-    if(!e.error)ent=e.data||null;
+  /* If auth could not settle at all, preserve the last known-good owner
+     instead of flashing the panel into viewer/locked mode. */
+  if(!authSettled&&!nextSlug&&previousSlug){
+    session=previousSession;
+    ownerSlug=previousSlug;
+    ent=previousEnt;
   }
 }
 async function ownerVideoAccess(){
@@ -962,7 +1019,7 @@ function bridge(){
     }
   });
 }
-async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},payload=>{let s=String(payload?.new?.shop_slug||payload?.old?.shop_slug||"").trim().toLowerCase();(async()=>{if(s){profileOptions.delete(s);await ensureProfileOptions(s)}await load();broadcast()})().catch(()=>load())}).subscribe()}
+async function realtime(){try{if(channel)c.removeChannel(channel)}catch(_){}channel=c.channel("m7-live-offers-v5").on("postgres_changes",{event:"*",schema:"public",table:"shop_live_posts"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_post_media"},()=>{load();setTimeout(load,300)}).on("postgres_changes",{event:"*",schema:"public",table:"shop_live_entitlements"},async()=>{lastRenderSignature="";await identity();await load()}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles"},payload=>{let s=String(payload?.new?.shop_slug||payload?.old?.shop_slug||"").trim().toLowerCase();(async()=>{if(s){profileOptions.delete(s);await ensureProfileOptions(s)}await load();broadcast()})().catch(()=>load())}).subscribe()}
 function openLiveDeepLinkFromUrl(){
   try{
     const url=new URL(window.location.href);
