@@ -1092,6 +1092,11 @@ function injectNotificationCSS(){
   background:rgba(217,164,65,.11);
 }
 
+/* Legacy following-filter empty copy must never create a second message. */
+#ma7alak-notification-list .m7-follow-filter-empty{
+  display:none!important;
+}
+
 
 /* =========================================================
    NOTIFICATION
