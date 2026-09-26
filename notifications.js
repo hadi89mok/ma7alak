@@ -352,30 +352,78 @@ function acknowledgeCurrentBadgeNotifications(){
   const localNow=Date.now();
   saveNotificationBadgeAckLocal(localNow);
 
+  /*
+     Clear the current on-screen badge immediately.
+     Personal Media rows stay visually unread until the row itself
+     is opened, but their red-number acknowledgement is persisted
+     by account below.
+  */
+  notifications=notifications.map(function(notification){
+    if(
+      notification &&
+      String(notification.key||"").startsWith("media-social:")
+    ){
+      return {
+        ...notification,
+        badge_acknowledged:true
+      };
+    }
+    return notification;
+  });
+
   notificationBadgeCount=0;
   updateNotificationBadge();
 
   (async function(){
     try{
-      const client=await loadMa7alakSupabase();
+      await waitForNotificationAccountRuntime();
+
+      const client=
+        window.Ma7alakAccount?.client ||
+        await loadMa7alakSupabase();
+
       const token=getNotificationInteractionToken();
 
-      const result=await client.rpc(
-        "ma7alak_ack_notification_badge",
-        {
-          p_visitor_id:visitorId,
-          p_interaction_token:token
-        }
-      );
+      const tasks=[
+        client.rpc(
+          "ma7alak_ack_notification_badge",
+          {
+            p_visitor_id:visitorId,
+            p_interaction_token:token
+          }
+        )
+      ];
 
-      if(result.error)throw result.error;
+      if(window.Ma7alakAccount?.user){
+        tasks.push(
+          client.rpc(
+            "ma7alak_ack_my_media_notification_badges"
+          )
+        );
+      }
 
-      const serverMs=result.data?new Date(result.data).getTime():0;
+      const results=await Promise.all(tasks);
+
+      const genericResult=results[0];
+      if(genericResult?.error)throw genericResult.error;
+
+      const serverMs=
+        genericResult?.data
+          ? new Date(genericResult.data).getTime()
+          : 0;
+
       if(Number.isFinite(serverMs)&&serverMs>0){
         saveNotificationBadgeAckLocal(serverMs);
       }
+
+      const mediaResult=results[1];
+      if(mediaResult?.error)throw mediaResult.error;
+
     }catch(error){
-      console.warn("ShoufHon notification badge acknowledge:",error);
+      console.warn(
+        "ShoufHon notification badge acknowledge:",
+        error
+      );
     }
   })();
 }
@@ -389,9 +437,23 @@ function calculateBadgeCount(){
   if(notificationsOpen)return 0;
 
   return notifications.filter(function(notification){
+    if(notification.seen)return false;
+
+    /*
+       Personal Media notifications are account-scoped.
+       Their badge state comes from Supabase, not the anonymous
+       visitor/device acknowledgement clock.
+    */
+    if(
+      notification &&
+      String(notification.key||"").startsWith("media-social:")
+    ){
+      return notification.badge_acknowledged !== true;
+    }
+
     return (
-      !notification.seen &&
-      notificationCreatedAtMs(notification)>notificationBadgeAckAtMs
+      notificationCreatedAtMs(notification)>
+      notificationBadgeAckAtMs
     );
   }).length;
 }
@@ -3540,7 +3602,9 @@ async function loadNotifications(){
                 return {
                   ...row,
                   key:"media-social:"+String(row.id||""),
-                  seen:row.seen===true
+                  seen:row.seen===true,
+                  badge_acknowledged:
+                    row.badge_acknowledged===true
                 };
               }
             );
