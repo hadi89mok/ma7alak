@@ -5615,3 +5615,50 @@ start().catch(error=>
 
   start().catch(error=>console.warn("[ShoufHon Hub] owner Hub editor:",error));
 })();
+
+
+/* =========================================================
+   SHOUFHON PROFILE HUB — PARENT LAYOUT REGISTRATION V1
+   Lets the top page identify the exact Hostinger Profile Hub iframe so
+   optional modules above it (Catalog) can reflow it without guessing.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__SHOUFHON_PROFILE_HUB_LAYOUT_REGISTER_V1__)return;
+  window.__SHOUFHON_PROFILE_HUB_LAYOUT_REGISTER_V1__=true;
+
+  function slug(){
+    return String(
+      window.__MA7ALAK_EXACT_HUB_SLUG__ ||
+      document.getElementById("ma7alak-shop-profile-hub-mount")?.getAttribute("data-shop-slug") ||
+      ""
+    ).trim().toLowerCase();
+  }
+
+  function send(){
+    var s=slug();
+    if(!s)return;
+    try{
+      if(window.top&&window.top!==window){
+        window.top.postMessage({
+          type:"SHOUFHON_PROFILE_HUB_REGISTER",
+          shopSlug:s
+        },"*");
+      }else if(window.parent&&window.parent!==window){
+        window.parent.postMessage({
+          type:"SHOUFHON_PROFILE_HUB_REGISTER",
+          shopSlug:s
+        },"*");
+      }
+    }catch(_){}
+  }
+
+  send();
+  setTimeout(send,120);
+  setTimeout(send,500);
+  setTimeout(send,1400);
+  window.addEventListener("pageshow",send);
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="visible")send();
+  });
+})();
