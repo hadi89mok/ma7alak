@@ -14776,6 +14776,20 @@ function ensureCss(){
   document.head.appendChild(style);
 }
 
+function removeObsoleteLegacyManageShopsCard(){
+  /*
+     Workspace V4 owns the live shop list.
+     The old Manage Shops card contains only the obsolete duplicate
+     search/count/list/refresh UI. Core code has already captured any
+     legacy element references it needs before V4 mounts, so the detached
+     nodes can safely disappear from the document without touching Add Shop,
+     Edit Shop, Gallery, Videos, Reels or Admin Tools.
+  */
+  const legacy=document.getElementById("ma-manage-shops-card");
+  if(!legacy)return;
+  legacy.remove();
+}
+
 function markLegacyPanels(){
   PANEL_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -17988,6 +18002,7 @@ function mount(){
   `;
 
   dash.prepend(root);
+  removeObsoleteLegacyManageShopsCard();
   ensureAdminToolsFooter();
 
   root.addEventListener("input",event=>{
@@ -21443,29 +21458,6 @@ boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
   }
 
   function decorate(){
-    // Legacy Manage Shops cards (kept for compatibility on older Admin layouts).
-    document.querySelectorAll("#ma-admin-shop-list .ma-admin-shop-item").forEach(card=>{
-      const actions=card.querySelector(".ma-admin-shop-actions");
-      if(!actions||actions.querySelector("[data-m7-catalog-access]"))return;
-      const b=document.createElement("button");
-      b.type="button";
-      b.className="ma-shop-action catalog";
-      b.dataset.m7CatalogAccess="1";
-      b.textContent="▤ Catalog";
-      b.onclick=e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        const name=card.querySelector(".ma-admin-shop-name")?.textContent?.trim()||card.dataset.slug||"Shop";
-        open(card.dataset.slug,name).catch(err=>{
-          inject();
-          document.getElementById("m7cat-admin-overlay").classList.add("active");
-          status(err?.message||"Could not open Catalog access.","error");
-        });
-      };
-      const danger=actions.querySelector(".danger");
-      actions.insertBefore(b,danger||null);
-    });
-
     // Current Workspace V4 cards — this is the layout actually shown on /admin.
     document.querySelectorAll(".m7v4-shop[data-m7v4-slug]").forEach(card=>{
       const controls=card.querySelector(".m7v4-shop-controls");
