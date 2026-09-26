@@ -5534,8 +5534,8 @@ start().catch(error=>
     style.id="m7-owner-about-edit-style";
     style.textContent=
       "#ma7alak-exact-merged-hub{position:relative!important;overflow:visible!important}"+
-      "#m7-owner-about-edit{position:absolute!important;top:0!important;right:18px!important;left:auto!important;z-index:180!important;width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:1.5px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.82)!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.08),transparent 28%),linear-gradient(160deg,rgba(19,17,14,.98),rgba(7,7,8,.99))!important;color:var(--m7-shop-accent-light,#f0cc83)!important;font:950 22px/1 Arial,Segoe UI,sans-serif!important;display:none!important;place-items:center!important;box-shadow:0 5px 14px rgba(0,0,0,.38),0 0 0 2px rgba(7,7,8,.64),inset 0 1px 0 rgba(255,255,255,.07)!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;outline:none!important;transform:translateY(-50%)!important}"+
-      "#m7-owner-about-edit.visible{display:grid!important}#m7-owner-about-edit:active{transform:translateY(-50%) scale(.91)!important}"+
+      "#m7-owner-about-edit{position:absolute!important;top:12px!important;right:12px!important;left:auto!important;z-index:180!important;width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:1.5px solid color-mix(in srgb,var(--m7-about-edit-frame,var(--m7-shop-accent,#d9a441)) 82%,transparent)!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.08),transparent 28%),linear-gradient(160deg,color-mix(in srgb,var(--m7-about-edit-bg,#080809) 96%,white 4%),color-mix(in srgb,var(--m7-about-edit-bg,#080809) 92%,black 8%))!important;color:var(--m7-about-edit-frame,var(--m7-shop-accent-light,#f0cc83))!important;font:950 22px/1 Arial,Segoe UI,sans-serif!important;display:none!important;place-items:center!important;box-shadow:0 5px 14px rgba(0,0,0,.38),0 0 0 2px rgba(7,7,8,.42),inset 0 1px 0 rgba(255,255,255,.07)!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;outline:none!important;transform:none!important}"+
+      "#m7-owner-about-edit.visible{display:grid!important}#m7-owner-about-edit:active{transform:scale(.91)!important}"+
       "#m7-owner-about-sheet{position:absolute!important;inset:7px!important;z-index:220!important;display:none!important;padding:14px!important;box-sizing:border-box!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.38)!important;border-radius:20px!important;background:linear-gradient(160deg,rgba(19,17,15,.985),rgba(7,7,8,.995))!important;box-shadow:0 18px 55px rgba(0,0,0,.65)!important;color:#fff!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}"+
       "#m7-owner-about-sheet.open{display:block!important}.m7oa-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-right:42px}.m7oa-head b{display:block;font-size:15px;color:#fff}.m7oa-head small{display:block;margin-top:4px;color:#968a79;font-size:9px;line-height:1.45}"+
       "#m7-owner-about-close{position:absolute;right:10px;top:9px;width:36px;height:36px;border:1px solid rgba(255,255,255,.09);border-radius:50%;background:rgba(255,255,255,.055);color:#fff;font-size:23px;line-height:30px;touch-action:manipulation}"+
@@ -5543,7 +5543,7 @@ start().catch(error=>
       "#m7-owner-about-textarea:focus{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.54)!important}.m7oa-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:8px}#m7-owner-about-count{color:#817665;font-size:8px}"+
       "#m7-owner-about-save{min-width:120px;min-height:42px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--m7-shop-accent-light,#f0cf86),var(--m7-shop-accent,#c99442));color:#211507;font-size:10px;font-weight:950;touch-action:manipulation}#m7-owner-about-save:disabled{opacity:.45}"+
       "#m7-owner-about-status{min-height:16px;margin-top:7px;color:#918574;font-size:9px}#m7-owner-about-status.ok{color:#7fe0a4}#m7-owner-about-status.err{color:#ff9999}"+
-      "@media(max-width:480px){#m7-owner-about-edit{right:16px!important;top:0!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;font-size:21px!important}#m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}#m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}}";
+      "@media(max-width:480px){#m7-owner-about-edit{right:11px!important;top:11px!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;font-size:21px!important}#m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}#m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}}";
     document.head.appendChild(style);
 
     var edit=document.createElement("button");
@@ -5557,14 +5557,8 @@ start().catch(error=>
     sheet.id="m7-owner-about-sheet";
     sheet.innerHTML='<button id="m7-owner-about-close" type="button" aria-label="Close">×</button><div class="m7oa-head"><div><b>Edit About</b><small>Update the text visitors see in this About box.</small></div></div><textarea id="m7-owner-about-textarea" maxlength="4000" dir="auto" placeholder="Tell visitors about your shop…"></textarea><div class="m7oa-foot"><span id="m7-owner-about-count">0 / 4000</span><button id="m7-owner-about-save" type="button">Save About</button></div><div id="m7-owner-about-status" aria-live="polite"></div>';
 
-    var hub=card.parentElement;
-    if(hub){
-      hub.append(edit);
-      card.append(sheet);
-    }else{
-      card.prepend(edit);
-      card.append(sheet);
-    }
+    card.append(edit);
+    card.append(sheet);
 
     var textarea=sheet.querySelector("#m7-owner-about-textarea");
     var count=sheet.querySelector("#m7-owner-about-count");
