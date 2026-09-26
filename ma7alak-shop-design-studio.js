@@ -86,12 +86,6 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="whatsapp_url"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="address_text"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="menu_image_url"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_status_text"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_sub_text"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_accent_color"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_text_color"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_sub_color"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_dot_color"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="availability_days"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="availability_time"]{display:flex!important}
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras .m7-hub-manual-tools{display:grid!important}
@@ -1982,16 +1976,7 @@
         }
 
         const grid=extras.querySelector(".m7da-grid");
-        const statusAnchor=extras.querySelector('[data-m7-extra-key="hours_status_text"]');
         const availabilityAnchor=extras.querySelector('[data-m7-extra-key="availability_days"]');
-
-        if(grid&&statusAnchor&&!grid.querySelector('[data-m7studio-hub-subhead="status"]')){
-          const heading=document.createElement("div");
-          heading.className="m7studio-hub-subhead";
-          heading.dataset.m7studioHubSubhead="status";
-          heading.innerHTML='<b>Manual status pill</b><small>Optional. If either text field contains something, it overrides the automatic weekly Hours status shown on the shop page.</small>';
-          statusAnchor.before(heading);
-        }
 
         if(grid&&availabilityAnchor&&!grid.querySelector('[data-m7studio-hub-subhead="availability"]')){
           const heading=document.createElement("div");
@@ -2004,7 +1989,7 @@
 
       const hubNote=document.createElement("div");
       hubNote.className="m7studio-hub-note";
-      hubNote.innerHTML="<b>Profile Hub controls</b><br>About, socials, location, manual status/availability overrides and Hub appearance are grouped here. Weekly automatic opening times stay in Hours.";
+      hubNote.innerHTML="<b>Profile Hub controls</b><br>About, socials, location, optional Location availability and Hub appearance are grouped here. Public opening status and Online Service / Delivery overrides stay in Hours.";
       form.insertBefore(hubNote,form.firstChild.nextSibling);
 
       filterFields(
