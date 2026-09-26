@@ -5290,54 +5290,8 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
     const s=document.createElement("style");
     s.id="shoufhon-platform-compact-menu-css";
     s.textContent=`
-      /* Homepage: make only "منصة" feel special, without changing the rest of the line. */
-      .shoufhon-platform-word{
-        position:relative!important;
-        display:inline-block!important;
-        margin-inline:2px!important;
-
-        /* Only a little bigger than the sentence around it. */
-        font-size:1.11em!important;
-        line-height:1.06!important;
-        font-weight:inherit!important;
-
-        /* Keep EXACTLY the same visible colour as the original sentence. */
-        background:none!important;
-        -webkit-background-clip:border-box!important;
-        background-clip:border-box!important;
-        opacity:1!important;
-        visibility:visible!important;
-
-        direction:rtl!important;
-        unicode-bidi:isolate!important;
-        letter-spacing:inherit!important;
-        transform-origin:50% 65%!important;
-
-        /* Small playful phone-safe movement. No glow, underline or colour change. */
-        animation:shoufhonPlatformMove 3.4s cubic-bezier(.2,.8,.2,1) infinite!important;
-        -webkit-animation:shoufhonPlatformMove 3.4s cubic-bezier(.2,.8,.2,1) infinite!important;
-        will-change:transform;
-      }
-      .shoufhon-platform-word::after{
-        display:none!important;
-        content:none!important;
-      }
-      @keyframes shoufhonPlatformMove{
-        0%,64%,100%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-        69%{transform:translate3d(-2px,0,0) rotate(-2deg) scale(1.01)}
-        74%{transform:translate3d(2px,-1px,0) rotate(2deg) scale(1.025)}
-        79%{transform:translate3d(-1px,0,0) rotate(-1.5deg) scale(1.015)}
-        84%{transform:translate3d(1px,0,0) rotate(1deg) scale(1.008)}
-        89%{transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-      }
-      @-webkit-keyframes shoufhonPlatformMove{
-        0%,64%,100%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-        69%{-webkit-transform:translate3d(-2px,0,0) rotate(-2deg) scale(1.01)}
-        74%{-webkit-transform:translate3d(2px,-1px,0) rotate(2deg) scale(1.025)}
-        79%{-webkit-transform:translate3d(-1px,0,0) rotate(-1.5deg) scale(1.015)}
-        84%{-webkit-transform:translate3d(1px,0,0) rotate(1deg) scale(1.008)}
-        89%{-webkit-transform:translate3d(0,0,0) rotate(0deg) scale(1)}
-      }
+      /* Homepage platform-word animation is owned by ma7alak-opening-header.js.
+         Keeping it out of the global header prevents duplicate/ghost text layers. */
       /* Header three-lines menu: same design, just a little tighter and cleaner. */
       #ma7alak-header-menu-panel{
         width:238px!important;
@@ -5395,75 +5349,13 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
   }
 
   function enhancePlatformWord(){
-    if(!isHome()||!document.body)return true;
-    if(document.querySelector(".shoufhon-platform-word"))return true;
-
-    const walker=document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode(node){
-          const text=String(node.nodeValue||"");
-          const parent=node.parentElement;
-          if(!parent||parent.closest("script,style,noscript,#ma7alak-social-header"))return NodeFilter.FILTER_REJECT;
-          return /مش\s*بس\s*صفحة/.test(text)&&text.includes("منصة")
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_SKIP;
-        }
-      }
-    );
-
-    const node=walker.nextNode();
-    if(!node)return false;
-
-    const value=String(node.nodeValue||"");
-    const index=value.indexOf("منصة");
-    if(index<0)return false;
-
-    const frag=document.createDocumentFragment();
-    if(index>0)frag.appendChild(document.createTextNode(value.slice(0,index)));
-
-    const word=document.createElement("span");
-    word.className="shoufhon-platform-word";
-    word.textContent="منصة";
-    word.setAttribute("aria-label","منصة");
-
-    /* Preserve the original sentence colour before moving the word into its
-       own animated span. Hostinger can use transparent text-fill internally,
-       so copy the actual computed colour onto the word. */
-    try{
-      const parentStyle=getComputedStyle(node.parentElement);
-      const visibleColor=parentStyle.color||"#fff";
-      word.style.setProperty("color",visibleColor,"important");
-      word.style.setProperty("-webkit-text-fill-color",visibleColor,"important");
-      word.style.setProperty("text-shadow","inherit","important");
-    }catch(_){}
-
-    frag.appendChild(word);
-
-    const rest=value.slice(index+"منصة".length);
-    if(rest)frag.appendChild(document.createTextNode(rest));
-
-    node.parentNode?.replaceChild(frag,node);
+    /* Single-owner rule: ma7alak-opening-header.js renders the span directly.
+       Do not scan/replace Arabic text nodes from the global header. */
     return true;
   }
 
   function boot(){
     addCss();
-    if(!isHome())return;
-    if(enhancePlatformWord())return;
-
-    let tries=0;
-    const timer=setInterval(()=>{
-      tries++;
-      if(enhancePlatformWord()||tries>80)clearInterval(timer);
-    },250);
-
-    const observer=new MutationObserver(()=>{
-      if(enhancePlatformWord())observer.disconnect();
-    });
-    observer.observe(document.documentElement,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),20000);
   }
 
   if(document.readyState==="loading"){
@@ -5474,6 +5366,5 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
 
   window.addEventListener("pageshow",()=>{
     addCss();
-    if(isHome())enhancePlatformWord();
   });
 })();
