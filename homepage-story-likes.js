@@ -88,9 +88,9 @@ function mount(){
 .m7sn-count{color:#efc66e;font-weight:900;white-space:nowrap}
 .m7sn-copy small{display:block;color:#888;margin-top:4px;font-size:11px}
 .m7sn-empty{padding:28px;text-align:center;color:#999}
-#m7sn-action-sheet{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;padding:14px max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#0009;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#m7sn-action-sheet.open{display:flex}
-#m7sn-action-card{width:min(100%,430px);padding:10px;border:1px solid #ffffff18;border-radius:22px;background:#111;box-shadow:0 24px 70px #000b}
+#m7sn-action-sheet{position:fixed!important;inset:0!important;z-index:2147483647!important;display:none;align-items:flex-end!important;justify-content:center!important;padding:14px max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;background:rgba(0,0,0,.62)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform:none!important}
+#m7sn-action-sheet.open{display:flex!important}
+#m7sn-action-card{width:min(100%,430px);padding:10px;border:1px solid rgba(255,255,255,.10);border-radius:24px;background:linear-gradient(180deg,#171717,#0e0e0e);box-shadow:0 24px 70px #000c, inset 0 1px 0 rgba(255,255,255,.035);transform:translateY(0)!important}
 #m7sn-action-title{padding:8px 10px 10px;color:#aaa;font-size:10px;font-weight:800}
 .m7sn-sheet-btn{width:100%;min-height:48px;margin:3px 0;padding:0 14px;border:0;border-radius:14px;background:#191919;color:#fff;font-size:12px;font-weight:900;text-align:left}
 .m7sn-sheet-btn.delete{background:#7b252533;color:#ff9292}
@@ -101,12 +101,23 @@ function mount(){
 
   const w=document.createElement("div");
   w.id="ma7alak-story-likes-wrapper";
-  w.innerHTML=`<button id="ma7alak-story-likes-button" type="button" aria-label="Shop activity">${heartSVG}<span id="m7-heart-badge">0</span></button><div id="m7-owner-social-panel" aria-hidden="true"><div id="m7sn-head"><b>Activity</b><div id="m7sn-head-actions"><button id="m7sn-mark-all" type="button">Mark all read</button><button id="m7sn-close" type="button" aria-label="Close">×</button></div></div><div id="m7sn-list"><div class="m7sn-empty">Loading…</div></div></div><div id="m7sn-action-sheet" aria-hidden="true"><div id="m7sn-action-card"></div></div>`;
+  w.innerHTML=`<button id="ma7alak-story-likes-button" type="button" aria-label="Shop activity">${heartSVG}<span id="m7-heart-badge">0</span></button><div id="m7-owner-social-panel" aria-hidden="true"><div id="m7sn-head"><b>Activity</b><div id="m7sn-head-actions"><button id="m7sn-mark-all" type="button">Mark all read</button><button id="m7sn-close" type="button" aria-label="Close">×</button></div></div><div id="m7sn-list"><div class="m7sn-empty">Loading…</div></div></div>`;
   document.body.appendChild(w);
+
+  /*
+     Keep the hold menu OUTSIDE the header/heart wrapper.
+     The header is transformed/compacted on phones and can create a
+     containing block for position:fixed descendants, which was why
+     the Cancel sheet could appear at the top of the screen.
+  */
+  const actionSheet=document.createElement("div");
+  actionSheet.id="m7sn-action-sheet";
+  actionSheet.setAttribute("aria-hidden","true");
+  actionSheet.innerHTML='<div id="m7sn-action-card"></div>';
+  document.body.appendChild(actionSheet);
 
   const panel=document.getElementById("m7-owner-social-panel");
   const list=document.getElementById("m7sn-list");
-  const actionSheet=document.getElementById("m7sn-action-sheet");
 
   document.getElementById("ma7alak-story-likes-button").onclick=e=>{
     e.preventDefault();
@@ -209,6 +220,27 @@ function mount(){
 
     rows=rows.map(x=>ids.includes(String(x.id))?{...x,seen:true}:x);
     render();
+
+    try{
+      const parsed=new URL(target,location.origin);
+      const mediaRaw=String(parsed.searchParams.get("media")||"");
+      const match=mediaRaw.match(/^(photo|video):(\d+)$/);
+
+      if(
+        match &&
+        window.ShoufHonMediaActivity &&
+        typeof window.ShoufHonMediaActivity.open==="function"
+      ){
+        window.ShoufHonMediaActivity.open({
+          shopSlug:parsed.pathname.split("/").filter(Boolean).pop()||owner?.shop_slug||"",
+          mediaType:match[1],
+          mediaId:Number(match[2]),
+          comments:parsed.searchParams.get("comments")==="1",
+          commentId:Number(parsed.searchParams.get("comment")||0)||null
+        });
+        return;
+      }
+    }catch(_){}
 
     try{window.top.location.href=target}
     catch(_){window.location.href=target}
