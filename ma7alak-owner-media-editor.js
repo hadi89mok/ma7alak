@@ -1051,6 +1051,8 @@
        - browsers that allow iframe fullscreen can hide browser chrome
        - loading happens after the editor is already visible
     */
+    document.documentElement.classList.add("m7om-editor-open");
+    document.body.classList.add("m7om-editor-open");
     sheet.classList.add("open");
     portal(true);
 
@@ -1071,13 +1073,19 @@
       allowed=false;
       document.getElementById("m7-owner-media-edit")?.classList.remove("visible");
       status(error?.message||"Could not open Media editor.","error");
+
+      /*
+         Opening already promoted the Hostinger iframe. If loading fails,
+         always unwind the fullscreen portal immediately instead of leaving
+         the page locked/expanded.
+      */
+      closeEditor({force:true});
     }
   }
 
   function closeEditor(options={}){
     if(closingEditor)return;
 
-    const fromPortalBack=options.fromPortalBack===true;
     const force=options.force===true;
 
     if(busy&&!force)return;
@@ -1085,12 +1093,19 @@
     closingEditor=true;
 
     removeAlbumBuilder();
+    removeReview();
     clearLibrarySelection();
-    editorSheet()?.classList.remove("open");
 
-    if(!fromPortalBack){
-      portal(false);
-    }
+    editorSheet()?.classList.remove("open");
+    document.documentElement.classList.remove("m7om-editor-open");
+    document.body.classList.remove("m7om-editor-open");
+
+    /*
+       CLOSE is intentionally always sent, including when phone Back
+       initiated the close. The parent portal treats this as idempotent,
+       which guarantees Hostinger iframe/body styles are restored.
+    */
+    portal(false);
 
     if(nativeFullscreenEntered){
       nativeFullscreenEntered=false;
@@ -1100,14 +1115,9 @@
     clearReviewUrls();
     changed=false;
 
-    /*
-       Public Media updates live through Realtime + owner-media-updated.
-       Never reload the iframe on close; reload was causing the page to jump
-       up and then snap back to the Media section.
-    */
     setTimeout(()=>{
       closingEditor=false;
-    },40);
+    },60);
   }
 
   function removeReview(){
@@ -1877,12 +1887,14 @@
         }
       }
 
-      html:has(#m7-owner-media-sheet.open),body:has(#m7-owner-media-sheet.open){margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;background:#050506!important}
+      html.m7om-editor-open,body.m7om-editor-open{margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;background:#050506!important}
       #m7-owner-media-sheet{position:fixed!important;inset:-1px!important;top:-1px!important;left:-1px!important;width:calc(100vw + 2px)!important;width:calc(100dvw + 2px)!important;height:calc(100vh + 2px)!important;height:calc(100dvh + 2px)!important;z-index:2147483646!important;display:none!important;background:#050506!important;color:#fff!important;overflow:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:max(11px,env(safe-area-inset-top)) 13px max(25px,env(safe-area-inset-bottom))!important;font-family:Arial,"Segoe UI",sans-serif!important;box-sizing:border-box!important}
       #m7-owner-media-sheet.open{display:block!important}
       #m7-owner-media-sheet:fullscreen,#m7-owner-media-sheet:-webkit-full-screen{width:100vw!important;width:100dvw!important;height:100vh!important;height:100dvh!important;background:#050506!important}
       .m7om-card{width:min(100%,640px);margin:0 auto;padding:15px;border:1px solid rgba(217,164,65,.30);border-radius:22px;background:linear-gradient(155deg,#15120f,#080809 72%);box-shadow:0 24px 70px rgba(0,0,0,.62)}
-      .m7om-head{display:flex;gap:10px;align-items:flex-start;position:relative}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
+      .m7om-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;position:relative}
+       .m7om-head>div{min-width:0;flex:1 1 auto}
+       .m7om-editor-close{width:38px;height:38px;min-width:38px;display:grid;place-items:center;margin:-3px -3px 0 6px;border:1px solid rgba(255,255,255,.11);border-radius:50%;background:#171717;color:#fff;font:400 25px/1 Arial;box-shadow:0 7px 20px rgba(0,0,0,.34);touch-action:manipulation;-webkit-tap-highlight-color:transparent}.m7om-head b{font-size:18px}.m7om-head small{display:block;margin-top:4px;color:#978b79;font-size:9px;line-height:1.45}
       #m7-owner-media-quota{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}#m7-owner-media-quota span{padding:7px 9px;border:1px solid rgba(217,164,65,.20);border-radius:999px;background:rgba(217,164,65,.065);color:#aa9e8a;font-size:8px}#m7-owner-media-quota b{color:#f0ca6b;font-size:10px}
       #m7-owner-media-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
       .m7om-list{display:grid;gap:9px}.m7om-media-grid,.m7om-album-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
@@ -2002,8 +2014,14 @@
 
     const sheet=document.createElement("div");
     sheet.id="m7-owner-media-sheet";
-    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Hold a photo or album to select. Use Add Media for new uploads. Use your phone Back button to close.</small></div></div><div id="m7-owner-media-quota"></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div><div id="m7om-library-selection" class="m7om-selection-bar" hidden><div class="m7om-selection-copy"><b data-library-select-count>0 selected</b><small data-library-select-label>Photos & videos</small></div><button type="button" data-library-select-cancel>Cancel</button><button type="button" data-library-select-feature hidden>☆ Feature</button><button type="button" data-library-select-album hidden>Create Album</button><button type="button" class="danger" data-library-select-delete>Delete</button></div>';
+    sheet.innerHTML='<div class="m7om-card"><div class="m7om-head"><div><b>Edit Media</b><small>Hold a photo or album to select. Use Add Media for new uploads. Tap × or use your phone Back button to close.</small></div><button type="button" class="m7om-editor-close" data-media-editor-close aria-label="Close Media editor">×</button></div><div id="m7-owner-media-quota"></div><input id="m7-owner-media-file" type="file"><div id="m7-owner-media-albums"></div><div id="m7-owner-media-list" class="m7om-list"></div><div id="m7-owner-media-status" aria-live="polite"></div></div><div id="m7om-library-selection" class="m7om-selection-bar" hidden><div class="m7om-selection-copy"><b data-library-select-count>0 selected</b><small data-library-select-label>Photos & videos</small></div><button type="button" data-library-select-cancel>Cancel</button><button type="button" data-library-select-feature hidden>☆ Feature</button><button type="button" data-library-select-album hidden>Create Album</button><button type="button" class="danger" data-library-select-delete>Delete</button></div>';
     document.body.appendChild(sheet);
+
+    sheet
+      .querySelector("[data-media-editor-close]")
+      ?.addEventListener("click",()=>{
+        closeEditor();
+      });
 
     window.addEventListener("message",event=>{
       if(!trustedParentEvent(event))return;
@@ -2297,6 +2315,7 @@
       if(!owner){
         allowed=false;
         document.getElementById("m7-owner-media-edit")?.classList.remove("visible");
+        if(editorOpen())closeEditor({force:true});
       }else{
         syncPermission();
       }
@@ -2312,7 +2331,11 @@
     }
   });
 
-  async function start(){
+  window.addEventListener("pagehide",()=>{
+    if(editorOpen())closeEditor({force:true});
+  });
+
+    async function start(){
     for(let i=0;i<180&&!document.querySelector(".m7-media-heading-row");i++)await new Promise(r=>setTimeout(r,50));
     inject();
     await resolveSlug();
