@@ -5598,7 +5598,8 @@ ready().catch(console.error);
 'use strict';
 if(location.pathname.replace(/\/+$/,'')!=='/admin')return;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const shopFields=[['story_color','Universal shop accent — Story / identity / Gallery / Videos','color'],['hours_status_text','Status pill — manual main text (blank = automatic)','text'],['hours_sub_text','Status pill — manual sub text (blank = automatic)','text'],['hours_accent_color','Status pill — accent color','color'],['hours_text_color','Status pill — main text color','color'],['hours_sub_color','Status pill — sub text color','color'],['hours_dot_color','Status pill — pulsing dot color','color'],['facebook_url','Facebook — URL or page name','text'],['availability_days','Availability — manual days / label (blank = automatic)','text'],['availability_time','Availability — manual time (blank = automatic)','text'],['price','Price level ($, $, $)','text'],['order','Display order (lower comes first)','number'],['latitude','Latitude — enables Near me','number'],['longitude','Longitude — enables Near me','number'],['rating','Verified rating, 0–5 (optional)','number'],['review_count','Actual number of reviews (optional)','number']];
+const LEGACY_STATUS_KEYS=["hours_status_text","hours_sub_text","hours_accent_color","hours_text_color","hours_sub_color","hours_dot_color"];
+const shopFields=[['story_color','Universal shop accent — Story / identity / Gallery / Videos','color'],['facebook_url','Facebook — URL or page name','text'],['availability_days','Availability — manual days / label (blank = automatic)','text'],['availability_time','Availability — manual time (blank = automatic)','text'],['price','Price level ($, $, $)','text'],['order','Display order (lower comes first)','number'],['latitude','Latitude — enables Near me','number'],['longitude','Longitude — enables Near me','number'],['rating','Verified rating, 0–5 (optional)','number'],['review_count','Actual number of reviews (optional)','number']];
 const homeFields=[['home_spotlight_label','Homepage spotlight label','text'],['home_spotlight_about','Homepage spotlight description','textarea'],['home_spotlight_accent','Homepage spotlight accent color','color'],['home_spotlight_cta','Homepage button label','text']];
 const profileFields=[['about_text','About the shop','textarea'],['tiktok_url','TikTok — URL or @username','text'],['instagram_url','Instagram — URL or username','text'],['whatsapp_url','WhatsApp — URL or phone number','text'],['address_text','Full address','text'],['map_embed_url','Google Maps embed URL','url'],['menu_image_url','Menu image URL','url']];
 let settings={},section,client;
@@ -5665,10 +5666,9 @@ function mountForm(form,prefix){
   const hubTools=document.createElement("div");
   hubTools.className="m7-hub-manual-tools";
   hubTools.innerHTML=
-    '<div><b>Manual overrides</b><small>Manual text overrides automatic hours. Clear it to return to the weekly schedule.</small></div>'+
+    '<div><b>Manual Availability</b><small>Optional. Manual days/time override the Location card schedule. Clear both fields to use the weekly Hours schedule.</small></div>'+
     '<div class="m7-hub-manual-actions">'+
-      '<button type="button" data-m7-reset-manual="status">Reset status to automatic</button>'+
-      '<button type="button" data-m7-reset-manual="availability">Reset availability to automatic</button>'+
+      '<button type="button" data-m7-reset-manual="availability">Use automatic Hours schedule</button>'+
     '</div>';
   box.append(hubTools);
 
@@ -5676,11 +5676,7 @@ function mountForm(form,prefix){
     const button=event.target.closest("[data-m7-reset-manual]");
     if(!button)return;
 
-    const keys=button.dataset.m7ResetManual==="status"
-      ?["hours_status_text","hours_sub_text"]
-      :["availability_days","availability_time"];
-
-    keys.forEach(key=>{
+    ["availability_days","availability_time"].forEach(key=>{
       const input=document.getElementById(prefix+key);
       if(!input)return;
       input.value="";
@@ -5688,11 +5684,9 @@ function mountForm(form,prefix){
       input.dispatchEvent(new Event("change",{bubbles:true}));
     });
 
-    button.textContent="Reset ✓";
+    button.textContent="Automatic ✓";
     setTimeout(()=>{
-      button.textContent=button.dataset.m7ResetManual==="status"
-        ?"Reset status to automatic"
-        :"Reset availability to automatic";
+      button.textContent="Use automatic Hours schedule";
     },900);
   });
 
@@ -5754,6 +5748,7 @@ window.Ma7alakDirectoryAdmin={
         :{};
 
     const options={...source};
+    LEGACY_STATUS_KEYS.forEach(key=>delete options[key]);
 
     /* Old Studio builds could persist rating=50 from a generic 0–100 slider.
        Remove only an impossible rating; preserve every other directory value. */
@@ -5795,6 +5790,8 @@ window.Ma7alakDirectoryAdmin={
     try{
       options=JSON.parse(form.dataset.directoryOptions||'{}');
     }catch{}
+
+    LEGACY_STATUS_KEYS.forEach(key=>delete options[key]);
 
     shopFields.concat(homeFields).forEach(([k,l,t])=>{
       const input=document.getElementById(prefix+k);
@@ -11473,6 +11470,22 @@ const DEFAULT_DAY={
   close:"17:00"
 };
 
+const ONLINE_MODES={
+  online_service:{
+    label:"Online Service",
+    color:"#38a8ff"
+  },
+  online_delivery:{
+    label:"Online Delivery",
+    color:"#a855f7"
+  }
+};
+
+function normalizeStatusMode(value){
+  const mode=String(value||"").trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(ONLINE_MODES,mode)?mode:"";
+}
+
 function esc(value){
   return String(value??"")
     .replace(/&/g,"&amp;")
@@ -11664,6 +11677,82 @@ function ensureCss(){
       line-height:1.5;
     }
 
+    .m7-hours-online-override{
+      margin-top:12px;
+      padding:11px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:13px;
+      background:rgba(255,255,255,.018);
+    }
+
+    .m7-hours-online-override-head strong{
+      display:block;
+      color:#eee0c6;
+      font-size:10px;
+      font-weight:950;
+    }
+
+    .m7-hours-online-override-head small{
+      display:block;
+      margin-top:4px;
+      color:#8f8370;
+      font-size:8px;
+      line-height:1.45;
+    }
+
+    .m7-hours-online-buttons{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .m7-hours-online-button{
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:0 12px;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:12px;
+      background:#0b0c0d;
+      color:#d7d0c5;
+      font-size:9px;
+      font-weight:950;
+      cursor:pointer;
+      touch-action:manipulation;
+      transition:transform .14s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+
+    .m7-hours-online-button:active{
+      transform:scale(.98);
+    }
+
+    .m7-hours-online-dot{
+      width:11px;
+      height:11px;
+      flex:0 0 11px;
+      border-radius:50%;
+      background:var(--m7-mode-color);
+      box-shadow:0 0 12px color-mix(in srgb,var(--m7-mode-color) 70%,transparent);
+    }
+
+    .m7-hours-online-button.active{
+      border-color:color-mix(in srgb,var(--m7-mode-color) 68%,white 6%);
+      background:color-mix(in srgb,var(--m7-mode-color) 12%,#0b0c0d);
+      color:#fff;
+      box-shadow:0 0 0 1px color-mix(in srgb,var(--m7-mode-color) 16%,transparent),0 0 22px color-mix(in srgb,var(--m7-mode-color) 13%,transparent);
+    }
+
+    .m7-hours-online-note{
+      display:block;
+      margin-top:8px;
+      color:#756b5c;
+      font-size:7.5px;
+      line-height:1.45;
+    }
+
     @media(max-width:900px){
       .m7-hours-schedule-days{grid-template-columns:1fr}
     }
@@ -11755,6 +11844,40 @@ function ensureForm(form,prefix){
         Overnight hours are supported. Example: 09:00 → 01:00 means the shop
         stays open past midnight until 1:00 AM the next day.
       </p>
+
+      <div class="m7-hours-online-override">
+        <div class="m7-hours-online-override-head">
+          <strong>Temporary online status override</strong>
+          <small>
+            These override the weekly opening schedule on the public Status pill.
+          </small>
+        </div>
+        <div class="m7-hours-online-buttons">
+          <button
+            type="button"
+            class="m7-hours-online-button"
+            data-hours-online-mode="online_service"
+            style="--m7-mode-color:#38a8ff"
+            aria-pressed="false"
+          >
+            <span class="m7-hours-online-dot"></span>
+            Online Service
+          </button>
+          <button
+            type="button"
+            class="m7-hours-online-button"
+            data-hours-online-mode="online_delivery"
+            style="--m7-mode-color:#a855f7"
+            aria-pressed="false"
+          >
+            <span class="m7-hours-online-dot"></span>
+            Online Delivery
+          </button>
+        </div>
+        <small class="m7-hours-online-note">
+          Tap the active button again to return to automatic opening hours, then Save Changes.
+        </small>
+      </div>
     `;
 
     const home=form.querySelector(".m7da-home-fields");
@@ -11808,7 +11931,30 @@ function ensureForm(form,prefix){
       });
     });
 
+    function syncStatusMode(){
+      const current=normalizeStatusMode(box.dataset.hoursStatusMode);
+      box.querySelectorAll("[data-hours-online-mode]").forEach(button=>{
+        const active=button.dataset.hoursOnlineMode===current;
+        button.classList.toggle("active",active);
+        button.setAttribute("aria-pressed",active?"true":"false");
+      });
+    }
+
+    box.querySelectorAll("[data-hours-online-mode]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const next=normalizeStatusMode(button.dataset.hoursOnlineMode);
+        const current=normalizeStatusMode(box.dataset.hoursStatusMode);
+        box.dataset.hoursStatusMode=current===next?"":next;
+        syncStatusMode();
+
+        /* Bubble a normal input event so Studio live preview refreshes immediately. */
+        box.dispatchEvent(new Event("input",{bubbles:true}));
+      });
+    });
+
     box.__m7SyncDay=syncDay;
+    box.__m7SyncStatusMode=syncStatusMode;
+    syncStatusMode();
   }
 
   return box;
@@ -11825,6 +11971,8 @@ function fillSchedule(prefix,options){
   if(!box)return;
 
   const schedule=currentSchedule(options);
+  box.dataset.hoursStatusMode=normalizeStatusMode(options?.hours_status_mode);
+  box.__m7SyncStatusMode?.();
 
   DAYS.forEach(([key])=>{
     const row=schedule[key];
@@ -11873,6 +12021,16 @@ function collectSchedule(prefix,result){
 
   result.directory_options.hours_schedule=schedule;
   result.directory_options.hours_timezone="Asia/Beirut";
+  result.directory_options.hours_status_mode=
+    normalizeStatusMode(
+      document
+        .querySelector((prefix==="m7de-"?"#ma-admin-edit-form ":"#ma-admin-shop-form ")+".m7-hours-schedule-box")
+        ?.dataset?.hoursStatusMode
+    ) || null;
+
+  /* Fully retire the old free-text/color Status-pill override system. */
+  ["hours_status_text","hours_sub_text","hours_accent_color","hours_text_color","hours_sub_color","hours_dot_color"]
+    .forEach(key=>delete result.directory_options[key]);
 
   return result;
 }
@@ -14374,12 +14532,6 @@ function ensureCss(){
 
     #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="about_text"],
     #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="address_text"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_status_text"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_sub_text"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_accent_color"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_text_color"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_sub_color"],
-    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="hours_dot_color"],
     #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="availability_days"],
     #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about [data-m7-extra-key="availability_time"]{
       display:flex!important;
@@ -16574,45 +16726,25 @@ function previewHoursHtml(shop){
     })
     .join("");
 
-  const status=
-    previewVal(
-      "m7de-hours_status_text",
-      shop?.directory_options?.hours_status_text||
-      "Opening hours"
-    ) ||
-    "Opening hours";
+  const modeBox=document.querySelector("#ma-admin-edit-form .m7-hours-schedule-box");
+  const mode=normalizeStatusMode(
+    modeBox?.dataset?.hoursStatusMode||
+    shop?.directory_options?.hours_status_mode
+  );
 
-  const sub=
-    previewVal(
-      "m7de-hours_sub_text",
-      shop?.directory_options?.hours_sub_text||
-      "Asia/Beirut"
-    ) ||
-    "Asia/Beirut";
+  const modeMeta=
+    mode==="online_service"
+      ?{status:"Online Service",sub:"Available online",dot:"#38a8ff"}
+      :mode==="online_delivery"
+        ?{status:"Online Delivery",sub:"Delivery available now",dot:"#a855f7"}
+        :{status:"Opening hours",sub:"Automatic · Asia/Beirut",dot:"#d9aa58"};
 
-  const accent=
-    previewColor(
-      "m7de-hours_accent_color",
-      "#d9aa58"
-    );
-
-  const mainColor=
-    previewColor(
-      "m7de-hours_text_color",
-      "#ffffff"
-    );
-
-  const subColor=
-    previewColor(
-      "m7de-hours_sub_color",
-      "#9b8f7e"
-    );
-
-  const dotColor=
-    previewColor(
-      "m7de-hours_dot_color",
-      accent
-    );
+  const status=modeMeta.status;
+  const sub=modeMeta.sub;
+  const accent="#d9aa58";
+  const mainColor="#ffffff";
+  const subColor="#9b8f7e";
+  const dotColor=modeMeta.dot;
 
   const hoursTypography=
     previewModuleTypography(
