@@ -1283,6 +1283,319 @@
     input.click();
   }
 
+  function installSafePublicImageEnhancements(){
+    const viewer=document.getElementById("m7-media-viewer");
+    const stage=document.getElementById("m7v-stage");
+    const image=document.getElementById("m7v-image");
+
+    if(!viewer||!stage||!image)return;
+    if(viewer.dataset.m7ImageEnhancements==="1")return;
+    viewer.dataset.m7ImageEnhancements="1";
+
+    /*
+       BLURRED BACKDROP
+       This is only a visual copy behind the original working <img>.
+       It never receives touches/clicks and never replaces the real Media.
+    */
+    const backdrop=document.createElement("img");
+    backdrop.className="m7v-photo-backdrop";
+    backdrop.alt="";
+    backdrop.setAttribute("aria-hidden","true");
+    backdrop.draggable=false;
+    stage.insertBefore(backdrop,stage.firstChild);
+
+    const syncBackdrop=()=>{
+      const active=
+        viewer.classList.contains("active") &&
+        image.classList.contains("active");
+
+      const src=String(
+        image.currentSrc ||
+        image.src ||
+        ""
+      ).trim();
+
+      if(active&&src){
+        if(backdrop.src!==src)backdrop.src=src;
+        backdrop.classList.add("active");
+      }else{
+        backdrop.classList.remove("active");
+      }
+    };
+
+    image.addEventListener("load",syncBackdrop,{passive:true});
+
+    const mediaObserver=new MutationObserver(()=>{
+      syncBackdrop();
+      /*
+         Every next/previous photo starts at normal zoom, like a phone gallery.
+      */
+      if(
+        !image.classList.contains("active") ||
+        String(image.dataset.m7ZoomSrc||"")!==String(image.currentSrc||image.src||"")
+      ){
+        resetZoom(true);
+        image.dataset.m7ZoomSrc=String(image.currentSrc||image.src||"");
+      }
+    });
+
+    mediaObserver.observe(image,{
+      attributes:true,
+      attributeFilter:["src","class"]
+    });
+    mediaObserver.observe(viewer,{
+      attributes:true,
+      attributeFilter:["class","aria-hidden"]
+    });
+
+    /*
+       PINCH ZOOM + PAN
+       - 1x / one finger: original Media swipe remains untouched.
+       - 2 fingers: this layer handles pinch.
+       - zoomed >1x / one finger: pan the photo instead of changing Media.
+    */
+    let scale=1;
+    let translateX=0;
+    let translateY=0;
+
+    let pinching=false;
+    let panning=false;
+
+    let pinchStartDistance=0;
+    let pinchStartScale=1;
+
+    let panStartX=0;
+    let panStartY=0;
+    let panBaseX=0;
+    let panBaseY=0;
+
+    const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+
+    const touchDistance=touches=>{
+      if(!touches||touches.length<2)return 0;
+      const dx=Number(touches[0].clientX||0)-Number(touches[1].clientX||0);
+      const dy=Number(touches[0].clientY||0)-Number(touches[1].clientY||0);
+      return Math.hypot(dx,dy);
+    };
+
+    const containedSize=()=>{
+      const rect=stage.getBoundingClientRect();
+      const stageW=Math.max(1,Number(rect.width||window.innerWidth||1));
+      const stageH=Math.max(1,Number(rect.height||window.innerHeight||1));
+
+      const naturalW=Math.max(1,Number(image.naturalWidth||stageW));
+      const naturalH=Math.max(1,Number(image.naturalHeight||stageH));
+      const mediaRatio=naturalW/naturalH;
+      const stageRatio=stageW/stageH;
+
+      let width;
+      let height;
+
+      if(mediaRatio>=stageRatio){
+        width=stageW;
+        height=stageW/mediaRatio;
+      }else{
+        height=stageH;
+        width=stageH*mediaRatio;
+      }
+
+      return{stageW,stageH,width,height};
+    };
+
+    const clampPan=()=>{
+      if(scale<=1){
+        translateX=0;
+        translateY=0;
+        return;
+      }
+
+      const size=containedSize();
+      const maxX=Math.max(
+        0,
+        (size.width*scale-size.stageW)/2
+      );
+      const maxY=Math.max(
+        0,
+        (size.height*scale-size.stageH)/2
+      );
+
+      translateX=clamp(translateX,-maxX,maxX);
+      translateY=clamp(translateY,-maxY,maxY);
+    };
+
+    const paintZoom=(animate=false)=>{
+      clampPan();
+
+      image.style.transition=animate
+        ?"transform .16s ease-out"
+        :"none";
+
+      image.style.transform=
+        "translate3d("+translateX+"px,"+translateY+"px,0) scale("+scale+")";
+
+      viewer.classList.toggle(
+        "m7v-image-zoomed",
+        scale>1.015
+      );
+
+      if(animate){
+        setTimeout(()=>{
+          if(scale===1)image.style.transition="";
+        },180);
+      }
+    };
+
+    function resetZoom(animate=false){
+      scale=1;
+      translateX=0;
+      translateY=0;
+      pinching=false;
+      panning=false;
+      paintZoom(animate);
+    }
+
+    const stopViewerGesture=event=>{
+      try{event.preventDefault()}catch(_){}
+      try{event.stopImmediatePropagation()}catch(_){
+        try{event.stopPropagation()}catch(__){}
+      }
+    };
+
+    stage.addEventListener("touchstart",event=>{
+      if(
+        !viewer.classList.contains("active") ||
+        !image.classList.contains("active")
+      ){
+        return;
+      }
+
+      if(event.touches.length>=2){
+        pinching=true;
+        panning=false;
+        pinchStartDistance=Math.max(1,touchDistance(event.touches));
+        pinchStartScale=scale;
+        stopViewerGesture(event);
+        return;
+      }
+
+      if(scale>1.015&&event.touches.length===1){
+        panning=true;
+        pinching=false;
+        panStartX=Number(event.touches[0].clientX||0);
+        panStartY=Number(event.touches[0].clientY||0);
+        panBaseX=translateX;
+        panBaseY=translateY;
+        stopViewerGesture(event);
+      }
+      /*
+         At 1x with one finger: intentionally do nothing.
+         The original gallery's swipe listeners receive the event normally.
+      */
+    },{capture:true,passive:false});
+
+    stage.addEventListener("touchmove",event=>{
+      if(
+        !viewer.classList.contains("active") ||
+        !image.classList.contains("active")
+      ){
+        return;
+      }
+
+      if(pinching&&event.touches.length>=2){
+        const distance=Math.max(1,touchDistance(event.touches));
+        scale=clamp(
+          pinchStartScale*(distance/pinchStartDistance),
+          1,
+          4
+        );
+
+        if(scale<1.015)scale=1;
+        paintZoom(false);
+        stopViewerGesture(event);
+        return;
+      }
+
+      if(panning&&scale>1.015&&event.touches.length===1){
+        translateX=
+          panBaseX+
+          (Number(event.touches[0].clientX||0)-panStartX);
+        translateY=
+          panBaseY+
+          (Number(event.touches[0].clientY||0)-panStartY);
+
+        paintZoom(false);
+        stopViewerGesture(event);
+      }
+    },{capture:true,passive:false});
+
+    stage.addEventListener("touchend",event=>{
+      if(!pinching&&!panning)return;
+
+      stopViewerGesture(event);
+
+      if(pinching){
+        if(event.touches.length>=2){
+          pinchStartDistance=Math.max(1,touchDistance(event.touches));
+          pinchStartScale=scale;
+          return;
+        }
+
+        pinching=false;
+
+        if(scale<=1.015){
+          resetZoom(true);
+          return;
+        }
+
+        if(event.touches.length===1){
+          panning=true;
+          panStartX=Number(event.touches[0].clientX||0);
+          panStartY=Number(event.touches[0].clientY||0);
+          panBaseX=translateX;
+          panBaseY=translateY;
+        }
+        return;
+      }
+
+      if(panning&&event.touches.length===0){
+        panning=false;
+        if(scale<=1.015)resetZoom(true);
+        else paintZoom(true);
+      }
+    },{capture:true,passive:false});
+
+    stage.addEventListener("touchcancel",event=>{
+      if(!pinching&&!panning)return;
+      stopViewerGesture(event);
+      pinching=false;
+      panning=false;
+      if(scale<=1.015)resetZoom(true);
+      else paintZoom(true);
+    },{capture:true,passive:false});
+
+    /*
+       If the viewer closes while zoomed, leave no transform behind.
+    */
+    const viewerObserver=new MutationObserver(()=>{
+      if(!viewer.classList.contains("active")){
+        resetZoom(false);
+      }
+      syncBackdrop();
+    });
+
+    viewerObserver.observe(viewer,{
+      attributes:true,
+      attributeFilter:["class","aria-hidden"]
+    });
+
+    window.addEventListener("resize",()=>{
+      if(scale>1.015)paintZoom(false);
+    },{passive:true});
+
+    image.dataset.m7ZoomSrc=String(image.currentSrc||image.src||"");
+    syncBackdrop();
+  }
+
   function inject(){
     const existing=document.getElementById("m7-owner-media-edit");
     if(existing){
@@ -1348,7 +1661,50 @@
         width:100%!important;
         height:100%!important;
         padding:0!important;
-        background:transparent!important;
+        background:#050505!important;
+        isolation:isolate!important;
+      }
+
+      /*
+         Landscape/short photos keep their full uncropped image in front.
+         This non-interactive copy fills unused portrait-screen space behind it.
+      */
+      #m7-media-viewer .m7v-photo-backdrop{
+        position:absolute!important;
+        inset:-38px!important;
+        z-index:0!important;
+        width:calc(100% + 76px)!important;
+        height:calc(100% + 76px)!important;
+        display:none!important;
+        object-fit:cover!important;
+        object-position:center!important;
+        opacity:.92!important;
+        filter:blur(30px) brightness(.31) saturate(1.04)!important;
+        -webkit-filter:blur(30px) brightness(.31) saturate(1.04)!important;
+        transform:scale(1.08)!important;
+        pointer-events:none!important;
+        user-select:none!important;
+        -webkit-user-select:none!important;
+      }
+
+      #m7-media-viewer .m7v-photo-backdrop.active{
+        display:block!important;
+      }
+
+      #m7-media-viewer #m7v-stage:after{
+        content:"";
+        position:absolute;
+        inset:0;
+        z-index:1;
+        pointer-events:none;
+        background:
+          linear-gradient(
+            180deg,
+            rgba(0,0,0,.32) 0%,
+            rgba(0,0,0,.08) 27%,
+            rgba(0,0,0,.08) 73%,
+            rgba(0,0,0,.34) 100%
+          );
       }
 
       #m7-media-viewer #m7v-image,
@@ -1359,6 +1715,22 @@
         max-height:100%!important;
         object-fit:contain!important;
         object-position:center center!important;
+        position:relative!important;
+        z-index:2!important;
+      }
+
+      #m7-media-viewer #m7v-image{
+        touch-action:none!important;
+        -ms-touch-action:none!important;
+        transform-origin:center center!important;
+        will-change:transform;
+        -webkit-user-drag:none!important;
+      }
+
+      #m7-media-viewer.m7v-image-zoomed .m7v-top,
+      #m7-media-viewer.m7v-image-zoomed .m7v-hint{
+        opacity:.22!important;
+        transition:opacity .16s ease!important;
       }
 
       /*
@@ -1589,6 +1961,9 @@
       #m7-media-showcase.m7-media-effects-paused .photo::after,#m7-media-showcase.m7-media-effects-paused .video::after,#m7-media-showcase.m7-media-effects-paused .m7-media-frame-layer{animation-play-state:paused!important;-webkit-animation-play-state:paused!important}
     `;
     document.head.appendChild(style);
+
+    installSafePublicImageEnhancements();
+    setTimeout(installSafePublicImageEnhancements,220);
 
     /* Stop decorative frame work while this embed is off-screen or hidden. */
     const mediaRoot=document.getElementById("m7-media-showcase");
