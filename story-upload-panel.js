@@ -5484,7 +5484,12 @@
       albumItems:results[3].data||[],
       photoLimit:numberLimit(options.owner_media_photo_limit,6),
       videoLimit:numberLimit(options.owner_media_video_limit,2),
-      albumLimit:numberLimit(options.owner_media_album_item_limit,8)
+      albumLimit:numberLimit(options.owner_media_album_item_limit,8),
+      commentsEnabled:
+        !(
+          options.media_comments_enabled===false ||
+          String(options.media_comments_enabled||"").trim().toLowerCase()==="false"
+        )
     };
   }
 
@@ -5542,7 +5547,17 @@
         return;
       }
 
-      if(op==="add"){
+      if(op==="comments-toggle"){
+        var commentsToggle=await client.rpc(
+          "owner_set_media_comments_enabled",
+          {
+            p_shop_slug:slug,
+            p_enabled:data.enabled===true
+          }
+        );
+        if(commentsToggle.error)throw commentsToggle.error;
+      }
+      else if(op==="add"){
         var type=data.mediaType==="video"?"video":"photo";
         var files=Array.isArray(data.files)?data.files:[];
         if(!files.length)throw new Error("Choose at least one file.");
