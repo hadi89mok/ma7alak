@@ -2607,8 +2607,8 @@ window.addEventListener(
   const SHOP_SLUG = window.__MA7ALAK_EXACT_HUB_SLUG__;
 
 
-  const PRESENCE_INTERVAL_MS = 12000;
-  const STATS_INTERVAL_MS = 10000;
+  const PRESENCE_INTERVAL_MS = 30000;
+  const STATS_INTERVAL_MS = 45000;
 
 
   const SUPABASE_URL =
