@@ -1,5 +1,5 @@
 /* =========================================================
- SHOUFHON FOLLOWING NOTIFICATION FILTER V6 — CACHED / LOCAL APPLY
+ SHOUFHON FOLLOWING NOTIFICATION FILTER V7 — PERSONAL ACTIVITY SAFE
  - top-level page only
  - reuses shared Following state from premium header
  - falls back to the existing Follow RPC only when shared state is unavailable
@@ -13,8 +13,8 @@
 "use strict";
 
 if(window.self!==window.top)return;
-if(window.__M7_FOLLOW_FILTER_V6__)return;
-window.__M7_FOLLOW_FILTER_V6__=true;
+if(window.__M7_FOLLOW_FILTER_V7__)return;
+window.__M7_FOLLOW_FILTER_V7__=true;
 
 const URL="https://wdtaiuwtqdepzdamgsrs.supabase.co";
 const KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl";
@@ -243,11 +243,36 @@ function apply(){
     const followedAt=
       followed.get(slug);
 
+    const notificationType=
+      String(
+        row.dataset.notificationType||
+        ""
+      ).trim();
+
+    const notificationKey=
+      String(
+        row.dataset.notificationKey||
+        ""
+      ).trim();
+
+    /*
+       Replies / comment likes are personal ACCOUNT notifications.
+       They must not depend on Following state.
+    */
+    const personalActivity=
+      notificationKey.startsWith("media-social:") ||
+      notificationType==="media_reply" ||
+      notificationType==="comment_like" ||
+      notificationType==="owner_comment_like";
+
     const visible=
-      !own&&
-      !!followedAt&&
-      Number.isFinite(created)&&
-      created>followedAt;
+      personalActivity ||
+      (
+        !own&&
+        !!followedAt&&
+        Number.isFinite(created)&&
+        created>followedAt
+      );
 
     row.style.display=
       visible
