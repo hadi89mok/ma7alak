@@ -21261,21 +21261,21 @@ function liveUsageMarkup(slug){
   const row=liveUsage.get(String(slug||"").trim().toLowerCase());
 
   if(!row||row.video_live_enabled!==true){
-    return '<div class="m7v4-live-usage off" data-m7-live-usage><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>OFF</span></div><div class="m7v4-live-usage-bar"><i style="width:0%"></i></div></div>';
+    return '<div class="m7v4-live-usage off" data-m7-live-usage data-signature="off"><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>OFF</span></div><div class="m7v4-live-usage-bar"><i style="width:0%"></i></div></div>';
   }
 
   const used=Math.max(0,Number(row.used_minutes)||0);
   const limit=Math.max(0,Number(row.monthly_minutes)||0);
 
   if(limit===0){
-    return '<div class="m7v4-live-usage unlimited" data-m7-live-usage><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>'+used+' min used · UNLIMITED</span></div><div class="m7v4-live-usage-bar"><i></i></div></div>';
+    return '<div class="m7v4-live-usage unlimited" data-m7-live-usage data-signature="unlimited:'+used+'"><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>'+used+' min used · UNLIMITED</span></div><div class="m7v4-live-usage-bar"><i></i></div></div>';
   }
 
   const left=Math.max(0,Number(row.remaining_minutes)||0);
   const pct=Math.max(0,Math.min(100,(used/limit)*100));
   const exhausted=row.exhausted===true||left<=0;
 
-  return '<div class="m7v4-live-usage '+(exhausted?"exhausted":"")+'" data-m7-live-usage>'+
+  return '<div class="m7v4-live-usage '+(exhausted?"exhausted":"")+'" data-m7-live-usage data-signature="'+used+':'+limit+':'+left+':'+(exhausted?"1":"0")+'">'+
     '<div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>'+
       used+' / '+limit+' min · '+(exhausted?"USED UP":left+' left')+
     '</span></div>'+
@@ -21331,7 +21331,10 @@ function decorateWorkspace(){
     if(usage){
       const box=document.createElement("div");
       box.innerHTML=usageHtml;
-      usage.replaceWith(box.firstElementChild);
+      const next=box.firstElementChild;
+      if(next&&usage.dataset.signature!==next.dataset.signature){
+        usage.replaceWith(next);
+      }
     }else{
       row.insertAdjacentHTML("afterend",usageHtml);
     }
