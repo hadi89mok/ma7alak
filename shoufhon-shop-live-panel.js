@@ -817,7 +817,7 @@ async function boot(){
   }
   requestState();
   [180,500,1000,1900,3400].forEach(ms=>setTimeout(requestState,ms));
-  setInterval(()=>{if(!document.hidden)requestState()},15000);
+  /* Realtime + parent fallback keep state live; no idle 15s polling loop needed. */
 }
 
 window.addEventListener("message",event=>{
