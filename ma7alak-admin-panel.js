@@ -20953,3 +20953,426 @@ addEventListener("ma7alak:admin-ready",()=>{
   if(mount())load();
 });
 })();
+
+
+(function planAdminModule(){
+"use strict";
+
+if((location.pathname.replace(/\/+$/,"")||"/")!=="/admin")return;
+if(window.__SHOUFHON_MASTER_PLAN_ADMIN__)return;
+window.__SHOUFHON_MASTER_PLAN_ADMIN__=true;
+
+const PLAN_ORDER=["basic","premium","vip","custom"];
+const PLAN_LABELS={basic:"Basic",premium:"Premium",vip:"VIP",custom:"Custom"};
+let client=null;
+let presets=new Map();
+let assignments=new Map();
+let activePlan="basic";
+let observer=null;
+let realtime=null;
+
+const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[ch]));
+
+const int=(value,min,max,fallback=0)=>{
+  const n=Math.round(Number(value));
+  return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+};
+
+function injectCss(){
+  if(document.getElementById("m7-plan-admin-css"))return;
+  const style=document.createElement("style");
+  style.id="m7-plan-admin-css";
+  style.textContent=`
+    body.m7plans-open{overflow:hidden!important}
+    .m7v4-plan-row{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(217,170,88,.09)}
+    .m7v4-plan-row>span{color:#8f826d;font-size:7px;font-weight:950;letter-spacing:1.1px}
+    .m7v4-plan-select{width:100%;min-width:0;min-height:34px;padding:0 9px;border:1px solid rgba(217,170,88,.24);border-radius:9px;background:#0b0a09;color:#efcf8c;font-size:9px;font-weight:900;outline:none}
+    .m7v4-plan-select[data-plan="vip"]{border-color:rgba(242,196,85,.52);color:#ffd875}
+    .m7v4-plan-select[data-plan="premium"]{border-color:rgba(202,167,247,.42);color:#e7cdfc}
+    .m7v4-plan-select[data-plan="basic"]{color:#c7d0da}
+    .m7v4-plan-select[data-plan="custom"]{border-color:rgba(99,201,255,.38);color:#a9e1ff}
+    .m7plans-home-entry{width:100%;margin:0 0 12px!important}
+    #m7-plan-admin-overlay{position:fixed;inset:0;z-index:2147483647;display:none;padding:12px;background:rgba(3,3,4,.91);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:Arial,"Segoe UI",sans-serif;color:#fff}
+    #m7-plan-admin-overlay.active{display:grid;place-items:center}
+    #m7-plan-admin-panel{position:relative;width:min(760px,100%);max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box;padding:18px;border:1px solid rgba(217,170,88,.34);border-radius:22px;background:radial-gradient(circle at 86% 0%,rgba(217,170,88,.09),transparent 35%),linear-gradient(155deg,#17130f,#090909 64%);box-shadow:0 30px 100px #000}
+    .m7plans-head{display:flex;align-items:flex-start;gap:12px;padding-right:44px}.m7plans-head>div{min-width:0;flex:1}.m7plans-head b{display:block;color:#f0cb7e;font-size:20px}.m7plans-head small{display:block;margin-top:4px;color:#938675;font-size:9px;line-height:1.45}
+    #m7plans-close{position:absolute;right:13px;top:13px;width:35px;height:35px;border:1px solid rgba(255,255,255,.10);border-radius:50%;background:#ffffff09;color:#fff;font-size:21px}
+    .m7plans-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:15px 0 12px}.m7plans-tab{min-height:41px;border:1px solid rgba(217,170,88,.18);border-radius:11px;background:#11100e;color:#9d917f;font-size:9px;font-weight:950;letter-spacing:.5px}.m7plans-tab.active{border-color:#dfae55;background:rgba(217,170,88,.10);color:#f2cf86;box-shadow:inset 0 0 0 1px rgba(217,170,88,.08)}
+    .m7plans-plan-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;padding:10px 11px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.02)}.m7plans-plan-head b{color:#f0d4a0;font-size:13px}.m7plans-plan-head small{display:block;margin-top:2px;color:#857b6e;font-size:8px}.m7plans-count{flex:0 0 auto;padding:6px 8px;border:1px solid rgba(217,170,88,.18);border-radius:999px;color:#d9b56c;font-size:7px;font-weight:900}
+    .m7plans-section{margin-top:9px;padding:11px;border:1px solid rgba(255,255,255,.065);border-radius:14px;background:rgba(255,255,255,.018)}.m7plans-section-title{margin-bottom:8px;color:#e7c77f;font-size:9px;font-weight:950;letter-spacing:.6px}.m7plans-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .m7plans-field{display:flex;flex-direction:column;gap:5px;min-width:0;color:#a99d8b;font-size:8px;font-weight:850}.m7plans-field input[type="number"],.m7plans-field input[type="text"]{width:100%;min-height:39px;box-sizing:border-box;padding:0 10px;border:1px solid rgba(217,170,88,.15);border-radius:9px;background:#090909;color:#fff;font-size:11px;font-weight:900;outline:none}
+    .m7plans-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:43px;padding:0 10px;border:1px solid rgba(217,170,88,.11);border-radius:10px;background:#0b0b0b;color:#d1c5b3;font-size:8px;font-weight:850}.m7plans-toggle input{width:19px;height:19px;accent-color:#d9aa58}
+    .m7plans-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.m7plans-actions button{min-height:44px;border:1px solid rgba(217,170,88,.22);border-radius:11px;background:#16120e;color:#e7c57c;font-size:9px;font-weight:950}.m7plans-actions .primary{border:0;background:linear-gradient(135deg,#f0ce84,#d59d3e);color:#1c1308}.m7plans-actions button:disabled{opacity:.45}
+    #m7plans-status{min-height:18px;margin-top:8px;color:#8ee6a5;font-size:8px;text-align:center}
+    .m7plans-note{margin-top:9px;padding:9px 10px;border-left:3px solid #d9aa58;border-radius:8px;background:rgba(217,170,88,.055);color:#918473;font-size:7.5px;line-height:1.5}
+    @media(max-width:560px){#m7-plan-admin-panel{padding:14px;border-radius:18px}.m7plans-tabs{grid-template-columns:repeat(2,1fr)}.m7plans-grid{grid-template-columns:1fr}.m7plans-actions{grid-template-columns:1fr}.m7plans-head b{font-size:18px}}
+  `;
+  document.head.appendChild(style);
+}
+
+function injectOverlay(){
+  if(document.getElementById("m7-plan-admin-overlay"))return;
+  const overlay=document.createElement("div");
+  overlay.id="m7-plan-admin-overlay";
+  overlay.innerHTML=`
+    <section id="m7-plan-admin-panel" role="dialog" aria-modal="true" aria-label="Plans and Access">
+      <button id="m7plans-close" type="button" aria-label="Close">×</button>
+      <div class="m7plans-head">
+        <div>
+          <b>Plans & Access</b>
+          <small>Master presets for Basic, Premium, VIP and Custom. These values feed the existing Story, Reel, Media, Offers and Video LIVE entitlement system.</small>
+        </div>
+      </div>
+      <div class="m7plans-tabs" data-m7plans-tabs></div>
+      <div data-m7plans-form></div>
+      <div id="m7plans-status" aria-live="polite"></div>
+    </section>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click",event=>{
+    if(event.target===overlay)closeManager();
+  });
+
+  overlay.querySelector("#m7plans-close").onclick=closeManager;
+
+  overlay.querySelector("[data-m7plans-tabs]").addEventListener("click",event=>{
+    const button=event.target.closest("[data-plan-key]");
+    if(!button)return;
+    activePlan=button.dataset.planKey;
+    renderManager();
+  });
+
+  overlay.querySelector("[data-m7plans-form]").addEventListener("click",event=>{
+    const save=event.target.closest("[data-m7plans-save]");
+    if(save){
+      savePreset(save).catch(error=>setStatus(error.message||"Could not save plan.",true));
+      return;
+    }
+
+    const apply=event.target.closest("[data-m7plans-apply]");
+    if(apply){
+      applyPresetToAssigned(apply).catch(error=>setStatus(error.message||"Could not apply plan.",true));
+    }
+  });
+}
+
+function setStatus(message,error=false){
+  const el=document.getElementById("m7plans-status");
+  if(!el)return;
+  el.textContent=message||"";
+  el.style.color=error?"#ff9a91":"#8ee6a5";
+}
+
+function assignmentCount(key){
+  let count=0;
+  assignments.forEach(value=>{if(value===key)count++});
+  return count;
+}
+
+function checkbox(key,label,value){
+  return '<label class="m7plans-toggle"><span>'+esc(label)+'</span><input type="checkbox" data-preset="'+esc(key)+'" '+(value?"checked":"")+'></label>';
+}
+
+function numberField(key,label,value,max=100){
+  return '<label class="m7plans-field"><span>'+esc(label)+'</span><input type="number" min="0" max="'+max+'" step="1" inputmode="numeric" value="'+esc(value)+'" data-preset="'+esc(key)+'"></label>';
+}
+
+function renderManager(){
+  const tabs=document.querySelector("[data-m7plans-tabs]");
+  const form=document.querySelector("[data-m7plans-form]");
+  if(!tabs||!form)return;
+
+  tabs.innerHTML=PLAN_ORDER.map(key=>
+    '<button type="button" class="m7plans-tab '+(activePlan===key?"active":"")+'" data-plan-key="'+key+'">'+esc(PLAN_LABELS[key])+'</button>'
+  ).join("");
+
+  const p=presets.get(activePlan);
+  if(!p){
+    form.innerHTML='<div class="m7plans-note">This preset is unavailable. Reload Plans & Access.</div>';
+    return;
+  }
+
+  const count=assignmentCount(activePlan);
+
+  form.innerHTML=
+    '<div class="m7plans-plan-head"><div><b>'+esc(p.display_name||PLAN_LABELS[activePlan])+'</b><small>'+esc(activePlan.toUpperCase())+' master entitlement preset</small></div><span class="m7plans-count">'+count+' assigned shop'+(count===1?"":"s")+'</span></div>'+
+    '<section class="m7plans-section"><div class="m7plans-section-title">PLAN NAME</div><div class="m7plans-grid"><label class="m7plans-field"><span>Display name</span><input type="text" maxlength="40" value="'+esc(p.display_name||PLAN_LABELS[activePlan])+'" data-preset="display_name"></label></div></section>'+
+    '<section class="m7plans-section"><div class="m7plans-section-title">OWNER EDITING</div><div class="m7plans-grid">'+
+      checkbox("owner_profile_edit_enabled","Profile & banner editing",p.owner_profile_edit_enabled)+
+      checkbox("owner_media_edit_enabled","Media editing / uploads",p.owner_media_edit_enabled)+
+      checkbox("owner_about_edit_enabled","About editing",p.owner_about_edit_enabled)+
+    '</div></section>'+
+    '<section class="m7plans-section"><div class="m7plans-section-title">MEDIA & PUBLISHING LIMITS</div><div class="m7plans-grid">'+
+      numberField("photo_limit","Gallery photos",p.photo_limit)+
+      numberField("video_limit","Gallery videos",p.video_limit)+
+      numberField("album_item_limit","Items per album",p.album_item_limit)+
+      numberField("story_limit","Active Stories",p.story_limit)+
+      numberField("reel_limit","Active Reels",p.reel_limit)+
+    '</div></section>'+
+    '<section class="m7plans-section"><div class="m7plans-section-title">LIVE OFFERS</div><div class="m7plans-grid">'+
+      checkbox("offers_enabled","Offers enabled",p.offers_enabled)+
+      numberField("offer_active_limit","Active offer slots",p.offer_active_limit)+
+      numberField("media_per_offer_limit","Media per offer",p.media_per_offer_limit,20)+
+      checkbox("offer_allow_image","Allow offer photos",p.offer_allow_image)+
+      checkbox("offer_allow_video","Allow offer videos",p.offer_allow_video)+
+    '</div></section>'+
+    '<section class="m7plans-section"><div class="m7plans-section-title">VIDEO LIVE</div><div class="m7plans-grid">'+
+      checkbox("video_live_enabled","Camera LIVE enabled",p.video_live_enabled)+
+      numberField("video_live_monthly_minutes","LIVE minutes / month",p.video_live_monthly_minutes,1000000)+
+    '</div></section>'+
+    '<div class="m7plans-actions"><button type="button" class="primary" data-m7plans-save>Save '+esc(PLAN_LABELS[activePlan])+' preset</button><button type="button" data-m7plans-apply '+(count?"":"disabled")+'>Apply current preset to '+count+' assigned shop'+(count===1?"":"s")+'</button></div>'+
+    '<div class="m7plans-note"><b>Safe preset editing:</b> Saving this master preset does not silently change live shops. Use Apply when you want every shop already assigned to this plan to receive the new values. Assigning a plan from Manage Shops applies it immediately to that shop.</div>';
+}
+
+function readPresetForm(){
+  const form=document.querySelector("[data-m7plans-form]");
+  const patch={};
+
+  form.querySelectorAll("[data-preset]").forEach(input=>{
+    const key=input.dataset.preset;
+    if(input.type==="checkbox"){
+      patch[key]=input.checked===true;
+    }else if(input.type==="number"){
+      const max=Number(input.max)||100;
+      patch[key]=int(input.value,0,max,0);
+    }else{
+      patch[key]=String(input.value||"").trim();
+    }
+  });
+
+  if(!patch.display_name)throw new Error("Plan display name cannot be empty.");
+  return patch;
+}
+
+async function savePreset(button){
+  if(!client)return;
+  button.disabled=true;
+  setStatus("Saving preset…");
+
+  try{
+    const patch=readPresetForm();
+    const user=(await client.auth.getUser()).data?.user;
+    patch.updated_at=new Date().toISOString();
+    patch.updated_by=user?.id||null;
+
+    const result=await client
+      .from("subscription_plan_presets")
+      .update(patch)
+      .eq("plan_key",activePlan)
+      .select("*")
+      .single();
+
+    if(result.error)throw result.error;
+
+    presets.set(activePlan,result.data);
+    renderManager();
+    setStatus(PLAN_LABELS[activePlan]+" preset saved. Assigned shops were not changed.");
+  }finally{
+    if(button.isConnected)button.disabled=false;
+  }
+}
+
+async function applyPresetToAssigned(button){
+  const count=assignmentCount(activePlan);
+  if(!count)return;
+
+  if(!window.confirm("Apply the current "+PLAN_LABELS[activePlan]+" preset to all "+count+" assigned shop"+(count===1?"":"s")+" now?"))return;
+
+  button.disabled=true;
+  setStatus("Applying preset to assigned shops…");
+
+  try{
+    const result=await client.rpc("ma7alak_admin_apply_plan_to_assigned",{p_plan_key:activePlan});
+    if(result.error)throw result.error;
+
+    await loadPlanData();
+    const applied=Number(result.data||count);
+    setStatus("Applied "+PLAN_LABELS[activePlan]+" to "+applied+" shop"+(applied===1?"":"s")+".");
+  }finally{
+    if(button.isConnected)button.disabled=false;
+  }
+}
+
+async function loadPlanData(){
+  if(!client)return;
+
+  const [presetResult,assignmentResult]=await Promise.all([
+    client.from("subscription_plan_presets").select("*"),
+    client.from("shop_plan_assignments").select("shop_slug,plan_key")
+  ]);
+
+  if(presetResult.error)throw presetResult.error;
+  if(assignmentResult.error)throw assignmentResult.error;
+
+  presets=new Map((presetResult.data||[]).map(row=>[String(row.plan_key),row]));
+  assignments=new Map((assignmentResult.data||[]).map(row=>[String(row.shop_slug),String(row.plan_key)]));
+
+  decorateWorkspace();
+
+  if(document.getElementById("m7-plan-admin-overlay")?.classList.contains("active")){
+    renderManager();
+  }
+}
+
+function planOptions(current){
+  return '<option value="">Unassigned</option>'+
+    PLAN_ORDER.map(key=>
+      '<option value="'+key+'" '+(current===key?"selected":"")+'>'+esc(PLAN_LABELS[key])+'</option>'
+    ).join("");
+}
+
+function decorateWorkspace(){
+  const root=document.getElementById("m7-admin-workspace-v4");
+  if(!root)return;
+
+  const home=root.querySelector("[data-m7v4-home]");
+
+  if(home&&!home.querySelector("[data-m7plans-open]")){
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="m7v4-home-footer-btn m7plans-home-entry";
+    button.dataset.m7plansOpen="1";
+    button.innerHTML='<span><strong>💳 Plans & Access</strong><small>Configure Basic, Premium, VIP and Custom entitlement presets.</small></span><b>›</b>';
+
+    const footer=home.querySelector("[data-m7v4-footer-manager]");
+    if(footer)footer.after(button);
+    else home.prepend(button);
+  }
+
+  root.querySelectorAll(".m7v4-shop[data-m7v4-slug]").forEach(card=>{
+    const slug=String(card.dataset.m7v4Slug||"");
+    if(!slug)return;
+
+    const info=card.querySelector(".m7v4-shop-info");
+    if(!info)return;
+
+    let row=info.querySelector("[data-m7-plan-row]");
+
+    if(!row){
+      row=document.createElement("div");
+      row.className="m7v4-plan-row";
+      row.dataset.m7PlanRow="1";
+      row.innerHTML='<span>PLAN</span><select class="m7v4-plan-select" data-m7v4-plan-select aria-label="Select subscription plan"></select>';
+      info.appendChild(row);
+    }
+
+    const select=row.querySelector("select");
+    const current=assignments.get(slug)||"";
+
+    select.dataset.slug=slug;
+    select.dataset.plan=current;
+    select.innerHTML=planOptions(current);
+    select.value=current;
+  });
+
+  const workspace=root.querySelector("[data-m7v4-shop-workspace]");
+  const system=workspace?.querySelector(".m7v4-system");
+
+  if(system&&!system.querySelector("[data-m7plans-open]")){
+    const button=document.createElement("button");
+    button.type="button";
+    button.dataset.m7plansOpen="1";
+    button.textContent="Plans & Access";
+    system.prepend(button);
+  }
+}
+
+async function assignPlan(select){
+  if(!client)return;
+
+  const slug=String(select.dataset.slug||"").trim();
+  const key=String(select.value||"").trim().toLowerCase();
+  if(!slug)return;
+
+  const previous=assignments.get(slug)||"";
+  select.disabled=true;
+
+  try{
+    const result=key
+      ?await client.rpc("ma7alak_admin_apply_plan_to_shop",{p_shop_slug:slug,p_plan_key:key})
+      :await client.rpc("ma7alak_admin_clear_shop_plan",{p_shop_slug:slug});
+
+    if(result.error)throw result.error;
+
+    if(key)assignments.set(slug,key);
+    else assignments.delete(slug);
+
+    select.dataset.plan=key;
+    select.value=key;
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "shoufhon:shop-plan-changed",
+        {detail:{shop_slug:slug,plan_key:key}}
+      )
+    );
+  }catch(error){
+    select.value=previous;
+    select.dataset.plan=previous;
+    window.alert(error.message||"Could not change this shop plan.");
+  }finally{
+    select.disabled=false;
+  }
+}
+
+function openManager(){
+  injectCss();
+  injectOverlay();
+  document.body.classList.add("m7plans-open");
+  document.getElementById("m7-plan-admin-overlay").classList.add("active");
+  setStatus("");
+
+  loadPlanData()
+    .then(renderManager)
+    .catch(error=>setStatus(error.message||"Could not load plans.",true));
+}
+
+function closeManager(){
+  document.body.classList.remove("m7plans-open");
+  document.getElementById("m7-plan-admin-overlay")?.classList.remove("active");
+}
+
+window.Ma7alakOpenPlanManager=openManager;
+
+async function boot(){
+  for(let i=0;i<180&&!window.Ma7alakAdminClient;i++){
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+
+  client=window.Ma7alakAdminClient;
+  if(!client)return;
+
+  injectCss();
+  injectOverlay();
+  await loadPlanData();
+
+  document.addEventListener("click",event=>{
+    if(event.target.closest("[data-m7plans-open]")){
+      event.preventDefault();
+      openManager();
+    }
+  });
+
+  document.addEventListener("change",event=>{
+    const select=event.target.closest("[data-m7v4-plan-select]");
+    if(select)assignPlan(select);
+  });
+
+  observer=new MutationObserver(()=>decorateWorkspace());
+  observer.observe(document.body,{childList:true,subtree:true});
+
+  try{
+    realtime=client
+      .channel("shoufhon-admin-plan-presets")
+      .on("postgres_changes",{event:"*",schema:"public",table:"subscription_plan_presets"},()=>loadPlanData().catch(()=>{}))
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_plan_assignments"},()=>loadPlanData().catch(()=>{}))
+      .subscribe();
+  }catch(_){}
+
+  window.addEventListener("ma7alak:admin-ready",()=>loadPlanData().catch(()=>{}));
+}
+
+boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
+})();
