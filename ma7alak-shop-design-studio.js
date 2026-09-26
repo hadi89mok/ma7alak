@@ -85,7 +85,18 @@
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="instagram_url"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="whatsapp_url"],
       #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="address_text"],
-      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="menu_image_url"]{display:flex!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="menu_image_url"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_status_text"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_sub_text"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_accent_color"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_text_color"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_sub_color"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="hours_dot_color"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="availability_days"],
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras [data-m7-extra-key="availability_time"]{display:flex!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7da-sectioned-extras.m7studio-hub-extras .m7-hub-manual-tools{display:grid!important}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-subhead{grid-column:1/-1;margin:12px 0 2px;padding:9px 10px;border:1px solid rgba(218,170,82,.16);border-left:3px solid #d9aa58;border-radius:9px;background:rgba(218,170,82,.035);color:#efcf8d;font-size:9px;font-weight:950;letter-spacing:.5px}
+      #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-subhead small{display:block;margin-top:3px;color:#817666;font-size:7.5px;font-weight:600;letter-spacing:0;line-height:1.45}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-note{margin:0 0 12px;padding:11px 12px;border:1px solid rgba(95,199,255,.20);border-radius:11px;background:rgba(95,199,255,.055);color:#a9dfff;font-size:8px;line-height:1.55}
       #ma-admin-edit-card.m7studio-fullscreen .m7studio-hub-note b{color:#d9f2ff}
       #ma-admin-edit-card.m7studio-fullscreen .m7ds-section-title{margin:16px 0 10px!important;padding:8px 10px!important;border:1px solid rgba(244,191,80,.24)!important;border-left:4px solid #f4bf50!important;border-radius:9px!important;background:linear-gradient(90deg,rgba(244,191,80,.10),rgba(244,191,80,.025))!important;color:#ffd878!important;font-size:10px!important;font-weight:950!important;letter-spacing:.8px!important;text-transform:uppercase!important}
@@ -473,7 +484,15 @@
     form.querySelector(":scope > .m7studio-profile-image-card")?.remove();
     form.querySelector(":scope > .m7studio-hub-note")?.remove();
     form.querySelector(":scope > .m7studio-inline-capability")?.remove();
-    form.querySelector(".m7da-sectioned-extras")?.classList.remove("m7studio-hub-extras","m7studio-global-extras");
+    form.querySelectorAll(".m7studio-hub-subhead").forEach(node=>node.remove());
+    const resetExtras=form.querySelector(".m7da-sectioned-extras");
+    if(resetExtras){
+      resetExtras.classList.remove("m7studio-hub-extras","m7studio-global-extras");
+      const legend=resetExtras.querySelector(":scope > legend");
+      if(legend&&legend.dataset.m7OriginalLegend){
+        legend.textContent=legend.dataset.m7OriginalLegend;
+      }
+    }
     [...form.children].forEach(child=>child.classList.remove("m7studio-hidden","m7studio-force-show"));
     form.querySelectorAll(".m7studio-field-hidden,.m7studio-group-hidden").forEach(node=>node.classList.remove("m7studio-field-hidden","m7studio-group-hidden"));
     const design=form.querySelector(".m7-design-studio");
@@ -1953,11 +1972,39 @@
 
       if(extras){
         extras.classList.add("m7studio-hub-extras");
+
+        const legend=extras.querySelector(":scope > legend");
+        if(legend){
+          if(!legend.dataset.m7OriginalLegend){
+            legend.dataset.m7OriginalLegend=legend.textContent||"Shop extras";
+          }
+          legend.textContent="Hub details";
+        }
+
+        const grid=extras.querySelector(".m7da-grid");
+        const statusAnchor=extras.querySelector('[data-m7-extra-key="hours_status_text"]');
+        const availabilityAnchor=extras.querySelector('[data-m7-extra-key="availability_days"]');
+
+        if(grid&&statusAnchor&&!grid.querySelector('[data-m7studio-hub-subhead="status"]')){
+          const heading=document.createElement("div");
+          heading.className="m7studio-hub-subhead";
+          heading.dataset.m7studioHubSubhead="status";
+          heading.innerHTML='<b>Manual status pill</b><small>Optional. If either text field contains something, it overrides the automatic weekly Hours status shown on the shop page.</small>';
+          statusAnchor.before(heading);
+        }
+
+        if(grid&&availabilityAnchor&&!grid.querySelector('[data-m7studio-hub-subhead="availability"]')){
+          const heading=document.createElement("div");
+          heading.className="m7studio-hub-subhead";
+          heading.dataset.m7studioHubSubhead="availability";
+          heading.innerHTML='<b>Manual Availability</b><small>Optional. Manual days/time override the automatic Hours schedule inside the Hub Location card. Leave both blank for automatic.</small>';
+          availabilityAnchor.before(heading);
+        }
       }
 
       const hubNote=document.createElement("div");
       hubNote.className="m7studio-hub-note";
-      hubNote.innerHTML="<b>Profile Hub controls</b><br>About text, services, social links, address/location styling and Hub appearance are grouped here. Followers / Following / Likes are live stats and are not manually editable.";
+      hubNote.innerHTML="<b>Profile Hub controls</b><br>About, socials, location, manual status/availability overrides and Hub appearance are grouped here. Weekly automatic opening times stay in Hours.";
       form.insertBefore(hubNote,form.firstChild.nextSibling);
 
       filterFields(
