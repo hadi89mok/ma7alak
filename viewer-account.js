@@ -234,6 +234,7 @@ function trustedEmbedSource(source){
 }
 
 let activeEmbedViewerPortal=null;
+let embedPortalBackTimer=null;
 
 function embedFrameForSource(source){
   if(!source)return null;
@@ -264,6 +265,11 @@ function portalHistoryToken(){
 function closeEmbedViewerPortal(source,options={}){
   const state=activeEmbedViewerPortal;
   if(!state)return false;
+
+  if(embedPortalBackTimer){
+    clearTimeout(embedPortalBackTimer);
+    embedPortalBackTimer=null;
+  }
   if(source&&state.source&&source!==state.source)return false;
 
   const requestedKind=
@@ -494,10 +500,41 @@ function openEmbedViewerPortal(source,data={}){
   return true;
 }
 
+function rearmEmbedViewerHistory(state){
+  if(
+    !state ||
+    activeEmbedViewerPortal!==state
+  ){
+    return;
+  }
+
+  try{
+    history.pushState(
+      {
+        ...(history.state||{}),
+        __shoufhonEmbedPortal:
+          state.historyToken
+      },
+      "",
+      location.href
+    );
+  }catch(_){}
+}
+
 window.addEventListener("popstate",()=>{
   const state=activeEmbedViewerPortal;
   if(!state)return;
 
+  if(embedPortalBackTimer){
+    clearTimeout(embedPortalBackTimer);
+    embedPortalBackTimer=null;
+  }
+
+  /*
+     Give the child first chance to consume Back.
+     Example: Media comments close first while the fullscreen viewer stays open.
+     If the child does not answer, the portal closes as a safe fallback.
+  */
   try{
     state.source?.postMessage(
       {
@@ -509,13 +546,21 @@ window.addEventListener("popstate",()=>{
     );
   }catch(_){}
 
-  closeEmbedViewerPortal(
-    state.source,
-    {
-      fromHistory:true,
-      viewerKind:state.viewerKind
+  embedPortalBackTimer=setTimeout(()=>{
+    embedPortalBackTimer=null;
+
+    if(activeEmbedViewerPortal!==state){
+      return;
     }
-  );
+
+    closeEmbedViewerPortal(
+      state.source,
+      {
+        fromHistory:true,
+        viewerKind:state.viewerKind
+      }
+    );
+  },220);
 });
 
 function safeBridgeError(error){
@@ -547,6 +592,24 @@ async function handleMediaBridge(event){
         ).trim()
       }
     );
+    return;
+  }
+
+  if(data.type==="SHOUFHON_EMBED_VIEWER_BACK_HANDLED"){
+    const state=activeEmbedViewerPortal;
+
+    if(
+      state &&
+      state.source===event.source
+    ){
+      if(embedPortalBackTimer){
+        clearTimeout(embedPortalBackTimer);
+        embedPortalBackTimer=null;
+      }
+
+      rearmEmbedViewerHistory(state);
+    }
+
     return;
   }
 
