@@ -318,6 +318,209 @@ function panelPremiumCss(){
 `;
   document.head.appendChild(s);
 }
+function compactComposerCss(){
+  if($("#m7lo-compact-composer-css"))return;
+  const s=document.createElement("style");
+  s.id="m7lo-compact-composer-css";
+  s.textContent=`
+.m7lo-editor-panel{
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important
+}
+.m7lo-editor-panel .m7lo-types{
+  flex:0 0 auto
+}
+.m7lo-editor-panel .m7lo-form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important
+}
+.m7lo-form-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  display:grid;
+  gap:9px;
+  padding:1px 2px 12px
+}
+.m7lo-field[hidden],
+#m7lo-prices[hidden]{display:none!important}
+.m7lo-editor-panel .m7lo-in{
+  min-height:44px;
+  padding:10px 11px;
+  border-radius:12px
+}
+.m7lo-editor-panel .m7lo-ta{
+  min-height:72px;
+  max-height:132px;
+  padding:10px 11px;
+  border-radius:12px;
+  resize:none;
+  overflow:auto
+}
+.m7lo-editor-panel .m7lo-label{
+  font-size:7.5px;
+  letter-spacing:.72px;
+  margin-left:2px
+}
+.m7lo-editor-panel .m7lo-price-row,
+.m7lo-editor-panel .m7lo-time-row{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px
+}
+.m7lo-editor-panel .m7lo-time-row .m7lo-in{
+  min-height:45px;
+  padding:9px 8px;
+  font-size:10px
+}
+.m7lo-file-compact{
+  min-height:44px;
+  padding:0 12px!important;
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-radius:12px!important;
+  cursor:pointer;
+  text-align:left!important
+}
+.m7lo-file-compact span{
+  color:#f0c46f;
+  font-size:10px;
+  font-weight:950
+}
+.m7lo-file-compact b{
+  flex:0 0 auto;
+  color:rgba(255,255,255,.54);
+  font-size:8px;
+  font-weight:900
+}
+.m7lo-file-note{
+  min-height:0!important;
+  margin:-2px 2px 0!important;
+  font-size:8px!important
+}
+.m7lo-publish-dock{
+  position:relative;
+  z-index:30;
+  flex:0 0 auto;
+  padding:9px 0 0;
+  background:linear-gradient(180deg,rgba(17,16,15,0),#11100f 18%,#11100f 100%);
+  box-shadow:0 -12px 24px rgba(0,0,0,.16)
+}
+.m7lo-editor-panel .m7lo-publish-btn{
+  position:relative!important;
+  bottom:auto!important;
+  width:100%;
+  min-height:46px!important;
+  margin:0!important;
+  border-radius:13px!important;
+  font-size:11px!important
+}
+.m7lo-publish-dock .m7lo-status{
+  min-height:14px;
+  margin:4px 2px 0;
+  font-size:9px
+}
+@media(max-width:520px){
+  #m7lo-overlay:has(.m7lo-editor-panel){
+    padding:0!important;
+    align-items:stretch!important
+  }
+  .m7lo-editor-panel{
+    width:100%!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    margin:0!important;
+    padding:
+      calc(9px + env(safe-area-inset-top))
+      11px
+      calc(8px + env(safe-area-inset-bottom))!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 50% -5%,rgba(228,170,79,.075),transparent 30%),
+      #0b0b0b!important
+  }
+  .m7lo-editor-panel .m7lo-close{
+    top:calc(7px + env(safe-area-inset-top))!important;
+    right:9px!important;
+    width:34px!important;
+    height:34px!important;
+    font-size:19px!important
+  }
+  .m7lo-editor-panel .m7lo-panel-title{
+    margin:0 42px 1px 0!important;
+    font-size:18px!important;
+    line-height:1.15!important
+  }
+  .m7lo-editor-panel .m7lo-panel-subtitle{
+    margin:2px 42px 7px 0!important;
+    font-size:8.5px!important;
+    line-height:1.3!important
+  }
+  .m7lo-editor-panel .m7lo-types{
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+    margin:5px 0 8px!important
+  }
+  .m7lo-editor-panel .m7lo-type{
+    min-height:46px!important;
+    padding:5px 7px!important;
+    grid-template-columns:25px minmax(0,1fr)!important;
+    gap:6px!important;
+    text-align:left!important;
+    border-radius:12px!important
+  }
+  .m7lo-editor-panel .m7lo-type-icon{
+    width:25px!important;
+    height:25px!important;
+    margin:0!important;
+    border-radius:8px!important;
+    font-size:12px!important
+  }
+  .m7lo-editor-panel .m7lo-type-copy b{font-size:8px!important}
+  .m7lo-editor-panel .m7lo-type-copy small{font-size:6.5px!important}
+  .m7lo-form-scroll{gap:8px;padding-bottom:9px}
+  .m7lo-editor-panel .m7lo-field{gap:4px}
+  .m7lo-editor-panel .m7lo-in{
+    min-height:42px!important;
+    padding:9px 10px!important;
+    font-size:11px!important
+  }
+  .m7lo-editor-panel .m7lo-ta{
+    min-height:68px!important;
+    padding:9px 10px!important;
+    font-size:11px!important;
+    line-height:1.35!important
+  }
+  .m7lo-editor-panel .m7lo-price-row,
+  .m7lo-editor-panel .m7lo-time-row{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important
+  }
+  .m7lo-editor-panel .m7lo-time-row .m7lo-in{
+    padding:8px 6px!important;
+    font-size:9px!important
+  }
+  .m7lo-file-compact{min-height:42px!important}
+  .m7lo-publish-dock{padding-top:7px}
+}
+@media(max-width:340px){
+  .m7lo-editor-panel .m7lo-time-row{
+    grid-template-columns:1fr!important
+  }
+}
+`;
+  document.head.appendChild(s);
+}
+
 function membershipGateCss(){
   if($("#m7lo-membership-gate-css"))return;
   const s=document.createElement("style");
@@ -1083,32 +1286,67 @@ function formHtml(x){
   const edit=!!x,type=x?.post_type||"offer",mediaLimit=offerMediaLimit();
   const types=[["offer","🏷️","OFFER","Deal / price"],["happening","●","HAPPENING NOW","Right now"],["arrival","✨","NEW ARRIVAL","Just landed"],["event","▣","EVENT","Date / activity"]];
   return`<div id="m7lo-panel" class="m7lo-editor-panel">
-    <button class="m7lo-close">×</button>
-    <div class="m7lo-panel-title">${edit?"Edit Live / Offer":"Create Live / Offer"}</div>
-    <div class="m7lo-panel-subtitle">${edit?"Update what viewers see immediately.":"Publish an offer, arrival, event or happening-now update."}</div>
+    <button class="m7lo-close" type="button" aria-label="Close">×</button>
+    <div class="m7lo-panel-title">${edit?"Edit update":"Create update"}</div>
+    <div class="m7lo-panel-subtitle">${edit?"Update what viewers see immediately.":"Choose a type, add the essentials, then publish."}</div>
     <div class="m7lo-types">${types.map(a=>`<button class="m7lo-type ${a[0]===type?"on":""}" data-m7-type="${a[0]}" type="button"><span class="m7lo-type-icon">${a[1]}</span><span class="m7lo-type-copy"><b>${a[2]}</b><small>${a[3]}</small></span></button>`).join("")}</div>
     <form id="m7lo-form" class="m7lo-form">
       <input id="m7lo-type" type="hidden" value="${esc(type)}">
-      <label class="m7lo-field"><span class="m7lo-label">TITLE</span><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="What are you sharing?" value="${esc(x?.title||"")}"></label>
-      <label class="m7lo-field"><span class="m7lo-label">MAIN DESCRIPTION</span><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" placeholder="Short details viewers should know…">${esc(x?.description||"")}</textarea></label>
-      <input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Location" value="${esc(x?.location_text||"")}">
-      <div id="m7lo-prices" class="m7lo-two" style="display:${type==="offer"?"grid":"none"}"><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" placeholder="Original $" value="${x?.original_price??""}"><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" placeholder="Offer $" value="${x?.offer_price??""}"></div>
-      <div class="m7lo-two m7lo-time-row"><label class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label class="m7lo-field"><span class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>
-      ${edit?"":(mediaLimit>0?`<label class="m7lo-file">📷 Add up to ${mediaLimit} photos / videos<input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub"></div><div id="m7lo-new-media-draft"></div>`:`<div class="m7lo-status">Media uploads are disabled for this shop.</div>`)}
-      <button class="m7lo-btn m7lo-publish-btn" type="submit">${edit?"Save Changes":"⚡ Publish Now"}</button>
-      <div id="m7lo-status" class="m7lo-status"></div>
+      <div class="m7lo-form-scroll">
+        <label class="m7lo-field"><span class="m7lo-label">TITLE</span><input id="m7lo-title" class="m7lo-in" maxlength="70" required placeholder="What are you sharing?" value="${esc(x?.title||"")}"></label>
+        <label class="m7lo-field"><span class="m7lo-label">MAIN DESCRIPTION</span><textarea id="m7lo-desc" class="m7lo-ta" maxlength="400" rows="3" placeholder="Short details viewers should know…">${esc(x?.description||"")}</textarea></label>
+        <label id="m7lo-location-wrap" class="m7lo-field"><span class="m7lo-label">LOCATION</span><input id="m7lo-location" class="m7lo-in" maxlength="120" placeholder="📍 Add location" value="${esc(x?.location_text||"")}"></label>
+        <div id="m7lo-prices" class="m7lo-two m7lo-price-row"><label class="m7lo-field"><span class="m7lo-label">ORIGINAL</span><input id="m7lo-original" class="m7lo-in" type="number" min="0" step=".01" inputmode="decimal" placeholder="$ 0.00" value="${x?.original_price??""}"></label><label class="m7lo-field"><span class="m7lo-label">OFFER PRICE</span><input id="m7lo-offer" class="m7lo-in" type="number" min="0" step=".01" inputmode="decimal" placeholder="$ 0.00" value="${x?.offer_price??""}"></label></div>
+        <div id="m7lo-time-row" class="m7lo-two m7lo-time-row"><label id="m7lo-start-wrap" class="m7lo-field"><span class="m7lo-label">STARTS</span><input id="m7lo-start" class="m7lo-in" type="datetime-local"></label><label id="m7lo-finish-wrap" class="m7lo-field"><span id="m7lo-finish-label" class="m7lo-label">ENDS *</span><input id="m7lo-finish" class="m7lo-in" type="datetime-local" required></label></div>
+        ${edit?"":(mediaLimit>0?`<label class="m7lo-file m7lo-file-compact"><span>＋ Add media</span><b id="m7lo-media-count">0 / ${mediaLimit}</b><input id="m7lo-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" hidden></label><div id="m7lo-file-name" class="m7lo-sub m7lo-file-note"></div><div id="m7lo-new-media-draft"></div>`:`<div class="m7lo-status">Media uploads are disabled for this shop.</div>`)}
+      </div>
+      <div class="m7lo-publish-dock">
+        <button class="m7lo-btn m7lo-publish-btn" type="submit">${edit?"Save Changes":"⚡ Publish Now"}</button>
+        <div id="m7lo-status" class="m7lo-status"></div>
+      </div>
     </form>
   </div>`;
 }
 function localValue(v){let d=new Date(v);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
 function wireForm(d,x){
   $(".m7lo-close",d).onclick=close;
+
+  const typeInput=$("#m7lo-type");
+  const prices=$("#m7lo-prices");
+  const locationWrap=$("#m7lo-location-wrap");
+  const startWrap=$("#m7lo-start-wrap");
+  const finishLabel=$("#m7lo-finish-label");
+  const startInput=$("#m7lo-start");
+  const desc=$("#m7lo-desc");
+
+  function syncTypeFields(type,fromClick){
+    type=String(type||"offer");
+    if(prices)prices.hidden=type!=="offer";
+    if(locationWrap)locationWrap.hidden=!(type==="happening"||type==="event");
+    if(startWrap)startWrap.hidden=!(type==="offer"||type==="event");
+    if(finishLabel)finishLabel.textContent=type==="arrival"?"EXPIRES *":"ENDS *";
+
+    if(fromClick){
+      if(type==="happening"||type==="arrival")startInput.value="";
+      else if(!startInput.value)startInput.value=localValue(new Date());
+    }
+  }
+
+  function fitDescription(){
+    if(!desc)return;
+    desc.style.height="auto";
+    desc.style.height=Math.min(132,Math.max(72,desc.scrollHeight))+"px";
+  }
+
   $all('[data-m7-type]',d).forEach(b=>b.onclick=()=>{
     $all('[data-m7-type]',d).forEach(q=>q.classList.remove("on"));
     b.classList.add("on");
-    $("#m7lo-type").value=b.dataset.m7Type;
-    $("#m7lo-prices").style.display=b.dataset.m7Type==="offer"?"grid":"none";
+    typeInput.value=b.dataset.m7Type;
+    syncTypeFields(b.dataset.m7Type,true);
   });
+
+  desc?.addEventListener("input",fitDescription);
+
   if(x){
     $("#m7lo-start").value=localValue(x.starts_at);
     $("#m7lo-finish").value=localValue(x.ends_at);
@@ -1118,18 +1356,23 @@ function wireForm(d,x){
     $("#m7lo-finish").value=localValue(f);
     const createFiles=$("#m7lo-file");
     if(createFiles)createFiles.onchange=e=>{
-      const files=[...(e.target.files||[])],n=files.length,box=$("#m7lo-new-media-draft"),limit=offerMediaLimit();
+      const files=[...(e.target.files||[])],n=files.length,box=$("#m7lo-new-media-draft"),limit=offerMediaLimit(),count=$("#m7lo-media-count");
       if(n>limit){
         $("#m7lo-file-name").textContent=`Maximum ${limit} media item${limit===1?"":"s"} per offer.`;
+        if(count)count.textContent=`0 / ${limit}`;
         box.innerHTML="";
         e.target.value="";
         return;
       }
-      $("#m7lo-file-name").textContent=n?`${n} file${n===1?"":"s"} selected · first media becomes the cover`:"";
-      box.innerHTML=n?'<div class="m7lo-pending-head">Add a description to each media <small>optional</small></div>'+pendingMediaRows(files):"";
+      if(count)count.textContent=`${n} / ${limit}`;
+      $("#m7lo-file-name").textContent=n?`${n} selected · first media becomes the cover`:"";
+      box.innerHTML=n?'<div class="m7lo-pending-head">Media descriptions <small>optional</small></div>'+pendingMediaRows(files):"";
     };
     $("#m7lo-form").onsubmit=publish;
   }
+
+  syncTypeFields(typeInput.value,false);
+  requestAnimationFrame(fitDescription);
 }
 
 function creator(){const lim=Math.max(0,Number(ent?.active_limit||0));if(!ent?.enabled||lim<=0){membershipGate("offer");return}if(ownerItems.length>=lim)return;$("#m7lo-overlay")?.remove();let d=document.createElement("div");d.id="m7lo-overlay";lock();d.innerHTML=formHtml(null);mountLiveOverlay(d);wireForm(d,null)}
@@ -1583,6 +1826,7 @@ async function init(){
   motionCss();
   panelPremiumCss();
   finalLiveOffersUxCss();
+  compactComposerCss();
   membershipGateCss();
   bridge();
 
