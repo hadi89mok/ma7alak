@@ -5368,3 +5368,183 @@ body.ma7alak-premium-homepage.${READY_CLASS}.ma7alak-header-page{
     addCss();
   });
 })();
+
+/* =========================================================
+   SHOUFHON HEADER ICON SYSTEM V28
+   ---------------------------------------------------------
+   Phone-first visual normalization only.
+   Keeps every existing action/function while making the header
+   feel like one coherent social app instead of mixed icon systems.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__SHOUFHON_HEADER_ICON_SYSTEM_V28__)return;
+  window.__SHOUFHON_HEADER_ICON_SYSTEM_V28__=true;
+
+  function install(){
+    if(document.getElementById("shoufhon-header-icon-system-v28"))return;
+
+    const style=document.createElement("style");
+    style.id="shoufhon-header-icon-system-v28";
+    style.textContent=`
+#ma7alak-social-header .ma7alak-header-nav{
+  align-items:center!important;
+  gap:2px!important
+}
+#ma7alak-social-header .ma7alak-header-nav-item,
+#ma7alak-social-header #m7-header-messages,
+#ma7alak-social-header #m7-owner-messages,
+#ma7alak-social-header #ma7alak-header-following,
+#ma7alak-social-header #ma7alak-header-reels{
+  min-width:42px!important;
+  width:42px!important;
+  height:44px!important;
+  padding:0!important;
+  gap:0!important;
+  border-radius:14px!important;
+  color:rgba(255,255,255,.88)!important;
+  background:transparent!important;
+  transition:transform .14s ease,background .14s ease,color .14s ease!important
+}
+#ma7alak-social-header .ma7alak-header-nav-item:hover,
+#ma7alak-social-header .ma7alak-header-nav-item:focus-visible{
+  background:rgba(255,255,255,.055)!important;
+  color:#fff!important
+}
+#ma7alak-social-header .ma7alak-header-nav-item:active{
+  transform:scale(.91)!important;
+  background:rgba(217,164,65,.08)!important
+}
+#ma7alak-social-header .ma7alak-header-nav-item::after{
+  display:none!important
+}
+#ma7alak-social-header .ma7alak-header-nav-icon{
+  width:23px!important;
+  height:23px!important;
+  display:grid!important;
+  place-items:center!important
+}
+#ma7alak-social-header .ma7alak-header-nav-icon svg{
+  width:23px!important;
+  height:23px!important;
+  display:block!important;
+  stroke-width:1.75!important;
+  filter:none!important
+}
+#ma7alak-social-header .ma7alak-header-nav-label,
+#ma7alak-social-header .ma7alak-integrated-label{
+  display:none!important
+}
+#ma7alak-social-header #ma7alak-header-likes-slot,
+#ma7alak-social-header #ma7alak-header-notification-slot{
+  min-width:42px!important;
+  width:42px!important;
+  height:44px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:14px!important
+}
+#ma7alak-social-header #ma7alak-story-likes-wrapper,
+#ma7alak-social-header #ma7alak-notification-wrapper{
+  width:42px!important;
+  height:44px!important;
+  display:grid!important;
+  place-items:center!important
+}
+#ma7alak-social-header #ma7alak-story-likes-button,
+#ma7alak-social-header #ma7alak-notification-bell,
+#ma7alak-social-header #ma7alak-instant-likes-placeholder{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid transparent!important;
+  border-radius:13px!important;
+  background:transparent!important;
+  color:rgba(255,255,255,.9)!important
+}
+#ma7alak-social-header #ma7alak-story-likes-button:hover,
+#ma7alak-social-header #ma7alak-notification-bell:hover,
+#ma7alak-social-header #ma7alak-instant-likes-placeholder:hover{
+  border-color:rgba(255,255,255,.06)!important;
+  background:rgba(255,255,255,.055)!important
+}
+#ma7alak-social-header #ma7alak-story-likes-button svg,
+#ma7alak-social-header #ma7alak-notification-bell svg,
+#ma7alak-social-header #ma7alak-instant-likes-placeholder svg{
+  width:22px!important;
+  height:22px!important;
+  filter:none!important
+}
+#ma7alak-social-header #ma7alak-header-menu-button{
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  border-radius:14px!important;
+  border-color:rgba(255,255,255,.09)!important;
+  background:linear-gradient(180deg,rgba(28,28,28,.96),rgba(15,15,15,.96))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 7px 18px rgba(0,0,0,.18)!important
+}
+#ma7alak-social-header #ma7alak-header-menu-button span{
+  width:18px!important;
+  height:1.7px!important;
+  background:#e9d4a6!important
+}
+#ma7alak-social-header .m7-msg-badge,
+#ma7alak-social-header #ma7alak-notification-badge,
+#ma7alak-social-header #m7-heart-badge{
+  min-width:16px!important;
+  height:16px!important;
+  padding:0 3px!important;
+  border-width:2px!important;
+  font-size:8px!important
+}
+@media(max-width:900px){
+  #ma7alak-social-header{
+    gap:2px!important
+  }
+  #ma7alak-social-header .ma7alak-header-nav{
+    gap:0!important
+  }
+  #ma7alak-social-header .ma7alak-header-nav-item,
+  #ma7alak-social-header #m7-header-messages,
+  #ma7alak-social-header #m7-owner-messages,
+  #ma7alak-social-header #ma7alak-header-following,
+  #ma7alak-social-header #ma7alak-header-reels,
+  #ma7alak-social-header #ma7alak-header-likes-slot,
+  #ma7alak-social-header #ma7alak-header-notification-slot{
+    min-width:39px!important;
+    width:39px!important
+  }
+  #ma7alak-social-header .ma7alak-header-nav-icon,
+  #ma7alak-social-header .ma7alak-header-nav-icon svg{
+    width:22px!important;
+    height:22px!important
+  }
+}
+@media(max-width:390px){
+  #ma7alak-social-header .ma7alak-header-nav-item,
+  #ma7alak-social-header #m7-header-messages,
+  #ma7alak-social-header #m7-owner-messages,
+  #ma7alak-social-header #ma7alak-header-following,
+  #ma7alak-social-header #ma7alak-header-reels,
+  #ma7alak-social-header #ma7alak-header-likes-slot,
+  #ma7alak-social-header #ma7alak-header-notification-slot{
+    min-width:36px!important;
+    width:36px!important
+  }
+}
+`;
+    document.head.appendChild(style);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",install,{once:true});
+  }else{
+    install();
+  }
+})();
