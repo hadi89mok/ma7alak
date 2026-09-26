@@ -89,12 +89,20 @@ async function init(){
    call a small allow-list of media RPCs through the real account
    session. SQL still derives auth.uid() server-side.
 ========================================================= */
-const MEDIA_RPC_ALLOWLIST=new Set([
+const MEDIA_RPC_READ_ALLOWLIST=new Set([
+  "ma7alak_get_shop_media_engagement",
+  "ma7alak_get_media_comments"
+]);
+const MEDIA_RPC_WRITE_ALLOWLIST=new Set([
   "ma7alak_toggle_media_like",
   "ma7alak_create_media_comment",
   "ma7alak_edit_media_comment",
   "ma7alak_delete_media_comment",
   "ma7alak_toggle_media_comment_like"
+]);
+const MEDIA_RPC_ALLOWLIST=new Set([
+  ...MEDIA_RPC_READ_ALLOWLIST,
+  ...MEDIA_RPC_WRITE_ALLOWLIST
 ]);
 function trustedEmbedSource(source){
   if(!source)return false;
@@ -154,7 +162,8 @@ async function handleMediaBridge(event){
 
   try{
     await initPromise;
-    if(!session?.user||!client)throw new Error("LOGIN_REQUIRED");
+    if(!client)throw new Error("CLIENT_NOT_READY");
+    if(MEDIA_RPC_WRITE_ALLOWLIST.has(fn)&&!session?.user)throw new Error("LOGIN_REQUIRED");
     const result=await client.rpc(
       fn,
       data.args&&typeof data.args==="object"?data.args:{}
