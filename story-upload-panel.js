@@ -6065,6 +6065,44 @@
     }
   }
 
+  async function handleHubLocationRequest(event){
+    var data=event.data||{};
+    var source=event.source||null;
+    var requestId=String(data.requestId||"");
+    var slug=String(data.shopSlug||"").trim().toLowerCase();
+
+    if(!requestId||!slug||!sourceCanReply(source))return;
+
+    try{
+      var context=await requireOwner(slug,"owner_about_edit_enabled");
+      var result=await context.client.rpc("owner_update_hub_details",{
+        p_shop_slug:slug,
+        p_address_text:String(data.addressText||""),
+        p_availability_days:String(data.availabilityDays||""),
+        p_availability_time:String(data.availabilityTime||"")
+      });
+      if(result.error)throw result.error;
+
+      reply(
+        source,
+        "SHOUFHON_OWNER_HUB_LOCATION_RESULT",
+        requestId,
+        true,
+        result.data||{},
+        ""
+      );
+    }catch(error){
+      reply(
+        source,
+        "SHOUFHON_OWNER_HUB_LOCATION_RESULT",
+        requestId,
+        false,
+        null,
+        error&&error.message||"Could not update Location."
+      );
+    }
+  }
+
   window.addEventListener("message",function(event){
     if(!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true))return;
     var data=event&&event.data||{};
@@ -6074,6 +6112,10 @@
     }
     if(data.type==="SHOUFHON_OWNER_ABOUT_REQUEST"){
       handleAboutRequest(event);
+      return;
+    }
+    if(data.type==="SHOUFHON_OWNER_HUB_LOCATION_REQUEST"){
+      handleHubLocationRequest(event);
     }
   });
 })();
