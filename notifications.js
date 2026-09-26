@@ -5918,7 +5918,7 @@ function renderNotifications(){
               ){
                 contentOpened=true;
 
-                markSingleMediaSocialNotificationSeen(
+                await markSingleMediaSocialNotificationSeen(
                   notificationId
                 );
 
