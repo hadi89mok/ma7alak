@@ -5,6 +5,7 @@
 if(window.self!==window.top)return;
 if(window.__MA7ALAK_NOTIFICATIONS_ENGINE__)return;
 window.__MA7ALAK_NOTIFICATIONS_ENGINE__=true;
+window.__SHOUFHON_NOTIFICATIONS_BUILD__="2026-09-26-media-social-v5";
 
 
 /* =========================================================
@@ -189,6 +190,8 @@ let personalMediaNotifications = [];
 let personalMediaNotificationsUserId = "";
 let personalMediaNotificationsPromise = null;
 let personalMediaNotificationsLoadedAt = 0;
+let notificationLoadActive = false;
+let notificationLoadQueued = false;
 
 let notificationsOpen = false;
 
@@ -3200,6 +3203,36 @@ async function refreshPersonalMediaNotifications(force){
 
     personalMediaNotificationsUserId=userId;
 
+    /*
+       viewer-account.js now owns the authenticated private notification
+       source and its Realtime subscription. Prefer that single source so
+       the bell cannot race a second Supabase client/state machine.
+    */
+    if(
+      typeof account?.refreshPersonalNotifications==="function"
+    ){
+      if(force){
+        await account.refreshPersonalNotifications();
+      }
+
+      const accountRows=
+        Array.isArray(account.personalNotifications)
+          ?account.personalNotifications
+          :[];
+
+      personalMediaNotifications=
+        accountRows.map(
+          normalizePersonalMediaNotification
+        );
+
+      personalMediaNotificationsLoadedAt=Date.now();
+
+      return personalMediaNotifications;
+    }
+
+    /*
+       Backward-compatible fallback for an older account script.
+    */
     if(
       !force &&
       personalMediaNotificationsPromise
@@ -3247,10 +3280,6 @@ async function refreshPersonalMediaNotifications(force){
       error
     );
 
-    /*
-       Keep the last good rows if a transient request fails.
-       Never replace a valid personal notification list with [].
-    */
     return personalMediaNotifications;
   }
   finally{
@@ -3278,6 +3307,13 @@ function refreshRenderedPersonalMediaNotifications(force){
 
 
 async function loadNotifications(){
+
+  if(notificationLoadActive){
+    notificationLoadQueued=true;
+    return;
+  }
+
+  notificationLoadActive=true;
 
   try{
 
@@ -3842,6 +3878,20 @@ async function loadNotifications(){
       error
     );
 
+  }
+  finally{
+    notificationLoadActive=false;
+
+    if(notificationLoadQueued){
+      notificationLoadQueued=false;
+      setTimeout(
+        function(){
+          loadNotifications()
+            .catch(function(){});
+        },
+        0
+      );
+    }
   }
 
 }
@@ -4855,9 +4905,22 @@ function renderNotifications(){
 
   /*
      Last-line protection against race conditions:
-     always merge account-owned Media rows back into the panel
-     before deciding that the list is empty.
+     viewer-account.js owns the authenticated rows. Pull its latest
+     in-memory snapshot before every render, then merge.
   */
+  const accountRows=
+    window.Ma7alakAccount?.personalNotifications;
+
+  if(
+    Array.isArray(accountRows) &&
+    window.Ma7alakAccount?.user
+  ){
+    personalMediaNotifications=
+      accountRows.map(
+        normalizePersonalMediaNotification
+      );
+  }
+
   notifications=
     mergePersonalMediaNotifications(
       notifications
@@ -5890,6 +5953,28 @@ async function setupUserNotificationRealtime(){
   try{
     await waitForNotificationAccountRuntime();
 
+    /*
+       New viewer-account.js owns this Realtime channel. Do not create
+       a second subscriber when that source is available.
+    */
+    if(
+      typeof window.Ma7alakAccount?.refreshPersonalNotifications===
+        "function"
+    ){
+      if(userNotificationChannel){
+        try{
+          const oldClient=
+            window.Ma7alakAccount?.client ||
+            await loadMa7alakSupabase();
+          await oldClient.removeChannel(
+            userNotificationChannel
+          );
+        }catch(error){}
+        userNotificationChannel=null;
+      }
+      return;
+    }
+
     const client=
       window.Ma7alakAccount?.client ||
       await loadMa7alakSupabase();
@@ -6360,6 +6445,54 @@ window.addEventListener(
   "ma7alak:page-wake",
   refreshNotificationsAfterResume
 );
+
+window.addEventListener(
+  "ma7alak:personal-notifications",
+  function(event){
+    const detail=event?.detail||{};
+    const userId=String(detail.userId||"").trim();
+
+    if(
+      userId &&
+      userId===
+        String(
+          window.Ma7alakAccount?.user?.id||
+          ""
+        ).trim()
+    ){
+      personalMediaNotifications=
+        (Array.isArray(detail.rows)?detail.rows:[])
+          .map(
+            normalizePersonalMediaNotification
+          );
+
+      personalMediaNotificationsUserId=userId;
+      personalMediaNotificationsLoadedAt=Date.now();
+
+      notifications=
+        mergePersonalMediaNotifications(
+          notifications
+        );
+
+      personalMediaNotifications.forEach(
+        function(notification){
+          if(!notification.seen){
+            highlightedNotifications.add(
+              notification.key
+            );
+          }
+        }
+      );
+
+      notificationBadgeCount=
+        calculateBadgeCount();
+
+      updateNotificationBadge();
+      renderNotifications();
+    }
+  }
+);
+
 
 window.addEventListener(
   "ma7alak:account-change",
