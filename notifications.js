@@ -5,7 +5,7 @@
 if(window.self!==window.top)return;
 if(window.__MA7ALAK_NOTIFICATIONS_ENGINE__)return;
 window.__MA7ALAK_NOTIFICATIONS_ENGINE__=true;
-window.__SHOUFHON_NOTIFICATIONS_BUILD__="2026-09-26-media-social-v5";
+window.__SHOUFHON_NOTIFICATIONS_BUILD__="2026-09-26-social-center-v6";
 
 
 /* =========================================================
@@ -240,6 +240,53 @@ let highlightedNotifications =
 
 let notificationBadgeCount = 0;
 
+const MA7ALAK_DISMISSED_NOTIFICATIONS_KEY =
+  "ma7alak_dismissed_notifications_v1";
+
+let dismissedNotificationKeys=(function(){
+  try{
+    const raw=JSON.parse(
+      localStorage.getItem(
+        MA7ALAK_DISMISSED_NOTIFICATIONS_KEY
+      )||"[]"
+    );
+    return new Set(
+      Array.isArray(raw)
+        ?raw.map(String).filter(Boolean).slice(-300)
+        :[]
+    );
+  }catch(error){
+    return new Set();
+  }
+})();
+
+let notificationLongPressTimer=null;
+let notificationLongPressStartX=0;
+let notificationLongPressStartY=0;
+let suppressNotificationClickUntil=0;
+
+function saveDismissedNotificationKeys(){
+  try{
+    localStorage.setItem(
+      MA7ALAK_DISMISSED_NOTIFICATIONS_KEY,
+      JSON.stringify(
+        Array.from(dismissedNotificationKeys).slice(-300)
+      )
+    );
+  }catch(error){}
+}
+
+function notificationIsDismissed(notification){
+  const key=String(notification?.key||"");
+  return !!key&&dismissedNotificationKeys.has(key);
+}
+
+function activeNotifications(){
+  return (notifications||[]).filter(
+    notification=>!notificationIsDismissed(notification)
+  );
+}
+
 
 /* =========================================================
    FACEBOOK-STYLE BADGE ACKNOWLEDGEMENT
@@ -449,7 +496,7 @@ function notificationCreatedAtMs(notification){
 function calculateBadgeCount(){
   if(notificationsOpen)return 0;
 
-  return notifications.filter(function(notification){
+  return activeNotifications().filter(function(notification){
     if(notification.seen)return false;
 
     /*
@@ -1044,6 +1091,37 @@ function injectNotificationCSS(){
 }
 
 
+#ma7alak-notification-head-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+#ma7alak-notification-mark-all{
+  min-height:32px;
+  padding:0 11px;
+  border:1px solid rgba(217,164,65,.26);
+  border-radius:999px;
+  background:rgba(217,164,65,.07);
+  color:#e8c77e;
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#ma7alak-notification-mark-all:active{
+  transform:scale(.97);
+  background:rgba(217,164,65,.13);
+}
+
+#ma7alak-notification-mark-all:disabled{
+  opacity:.42;
+  pointer-events:none;
+}
+
 #ma7alak-notification-title{
 
   margin:0;
@@ -1111,6 +1189,69 @@ function injectNotificationCSS(){
   transform:
     scale(.88);
 
+}
+
+#ma7alak-notification-action-sheet{
+  position:fixed;
+  inset:0;
+  z-index:2147483647;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  padding:14px max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+#ma7alak-notification-action-sheet.open{
+  display:flex;
+}
+
+#ma7alak-notification-action-card{
+  width:min(100%,440px);
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:22px;
+  background:#111;
+  box-shadow:0 24px 70px rgba(0,0,0,.68);
+}
+
+.ma7alak-notification-action-title{
+  padding:9px 10px 11px;
+  color:#aaa;
+  font-size:10px;
+  font-weight:800;
+}
+
+.ma7alak-notification-action-button{
+  width:100%;
+  min-height:48px;
+  margin:3px 0;
+  padding:0 14px;
+  border:0;
+  border-radius:14px;
+  background:#191919;
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+  text-align:left;
+}
+
+.ma7alak-notification-action-button.delete{
+  color:#ff8e8e;
+  background:rgba(132,36,36,.18);
+}
+
+.ma7alak-notification-action-button.cancel{
+  margin-top:8px;
+  text-align:center;
+  color:#bbb;
+}
+
+.ma7alak-notification-item.m7-hold-active{
+  transform:scale(.985);
+  background:rgba(255,255,255,.065);
 }
 
 
@@ -1900,14 +2041,22 @@ function createNotificationUI(){
         Notifications
       </h2>
 
+      <div id="ma7alak-notification-head-actions">
+        <button
+          id="ma7alak-notification-mark-all"
+          type="button"
+        >
+          Mark all as read
+        </button>
 
-      <button
-        id="ma7alak-notification-close"
-        type="button"
-        aria-label="Close"
-      >
-        ×
-      </button>
+        <button
+          id="ma7alak-notification-close"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
 
     </div>
 
@@ -1921,6 +2070,24 @@ function createNotificationUI(){
 
   document.body.appendChild(
     panel
+  );
+
+  const actionSheet=
+    document.createElement("div");
+
+  actionSheet.id=
+    "ma7alak-notification-action-sheet";
+
+  actionSheet.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  actionSheet.innerHTML=
+    '<div id="ma7alak-notification-action-card"></div>';
+
+  document.body.appendChild(
+    actionSheet
   );
 
 
@@ -1970,6 +2137,59 @@ function createNotificationUI(){
 
       }
     );
+
+
+  document
+    .getElementById(
+      "ma7alak-notification-mark-all"
+    )
+    ?.addEventListener(
+      "click",
+      async function(event){
+        event.preventDefault();
+        event.stopPropagation();
+
+        const button=event.currentTarget;
+        button.disabled=true;
+        button.textContent="Marking…";
+
+        try{
+          await markAllCurrentNotificationsAsSeen();
+          notificationBadgeCount=0;
+          updateNotificationBadge();
+          renderNotifications();
+          button.textContent="All read";
+          setTimeout(()=>{
+            button.textContent="Mark all as read";
+          },850);
+        }catch(error){
+          console.warn(
+            "ShoufHon mark all read:",
+            error
+          );
+          button.textContent="Try again";
+          setTimeout(()=>{
+            button.textContent="Mark all as read";
+          },1000);
+        }finally{
+          button.disabled=false;
+        }
+      }
+    );
+
+  actionSheet.addEventListener(
+    "click",
+    function(event){
+      if(
+        event.target===actionSheet ||
+        event.target.closest(
+          "[data-notification-action-cancel]"
+        )
+      ){
+        closeNotificationActionSheet();
+      }
+    }
+  );
 
 
   /* -------------------------------------------------------
@@ -4118,6 +4338,52 @@ function buildNotificationUrl(path,params){
 const SHOUFHON_STORY_DEEP_LINK_PENDING_KEY =
   "shoufhon_story_deep_link_v1";
 
+const SHOUFHON_MEDIA_DEEP_LINK_PENDING_KEY =
+  "shoufhon_media_deep_link_v1";
+
+function rememberMediaDeepLink(url){
+  try{
+    const parsed=new URL(
+      url,
+      window.location.href
+    );
+
+    const raw=
+      String(
+        parsed.searchParams.get("media")||
+        ""
+      ).trim();
+
+    const match=
+      raw.match(
+        /^(photo|video):(\d+)$/
+      );
+
+    if(!match)return;
+
+    sessionStorage.setItem(
+      SHOUFHON_MEDIA_DEEP_LINK_PENDING_KEY,
+      JSON.stringify({
+        shopSlug:String(
+          parsed.pathname
+            .split("/")
+            .filter(Boolean)
+            .pop()||""
+        ).trim().toLowerCase(),
+        mediaType:match[1],
+        mediaId:Number(match[2]),
+        comments:
+          parsed.searchParams.get("comments")==="1",
+        commentId:
+          Number(
+            parsed.searchParams.get("comment")||0
+          )||null,
+        savedAt:Date.now()
+      })
+    );
+  }catch(error){}
+}
+
 function rememberStoryDeepLink(url){
   try{
     const parsed =
@@ -4162,6 +4428,26 @@ function rememberStoryDeepLink(url){
 
 function navigateFromNotification(url){
   rememberStoryDeepLink(url);
+  rememberMediaDeepLink(url);
+
+  /*
+     Media reply/comment-like navigation intentionally uses a full same-tab
+     navigation. It matches the owner Activity behavior and guarantees the
+     destination shop boots with its exact media/comment deep link intact.
+  */
+  try{
+    const parsed=new URL(
+      url,
+      window.location.href
+    );
+
+    if(parsed.searchParams.has("media")){
+      window.location.assign(
+        parsed.href
+      );
+      return;
+    }
+  }catch(error){}
 
   if(typeof window.ma7alakFreshNavigate==="function"){
     window.ma7alakFreshNavigate(url);
@@ -4855,6 +5141,223 @@ else{
 }
 
 
+function notificationByKey(key){
+  const target=String(key||"");
+  return (notifications||[]).find(
+    row=>String(row?.key||"")===target
+  )||null;
+}
+
+function closeNotificationActionSheet(){
+  const sheet=document.getElementById(
+    "ma7alak-notification-action-sheet"
+  );
+  if(!sheet)return;
+  sheet.classList.remove("open");
+  sheet.setAttribute("aria-hidden","true");
+  const card=document.getElementById(
+    "ma7alak-notification-action-card"
+  );
+  if(card)card.innerHTML="";
+}
+
+async function markNotificationRowRead(notification){
+  if(!notification)return;
+
+  const key=String(notification.key||"");
+  const type=String(notification.type||"");
+  const id=String(notification.id||"");
+  const shopSlug=String(notification.shop_slug||"");
+
+  highlightedNotifications.delete(key);
+
+  notifications=notifications.map(row=>
+    String(row?.key||"")===key
+      ?{...row,seen:true,badge_acknowledged:true}
+      :row
+  );
+
+  if(key.startsWith("media-social:")&&id){
+    try{
+      await waitForNotificationAccountRuntime();
+      const client=
+        window.Ma7alakAccount?.client||
+        await loadMa7alakSupabase();
+      const result=await client.rpc(
+        "ma7alak_set_media_notification_seen",
+        {
+          p_notification_id:id,
+          p_seen:true
+        }
+      );
+      if(result.error)throw result.error;
+      await window.Ma7alakAccount
+        ?.refreshPersonalNotifications?.();
+    }catch(error){
+      console.warn(
+        "ShoufHon mark personal notification read:",
+        error
+      );
+    }
+  }
+  else if(type==="story"){
+    markSingleStoryAsSeen(id);
+  }
+  else if(type==="reel"){
+    markReelFingerprintAsSeen(id);
+  }
+  else if(type==="video_live"){
+    markVideoLiveNotificationAsSeen(
+      shopSlug,
+      id
+    );
+  }
+  else if(type==="live"){
+    markLiveNotificationAsSeen(
+      shopSlug,
+      id
+    );
+  }
+
+  renderNotifications();
+}
+
+async function deleteNotificationRow(notification){
+  if(!notification)return;
+
+  const key=String(notification.key||"");
+  const id=String(notification.id||"");
+
+  if(key.startsWith("media-social:")&&id){
+    try{
+      await waitForNotificationAccountRuntime();
+      const client=
+        window.Ma7alakAccount?.client||
+        await loadMa7alakSupabase();
+      const result=await client.rpc(
+        "ma7alak_delete_media_notification",
+        {
+          p_notification_id:id
+        }
+      );
+      if(result.error)throw result.error;
+      await window.Ma7alakAccount
+        ?.refreshPersonalNotifications?.();
+    }catch(error){
+      console.warn(
+        "ShoufHon delete personal notification:",
+        error
+      );
+      throw error;
+    }
+  }
+  else{
+    /*
+       Story/Reel/Live rows are generated from content streams rather than
+       a dedicated per-user row. Persist dismissal locally so they stay gone
+       on this device instead of popping back on the next refresh.
+    */
+    dismissedNotificationKeys.add(key);
+    saveDismissedNotificationKeys();
+  }
+
+  highlightedNotifications.delete(key);
+  notifications=notifications.filter(
+    row=>String(row?.key||"")!==key
+  );
+  personalMediaNotifications=
+    personalMediaNotifications.filter(
+      row=>String(row?.key||"")!==key
+    );
+
+  notificationBadgeCount=
+    calculateBadgeCount();
+
+  updateNotificationBadge();
+  renderNotifications();
+}
+
+function openNotificationActionSheet(notification,item){
+  if(!notification)return;
+
+  const sheet=document.getElementById(
+    "ma7alak-notification-action-sheet"
+  );
+  const card=document.getElementById(
+    "ma7alak-notification-action-card"
+  );
+  if(!sheet||!card)return;
+
+  const title=
+    isMediaSocialNotification(notification)
+      ?notificationActivityText(notification)
+      :"Notification";
+
+  card.innerHTML=
+    '<div class="ma7alak-notification-action-title">'+
+      escapeHtml(title)+
+    '</div>'+
+    (
+      notification.seen
+        ?""
+        :'<button type="button" class="ma7alak-notification-action-button" data-notification-action-read>✓ Mark as read</button>'
+    )+
+    '<button type="button" class="ma7alak-notification-action-button delete" data-notification-action-delete>Delete notification</button>'+
+    '<button type="button" class="ma7alak-notification-action-button cancel" data-notification-action-cancel>Cancel</button>';
+
+  card
+    .querySelector(
+      "[data-notification-action-read]"
+    )
+    ?.addEventListener(
+      "click",
+      async function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        closeNotificationActionSheet();
+        await markNotificationRowRead(
+          notification
+        );
+      }
+    );
+
+  card
+    .querySelector(
+      "[data-notification-action-delete]"
+    )
+    ?.addEventListener(
+      "click",
+      async function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        const button=event.currentTarget;
+        button.disabled=true;
+        button.textContent="Deleting…";
+        try{
+          await deleteNotificationRow(
+            notification
+          );
+          closeNotificationActionSheet();
+        }catch(error){
+          button.disabled=false;
+          button.textContent="Could not delete · try again";
+        }
+      }
+    );
+
+  sheet.classList.add("open");
+  sheet.setAttribute("aria-hidden","false");
+
+  try{
+    navigator.vibrate?.(18);
+  }catch(error){}
+
+  item?.classList.remove(
+    "m7-hold-active"
+  );
+}
+
+
 /* =========================================================
    RENDER
 ========================================================= */
@@ -4937,8 +5440,23 @@ function renderNotifications(){
   }
 
 
+  const renderRows=
+    activeNotifications();
+
+  const markAllButton=
+    document.getElementById(
+      "ma7alak-notification-mark-all"
+    );
+
+  if(markAllButton){
+    markAllButton.disabled=
+      !renderRows.some(
+        notification=>!notification.seen
+      );
+  }
+
   if(
-    notifications.length === 0
+    renderRows.length === 0
   ){
 
     list.innerHTML = `
@@ -4978,8 +5496,8 @@ function renderNotifications(){
 
   const visibleNotifications =
     showAllNotifications
-      ? notifications
-      : notifications.slice(
+      ? renderRows
+      : renderRows.slice(
           0,
           NOTIFICATION_PREVIEW_LIMIT
         );
@@ -5176,13 +5694,13 @@ function renderNotifications(){
 
 
   if(
-    notifications.length >
+    renderRows.length >
     NOTIFICATION_PREVIEW_LIMIT
   ){
     const hiddenCount =
       Math.max(
         0,
-        notifications.length -
+        renderRows.length -
         NOTIFICATION_PREVIEW_LIMIT
       );
 
@@ -5231,9 +5749,106 @@ function renderNotifications(){
     .forEach(
       function(item){
 
+        const cancelHold=()=>{
+          if(notificationLongPressTimer){
+            clearTimeout(
+              notificationLongPressTimer
+            );
+            notificationLongPressTimer=null;
+          }
+          item.classList.remove(
+            "m7-hold-active"
+          );
+        };
+
+        item.addEventListener(
+          "pointerdown",
+          function(event){
+            if(event.pointerType==="mouse"&&event.button!==0)return;
+
+            cancelHold();
+
+            notificationLongPressStartX=
+              Number(event.clientX||0);
+            notificationLongPressStartY=
+              Number(event.clientY||0);
+
+            item.classList.add(
+              "m7-hold-active"
+            );
+
+            notificationLongPressTimer=
+              setTimeout(
+                function(){
+                  notificationLongPressTimer=null;
+                  suppressNotificationClickUntil=
+                    Date.now()+650;
+
+                  const row=
+                    notificationByKey(
+                      item.dataset.notificationKey
+                    );
+
+                  openNotificationActionSheet(
+                    row,
+                    item
+                  );
+                },
+                520
+              );
+          }
+        );
+
+        item.addEventListener(
+          "pointermove",
+          function(event){
+            if(!notificationLongPressTimer)return;
+
+            const dx=
+              Number(event.clientX||0)-
+              notificationLongPressStartX;
+            const dy=
+              Number(event.clientY||0)-
+              notificationLongPressStartY;
+
+            if(Math.hypot(dx,dy)>10){
+              cancelHold();
+            }
+          }
+        );
+
+        ["pointerup","pointercancel","pointerleave"]
+          .forEach(type=>{
+            item.addEventListener(
+              type,
+              cancelHold
+            );
+          });
+
+        item.addEventListener(
+          "contextmenu",
+          function(event){
+            if(
+              Date.now()<
+                suppressNotificationClickUntil
+            ){
+              event.preventDefault();
+            }
+          }
+        );
+
         item.addEventListener(
           "click",
-          async function(){
+          async function(event){
+
+            if(
+              Date.now()<
+                suppressNotificationClickUntil
+            ){
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
 
             const notificationKey =
               String(
@@ -5716,6 +6331,34 @@ async function markAllCurrentNotificationsAsSeen(){
 
     markAllCurrentVideoLivesAsSeen();
 
+    if(window.Ma7alakAccount?.user){
+      try{
+        await waitForNotificationAccountRuntime();
+
+        const accountClient=
+          window.Ma7alakAccount?.client||
+          client;
+
+        const personalResult=
+          await accountClient.rpc(
+            "ma7alak_mark_all_my_media_notifications_seen"
+          );
+
+        if(personalResult.error){
+          throw personalResult.error;
+        }
+
+        await window.Ma7alakAccount
+          ?.refreshPersonalNotifications?.();
+
+      }catch(error){
+        console.warn(
+          "ShoufHon mark all personal notifications:",
+          error
+        );
+      }
+    }
+
 
     notifications =
       notifications.map(
@@ -5723,14 +6366,28 @@ async function markAllCurrentNotificationsAsSeen(){
 
           return {
             ...notification,
-            seen:true
+            seen:true,
+            badge_acknowledged:true
           };
 
         }
       );
 
+    personalMediaNotifications=
+      personalMediaNotifications.map(
+        notification=>({
+          ...notification,
+          seen:true,
+          badge_acknowledged:true
+        })
+      );
+
 
     highlightedNotifications.clear();
+
+    notificationBadgeCount=0;
+    updateNotificationBadge();
+    renderNotifications();
 
   }
   catch(error){
