@@ -186,6 +186,8 @@ let visitorId = null;
 
 let realtimeChannel = null;
 
+let userNotificationChannel = null;
+
 let refreshTimer = null;
 
 
@@ -3465,6 +3467,53 @@ async function loadNotifications(){
     }
 
     /* -------------------------------------------------------
+       PERSONAL MEDIA SOCIAL NOTIFICATIONS
+       Replies and comment likes are account-specific and do not
+       depend on Following state.
+    ------------------------------------------------------- */
+
+    let mediaSocialNotifications = [];
+
+    try{
+      if(window.Ma7alakAccount?.ready){
+        await window.Ma7alakAccount.ready();
+      }
+
+      if(window.Ma7alakAccount?.user){
+        const socialResult =
+          await client.rpc(
+            "ma7alak_get_my_media_notifications"
+          );
+
+        if(socialResult.error){
+          console.warn(
+            "ShoufHon media notifications:",
+            socialResult.error
+          );
+        }
+        else{
+          mediaSocialNotifications =
+            (socialResult.data || []).map(
+              function(row){
+                return {
+                  ...row,
+                  key:"media-social:"+String(row.id||""),
+                  seen:row.seen===true
+                };
+              }
+            );
+        }
+      }
+    }
+    catch(error){
+      console.warn(
+        "ShoufHon media notifications failed:",
+        error
+      );
+    }
+
+
+    /* -------------------------------------------------------
        COMBINE + SORT
     ------------------------------------------------------- */
 
@@ -3478,6 +3527,9 @@ async function loadNotifications(){
         )
         .concat(
           videoLiveNotifications
+        )
+        .concat(
+          mediaSocialNotifications
         )
         .sort(
           function(a,b){
@@ -4538,8 +4590,16 @@ else{
    RENDER
 ========================================================= */
 
+function isMediaSocialNotification(notification){
+  const type=String(notification&&notification.type||"");
+  return type==="media_reply"||type==="comment_like"||type==="owner_comment_like";
+}
+
 function notificationActivityText(notification){
   const type=String(notification&&notification.type||"story");
+  if(type==="media_reply")return "replied to your comment.";
+  if(type==="owner_comment_like")return "liked your comment.";
+  if(type==="comment_like")return "liked your comment.";
   if(type==="video_live")return "is now live!";
   if(type==="live"){
     switch(String(notification&&notification.post_type||"").toLowerCase()){
@@ -4556,6 +4616,8 @@ function notificationActivityText(notification){
 
 function notificationFallbackEmoji(notification){
   const type=String(notification&&notification.type||"story");
+  if(type==="media_reply")return "💬";
+  if(type==="owner_comment_like"||type==="comment_like")return "♥";
   if(type==="video_live")return "🟢";
   if(type==="reel")return "▶️";
   if(type==="live"){
@@ -4657,6 +4719,9 @@ function renderNotifications(){
           const isVideoLive =
             notification.type === "video_live";
 
+          const isMediaSocial =
+            isMediaSocialNotification(notification);
+
           const activityText =
             notificationActivityText(notification);
 
@@ -4671,6 +4736,11 @@ function renderNotifications(){
                   notification.shop_slug
                 );
 
+          const displayName =
+            isMediaSocial
+              ? String(notification.actor_name || "Someone")
+              : shopName;
+
 
           const profileImage =
             getShopProfileImage(
@@ -4679,13 +4749,17 @@ function renderNotifications(){
 
 
           const shopImage =
-            isReel
-              ? (
-                  profileImage ||
-                  notification.icon ||
-                  ""
-                )
-              : profileImage;
+            isMediaSocial
+              ? String(notification.actor_avatar || "")
+              : (
+                  isReel
+                    ? (
+                        profileImage ||
+                        notification.icon ||
+                        ""
+                      )
+                    : profileImage
+                );
 
 
           const time =
@@ -4703,7 +4777,7 @@ function renderNotifications(){
 
               <img
                 src="${escapeAttribute(shopImage)}"
-                alt="${escapeAttribute(shopName)}"
+                alt="${escapeAttribute(displayName)}"
                 loading="lazy"
                 onerror="
                   this.style.display='none';
@@ -4750,6 +4824,9 @@ function renderNotifications(){
               data-live-post-type="${escapeAttribute(notification.post_type || "")}"
               data-shop-slug="${escapeAttribute(notification.shop_slug || "")}"
               data-shop-url="${escapeAttribute(notification.shop_url || "")}"
+              data-media-type="${escapeAttribute(notification.media_type || "")}"
+              data-media-id="${escapeAttribute(String(notification.media_id || ""))}"
+              data-comment-id="${escapeAttribute(String(notification.comment_id || ""))}"
             >
 
               <div
@@ -4770,7 +4847,7 @@ function renderNotifications(){
                 >
 
                   <strong>
-                    ${escapeHtml(shopName)}
+                    ${escapeHtml(displayName)}
                   </strong>
 
                   ${escapeHtml(activityText)}
@@ -4899,7 +4976,57 @@ function renderNotifications(){
               false;
 
 
+            const mediaType =
+              String(
+                item.dataset.mediaType || ""
+              );
+
+            const mediaId =
+              String(
+                item.dataset.mediaId || ""
+              );
+
+            const commentId =
+              String(
+                item.dataset.commentId || ""
+              );
+
+
             if(
+              notificationType === "media_reply" ||
+              notificationType === "comment_like" ||
+              notificationType === "owner_comment_like"
+            ){
+
+              if(
+                shopSlug &&
+                mediaType &&
+                mediaId
+              ){
+                contentOpened=true;
+
+                markSingleMediaSocialNotificationSeen(
+                  notificationId
+                );
+
+                navigateFromNotification(
+                  buildNotificationUrl(
+                    "/" + encodeURIComponent(shopSlug),
+                    {
+                      media:
+                        mediaType +
+                        ":" +
+                        mediaId,
+                      comments:"1",
+                      comment:
+                        commentId || ""
+                    }
+                  )
+                );
+              }
+
+            }
+            else             if(
               notificationType === "reel"
             ){
 
@@ -5046,7 +5173,9 @@ function renderNotifications(){
               );
 
             }
-            else{
+            else if(
+              notificationType === "story"
+            ){
 
               /*
                  Do not delay navigation/UI waiting on Supabase.
@@ -5108,6 +5237,31 @@ function renderNotifications(){
       }
     );
 
+}
+
+
+/* =========================================================
+   MARK ONE PERSONAL MEDIA NOTIFICATION AS SEEN
+========================================================= */
+
+async function markSingleMediaSocialNotificationSeen(notificationId){
+  try{
+    if(!notificationId)return;
+    const client=await loadMa7alakSupabase();
+    const result=await client.rpc(
+      "ma7alak_mark_media_notification_seen",
+      {
+        p_notification_id:notificationId
+      }
+    );
+    if(result.error)throw result.error;
+  }
+  catch(error){
+    console.warn(
+      "ShoufHon media notification seen:",
+      error
+    );
+  }
 }
 
 
@@ -5489,6 +5643,65 @@ function registerRealtimeReelNotification(row){
 }
 
 
+async function setupUserNotificationRealtime(){
+  try{
+    const client=await loadMa7alakSupabase();
+
+    if(userNotificationChannel){
+      try{
+        await client.removeChannel(
+          userNotificationChannel
+        );
+      }catch(error){}
+      userNotificationChannel=null;
+    }
+
+    if(window.Ma7alakAccount?.ready){
+      await window.Ma7alakAccount.ready();
+    }
+
+    const userId=
+      String(
+        window.Ma7alakAccount?.user?.id ||
+        ""
+      ).trim();
+
+    if(!userId)return;
+
+    userNotificationChannel=
+      client
+        .channel(
+          "ma7alak-user-media-notifications-"+userId
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"*",
+            schema:"public",
+            table:"ma7alak_user_notifications",
+            filter:"recipient_user_id=eq."+userId
+          },
+          function(){
+            setTimeout(
+              function(){
+                loadNotifications()
+                  .catch(function(){});
+              },
+              25
+            );
+          }
+        )
+        .subscribe();
+  }
+  catch(error){
+    console.warn(
+      "ShoufHon personal notification realtime:",
+      error
+    );
+  }
+}
+
+
 /* =========================================================
    STORY + REEL REALTIME
 ========================================================= */
@@ -5834,6 +6047,8 @@ async function startMa7alakNotifications(){
 
     await setupRealtime();
 
+    await setupUserNotificationRealtime();
+
     startNotificationRefresh();
 
   }
@@ -5897,6 +6112,17 @@ window.addEventListener(
 window.addEventListener(
   "ma7alak:page-wake",
   refreshNotificationsAfterResume
+);
+
+window.addEventListener(
+  "ma7alak:account-change",
+  function(){
+    setupUserNotificationRealtime()
+      .catch(function(){});
+
+    loadNotifications()
+      .catch(function(){});
+  }
 );
 
 
