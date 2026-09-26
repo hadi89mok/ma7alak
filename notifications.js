@@ -455,6 +455,33 @@ visitorId =
    LOAD SUPABASE
 ========================================================= */
 
+async function waitForNotificationAccountRuntime(){
+  /*
+     viewer-account.js owns the persisted authenticated Supabase session.
+     Notifications may load before that script finishes, so briefly wait for
+     the account runtime before choosing a client. This prevents private
+     reply/comment-like notifications from being queried as anon.
+  */
+  for(let i=0;i<100&&!window.Ma7alakAccount;i++){
+    await new Promise(resolve=>setTimeout(resolve,40));
+  }
+
+  try{
+    await window.Ma7alakAccount?.ready?.();
+  }catch(error){}
+
+  const accountClient=
+    window.Ma7alakAccount?.client ||
+    null;
+
+  if(accountClient){
+    ma7alakSupabase=accountClient;
+  }
+
+  return accountClient;
+}
+
+
 function loadMa7alakSupabase(){
 
   const sharedClient =
@@ -3046,6 +3073,8 @@ async function getFollowedShopSlugSet(client){
 async function loadNotifications(){
 
   try{
+
+    await waitForNotificationAccountRuntime();
 
     const client =
       await loadMa7alakSupabase();
@@ -5664,7 +5693,11 @@ function registerRealtimeReelNotification(row){
 
 async function setupUserNotificationRealtime(){
   try{
-    const client=await loadMa7alakSupabase();
+    await waitForNotificationAccountRuntime();
+
+    const client=
+      window.Ma7alakAccount?.client ||
+      await loadMa7alakSupabase();
 
     if(userNotificationChannel){
       try{
@@ -5673,10 +5706,6 @@ async function setupUserNotificationRealtime(){
         );
       }catch(error){}
       userNotificationChannel=null;
-    }
-
-    if(window.Ma7alakAccount?.ready){
-      await window.Ma7alakAccount.ready();
     }
 
     const userId=
@@ -6053,6 +6082,8 @@ async function startMa7alakNotifications(){
        inside the tap and request native fullscreen.
     */
     ensureNotificationStoryViewer().catch(function(){});
+
+    await waitForNotificationAccountRuntime();
 
     await loadMa7alakSupabase();
 
