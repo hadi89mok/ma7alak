@@ -158,7 +158,32 @@ as $$
           false
         )
       ),
-    'options', p.directory_options,
+    'options',
+      jsonb_build_object(
+        'catalog_images_enabled', coalesce(p.directory_options -> 'catalog_images_enabled','true'::jsonb),
+        'catalog_max_sections', coalesce(p.directory_options -> 'catalog_max_sections','10'::jsonb),
+        'catalog_max_items', coalesce(p.directory_options -> 'catalog_max_items','60'::jsonb),
+        'catalog_max_prices', coalesce(p.directory_options -> 'catalog_max_prices','6'::jsonb),
+        'gallery_accent_color', p.directory_options -> 'gallery_accent_color',
+        'story_color', p.directory_options -> 'story_color',
+        'card_color', p.directory_options -> 'card_color',
+        'media_title_color', p.directory_options -> 'media_title_color',
+        'media_count_color', p.directory_options -> 'media_count_color',
+        'media_header_bg_color', p.directory_options -> 'media_header_bg_color',
+        'media_header_frame_color', p.directory_options -> 'media_header_frame_color',
+        'media_symbol_color', p.directory_options -> 'media_symbol_color',
+        'media_symbol_frame_color', p.directory_options -> 'media_symbol_frame_color',
+        'media_symbol_bg_color', p.directory_options -> 'media_symbol_bg_color',
+        'media_button_text_color', p.directory_options -> 'media_button_text_color',
+        'media_button_frame_color', p.directory_options -> 'media_button_frame_color',
+        'media_button_bg_color', p.directory_options -> 'media_button_bg_color',
+        'media_button_active_text_color', p.directory_options -> 'media_button_active_text_color',
+        'media_button_active_frame_color', p.directory_options -> 'media_button_active_frame_color',
+        'media_button_active_bg_color', p.directory_options -> 'media_button_active_bg_color',
+        'profile_shell_bg_color', p.directory_options -> 'profile_shell_bg_color',
+        'profile_shell_border_color', p.directory_options -> 'profile_shell_border_color',
+        'profile_shell_radius', p.directory_options -> 'profile_shell_radius'
+      ),
     'catalog',
       jsonb_build_object(
         'title', coalesce(c.title, 'Menu & Prices'),
@@ -549,6 +574,8 @@ begin
     if jsonb_typeof(v_payload -> 'ids') <> 'array' then
       raise exception 'Section order is invalid.';
     end if;
+
+    v_sort := 0;
 
     for v_row in
       select value
