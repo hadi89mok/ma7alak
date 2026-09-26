@@ -6177,7 +6177,7 @@ function setupActions(about){
     row.innerHTML=
       '<a id="m7hub-whatsapp" class="m7hub-action" href="#" target="_blank" rel="noopener" hidden>'+iconWhatsapp()+'<span>WhatsApp</span><i>›</i></a>'+
       '<button id="m7hub-catalog" class="m7hub-action" type="button" hidden>'+iconCatalog()+'<span>Menu & Prices</span><i>›</i></button>';
-    if(signature)signature.insertAdjacentElement("beforebegin",row);
+    if(signature)signature.insertAdjacentElement("afterend",row);
     else services.insertAdjacentElement("afterend",row);
 
     row.querySelector("#m7hub-catalog").addEventListener("click",function(){
@@ -6212,7 +6212,14 @@ function syncPrimaryActions(){
     wa.hidden=true;
   }
 
-  var catalogOn=!!catalogSnapshot?.enabled;
+  var sections=Array.isArray(catalogSnapshot?.snapshot?.sections)
+    ?catalogSnapshot.snapshot.sections
+    :[];
+  var hasPublicItems=sections.some(function(section){
+    return section&&section.is_visible!==false&&Array.isArray(section.items)&&
+      section.items.some(function(item){return item&&item.is_visible!==false});
+  });
+  var catalogOn=!!catalogSnapshot?.enabled&&(hasPublicItems||!!catalogSnapshot?.isOwner);
   cat.hidden=!catalogOn;
 
   var visible=[wa,cat].filter(function(el){return el&&!el.hidden}).length;
