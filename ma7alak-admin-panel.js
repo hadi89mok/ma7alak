@@ -20967,9 +20967,11 @@ const PLAN_LABELS={basic:"Basic",premium:"Premium",vip:"VIP",custom:"Custom"};
 let client=null;
 let presets=new Map();
 let assignments=new Map();
+let liveUsage=new Map();
 let activePlan="basic";
 let observer=null;
 let realtime=null;
+let usageTimer=null;
 
 const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -20993,6 +20995,16 @@ function injectCss(){
     .m7v4-plan-select[data-plan="premium"]{border-color:rgba(202,167,247,.42);color:#e7cdfc}
     .m7v4-plan-select[data-plan="basic"]{color:#c7d0da}
     .m7v4-plan-select[data-plan="custom"]{border-color:rgba(99,201,255,.38);color:#a9e1ff}
+    .m7v4-live-usage{grid-column:1/-1;margin-top:7px;padding:7px 9px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.025)}
+    .m7v4-live-usage-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#b8aa96;font-size:7.5px;font-weight:900;line-height:1.2}
+    .m7v4-live-usage-top b{color:#efca7d;font-size:7.5px;letter-spacing:.45px}
+    .m7v4-live-usage.off .m7v4-live-usage-top b,.m7v4-live-usage.off .m7v4-live-usage-top span{color:#746f68}
+    .m7v4-live-usage.exhausted{border-color:rgba(255,92,92,.24);background:rgba(120,24,24,.08)}
+    .m7v4-live-usage.exhausted .m7v4-live-usage-top b,.m7v4-live-usage.exhausted .m7v4-live-usage-top span{color:#ff9f95}
+    .m7v4-live-usage-bar{height:3px;margin-top:6px;border-radius:999px;background:#ffffff0b;overflow:hidden}
+    .m7v4-live-usage-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#d39a3e,#efc976)}
+    .m7v4-live-usage.exhausted .m7v4-live-usage-bar i{background:#df6258}
+    .m7v4-live-usage.unlimited .m7v4-live-usage-bar i{width:100%!important;background:linear-gradient(90deg,#5c91a9,#8ed7ef)}
     .m7plans-home-entry{width:100%;margin:0 0 12px!important}
     #m7-plan-admin-overlay{position:fixed;inset:0;z-index:2147483647;display:none;padding:12px;background:rgba(3,3,4,.91);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:Arial,"Segoe UI",sans-serif;color:#fff}
     #m7-plan-admin-overlay.active{display:grid;place-items:center}
@@ -21195,12 +21207,27 @@ async function applyPresetToAssigned(button){
   }
 }
 
+async function loadLiveUsage(){
+  if(!client)return;
+
+  const result=await client.rpc("ma7alak_admin_get_all_video_live_usage");
+  if(result.error)throw result.error;
+
+  liveUsage=new Map(
+    (Array.isArray(result.data)?result.data:[])
+      .map(row=>[String(row.shop_slug||"").trim().toLowerCase(),row])
+  );
+
+  decorateWorkspace();
+}
+
 async function loadPlanData(){
   if(!client)return;
 
-  const [presetResult,assignmentResult]=await Promise.all([
+  const [presetResult,assignmentResult,usageResult]=await Promise.all([
     client.from("subscription_plan_presets").select("*"),
-    client.from("shop_plan_assignments").select("shop_slug,plan_key")
+    client.from("shop_plan_assignments").select("shop_slug,plan_key"),
+    client.rpc("ma7alak_admin_get_all_video_live_usage")
   ]);
 
   if(presetResult.error)throw presetResult.error;
@@ -21208,6 +21235,13 @@ async function loadPlanData(){
 
   presets=new Map((presetResult.data||[]).map(row=>[String(row.plan_key),row]));
   assignments=new Map((assignmentResult.data||[]).map(row=>[String(row.shop_slug),String(row.plan_key)]));
+
+  if(!usageResult.error){
+    liveUsage=new Map(
+      (Array.isArray(usageResult.data)?usageResult.data:[])
+        .map(row=>[String(row.shop_slug||"").trim().toLowerCase(),row])
+    );
+  }
 
   decorateWorkspace();
 
@@ -21221,6 +21255,32 @@ function planOptions(current){
     PLAN_ORDER.map(key=>
       '<option value="'+key+'" '+(current===key?"selected":"")+'>'+esc(PLAN_LABELS[key])+'</option>'
     ).join("");
+}
+
+function liveUsageMarkup(slug){
+  const row=liveUsage.get(String(slug||"").trim().toLowerCase());
+
+  if(!row||row.video_live_enabled!==true){
+    return '<div class="m7v4-live-usage off" data-m7-live-usage><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>OFF</span></div><div class="m7v4-live-usage-bar"><i style="width:0%"></i></div></div>';
+  }
+
+  const used=Math.max(0,Number(row.used_minutes)||0);
+  const limit=Math.max(0,Number(row.monthly_minutes)||0);
+
+  if(limit===0){
+    return '<div class="m7v4-live-usage unlimited" data-m7-live-usage><div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>'+used+' min used · UNLIMITED</span></div><div class="m7v4-live-usage-bar"><i></i></div></div>';
+  }
+
+  const left=Math.max(0,Number(row.remaining_minutes)||0);
+  const pct=Math.max(0,Math.min(100,(used/limit)*100));
+  const exhausted=row.exhausted===true||left<=0;
+
+  return '<div class="m7v4-live-usage '+(exhausted?"exhausted":"")+'" data-m7-live-usage>'+
+    '<div class="m7v4-live-usage-top"><b>LIVE TIME</b><span>'+
+      used+' / '+limit+' min · '+(exhausted?"USED UP":left+' left')+
+    '</span></div>'+
+    '<div class="m7v4-live-usage-bar"><i style="width:'+pct.toFixed(1)+'%"></i></div>'+
+  '</div>';
 }
 
 function decorateWorkspace(){
@@ -21264,6 +21324,17 @@ function decorateWorkspace(){
     select.dataset.slug=slug;
     select.dataset.plan=current;
     select.value=current;
+
+    let usage=info.querySelector("[data-m7-live-usage]");
+    const usageHtml=liveUsageMarkup(slug);
+
+    if(usage){
+      const box=document.createElement("div");
+      box.innerHTML=usageHtml;
+      usage.replaceWith(box.firstElementChild);
+    }else{
+      row.insertAdjacentHTML("afterend",usageHtml);
+    }
   });
 
   const workspace=root.querySelector("[data-m7v4-shop-workspace]");
@@ -21300,6 +21371,8 @@ async function assignPlan(select){
 
     select.dataset.plan=key;
     select.value=key;
+
+    await loadLiveUsage().catch(()=>{});
 
     window.dispatchEvent(
       new CustomEvent(
@@ -21362,6 +21435,19 @@ async function boot(){
   observer.observe(document.body,{childList:true,subtree:true});
 
   loadPlanData().catch(()=>{});
+
+  if(usageTimer)clearInterval(usageTimer);
+  usageTimer=setInterval(()=>{
+    if(document.visibilityState==="visible"){
+      loadLiveUsage().catch(()=>{});
+    }
+  },30000);
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"){
+      loadLiveUsage().catch(()=>{});
+    }
+  });
 
   try{
     realtime=client
