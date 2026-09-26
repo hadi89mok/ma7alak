@@ -6222,7 +6222,7 @@ function syncPrimaryActions(){
   var socialSection=document.getElementById("ma7alak-social-section");
   if(socialSection){
     var extras=Array.from(socialSection.querySelectorAll(".ma7alak-social-item")).filter(function(el){
-      return !el.classList.contains("m7hub-primary-social")&&el.offsetParent!==null;
+      return !el.classList.contains("m7hub-primary-social");
     });
     socialSection.style.display=extras.length?"":"none";
   }
@@ -6270,7 +6270,7 @@ function setupVisitArea(about){
       try{
         window.open(src,"_blank","noopener,noreferrer");
       }catch(_){
-        location.href=src;
+        try{window.location.href=src}catch(__){}
       }
     });
   }
