@@ -5157,8 +5157,8 @@ function css(){if(document.getElementById("m7adm-v3-css"))return;let s=document.
 function addCollapse(section,label){if(!section||section.dataset.m7collapse)return;section.dataset.m7collapse="1";let head=section.querySelector(":scope > .ma-admin-section-head, :scope > .ma-v2-head");if(!head)return;let b=document.createElement("button");b.type="button";b.className="m7-collapse-btn";b.textContent="Hide";b.onclick=e=>{e.stopPropagation();let kids=[...section.children].filter(x=>x!==head);let hide=b.textContent==="Hide";kids.forEach(x=>x.classList.toggle("m7-collapsed-body",hide));b.textContent=hide?"Unhide":"Hide"};head.appendChild(b)}
 function installCollapsers(){let dash=document.getElementById("ma-admin-dashboard");if(!dash)return;[...dash.querySelectorAll("section.ma-admin-card")].forEach(sec=>{let h=(sec.querySelector("h2")?.textContent||"").trim();if(["Add New Shop","Manage Shops"].includes(h))addCollapse(sec,h)});let dir=document.getElementById("ma-v2-hub")||[...document.querySelectorAll("section,div")].find(x=>x.querySelector?.("h2")?.textContent?.trim()==="Directory Control");if(dir)addCollapse(dir,"Directory Control")}
 function stopAdminToolPolling(){if(analyticsTimer){clearInterval(analyticsTimer);analyticsTimer=null}}
-async function refreshActiveAdminTool(){if(adminToolRefreshBusy)return;adminToolRefreshBusy=true;try{if(activeAdminTool==="m7adm-analytics")await loadAnalytics();else if(activeAdminTool==="m7adm-users"){await loadPresence();renderUsers()}}finally{adminToolRefreshBusy=false}}
-function setActiveAdminTool(target,open){stopAdminToolPolling();activeAdminTool=open?String(target||""):"";if(activeAdminTool==="m7adm-analytics"||activeAdminTool==="m7adm-users"){refreshActiveAdminTool().catch(()=>{});analyticsTimer=setInterval(()=>refreshActiveAdminTool().catch(()=>{}),2000)}}
+async function refreshActiveAdminTool(){if(document.visibilityState==="hidden"||adminToolRefreshBusy)return;adminToolRefreshBusy=true;try{if(activeAdminTool==="m7adm-analytics")await loadAnalytics();else if(activeAdminTool==="m7adm-users"){await loadPresence();renderUsers()}}finally{adminToolRefreshBusy=false}}
+function setActiveAdminTool(target,open){stopAdminToolPolling();activeAdminTool=open?String(target||""):"";if(activeAdminTool==="m7adm-analytics"||activeAdminTool==="m7adm-users"){refreshActiveAdminTool().catch(()=>{});analyticsTimer=setInterval(()=>refreshActiveAdminTool().catch(()=>{}),12000)}}
 function selectAdminTool(target){
   let root=document.getElementById("m7adm-v3");
   if(!root)return;
@@ -5242,9 +5242,38 @@ ready().catch(console.error);
 (function(){
 "use strict";
 if(window.__M7_VIEWER_PRESENCE__)return;window.__M7_VIEWER_PRESENCE__=true;
-let timer=null;
-async function touch(){try{let a=window.Ma7alakAccount;if(!a?.user||!a?.client)return;await a.client.rpc("ma7alak_touch_viewer_presence")}catch(_){}}
-async function start(){for(let i=0;i<120&&!window.Ma7alakAccount;i++)await new Promise(r=>setTimeout(r,100));await window.Ma7alakAccount?.ready?.();await touch();clearInterval(timer);timer=setInterval(touch,4000);addEventListener("ma7alak:account-change",touch)}
+const VIEWER_PRESENCE_INTERVAL_MS=30000;
+let timer=null,presenceRunning=false;
+async function touch(){
+  if(document.visibilityState==="hidden"||presenceRunning)return;
+  try{
+    let a=window.Ma7alakAccount;
+    if(!a?.user||!a?.client)return;
+    presenceRunning=true;
+    await a.client.rpc("ma7alak_touch_viewer_presence");
+  }catch(_){}
+  finally{presenceRunning=false}
+}
+function startTimer(){
+  if(timer){clearInterval(timer);timer=null}
+  if(document.visibilityState==="hidden")return;
+  timer=setInterval(touch,VIEWER_PRESENCE_INTERVAL_MS);
+}
+async function start(){
+  for(let i=0;i<120&&!window.Ma7alakAccount;i++)await new Promise(r=>setTimeout(r,100));
+  await window.Ma7alakAccount?.ready?.();
+  await touch();
+  startTimer();
+  addEventListener("ma7alak:account-change",()=>{touch();startTimer()});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden"){
+      if(timer){clearInterval(timer);timer=null}
+      return;
+    }
+    touch();
+    startTimer();
+  });
+}
 start().catch(()=>{});
 })();
 
