@@ -17,8 +17,8 @@
     ["animations","✦","VIP / Story Animations","Story glow, bursts and motion together with optional VIP rings, particles and branded effects"],
     ["live","◉","Live","Live panel, offer cards, colors, typography, radius, glow and pulse"],
     ["media","▧","Media","Photo + Video accents, Media typography, filters, Gallery frame shape/layers and animation"],
-    ["uploads","↑","Uploads","Photos, videos, reels, offers and owner upload limits in one place"],
-    ["publishing","✓","Access & Visibility","Visibility, verification and identity access controls"],
+    ["uploads","↑","Uploads","Manage shop photos, videos, reels and offers in one place"],
+    ["publishing","✓","Visibility & Badges","Public visibility, verification and profile badges"],
     ["about","●","About / Hub","ABOUT + HUB: description, services, social links, address, colors, typography and effects"],
     ["hours","◷","Hours","Compact weekly opening schedule and availability"],
     ["advanced","⚙","Global","Global preset, universal accent, motion and typography"]
@@ -1457,10 +1457,26 @@
         document.getElementById("m7-live-admin-overlay")?.classList.remove("active");
         const node=rememberManager(document.getElementById("m7-live-admin-panel"));if(node)host.replaceChildren(node);
         await pending;
+        /* Access/quota controls moved to the master Plans & Access manager. */
+        node?.querySelector(".m7la-access-card")?.remove();
+        node?.querySelector("#m7-live-admin-save")?.remove();
+        node?.querySelector("#m7-live-admin-status")?.remove();
       }else{
         const [id,open]=rows[key];if(typeof open!=="function")throw Error("This manager is still loading. Try again.");
         const node=rememberManager(document.getElementById(id));if(!node)throw Error("This manager is unavailable.");
         host.replaceChildren(node);await open(shop);
+
+        /* Plan limits live only in Plans & Access now. */
+        if(key==="reels"){
+          const reelLimit=node.querySelector("#ma-reels-owner-limit");
+          const reelLimitWrap=reelLimit?.closest("label")||reelLimit?.parentElement;
+          if(reelLimitWrap)reelLimitWrap.style.display="none";
+          const reelSave=node.querySelector("#ma-reels-save-limit");
+          if(reelSave)reelSave.style.display="none";
+          const reelStatus=node.querySelector("#ma-reels-limit-status");
+          if(reelStatus)reelStatus.style.display="none";
+        }
+
         if(request===managerRequest){node.hidden=false;node.classList.add("m7v4-show")}
       }
     }catch(error){if(request===managerRequest)host.textContent=error.message||"Could not load this manager."}
@@ -1519,9 +1535,9 @@
       });return;
     }
     if(key==="uploads"){
-      const nav=document.createElement("div");nav.className="m7studio-upload-menu";nav.innerHTML='<button type="button" class="m7studio-upload-card" data-manager="gallery" aria-pressed="false"><b>▧ Photos</b><small>Upload and manage gallery images</small></button><button type="button" class="m7studio-upload-card" data-manager="video" aria-pressed="false"><b>▶ Videos</b><small>Upload and manage shop videos</small></button><button type="button" class="m7studio-upload-card" data-manager="reels" aria-pressed="false"><b>▸ Reels</b><small>Homepage reel uploads</small></button><button type="button" class="m7studio-upload-card" data-manager="offers" aria-pressed="false"><b>⚡ Offers</b><small>Live and scheduled offers</small></button><button type="button" class="m7studio-upload-card" data-manager="permissions" aria-pressed="false"><b>✓ Access & limits</b><small>Owner upload access and quotas</small></button>';
+      const nav=document.createElement("div");nav.className="m7studio-upload-menu";nav.innerHTML='<button type="button" class="m7studio-upload-card" data-manager="gallery" aria-pressed="false"><b>▧ Photos</b><small>Upload and manage gallery images</small></button><button type="button" class="m7studio-upload-card" data-manager="video" aria-pressed="false"><b>▶ Videos</b><small>Upload and manage shop videos</small></button><button type="button" class="m7studio-upload-card" data-manager="reels" aria-pressed="false"><b>▸ Reels</b><small>Homepage reel uploads</small></button><button type="button" class="m7studio-upload-card" data-manager="offers" aria-pressed="false"><b>⚡ Offers</b><small>Live and scheduled offers</small></button>';
       host.className="m7studio-manager-host";
-      nav.addEventListener("click",event=>{const button=event.target.closest("[data-manager]");if(!button)return;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));host.onclick=null;if(button.dataset.manager==="permissions")renderUploadPermissions(host,note);else mountManager(host,button.dataset.manager)});
+      nav.addEventListener("click",event=>{const button=event.target.closest("[data-manager]");if(!button)return;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));host.onclick=null;mountManager(host,button.dataset.manager)});
       dock.append(nav,host);
     }else{dock.append(host);mountManager(host,key)}
   }
@@ -1860,7 +1876,6 @@
 
       hideFormRoots(form,roots);
       ensureProfileUpload(form);
-      addInlineCapability(form,["owner-profile-edit"]);
     }
     else if(key==="animations"){
       const roots=showRoots(form,[".m7-design-studio"]);
@@ -1977,7 +1992,6 @@
       tidyPane(design?.querySelector('[data-m7ds-pane="typography"]'));
       tidyPane(design?.querySelector('[data-m7ds-pane="modules"]'));
       hideFormRoots(form,roots);
-      addInlineCapability(form,["owner-about-edit"]);
     }
     else if(key==="hours"){
       const roots=showRoots(form,[
