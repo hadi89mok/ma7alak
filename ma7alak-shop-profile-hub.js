@@ -53,7 +53,7 @@ if(!slug){
 
 window.__MA7ALAK_EXACT_HUB_SLUG__ = slug;
 
-const MARKUP = "<!-- =========================================================\n     SHOUFHON — EXACT MERGED SHOP HUB\n\n     WHY THIS VERSION EXISTS:\n     The first merged rewrite changed the proven animation engines,\n     service icon behavior, text typography and Location effects.\n\n     THIS VERSION DOES NOT REWRITE THEM.\n\n     ✓ Exact old About CSS/keyframes/Admin effects\n     ✓ Exact old service icon renderer\n     ✓ Tattoo ink-drop + Piercing sparkle restored\n     ✓ Exact old About text typography restored\n     ✓ Exact old Social design\n     ✓ Exact old Location aura / shimmer / pin / clock animations\n     ✓ Exact old optimized Stats design + eye animation\n     ✓ One Hostinger embed\n     ✓ One slug to change\n     ✓ Optional Google Map added without replacing old Location code\n========================================================= -->\n\n<style id=\"ma7alak-exact-merged-hub-shell-style\">\n/* =========================================================\n   SHOUFHON EXACT MERGED HUB SHELL\n   IMPORTANT:\n   The inner About / Social / Location / Stats modules below\n   are the SAME proven separate modules, not rewritten copies.\n   This shell only groups them into ONE Hostinger embed.\n========================================================= */\n\n#ma7alak-exact-merged-hub{\n  --m7-exact-shell-accent:#f2caed;\n  --m7-exact-shell-accent-rgb:242,202,237;\n\n  width:100%;\n  max-width:720px;\n  margin:0 auto;\n  padding:8px 0 10px;\n  box-sizing:border-box;\n\n  position:relative;\n  overflow:hidden;\n\n  border-radius:30px;\n\n  border:0;\n\n  background:\n    radial-gradient(\n      circle at 50% -8%,\n      rgba(var(--m7-exact-shell-accent-rgb),.085),\n      transparent 28%\n    ),\n    linear-gradient(\n      180deg,\n      rgba(9,8,10,.94),\n      rgba(5,5,6,.98)\n    );\n\n  box-shadow:\n    0 24px 58px rgba(0,0,0,.38),\n    0 0 25px rgba(var(--m7-exact-shell-accent-rgb),.06),\n    inset 0 1px 0 rgba(255,255,255,.025);\n\n  isolation:isolate;\n}\n\n#ma7alak-exact-merged-hub::before{\n  content:\"\";\n  position:absolute;\n  inset:0;\n  z-index:20;\n  pointer-events:none;\n\n  border:\n    1px solid\n    rgba(var(--m7-exact-shell-accent-rgb),.23);\n\n  border-radius:inherit;\n\n  box-sizing:border-box;\n}\n\n\n/*\n  Keep every proven module's own visual engine.\n  Only normalize its maximum width so it fits cleanly inside one embed.\n*/\n#ma7alak-exact-merged-hub > .zee-about-card,\n#ma7alak-exact-merged-hub > .ma7alak-social-section,\n#ma7alak-exact-merged-hub > .ma7alak-location-section,\n#ma7alak-exact-merged-hub > .ma7alak-realtime-stats{\n  max-width:680px;\n}\n\n\n/* Slightly reduce the empty gap created by separate Hostinger elements.\n   This does NOT touch typography, icons, keyframes, or Admin effect CSS. */\n#ma7alak-exact-merged-hub > .zee-about-card{\n  margin-top:8px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-social-section{\n  margin-top:10px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-location-section{\n  margin-top:10px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-realtime-stats{\n  margin-top:10px;\n  margin-bottom:8px;\n}\n\n\n/* =========================================================\n   OPTIONAL GOOGLE MAP\n   New addition only. Existing Location module stays untouched.\n========================================================= */\n\n#ma7alak-exact-map-section{\n  width:calc(100% - 20px);\n  max-width:680px;\n  margin:10px auto;\n  padding:12px;\n  box-sizing:border-box;\n\n  border-radius:20px;\n  border:1px solid rgba(var(--m7-exact-shell-accent-rgb),.24);\n\n  background:\n    radial-gradient(\n      circle at 15% 0%,\n      rgba(var(--m7-exact-shell-accent-rgb),.08),\n      transparent 34%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(25,22,24,.94),\n      rgba(11,10,11,.97)\n    );\n\n  box-shadow:\n    0 12px 28px rgba(0,0,0,.22),\n    inset 0 1px 0 rgba(255,255,255,.035);\n}\n\n#ma7alak-exact-map-section[hidden]{\n  display:none!important;\n}\n\n.ma7alak-exact-map-heading{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:8px;\n  margin:0 0 10px;\n\n  color:var(--m7-shop-accent-light,#f2d99f);\n\n  font-family:Georgia,\"Times New Roman\",serif;\n  font-size:17px;\n  font-weight:800;\n\n  text-shadow:\n    0 0 8px rgba(var(--m7-exact-shell-accent-rgb),.24),\n    0 2px 8px rgba(0,0,0,.55);\n}\n\n.ma7alak-exact-map-heading svg{\n  width:19px;\n  height:19px;\n  display:block;\n}\n\n.ma7alak-exact-map-frame{\n  position:relative;\n  width:100%;\n  aspect-ratio:16 / 9;\n  min-height:150px;\n  overflow:hidden;\n\n  border-radius:15px;\n\n  background:rgba(255,255,255,.025);\n\n  box-shadow:\n    inset 0 0 0 1px rgba(255,255,255,.035);\n}\n\n.ma7alak-exact-map-frame iframe{\n  position:absolute;\n  inset:0;\n\n  width:100%;\n  height:100%;\n\n  border:0;\n  display:block;\n}\n\n\n/* =========================================================\n   PHONE\n========================================================= */\n\n@media(max-width:600px){\n\n  #ma7alak-exact-merged-hub{\n    width:100%;\n    padding:5px 0 8px;\n    border-radius:26px;\n  }\n\n}\n\n@media(max-width:390px){\n\n  #ma7alak-exact-map-section{\n    width:calc(100% - 14px);\n    margin-left:7px;\n    margin-right:7px;\n    padding:9px;\n  }\n\n}\n</style>\n\n<div id=\"ma7alak-exact-merged-hub\">\n<!-- =========================================================\n     SHOUFHON — ZEE PREMIUM ABOUT SECTION\n     PHONE-FIRST\n========================================================= -->\n\n<section class=\"zee-about-card m7-fx-title-sparkles m7-fx-title-shimmer m7-fx-ornament\">\n\n  <!-- DECORATIVE GLOW -->\n  <div class=\"zee-about-glow zee-glow-one\" aria-hidden=\"true\"></div>\n  <div class=\"zee-about-glow zee-glow-two\" aria-hidden=\"true\"></div>\n\n  <!-- OPTIONAL ADMIN-CONTROLLED FLOATING SPARKLES -->\n  <div id=\"ma7alak-about-floating-sparkles\" class=\"ma7alak-about-floating-sparkles\" aria-hidden=\"true\"></div>\n\n  <!-- TOP ORNAMENT -->\n  <div class=\"zee-about-topline\" aria-hidden=\"true\">\n\n    <span class=\"zee-line\"></span>\n\n    <span class=\"zee-center-symbol\">\n      ✦\n    </span>\n\n    <span class=\"zee-line zee-line-right\"></span>\n\n  </div>\n\n\n  <!-- TITLE — AUTO FROM SHOP SLUG -->\n  <div class=\"zee-about-heading\">\n\n    <div class=\"zee-kicker\" id=\"ma7alak-about-kicker\">\n      SHOP\n    </div>\n\n    <h2 class=\"zee-about-title\">\n\n      <span class=\"zee-title-word\" id=\"ma7alak-about-title\">\n        About\n      </span>\n\n      <span class=\"zee-title-sparkle zee-sparkle-one\" aria-hidden=\"true\">\n        ✦\n      </span>\n\n      <span class=\"zee-title-sparkle zee-sparkle-two\" aria-hidden=\"true\">\n        ✧\n      </span>\n\n    </h2>\n\n    <div id=\"ma7alak-about-arabic-name\" class=\"ma7alak-about-arabic-name\" hidden></div>\n\n  </div>\n\n\n  <!-- MAIN ABOUT CONTENT — AUTO FROM ADMIN -->\n  <div class=\"zee-about-content\">\n\n    <div class=\"zee-quote-mark\" aria-hidden=\"true\">\n      ❝\n    </div>\n\n    <p class=\"zee-about-text\" id=\"ma7alak-about-text\" dir=\"auto\">\n      Loading…\n    </p>\n\n  </div>\n\n\n  <!-- SERVICES — AUTO FROM ADMIN -->\n  <div class=\"zee-about-services\" id=\"ma7alak-about-services\"></div>\n\n\n  <!-- BOTTOM SIGNATURE -->\n  <div class=\"zee-about-signature\">\n\n    <span class=\"zee-signature-line\"></span>\n\n    <span class=\"zee-signature-text\" id=\"ma7alak-about-signature\">\n      Your style. Your story.\n    </span>\n\n    <span class=\"zee-signature-line zee-signature-line-right\"></span>\n\n  </div>\n\n</section>\n\n\n<style>\n\n/* =========================================================\n   ZEE PREMIUM ABOUT — ROOT\n========================================================= */\n\n.zee-about-card {\n\n  position: relative;\n\n  width: calc(100% - 18px);\n\n  max-width: 680px;\n\n  margin: 22px auto;\n\n  padding:\n    22px 18px 20px;\n\n  box-sizing: border-box;\n\n  overflow: hidden;\n\n  border-radius: 24px;\n\n  border:\n    1px solid rgba(239,143,182,.28);\n\n  background:\n    radial-gradient(\n      circle at 20% 0%,\n      rgba(239,143,182,.10),\n      transparent 34%\n    ),\n    radial-gradient(\n      circle at 90% 100%,\n      rgba(217,164,65,.08),\n      transparent 34%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(24,20,24,.97),\n      rgba(10,10,12,.98)\n    );\n\n  box-shadow:\n    0 18px 44px rgba(0,0,0,.34),\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 0 24px rgba(239,143,182,.04);\n\n  backdrop-filter:\n    blur(16px)\n    saturate(120%);\n\n  -webkit-backdrop-filter:\n    blur(16px)\n    saturate(120%);\n\n  font-family:\n    Arial,\n    \"Segoe UI\",\n    sans-serif;\n\n  isolation: isolate;\n\n}\n\n\n/* =========================================================\n   SOFT BACKGROUND GLOWS\n========================================================= */\n\n.zee-about-glow {\n\n  position: absolute;\n\n  border-radius: 50%;\n\n  filter:\n    blur(30px);\n\n  pointer-events: none;\n\n  z-index: 0;\n\n}\n\n\n.zee-glow-one {\n\n  width: 120px;\n  height: 120px;\n\n  left: -55px;\n  top: 40px;\n\n  background:\n    rgba(239,143,182,.10);\n\n}\n\n\n.zee-glow-two {\n\n  width: 130px;\n  height: 130px;\n\n  right: -60px;\n  bottom: 24px;\n\n  background:\n    rgba(217,164,65,.08);\n\n}\n\n\n/* =========================================================\n   TOP DECORATIVE LINE\n========================================================= */\n\n.zee-about-topline {\n\n  position: relative;\n  z-index: 2;\n\n  width: 100%;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap: 10px;\n\n  margin-bottom: 15px;\n\n}\n\n\n.zee-line {\n\n  position: relative;\n\n  flex: 1;\n\n  max-width: 92px;\n\n  height: 2px;\n\n  overflow: visible;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent 0%,\n      rgba(239,143,182,.32) 25%,\n      #ffd8e8 46%,\n      #f2c46d 58%,\n      transparent 100%\n    );\n\n  background-size:\n    240% 100%;\n\n  animation:\n    zeeLineShine\n    2.2s\n    linear\n    infinite;\n\n}\n\n\n.zee-line-right {\n\n  transform:\n    scaleX(-1);\n\n}\n\n\n.zee-line::after {\n\n  content: \"\";\n\n  position: absolute;\n\n  top: 50%;\n  left: -8px;\n\n  width: 8px;\n  height: 8px;\n\n  transform:\n    translateY(-50%);\n\n  border-radius: 50%;\n\n  background:\n    radial-gradient(\n      circle,\n      #ffffff 0 15%,\n      #ffd7e7 30%,\n      #f0bd65 48%,\n      transparent 70%\n    );\n\n  opacity: 0;\n\n  filter:\n    drop-shadow(\n      0 0 6px\n      rgba(255,188,216,.78)\n    );\n\n  animation:\n    zeeTravelSpark\n    2.2s\n    linear\n    infinite;\n\n}\n\n\n.zee-line-right::after {\n\n  animation-delay:\n    .15s;\n\n}\n\n\n@keyframes zeeLineShine {\n\n  from {\n    background-position:\n      130% 50%;\n  }\n\n  to {\n    background-position:\n      -130% 50%;\n  }\n\n}\n\n\n@keyframes zeeTravelSpark {\n\n  0% {\n    left: -8px;\n    opacity: 0;\n  }\n\n  12% {\n    opacity: 1;\n  }\n\n  84% {\n    opacity: .9;\n  }\n\n  100% {\n    left: calc(100% + 2px);\n    opacity: 0;\n  }\n\n}\n\n\n/* =========================================================\n   CENTER SYMBOL\n========================================================= */\n\n.zee-center-symbol {\n\n  color:\n    #ffd7e7;\n\n  font-size:\n    12px;\n\n  line-height:\n    1;\n\n  text-shadow:\n    0 0 7px rgba(255,255,255,.75),\n    0 0 12px rgba(239,143,182,.56);\n\n  animation:\n    zeeCenterPulse\n    1.8s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeeCenterPulse {\n\n  0%,\n  100% {\n\n    transform:\n      scale(.88)\n      rotate(0deg);\n\n    opacity:\n      .72;\n\n  }\n\n  50% {\n\n    transform:\n      scale(1.25)\n      rotate(45deg);\n\n    opacity:\n      1;\n\n  }\n\n}\n\n\n/* =========================================================\n   HEADING\n========================================================= */\n\n.zee-about-heading {\n\n  position: relative;\n  z-index: 2;\n\n  text-align: center;\n\n  margin-bottom:\n    16px;\n\n}\n\n\n.zee-kicker {\n\n  margin-bottom:\n    7px;\n\n  color:\n    rgba(255,216,232,.72);\n\n  font-size:\n    9px;\n\n  font-weight:\n    900;\n\n  letter-spacing:\n    2.7px;\n\n  text-transform:\n    uppercase;\n\n}\n\n\n.zee-about-title {\n\n  position: relative;\n\n  display: inline-block;\n\n  margin: 0;\n\n  padding:\n    0 12px;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:\n    28px;\n\n  line-height:\n    1.08;\n\n  font-weight:\n    800;\n\n}\n\n\n.zee-title-word {\n\n  display: inline-block;\n\n  background:\n    linear-gradient(\n      105deg,\n      #ffffff 0%,\n      #ffd5e5 24%,\n      #ffffff 39%,\n      #efbc62 49%,\n      #fff5fa 60%,\n      #ee9fc0 75%,\n      #ffffff 100%\n    );\n\n  background-size:\n    280% 100%;\n\n  -webkit-background-clip:\n    text;\n\n  background-clip:\n    text;\n\n  color:\n    transparent;\n\n  -webkit-text-fill-color:\n    transparent;\n\n  animation:\n    zeeTitleShimmer\n    3.7s\n    ease-in-out\n    infinite;\n\n  filter:\n    drop-shadow(\n      0 3px 10px\n      rgba(0,0,0,.30)\n    );\n\n}\n\n\n@keyframes zeeTitleShimmer {\n\n  from {\n    background-position:\n      120% 50%;\n  }\n\n  to {\n    background-position:\n      -120% 50%;\n  }\n\n}\n\n\n/* =========================================================\n   TITLE SPARKLES\n========================================================= */\n\n.zee-title-sparkle {\n\n  position: absolute;\n\n  color:\n    #ffd5e5;\n\n  text-shadow:\n    0 0 6px rgba(255,255,255,.80),\n    0 0 12px rgba(239,143,182,.62);\n\n  pointer-events: none;\n\n}\n\n\n.zee-sparkle-one {\n\n  left: -3px;\n  top: -8px;\n\n  font-size:\n    11px;\n\n  animation:\n    zeeSparkleOne\n    3.2s\n    ease-in-out\n    infinite;\n\n}\n\n\n.zee-sparkle-two {\n\n  right: -1px;\n  bottom: -5px;\n\n  color:\n    #ffe3a1;\n\n  font-size:\n    12px;\n\n  animation:\n    zeeSparkleTwo\n    3.2s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeeSparkleOne {\n\n  0%,\n  20%,\n  100% {\n\n    opacity: 0;\n\n    transform:\n      scale(.5)\n      rotate(0deg);\n\n  }\n\n  38% {\n\n    opacity: 1;\n\n    transform:\n      scale(1.2)\n      rotate(36deg);\n\n  }\n\n  52% {\n\n    opacity: .4;\n\n    transform:\n      scale(.85)\n      rotate(68deg);\n\n  }\n\n}\n\n\n@keyframes zeeSparkleTwo {\n\n  0%,\n  48%,\n  100% {\n\n    opacity: 0;\n\n    transform:\n      scale(.5)\n      rotate(0deg);\n\n  }\n\n  68% {\n\n    opacity: 1;\n\n    transform:\n      scale(1.2)\n      rotate(-34deg);\n\n  }\n\n  84% {\n\n    opacity: .45;\n\n    transform:\n      scale(.85)\n      rotate(-70deg);\n\n  }\n\n}\n\n\n/* =========================================================\n   MAIN CONTENT BOX\n========================================================= */\n\n.zee-about-content {\n\n  position: relative;\n  z-index: 2;\n\n  padding:\n    18px 16px 17px;\n\n  border-radius:\n    18px;\n\n  border:\n    1px solid\n    rgba(255,255,255,.055);\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,.035),\n      rgba(255,255,255,.012)\n    );\n\n  box-shadow:\n    inset 0 1px 0\n    rgba(255,255,255,.025);\n\n}\n\n\n/* =========================================================\n   QUOTE MARK\n========================================================= */\n\n.zee-quote-mark {\n\n  position: absolute;\n\n  left: 12px;\n  top: 5px;\n\n  color:\n    rgba(239,143,182,.17);\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:\n    44px;\n\n  line-height:\n    1;\n\n  pointer-events:\n    none;\n\n}\n\n\n/* =========================================================\n   ARABIC TEXT\n========================================================= */\n\n.zee-about-text {\n\n  position: relative;\n\n  margin: 0;\n\n  color:\n    rgba(255,255,255,.92);\n\n  font-family:\n    Tahoma,\n    Arial,\n    sans-serif;\n\n  font-size:\n    15px;\n\n  font-weight:\n    650;\n\n  line-height:\n    2;\n\n  text-align:\n    right;\n\n  text-shadow:\n    0 2px 8px\n    rgba(0,0,0,.50);\n\n  -webkit-font-smoothing:\n    antialiased;\n\n  text-rendering:\n    optimizeLegibility;\n\n}\n\n\n.zee-about-text strong {\n\n  color:\n    #ffd0e2;\n\n  font-weight:\n    900;\n\n  text-shadow:\n    0 0 10px\n    rgba(239,143,182,.18);\n\n}\n\n\n/* =========================================================\n   SERVICE PILLS\n========================================================= */\n\n.zee-about-services {\n\n  position: relative;\n  z-index: 2;\n\n  display: grid;\n\n  grid-template-columns:\n    repeat(2,minmax(0,1fr));\n\n  gap:\n    9px;\n\n  margin-top:\n    12px;\n\n}\n\n\n.zee-service-pill {\n\n  position: relative;\n\n  min-height:\n    48px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap:\n    8px;\n\n  overflow:\n    visible;\n\n  border-radius:\n    15px;\n\n  border:\n    1px solid\n    rgba(239,143,182,.18);\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,.035),\n      rgba(255,255,255,.012)\n    );\n\n  color:\n    #fff;\n\n  font-size:\n    12px;\n\n  font-weight:\n    850;\n\n  letter-spacing:\n    .25px;\n\n  box-shadow:\n    inset 0 1px 0\n    rgba(255,255,255,.025);\n\n}\n\n\n.zee-service-icon {\n\n  position: relative;\n\n  width:\n    27px;\n\n  height:\n    27px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  border-radius:\n    50%;\n\n  color:\n    #ffdca0;\n\n  border:\n    1px solid\n    rgba(244,194,103,.45);\n\n  background:\n    radial-gradient(\n      circle at 35% 30%,\n      rgba(255,240,200,.15),\n      rgba(217,164,65,.06)\n    );\n\n  box-shadow:\n    0 0 8px\n    rgba(217,164,65,.14);\n\n}\n\n\n.zee-service-icon svg {\n\n  width:\n    16px;\n\n  height:\n    16px;\n\n  display:\n    block;\n\n}\n\n\n/* =========================================================\n   TATTOO INK DROP\n========================================================= */\n\n.zee-ink-drop {\n\n  position:\n    absolute;\n\n  left:\n    calc(50% - 44px);\n\n  top:\n    32px;\n\n  width:\n    4px;\n\n  height:\n    7px;\n\n  border-radius:\n    55% 45% 62% 38%\n    /\n    42% 42% 58% 58%;\n\n  background:\n    linear-gradient(\n      180deg,\n      #35353a,\n      #050506\n    );\n\n  opacity:\n    0;\n\n  animation:\n    zeeInkDrop\n    3.3s\n    ease-in\n    infinite;\n\n}\n\n\n@keyframes zeeInkDrop {\n\n  0%,\n  46% {\n\n    opacity:\n      0;\n\n    transform:\n      translateY(-3px)\n      scale(.5);\n\n  }\n\n  58% {\n\n    opacity:\n      1;\n\n  }\n\n  76% {\n\n    opacity:\n      .8;\n\n    transform:\n      translateY(8px)\n      scale(.82);\n\n  }\n\n  90%,\n  100% {\n\n    opacity:\n      0;\n\n    transform:\n      translateY(15px)\n      scale(.55);\n\n  }\n\n}\n\n\n/* =========================================================\n   PIERCING SPARKLE\n========================================================= */\n\n.zee-piercing-spark {\n\n  position:\n    absolute;\n\n  right:\n    12px;\n\n  top:\n    6px;\n\n  color:\n    #ffd2e4;\n\n  font-size:\n    9px;\n\n  text-shadow:\n    0 0 6px rgba(255,255,255,.90),\n    0 0 10px rgba(239,143,182,.68);\n\n  animation:\n    zeePiercingSpark\n    2.1s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeePiercingSpark {\n\n  0%,\n  100% {\n\n    opacity:\n      .18;\n\n    transform:\n      scale(.7)\n      rotate(0deg);\n\n  }\n\n  50% {\n\n    opacity:\n      1;\n\n    transform:\n      scale(1.25)\n      rotate(45deg);\n\n  }\n\n}\n\n\n/* =========================================================\n   SIGNATURE\n========================================================= */\n\n.zee-about-signature {\n\n  position: relative;\n  z-index: 2;\n\n  margin-top:\n    15px;\n\n  display:\n    flex;\n\n  align-items:\n    center;\n\n  justify-content:\n    center;\n\n  gap:\n    9px;\n\n}\n\n\n.zee-signature-line {\n\n  flex:\n    1;\n\n  max-width:\n    55px;\n\n  height:\n    1px;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(239,143,182,.42)\n    );\n\n}\n\n\n.zee-signature-line-right {\n\n  transform:\n    scaleX(-1);\n\n}\n\n\n.zee-signature-text {\n\n  color:\n    rgba(255,222,235,.72);\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:\n    11px;\n\n  font-style:\n    italic;\n\n  letter-spacing:\n    .3px;\n\n}\n\n\n/* =========================================================\n   PHONE FIRST\n========================================================= */\n\n@media(max-width:600px) {\n\n  .zee-about-card {\n\n    width:\n      calc(100% - 16px);\n\n    margin:\n      18px 8px;\n\n    padding:\n      19px 14px 17px;\n\n    border-radius:\n      21px;\n\n  }\n\n\n  .zee-about-title {\n\n    font-size:\n      25px;\n\n  }\n\n\n  .zee-kicker {\n\n    font-size:\n      8px;\n\n    letter-spacing:\n      2.1px;\n\n  }\n\n\n  .zee-about-content {\n\n    padding:\n      16px 13px 15px;\n\n    border-radius:\n      16px;\n\n  }\n\n\n  .zee-about-text {\n\n    font-size:\n      14px;\n\n    line-height:\n      1.95;\n\n  }\n\n\n  .zee-service-pill {\n\n    min-height:\n      46px;\n\n    font-size:\n      11px;\n\n  }\n\n\n  .zee-signature-text {\n\n    font-size:\n      10px;\n\n  }\n\n}\n\n\n/* =========================================================\n   SMALL PHONES\n========================================================= */\n\n@media(max-width:380px) {\n\n  .zee-about-card {\n\n    width:\n      calc(100% - 12px);\n\n    margin:\n      16px 6px;\n\n    padding:\n      17px 11px 15px;\n\n  }\n\n\n  .zee-about-title {\n\n    font-size:\n      23px;\n\n  }\n\n\n  .zee-about-text {\n\n    font-size:\n      13px;\n\n  }\n\n\n  .zee-about-services {\n\n    gap:\n      7px;\n\n  }\n\n\n  .zee-service-pill {\n\n    min-height:\n      44px;\n\n    gap:\n      6px;\n\n  }\n\n}\n\n\n/* Mobile animation fix: reduced-motion auto-disable removed for this visual component. */\n\n\n\n/* =========================================================\n   WHAT CHANGED\n   =========================================================\n   1. Built a completely custom About section for Zee Tattoo & Piercing.\n   2. Designed specifically for a feminine tattoo / piercing / beauty aesthetic.\n   3. Added dark premium glass styling with blush pink, rose-gold, white, and gold accents.\n   4. Added animated decorative side lines with moving light.\n   5. Added animated sparkles around the \"About Zee\" title.\n   6. Added a subtle animated tattoo ink drop.\n   7. Added a piercing sparkle animation.\n   8. Added Tattoo and Piercing service pills.\n   9. Preserved the Arabic About text and improved readability.\n   10. Added \"Your style. Your story.\" signature detail.\n   11. Built phone-first for mobile viewing.\n   12. No JavaScript required — all visual effects are pure CSS.\n========================================================= */\n\n\n\n/* =========================================================\n   PHONE ANIMATION HARDENING — ABOUT ZEE\n   Same design; animation compatibility only.\n========================================================= */\n\n.zee-line,\n.zee-line::after,\n.zee-center-symbol,\n.zee-title-word,\n.zee-title-sparkle,\n.zee-ink-drop,\n.zee-piercing-spark{\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  backface-visibility:hidden;\n  -webkit-backface-visibility:hidden;\n  will-change:transform,opacity,background-position;\n}\n\n.zee-line{\n  -webkit-animation:zeeLineShine 2.2s linear infinite!important;\n}\n\n.zee-line::after{\n  -webkit-animation:zeeTravelSpark 2.2s linear infinite!important;\n}\n\n.zee-line-right::after{\n  -webkit-animation-delay:.15s!important;\n}\n\n.zee-center-symbol{\n  -webkit-animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n}\n\n.zee-title-word{\n  -webkit-animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n}\n\n.zee-sparkle-one{\n  -webkit-animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n}\n\n.zee-sparkle-two{\n  -webkit-animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n}\n\n.zee-ink-drop{\n  -webkit-animation:zeeInkDrop 3.3s ease-in infinite!important;\n}\n\n.zee-piercing-spark{\n  -webkit-animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n}\n\n@media(max-width:600px){\n\n  .zee-line{\n    animation:zeeLineShine 2.2s linear infinite!important;\n    -webkit-animation:zeeLineShine 2.2s linear infinite!important;\n  }\n\n  .zee-line::after{\n    animation:zeeTravelSpark 2.2s linear infinite!important;\n    -webkit-animation:zeeTravelSpark 2.2s linear infinite!important;\n  }\n\n  .zee-center-symbol{\n    animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n    -webkit-animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n  }\n\n  .zee-title-word{\n    animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n    -webkit-animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n  }\n\n  .zee-sparkle-one{\n    animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n    -webkit-animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n  }\n\n  .zee-sparkle-two{\n    animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n    -webkit-animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n  }\n\n  .zee-ink-drop{\n    animation:zeeInkDrop 3.3s ease-in infinite!important;\n    -webkit-animation:zeeInkDrop 3.3s ease-in infinite!important;\n  }\n\n  .zee-piercing-spark{\n    animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n    -webkit-animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n  }\n}\n\n/* =========================================================\n   WHAT CHANGED — PHONE ANIMATION FIX\n   =========================================================\n   1. About Zee design, colors, layout and Arabic content are unchanged.\n   2. Removed the reduced-motion rule that could disable every About animation on phones.\n   3. Added WebKit animation support for mobile browsers.\n   4. Added explicit running animation state.\n   5. Added backface-visibility and will-change for mobile rendering.\n   6. Added phone-specific animation declarations below 600px.\n========================================================= */\n\n\n\n/* =========================================================\n   SHOUFHON SLUG-DRIVEN ABOUT\n   Shop color + Admin content\n========================================================= */\n\n:root{\n  --m7-about-accent:#ef8fb6;\n  --m7-about-accent-rgb:239,143,182;\n  --m7-about-accent-light:#f8cadd;\n  --m7-about-accent-dark:#985b73;\n}\n\n.zee-about-card{\n  border-color:rgba(var(--m7-about-accent-rgb),.34)!important;\n  background:\n    radial-gradient(circle at 20% 0%,rgba(var(--m7-about-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 90% 100%,rgba(217,164,65,.08),transparent 34%),\n    linear-gradient(145deg,rgba(24,20,24,.97),rgba(10,10,12,.98))!important;\n  box-shadow:\n    0 18px 44px rgba(0,0,0,.34),\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 0 24px rgba(var(--m7-about-accent-rgb),.08)!important;\n}\n\n.zee-glow-one{\n  background:rgba(var(--m7-about-accent-rgb),.12)!important;\n}\n\n.zee-kicker,\n.zee-title-sparkle,\n.zee-about-text strong,\n.zee-signature-text{\n  color:var(--m7-about-accent-light)!important;\n}\n\n.zee-service-pill{\n  border-color:rgba(var(--m7-about-accent-rgb),.24)!important;\n}\n\n.zee-service-icon{\n  color:var(--m7-about-accent-light)!important;\n  border-color:rgba(var(--m7-about-accent-rgb),.42)!important;\n  background:\n    radial-gradient(\n      circle at 35% 30%,\n      rgba(255,255,255,.14),\n      rgba(var(--m7-about-accent-rgb),.08)\n    )!important;\n  box-shadow:0 0 10px rgba(var(--m7-about-accent-rgb),.15)!important;\n}\n\n.ma7alak-about-arabic-name{\n  margin-top:8px;\n  color:var(--m7-about-accent-light);\n  font-family:Tahoma,Arial,sans-serif;\n  font-size:15px;\n  font-weight:800;\n  line-height:1.4;\n  direction:rtl;\n  text-align:center;\n  opacity:.9;\n}\n\n#ma7alak-about-text{\n  white-space:pre-line!important;\n}\n\n.zee-about-services:empty{\n  display:none!important;\n}\n\n.ma7alak-service-svg{\n  width:16px;\n  height:16px;\n  display:block;\n}\n\n@media(max-width:600px){\n  .ma7alak-about-arabic-name{\n    font-size:14px;\n  }\n}\n\n\n\n/* =========================================================\n   ADMIN-CONTROLLED ABOUT EFFECTS\n========================================================= */\n\n.ma7alak-about-floating-sparkles{\n  position:absolute;\n  inset:0;\n  overflow:hidden;\n  pointer-events:none;\n  z-index:1;\n  display:none;\n}\n\n.zee-about-card.m7-fx-floating .ma7alak-about-floating-sparkles{\n  display:block;\n}\n\n.ma7alak-about-floating-sparkles span{\n  position:absolute;\n  left:var(--m7-left);\n  top:var(--m7-top);\n  width:var(--m7-size);\n  height:var(--m7-size);\n  border-radius:50%;\n  opacity:0;\n  background:\n    radial-gradient(\n      circle,\n      #fff 0 16%,\n      var(--m7-about-accent-light) 28%,\n      rgba(var(--m7-about-accent-rgb),.72) 48%,\n      transparent 72%\n    );\n  filter:\n    drop-shadow(0 0 5px rgba(var(--m7-about-accent-rgb),.72));\n  animation:\n    m7AboutFloatSpark\n    var(--m7-duration)\n    ease-in-out\n    var(--m7-delay)\n    infinite;\n  -webkit-animation:\n    m7AboutFloatSpark\n    var(--m7-duration)\n    ease-in-out\n    var(--m7-delay)\n    infinite;\n  animation-play-state:running;\n  -webkit-animation-play-state:running;\n  will-change:transform,opacity;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n@keyframes m7AboutFloatSpark{\n  0%,100%{\n    opacity:0;\n    transform:translate3d(0,10px,0) scale(.45) rotate(0deg);\n  }\n  18%{\n    opacity:.78;\n  }\n  55%{\n    opacity:1;\n    transform:\n      translate3d(var(--m7-drift),-14px,0)\n      scale(1.12)\n      rotate(35deg);\n  }\n  82%{\n    opacity:.34;\n  }\n}\n\n@-webkit-keyframes m7AboutFloatSpark{\n  0%,100%{\n    opacity:0;\n    -webkit-transform:translate3d(0,10px,0) scale(.45) rotate(0deg);\n  }\n  18%{\n    opacity:.78;\n  }\n  55%{\n    opacity:1;\n    -webkit-transform:\n      translate3d(var(--m7-drift),-14px,0)\n      scale(1.12)\n      rotate(35deg);\n  }\n  82%{\n    opacity:.34;\n  }\n}\n\n/* Title sparkles */\n.zee-about-card:not(.m7-fx-title-sparkles)\n.zee-title-sparkle{\n  display:none!important;\n}\n\n/* Title shimmer */\n.zee-about-card:not(.m7-fx-title-shimmer)\n.zee-title-word{\n  animation:none!important;\n  -webkit-animation:none!important;\n  background:none!important;\n  color:#fff!important;\n  -webkit-text-fill-color:#fff!important;\n  filter:none!important;\n}\n\n/* Top lines + center ornament */\n.zee-about-card:not(.m7-fx-ornament)\n.zee-line,\n.zee-about-card:not(.m7-fx-ornament)\n.zee-line::after,\n.zee-about-card:not(.m7-fx-ornament)\n.zee-center-symbol{\n  animation:none!important;\n  -webkit-animation:none!important;\n}\n\n/* Breathing outer panel glow */\n.zee-about-card.m7-fx-panel-glow{\n  animation:\n    m7AboutPanelGlow\n    var(--m7-page-animation-speed,3.2s)\n    ease-in-out\n    infinite!important;\n  -webkit-animation:\n    m7AboutPanelGlow\n    var(--m7-page-animation-speed,3.2s)\n    ease-in-out\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:box-shadow;\n}\n\n@keyframes m7AboutPanelGlow{\n  0%,100%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.035),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.10);\n  }\n  50%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.045),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.32),\n      0 0 var(--m7-page-glow-far,38px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n@-webkit-keyframes m7AboutPanelGlow{\n  0%,100%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.035),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.10);\n  }\n  50%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.045),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.32),\n      0 0 var(--m7-page-glow-far,38px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n/* Bottom service icon pulse */\n.zee-about-card.m7-fx-icons\n.zee-service-icon{\n  animation:\n    m7AboutIconPulse\n    var(--m7-page-animation-speed,2.2s)\n    ease-in-out\n    infinite!important;\n  -webkit-animation:\n    m7AboutIconPulse\n    var(--m7-page-animation-speed,2.2s)\n    ease-in-out\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:transform,box-shadow;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(2)\n.zee-service-icon{\n  animation-delay:.18s!important;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(3)\n.zee-service-icon{\n  animation-delay:.36s!important;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(4)\n.zee-service-icon{\n  animation-delay:.54s!important;\n}\n\n@keyframes m7AboutIconPulse{\n  0%,100%{\n    transform:scale(1);\n    box-shadow:\n      0 0 8px rgba(var(--m7-about-accent-rgb),.12);\n  }\n  50%{\n    transform:scale(var(--m7-page-scale-max,1.10));\n    box-shadow:\n      0 0 var(--m7-page-glow-near,10px) rgba(var(--m7-about-accent-rgb),.36),\n      0 0 var(--m7-page-glow-far,20px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n@-webkit-keyframes m7AboutIconPulse{\n  0%,100%{\n    -webkit-transform:scale(1);\n    box-shadow:\n      0 0 8px rgba(var(--m7-about-accent-rgb),.12);\n  }\n  50%{\n    -webkit-transform:scale(var(--m7-page-scale-max,1.10));\n    box-shadow:\n      0 0 var(--m7-page-glow-near,10px) rgba(var(--m7-about-accent-rgb),.36),\n      0 0 var(--m7-page-glow-far,20px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n/* Editable signature shimmer */\n.zee-about-card.m7-fx-signature\n.zee-signature-text{\n  display:inline-block;\n  background:\n    linear-gradient(\n      105deg,\n      var(--m7-about-accent-light) 0%,\n      var(--m7-about-accent-light) 30%,\n      rgba(255,255,255,var(--m7-page-shimmer-alpha,.88)) 46%,\n      #fff 51%,\n      rgba(255,255,255,var(--m7-page-shimmer-alpha,.88)) 56%,\n      var(--m7-about-accent-light) 70%,\n      var(--m7-about-accent-light) 100%\n    );\n  background-size:320% 100%;\n  background-position:145% 50%;\n  background-repeat:no-repeat;\n  -webkit-background-clip:text;\n  background-clip:text;\n  color:transparent!important;\n  -webkit-text-fill-color:transparent!important;\n  animation:\n    m7AboutSignatureShimmer\n    var(--m7-page-animation-speed,3.6s)\n    linear\n    infinite!important;\n  -webkit-animation:\n    m7AboutSignatureShimmer\n    var(--m7-page-animation-speed,3.6s)\n    linear\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:background-position,filter;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n@keyframes m7AboutSignatureShimmer{\n  from{background-position:145% 50%;}\n  to{background-position:-145% 50%;}\n}\n\n@-webkit-keyframes m7AboutSignatureShimmer{\n  from{background-position:145% 50%;}\n  to{background-position:-145% 50%;}\n}\n\n@media(max-width:600px){\n  .ma7alak-about-floating-sparkles span{\n    filter:\n      drop-shadow(0 0 4px rgba(var(--m7-about-accent-rgb),.62));\n  }\n}\n\n</style>\n<div class=\"ma7alak-social-section\" id=\"ma7alak-social-section\">\n\n  <div class=\"ma7alak-social-heading\">\n    <div class=\"ma7alak-social-line\"></div>\n\n    <div class=\"ma7alak-social-heading-text\">\n      <div class=\"ma7alak-social-title\">Connect with us</div>\n      <div class=\"ma7alak-social-subtitle\">Follow us & get in touch</div>\n    </div>\n\n    <div class=\"ma7alak-social-line\"></div>\n  </div>\n\n  <div class=\"ma7alak-social-links\" id=\"ma7alak-social-links\">\n    <div class=\"ma7alak-social-empty\">Loading…</div>\n  </div>\n\n</div>\n\n<style>\n\n\n/* =========================================================\n   SHOUFHON SOCIAL SECTION\n========================================================= */\n\n.ma7alak-social-section {\n\n  width: 100%;\n  max-width: 680px;\n\n  margin: 28px auto;\n\n  padding: 22px 24px 25px;\n\n  box-sizing: border-box;\n\n  border-radius: 22px;\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,0.065),\n      rgba(255,255,255,0.018)\n    );\n\n  border: 1px solid rgba(255,255,255,0.10);\n\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n\n  box-shadow:\n    0 15px 40px rgba(0,0,0,0.22);\n\n}\n\n\n/* =========================================================\n   HEADING\n========================================================= */\n\n.ma7alak-social-heading {\n\n  position: relative;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap: 15px;\n\n  margin-bottom: 30px;\n\n}\n\n\n.ma7alak-social-heading-text {\n\n  text-align: center;\n\n}\n\n\n.ma7alak-social-title {\n\n  color: #f5b544;\n\n  font-size: 17px;\n\n  line-height: 1.2;\n\n  font-weight: 800;\n\n  letter-spacing: .4px;\n\n  text-shadow:\n    0 2px 9px rgba(0,0,0,.5);\n\n}\n\n\n.ma7alak-social-subtitle {\n\n  margin-top: 6px;\n\n  color: rgba(255,255,255,.58);\n\n  font-size: 12px;\n\n  line-height: 1.2;\n\n  font-weight: 500;\n\n  letter-spacing: .15px;\n\n}\n\n\n.ma7alak-social-line {\n\n  width: 50px;\n\n  height: 1px;\n\n  flex-shrink: 0;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(245,181,68,.60)\n    );\n\n}\n\n\n.ma7alak-social-line:last-child {\n\n  background:\n    linear-gradient(\n      90deg,\n      rgba(245,181,68,.60),\n      transparent\n    );\n\n}\n\n\n/* =========================================================\n   SOCIAL LINKS\n========================================================= */\n\n.ma7alak-social-links {\n\n  display: flex;\n\n  align-items: flex-start;\n\n  justify-content: center;\n\n  gap: 42px;\n\n  width: 100%;\n\n}\n\n\n/* =========================================================\n   CLICKABLE ITEM\n========================================================= */\n\n.ma7alak-social-item {\n\n  display: flex;\n\n  flex-direction: column;\n\n  align-items: center;\n\n  justify-content: flex-start;\n\n  width: 92px;\n\n  min-height: 90px;\n\n  text-decoration: none;\n\n  cursor: pointer;\n\n  background: transparent;\n\n  border: none;\n\n  transition:\n    transform .25s ease;\n\n}\n\n\n/* =========================================================\n   ICON\n========================================================= */\n\n.ma7alak-social-icon {\n\n  width: 46px;\n\n  height: 46px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n}\n\n\n.ma7alak-social-icon svg {\n\n  width: 40px;\n\n  height: 40px;\n\n  display: block;\n\n}\n\n\n/* =========================================================\n   LABEL\n========================================================= */\n\n.ma7alak-social-label {\n\n  margin-top: 9px;\n\n  font-family:\n    Inter,\n    -apple-system,\n    BlinkMacSystemFont,\n    \"Segoe UI\",\n    Arial,\n    sans-serif;\n\n  color: rgba(255,255,255,.78);\n\n  font-size: 13px;\n\n  line-height: 1.2;\n\n  font-weight: 650;\n\n  letter-spacing: .1px;\n\n  white-space: nowrap;\n\n  text-align: center;\n\n  text-shadow:\n    0 2px 7px rgba(0,0,0,.55);\n\n  transition:\n    color .25s ease,\n    transform .25s ease;\n\n}\n\n\n/* =========================================================\n   TIKTOK\n========================================================= */\n\n.ma7alak-tiktok .ma7alak-social-icon svg {\n\n  overflow: visible;\n\n  filter:\n    drop-shadow(-2px 0 #25F4EE)\n    drop-shadow(2px 0 #FE2C55);\n\n}\n\n\n.ma7alak-tiktok .tiktok-main {\n\n  fill: #050505;\n\n  stroke: #050505;\n\n  stroke-width: .35;\n\n}\n\n\n/* =========================================================\n   INSTAGRAM\n========================================================= */\n\n.ma7alak-instagram .ma7alak-social-icon svg {\n\n  overflow: visible;\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(214,41,118,.28)\n    );\n\n}\n\n\n/* =========================================================\n   FACEBOOK\n========================================================= */\n\n.ma7alak-facebook .ma7alak-social-icon svg {\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(24,119,242,.30)\n    );\n\n}\n\n\n/* =========================================================\n   WHATSAPP\n========================================================= */\n\n.ma7alak-whatsapp .ma7alak-social-icon svg {\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(37,211,102,.30)\n    );\n\n}\n\n\n/* =========================================================\n   HOVER\n========================================================= */\n\n.ma7alak-social-item:hover {\n\n  transform:\n    translateY(-5px)\n    scale(1.07);\n\n}\n\n\n.ma7alak-social-item:hover .ma7alak-social-label {\n\n  color: #ffffff;\n\n  transform: translateY(-1px);\n\n}\n\n\n/* =========================================================\n   MOBILE\n========================================================= */\n\n@media (max-width: 600px) {\n\n  .ma7alak-social-section {\n\n    width: calc(100% - 20px);\n\n    margin: 20px 10px;\n\n    padding:\n      20px 10px\n      23px;\n\n    border-radius: 19px;\n\n  }\n\n\n  .ma7alak-social-heading {\n\n    gap: 9px;\n\n    margin-bottom: 28px;\n\n  }\n\n\n  .ma7alak-social-title {\n\n    font-size: 16px;\n\n  }\n\n\n  .ma7alak-social-subtitle {\n\n    margin-top: 6px;\n\n    font-size: 11px;\n\n  }\n\n\n  .ma7alak-social-line {\n\n    width: 27px;\n\n  }\n\n\n  .ma7alak-social-links {\n\n    gap: 0;\n\n    justify-content: space-between;\n\n  }\n\n\n  .ma7alak-social-item {\n\n    width: 72px;\n\n    min-height: 84px;\n\n  }\n\n\n  .ma7alak-social-icon {\n\n    width: 43px;\n\n    height: 43px;\n\n  }\n\n\n  .ma7alak-social-icon svg {\n\n    width: 37px;\n\n    height: 37px;\n\n  }\n\n\n  .ma7alak-social-label {\n\n    margin-top: 9px;\n\n    font-size: 12px;\n\n    font-weight: 650;\n\n  }\n\n}\n\n\n/* =========================================================\n   SMALL PHONES\n========================================================= */\n\n@media (max-width: 390px) {\n\n  .ma7alak-social-section {\n\n    padding-left: 7px;\n\n    padding-right: 7px;\n\n  }\n\n\n  .ma7alak-social-links {\n\n    gap: 0;\n\n  }\n\n\n  .ma7alak-social-item {\n\n    width: 70px;\n\n  }\n\n\n  .ma7alak-social-icon svg {\n\n    width: 35px;\n\n    height: 35px;\n\n  }\n\n\n  .ma7alak-social-label {\n\n    font-size: 11px;\n\n  }\n\n\n  .ma7alak-social-line {\n\n    width: 22px;\n\n  }\n\n}\n\n\n/* =========================================================\n   TOUCH DEVICES\n========================================================= */\n\n@media (hover: none) {\n\n  .ma7alak-social-item:active {\n\n    transform:\n      scale(.94);\n\n  }\n\n}\n\n\n/* =========================================================\n   REDUCED MOTION\n========================================================= */\n\n@media (prefers-reduced-motion: reduce) {\n\n  .ma7alak-social-item {\n\n    transition: none;\n\n  }\n\n  .ma7alak-social-label {\n\n    transition: none;\n\n  }\n\n}\n\n\n\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n/* Panel follows the Admin Story/card color. Social icon artwork is untouched. */\n.ma7alak-social-section{\n  position:relative!important;\n  overflow:hidden!important;\n  border-color:rgba(var(--m7-shop-accent-rgb),.30)!important;\n  background:\n    radial-gradient(circle at 15% 0%,rgba(var(--m7-shop-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(var(--m7-shop-accent-rgb),.07),transparent 38%),\n    linear-gradient(145deg,rgba(25,22,20,.95),rgba(11,10,10,.98))!important;\n  box-shadow:\n    0 15px 40px rgba(0,0,0,.28),\n    0 0 22px rgba(var(--m7-shop-accent-rgb),.08),\n    inset 0 1px 0 rgba(255,255,255,.045)!important;\n}\n\n.ma7alak-social-title{\n  color:var(--m7-shop-accent-light)!important;\n  text-shadow:\n    0 0 8px rgba(var(--m7-shop-accent-rgb),.28),\n    0 2px 9px rgba(0,0,0,.55)!important;\n}\n\n.ma7alak-social-subtitle,\n.ma7alak-social-label{\n  color:rgba(var(--m7-shop-accent-rgb),.82)!important;\n}\n\n.ma7alak-social-line{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.74)\n    )!important;\n  box-shadow:0 0 7px rgba(var(--m7-shop-accent-rgb),.20)!important;\n}\n\n.ma7alak-social-line:last-child{\n  background:\n    linear-gradient(\n      90deg,\n      rgba(var(--m7-shop-accent-rgb),.74),\n      transparent\n    )!important;\n}\n\n/*\n  SMART SOCIAL LAYOUT\n  1 icon  = centered\n  2 icons = compact centered pair\n  3 icons = compact centered row\n  4 icons = all four fit cleanly\n*/\n.ma7alak-social-links{\n  display:grid!important;\n  grid-auto-flow:column!important;\n  grid-auto-columns:minmax(64px,78px)!important;\n  justify-content:center!important;\n  justify-items:center!important;\n  align-items:start!important;\n  gap:clamp(9px,3.2vw,22px)!important;\n  width:max-content!important;\n  max-width:100%!important;\n  margin:0 auto!important;\n}\n\n.ma7alak-social-item{\n  width:72px!important;\n  min-width:64px!important;\n}\n\n.ma7alak-social-empty{\n  width:100%;\n  text-align:center;\n  color:rgba(255,255,255,.48);\n  font-size:12px;\n}\n\n/* Keep the original branded icon design/colors exactly as-is. */\n.ma7alak-tiktok .ma7alak-social-icon svg,\n.ma7alak-instagram .ma7alak-social-icon svg,\n.ma7alak-facebook .ma7alak-social-icon svg,\n.ma7alak-whatsapp .ma7alak-social-icon svg{\n  opacity:1!important;\n}\n\n@media(max-width:600px){\n  .ma7alak-social-links{\n    grid-auto-columns:minmax(60px,72px)!important;\n    gap:clamp(5px,2.6vw,14px)!important;\n  }\n\n  .ma7alak-social-item{\n    width:68px!important;\n    min-width:60px!important;\n  }\n}\n\n</style>\n<div class=\"ma7alak-location-section\">\n\n  <!-- PERFECTLY CENTERED HEADER -->\n  <div class=\"ma7alak-location-header\">\n    <div class=\"ma7alak-location-title\">\n      <span class=\"ma7alak-location-title-icon\">\n        <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n          <path d=\"M12 2C7.58 2 4 5.58 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.42-3.58-8-8-8z\" fill=\"#ff73b9\"/>\n          <circle cx=\"12\" cy=\"10\" r=\"3\" fill=\"#fff\"/>\n        </svg>\n      </span>\n      <span>Location</span>\n    </div>\n  </div>\n\n  <!-- LOCATION + HOURS -->\n  <div class=\"ma7alak-location-info\">\n\n    <!-- LOCATION BOX -->\n    <div class=\"ma7alak-info-row\">\n      <div class=\"ma7alak-info-content\">\n        <div class=\"ma7alak-info-label\">LOCATION</div>\n        <div class=\"ma7alak-info-text\" id=\"ma7alak-location-value\">Loading…</div>\n      </div>\n\n      <div class=\"ma7alak-info-icon ma7alak-location-icon\">\n        <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n          <path d=\"M12 2C7.58 2 4 5.58 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.42-3.58-8-8-8z\" fill=\"#ff73b9\"/>\n          <circle cx=\"12\" cy=\"10\" r=\"3\" fill=\"#fff\"/>\n        </svg>\n      </div>\n    </div>\n\n    <!-- OPENING HOURS BOX -->\n    <div class=\"ma7alak-info-row\">\n      <div class=\"ma7alak-info-content\">\n        <div class=\"ma7alak-info-label\">AVAILABILITY</div>\n\n        <div class=\"ma7alak-hours-list\">\n          <div class=\"ma7alak-hours-text ma7alak-hours-primary\">\n            <span id=\"ma7alak-availability-days\">Loading…</span>\n            <strong id=\"ma7alak-availability-time\"></strong>\n          </div>\n          <div id=\"ma7alak-availability-extra\" class=\"ma7alak-availability-extra\"></div>\n        </div>\n      </div>\n\n      <div class=\"ma7alak-info-icon ma7alak-clock-icon\">\n        <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n          <circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"none\" stroke=\"#ff73b9\" stroke-width=\"2\"/>\n          <path d=\"M12 7v5l3.5 2\" fill=\"none\" stroke=\"#ff73b9\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n        </svg>\n      </div>\n    </div>\n\n  </div>\n</div>\n\n<style>\n/* =========================================================\n   ZEE PREMIUM LOCATION — PHONE FIRST\n   Rose / pink / purple palette matching Premium About Zee\n========================================================= */\n\n.ma7alak-location-section{\n  width:calc(100% - 20px);\n  max-width:680px;\n  margin:20px 10px;\n  padding:20px 10px 14px;\n  box-sizing:border-box;\n  position:relative;\n  overflow:hidden;\n\n  border-radius:22px;\n  border:1px solid rgba(255,112,184,.32);\n\n  background:\n    radial-gradient(circle at 15% 0%,rgba(255,99,177,.11),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(165,91,255,.10),transparent 38%),\n    linear-gradient(145deg,rgba(29,20,29,.92),rgba(13,11,16,.96));\n\n  box-shadow:\n    0 16px 40px rgba(0,0,0,.30),\n    0 0 24px rgba(255,93,170,.07),\n    inset 0 1px 0 rgba(255,255,255,.05);\n\n  backdrop-filter:blur(15px);\n  -webkit-backdrop-filter:blur(15px);\n\n  font-family:Arial,\"Segoe UI\",sans-serif;\n}\n\n/* soft premium moving blush light */\n.ma7alak-location-section::before{\n  content:\"\";\n  position:absolute;\n  width:150px;\n  height:150px;\n  left:-90px;\n  top:-80px;\n  border-radius:50%;\n  background:rgba(255,92,171,.14);\n  filter:blur(42px);\n  pointer-events:none;\n  animation:zeeLocationAura 5s ease-in-out infinite alternate;\n}\n\n@keyframes zeeLocationAura{\n  from{transform:translate(0,0) scale(.9);opacity:.45;}\n  to{transform:translate(190px,50px) scale(1.12);opacity:.85;}\n}\n\n/* =========================================================\n   HEADER — ACTUALLY CENTERED\n========================================================= */\n\n.ma7alak-location-header{\n  width:100%;\n  display:grid;\n  grid-template-columns:1fr auto 1fr;\n  align-items:center;\n  margin:0 0 18px;\n  position:relative;\n  z-index:2;\n}\n\n.ma7alak-location-header::before,\n.ma7alak-location-header::after{\n  content:\"\";\n  height:1px;\n  width:100%;\n  max-width:72px;\n  justify-self:center;\n  background:linear-gradient(\n    90deg,\n    transparent,\n    rgba(255,116,184,.78),\n    rgba(207,142,255,.70)\n  );\n  box-shadow:0 0 8px rgba(255,105,177,.25);\n}\n\n.ma7alak-location-header::after{\n  transform:scaleX(-1);\n}\n\n.ma7alak-location-title{\n  grid-column:2;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:8px;\n  margin:0;\n  padding:0 10px;\n\n  color:#ff9dce;\n  font-family:Georgia,\"Times New Roman\",serif;\n  font-size:21px;\n  font-weight:800;\n  line-height:1;\n  white-space:nowrap;\n\n  text-shadow:\n    0 0 8px rgba(255,105,178,.42),\n    0 0 18px rgba(194,103,255,.16),\n    0 2px 8px rgba(0,0,0,.65);\n}\n\n.ma7alak-location-title-icon{\n  width:20px;\n  height:20px;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  flex:0 0 20px;\n}\n\n.ma7alak-location-title-icon svg{\n  width:19px;\n  height:19px;\n  display:block;\n  filter:\n    drop-shadow(0 0 5px rgba(255,103,177,.58))\n    drop-shadow(0 0 10px rgba(194,103,255,.18));\n}\n\n/* =========================================================\n   BOXES\n========================================================= */\n\n.ma7alak-location-info{\n  position:relative;\n  z-index:2;\n  display:flex;\n  flex-direction:column;\n  gap:10px;\n  margin:0;\n}\n\n.ma7alak-info-row{\n  position:relative;\n  width:100%;\n  min-height:78px;\n\n  display:flex;\n  align-items:center;\n  justify-content:center;\n\n  padding:13px 48px;\n  box-sizing:border-box;\n  overflow:hidden;\n\n  border-radius:15px;\n  border:1px solid rgba(255,124,187,.16);\n\n  background:\n    linear-gradient(135deg,rgba(255,108,179,.055),rgba(183,102,255,.025)),\n    rgba(255,255,255,.022);\n\n  box-shadow:\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 8px 22px rgba(0,0,0,.16);\n}\n\n/* tiny feminine shimmer through each box */\n.ma7alak-info-row::before{\n  content:\"\";\n  position:absolute;\n  top:0;\n  bottom:0;\n  left:-45%;\n  width:32%;\n  pointer-events:none;\n  transform:skewX(-20deg);\n  background:linear-gradient(\n    90deg,\n    transparent,\n    rgba(255,179,217,.055),\n    rgba(255,255,255,.08),\n    transparent\n  );\n  animation:zeeBoxShimmer 4.5s ease-in-out infinite;\n}\n\n.ma7alak-info-row:nth-child(2)::before{\n  animation-delay:1.1s;\n}\n\n@keyframes zeeBoxShimmer{\n  0%,55%{left:-45%;opacity:0;}\n  65%{opacity:1;}\n  88%{left:115%;opacity:.8;}\n  100%{left:115%;opacity:0;}\n}\n\n.ma7alak-info-content{\n  width:100%;\n  margin:0 auto;\n  text-align:center;\n  position:relative;\n  z-index:2;\n}\n\n/* =========================================================\n   TEXT — PREMIUM ABOUT ZEE COLORS\n========================================================= */\n\n.ma7alak-info-label{\n  margin:0 0 6px;\n\n  /* pink/purple instead of orange */\n  color:#f08bc5;\n\n  font-size:10px;\n  font-weight:900;\n  line-height:1;\n  letter-spacing:1px;\n  text-transform:uppercase;\n  text-align:center;\n\n  text-shadow:\n    0 0 7px rgba(240,139,197,.42),\n    0 0 14px rgba(181,103,255,.16);\n}\n\n.ma7alak-info-text{\n  color:#ffd1e7;\n  font-size:14px;\n  font-weight:800;\n  line-height:1.45;\n  text-align:center;\n\n  text-shadow:\n    0 0 7px rgba(255,113,181,.30),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n.ma7alak-hours-text{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:7px;\n  flex-wrap:wrap;\n\n  font-size:13px;\n  line-height:1.45;\n  text-align:center;\n}\n\n.ma7alak-hours-text span{\n  color:#e8a7ca;\n  font-weight:700;\n  text-shadow:\n    0 0 6px rgba(232,167,202,.18),\n    0 2px 7px rgba(0,0,0,.65);\n}\n\n.ma7alak-hours-text strong{\n  color:#ffd2e8;\n  font-size:13px;\n  font-weight:900;\n\n  text-shadow:\n    0 0 7px rgba(255,105,179,.38),\n    0 0 15px rgba(193,102,255,.16),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n.ma7alak-hours-list{\n  display:grid;\n  gap:6px;\n  width:100%;\n}\n\n.ma7alak-hours-primary:empty{\n  display:none;\n}\n\n.ma7alak-availability-extra{\n  display:grid;\n  gap:5px;\n  width:100%;\n}\n\n.ma7alak-availability-extra:empty{\n  display:none;\n}\n\n.ma7alak-availability-line{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:7px;\n  flex-wrap:wrap;\n  padding-top:5px;\n  border-top:1px solid rgba(var(--m7-shop-accent-rgb),.10);\n  font-size:12px;\n  line-height:1.45;\n  text-align:center;\n}\n\n.ma7alak-availability-line span{\n  color:#e8a7ca;\n  font-weight:700;\n  text-shadow:\n    0 0 6px rgba(232,167,202,.18),\n    0 2px 7px rgba(0,0,0,.65);\n}\n\n.ma7alak-availability-line strong{\n  color:#ffd2e8;\n  font-size:12px;\n  font-weight:900;\n  text-shadow:\n    0 0 7px rgba(255,105,179,.30),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n/* =========================================================\n   ICONS — PINK / PURPLE, NO ORANGE\n========================================================= */\n\n.ma7alak-info-icon{\n  position:absolute;\n  right:13px;\n  top:50%;\n  transform:translateY(-50%);\n\n  width:32px;\n  height:32px;\n\n  display:flex;\n  align-items:center;\n  justify-content:center;\n\n  border-radius:50%;\n  box-sizing:border-box;\n  z-index:3;\n\n  border:1px solid rgba(255,119,184,.20);\n  background:\n    radial-gradient(circle at 35% 25%,rgba(255,188,220,.15),rgba(255,105,177,.06) 52%,rgba(142,72,190,.05));\n\n  box-shadow:\n    0 0 10px rgba(255,98,174,.12),\n    inset 0 1px 0 rgba(255,255,255,.05);\n}\n\n.ma7alak-info-icon svg{\n  width:20px;\n  height:20px;\n  display:block;\n}\n\n.ma7alak-location-icon{\n  animation:zeePinGlow 2.5s ease-in-out infinite;\n}\n\n.ma7alak-clock-icon{\n  animation:zeeClockGlow 2.8s ease-in-out infinite;\n}\n\n@keyframes zeePinGlow{\n  0%,100%{\n    box-shadow:0 0 8px rgba(255,95,172,.10);\n  }\n  50%{\n    box-shadow:\n      0 0 11px rgba(255,95,172,.30),\n      0 0 20px rgba(184,101,255,.12);\n  }\n}\n\n@keyframes zeeClockGlow{\n  0%,100%{\n    box-shadow:0 0 8px rgba(255,95,172,.10);\n  }\n  50%{\n    box-shadow:\n      0 0 11px rgba(255,95,172,.26),\n      0 0 20px rgba(184,101,255,.10);\n  }\n}\n\n/* =========================================================\n   VERY SMALL PHONES\n========================================================= */\n\n@media(max-width:390px){\n  .ma7alak-location-section{\n    width:calc(100% - 14px);\n    margin:18px 7px;\n    padding:18px 7px 12px;\n  }\n\n  .ma7alak-location-header{\n    margin-bottom:16px;\n  }\n\n  .ma7alak-location-header::before,\n  .ma7alak-location-header::after{\n    max-width:45px;\n  }\n\n  .ma7alak-location-title{\n    font-size:20px;\n    padding:0 7px;\n  }\n\n  .ma7alak-info-row{\n    min-height:76px;\n    padding-left:38px;\n    padding-right:38px;\n  }\n\n  .ma7alak-info-icon{\n    right:9px;\n    width:29px;\n    height:29px;\n  }\n\n  .ma7alak-info-icon svg{\n    width:18px;\n    height:18px;\n  }\n\n  .ma7alak-info-text,\n  .ma7alak-hours-text,\n  .ma7alak-hours-text strong{\n    font-size:12px;\n  }\n}\n\n/* =========================================================\n   WHAT CHANGED\n   =========================================================\n   1. Removed the old orange/gold text palette.\n   2. Location/Availability labels now use Zee premium rose-pink.\n   3. Beirut/Flexible Time now use soft blush-pink.\n   4. Clock changed from orange/gold to pink.\n   5. Location pin changed to pink.\n   6. Box borders/glows now use pink + subtle purple.\n   7. Added soft feminine shimmer animation to both boxes.\n   8. Kept the Location title mathematically centered.\n   9. Kept Google Maps completely removed.\n   10. Phone-first layout preserved.\n========================================================= */\n</style>\n\n\n<style>\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n/* Same panel design, but now it follows the shop Story/card color. */\n.ma7alak-location-section{\n  border-color:rgba(var(--m7-shop-accent-rgb),.32)!important;\n  background:\n    radial-gradient(circle at 15% 0%,rgba(var(--m7-shop-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(var(--m7-shop-accent-rgb),.07),transparent 38%),\n    linear-gradient(145deg,rgba(25,22,20,.94),rgba(11,10,10,.97))!important;\n  box-shadow:\n    0 16px 40px rgba(0,0,0,.30),\n    0 0 24px rgba(var(--m7-shop-accent-rgb),.08),\n    inset 0 1px 0 rgba(255,255,255,.05)!important;\n}\n\n.ma7alak-location-section::before{\n  background:rgba(var(--m7-shop-accent-rgb),.14)!important;\n}\n\n.ma7alak-location-title,\n.ma7alak-info-text,\n.ma7alak-hours-text strong{\n  color:var(--m7-shop-accent-light)!important;\n}\n\n.ma7alak-info-label,\n.ma7alak-hours-text span{\n  color:rgba(var(--m7-shop-accent-rgb),.86)!important;\n}\n\n.ma7alak-location-header::before,\n.ma7alak-location-header::after{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.78),\n      rgba(var(--m7-shop-accent-rgb),.42)\n    )!important;\n}\n\n.ma7alak-info-row{\n  border-color:rgba(var(--m7-shop-accent-rgb),.17)!important;\n  background:\n    linear-gradient(\n      135deg,\n      rgba(var(--m7-shop-accent-rgb),.06),\n      rgba(var(--m7-shop-accent-rgb),.02)\n    ),\n    rgba(255,255,255,.022)!important;\n}\n\n.ma7alak-info-icon{\n  border-color:rgba(var(--m7-shop-accent-rgb),.22)!important;\n  background:\n    radial-gradient(\n      circle at 35% 25%,\n      rgba(var(--m7-shop-accent-rgb),.18),\n      rgba(var(--m7-shop-accent-rgb),.06) 52%,\n      rgba(0,0,0,.04)\n    )!important;\n}\n\n.ma7alak-location-title-icon path:first-child,\n.ma7alak-location-icon path:first-child{\n  fill:var(--m7-shop-accent)!important;\n}\n\n.ma7alak-clock-icon circle,\n.ma7alak-clock-icon path{\n  stroke:var(--m7-shop-accent)!important;\n}\n</style>\n<div id=\"ma7alak-exact-map-section\" hidden>\n\n  <div class=\"ma7alak-exact-map-heading\">\n    <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n      <path\n        d=\"M9 4 3 7v13l6-3 6 3 6-3V4l-6 3-6-3Z\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        stroke-width=\"1.7\"\n        stroke-linecap=\"round\"\n        stroke-linejoin=\"round\"\n      />\n      <path\n        d=\"M9 4v13M15 7v13\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        stroke-width=\"1.7\"\n      />\n    </svg>\n    <span>Find us</span>\n  </div>\n\n  <div class=\"ma7alak-exact-map-frame\">\n    <iframe\n      id=\"ma7alak-exact-map\"\n      title=\"Shop location map\"\n      loading=\"lazy\"\n      referrerpolicy=\"no-referrer-when-downgrade\"\n      allowfullscreen\n    ></iframe>\n  </div>\n\n</div>\n\n<div class=\"ma7alak-realtime-stats\">\n\n    <div class=\"ma7alak-stats-panel\">\n\n        <div class=\"ma7alak-stat\" id=\"ma7alak-online-card\">\n            <span class=\"ma7alak-icon ma7alak-eye-icon\" id=\"ma7alak-online-eye\">👁️</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-online\">0</strong>\n                <span>Viewing now</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">👥</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-week\">0</strong>\n                <span>Views this week</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">🔥</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-today\">0</strong>\n                <span>Visitors today</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">👀</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-total\">0</strong>\n                <span>Total views</span>\n            </div>\n        </div>\n\n    </div>\n\n</div>\n\n<style>\n.ma7alak-realtime-stats {\n    width: min(100%, 420px);\n    margin: 16px auto;\n    padding: 0 6px;\n    font-family: Arial, sans-serif;\n    box-sizing: border-box;\n}\n\n.ma7alak-stats-panel {\n    position: relative;\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    gap: 0;\n    overflow: hidden;\n\n    border-radius: 20px;\n    border: 1px solid rgba(242, 198, 209, 0.34);\n\n    background:\n        radial-gradient(\n            circle at 50% 0%,\n            rgba(201, 126, 148, 0.12),\n            transparent 50%\n        ),\n        linear-gradient(\n            145deg,\n            rgba(40, 25, 32, 0.97),\n            rgba(11, 8, 10, 0.98)\n        );\n\n    box-shadow:\n        0 12px 28px rgba(0, 0, 0, 0.34),\n        0 0 18px rgba(213, 141, 163, 0.08),\n        0 0 14px rgba(215, 168, 68, 0.06);\n\n    backdrop-filter: blur(10px);\n    -webkit-backdrop-filter: blur(10px);\n}\n\n.ma7alak-stats-panel::before {\n    content: \"\";\n    position: absolute;\n    top: 0;\n    left: 16%;\n    right: 16%;\n    height: 2px;\n    z-index: 3;\n\n    background:\n        linear-gradient(\n            90deg,\n            transparent,\n            #c8879a 28%,\n            #e3b85f 52%,\n            #c8879a 74%,\n            transparent\n        );\n\n    border-radius: 0 0 8px 8px;\n\n    box-shadow:\n        0 0 8px rgba(227, 184, 95, 0.18);\n}\n\n.ma7alak-stat {\n    position: relative;\n    min-width: 0;\n    display: flex;\n    align-items: center;\n    gap: 9px;\n    padding: 12px 11px;\n    box-sizing: border-box;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(2) {\n    border-bottom: 1px solid rgba(242, 198, 209, 0.10);\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(3) {\n    border-right: 1px solid rgba(242, 198, 209, 0.10);\n}\n\n.ma7alak-icon {\n    flex: 0 0 auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n\n    width: 34px;\n    height: 34px;\n\n    font-size: 19px;\n    line-height: 1;\n\n    border-radius: 11px;\n\n    background:\n        linear-gradient(\n            145deg,\n            rgba(238, 200, 210, 0.13),\n            rgba(177, 105, 128, 0.07)\n        );\n\n    border: 1px solid rgba(239, 201, 211, 0.14);\n\n    box-shadow:\n        0 5px 14px rgba(0, 0, 0, 0.18);\n\n    transform-origin: center;\n}\n\n.ma7alak-stat-copy {\n    min-width: 0;\n    flex: 1;\n    text-align: left;\n}\n\n.ma7alak-stat strong {\n    display: block;\n    margin: 0;\n\n    font-size: 20px;\n    font-weight: 800;\n    line-height: 1;\n\n    color: #f7d7df;\n\n    text-shadow:\n        0 0 10px rgba(202, 137, 155, 0.10);\n}\n\n.ma7alak-stat-copy span {\n    display: block;\n    margin-top: 5px;\n\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.25;\n\n    color: rgba(244, 211, 220, 0.70);\n\n    letter-spacing: 0.1px;\n\n    white-space: normal;\n    overflow-wrap: break-word;\n    word-break: normal;\n}\n\n\n/* =========================================================\n   VIEWING NOW EYE ANIMATION\n   Starts only when 2 or more people are viewing.\n========================================================= */\n\n@keyframes ma7alakEyeLook {\n    0%,\n    100% {\n        transform: translateX(0) scale(1);\n    }\n\n    20% {\n        transform: translateX(-3px) scale(1.04);\n    }\n\n    40% {\n        transform: translateX(3px) scale(1.04);\n    }\n\n    60% {\n        transform: translateX(-2px) scale(1.02);\n    }\n\n    80% {\n        transform: translateX(2px) scale(1.02);\n    }\n}\n\n@keyframes ma7alakEyeGlow {\n    0%,\n    100% {\n        filter:\n            drop-shadow(0 0 0 rgba(217,164,65,0));\n    }\n\n    50% {\n        filter:\n            drop-shadow(0 0 8px rgba(227,184,95,0.58));\n    }\n}\n\n#ma7alak-online-eye.ma7alak-eye-active {\n    animation:\n        ma7alakEyeLook 1.8s ease-in-out infinite,\n        ma7alakEyeGlow 1.8s ease-in-out infinite;\n}\n\n\n/* Smaller phones */\n@media (max-width: 380px) {\n    .ma7alak-realtime-stats {\n        width: min(100%, 360px);\n        padding: 0 4px;\n    }\n\n    .ma7alak-stat {\n        gap: 7px;\n        padding: 10px 8px;\n    }\n\n    .ma7alak-icon {\n        width: 31px;\n        height: 31px;\n        font-size: 17px;\n        border-radius: 10px;\n    }\n\n    .ma7alak-stat strong {\n        font-size: 18px;\n    }\n\n    .ma7alak-stat-copy span {\n        font-size: 9px;\n        line-height: 1.2;\n    }\n}\n\n\n/* Desktop */\n@media (min-width: 700px) {\n    .ma7alak-realtime-stats {\n        width: min(100%, 560px);\n    }\n\n    .ma7alak-stats-panel {\n        grid-template-columns: repeat(4, minmax(0, 1fr));\n    }\n\n    .ma7alak-stat {\n        padding: 13px 12px;\n    }\n\n    .ma7alak-stat:nth-child(1),\n    .ma7alak-stat:nth-child(2) {\n        border-bottom: 0;\n    }\n\n    .ma7alak-stat:nth-child(1),\n    .ma7alak-stat:nth-child(2),\n    .ma7alak-stat:nth-child(3) {\n        border-right: 1px solid rgba(242, 198, 209, 0.10);\n    }\n\n    .ma7alak-stat:nth-child(4) {\n        border-right: 0;\n    }\n}\n</style>\n\n\n<style>\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n.ma7alak-stats-panel{\n  border-color:rgba(var(--m7-shop-accent-rgb),.34)!important;\n  background:\n    radial-gradient(\n      circle at 50% 0%,\n      rgba(var(--m7-shop-accent-rgb),.12),\n      transparent 50%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(32,27,25,.97),\n      rgba(10,9,9,.98)\n    )!important;\n  box-shadow:\n    0 12px 28px rgba(0,0,0,.34),\n    0 0 18px rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-stats-panel::before{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.64) 28%,\n      var(--m7-shop-accent-light) 52%,\n      rgba(var(--m7-shop-accent-rgb),.64) 74%,\n      transparent\n    )!important;\n  box-shadow:\n    0 0 8px rgba(var(--m7-shop-accent-rgb),.22)!important;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(2){\n  border-bottom-color:\n    rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(3){\n  border-right-color:\n    rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-icon{\n  background:\n    linear-gradient(\n      145deg,\n      rgba(var(--m7-shop-accent-rgb),.14),\n      rgba(var(--m7-shop-accent-rgb),.06)\n    )!important;\n  border-color:\n    rgba(var(--m7-shop-accent-rgb),.15)!important;\n}\n\n.ma7alak-stat strong{\n  color:\n    var(--m7-shop-accent-light)!important;\n}\n\n.ma7alak-stat-copy span{\n  color:\n    rgba(var(--m7-shop-accent-rgb),.72)!important;\n}\n\n@media(min-width:700px){\n  .ma7alak-stat:nth-child(1),\n  .ma7alak-stat:nth-child(2),\n  .ma7alak-stat:nth-child(3){\n    border-right-color:\n      rgba(var(--m7-shop-accent-rgb),.10)!important;\n  }\n}\n</style>\n</div>\n";
+const MARKUP = "<!-- =========================================================\n     SHOUFHON — EXACT MERGED SHOP HUB\n\n     WHY THIS VERSION EXISTS:\n     The first merged rewrite changed the proven animation engines,\n     service icon behavior, text typography and Location effects.\n\n     THIS VERSION DOES NOT REWRITE THEM.\n\n     ✓ Exact old About CSS/keyframes/Admin effects\n     ✓ Exact old service icon renderer\n     ✓ Tattoo ink-drop + Piercing sparkle restored\n     ✓ Exact old About text typography restored\n     ✓ Exact old Social design\n     ✓ Exact old Location aura / shimmer / pin / clock animations\n     ✓ Exact old optimized Stats design + eye animation\n     ✓ One Hostinger embed\n     ✓ One slug to change\n     ✓ Optional Google Map added without replacing old Location code\n========================================================= -->\n\n<style id=\"ma7alak-exact-merged-hub-shell-style\">\n/* =========================================================\n   SHOUFHON EXACT MERGED HUB SHELL\n   IMPORTANT:\n   The inner About / Social / Location / Stats modules below\n   are the SAME proven separate modules, not rewritten copies.\n   This shell only groups them into ONE Hostinger embed.\n========================================================= */\n\n#ma7alak-exact-merged-hub{\n  --m7-exact-shell-accent:#f2caed;\n  --m7-exact-shell-accent-rgb:242,202,237;\n\n  width:100%;\n  max-width:720px;\n  margin:0 auto;\n  padding:8px 0 10px;\n  box-sizing:border-box;\n\n  position:relative;\n  overflow:hidden;\n\n  border-radius:30px;\n\n  border:0;\n\n  background:\n    radial-gradient(\n      circle at 50% -8%,\n      rgba(var(--m7-exact-shell-accent-rgb),.085),\n      transparent 28%\n    ),\n    linear-gradient(\n      180deg,\n      rgba(9,8,10,.94),\n      rgba(5,5,6,.98)\n    );\n\n  box-shadow:\n    0 24px 58px rgba(0,0,0,.38),\n    0 0 25px rgba(var(--m7-exact-shell-accent-rgb),.06),\n    inset 0 1px 0 rgba(255,255,255,.025);\n\n  isolation:isolate;\n}\n\n#ma7alak-exact-merged-hub::before{\n  content:\"\";\n  position:absolute;\n  inset:0;\n  z-index:20;\n  pointer-events:none;\n\n  border:\n    1px solid\n    rgba(var(--m7-exact-shell-accent-rgb),.23);\n\n  border-radius:inherit;\n\n  box-sizing:border-box;\n}\n\n\n/*\n  Keep every proven module's own visual engine.\n  Only normalize its maximum width so it fits cleanly inside one embed.\n*/\n#ma7alak-exact-merged-hub > .zee-about-card,\n#ma7alak-exact-merged-hub > .ma7alak-social-section,\n#ma7alak-exact-merged-hub > .ma7alak-location-section,\n#ma7alak-exact-merged-hub > .ma7alak-realtime-stats{\n  max-width:680px;\n}\n\n\n/* Slightly reduce the empty gap created by separate Hostinger elements.\n   This does NOT touch typography, icons, keyframes, or Admin effect CSS. */\n#ma7alak-exact-merged-hub > .zee-about-card{\n  margin-top:8px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-social-section{\n  margin-top:10px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-location-section{\n  margin-top:10px;\n  margin-bottom:10px;\n}\n\n#ma7alak-exact-merged-hub > .ma7alak-realtime-stats{\n  margin-top:10px;\n  margin-bottom:8px;\n}\n\n\n/* =========================================================\n   OPTIONAL GOOGLE MAP\n   New addition only. Existing Location module stays untouched.\n========================================================= */\n\n#ma7alak-exact-map-section{\n  width:calc(100% - 20px);\n  max-width:680px;\n  margin:10px auto;\n  padding:12px;\n  box-sizing:border-box;\n\n  border-radius:20px;\n  border:1px solid rgba(var(--m7-exact-shell-accent-rgb),.24);\n\n  background:\n    radial-gradient(\n      circle at 15% 0%,\n      rgba(var(--m7-exact-shell-accent-rgb),.08),\n      transparent 34%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(25,22,24,.94),\n      rgba(11,10,11,.97)\n    );\n\n  box-shadow:\n    0 12px 28px rgba(0,0,0,.22),\n    inset 0 1px 0 rgba(255,255,255,.035);\n}\n\n#ma7alak-exact-map-section[hidden]{\n  display:none!important;\n}\n\n.ma7alak-exact-map-heading{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:8px;\n  margin:0 0 10px;\n\n  color:var(--m7-shop-accent-light,#f2d99f);\n\n  font-family:Georgia,\"Times New Roman\",serif;\n  font-size:17px;\n  font-weight:800;\n\n  text-shadow:\n    0 0 8px rgba(var(--m7-exact-shell-accent-rgb),.24),\n    0 2px 8px rgba(0,0,0,.55);\n}\n\n.ma7alak-exact-map-heading svg{\n  width:19px;\n  height:19px;\n  display:block;\n}\n\n.ma7alak-exact-map-frame{\n  position:relative;\n  width:100%;\n  aspect-ratio:16 / 9;\n  min-height:150px;\n  overflow:hidden;\n\n  border-radius:15px;\n\n  background:rgba(255,255,255,.025);\n\n  box-shadow:\n    inset 0 0 0 1px rgba(255,255,255,.035);\n}\n\n.ma7alak-exact-map-frame iframe{\n  position:absolute;\n  inset:0;\n\n  width:100%;\n  height:100%;\n\n  border:0;\n  display:block;\n}\n\n\n/* =========================================================\n   PHONE\n========================================================= */\n\n@media(max-width:600px){\n\n  #ma7alak-exact-merged-hub{\n    width:100%;\n    padding:5px 0 8px;\n    border-radius:26px;\n  }\n\n}\n\n@media(max-width:390px){\n\n  #ma7alak-exact-map-section{\n    width:calc(100% - 14px);\n    margin-left:7px;\n    margin-right:7px;\n    padding:9px;\n  }\n\n}\n</style>\n\n<div id=\"ma7alak-exact-merged-hub\">\n<!-- =========================================================\n     SHOUFHON — ZEE PREMIUM ABOUT SECTION\n     PHONE-FIRST\n========================================================= -->\n\n<section class=\"zee-about-card m7-fx-title-sparkles m7-fx-title-shimmer m7-fx-ornament\">\n\n  <!-- DECORATIVE GLOW -->\n  <div class=\"zee-about-glow zee-glow-one\" aria-hidden=\"true\"></div>\n  <div class=\"zee-about-glow zee-glow-two\" aria-hidden=\"true\"></div>\n\n  <!-- OPTIONAL ADMIN-CONTROLLED FLOATING SPARKLES -->\n  <div id=\"ma7alak-about-floating-sparkles\" class=\"ma7alak-about-floating-sparkles\" aria-hidden=\"true\"></div>\n\n  <!-- TOP ORNAMENT -->\n  <div class=\"zee-about-topline\" aria-hidden=\"true\">\n\n    <span class=\"zee-line\"></span>\n\n    <span class=\"zee-center-symbol\">\n      ✦\n    </span>\n\n    <span class=\"zee-line zee-line-right\"></span>\n\n  </div>\n\n\n  <!-- TITLE — AUTO FROM SHOP SLUG -->\n  <div class=\"zee-about-heading\">\n\n    <div class=\"zee-kicker\" id=\"ma7alak-about-kicker\">\n      SHOP\n    </div>\n\n    <h2 class=\"zee-about-title\">\n\n      <span class=\"zee-title-word\" id=\"ma7alak-about-title\">\n        About\n      </span>\n\n      <span class=\"zee-title-sparkle zee-sparkle-one\" aria-hidden=\"true\">\n        ✦\n      </span>\n\n      <span class=\"zee-title-sparkle zee-sparkle-two\" aria-hidden=\"true\">\n        ✧\n      </span>\n\n    </h2>\n\n    <div id=\"ma7alak-about-arabic-name\" class=\"ma7alak-about-arabic-name\" hidden></div>\n\n  </div>\n\n\n  <!-- MAIN ABOUT CONTENT — AUTO FROM ADMIN -->\n  <div class=\"zee-about-content\">\n\n    <div class=\"zee-quote-mark\" aria-hidden=\"true\">\n      ❝\n    </div>\n\n    <p class=\"zee-about-text\" id=\"ma7alak-about-text\" dir=\"auto\">\n      Loading…\n    </p>\n\n  </div>\n\n\n  <!-- SERVICES — AUTO FROM ADMIN -->\n  <div class=\"zee-about-services\" id=\"ma7alak-about-services\"></div>\n\n\n  <!-- BOTTOM SIGNATURE -->\n  <div class=\"zee-about-signature\">\n\n    <span class=\"zee-signature-line\"></span>\n\n    <span class=\"zee-signature-text\" id=\"ma7alak-about-signature\">\n      Your style. Your story.\n    </span>\n\n    <span class=\"zee-signature-line zee-signature-line-right\"></span>\n\n  </div>\n\n</section>\n\n\n<style>\n\n/* =========================================================\n   ZEE PREMIUM ABOUT — ROOT\n========================================================= */\n\n.zee-about-card {\n\n  position: relative;\n\n  width: calc(100% - 18px);\n\n  max-width: 680px;\n\n  margin: 22px auto;\n\n  padding:\n    22px 18px 20px;\n\n  box-sizing: border-box;\n\n  overflow: hidden;\n\n  border-radius: 24px;\n\n  border:\n    1px solid rgba(239,143,182,.28);\n\n  background:\n    radial-gradient(\n      circle at 20% 0%,\n      rgba(239,143,182,.10),\n      transparent 34%\n    ),\n    radial-gradient(\n      circle at 90% 100%,\n      rgba(217,164,65,.08),\n      transparent 34%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(24,20,24,.97),\n      rgba(10,10,12,.98)\n    );\n\n  box-shadow:\n    0 18px 44px rgba(0,0,0,.34),\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 0 24px rgba(239,143,182,.04);\n\n  backdrop-filter:\n    blur(16px)\n    saturate(120%);\n\n  -webkit-backdrop-filter:\n    blur(16px)\n    saturate(120%);\n\n  font-family:\n    Arial,\n    \"Segoe UI\",\n    sans-serif;\n\n  isolation: isolate;\n\n}\n\n\n/* =========================================================\n   SOFT BACKGROUND GLOWS\n========================================================= */\n\n.zee-about-glow {\n\n  position: absolute;\n\n  border-radius: 50%;\n\n  filter:\n    blur(30px);\n\n  pointer-events: none;\n\n  z-index: 0;\n\n}\n\n\n.zee-glow-one {\n\n  width: 120px;\n  height: 120px;\n\n  left: -55px;\n  top: 40px;\n\n  background:\n    rgba(239,143,182,.10);\n\n}\n\n\n.zee-glow-two {\n\n  width: 130px;\n  height: 130px;\n\n  right: -60px;\n  bottom: 24px;\n\n  background:\n    rgba(217,164,65,.08);\n\n}\n\n\n/* =========================================================\n   TOP DECORATIVE LINE\n========================================================= */\n\n.zee-about-topline {\n\n  position: relative;\n  z-index: 2;\n\n  width: 100%;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap: 10px;\n\n  margin-bottom: 15px;\n\n}\n\n\n.zee-line {\n\n  position: relative;\n\n  flex: 1;\n\n  max-width: 92px;\n\n  height: 2px;\n\n  overflow: visible;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent 0%,\n      rgba(239,143,182,.32) 25%,\n      #ffd8e8 46%,\n      #f2c46d 58%,\n      transparent 100%\n    );\n\n  background-size:\n    240% 100%;\n\n  animation:\n    zeeLineShine\n    2.2s\n    linear\n    infinite;\n\n}\n\n\n.zee-line-right {\n\n  transform:\n    scaleX(-1);\n\n}\n\n\n.zee-line::after {\n\n  content: \"\";\n\n  position: absolute;\n\n  top: 50%;\n  left: -8px;\n\n  width: 8px;\n  height: 8px;\n\n  transform:\n    translateY(-50%);\n\n  border-radius: 50%;\n\n  background:\n    radial-gradient(\n      circle,\n      #ffffff 0 15%,\n      #ffd7e7 30%,\n      #f0bd65 48%,\n      transparent 70%\n    );\n\n  opacity: 0;\n\n  filter:\n    drop-shadow(\n      0 0 6px\n      rgba(255,188,216,.78)\n    );\n\n  animation:\n    zeeTravelSpark\n    2.2s\n    linear\n    infinite;\n\n}\n\n\n.zee-line-right::after {\n\n  animation-delay:\n    .15s;\n\n}\n\n\n@keyframes zeeLineShine {\n\n  from {\n    background-position:\n      130% 50%;\n  }\n\n  to {\n    background-position:\n      -130% 50%;\n  }\n\n}\n\n\n@keyframes zeeTravelSpark {\n\n  0% {\n    left: -8px;\n    opacity: 0;\n  }\n\n  12% {\n    opacity: 1;\n  }\n\n  84% {\n    opacity: .9;\n  }\n\n  100% {\n    left: calc(100% + 2px);\n    opacity: 0;\n  }\n\n}\n\n\n/* =========================================================\n   CENTER SYMBOL\n========================================================= */\n\n.zee-center-symbol {\n\n  color:\n    #ffd7e7;\n\n  font-size:\n    12px;\n\n  line-height:\n    1;\n\n  text-shadow:\n    0 0 7px rgba(255,255,255,.75),\n    0 0 12px rgba(239,143,182,.56);\n\n  animation:\n    zeeCenterPulse\n    1.8s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeeCenterPulse {\n\n  0%,\n  100% {\n\n    transform:\n      scale(.88)\n      rotate(0deg);\n\n    opacity:\n      .72;\n\n  }\n\n  50% {\n\n    transform:\n      scale(1.25)\n      rotate(45deg);\n\n    opacity:\n      1;\n\n  }\n\n}\n\n\n/* =========================================================\n   HEADING\n========================================================= */\n\n.zee-about-heading {\n\n  position: relative;\n  z-index: 2;\n\n  text-align: center;\n\n  margin-bottom:\n    16px;\n\n}\n\n\n.zee-kicker {\n\n  margin-bottom:\n    7px;\n\n  color:\n    rgba(255,216,232,.72);\n\n  font-size:\n    9px;\n\n  font-weight:\n    900;\n\n  letter-spacing:\n    2.7px;\n\n  text-transform:\n    uppercase;\n\n}\n\n\n.zee-about-title {\n\n  position: relative;\n\n  display: inline-block;\n\n  margin: 0;\n\n  padding:\n    0 12px;\n\n  font-family:\n    Georgia,\n    \"Times New Roman\",\n    serif;\n\n  font-size:\n    28px;\n\n  line-height:\n    1.08;\n\n  font-weight:\n    800;\n\n}\n\n\n.zee-title-word {\n\n  display: inline-block;\n\n  background:\n    linear-gradient(\n      105deg,\n      #ffffff 0%,\n      #ffd5e5 24%,\n      #ffffff 39%,\n      #efbc62 49%,\n      #fff5fa 60%,\n      #ee9fc0 75%,\n      #ffffff 100%\n    );\n\n  background-size:\n    280% 100%;\n\n  -webkit-background-clip:\n    text;\n\n  background-clip:\n    text;\n\n  color:\n    transparent;\n\n  -webkit-text-fill-color:\n    transparent;\n\n  animation:\n    zeeTitleShimmer\n    3.7s\n    ease-in-out\n    infinite;\n\n  filter:\n    drop-shadow(\n      0 3px 10px\n      rgba(0,0,0,.30)\n    );\n\n}\n\n\n@keyframes zeeTitleShimmer {\n\n  from {\n    background-position:\n      120% 50%;\n  }\n\n  to {\n    background-position:\n      -120% 50%;\n  }\n\n}\n\n\n/* =========================================================\n   TITLE SPARKLES\n========================================================= */\n\n.zee-title-sparkle {\n\n  position: absolute;\n\n  color:\n    #ffd5e5;\n\n  text-shadow:\n    0 0 6px rgba(255,255,255,.80),\n    0 0 12px rgba(239,143,182,.62);\n\n  pointer-events: none;\n\n}\n\n\n.zee-sparkle-one {\n\n  left: -3px;\n  top: -8px;\n\n  font-size:\n    11px;\n\n  animation:\n    zeeSparkleOne\n    3.2s\n    ease-in-out\n    infinite;\n\n}\n\n\n.zee-sparkle-two {\n\n  right: -1px;\n  bottom: -5px;\n\n  color:\n    #ffe3a1;\n\n  font-size:\n    12px;\n\n  animation:\n    zeeSparkleTwo\n    3.2s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeeSparkleOne {\n\n  0%,\n  20%,\n  100% {\n\n    opacity: 0;\n\n    transform:\n      scale(.5)\n      rotate(0deg);\n\n  }\n\n  38% {\n\n    opacity: 1;\n\n    transform:\n      scale(1.2)\n      rotate(36deg);\n\n  }\n\n  52% {\n\n    opacity: .4;\n\n    transform:\n      scale(.85)\n      rotate(68deg);\n\n  }\n\n}\n\n\n@keyframes zeeSparkleTwo {\n\n  0%,\n  48%,\n  100% {\n\n    opacity: 0;\n\n    transform:\n      scale(.5)\n      rotate(0deg);\n\n  }\n\n  68% {\n\n    opacity: 1;\n\n    transform:\n      scale(1.2)\n      rotate(-34deg);\n\n  }\n\n  84% {\n\n    opacity: .45;\n\n    transform:\n      scale(.85)\n      rotate(-70deg);\n\n  }\n\n}\n\n\n/* =========================================================\n   MAIN CONTENT BOX\n========================================================= */\n\n.zee-about-content {\n\n  position: relative;\n  z-index: 2;\n\n  padding:\n    18px 16px 17px;\n\n  border-radius:\n    18px;\n\n  border:\n    1px solid\n    rgba(255,255,255,.055);\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,.035),\n      rgba(255,255,255,.012)\n    );\n\n  box-shadow:\n    inset 0 1px 0\n    rgba(255,255,255,.025);\n\n}\n\n\n/* =========================================================\n   QUOTE MARK\n========================================================= */\n\n.zee-quote-mark {\n\n  position: absolute;\n\n  left: 12px;\n  top: 5px;\n\n  color:\n    rgba(239,143,182,.17);\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:\n    44px;\n\n  line-height:\n    1;\n\n  pointer-events:\n    none;\n\n}\n\n\n/* =========================================================\n   ARABIC TEXT\n========================================================= */\n\n.zee-about-text {\n\n  position: relative;\n\n  margin: 0;\n\n  color:\n    rgba(255,255,255,.92);\n\n  font-family:\n    Tahoma,\n    Arial,\n    sans-serif;\n\n  font-size:\n    15px;\n\n  font-weight:\n    650;\n\n  line-height:\n    2;\n\n  text-align:\n    right;\n\n  text-shadow:\n    0 2px 8px\n    rgba(0,0,0,.50);\n\n  -webkit-font-smoothing:\n    antialiased;\n\n  text-rendering:\n    optimizeLegibility;\n\n}\n\n\n.zee-about-text strong {\n\n  color:\n    #ffd0e2;\n\n  font-weight:\n    900;\n\n  text-shadow:\n    0 0 10px\n    rgba(239,143,182,.18);\n\n}\n\n\n/* =========================================================\n   SERVICE PILLS\n========================================================= */\n\n.zee-about-services {\n\n  position: relative;\n  z-index: 2;\n\n  display: grid;\n\n  grid-template-columns:\n    repeat(2,minmax(0,1fr));\n\n  gap:\n    9px;\n\n  margin-top:\n    12px;\n\n}\n\n\n.zee-service-pill {\n\n  position: relative;\n\n  min-height:\n    48px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap:\n    8px;\n\n  overflow:\n    visible;\n\n  border-radius:\n    15px;\n\n  border:\n    1px solid\n    rgba(239,143,182,.18);\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,.035),\n      rgba(255,255,255,.012)\n    );\n\n  color:\n    #fff;\n\n  font-size:\n    12px;\n\n  font-weight:\n    850;\n\n  letter-spacing:\n    .25px;\n\n  box-shadow:\n    inset 0 1px 0\n    rgba(255,255,255,.025);\n\n}\n\n\n.zee-service-icon {\n\n  position: relative;\n\n  width:\n    27px;\n\n  height:\n    27px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  border-radius:\n    50%;\n\n  color:\n    #ffdca0;\n\n  border:\n    1px solid\n    rgba(244,194,103,.45);\n\n  background:\n    radial-gradient(\n      circle at 35% 30%,\n      rgba(255,240,200,.15),\n      rgba(217,164,65,.06)\n    );\n\n  box-shadow:\n    0 0 8px\n    rgba(217,164,65,.14);\n\n}\n\n\n.zee-service-icon svg {\n\n  width:\n    16px;\n\n  height:\n    16px;\n\n  display:\n    block;\n\n}\n\n\n/* =========================================================\n   TATTOO INK DROP\n========================================================= */\n\n.zee-ink-drop {\n\n  position:\n    absolute;\n\n  left:\n    calc(50% - 44px);\n\n  top:\n    32px;\n\n  width:\n    4px;\n\n  height:\n    7px;\n\n  border-radius:\n    55% 45% 62% 38%\n    /\n    42% 42% 58% 58%;\n\n  background:\n    linear-gradient(\n      180deg,\n      #35353a,\n      #050506\n    );\n\n  opacity:\n    0;\n\n  animation:\n    zeeInkDrop\n    3.3s\n    ease-in\n    infinite;\n\n}\n\n\n@keyframes zeeInkDrop {\n\n  0%,\n  46% {\n\n    opacity:\n      0;\n\n    transform:\n      translateY(-3px)\n      scale(.5);\n\n  }\n\n  58% {\n\n    opacity:\n      1;\n\n  }\n\n  76% {\n\n    opacity:\n      .8;\n\n    transform:\n      translateY(8px)\n      scale(.82);\n\n  }\n\n  90%,\n  100% {\n\n    opacity:\n      0;\n\n    transform:\n      translateY(15px)\n      scale(.55);\n\n  }\n\n}\n\n\n/* =========================================================\n   PIERCING SPARKLE\n========================================================= */\n\n.zee-piercing-spark {\n\n  position:\n    absolute;\n\n  right:\n    12px;\n\n  top:\n    6px;\n\n  color:\n    #ffd2e4;\n\n  font-size:\n    9px;\n\n  text-shadow:\n    0 0 6px rgba(255,255,255,.90),\n    0 0 10px rgba(239,143,182,.68);\n\n  animation:\n    zeePiercingSpark\n    2.1s\n    ease-in-out\n    infinite;\n\n}\n\n\n@keyframes zeePiercingSpark {\n\n  0%,\n  100% {\n\n    opacity:\n      .18;\n\n    transform:\n      scale(.7)\n      rotate(0deg);\n\n  }\n\n  50% {\n\n    opacity:\n      1;\n\n    transform:\n      scale(1.25)\n      rotate(45deg);\n\n  }\n\n}\n\n\n/* =========================================================\n   SIGNATURE\n========================================================= */\n\n.zee-about-signature {\n\n  position: relative;\n  z-index: 2;\n\n  margin-top:\n    15px;\n\n  display:\n    flex;\n\n  align-items:\n    center;\n\n  justify-content:\n    center;\n\n  gap:\n    9px;\n\n}\n\n\n.zee-signature-line {\n\n  flex:\n    1;\n\n  max-width:\n    55px;\n\n  height:\n    1px;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(239,143,182,.42)\n    );\n\n}\n\n\n.zee-signature-line-right {\n\n  transform:\n    scaleX(-1);\n\n}\n\n\n.zee-signature-text {\n\n  color:\n    rgba(255,222,235,.72);\n\n  font-family:\n    Georgia,\n    serif;\n\n  font-size:\n    11px;\n\n  font-style:\n    italic;\n\n  letter-spacing:\n    .3px;\n\n}\n\n\n/* =========================================================\n   PHONE FIRST\n========================================================= */\n\n@media(max-width:600px) {\n\n  .zee-about-card {\n\n    width:\n      calc(100% - 16px);\n\n    margin:\n      18px 8px;\n\n    padding:\n      19px 14px 17px;\n\n    border-radius:\n      21px;\n\n  }\n\n\n  .zee-about-title {\n\n    font-size:\n      25px;\n\n  }\n\n\n  .zee-kicker {\n\n    font-size:\n      8px;\n\n    letter-spacing:\n      2.1px;\n\n  }\n\n\n  .zee-about-content {\n\n    padding:\n      16px 13px 15px;\n\n    border-radius:\n      16px;\n\n  }\n\n\n  .zee-about-text {\n\n    font-size:\n      14px;\n\n    line-height:\n      1.95;\n\n  }\n\n\n  .zee-service-pill {\n\n    min-height:\n      46px;\n\n    font-size:\n      11px;\n\n  }\n\n\n  .zee-signature-text {\n\n    font-size:\n      10px;\n\n  }\n\n}\n\n\n/* =========================================================\n   SMALL PHONES\n========================================================= */\n\n@media(max-width:380px) {\n\n  .zee-about-card {\n\n    width:\n      calc(100% - 12px);\n\n    margin:\n      16px 6px;\n\n    padding:\n      17px 11px 15px;\n\n  }\n\n\n  .zee-about-title {\n\n    font-size:\n      23px;\n\n  }\n\n\n  .zee-about-text {\n\n    font-size:\n      13px;\n\n  }\n\n\n  .zee-about-services {\n\n    gap:\n      7px;\n\n  }\n\n\n  .zee-service-pill {\n\n    min-height:\n      44px;\n\n    gap:\n      6px;\n\n  }\n\n}\n\n\n/* Mobile animation fix: reduced-motion auto-disable removed for this visual component. */\n\n\n\n/* =========================================================\n   WHAT CHANGED\n   =========================================================\n   1. Built a completely custom About section for Zee Tattoo & Piercing.\n   2. Designed specifically for a feminine tattoo / piercing / beauty aesthetic.\n   3. Added dark premium glass styling with blush pink, rose-gold, white, and gold accents.\n   4. Added animated decorative side lines with moving light.\n   5. Added animated sparkles around the \"About Zee\" title.\n   6. Added a subtle animated tattoo ink drop.\n   7. Added a piercing sparkle animation.\n   8. Added Tattoo and Piercing service pills.\n   9. Preserved the Arabic About text and improved readability.\n   10. Added \"Your style. Your story.\" signature detail.\n   11. Built phone-first for mobile viewing.\n   12. No JavaScript required — all visual effects are pure CSS.\n========================================================= */\n\n\n\n/* =========================================================\n   PHONE ANIMATION HARDENING — ABOUT ZEE\n   Same design; animation compatibility only.\n========================================================= */\n\n.zee-line,\n.zee-line::after,\n.zee-center-symbol,\n.zee-title-word,\n.zee-title-sparkle,\n.zee-ink-drop,\n.zee-piercing-spark{\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  backface-visibility:hidden;\n  -webkit-backface-visibility:hidden;\n  will-change:transform,opacity,background-position;\n}\n\n.zee-line{\n  -webkit-animation:zeeLineShine 2.2s linear infinite!important;\n}\n\n.zee-line::after{\n  -webkit-animation:zeeTravelSpark 2.2s linear infinite!important;\n}\n\n.zee-line-right::after{\n  -webkit-animation-delay:.15s!important;\n}\n\n.zee-center-symbol{\n  -webkit-animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n}\n\n.zee-title-word{\n  -webkit-animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n}\n\n.zee-sparkle-one{\n  -webkit-animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n}\n\n.zee-sparkle-two{\n  -webkit-animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n}\n\n.zee-ink-drop{\n  -webkit-animation:zeeInkDrop 3.3s ease-in infinite!important;\n}\n\n.zee-piercing-spark{\n  -webkit-animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n}\n\n@media(max-width:600px){\n\n  .zee-line{\n    animation:zeeLineShine 2.2s linear infinite!important;\n    -webkit-animation:zeeLineShine 2.2s linear infinite!important;\n  }\n\n  .zee-line::after{\n    animation:zeeTravelSpark 2.2s linear infinite!important;\n    -webkit-animation:zeeTravelSpark 2.2s linear infinite!important;\n  }\n\n  .zee-center-symbol{\n    animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n    -webkit-animation:zeeCenterPulse 1.8s ease-in-out infinite!important;\n  }\n\n  .zee-title-word{\n    animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n    -webkit-animation:zeeTitleShimmer 3.7s ease-in-out infinite!important;\n  }\n\n  .zee-sparkle-one{\n    animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n    -webkit-animation:zeeSparkleOne 3.2s ease-in-out infinite!important;\n  }\n\n  .zee-sparkle-two{\n    animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n    -webkit-animation:zeeSparkleTwo 3.2s ease-in-out infinite!important;\n  }\n\n  .zee-ink-drop{\n    animation:zeeInkDrop 3.3s ease-in infinite!important;\n    -webkit-animation:zeeInkDrop 3.3s ease-in infinite!important;\n  }\n\n  .zee-piercing-spark{\n    animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n    -webkit-animation:zeePiercingSpark 2.1s ease-in-out infinite!important;\n  }\n}\n\n/* =========================================================\n   WHAT CHANGED — PHONE ANIMATION FIX\n   =========================================================\n   1. About Zee design, colors, layout and Arabic content are unchanged.\n   2. Removed the reduced-motion rule that could disable every About animation on phones.\n   3. Added WebKit animation support for mobile browsers.\n   4. Added explicit running animation state.\n   5. Added backface-visibility and will-change for mobile rendering.\n   6. Added phone-specific animation declarations below 600px.\n========================================================= */\n\n\n\n/* =========================================================\n   SHOUFHON SLUG-DRIVEN ABOUT\n   Shop color + Admin content\n========================================================= */\n\n:root{\n  --m7-about-accent:#ef8fb6;\n  --m7-about-accent-rgb:239,143,182;\n  --m7-about-accent-light:#f8cadd;\n  --m7-about-accent-dark:#985b73;\n}\n\n.zee-about-card{\n  border-color:rgba(var(--m7-about-accent-rgb),.34)!important;\n  background:\n    radial-gradient(circle at 20% 0%,rgba(var(--m7-about-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 90% 100%,rgba(217,164,65,.08),transparent 34%),\n    linear-gradient(145deg,rgba(24,20,24,.97),rgba(10,10,12,.98))!important;\n  box-shadow:\n    0 18px 44px rgba(0,0,0,.34),\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 0 24px rgba(var(--m7-about-accent-rgb),.08)!important;\n}\n\n.zee-glow-one{\n  background:rgba(var(--m7-about-accent-rgb),.12)!important;\n}\n\n.zee-kicker,\n.zee-title-sparkle,\n.zee-about-text strong,\n.zee-signature-text{\n  color:var(--m7-about-accent-light)!important;\n}\n\n.zee-service-pill{\n  border-color:rgba(var(--m7-about-accent-rgb),.24)!important;\n}\n\n.zee-service-icon{\n  color:var(--m7-about-accent-light)!important;\n  border-color:rgba(var(--m7-about-accent-rgb),.42)!important;\n  background:\n    radial-gradient(\n      circle at 35% 30%,\n      rgba(255,255,255,.14),\n      rgba(var(--m7-about-accent-rgb),.08)\n    )!important;\n  box-shadow:0 0 10px rgba(var(--m7-about-accent-rgb),.15)!important;\n}\n\n.ma7alak-about-arabic-name{\n  margin-top:8px;\n  color:var(--m7-about-accent-light);\n  font-family:Tahoma,Arial,sans-serif;\n  font-size:15px;\n  font-weight:800;\n  line-height:1.4;\n  direction:rtl;\n  text-align:center;\n  opacity:.9;\n}\n\n#ma7alak-about-text{\n  white-space:pre-line!important;\n}\n\n.zee-about-services:empty{\n  display:none!important;\n}\n\n.ma7alak-service-svg{\n  width:16px;\n  height:16px;\n  display:block;\n}\n\n@media(max-width:600px){\n  .ma7alak-about-arabic-name{\n    font-size:14px;\n  }\n}\n\n\n\n/* =========================================================\n   ADMIN-CONTROLLED ABOUT EFFECTS\n========================================================= */\n\n.ma7alak-about-floating-sparkles{\n  position:absolute;\n  inset:0;\n  overflow:hidden;\n  pointer-events:none;\n  z-index:1;\n  display:none;\n}\n\n.zee-about-card.m7-fx-floating .ma7alak-about-floating-sparkles{\n  display:block;\n}\n\n.ma7alak-about-floating-sparkles span{\n  position:absolute;\n  left:var(--m7-left);\n  top:var(--m7-top);\n  width:var(--m7-size);\n  height:var(--m7-size);\n  border-radius:50%;\n  opacity:0;\n  background:\n    radial-gradient(\n      circle,\n      #fff 0 16%,\n      var(--m7-about-accent-light) 28%,\n      rgba(var(--m7-about-accent-rgb),.72) 48%,\n      transparent 72%\n    );\n  filter:\n    drop-shadow(0 0 5px rgba(var(--m7-about-accent-rgb),.72));\n  animation:\n    m7AboutFloatSpark\n    var(--m7-duration)\n    ease-in-out\n    var(--m7-delay)\n    infinite;\n  -webkit-animation:\n    m7AboutFloatSpark\n    var(--m7-duration)\n    ease-in-out\n    var(--m7-delay)\n    infinite;\n  animation-play-state:running;\n  -webkit-animation-play-state:running;\n  will-change:transform,opacity;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n@keyframes m7AboutFloatSpark{\n  0%,100%{\n    opacity:0;\n    transform:translate3d(0,10px,0) scale(.45) rotate(0deg);\n  }\n  18%{\n    opacity:.78;\n  }\n  55%{\n    opacity:1;\n    transform:\n      translate3d(var(--m7-drift),-14px,0)\n      scale(1.12)\n      rotate(35deg);\n  }\n  82%{\n    opacity:.34;\n  }\n}\n\n@-webkit-keyframes m7AboutFloatSpark{\n  0%,100%{\n    opacity:0;\n    -webkit-transform:translate3d(0,10px,0) scale(.45) rotate(0deg);\n  }\n  18%{\n    opacity:.78;\n  }\n  55%{\n    opacity:1;\n    -webkit-transform:\n      translate3d(var(--m7-drift),-14px,0)\n      scale(1.12)\n      rotate(35deg);\n  }\n  82%{\n    opacity:.34;\n  }\n}\n\n/* Title sparkles */\n.zee-about-card:not(.m7-fx-title-sparkles)\n.zee-title-sparkle{\n  display:none!important;\n}\n\n/* Title shimmer */\n.zee-about-card:not(.m7-fx-title-shimmer)\n.zee-title-word{\n  animation:none!important;\n  -webkit-animation:none!important;\n  background:none!important;\n  color:#fff!important;\n  -webkit-text-fill-color:#fff!important;\n  filter:none!important;\n}\n\n/* Top lines + center ornament */\n.zee-about-card:not(.m7-fx-ornament)\n.zee-line,\n.zee-about-card:not(.m7-fx-ornament)\n.zee-line::after,\n.zee-about-card:not(.m7-fx-ornament)\n.zee-center-symbol{\n  animation:none!important;\n  -webkit-animation:none!important;\n}\n\n/* Breathing outer panel glow */\n.zee-about-card.m7-fx-panel-glow{\n  animation:\n    m7AboutPanelGlow\n    var(--m7-page-animation-speed,3.2s)\n    ease-in-out\n    infinite!important;\n  -webkit-animation:\n    m7AboutPanelGlow\n    var(--m7-page-animation-speed,3.2s)\n    ease-in-out\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:box-shadow;\n}\n\n@keyframes m7AboutPanelGlow{\n  0%,100%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.035),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.10);\n  }\n  50%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.045),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.32),\n      0 0 var(--m7-page-glow-far,38px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n@-webkit-keyframes m7AboutPanelGlow{\n  0%,100%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.035),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.10);\n  }\n  50%{\n    box-shadow:\n      0 18px 44px rgba(0,0,0,.34),\n      inset 0 1px 0 rgba(255,255,255,.045),\n      0 0 var(--m7-page-glow-near,18px) rgba(var(--m7-about-accent-rgb),.32),\n      0 0 var(--m7-page-glow-far,38px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n/* Bottom service icon pulse */\n.zee-about-card.m7-fx-icons\n.zee-service-icon{\n  animation:\n    m7AboutIconPulse\n    var(--m7-page-animation-speed,2.2s)\n    ease-in-out\n    infinite!important;\n  -webkit-animation:\n    m7AboutIconPulse\n    var(--m7-page-animation-speed,2.2s)\n    ease-in-out\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:transform,box-shadow;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(2)\n.zee-service-icon{\n  animation-delay:.18s!important;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(3)\n.zee-service-icon{\n  animation-delay:.36s!important;\n}\n\n.zee-about-card.m7-fx-icons\n.zee-service-pill:nth-child(4)\n.zee-service-icon{\n  animation-delay:.54s!important;\n}\n\n@keyframes m7AboutIconPulse{\n  0%,100%{\n    transform:scale(1);\n    box-shadow:\n      0 0 8px rgba(var(--m7-about-accent-rgb),.12);\n  }\n  50%{\n    transform:scale(var(--m7-page-scale-max,1.10));\n    box-shadow:\n      0 0 var(--m7-page-glow-near,10px) rgba(var(--m7-about-accent-rgb),.36),\n      0 0 var(--m7-page-glow-far,20px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n@-webkit-keyframes m7AboutIconPulse{\n  0%,100%{\n    -webkit-transform:scale(1);\n    box-shadow:\n      0 0 8px rgba(var(--m7-about-accent-rgb),.12);\n  }\n  50%{\n    -webkit-transform:scale(var(--m7-page-scale-max,1.10));\n    box-shadow:\n      0 0 var(--m7-page-glow-near,10px) rgba(var(--m7-about-accent-rgb),.36),\n      0 0 var(--m7-page-glow-far,20px) rgba(var(--m7-about-accent-rgb),.16);\n  }\n}\n\n/* Editable signature shimmer */\n.zee-about-card.m7-fx-signature\n.zee-signature-text{\n  display:inline-block;\n  background:\n    linear-gradient(\n      105deg,\n      var(--m7-about-accent-light) 0%,\n      var(--m7-about-accent-light) 30%,\n      rgba(255,255,255,var(--m7-page-shimmer-alpha,.88)) 46%,\n      #fff 51%,\n      rgba(255,255,255,var(--m7-page-shimmer-alpha,.88)) 56%,\n      var(--m7-about-accent-light) 70%,\n      var(--m7-about-accent-light) 100%\n    );\n  background-size:320% 100%;\n  background-position:145% 50%;\n  background-repeat:no-repeat;\n  -webkit-background-clip:text;\n  background-clip:text;\n  color:transparent!important;\n  -webkit-text-fill-color:transparent!important;\n  animation:\n    m7AboutSignatureShimmer\n    var(--m7-page-animation-speed,3.6s)\n    linear\n    infinite!important;\n  -webkit-animation:\n    m7AboutSignatureShimmer\n    var(--m7-page-animation-speed,3.6s)\n    linear\n    infinite!important;\n  animation-play-state:running!important;\n  -webkit-animation-play-state:running!important;\n  will-change:background-position,filter;\n  -webkit-backface-visibility:hidden;\n  backface-visibility:hidden;\n}\n\n@keyframes m7AboutSignatureShimmer{\n  from{background-position:145% 50%;}\n  to{background-position:-145% 50%;}\n}\n\n@-webkit-keyframes m7AboutSignatureShimmer{\n  from{background-position:145% 50%;}\n  to{background-position:-145% 50%;}\n}\n\n@media(max-width:600px){\n  .ma7alak-about-floating-sparkles span{\n    filter:\n      drop-shadow(0 0 4px rgba(var(--m7-about-accent-rgb),.62));\n  }\n}\n\n</style>\n<div class=\"ma7alak-social-section\" id=\"ma7alak-social-section\">\n\n  <div class=\"ma7alak-social-heading\">\n    <div class=\"ma7alak-social-line\"></div>\n\n    <div class=\"ma7alak-social-heading-text\">\n      <div class=\"ma7alak-social-title\">Connect with us</div>\n      <div class=\"ma7alak-social-subtitle\">Follow us & get in touch</div>\n    </div>\n\n    <div class=\"ma7alak-social-line\"></div>\n  </div>\n\n  <div class=\"ma7alak-social-links\" id=\"ma7alak-social-links\">\n    <div class=\"ma7alak-social-empty\">Loading…</div>\n  </div>\n\n</div>\n\n<style>\n\n\n/* =========================================================\n   SHOUFHON SOCIAL SECTION\n========================================================= */\n\n.ma7alak-social-section {\n\n  width: 100%;\n  max-width: 680px;\n\n  margin: 28px auto;\n\n  padding: 22px 24px 25px;\n\n  box-sizing: border-box;\n\n  border-radius: 22px;\n\n  background:\n    linear-gradient(\n      145deg,\n      rgba(255,255,255,0.065),\n      rgba(255,255,255,0.018)\n    );\n\n  border: 1px solid rgba(255,255,255,0.10);\n\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n\n  box-shadow:\n    0 15px 40px rgba(0,0,0,0.22);\n\n}\n\n\n/* =========================================================\n   HEADING\n========================================================= */\n\n.ma7alak-social-heading {\n\n  position: relative;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n  gap: 15px;\n\n  margin-bottom: 30px;\n\n}\n\n\n.ma7alak-social-heading-text {\n\n  text-align: center;\n\n}\n\n\n.ma7alak-social-title {\n\n  color: #f5b544;\n\n  font-size: 17px;\n\n  line-height: 1.2;\n\n  font-weight: 800;\n\n  letter-spacing: .4px;\n\n  text-shadow:\n    0 2px 9px rgba(0,0,0,.5);\n\n}\n\n\n.ma7alak-social-subtitle {\n\n  margin-top: 6px;\n\n  color: rgba(255,255,255,.58);\n\n  font-size: 12px;\n\n  line-height: 1.2;\n\n  font-weight: 500;\n\n  letter-spacing: .15px;\n\n}\n\n\n.ma7alak-social-line {\n\n  width: 50px;\n\n  height: 1px;\n\n  flex-shrink: 0;\n\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(245,181,68,.60)\n    );\n\n}\n\n\n.ma7alak-social-line:last-child {\n\n  background:\n    linear-gradient(\n      90deg,\n      rgba(245,181,68,.60),\n      transparent\n    );\n\n}\n\n\n/* =========================================================\n   SOCIAL LINKS\n========================================================= */\n\n.ma7alak-social-links {\n\n  display: flex;\n\n  align-items: flex-start;\n\n  justify-content: center;\n\n  gap: 42px;\n\n  width: 100%;\n\n}\n\n\n/* =========================================================\n   CLICKABLE ITEM\n========================================================= */\n\n.ma7alak-social-item {\n\n  display: flex;\n\n  flex-direction: column;\n\n  align-items: center;\n\n  justify-content: flex-start;\n\n  width: 92px;\n\n  min-height: 90px;\n\n  text-decoration: none;\n\n  cursor: pointer;\n\n  background: transparent;\n\n  border: none;\n\n  transition:\n    transform .25s ease;\n\n}\n\n\n/* =========================================================\n   ICON\n========================================================= */\n\n.ma7alak-social-icon {\n\n  width: 46px;\n\n  height: 46px;\n\n  display: flex;\n\n  align-items: center;\n\n  justify-content: center;\n\n}\n\n\n.ma7alak-social-icon svg {\n\n  width: 40px;\n\n  height: 40px;\n\n  display: block;\n\n}\n\n\n/* =========================================================\n   LABEL\n========================================================= */\n\n.ma7alak-social-label {\n\n  margin-top: 9px;\n\n  font-family:\n    Inter,\n    -apple-system,\n    BlinkMacSystemFont,\n    \"Segoe UI\",\n    Arial,\n    sans-serif;\n\n  color: rgba(255,255,255,.78);\n\n  font-size: 13px;\n\n  line-height: 1.2;\n\n  font-weight: 650;\n\n  letter-spacing: .1px;\n\n  white-space: nowrap;\n\n  text-align: center;\n\n  text-shadow:\n    0 2px 7px rgba(0,0,0,.55);\n\n  transition:\n    color .25s ease,\n    transform .25s ease;\n\n}\n\n\n/* =========================================================\n   TIKTOK\n========================================================= */\n\n.ma7alak-tiktok .ma7alak-social-icon svg {\n\n  overflow: visible;\n\n  filter:\n    drop-shadow(-2px 0 #25F4EE)\n    drop-shadow(2px 0 #FE2C55);\n\n}\n\n\n.ma7alak-tiktok .tiktok-main {\n\n  fill: #050505;\n\n  stroke: #050505;\n\n  stroke-width: .35;\n\n}\n\n\n/* =========================================================\n   INSTAGRAM\n========================================================= */\n\n.ma7alak-instagram .ma7alak-social-icon svg {\n\n  overflow: visible;\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(214,41,118,.28)\n    );\n\n}\n\n\n/* =========================================================\n   FACEBOOK\n========================================================= */\n\n.ma7alak-facebook .ma7alak-social-icon svg {\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(24,119,242,.30)\n    );\n\n}\n\n\n/* =========================================================\n   WHATSAPP\n========================================================= */\n\n.ma7alak-whatsapp .ma7alak-social-icon svg {\n\n  filter:\n    drop-shadow(\n      0 4px 10px rgba(37,211,102,.30)\n    );\n\n}\n\n\n/* =========================================================\n   HOVER\n========================================================= */\n\n.ma7alak-social-item:hover {\n\n  transform:\n    translateY(-5px)\n    scale(1.07);\n\n}\n\n\n.ma7alak-social-item:hover .ma7alak-social-label {\n\n  color: #ffffff;\n\n  transform: translateY(-1px);\n\n}\n\n\n/* =========================================================\n   MOBILE\n========================================================= */\n\n@media (max-width: 600px) {\n\n  .ma7alak-social-section {\n\n    width: calc(100% - 20px);\n\n    margin: 20px 10px;\n\n    padding:\n      20px 10px\n      23px;\n\n    border-radius: 19px;\n\n  }\n\n\n  .ma7alak-social-heading {\n\n    gap: 9px;\n\n    margin-bottom: 28px;\n\n  }\n\n\n  .ma7alak-social-title {\n\n    font-size: 16px;\n\n  }\n\n\n  .ma7alak-social-subtitle {\n\n    margin-top: 6px;\n\n    font-size: 11px;\n\n  }\n\n\n  .ma7alak-social-line {\n\n    width: 27px;\n\n  }\n\n\n  .ma7alak-social-links {\n\n    gap: 0;\n\n    justify-content: space-between;\n\n  }\n\n\n  .ma7alak-social-item {\n\n    width: 72px;\n\n    min-height: 84px;\n\n  }\n\n\n  .ma7alak-social-icon {\n\n    width: 43px;\n\n    height: 43px;\n\n  }\n\n\n  .ma7alak-social-icon svg {\n\n    width: 37px;\n\n    height: 37px;\n\n  }\n\n\n  .ma7alak-social-label {\n\n    margin-top: 9px;\n\n    font-size: 12px;\n\n    font-weight: 650;\n\n  }\n\n}\n\n\n/* =========================================================\n   SMALL PHONES\n========================================================= */\n\n@media (max-width: 390px) {\n\n  .ma7alak-social-section {\n\n    padding-left: 7px;\n\n    padding-right: 7px;\n\n  }\n\n\n  .ma7alak-social-links {\n\n    gap: 0;\n\n  }\n\n\n  .ma7alak-social-item {\n\n    width: 70px;\n\n  }\n\n\n  .ma7alak-social-icon svg {\n\n    width: 35px;\n\n    height: 35px;\n\n  }\n\n\n  .ma7alak-social-label {\n\n    font-size: 11px;\n\n  }\n\n\n  .ma7alak-social-line {\n\n    width: 22px;\n\n  }\n\n}\n\n\n/* =========================================================\n   TOUCH DEVICES\n========================================================= */\n\n@media (hover: none) {\n\n  .ma7alak-social-item:active {\n\n    transform:\n      scale(.94);\n\n  }\n\n}\n\n\n/* =========================================================\n   REDUCED MOTION\n========================================================= */\n\n@media (prefers-reduced-motion: reduce) {\n\n  .ma7alak-social-item {\n\n    transition: none;\n\n  }\n\n  .ma7alak-social-label {\n\n    transition: none;\n\n  }\n\n}\n\n\n\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n/* Panel follows the Admin Story/card color. Social icon artwork is untouched. */\n.ma7alak-social-section{\n  position:relative!important;\n  overflow:hidden!important;\n  border-color:rgba(var(--m7-shop-accent-rgb),.30)!important;\n  background:\n    radial-gradient(circle at 15% 0%,rgba(var(--m7-shop-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(var(--m7-shop-accent-rgb),.07),transparent 38%),\n    linear-gradient(145deg,rgba(25,22,20,.95),rgba(11,10,10,.98))!important;\n  box-shadow:\n    0 15px 40px rgba(0,0,0,.28),\n    0 0 22px rgba(var(--m7-shop-accent-rgb),.08),\n    inset 0 1px 0 rgba(255,255,255,.045)!important;\n}\n\n.ma7alak-social-title{\n  color:var(--m7-shop-accent-light)!important;\n  text-shadow:\n    0 0 8px rgba(var(--m7-shop-accent-rgb),.28),\n    0 2px 9px rgba(0,0,0,.55)!important;\n}\n\n.ma7alak-social-subtitle,\n.ma7alak-social-label{\n  color:rgba(var(--m7-shop-accent-rgb),.82)!important;\n}\n\n.ma7alak-social-line{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.74)\n    )!important;\n  box-shadow:0 0 7px rgba(var(--m7-shop-accent-rgb),.20)!important;\n}\n\n.ma7alak-social-line:last-child{\n  background:\n    linear-gradient(\n      90deg,\n      rgba(var(--m7-shop-accent-rgb),.74),\n      transparent\n    )!important;\n}\n\n/*\n  SMART SOCIAL LAYOUT\n  1 icon  = centered\n  2 icons = compact centered pair\n  3 icons = compact centered row\n  4 icons = all four fit cleanly\n*/\n.ma7alak-social-links{\n  display:grid!important;\n  grid-auto-flow:column!important;\n  grid-auto-columns:minmax(64px,78px)!important;\n  justify-content:center!important;\n  justify-items:center!important;\n  align-items:start!important;\n  gap:clamp(9px,3.2vw,22px)!important;\n  width:max-content!important;\n  max-width:100%!important;\n  margin:0 auto!important;\n}\n\n.ma7alak-social-item{\n  width:72px!important;\n  min-width:64px!important;\n}\n\n.ma7alak-social-empty{\n  width:100%;\n  text-align:center;\n  color:rgba(255,255,255,.48);\n  font-size:12px;\n}\n\n/* Keep the original branded icon design/colors exactly as-is. */\n.ma7alak-tiktok .ma7alak-social-icon svg,\n.ma7alak-instagram .ma7alak-social-icon svg,\n.ma7alak-facebook .ma7alak-social-icon svg,\n.ma7alak-whatsapp .ma7alak-social-icon svg{\n  opacity:1!important;\n}\n\n@media(max-width:600px){\n  .ma7alak-social-links{\n    grid-auto-columns:minmax(60px,72px)!important;\n    gap:clamp(5px,2.6vw,14px)!important;\n  }\n\n  .ma7alak-social-item{\n    width:68px!important;\n    min-width:60px!important;\n  }\n}\n\n</style>\n<div class=\"ma7alak-location-section\">\n\n\n  <!-- LOCATION + HOURS -->\n  <div class=\"ma7alak-location-info\">\n\n    <!-- LOCATION BOX -->\n    <div class=\"ma7alak-info-row\">\n      <div class=\"ma7alak-info-content\">\n        <div class=\"ma7alak-info-label\">LOCATION</div>\n        <div class=\"ma7alak-info-text\" id=\"ma7alak-location-value\">Loading…</div>\n      </div>\n\n      <div class=\"ma7alak-info-icon ma7alak-location-icon\">\n        <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n          <path d=\"M12 2C7.58 2 4 5.58 4 10c0 5.4 8 12 8 12s8-6.6 8-12c0-4.42-3.58-8-8-8z\" fill=\"#ff73b9\"/>\n          <circle cx=\"12\" cy=\"10\" r=\"3\" fill=\"#fff\"/>\n        </svg>\n      </div>\n    </div>\n\n    <!-- OPENING HOURS BOX -->\n    <div class=\"ma7alak-info-row\">\n      <div class=\"ma7alak-info-content\">\n        <div class=\"ma7alak-info-label\">AVAILABILITY</div>\n\n        <div class=\"ma7alak-hours-list\">\n          <div class=\"ma7alak-hours-text ma7alak-hours-primary\">\n            <span id=\"ma7alak-availability-days\">Loading…</span>\n            <strong id=\"ma7alak-availability-time\"></strong>\n          </div>\n          <div id=\"ma7alak-availability-extra\" class=\"ma7alak-availability-extra\"></div>\n        </div>\n      </div>\n\n      <div class=\"ma7alak-info-icon ma7alak-clock-icon\">\n        <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n          <circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"none\" stroke=\"#ff73b9\" stroke-width=\"2\"/>\n          <path d=\"M12 7v5l3.5 2\" fill=\"none\" stroke=\"#ff73b9\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n        </svg>\n      </div>\n    </div>\n\n  </div>\n</div>\n\n<style>\n/* =========================================================\n   ZEE PREMIUM LOCATION — PHONE FIRST\n   Rose / pink / purple palette matching Premium About Zee\n========================================================= */\n\n.ma7alak-location-section{\n  width:calc(100% - 20px);\n  max-width:680px;\n  margin:20px 10px;\n  padding:14px 10px 14px;\n  box-sizing:border-box;\n  position:relative;\n  overflow:hidden;\n\n  border-radius:22px;\n  border:1px solid rgba(255,112,184,.32);\n\n  background:\n    radial-gradient(circle at 15% 0%,rgba(255,99,177,.11),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(165,91,255,.10),transparent 38%),\n    linear-gradient(145deg,rgba(29,20,29,.92),rgba(13,11,16,.96));\n\n  box-shadow:\n    0 16px 40px rgba(0,0,0,.30),\n    0 0 24px rgba(255,93,170,.07),\n    inset 0 1px 0 rgba(255,255,255,.05);\n\n  backdrop-filter:blur(15px);\n  -webkit-backdrop-filter:blur(15px);\n\n  font-family:Arial,\"Segoe UI\",sans-serif;\n}\n\n/* soft premium moving blush light */\n.ma7alak-location-section::before{\n  content:\"\";\n  position:absolute;\n  width:150px;\n  height:150px;\n  left:-90px;\n  top:-80px;\n  border-radius:50%;\n  background:rgba(255,92,171,.14);\n  filter:blur(42px);\n  pointer-events:none;\n  animation:zeeLocationAura 5s ease-in-out infinite alternate;\n}\n\n@keyframes zeeLocationAura{\n  from{transform:translate(0,0) scale(.9);opacity:.45;}\n  to{transform:translate(190px,50px) scale(1.12);opacity:.85;}\n}\n\n/* =========================================================\n   HEADER — ACTUALLY CENTERED\n========================================================= */\n\n.ma7alak-location-header{\n  width:100%;\n  display:grid;\n  grid-template-columns:1fr auto 1fr;\n  align-items:center;\n  margin:0 0 18px;\n  position:relative;\n  z-index:2;\n}\n\n.ma7alak-location-header::before,\n.ma7alak-location-header::after{\n  content:\"\";\n  height:1px;\n  width:100%;\n  max-width:72px;\n  justify-self:center;\n  background:linear-gradient(\n    90deg,\n    transparent,\n    rgba(255,116,184,.78),\n    rgba(207,142,255,.70)\n  );\n  box-shadow:0 0 8px rgba(255,105,177,.25);\n}\n\n.ma7alak-location-header::after{\n  transform:scaleX(-1);\n}\n\n.ma7alak-location-title{\n  grid-column:2;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:8px;\n  margin:0;\n  padding:0 10px;\n\n  color:#ff9dce;\n  font-family:Georgia,\"Times New Roman\",serif;\n  font-size:21px;\n  font-weight:800;\n  line-height:1;\n  white-space:nowrap;\n\n  text-shadow:\n    0 0 8px rgba(255,105,178,.42),\n    0 0 18px rgba(194,103,255,.16),\n    0 2px 8px rgba(0,0,0,.65);\n}\n\n.ma7alak-location-title-icon{\n  width:20px;\n  height:20px;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  flex:0 0 20px;\n}\n\n.ma7alak-location-title-icon svg{\n  width:19px;\n  height:19px;\n  display:block;\n  filter:\n    drop-shadow(0 0 5px rgba(255,103,177,.58))\n    drop-shadow(0 0 10px rgba(194,103,255,.18));\n}\n\n/* =========================================================\n   BOXES\n========================================================= */\n\n.ma7alak-location-info{\n  position:relative;\n  z-index:2;\n  display:flex;\n  flex-direction:column;\n  gap:10px;\n  margin:0;\n}\n\n.ma7alak-info-row{\n  position:relative;\n  width:100%;\n  min-height:78px;\n\n  display:flex;\n  align-items:center;\n  justify-content:center;\n\n  padding:13px 48px;\n  box-sizing:border-box;\n  overflow:hidden;\n\n  border-radius:15px;\n  border:1px solid rgba(255,124,187,.16);\n\n  background:\n    linear-gradient(135deg,rgba(255,108,179,.055),rgba(183,102,255,.025)),\n    rgba(255,255,255,.022);\n\n  box-shadow:\n    inset 0 1px 0 rgba(255,255,255,.035),\n    0 8px 22px rgba(0,0,0,.16);\n}\n\n/* tiny feminine shimmer through each box */\n.ma7alak-info-row::before{\n  content:\"\";\n  position:absolute;\n  top:0;\n  bottom:0;\n  left:-45%;\n  width:32%;\n  pointer-events:none;\n  transform:skewX(-20deg);\n  background:linear-gradient(\n    90deg,\n    transparent,\n    rgba(255,179,217,.055),\n    rgba(255,255,255,.08),\n    transparent\n  );\n  animation:zeeBoxShimmer 4.5s ease-in-out infinite;\n}\n\n.ma7alak-info-row:nth-child(2)::before{\n  animation-delay:1.1s;\n}\n\n@keyframes zeeBoxShimmer{\n  0%,55%{left:-45%;opacity:0;}\n  65%{opacity:1;}\n  88%{left:115%;opacity:.8;}\n  100%{left:115%;opacity:0;}\n}\n\n.ma7alak-info-content{\n  width:100%;\n  margin:0 auto;\n  text-align:center;\n  position:relative;\n  z-index:2;\n}\n\n/* =========================================================\n   TEXT — PREMIUM ABOUT ZEE COLORS\n========================================================= */\n\n.ma7alak-info-label{\n  margin:0 0 6px;\n\n  /* pink/purple instead of orange */\n  color:#f08bc5;\n\n  font-size:10px;\n  font-weight:900;\n  line-height:1;\n  letter-spacing:1px;\n  text-transform:uppercase;\n  text-align:center;\n\n  text-shadow:\n    0 0 7px rgba(240,139,197,.42),\n    0 0 14px rgba(181,103,255,.16);\n}\n\n.ma7alak-info-text{\n  color:#ffd1e7;\n  font-size:14px;\n  font-weight:800;\n  line-height:1.45;\n  text-align:center;\n\n  text-shadow:\n    0 0 7px rgba(255,113,181,.30),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n.ma7alak-hours-text{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:7px;\n  flex-wrap:wrap;\n\n  font-size:13px;\n  line-height:1.45;\n  text-align:center;\n}\n\n.ma7alak-hours-text span{\n  color:#e8a7ca;\n  font-weight:700;\n  text-shadow:\n    0 0 6px rgba(232,167,202,.18),\n    0 2px 7px rgba(0,0,0,.65);\n}\n\n.ma7alak-hours-text strong{\n  color:#ffd2e8;\n  font-size:13px;\n  font-weight:900;\n\n  text-shadow:\n    0 0 7px rgba(255,105,179,.38),\n    0 0 15px rgba(193,102,255,.16),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n.ma7alak-hours-list{\n  display:grid;\n  gap:6px;\n  width:100%;\n}\n\n.ma7alak-hours-primary:empty{\n  display:none;\n}\n\n.ma7alak-availability-extra{\n  display:grid;\n  gap:5px;\n  width:100%;\n}\n\n.ma7alak-availability-extra:empty{\n  display:none;\n}\n\n.ma7alak-availability-line{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  gap:7px;\n  flex-wrap:wrap;\n  padding-top:5px;\n  border-top:1px solid rgba(var(--m7-shop-accent-rgb),.10);\n  font-size:12px;\n  line-height:1.45;\n  text-align:center;\n}\n\n.ma7alak-availability-line span{\n  color:#e8a7ca;\n  font-weight:700;\n  text-shadow:\n    0 0 6px rgba(232,167,202,.18),\n    0 2px 7px rgba(0,0,0,.65);\n}\n\n.ma7alak-availability-line strong{\n  color:#ffd2e8;\n  font-size:12px;\n  font-weight:900;\n  text-shadow:\n    0 0 7px rgba(255,105,179,.30),\n    0 2px 8px rgba(0,0,0,.72);\n}\n\n/* =========================================================\n   ICONS — PINK / PURPLE, NO ORANGE\n========================================================= */\n\n.ma7alak-info-icon{\n  position:absolute;\n  right:13px;\n  top:50%;\n  transform:translateY(-50%);\n\n  width:32px;\n  height:32px;\n\n  display:flex;\n  align-items:center;\n  justify-content:center;\n\n  border-radius:50%;\n  box-sizing:border-box;\n  z-index:3;\n\n  border:1px solid rgba(255,119,184,.20);\n  background:\n    radial-gradient(circle at 35% 25%,rgba(255,188,220,.15),rgba(255,105,177,.06) 52%,rgba(142,72,190,.05));\n\n  box-shadow:\n    0 0 10px rgba(255,98,174,.12),\n    inset 0 1px 0 rgba(255,255,255,.05);\n}\n\n.ma7alak-info-icon svg{\n  width:20px;\n  height:20px;\n  display:block;\n}\n\n.ma7alak-location-icon{\n  animation:zeePinGlow 2.5s ease-in-out infinite;\n}\n\n.ma7alak-clock-icon{\n  animation:zeeClockGlow 2.8s ease-in-out infinite;\n}\n\n@keyframes zeePinGlow{\n  0%,100%{\n    box-shadow:0 0 8px rgba(255,95,172,.10);\n  }\n  50%{\n    box-shadow:\n      0 0 11px rgba(255,95,172,.30),\n      0 0 20px rgba(184,101,255,.12);\n  }\n}\n\n@keyframes zeeClockGlow{\n  0%,100%{\n    box-shadow:0 0 8px rgba(255,95,172,.10);\n  }\n  50%{\n    box-shadow:\n      0 0 11px rgba(255,95,172,.26),\n      0 0 20px rgba(184,101,255,.10);\n  }\n}\n\n/* =========================================================\n   VERY SMALL PHONES\n========================================================= */\n\n@media(max-width:390px){\n  .ma7alak-location-section{\n    width:calc(100% - 14px);\n    margin:18px 7px;\n    padding:18px 7px 12px;\n  }\n\n  .ma7alak-location-header{\n    margin-bottom:16px;\n  }\n\n  .ma7alak-location-header::before,\n  .ma7alak-location-header::after{\n    max-width:45px;\n  }\n\n  .ma7alak-location-title{\n    font-size:20px;\n    padding:0 7px;\n  }\n\n  .ma7alak-info-row{\n    min-height:76px;\n    padding-left:38px;\n    padding-right:38px;\n  }\n\n  .ma7alak-info-icon{\n    right:9px;\n    width:29px;\n    height:29px;\n  }\n\n  .ma7alak-info-icon svg{\n    width:18px;\n    height:18px;\n  }\n\n  .ma7alak-info-text,\n  .ma7alak-hours-text,\n  .ma7alak-hours-text strong{\n    font-size:12px;\n  }\n}\n\n/* =========================================================\n   WHAT CHANGED\n   =========================================================\n   1. Removed the old orange/gold text palette.\n   2. Location/Availability labels now use Zee premium rose-pink.\n   3. Beirut/Flexible Time now use soft blush-pink.\n   4. Clock changed from orange/gold to pink.\n   5. Location pin changed to pink.\n   6. Box borders/glows now use pink + subtle purple.\n   7. Added soft feminine shimmer animation to both boxes.\n   8. Kept the Location title mathematically centered.\n   9. Kept Google Maps completely removed.\n   10. Phone-first layout preserved.\n========================================================= */\n</style>\n\n\n<style>\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n/* Same panel design, but now it follows the shop Story/card color. */\n.ma7alak-location-section{\n  border-color:rgba(var(--m7-shop-accent-rgb),.32)!important;\n  background:\n    radial-gradient(circle at 15% 0%,rgba(var(--m7-shop-accent-rgb),.12),transparent 34%),\n    radial-gradient(circle at 92% 100%,rgba(var(--m7-shop-accent-rgb),.07),transparent 38%),\n    linear-gradient(145deg,rgba(25,22,20,.94),rgba(11,10,10,.97))!important;\n  box-shadow:\n    0 16px 40px rgba(0,0,0,.30),\n    0 0 24px rgba(var(--m7-shop-accent-rgb),.08),\n    inset 0 1px 0 rgba(255,255,255,.05)!important;\n}\n\n.ma7alak-location-section::before{\n  background:rgba(var(--m7-shop-accent-rgb),.14)!important;\n}\n\n.ma7alak-location-title,\n.ma7alak-info-text,\n.ma7alak-hours-text strong{\n  color:var(--m7-shop-accent-light)!important;\n}\n\n.ma7alak-info-label,\n.ma7alak-hours-text span{\n  color:rgba(var(--m7-shop-accent-rgb),.86)!important;\n}\n\n.ma7alak-location-header::before,\n.ma7alak-location-header::after{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.78),\n      rgba(var(--m7-shop-accent-rgb),.42)\n    )!important;\n}\n\n.ma7alak-info-row{\n  border-color:rgba(var(--m7-shop-accent-rgb),.17)!important;\n  background:\n    linear-gradient(\n      135deg,\n      rgba(var(--m7-shop-accent-rgb),.06),\n      rgba(var(--m7-shop-accent-rgb),.02)\n    ),\n    rgba(255,255,255,.022)!important;\n}\n\n.ma7alak-info-icon{\n  border-color:rgba(var(--m7-shop-accent-rgb),.22)!important;\n  background:\n    radial-gradient(\n      circle at 35% 25%,\n      rgba(var(--m7-shop-accent-rgb),.18),\n      rgba(var(--m7-shop-accent-rgb),.06) 52%,\n      rgba(0,0,0,.04)\n    )!important;\n}\n\n.ma7alak-location-title-icon path:first-child,\n.ma7alak-location-icon path:first-child{\n  fill:var(--m7-shop-accent)!important;\n}\n\n.ma7alak-clock-icon circle,\n.ma7alak-clock-icon path{\n  stroke:var(--m7-shop-accent)!important;\n}\n</style>\n<div id=\"ma7alak-exact-map-section\" hidden>\n\n  <div class=\"ma7alak-exact-map-heading\">\n    <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n      <path\n        d=\"M9 4 3 7v13l6-3 6 3 6-3V4l-6 3-6-3Z\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        stroke-width=\"1.7\"\n        stroke-linecap=\"round\"\n        stroke-linejoin=\"round\"\n      />\n      <path\n        d=\"M9 4v13M15 7v13\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        stroke-width=\"1.7\"\n      />\n    </svg>\n    <span>Find us</span>\n  </div>\n\n  <div class=\"ma7alak-exact-map-frame\">\n    <iframe\n      id=\"ma7alak-exact-map\"\n      title=\"Shop location map\"\n      loading=\"lazy\"\n      referrerpolicy=\"no-referrer-when-downgrade\"\n      allowfullscreen\n    ></iframe>\n  </div>\n\n</div>\n\n<div class=\"ma7alak-realtime-stats\">\n\n    <div class=\"ma7alak-stats-panel\">\n\n        <div class=\"ma7alak-stat\" id=\"ma7alak-online-card\">\n            <span class=\"ma7alak-icon ma7alak-eye-icon\" id=\"ma7alak-online-eye\">👁️</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-online\">0</strong>\n                <span>Viewing now</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">👥</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-week\">0</strong>\n                <span>Views this week</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">🔥</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-today\">0</strong>\n                <span>Visitors today</span>\n            </div>\n        </div>\n\n        <div class=\"ma7alak-stat\">\n            <span class=\"ma7alak-icon\">👀</span>\n            <div class=\"ma7alak-stat-copy\">\n                <strong id=\"ma7alak-total\">0</strong>\n                <span>Total views</span>\n            </div>\n        </div>\n\n    </div>\n\n</div>\n\n<style>\n.ma7alak-realtime-stats {\n    width: min(100%, 420px);\n    margin: 16px auto;\n    padding: 0 6px;\n    font-family: Arial, sans-serif;\n    box-sizing: border-box;\n}\n\n.ma7alak-stats-panel {\n    position: relative;\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    gap: 0;\n    overflow: hidden;\n\n    border-radius: 20px;\n    border: 1px solid rgba(242, 198, 209, 0.34);\n\n    background:\n        radial-gradient(\n            circle at 50% 0%,\n            rgba(201, 126, 148, 0.12),\n            transparent 50%\n        ),\n        linear-gradient(\n            145deg,\n            rgba(40, 25, 32, 0.97),\n            rgba(11, 8, 10, 0.98)\n        );\n\n    box-shadow:\n        0 12px 28px rgba(0, 0, 0, 0.34),\n        0 0 18px rgba(213, 141, 163, 0.08),\n        0 0 14px rgba(215, 168, 68, 0.06);\n\n    backdrop-filter: blur(10px);\n    -webkit-backdrop-filter: blur(10px);\n}\n\n.ma7alak-stats-panel::before {\n    content: \"\";\n    position: absolute;\n    top: 0;\n    left: 16%;\n    right: 16%;\n    height: 2px;\n    z-index: 3;\n\n    background:\n        linear-gradient(\n            90deg,\n            transparent,\n            #c8879a 28%,\n            #e3b85f 52%,\n            #c8879a 74%,\n            transparent\n        );\n\n    border-radius: 0 0 8px 8px;\n\n    box-shadow:\n        0 0 8px rgba(227, 184, 95, 0.18);\n}\n\n.ma7alak-stat {\n    position: relative;\n    min-width: 0;\n    display: flex;\n    align-items: center;\n    gap: 9px;\n    padding: 12px 11px;\n    box-sizing: border-box;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(2) {\n    border-bottom: 1px solid rgba(242, 198, 209, 0.10);\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(3) {\n    border-right: 1px solid rgba(242, 198, 209, 0.10);\n}\n\n.ma7alak-icon {\n    flex: 0 0 auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n\n    width: 34px;\n    height: 34px;\n\n    font-size: 19px;\n    line-height: 1;\n\n    border-radius: 11px;\n\n    background:\n        linear-gradient(\n            145deg,\n            rgba(238, 200, 210, 0.13),\n            rgba(177, 105, 128, 0.07)\n        );\n\n    border: 1px solid rgba(239, 201, 211, 0.14);\n\n    box-shadow:\n        0 5px 14px rgba(0, 0, 0, 0.18);\n\n    transform-origin: center;\n}\n\n.ma7alak-stat-copy {\n    min-width: 0;\n    flex: 1;\n    text-align: left;\n}\n\n.ma7alak-stat strong {\n    display: block;\n    margin: 0;\n\n    font-size: 20px;\n    font-weight: 800;\n    line-height: 1;\n\n    color: #f7d7df;\n\n    text-shadow:\n        0 0 10px rgba(202, 137, 155, 0.10);\n}\n\n.ma7alak-stat-copy span {\n    display: block;\n    margin-top: 5px;\n\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.25;\n\n    color: rgba(244, 211, 220, 0.70);\n\n    letter-spacing: 0.1px;\n\n    white-space: normal;\n    overflow-wrap: break-word;\n    word-break: normal;\n}\n\n\n/* =========================================================\n   VIEWING NOW EYE ANIMATION\n   Starts only when 2 or more people are viewing.\n========================================================= */\n\n@keyframes ma7alakEyeLook {\n    0%,\n    100% {\n        transform: translateX(0) scale(1);\n    }\n\n    20% {\n        transform: translateX(-3px) scale(1.04);\n    }\n\n    40% {\n        transform: translateX(3px) scale(1.04);\n    }\n\n    60% {\n        transform: translateX(-2px) scale(1.02);\n    }\n\n    80% {\n        transform: translateX(2px) scale(1.02);\n    }\n}\n\n@keyframes ma7alakEyeGlow {\n    0%,\n    100% {\n        filter:\n            drop-shadow(0 0 0 rgba(217,164,65,0));\n    }\n\n    50% {\n        filter:\n            drop-shadow(0 0 8px rgba(227,184,95,0.58));\n    }\n}\n\n#ma7alak-online-eye.ma7alak-eye-active {\n    animation:\n        ma7alakEyeLook 1.8s ease-in-out infinite,\n        ma7alakEyeGlow 1.8s ease-in-out infinite;\n}\n\n\n/* Smaller phones */\n@media (max-width: 380px) {\n    .ma7alak-realtime-stats {\n        width: min(100%, 360px);\n        padding: 0 4px;\n    }\n\n    .ma7alak-stat {\n        gap: 7px;\n        padding: 10px 8px;\n    }\n\n    .ma7alak-icon {\n        width: 31px;\n        height: 31px;\n        font-size: 17px;\n        border-radius: 10px;\n    }\n\n    .ma7alak-stat strong {\n        font-size: 18px;\n    }\n\n    .ma7alak-stat-copy span {\n        font-size: 9px;\n        line-height: 1.2;\n    }\n}\n\n\n/* Desktop */\n@media (min-width: 700px) {\n    .ma7alak-realtime-stats {\n        width: min(100%, 560px);\n    }\n\n    .ma7alak-stats-panel {\n        grid-template-columns: repeat(4, minmax(0, 1fr));\n    }\n\n    .ma7alak-stat {\n        padding: 13px 12px;\n    }\n\n    .ma7alak-stat:nth-child(1),\n    .ma7alak-stat:nth-child(2) {\n        border-bottom: 0;\n    }\n\n    .ma7alak-stat:nth-child(1),\n    .ma7alak-stat:nth-child(2),\n    .ma7alak-stat:nth-child(3) {\n        border-right: 1px solid rgba(242, 198, 209, 0.10);\n    }\n\n    .ma7alak-stat:nth-child(4) {\n        border-right: 0;\n    }\n}\n</style>\n\n\n<style>\n:root{\n  --m7-shop-accent:#d9a441;\n  --m7-shop-accent-rgb:217,164,65;\n  --m7-shop-accent-light:#f2d99f;\n  --m7-shop-accent-soft:#e2b85f;\n  --m7-shop-accent-dark:#8b6829;\n}\n\n.ma7alak-stats-panel{\n  border-color:rgba(var(--m7-shop-accent-rgb),.34)!important;\n  background:\n    radial-gradient(\n      circle at 50% 0%,\n      rgba(var(--m7-shop-accent-rgb),.12),\n      transparent 50%\n    ),\n    linear-gradient(\n      145deg,\n      rgba(32,27,25,.97),\n      rgba(10,9,9,.98)\n    )!important;\n  box-shadow:\n    0 12px 28px rgba(0,0,0,.34),\n    0 0 18px rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-stats-panel::before{\n  background:\n    linear-gradient(\n      90deg,\n      transparent,\n      rgba(var(--m7-shop-accent-rgb),.64) 28%,\n      var(--m7-shop-accent-light) 52%,\n      rgba(var(--m7-shop-accent-rgb),.64) 74%,\n      transparent\n    )!important;\n  box-shadow:\n    0 0 8px rgba(var(--m7-shop-accent-rgb),.22)!important;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(2){\n  border-bottom-color:\n    rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-stat:nth-child(1),\n.ma7alak-stat:nth-child(3){\n  border-right-color:\n    rgba(var(--m7-shop-accent-rgb),.10)!important;\n}\n\n.ma7alak-icon{\n  background:\n    linear-gradient(\n      145deg,\n      rgba(var(--m7-shop-accent-rgb),.14),\n      rgba(var(--m7-shop-accent-rgb),.06)\n    )!important;\n  border-color:\n    rgba(var(--m7-shop-accent-rgb),.15)!important;\n}\n\n.ma7alak-stat strong{\n  color:\n    var(--m7-shop-accent-light)!important;\n}\n\n.ma7alak-stat-copy span{\n  color:\n    rgba(var(--m7-shop-accent-rgb),.72)!important;\n}\n\n@media(min-width:700px){\n  .ma7alak-stat:nth-child(1),\n  .ma7alak-stat:nth-child(2),\n  .ma7alak-stat:nth-child(3){\n    border-right-color:\n      rgba(var(--m7-shop-accent-rgb),.10)!important;\n  }\n}\n</style>\n</div>\n";
 mount.innerHTML = MARKUP;
 
 /*
@@ -2365,407 +2365,199 @@ window.addEventListener(
   }
 
 
-  async function loadLocationPanel(){
+  function m7AvailabilityTimeLabel(value){
+    const raw=String(value||"").trim();
+    const match=raw.match(/^(\\d{1,2}):(\\d{2})$/);
+    if(!match)return raw;
+    let hour=Number(match[1]);
+    const minute=match[2];
+    const suffix=hour>=12?"PM":"AM";
+    hour=hour%12||12;
+    return hour+(minute==="00"?"":":"+minute)+" "+suffix;
+  }
 
-    const client =
-      m7GetClient();
+  function m7AvailabilityRows(options){
+    const source=options&&typeof options==="object"?options:{};
+    const manualDays=String(source.availability_days||"").trim();
+    const manualTime=String(source.availability_time||"").trim();
+
+    if(manualDays||manualTime){
+      return [{days:manualDays,time:manualTime,manual:true}];
+    }
+
+    const schedule=
+      source.hours_schedule&&typeof source.hours_schedule==="object"
+        ?source.hours_schedule
+        :null;
+
+    if(!schedule)return [];
+
+    const order=["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+    const labels={
+      monday:"Monday",tuesday:"Tuesday",wednesday:"Wednesday",
+      thursday:"Thursday",friday:"Friday",saturday:"Saturday",sunday:"Sunday"
+    };
+
+    const active=order
+      .map(day=>{
+        const row=schedule[day]&&typeof schedule[day]==="object"?schedule[day]:{};
+        const open=String(row.open||"").trim();
+        const close=String(row.close||"").trim();
+        const enabled=row.enabled===true||String(row.enabled||"").toLowerCase()==="true";
+        return {day,open,close,enabled:enabled&&!!open&&!!close};
+      })
+      .filter(row=>row.enabled);
+
+    if(!active.length)return [];
+
+    const groups=[];
+    active.forEach(row=>{
+      const previous=groups[groups.length-1];
+      const rowIndex=order.indexOf(row.day);
+      const previousIndex=previous?order.indexOf(previous.endDay):-99;
+
+      if(
+        previous&&
+        previous.open===row.open&&
+        previous.close===row.close&&
+        rowIndex===previousIndex+1
+      ){
+        previous.endDay=row.day;
+      }else{
+        groups.push({
+          startDay:row.day,
+          endDay:row.day,
+          open:row.open,
+          close:row.close
+        });
+      }
+    });
+
+    return groups.map(group=>{
+      const dayText=
+        group.startDay===group.endDay
+          ?labels[group.startDay]
+          :labels[group.startDay]+" – "+labels[group.endDay];
+
+      const timeText=
+        group.open===group.close
+          ?"Open 24 hours"
+          :m7AvailabilityTimeLabel(group.open)+" - "+m7AvailabilityTimeLabel(group.close);
+
+      return {days:dayText,time:timeText,manual:false};
+    });
+  }
+
+  function m7RenderLocation(locationValue,options){
+    const rows=m7AvailabilityRows(options);
+    const primary=rows[0]||{days:"Contact shop for availability",time:""};
+
+    const locationEl=document.getElementById("ma7alak-location-value");
+    const daysEl=document.getElementById("ma7alak-availability-days");
+    const timeEl=document.getElementById("ma7alak-availability-time");
+    const extraEl=document.getElementById("ma7alak-availability-extra");
+
+    if(locationEl){
+      locationEl.textContent=String(locationValue||"").trim()||"Full address not added";
+    }
+
+    if(daysEl){
+      daysEl.textContent=primary.days||"";
+      daysEl.hidden=!primary.days;
+    }
+
+    if(timeEl){
+      timeEl.textContent=primary.time||"";
+      timeEl.hidden=!primary.time;
+    }
+
+    if(extraEl){
+      extraEl.innerHTML="";
+      rows.slice(1).forEach(row=>{
+        const line=document.createElement("div");
+        line.className="ma7alak-availability-line";
+
+        if(row.days){
+          const daysPart=document.createElement("span");
+          daysPart.textContent=row.days;
+          line.appendChild(daysPart);
+        }
+
+        if(row.time){
+          const timePart=document.createElement("strong");
+          timePart.textContent=row.time;
+          line.appendChild(timePart);
+        }
+
+        extraEl.appendChild(line);
+      });
+    }
+  }
+
+  async function loadLocationPanel(){
+    const client=m7GetClient();
 
     if(!client){
       setTimeout(loadLocationPanel,300);
       return;
     }
 
-
-    const result =
+    const result=
       await client
         .from("shop_profiles")
-        .select(
-          "shop_slug,address_text,directory_options"
-        )
+        .select("shop_slug,address_text,directory_options")
         .eq("shop_slug",SHOP_SLUG)
         .maybeSingle();
 
-
     if(result.error){
-      console.error(
-        "SHOUFHON location profile:",
-        result.error
-      );
+      console.error("SHOUFHON location profile:",result.error);
       return;
     }
-
 
     if(!result.data){
-      console.warn(
-        "SHOUFHON location: no Admin shop found for",
-        SHOP_SLUG
-      );
+      console.warn("SHOUFHON location: no Admin shop found for",SHOP_SLUG);
       return;
     }
 
+    const profile=result.data;
+    const options=
+      profile.directory_options&&typeof profile.directory_options==="object"
+        ?profile.directory_options
+        :{};
 
-    const profile =
-      result.data;
+    m7RenderLocation(
+      String(profile.address_text||"Full address not added").trim(),
+      options
+    );
 
-    const options =
-      profile.directory_options &&
-      typeof profile.directory_options === "object"
-        ? profile.directory_options
-        : {};
-
-
-    const locationValue =
-      String(
-        profile.address_text ||
-        "Full address not added"
-      ).trim();
-
-
-    /*
-       These two Admin fields are deliberately FREE TEXT.
-       Examples:
-       days: "Monday – Sunday", "By appointment", "Free days"
-       time: "10 AM – 8 PM", "Flexible Time", "Free Time"
-    */
-    const days =
-      String(
-        options.availability_days ||
-        ""
-      ).trim();
-
-    const time =
-      String(
-        options.availability_time ||
-        ""
-      ).trim();
-
-
-    const extraRows =
-      Array.isArray(
-        options.availability_extra_rows
-      )
-        ? options.availability_extra_rows
-            .map(
-              function(row){
-
-                return {
-                  days:
-                    String(
-                      row &&
-                      row.days ||
-                      ""
-                    ).trim(),
-
-                  time:
-                    String(
-                      row &&
-                      row.time ||
-                      ""
-                    ).trim()
-                };
-
-              }
-            )
-            .filter(
-              function(row){
-                return row.days || row.time;
-              }
-            )
-        : [];
-
-
-    const locationEl =
-      document.getElementById(
-        "ma7alak-location-value"
-      );
-
-    const daysEl =
-      document.getElementById(
-        "ma7alak-availability-days"
-      );
-
-    const timeEl =
-      document.getElementById(
-        "ma7alak-availability-time"
-      );
-
-
-    const extraEl =
-      document.getElementById(
-        "ma7alak-availability-extra"
-      );
-
-
-    if(locationEl){
-      locationEl.textContent =
-        locationValue;
-    }
-
-
-    if(daysEl){
-      daysEl.textContent =
-        days ||
-        (
-          time || extraRows.length
-            ? ""
-            : "Contact shop for availability"
-        );
-
-      daysEl.hidden =
-        !days &&
-        (
-          !!time ||
-          extraRows.length > 0
-        );
-    }
-
-
-    if(timeEl){
-      timeEl.textContent =
-        time;
-
-      timeEl.hidden =
-        !time;
-    }
-
-
-    if(extraEl){
-
-      extraEl.innerHTML =
-        "";
-
-      extraRows.forEach(
-        function(row){
-
-          const line =
-            document.createElement(
-              "div"
-            );
-
-          line.className =
-            "ma7alak-availability-line";
-
-
-          if(row.days){
-
-            const daysPart =
-              document.createElement(
-                "span"
-              );
-
-            daysPart.textContent =
-              row.days;
-
-            line.appendChild(
-              daysPart
-            );
-
-          }
-
-
-          if(row.time){
-
-            const timePart =
-              document.createElement(
-                "strong"
-              );
-
-            timePart.textContent =
-              row.time;
-
-            line.appendChild(
-              timePart
-            );
-
-          }
-
-
-          extraEl.appendChild(
-            line
-          );
-
-        }
-      );
-
-    }
-
-
-    const accent =
-      m7AccentFromProfile(
-        profile
-      );
-
-    if(accent){
-      m7ApplyAccent(accent);
-    }
-
+    const accent=m7AccentFromProfile(profile);
+    if(accent)m7ApplyAccent(accent);
   }
 
-
   function applyLocationDraft(message){
-    const draft =
-      message &&
-      message.profile &&
-      typeof message.profile === "object"
-        ? message.profile
-        : {};
+    const draft=
+      message&&message.profile&&typeof message.profile==="object"
+        ?message.profile
+        :{};
 
-    const options =
-      message &&
-      message.directory_options &&
-      typeof message.directory_options === "object"
-        ? message.directory_options
-        : {};
+    const options=
+      message&&message.directory_options&&typeof message.directory_options==="object"
+        ?message.directory_options
+        :{};
 
-    const locationValue =
-      String(
-        draft.address_text ||
-        draft.location ||
-        "Full address not added"
-      ).trim();
+    m7RenderLocation(
+      String(draft.address_text||draft.location||"Full address not added").trim(),
+      options
+    );
 
-    const days =
-      String(
-        options.availability_days ||
-        ""
-      ).trim();
-
-    const time =
-      String(
-        options.availability_time ||
-        ""
-      ).trim();
-
-    const extraRows =
-      Array.isArray(
-        options.availability_extra_rows
-      )
-        ? options.availability_extra_rows
-            .map(function(row){
-              return {
-                days:String(
-                  row && row.days || ""
-                ).trim(),
-                time:String(
-                  row && row.time || ""
-                ).trim()
-              };
-            })
-            .filter(function(row){
-              return row.days || row.time;
-            })
-        : [];
-
-    const locationEl =
-      document.getElementById(
-        "ma7alak-location-value"
-      );
-
-    const daysEl =
-      document.getElementById(
-        "ma7alak-availability-days"
-      );
-
-    const timeEl =
-      document.getElementById(
-        "ma7alak-availability-time"
-      );
-
-    const extraEl =
-      document.getElementById(
-        "ma7alak-availability-extra"
-      );
-
-    if(locationEl){
-      locationEl.textContent =
-        locationValue;
-    }
-
-    if(daysEl){
-      daysEl.textContent =
-        days ||
-        (
-          time || extraRows.length
-            ? ""
-            : "Contact shop for availability"
-        );
-
-      daysEl.hidden =
-        !days &&
-        (
-          !!time ||
-          extraRows.length > 0
-        );
-    }
-
-    if(timeEl){
-      timeEl.textContent =
-        time;
-
-      timeEl.hidden =
-        !time;
-    }
-
-    if(extraEl){
-      extraEl.innerHTML = "";
-
-      extraRows.forEach(function(row){
-        const line =
-          document.createElement(
-            "div"
-          );
-
-        line.className =
-          "ma7alak-availability-line";
-
-        if(row.days){
-          const daysPart =
-            document.createElement(
-              "span"
-            );
-
-          daysPart.textContent =
-            row.days;
-
-          line.appendChild(
-            daysPart
-          );
-        }
-
-        if(row.time){
-          const timePart =
-            document.createElement(
-              "strong"
-            );
-
-          timePart.textContent =
-            row.time;
-
-          line.appendChild(
-            timePart
-          );
-        }
-
-        extraEl.appendChild(
-          line
-        );
-      });
-    }
-
-    const profile = {
+    const profile={
       ...draft,
       shop_slug:SHOP_SLUG,
       directory_options:options
     };
 
-    const accent =
-      m7AccentFromProfile(
-        profile
-      );
-
-    if(accent){
-      m7ApplyAccent(accent);
-    }
+    const accent=m7AccentFromProfile(profile);
+    if(accent)m7ApplyAccent(accent);
   }
 
 
@@ -5445,18 +5237,18 @@ start().catch(error=>
 
 
 /* =========================================================
-   SHOUFHON PROFILE HUB — OWNER ABOUT EDITOR V2
-   Hostinger-safe owner state from parent page.
-   Save executes through the authenticated top-level owner bridge.
+   SHOUFHON PROFILE HUB — OWNER HUB EDITOR V3
+   One owner control for About + Location / Availability.
+   Saves through authenticated top-level owner bridge.
 ========================================================= */
 (function(){
   "use strict";
-  if(window.__M7_OWNER_ABOUT_EDITOR_V2__)return;
-  window.__M7_OWNER_ABOUT_EDITOR_V2__=true;
+  if(window.__M7_OWNER_HUB_EDITOR_V3__)return;
+  window.__M7_OWNER_HUB_EDITOR_V3__=true;
 
   var SLUG=String(
     window.__MA7ALAK_EXACT_HUB_SLUG__||
-    (document.getElementById("ma7alak-shop-profile-hub-mount")&&document.getElementById("ma7alak-shop-profile-hub-mount").getAttribute("data-shop-slug"))||
+    document.getElementById("ma7alak-shop-profile-hub-mount")?.getAttribute("data-shop-slug")||
     ""
   ).trim().toLowerCase();
 
@@ -5464,10 +5256,13 @@ start().catch(error=>
   var isOwner=false;
   var allowed=false;
   var currentAbout="";
+  var currentAddress="";
+  var currentDays="";
+  var currentTime="";
   var pending=new Map();
 
   function truthy(v){
-    return v===true||["true","1","yes","on"].indexOf(String(v||"").trim().toLowerCase())>=0;
+    return v===true||["true","1","yes","on"].includes(String(v||"").trim().toLowerCase());
   }
 
   function getClient(){
@@ -5475,6 +5270,7 @@ start().catch(error=>
       window.__MA7ALAK_EXACT_HUB_REST_CLIENT__||
       window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
       null;
+
     if(!client&&window.supabase&&typeof window.supabase.createClient==="function"){
       client=window.supabase.createClient(
         "https://wdtaiuwtqdepzdamgsrs.supabase.co",
@@ -5485,12 +5281,8 @@ start().catch(error=>
   }
 
   function pageTarget(){
-    try{
-      if(window.top&&window.top!==window)return window.top;
-    }catch(_){}
-    try{
-      if(window.parent&&window.parent!==window)return window.parent;
-    }catch(_){}
+    try{if(window.top&&window.top!==window)return window.top}catch(_){}
+    try{if(window.parent&&window.parent!==window)return window.parent}catch(_){}
     return null;
   }
 
@@ -5500,23 +5292,24 @@ start().catch(error=>
     }catch(_){}
   }
 
-  function requestSave(value){
+  function requestBridge(type,payload,timeoutText){
     return new Promise(function(resolve,reject){
       var id=(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+"-"+Date.now();
       var timer=setTimeout(function(){
         pending.delete(id);
-        reject(new Error("About update timed out."));
+        reject(new Error(timeoutText||"Update timed out."));
       },20000);
+
       pending.set(id,{resolve:resolve,reject:reject,timer:timer});
+
       try{
-        const target=pageTarget();
+        var target=pageTarget();
         if(!target)throw new Error("Owner page bridge is unavailable.");
-        target.postMessage({
-          type:"SHOUFHON_OWNER_ABOUT_REQUEST",
+        target.postMessage(Object.assign({
+          type:type,
           requestId:id,
-          shopSlug:SLUG,
-          aboutText:value
-        },"*");
+          shopSlug:SLUG
+        },payload||{}),"*");
       }catch(error){
         clearTimeout(timer);
         pending.delete(id);
@@ -5534,33 +5327,49 @@ start().catch(error=>
     style.id="m7-owner-about-edit-style";
     style.textContent=
       "#ma7alak-exact-merged-hub{position:relative!important;overflow:visible!important}"+
-      "#m7-owner-about-edit{position:absolute!important;top:12px!important;right:12px!important;left:auto!important;z-index:180!important;width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:1.5px solid color-mix(in srgb,var(--m7-about-edit-frame,var(--m7-shop-accent,#d9a441)) 82%,transparent)!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.08),transparent 28%),linear-gradient(160deg,color-mix(in srgb,var(--m7-about-edit-bg,#080809) 96%,white 4%),color-mix(in srgb,var(--m7-about-edit-bg,#080809) 92%,black 8%))!important;color:var(--m7-about-edit-frame,var(--m7-shop-accent-light,#f0cc83))!important;font:950 22px/1 Arial,Segoe UI,sans-serif!important;display:none!important;place-items:center!important;box-shadow:0 5px 14px rgba(0,0,0,.38),0 0 0 2px rgba(7,7,8,.42),inset 0 1px 0 rgba(255,255,255,.07)!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;outline:none!important;transform:none!important}"+
+      "#m7-owner-about-edit{position:absolute!important;top:11px!important;right:11px!important;z-index:180!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;margin:0!important;padding:0!important;border:1.5px solid color-mix(in srgb,var(--m7-about-edit-frame,var(--m7-shop-accent,#d9a441)) 82%,transparent)!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.08),transparent 28%),linear-gradient(160deg,color-mix(in srgb,var(--m7-about-edit-bg,#080809) 96%,white 4%),color-mix(in srgb,var(--m7-about-edit-bg,#080809) 92%,black 8%))!important;color:var(--m7-about-edit-frame,var(--m7-shop-accent-light,#f0cc83))!important;font:950 21px/1 Arial,Segoe UI,sans-serif!important;display:none!important;place-items:center!important;box-shadow:0 5px 14px rgba(0,0,0,.38),0 0 0 2px rgba(7,7,8,.42),inset 0 1px 0 rgba(255,255,255,.07)!important;touch-action:manipulation!important;outline:none!important}"+
       "#m7-owner-about-edit.visible{display:grid!important}#m7-owner-about-edit:active{transform:scale(.91)!important}"+
-      "#m7-owner-about-sheet{position:absolute!important;inset:7px!important;z-index:220!important;display:none!important;padding:14px!important;box-sizing:border-box!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.38)!important;border-radius:20px!important;background:linear-gradient(160deg,rgba(19,17,15,.985),rgba(7,7,8,.995))!important;box-shadow:0 18px 55px rgba(0,0,0,.65)!important;color:#fff!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}"+
-      "#m7-owner-about-sheet.open{display:block!important}.m7oa-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-right:42px}.m7oa-head b{display:block;font-size:15px;color:#fff}.m7oa-head small{display:block;margin-top:4px;color:#968a79;font-size:9px;line-height:1.45}"+
-      "#m7-owner-about-close{position:absolute;right:10px;top:9px;width:36px;height:36px;border:1px solid rgba(255,255,255,.09);border-radius:50%;background:rgba(255,255,255,.055);color:#fff;font-size:23px;line-height:30px;touch-action:manipulation}"+
-      "#m7-owner-about-textarea{width:100%!important;min-height:190px!important;resize:vertical!important;box-sizing:border-box!important;padding:13px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:15px!important;background:#080708!important;color:#fff!important;font:600 14px/1.65 Arial,Segoe UI,sans-serif!important;outline:none!important;direction:auto!important;-webkit-appearance:none!important}"+
-      "#m7-owner-about-textarea:focus{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.54)!important}.m7oa-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:8px}#m7-owner-about-count{color:#817665;font-size:8px}"+
-      "#m7-owner-about-save{min-width:120px;min-height:42px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--m7-shop-accent-light,#f0cf86),var(--m7-shop-accent,#c99442));color:#211507;font-size:10px;font-weight:950;touch-action:manipulation}#m7-owner-about-save:disabled{opacity:.45}"+
-      "#m7-owner-about-status{min-height:16px;margin-top:7px;color:#918574;font-size:9px}#m7-owner-about-status.ok{color:#7fe0a4}#m7-owner-about-status.err{color:#ff9999}"+
-      "@media(max-width:480px){#m7-owner-about-edit{right:11px!important;top:11px!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;font-size:21px!important}#m7-owner-about-sheet{inset:5px!important;padding:12px!important;border-radius:18px!important}#m7-owner-about-textarea{min-height:210px!important;font-size:14px!important}}";
+      "#m7-owner-about-sheet{position:absolute!important;inset:5px!important;z-index:220!important;display:none!important;padding:12px!important;box-sizing:border-box!important;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.38)!important;border-radius:18px!important;background:linear-gradient(160deg,rgba(19,17,15,.992),rgba(7,7,8,.997))!important;box-shadow:0 18px 55px rgba(0,0,0,.65)!important;color:#fff!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}"+
+      "#m7-owner-about-sheet.open{display:block!important}.m7oa-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-right:42px}.m7oa-head b{display:block;font-size:15px;color:#fff}.m7oa-head small{display:block;margin-top:3px;color:#968a79;font-size:9px;line-height:1.4}"+
+      "#m7-owner-about-close{position:absolute;right:10px;top:9px;width:34px;height:34px;border:1px solid rgba(255,255,255,.09);border-radius:50%;background:rgba(255,255,255,.055);color:#fff;font-size:21px;touch-action:manipulation}"+
+      ".m7oa-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}.m7oa-tab{min-height:39px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#0c0b0c;color:#9c9180;font-size:9px;font-weight:950;touch-action:manipulation}.m7oa-tab.active{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.5);background:rgba(var(--m7-shop-accent-rgb,217,164,65),.08);color:var(--m7-shop-accent-light,#f0cf86)}"+
+      ".m7oa-pane{display:none}.m7oa-pane.active{display:block}.m7oa-field{display:flex;flex-direction:column;gap:5px;margin-bottom:9px;color:#a99b87;font-size:8px;font-weight:850}.m7oa-field input,.m7oa-field textarea{width:100%!important;box-sizing:border-box!important;padding:11px 12px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:12px!important;background:#080708!important;color:#fff!important;font:600 14px/1.45 Arial,Segoe UI,sans-serif!important;outline:none!important;-webkit-appearance:none!important}.m7oa-field textarea{min-height:190px!important;resize:vertical!important;line-height:1.65!important}.m7oa-field input{min-height:44px!important}.m7oa-field input:focus,.m7oa-field textarea:focus{border-color:rgba(var(--m7-shop-accent-rgb,217,164,65),.54)!important}"+
+      ".m7oa-location-note{margin:2px 0 9px;padding:9px;border-left:3px solid var(--m7-shop-accent,#d9a441);border-radius:8px;background:rgba(var(--m7-shop-accent-rgb,217,164,65),.05);color:#8f8372;font-size:8px;line-height:1.45}.m7oa-auto{width:100%;min-height:37px;margin:1px 0 4px;border:1px solid rgba(var(--m7-shop-accent-rgb,217,164,65),.22);border-radius:10px;background:#0d0b09;color:var(--m7-shop-accent-light,#efcc85);font-size:8px;font-weight:900;touch-action:manipulation}"+
+      ".m7oa-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:9px}#m7-owner-about-count{color:#817665;font-size:8px}#m7-owner-about-save{min-width:128px;min-height:42px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--m7-shop-accent-light,#f0cf86),var(--m7-shop-accent,#c99442));color:#211507;font-size:10px;font-weight:950;touch-action:manipulation}#m7-owner-about-save:disabled{opacity:.45}#m7-owner-about-status{min-height:16px;margin-top:7px;color:#918574;font-size:9px}#m7-owner-about-status.ok{color:#7fe0a4}#m7-owner-about-status.err{color:#ff9999}"+
+      "@media(max-width:480px){.m7oa-field textarea{min-height:205px!important;font-size:14px!important}.m7oa-foot{align-items:flex-end}}";
     document.head.appendChild(style);
 
     var edit=document.createElement("button");
     edit.id="m7-owner-about-edit";
     edit.type="button";
-    edit.setAttribute("aria-label","Edit About");
-    edit.setAttribute("title","Edit About");
+    edit.setAttribute("aria-label","Edit About and Location");
+    edit.setAttribute("title","Edit About and Location");
     edit.textContent="+";
 
     var sheet=document.createElement("div");
     sheet.id="m7-owner-about-sheet";
-    sheet.innerHTML='<button id="m7-owner-about-close" type="button" aria-label="Close">×</button><div class="m7oa-head"><div><b>Edit About</b><small>Update the text visitors see in this About box.</small></div></div><textarea id="m7-owner-about-textarea" maxlength="4000" dir="auto" placeholder="Tell visitors about your shop…"></textarea><div class="m7oa-foot"><span id="m7-owner-about-count">0 / 4000</span><button id="m7-owner-about-save" type="button">Save About</button></div><div id="m7-owner-about-status" aria-live="polite"></div>';
+    sheet.innerHTML=
+      '<button id="m7-owner-about-close" type="button" aria-label="Close">×</button>'+
+      '<div class="m7oa-head"><div><b>Edit your Hub</b><small>Update what visitors see in About and Location.</small></div></div>'+
+      '<div class="m7oa-tabs"><button type="button" class="m7oa-tab active" data-m7oa-tab="about">About</button><button type="button" class="m7oa-tab" data-m7oa-tab="location">Location</button></div>'+
+      '<div class="m7oa-pane active" data-m7oa-pane="about"><label class="m7oa-field">About text<textarea id="m7-owner-about-textarea" maxlength="4000" dir="auto" placeholder="Tell visitors about your shop…"></textarea></label></div>'+
+      '<div class="m7oa-pane" data-m7oa-pane="location">'+
+        '<label class="m7oa-field">Location / address<input id="m7-owner-location-address" maxlength="500" dir="auto" placeholder="e.g. Da7ye, main street, next to …"></label>'+
+        '<div class="m7oa-location-note">Availability below is optional. Leave both fields empty to use the automatic weekly Hours schedule.</div>'+
+        '<label class="m7oa-field">Availability days / label<input id="m7-owner-location-days" maxlength="120" placeholder="e.g. Monday – Sunday"></label>'+
+        '<label class="m7oa-field">Availability time<input id="m7-owner-location-time" maxlength="120" placeholder="e.g. 9 AM - 1 AM"></label>'+
+        '<button type="button" class="m7oa-auto" id="m7-owner-location-auto">Use automatic Hours schedule</button>'+
+      '</div>'+
+      '<div class="m7oa-foot"><span id="m7-owner-about-count">0 / 4000</span><button id="m7-owner-about-save" type="button">Save changes</button></div>'+
+      '<div id="m7-owner-about-status" aria-live="polite"></div>';
 
     card.append(edit);
     card.append(sheet);
 
     var textarea=sheet.querySelector("#m7-owner-about-textarea");
+    var address=sheet.querySelector("#m7-owner-location-address");
+    var days=sheet.querySelector("#m7-owner-location-days");
+    var time=sheet.querySelector("#m7-owner-location-time");
     var count=sheet.querySelector("#m7-owner-about-count");
     var status=sheet.querySelector("#m7-owner-about-status");
     var save=sheet.querySelector("#m7-owner-about-save");
@@ -5568,12 +5377,37 @@ start().catch(error=>
     function syncCount(){count.textContent=textarea.value.length+" / 4000"}
     textarea.addEventListener("input",syncCount);
 
+    function showPane(name){
+      sheet.querySelectorAll("[data-m7oa-tab]").forEach(button=>
+        button.classList.toggle("active",button.dataset.m7oaTab===name)
+      );
+      sheet.querySelectorAll("[data-m7oa-pane]").forEach(pane=>
+        pane.classList.toggle("active",pane.dataset.m7oaPane===name)
+      );
+    }
+
+    sheet.addEventListener("click",function(event){
+      var tab=event.target.closest("[data-m7oa-tab]");
+      if(tab){showPane(tab.dataset.m7oaTab);return}
+    });
+
+    sheet.querySelector("#m7-owner-location-auto").addEventListener("click",function(){
+      days.value="";
+      time.value="";
+      status.textContent="Automatic weekly Hours will be used after Save.";
+      status.className="";
+    });
+
     edit.addEventListener("click",function(){
       if(!allowed)return;
       textarea.value=currentAbout;
+      address.value=currentAddress;
+      days.value=currentDays;
+      time.value=currentTime;
       syncCount();
       status.textContent="";
       status.className="";
+      showPane("about");
       sheet.classList.add("open");
       setTimeout(function(){try{textarea.focus({preventScroll:true})}catch(_){textarea.focus()}},80);
     });
@@ -5584,76 +5418,125 @@ start().catch(error=>
 
     save.addEventListener("click",async function(){
       if(!allowed)return;
+
+      var nextAbout=textarea.value.trim();
+      var nextAddress=address.value.trim();
+      var nextDays=days.value.trim();
+      var nextTime=time.value.trim();
+
       save.disabled=true;
       save.textContent="Saving…";
-      status.textContent="Saving your About text…";
+      status.textContent="Saving your Hub changes…";
       status.className="";
+
       try{
-        var value=textarea.value.trim();
-        var result=await requestSave(value);
-        currentAbout=String(result&&result.aboutText!=null?result.aboutText:value);
-        var text=document.getElementById("ma7alak-about-text");
-        if(text)text.textContent=currentAbout||"About information coming soon.";
-        status.textContent="About updated.";
+        var jobs=[];
+
+        if(nextAbout!==currentAbout){
+          jobs.push(requestBridge(
+            "SHOUFHON_OWNER_ABOUT_REQUEST",
+            {aboutText:nextAbout},
+            "About update timed out."
+          ));
+        }
+
+        if(nextAddress!==currentAddress||nextDays!==currentDays||nextTime!==currentTime){
+          jobs.push(requestBridge(
+            "SHOUFHON_OWNER_HUB_LOCATION_REQUEST",
+            {
+              addressText:nextAddress,
+              availabilityDays:nextDays,
+              availabilityTime:nextTime
+            },
+            "Location update timed out."
+          ));
+        }
+
+        if(jobs.length)await Promise.all(jobs);
+
+        currentAbout=nextAbout;
+        currentAddress=nextAddress;
+        currentDays=nextDays;
+        currentTime=nextTime;
+
+        if(typeof window.__MA7ALAK_PROFILE_HUB_REFRESH__==="function"){
+          window.__MA7ALAK_PROFILE_HUB_REFRESH__("owner-hub-save");
+        }
+
+        status.textContent="Hub updated.";
         status.className="ok";
-        setTimeout(function(){sheet.classList.remove("open")},600);
+        setTimeout(function(){sheet.classList.remove("open")},650);
       }catch(error){
-        status.textContent=error&&error.message||"Could not update About.";
+        status.textContent=error&&error.message||"Could not update Hub.";
         status.className="err";
       }finally{
         save.disabled=false;
-        save.textContent="Save About";
+        save.textContent="Save changes";
       }
     });
   }
 
   async function refreshProfile(){
     inject();
+
     var edit=document.getElementById("m7-owner-about-edit");
     if(!edit||!SLUG)return;
+
     var c=getClient();
     if(!c)return;
 
     try{
       var p=await c.from("shop_profiles")
-        .select("about_text,directory_options")
+        .select("about_text,address_text,directory_options")
         .eq("shop_slug",SLUG)
         .maybeSingle();
+
       if(p.error)throw p.error;
       if(!p.data)return;
+
+      var options=p.data.directory_options||{};
       currentAbout=String(p.data.about_text||"");
-      allowed=isOwner&&truthy((p.data.directory_options||{}).owner_about_edit_enabled);
+      currentAddress=String(p.data.address_text||"");
+      currentDays=String(options.availability_days||"");
+      currentTime=String(options.availability_time||"");
+
+      allowed=isOwner&&truthy(options.owner_about_edit_enabled);
       edit.classList.toggle("visible",allowed);
     }catch(error){
       allowed=false;
       edit.classList.remove("visible");
-      console.warn("[ShoufHon Hub] owner About editor:",error);
+      console.warn("[ShoufHon Hub] owner Hub editor:",error);
     }
   }
 
   window.addEventListener("message",function(event){
     var data=event.data||{};
+
     if(data.type==="MA7ALAK_OWNER_STATE"){
       var incoming=String(data.shopSlug||"").trim().toLowerCase();
       isOwner=!!data.isOwner&&incoming===SLUG;
       refreshProfile();
       return;
     }
-    if(data.type==="SHOUFHON_OWNER_ABOUT_RESULT"){
+
+    if(data.type==="SHOUFHON_OWNER_ABOUT_RESULT"||data.type==="SHOUFHON_OWNER_HUB_LOCATION_RESULT"){
       var id=String(data.requestId||"");
       var job=pending.get(id);
       if(!job)return;
+
       clearTimeout(job.timer);
       pending.delete(id);
+
       if(data.ok)job.resolve(data.data||{});
-      else job.reject(new Error(data.error||"Could not update About."));
+      else job.reject(new Error(data.error||"Could not update Hub."));
     }
   });
 
   async function start(){
     for(var i=0;i<160&&!document.querySelector(".zee-about-card");i++){
-      await new Promise(function(resolve){setTimeout(resolve,50)});
+      await new Promise(resolve=>setTimeout(resolve,50));
     }
+
     inject();
     await refreshProfile();
     requestOwnerState();
@@ -5665,5 +5548,5 @@ start().catch(error=>
     }
   }
 
-  start().catch(function(error){console.warn("[ShoufHon Hub] owner About editor:",error)});
+  start().catch(error=>console.warn("[ShoufHon Hub] owner Hub editor:",error));
 })();
