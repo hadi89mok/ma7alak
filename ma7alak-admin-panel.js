@@ -3780,7 +3780,7 @@
         .select("directory_options").eq("shop_slug",slug).maybeSingle();
       if(latest.error)throw latest.error;
       if(!latest.data)throw new Error("This shop no longer exists. Reopen the shop list.");
-      for(const key of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_media_album_item_limit"]){
+      for(const key of ["badge","vip_crown_enabled","og_badge_enabled","og_badge_text","og_badge_icon","og_badge_animation","og_badge_animation_speed","og_badge_primary_color","og_badge_secondary_color","og_badge_background_color","og_badge_text_color","og_badge_size","og_badge_glow_strength","featured_until","owner_profile_edit_enabled","owner_media_edit_enabled","owner_about_edit_enabled","owner_media_photo_limit","owner_media_video_limit","owner_media_album_item_limit","catalog_enabled","catalog_images_enabled","catalog_max_sections","catalog_max_items","catalog_max_prices"]){
         if(Object.prototype.hasOwnProperty.call(latest.data.directory_options||{},key))payload.directory_options[key]=latest.data.directory_options[key];
         else delete payload.directory_options[key];
       }
@@ -21303,4 +21303,173 @@ async function boot(){
 }
 
 boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
+})();
+
+
+/* =========================================================
+   SHOUFHON — CATALOG ACCESS ADMIN V1
+   Per-shop entitlement. Data is retained when disabled.
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__SHOUFHON_CATALOG_ACCESS_ADMIN_V1__)return;
+  window.__SHOUFHON_CATALOG_ACCESS_ADMIN_V1__=true;
+
+  let sb=null;
+  let active=null;
+  let observer=null;
+  const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  const truth=v=>v===true||["true","1","yes","on"].includes(String(v||"").toLowerCase());
+  const clamp=(v,min,max,fallback)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):fallback};
+
+  function inject(){
+    if(document.getElementById("m7cat-admin-css"))return;
+    const st=document.createElement("style");
+    st.id="m7cat-admin-css";
+    st.textContent=`
+      .ma-shop-action.catalog{background:linear-gradient(145deg,rgba(62,47,21,.92),rgba(21,18,12,.98))!important;border-color:rgba(217,164,65,.32)!important;color:#f4d58c!important}
+      #m7cat-admin-overlay{position:fixed;z-index:2147483647;inset:0;display:none;align-items:flex-end;justify-content:center;padding:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);font-family:Arial,"Segoe UI",sans-serif}
+      #m7cat-admin-overlay.active{display:flex}
+      .m7cata-card{width:min(100%,560px);max-height:94dvh;overflow:auto;padding:17px 15px calc(18px + env(safe-area-inset-bottom));border:1px solid rgba(217,164,65,.23);border-radius:25px 25px 0 0;background:radial-gradient(circle at 50% -8%,rgba(217,164,65,.12),transparent 32%),linear-gradient(180deg,#17140f,#090909 55%,#070707);color:#fff;box-shadow:0 -22px 60px rgba(0,0,0,.48)}
+      .m7cata-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.m7cata-top small{display:block;color:#d9a441;font-size:8px;font-weight:900;letter-spacing:1.4px}.m7cata-top h2{margin:4px 0 0;font:800 21px/1.05 Georgia,"Times New Roman",serif}.m7cata-close{width:42px;height:42px;border:1px solid rgba(255,255,255,.09);border-radius:50%;background:#171717;color:#fff;font-size:22px}
+      .m7cata-hero{padding:13px;border:1px solid rgba(217,164,65,.18);border-radius:17px;background:rgba(217,164,65,.05);margin-bottom:12px}.m7cata-hero b{font-size:10px}.m7cata-hero p{margin:5px 0 0;color:rgba(255,255,255,.48);font-size:8.5px;line-height:1.45}
+      .m7cata-switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid rgba(255,255,255,.07);border-radius:15px;background:#101011;margin:8px 0}.m7cata-switch b{display:block;font-size:10px}.m7cata-switch small{display:block;margin-top:4px;color:rgba(255,255,255,.38);font-size:7.5px}.m7cata-switch input{display:none}.m7cata-switch i{position:relative;width:46px;height:27px;flex:0 0 46px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#202023;transition:.18s}.m7cata-switch i:after{content:"";position:absolute;left:3px;top:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.18s}.m7cata-switch input:checked+i{background:rgba(217,164,65,.28);border-color:rgba(217,164,65,.55)}.m7cata-switch input:checked+i:after{transform:translateX(19px);background:#f6d887}
+      .m7cata-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.m7cata-field{display:block}.m7cata-field span{display:block;margin:0 0 5px;color:rgba(255,255,255,.48);font-size:7px;font-weight:850}.m7cata-field input{width:100%;height:42px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#111113;color:#fff;outline:0;font-size:10px}.m7cata-field input:focus{border-color:rgba(217,164,65,.48)}
+      .m7cata-status{min-height:24px;padding-top:9px;color:rgba(255,255,255,.48);font-size:8px;text-align:center}.m7cata-status.error{color:#ff9ca7}.m7cata-status.ok{color:#9fe2b5}
+      .m7cata-actions{display:grid;grid-template-columns:.7fr 1.3fr;gap:8px;margin-top:6px}.m7cata-actions button{height:46px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#171719;color:#fff;font-size:9px;font-weight:900}.m7cata-actions button.primary{border-color:rgba(217,164,65,.46);background:linear-gradient(145deg,rgba(217,164,65,.24),rgba(33,27,17,.96));color:#ffe4a4}
+      @media(max-width:380px){.m7cata-card{padding-left:11px;padding-right:11px}.m7cata-grid{gap:5px}.m7cata-field input{padding:0 6px}}
+    `;
+    document.head.appendChild(st);
+
+    const ov=document.createElement("div");
+    ov.id="m7cat-admin-overlay";
+    ov.innerHTML=`
+      <div class="m7cata-card" role="dialog" aria-modal="true" aria-label="Catalog access">
+        <div class="m7cata-top"><div><small>SHOP FEATURE</small><h2 id="m7cata-title">Catalog / Price List</h2></div><button class="m7cata-close" type="button" aria-label="Close">×</button></div>
+        <div class="m7cata-hero"><b>Menu, products & prices</b><p>Turn this on only for shops that need a Catalog. Turning it off hides the entire section but keeps all saved sections, items and prices.</p></div>
+        <label class="m7cata-switch"><span><b>Catalog enabled</b><small>Show the Catalog under Media and allow the owner to edit it.</small></span><input id="m7cata-enabled" type="checkbox"><i></i></label>
+        <label class="m7cata-switch"><span><b>Product images</b><small>Allow the shop owner to upload an image for each item.</small></span><input id="m7cata-images" type="checkbox"><i></i></label>
+        <div class="m7cata-grid">
+          <label class="m7cata-field"><span>MAX SECTIONS</span><input id="m7cata-sections" type="number" min="1" max="30" inputmode="numeric"></label>
+          <label class="m7cata-field"><span>MAX ITEMS</span><input id="m7cata-items" type="number" min="1" max="300" inputmode="numeric"></label>
+          <label class="m7cata-field"><span>PRICES / ITEM</span><input id="m7cata-prices" type="number" min="1" max="20" inputmode="numeric"></label>
+        </div>
+        <div id="m7cata-status" class="m7cata-status" aria-live="polite"></div>
+        <div class="m7cata-actions"><button type="button" data-cat-cancel>Cancel</button><button type="button" class="primary" data-cat-save>Save Catalog access</button></div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.querySelector(".m7cata-close").onclick=close;
+    ov.querySelector("[data-cat-cancel]").onclick=close;
+    ov.addEventListener("click",e=>{if(e.target===ov)close()});
+    ov.querySelector("[data-cat-save]").onclick=save;
+  }
+
+  function status(t,type=""){
+    const e=document.getElementById("m7cata-status");if(!e)return;
+    e.textContent=t||"";e.className="m7cata-status "+type;
+  }
+
+  function close(){
+    document.getElementById("m7cat-admin-overlay")?.classList.remove("active");
+    active=null;
+  }
+
+  async function open(slug,name){
+    if(!sb)throw new Error("Admin client is still loading.");
+    active={slug:String(slug||"").trim().toLowerCase(),name:String(name||slug||"Shop")};
+    inject();
+    document.getElementById("m7cata-title").textContent=active.name+" · Catalog";
+    status("Loading access…");
+    document.getElementById("m7cat-admin-overlay").classList.add("active");
+
+    const r=await sb.from("shop_profiles").select("directory_options").eq("shop_slug",active.slug).maybeSingle();
+    if(r.error)throw r.error;
+    if(!r.data)throw new Error("Shop profile not found.");
+    const o=r.data.directory_options||{};
+    document.getElementById("m7cata-enabled").checked=truth(o.catalog_enabled);
+    document.getElementById("m7cata-images").checked=o.catalog_images_enabled===undefined?true:truth(o.catalog_images_enabled);
+    document.getElementById("m7cata-sections").value=clamp(o.catalog_max_sections,1,30,10);
+    document.getElementById("m7cata-items").value=clamp(o.catalog_max_items,1,300,60);
+    document.getElementById("m7cata-prices").value=clamp(o.catalog_max_prices,1,20,6);
+    status("Access loaded.");
+  }
+
+  async function save(){
+    if(!active||!sb)return;
+    const button=document.querySelector("#m7cat-admin-overlay [data-cat-save]");
+    button.disabled=true;
+    status("Saving Catalog access…");
+    try{
+      const enabled=document.getElementById("m7cata-enabled").checked;
+      const images=document.getElementById("m7cata-images").checked;
+      const maxSections=clamp(document.getElementById("m7cata-sections").value,1,30,10);
+      const maxItems=clamp(document.getElementById("m7cata-items").value,1,300,60);
+      const maxPrices=clamp(document.getElementById("m7cata-prices").value,1,20,6);
+
+      // Merge into the latest JSON so saving here can never erase another Admin/Studio setting.
+      const latest=await sb.from("shop_profiles").select("directory_options").eq("shop_slug",active.slug).maybeSingle();
+      if(latest.error)throw latest.error;
+      if(!latest.data)throw new Error("Shop profile not found.");
+
+      const next={
+        ...(latest.data.directory_options||{}),
+        catalog_enabled:enabled,
+        catalog_images_enabled:images,
+        catalog_max_sections:maxSections,
+        catalog_max_items:maxItems,
+        catalog_max_prices:maxPrices
+      };
+
+      const upd=await sb.from("shop_profiles").update({directory_options:next}).eq("shop_slug",active.slug);
+      if(upd.error)throw upd.error;
+
+      status("✓ Saved · Catalog "+(enabled?"ON":"OFF")+" · "+maxSections+" sections · "+maxItems+" items","ok");
+      try{
+        window.dispatchEvent(new CustomEvent("shoufhon:admin-catalog-access-saved",{detail:{
+          shop_slug:active.slug,
+          catalog_enabled:enabled,
+          catalog_images_enabled:images,
+          catalog_max_sections:maxSections,
+          catalog_max_items:maxItems,
+          catalog_max_prices:maxPrices
+        }}));
+      }catch(_){}
+      setTimeout(close,900);
+    }catch(error){
+      status(error?.message||"Could not save Catalog access.","error");
+    }finally{
+      button.disabled=false;
+    }
+  }
+
+  function decorate(){
+    document.querySelectorAll("#ma-admin-shop-list .ma-admin-shop-item").forEach(card=>{
+      const actions=card.querySelector(".ma-admin-shop-actions");
+      if(!actions||actions.querySelector("[data-m7-catalog-access]"))return;
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="ma-shop-action catalog";
+      b.dataset.m7CatalogAccess="1";
+      b.textContent="▤ Catalog";
+      b.onclick=e=>{
+        e.preventDefault();e.stopPropagation();
+        const name=card.querySelector(".ma-admin-shop-name")?.textContent?.trim()||card.dataset.slug||"Shop";
+        open(card.dataset.slug,name).catch(err=>{inject();document.getElementById("m7cat-admin-overlay").classList.add("active");status(err?.message||"Could not open Catalog access.","error")});
+      };
+      const danger=actions.querySelector(".danger");
+      actions.insertBefore(b,danger||null);
+    });
+  }
+
+  async function ready(){
+    inject();
+    for(let i=0;i<180&&!window.Ma7alakAdminClient;i++)await new Promise(r=>setTimeout(r,100));
+    sb=window.Ma7alakAdminClient;
+    if(!sb){console.error("[ShoufHon Catalog Admin] shared admin client unavailable");return}
+    decorate();
+    observer=new MutationObserver(decorate);
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+
+  ready().catch(error=>console.error("[ShoufHon Catalog Admin]",error));
 })();
