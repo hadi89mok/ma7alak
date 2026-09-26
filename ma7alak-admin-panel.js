@@ -21254,7 +21254,7 @@ function decorateWorkspace(){
       row=document.createElement("div");
       row.className="m7v4-plan-row";
       row.dataset.m7PlanRow="1";
-      row.innerHTML='<span>PLAN</span><select class="m7v4-plan-select" data-m7v4-plan-select aria-label="Select subscription plan"></select>';
+      row.innerHTML='<span>PLAN</span><select class="m7v4-plan-select" data-m7v4-plan-select aria-label="Select subscription plan">'+planOptions("")+'</select>';
       info.appendChild(row);
     }
 
@@ -21263,7 +21263,6 @@ function decorateWorkspace(){
 
     select.dataset.slug=slug;
     select.dataset.plan=current;
-    select.innerHTML=planOptions(current);
     select.value=current;
   });
 
@@ -21346,7 +21345,6 @@ async function boot(){
 
   injectCss();
   injectOverlay();
-  await loadPlanData();
 
   document.addEventListener("click",event=>{
     if(event.target.closest("[data-m7plans-open]")){
@@ -21362,6 +21360,8 @@ async function boot(){
 
   observer=new MutationObserver(()=>decorateWorkspace());
   observer.observe(document.body,{childList:true,subtree:true});
+
+  loadPlanData().catch(()=>{});
 
   try{
     realtime=client
