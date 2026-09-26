@@ -20,7 +20,7 @@
     ["uploads","↑","Uploads","Manage shop photos, videos, reels and offers in one place"],
     ["publishing","✓","Visibility & Badges","Public visibility, verification and profile badges"],
     ["about","●","About / Hub","ABOUT + HUB: description, services, social links, address, colors, typography and effects"],
-    ["hours","◷","Hours","Compact weekly opening schedule and availability"],
+    ["hours","◷","Hours","Weekly automatic opening schedule. Manual Hub overrides live under About / Hub"],
     ["advanced","⚙","Global","Global preset, universal accent, motion and typography"]
   ];
 
