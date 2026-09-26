@@ -207,6 +207,11 @@ function setDotColor(color){
   const value=rgb(safe);
   root.style.setProperty("--m7-hours-dot",safe);
   root.style.setProperty("--m7-hours-dot-rgb",value.r+","+value.g+","+value.b);
+
+  /* Keep the whole pulsing circle in the active state color even when
+     the Hostinger embed uses accent-light/accent-dark in its dot gradient. */
+  root.style.setProperty("--m7-hours-accent-light",mix(safe,"#ffffff",.38));
+  root.style.setProperty("--m7-hours-accent-dark",mix(safe,"#000000",.36));
 }
 
 function setDotState(open){
