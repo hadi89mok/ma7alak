@@ -6432,10 +6432,10 @@
       hubLayoutState.set(box,st);
     }
 
-    var px=Math.max(0,Math.ceil(Number(shift)||0));
+    var px=Math.max(-1600,Math.min(1600,Math.round(Number(shift)||0)));
     st.shift=px;
 
-    if(px<=0){
+    if(Math.abs(px)<=1){
       restoreHubBox(box);
       return;
     }
@@ -6469,16 +6469,25 @@
     requestAnimationFrame(function(){
       if(!catalogBox.isConnected||!hubBox.isConnected)return;
 
-      var catRect=catalogBox.getBoundingClientRect();
+      var frameRect=catalogFrame.getBoundingClientRect();
       var hubRect=hubBox.getBoundingClientRect();
 
       /*
-        Keep a small visual gap. The correction is geometry-based rather
-        than hardcoded to the Catalog height, so it stays correct when the
-        Catalog grows, shrinks, switches category, or Hostinger reflows.
+        IMPORTANT:
+        Hostinger's outer grid cell can be much taller than the actual
+        Custom Embed iframe. Measuring catalogBox.bottom therefore creates
+        a huge false gap. Use the iframe's real top + the exact Catalog
+        content height reported by the child.
       */
       var gap=10;
-      var needed=Math.max(0,Math.ceil(catRect.bottom+gap-hubRect.top));
+      var visibleBottom=frameRect.top+Math.max(0,Number(height)||0);
+      var needed=Math.round(visibleBottom+gap-hubRect.top);
+
+      /*
+        Signed correction matters:
+        - positive = Hostinger left the Hub too high / overlapping Catalog
+        - negative = Hostinger reserved too much empty Embed space
+      */
       setHubShift(hubBox,needed);
     });
   }
