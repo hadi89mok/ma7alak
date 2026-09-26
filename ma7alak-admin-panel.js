@@ -21327,7 +21327,7 @@ boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
     const st=document.createElement("style");
     st.id="m7cat-admin-css";
     st.textContent=`
-      .ma-shop-action.catalog{background:linear-gradient(145deg,rgba(62,47,21,.92),rgba(21,18,12,.98))!important;border-color:rgba(217,164,65,.32)!important;color:#f4d58c!important}
+      .ma-shop-action.catalog{background:linear-gradient(145deg,rgba(62,47,21,.92),rgba(21,18,12,.98))!important;border-color:rgba(217,164,65,.32)!important;color:#f4d58c!important}.m7v4-catalog{width:100%;min-height:38px;border:1px solid rgba(217,164,65,.32);border-radius:12px;background:linear-gradient(145deg,rgba(62,47,21,.92),rgba(21,18,12,.98));color:#f4d58c;font-size:10px;font-weight:900;cursor:pointer}.m7v4-catalog:active{transform:scale(.985)}
       #m7cat-admin-overlay{position:fixed;z-index:2147483647;inset:0;display:none;align-items:flex-end;justify-content:center;padding:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);font-family:Arial,"Segoe UI",sans-serif}
       #m7cat-admin-overlay.active{display:flex}
       .m7cata-card{width:min(100%,560px);max-height:94dvh;overflow:auto;padding:17px 15px calc(18px + env(safe-area-inset-bottom));border:1px solid rgba(217,164,65,.23);border-radius:25px 25px 0 0;background:radial-gradient(circle at 50% -8%,rgba(217,164,65,.12),transparent 32%),linear-gradient(180deg,#17140f,#090909 55%,#070707);color:#fff;box-shadow:0 -22px 60px rgba(0,0,0,.48)}
@@ -21443,6 +21443,7 @@ boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
   }
 
   function decorate(){
+    // Legacy Manage Shops cards (kept for compatibility on older Admin layouts).
     document.querySelectorAll("#ma-admin-shop-list .ma-admin-shop-item").forEach(card=>{
       const actions=card.querySelector(".ma-admin-shop-actions");
       if(!actions||actions.querySelector("[data-m7-catalog-access]"))return;
@@ -21452,12 +21453,49 @@ boot().catch(error=>console.error("SHOUFHON Plans & Access:",error));
       b.dataset.m7CatalogAccess="1";
       b.textContent="▤ Catalog";
       b.onclick=e=>{
-        e.preventDefault();e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
         const name=card.querySelector(".ma-admin-shop-name")?.textContent?.trim()||card.dataset.slug||"Shop";
-        open(card.dataset.slug,name).catch(err=>{inject();document.getElementById("m7cat-admin-overlay").classList.add("active");status(err?.message||"Could not open Catalog access.","error")});
+        open(card.dataset.slug,name).catch(err=>{
+          inject();
+          document.getElementById("m7cat-admin-overlay").classList.add("active");
+          status(err?.message||"Could not open Catalog access.","error");
+        });
       };
       const danger=actions.querySelector(".danger");
       actions.insertBefore(b,danger||null);
+    });
+
+    // Current Workspace V4 cards — this is the layout actually shown on /admin.
+    document.querySelectorAll(".m7v4-shop[data-m7v4-slug]").forEach(card=>{
+      const controls=card.querySelector(".m7v4-shop-controls");
+      if(!controls||controls.querySelector("[data-m7-catalog-access]"))return;
+
+      const slug=String(card.dataset.m7v4Slug||"").trim().toLowerCase();
+      if(!slug)return;
+
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="m7v4-catalog";
+      b.dataset.m7CatalogAccess="1";
+      b.textContent="▤ Catalog";
+
+      b.onclick=e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        const name=
+          card.querySelector(".m7v4-shop-info > b")?.textContent?.trim()||
+          slug;
+
+        open(slug,name).catch(err=>{
+          inject();
+          document.getElementById("m7cat-admin-overlay").classList.add("active");
+          status(err?.message||"Could not open Catalog access.","error");
+        });
+      };
+
+      const del=controls.querySelector("[data-m7v4-delete-shop]");
+      controls.insertBefore(b,del||null);
     });
   }
 
