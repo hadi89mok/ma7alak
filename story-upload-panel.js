@@ -6149,6 +6149,10 @@
   window.__SHOUFHON_CATALOG_PARENT_BRIDGE_V1__=true;
 
   var realtimeBySource=new Map();
+  var profileHubBySlug=new Map();
+  var catalogFramesBySlug=new Map();
+  var catalogLayoutState=new WeakMap();
+  var hubLayoutState=new WeakMap();
 
   function trusted(event){
     return !!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true);
@@ -6355,13 +6359,174 @@
     realtimeBySource.set(source,{client:client,channel:channel,slug:slug});
   }
 
+  function builderLayoutItem(frame){
+    if(!frame)return null;
+
+    try{
+      var direct=frame.closest?.(".block-layout__item,[class*='block-layout__item']");
+      if(direct)return direct;
+    }catch(_){}
+
+    var node=frame;
+    for(var i=0;i<10&&node&&node.parentElement;i++){
+      var parent=node.parentElement;
+      try{
+        if(parent.matches?.(".block-layout,.block-layout--layout")){
+          return node;
+        }
+      }catch(_){}
+      node=parent;
+    }
+
+    return frame.parentElement||frame;
+  }
+
+  function rememberCatalogFrame(slug,frame){
+    if(!slug||!frame)return;
+    var set=catalogFramesBySlug.get(slug);
+    if(!set){
+      set=new Set();
+      catalogFramesBySlug.set(slug,set);
+    }
+    set.add(frame);
+  }
+
+  function profileHubFrame(slug){
+    var record=profileHubBySlug.get(slug);
+    var frame=record?.frame||null;
+    if(frame&&!frame.isConnected){
+      profileHubBySlug.delete(slug);
+      return null;
+    }
+    return frame;
+  }
+
+  function restoreHubBox(box){
+    var st=hubLayoutState.get(box);
+    if(!st)return;
+
+    if(st.inlineValue){
+      box.style.setProperty("margin-top",st.inlineValue,st.inlinePriority||"");
+    }else{
+      box.style.removeProperty("margin-top");
+    }
+
+    box.style.removeProperty("--shoufhon-catalog-push");
+    box.removeAttribute("data-shoufhon-catalog-pushed");
+    st.shift=0;
+  }
+
+  function setHubShift(box,shift){
+    if(!box)return;
+    var st=hubLayoutState.get(box);
+
+    if(!st){
+      var computed=0;
+      try{computed=parseFloat(getComputedStyle(box).marginTop)||0}catch(_){}
+      st={
+        baseMargin:computed,
+        inlineValue:box.style.getPropertyValue("margin-top")||"",
+        inlinePriority:box.style.getPropertyPriority("margin-top")||"",
+        shift:0
+      };
+      hubLayoutState.set(box,st);
+    }
+
+    var px=Math.max(0,Math.ceil(Number(shift)||0));
+    st.shift=px;
+
+    if(px<=0){
+      restoreHubBox(box);
+      return;
+    }
+
+    box.style.setProperty(
+      "margin-top",
+      (st.baseMargin+px)+"px",
+      "important"
+    );
+    box.style.setProperty("--shoufhon-catalog-push",px+"px");
+    box.setAttribute("data-shoufhon-catalog-pushed","1");
+  }
+
+  function realignProfileHub(slug,catalogFrame,height){
+    var hubFrame=profileHubFrame(slug);
+    if(!hubFrame||!catalogFrame||!catalogFrame.isConnected)return;
+
+    var catalogBox=builderLayoutItem(catalogFrame);
+    var hubBox=builderLayoutItem(hubFrame);
+    if(!catalogBox||!hubBox||catalogBox===hubBox)return;
+
+    /*
+      Measure the Hub at its natural Hostinger position first. If Hostinger
+      already reflowed it, the required correction becomes zero. If it did
+      not, only the missing distance is added. This prevents double-pushing.
+    */
+    setHubShift(hubBox,0);
+
+    if(!(Number(height)>0))return;
+
+    requestAnimationFrame(function(){
+      if(!catalogBox.isConnected||!hubBox.isConnected)return;
+
+      var catRect=catalogBox.getBoundingClientRect();
+      var hubRect=hubBox.getBoundingClientRect();
+
+      /*
+        Keep a small visual gap. The correction is geometry-based rather
+        than hardcoded to the Catalog height, so it stays correct when the
+        Catalog grows, shrinks, switches category, or Hostinger reflows.
+      */
+      var gap=10;
+      var needed=Math.max(0,Math.ceil(catRect.bottom+gap-hubRect.top));
+      setHubShift(hubBox,needed);
+    });
+  }
+
+  function realignCatalogsForSlug(slug){
+    var set=catalogFramesBySlug.get(slug);
+    if(!set)return;
+
+    Array.from(set).forEach(function(frame){
+      if(!frame||!frame.isConnected){
+        set.delete(frame);
+        return;
+      }
+      var st=catalogLayoutState.get(frame);
+      realignProfileHub(slug,frame,st?.height||0);
+    });
+  }
+
+  function registerProfileHub(event){
+    var slug=cleanSlug(event.data?.shopSlug);
+    if(!slug)return;
+
+    var frame=frameFor(event.source);
+    if(!frame)return;
+
+    profileHubBySlug.set(slug,{
+      source:event.source,
+      frame:frame
+    });
+
+    requestAnimationFrame(function(){
+      realignCatalogsForSlug(slug);
+    });
+  }
+
   function applyHeight(event){
     var d=event.data||{};
     if(d.module!=="catalog")return;
+
     var frame=frameFor(event.source);
     if(!frame)return;
+
+    var slug=cleanSlug(d.shopSlug);
     var h=Math.max(0,Math.min(10000,Math.ceil(Number(d.height)||0)));
     var px=h+"px";
+
+    if(slug)rememberCatalogFrame(slug,frame);
+    catalogLayoutState.set(frame,{height:h,shopSlug:slug});
 
     frame.style.setProperty("height",px,"important");
     frame.style.setProperty("min-height",px,"important");
@@ -6377,11 +6542,22 @@
       host.style.setProperty("overflow","hidden","important");
       host.dataset.shoufhonCatalogAutoHeight="1";
     }
+
+    if(slug){
+      realignProfileHub(slug,frame,h);
+      setTimeout(function(){realignProfileHub(slug,frame,h)},80);
+      setTimeout(function(){realignProfileHub(slug,frame,h)},260);
+    }
   }
 
   window.addEventListener("message",function(event){
     if(!trusted(event))return;
     var d=event.data||{};
+
+    if(d.type==="SHOUFHON_PROFILE_HUB_REGISTER"){
+      registerProfileHub(event);
+      return;
+    }
 
     if(d.type==="SHOUFHON_OWNER_CATALOG_REQUEST"){
       handleOwner(event);
