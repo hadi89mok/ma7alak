@@ -54,10 +54,19 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 .m7c-icon.m7c-nav:active{transform:scale(.91);background:#222}
 .m7c-hidden-action{display:none!important}
 #m7-chat-body{background:linear-gradient(180deg,#0b0b0b,#090909);padding:14px 12px;gap:7px}
-.m7-msg{max-width:78%;padding:9px 11px 7px;border:1px solid rgba(255,255,255,.055);border-radius:17px 17px 17px 6px;background:#1b1b1b;box-shadow:0 5px 16px rgba(0,0,0,.12)}
-.m7-msg.mine{align-self:flex-end;padding-right:11px;border-color:rgba(217,164,65,.18);border-radius:17px 17px 6px 17px;background:linear-gradient(145deg,#3b2b19,#2a2016)}
-.m7-msg-text{font-size:12px;line-height:1.45}
-.m7-msg-time{margin-top:4px;color:#8b8b8b;font-size:8px;opacity:1;text-align:right}
+.m7-msg{max-width:82%;padding:11px 13px 9px;border:1px solid rgba(255,255,255,.055);border-radius:18px 18px 18px 6px;background:#1b1b1b;box-shadow:0 5px 16px rgba(0,0,0,.12);position:relative}
+.m7-msg.mine{align-self:flex-end;padding-right:13px;border-color:rgba(217,164,65,.18);border-radius:18px 18px 6px 18px;background:linear-gradient(145deg,#3b2b19,#2a2016)}
+.m7-msg-text{font-size:14px;line-height:1.5;letter-spacing:-.05px}
+.m7-msg-time{margin-top:5px;color:#929292;font-size:9px;opacity:1;text-align:right}
+.m7-msg.has-reactions{margin-bottom:14px}
+.m7-msg-reactions{position:absolute;right:8px;bottom:-13px;z-index:7;display:block!important;margin:0!important;pointer-events:auto}
+.m7-msg-reactions:empty{display:none!important}
+.m7-reaction-pill{min-height:27px!important;height:27px;padding:2px 8px!important;display:inline-flex!important;align-items:center!important;gap:2px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:999px!important;background:#0d0d0f!important;color:#fff!important;box-shadow:0 3px 10px rgba(0,0,0,.55)!important;font:700 14px/1 Arial,sans-serif!important;cursor:pointer}
+.m7-msg.mine .m7-reaction-pill{background:#0d0d0f!important}
+.m7-reaction-pill.mine{border-color:rgba(217,164,65,.38)!important;box-shadow:0 3px 10px rgba(0,0,0,.55),0 0 0 1px rgba(217,164,65,.08)!important}
+.m7-reaction-emojis{display:inline-flex;align-items:center;letter-spacing:-3px;padding-right:2px}
+.m7-reaction-emojis span{display:inline-block;transform:none}
+.m7-reaction-count{font-size:9px!important;line-height:1;color:#cfcfcf;opacity:.95;margin-left:3px}
 .m7-msg-delete{display:none!important}
 .m7-convo{min-height:70px;padding:10px 11px;border:1px solid rgba(255,255,255,.065);border-radius:18px;background:linear-gradient(145deg,#151515,#101010);box-shadow:none;transition:transform .14s ease,background .14s ease,border-color .14s ease}
 .m7-convo:active,.m7-convo.m7-hold-active{transform:scale(.985);background:#191919}
@@ -86,7 +95,7 @@ function css(){if(document.getElementById("m7c-v9-css"))return;document.getEleme
 #m7-chat.m7-inbox-panel #m7-chat-body{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d9a44155 transparent}
 #m7-chat.m7-inbox-panel #m7-chat-body::-webkit-scrollbar{width:5px}
 #m7-chat.m7-inbox-panel #m7-chat-body::-webkit-scrollbar-thumb{background:#d9a44155;border-radius:20px}
-@media(max-width:600px){#m7-chat-shell{padding:0;align-items:stretch;justify-content:stretch;background:#100e0d}#m7-chat{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0;box-shadow:none}#m7-chat-head{padding-top:max(12px,env(safe-area-inset-top));min-height:calc(64px + env(safe-area-inset-top))}#m7-chat-body{padding:12px}.m7-msg{max-width:86%}#m7-chat-shell.m7-inbox-shell{padding:0 14px 14px;align-items:flex-start;justify-content:center;background:#0009}#m7-chat.m7-inbox-panel{width:calc(100% - 28px);height:min(500px,calc(100dvh - 104px));max-height:min(500px,calc(100dvh - 104px));margin-top:max(78px,calc(env(safe-area-inset-top) + 68px));border:1px solid #db9b4659;border-radius:22px;box-shadow:0 24px 70px #000b}#m7-chat.m7-inbox-panel #m7-chat-head{padding-top:12px;min-height:64px}.m7-convo{min-height:68px;box-sizing:border-box}}
+@media(max-width:600px){#m7-chat-shell{padding:0;align-items:stretch;justify-content:stretch;background:#100e0d}#m7-chat{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0;box-shadow:none}#m7-chat-head{padding-top:max(12px,env(safe-area-inset-top));min-height:calc(66px + env(safe-area-inset-top))}#m7-chat-body{padding:13px 12px 16px;gap:9px}.m7-msg{max-width:88%}.m7-msg-text{font-size:14.5px}.m7-msg-time{font-size:9px}#m7-chat-shell.m7-inbox-shell{padding:0 14px 14px;align-items:flex-start;justify-content:center;background:#0009}#m7-chat.m7-inbox-panel{width:calc(100% - 28px);height:min(500px,calc(100dvh - 104px));max-height:min(500px,calc(100dvh - 104px));margin-top:max(78px,calc(env(safe-area-inset-top) + 68px));border:1px solid #db9b4659;border-radius:22px;box-shadow:0 24px 70px #000b}#m7-chat.m7-inbox-panel #m7-chat-head{padding-top:12px;min-height:64px}.m7-convo{min-height:68px;box-sizing:border-box}}
 @supports not (height:100dvh){@media(max-width:600px){#m7-chat{height:100vh;max-height:100vh}}}
 `;document.head.appendChild(s)}
 function chatMediaCss(){
@@ -113,7 +122,7 @@ function chatMediaCss(){
     ".m7-record-cancel,.m7-record-stop{display:none;min-height:34px;border:0;border-radius:999px;padding:0 11px;font-size:10px;font-weight:950}.m7-record-cancel{background:#312925;color:#e4d7ce}.m7-record-stop{background:#d99a45;color:#170f08}.voice-locked .m7-record-cancel,.voice-locked .m7-record-stop{display:inline-flex;align-items:center;justify-content:center}.voice-locked .m7-record-wave{display:none}.voice-locked .m7-record-hint{color:#efbd66}",
     "#m7-chat-mic{touch-action:none!important;user-select:none;-webkit-user-select:none}#m7-chat-mic.is-recording{background:#84251f!important;color:#fff!important;border-color:#ff6c62!important;box-shadow:0 0 0 3px #ff3d3427,0 0 18px #ff3d3438!important;transform:scale(1.04)}",
     ".m7-voice-draft{display:flex;align-items:center;gap:9px}.m7-voice-draft audio{min-width:0;flex:1;height:36px}.m7-voice-draft strong{font-size:11px;color:#f2c36f;white-space:nowrap}",
-    ".m7-msg.m7-msg-media{padding:6px 7px;min-width:0;max-width:min(320px,86vw)}.m7-msg.mine.m7-msg-media{padding-right:30px}.m7-msg.m7-msg-media .m7-msg-time{margin-top:2px;padding-left:2px;font-size:9px}.m7-msg.m7-msg-media .m7-msg-reactions{position:absolute;left:9px;bottom:-13px;margin:0;z-index:6}.m7-msg.m7-msg-media.has-reactions{margin-bottom:13px}.m7-msg.m7-msg-media .m7-reaction-pill{min-height:24px;padding:2px 7px;font-size:12px}",
+    ".m7-msg.m7-msg-media{padding:7px 8px;min-width:0;max-width:min(340px,88vw)}.m7-msg.mine.m7-msg-media{padding-right:8px}.m7-msg.m7-msg-media .m7-msg-time{margin-top:3px;padding-left:2px;font-size:9px}.m7-msg.m7-msg-media.has-reactions{margin-bottom:14px}",
     ".m7-chat-photo{display:block;width:min(272px,72vw);max-height:330px;border:0;border-radius:12px;overflow:hidden;padding:0;background:#0b0908;cursor:pointer;touch-action:manipulation}.m7-chat-photo img{display:block;width:100%;height:auto;max-height:330px;object-fit:cover}",
     ".m7-chat-video{display:block;width:min(300px,72vw);max-height:360px;border-radius:13px;background:#000}",
     ".m7-media-caption{margin:7px 3px 1px;white-space:pre-wrap;font-size:13px;color:#fff}",
@@ -559,6 +568,15 @@ function wireStoryCards(b){
   }
 }
 const REACTION_EMOJIS=["❤️","😂","👍","😮","😢","🙏"];
+const reactionRowsCache=new Map();
+
+function reactionCacheKey(c){
+  return String(c?.id||"");
+}
+
+function cloneReactionRows(rows){
+  return (rows||[]).map(row=>({...row}));
+}
 
 function reactionGroups(rows){
   const out=new Map();
@@ -579,22 +597,41 @@ function applyReactionGroups(b,c,groups){
   b.querySelectorAll("[data-reactions-for]").forEach(slot=>{
     const id=String(slot.dataset.reactionsFor||"");
     const g=groups.get(id);
+
     if(!g){
       slot.innerHTML="";
       slot.closest(".m7-msg")?.classList.remove("has-reactions");
       return;
     }
-    slot.innerHTML=REACTION_EMOJIS.filter(e=>g.counts.get(e)).map(emoji=>{
-      const count=g.counts.get(emoji)||0;
-      return '<button type="button" class="m7-reaction-pill '+(g.mine===emoji?"mine":"")+'" data-reaction-message="'+esc(id)+'" data-reaction-emoji="'+esc(emoji)+'" aria-label="'+esc(emoji)+" reaction"+'">'+emoji+(count>1?'<span class="m7-reaction-count">'+count+'</span>':"")+'</button>';
-    }).join("");
-    slot.closest(".m7-msg")?.classList.toggle("has-reactions",!!slot.children.length);
+
+    const active=REACTION_EMOJIS.filter(e=>g.counts.get(e));
+    const total=active.reduce((sum,emoji)=>sum+(g.counts.get(emoji)||0),0);
+    const preview=active.slice(0,3);
+
+    if(!preview.length){
+      slot.innerHTML="";
+      slot.closest(".m7-msg")?.classList.remove("has-reactions");
+      return;
+    }
+
+    slot.innerHTML=
+      '<button type="button" class="m7-reaction-pill '+(g.mine?"mine":"")+'" data-reaction-message="'+esc(id)+'" data-reaction-emoji="'+esc(g.mine||preview[0])+'" aria-label="Message reactions">'+
+        '<span class="m7-reaction-emojis">'+
+          preview.map(emoji=>'<span>'+emoji+'</span>').join("")+
+        '</span>'+
+        (total>1?'<span class="m7-reaction-count">'+total+'</span>':"")+
+      '</button>';
+
+    slot.closest(".m7-msg")?.classList.add("has-reactions");
   });
+
   b.querySelectorAll(".m7-reaction-pill").forEach(btn=>{
     btn.onclick=e=>{
       e.preventDefault();
       e.stopPropagation();
-      toggleMessageReaction(btn.dataset.reactionMessage,btn.dataset.reactionEmoji,c);
+
+      const messageEl=btn.closest(".m7-msg");
+      if(messageEl)openReactionPicker(messageEl,c);
     };
   });
 }
@@ -606,7 +643,18 @@ async function refreshReactionsOnly(c){
     const r=await client.from("ma7alak_message_reactions").select("message_id,reactor_id,emoji").eq("conversation_id",c.id);
     if(r.error)throw r.error;
     if(!b.isConnected)return;
-    applyReactionGroups(b,c,reactionGroups(r.data||[]));
+
+    const rows=Array.isArray(r.data)?r.data:[];
+    reactionRowsCache.set(
+      reactionCacheKey(c),
+      cloneReactionRows(rows)
+    );
+
+    applyReactionGroups(
+      b,
+      c,
+      reactionGroups(rows)
+    );
   }catch(e){
     console.warn("Message reactions:",e);
   }
@@ -615,18 +663,107 @@ async function refreshReactionsOnly(c){
 async function toggleMessageReaction(messageId,emoji,c){
   messageId=String(messageId||"").trim();
   emoji=String(emoji||"").trim();
-  if(!messageId||!REACTION_EMOJIS.includes(emoji))return;
+
+  if(!messageId||!REACTION_EMOJIS.includes(emoji)||!c?.id)return;
+
+  const b=document.getElementById("m7-chat-body");
+  const key=reactionCacheKey(c);
+  const previous=cloneReactionRows(reactionRowsCache.get(key)||[]);
+  const optimistic=cloneReactionRows(previous);
+  const myId=String(user?.id||"");
+
   closeReactionPicker();
+
+  /*
+     OPTIMISTIC UI:
+     update immediately, then let Supabase confirm in the background.
+  */
+  const mineIndex=optimistic.findIndex(row=>
+    sameId(row.message_id,messageId)&&
+    sameId(row.reactor_id,myId)
+  );
+
+  if(mineIndex>=0){
+    if(String(optimistic[mineIndex].emoji||"")===emoji){
+      optimistic.splice(mineIndex,1);
+    }else{
+      optimistic[mineIndex]={
+        ...optimistic[mineIndex],
+        emoji
+      };
+    }
+  }else{
+    optimistic.push({
+      message_id:messageId,
+      reactor_id:myId,
+      emoji
+    });
+  }
+
+  reactionRowsCache.set(
+    key,
+    cloneReactionRows(optimistic)
+  );
+
+  if(b?.isConnected){
+    applyReactionGroups(
+      b,
+      c,
+      reactionGroups(optimistic)
+    );
+  }
+
+  try{navigator.vibrate?.(8)}catch(_){}
+
   try{
-    const r=await client.rpc("ma7alak_toggle_message_reaction",{p_message_id:messageId,p_emoji:emoji});
+    const r=await client.rpc(
+      "ma7alak_toggle_message_reaction",
+      {
+        p_message_id:messageId,
+        p_emoji:emoji
+      }
+    );
+
     if(r.error)throw r.error;
+
     const data=r.data||{};
+
     if(data.blocked){
-      alert("Too many reaction changes. Try again in "+String(data.retry_after_seconds||120)+" seconds.");
+      reactionRowsCache.set(key,previous);
+
+      if(b?.isConnected){
+        applyReactionGroups(
+          b,
+          c,
+          reactionGroups(previous)
+        );
+      }
+
+      alert(
+        "Too many reaction changes. Try again in "+
+        String(data.retry_after_seconds||120)+
+        " seconds."
+      );
       return;
     }
-    await refreshReactionsOnly(c);
+
+    /*
+       Reconcile quietly with the authoritative server result.
+       The user does not wait for this fetch.
+    */
+    refreshReactionsOnly(c).catch(()=>{});
+
   }catch(e){
+    reactionRowsCache.set(key,previous);
+
+    if(b?.isConnected){
+      applyReactionGroups(
+        b,
+        c,
+        reactionGroups(previous)
+      );
+    }
+
     console.error("Message reaction:",e);
     alert(e?.message||"Could not update reaction.");
   }
@@ -638,7 +775,10 @@ function openReactionPicker(messageEl,c){
   if(!messageId)return;
   closeReactionPicker();
 
-  const current=messageEl.querySelector(".m7-reaction-pill.mine")?.dataset.reactionEmoji||"";
+  const current=
+    messageEl.querySelector(".m7-reaction-pill.mine")
+      ?.dataset.reactionEmoji||
+    "";
   const picker=document.createElement("div");
   picker.className="m7-reaction-picker";
   picker.setAttribute("role","menu");
