@@ -59,6 +59,9 @@ function theme(s){
   root.style.setProperty("--cat-on-edge",hex(o.media_button_active_frame_color,a));
   root.style.setProperty("--cat-on-text",hex(o.media_button_active_text_color,"#fff"));
   root.style.setProperty("--cat-r",num(o.profile_shell_radius,22,12,34)+"px");
+  ["--cat-a","--cat-title","--cat-muted","--cat-bg","--cat-edge","--cat-symbol","--cat-symbol-bg","--cat-btn-bg","--cat-btn-edge","--cat-btn-text","--cat-on-bg","--cat-on-edge","--cat-on-text","--cat-r"].forEach(function(k){
+    document.documentElement.style.setProperty(k,root.style.getPropertyValue(k));
+  });
 }
 
 async function publicLoad(){
