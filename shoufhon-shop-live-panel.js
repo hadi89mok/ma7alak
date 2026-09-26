@@ -305,39 +305,64 @@ body{overflow:hidden}
 }
 
 /* ---------------------------------------------------------
-   OWNER — compact, integrated profile controls.
+   OWNER — attached control dock under the profile.
+   It stays in normal document flow: no absolute positioning,
+   so profile height changes can never overlap this panel.
 --------------------------------------------------------- */
+.m7slp.owner-idle-shell,
+.m7slp.owner-active-shell{
+  width:100%;
+  border-radius:10px 10px 22px 22px;
+  border-top-color:color-mix(in srgb,var(--m7a) 88%,transparent);
+  background:
+    radial-gradient(circle at 50% -28px,color-mix(in srgb,var(--m7a) 13%,transparent),transparent 42%),
+    linear-gradient(180deg,color-mix(in srgb,var(--m7surface) 98%,#17120c 2%),color-mix(in srgb,var(--m7surface) 96%,#050505 4%));
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+.m7slp.owner-idle-shell:before,
+.m7slp.owner-active-shell:before{
+  left:12%;
+  right:12%;
+  opacity:.92
+}
 .m7slp-owner{
   position:relative;
   z-index:2;
-  padding:8px 9px 9px
+  padding:7px 10px 9px
 }
 .m7slp-owner-top{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin-bottom:7px
+  justify-content:center;
+  gap:7px;
+  margin:-1px 0 7px
 }
+.m7slp-owner-link-line{
+  flex:1 1 28px;
+  max-width:74px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--m7a) 52%,transparent))
+}
+.m7slp-owner-link-line:last-child{transform:scaleX(-1)}
 .m7slp-owner-tag{
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:5px;
-  padding:3px 6px;
+  min-height:21px;
+  padding:0 8px;
   border:1px solid color-mix(in srgb,var(--m7a) 28%,transparent);
   border-radius:999px;
   background:color-mix(in srgb,var(--m7a) 6%,transparent);
   color:#edbd68;
-  font-size:7.5px;
+  font-size:7.25px;
   font-weight:950;
-  letter-spacing:.55px
-}
-.m7slp-owner-mini{
-  color:rgba(255,255,255,.35);
-  font-size:7.75px;
-  font-weight:850;
+  letter-spacing:.58px;
   white-space:nowrap
 }
+.m7slp-owner-mini{display:none}
 .m7slp-owner-main{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
@@ -471,6 +496,11 @@ body{overflow:hidden}
 
 @media(max-width:420px){
   .m7slp{width:94%;border-radius:17px}
+  .m7slp.owner-idle-shell,
+  .m7slp.owner-active-shell{
+    width:100%;
+    border-radius:9px 9px 20px 20px
+  }
   .m7slp-view{gap:7px;padding:8px 9px;min-height:64px}
   .m7slp-title{font-size:13.5px}
   .m7slp-sub{font-size:9px}
@@ -635,8 +665,9 @@ function ownerMarkup(){
 
   return '<div class="m7slp-owner">'+
     '<div class="m7slp-owner-top">'+
-      '<div class="m7slp-owner-tag">♛ SHOP OWNER</div>'+
-      '<div class="m7slp-owner-mini">Profile activity controls</div>'+
+      '<span class="m7slp-owner-link-line"></span>'+
+      '<div class="m7slp-owner-tag">♛ SHOP OWNER CONTROLS</div>'+
+      '<span class="m7slp-owner-link-line"></span>'+
     '</div>'+
     '<div class="m7slp-owner-main">'+
       '<div class="m7slp-owner-state">'+
