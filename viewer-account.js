@@ -10,6 +10,7 @@
 "use strict";
 if(window.__MA7ALAK_VIEWER_ACCOUNT_V92__)return;window.__MA7ALAK_VIEWER_ACCOUNT_V92__=true;
 const URL="https://wdtaiuwtqdepzdamgsrs.supabase.co",KEY="sb_publishable_lzog5ZX19HK5_rFfer8Ylw_OPG_0bXl",STORAGE_KEY="ma7alak-viewer-auth-v1",BUCKET="viewer-avatars";let client=null,session=null,profile=null,initPromise=null,ownerState=false,headerObserver=null,headerMountObserver=null;
+let personalNotificationRows=[],personalNotificationChannel=null,personalNotificationRefreshPromise=null;
 const esc=v=>String(v||"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[m]));
 function loadSB(){
   if(window.supabase?.createClient)return Promise.resolve(window.supabase);
@@ -24,6 +25,105 @@ function loadSB(){
 }
 function syncEmbeddedAccount(){const detail={session,user:session?.user||null,profile,signedIn:!!session?.user};document.querySelectorAll("iframe").forEach(frame=>{try{frame.contentWindow?.postMessage({type:"MA7ALAK_ACCOUNT_CHANGED",signedIn:detail.signedIn},"*")}catch(_){}try{frame.contentWindow?.dispatchEvent(new frame.contentWindow.CustomEvent("ma7alak:account-change",{detail}))}catch(_){}try{frame.contentDocument?.querySelectorAll("#ma7alak-owner-add-story,.ma7alak-owner-add-story,[data-owner-only]").forEach(el=>{if(detail.signedIn)el.style.removeProperty("display");else{el.classList.remove("visible","active","show");el.style.setProperty("display","none","important")}})}catch(_){}})}
 function emit(){const detail={session,user:session?.user||null,profile};dispatchEvent(new CustomEvent("ma7alak:account-change",{detail}));syncEmbeddedAccount()}
+
+function emitPersonalNotifications(){
+  const detail={
+    userId:String(session?.user?.id||""),
+    rows:Array.isArray(personalNotificationRows)
+      ?personalNotificationRows.map(row=>({...row}))
+      :[]
+  };
+  window.dispatchEvent(
+    new CustomEvent(
+      "ma7alak:personal-notifications",
+      {detail}
+    )
+  );
+}
+
+async function refreshPersonalNotifications(force=false){
+  if(!client||!session?.user){
+    personalNotificationRows=[];
+    emitPersonalNotifications();
+    return personalNotificationRows;
+  }
+
+  if(personalNotificationRefreshPromise&&!force){
+    return personalNotificationRefreshPromise;
+  }
+
+  personalNotificationRefreshPromise=(async()=>{
+    const result=await client.rpc(
+      "ma7alak_get_my_media_notifications"
+    );
+
+    if(result.error)throw result.error;
+
+    personalNotificationRows=
+      Array.isArray(result.data)
+        ?result.data
+        :[];
+
+    emitPersonalNotifications();
+
+    return personalNotificationRows;
+  })();
+
+  try{
+    return await personalNotificationRefreshPromise;
+  }catch(error){
+    console.warn(
+      "ShoufHon personal notifications:",
+      error
+    );
+    return personalNotificationRows;
+  }finally{
+    personalNotificationRefreshPromise=null;
+  }
+}
+
+async function bindPersonalNotificationRealtime(){
+  if(!client)return;
+
+  if(personalNotificationChannel){
+    try{
+      await client.removeChannel(
+        personalNotificationChannel
+      );
+    }catch(_){}
+    personalNotificationChannel=null;
+  }
+
+  const userId=
+    String(session?.user?.id||"").trim();
+
+  if(!userId)return;
+
+  personalNotificationChannel=
+    client
+      .channel(
+        "shoufhon-account-media-notifications-"+userId
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"ma7alak_user_notifications",
+          filter:"recipient_user_id=eq."+userId
+        },
+        ()=>{
+          refreshPersonalNotifications(true)
+            .catch(()=>{});
+        }
+      )
+      .subscribe();
+}
+
+async function syncPersonalNotifications(){
+  await refreshPersonalNotifications(true);
+  await bindPersonalNotificationRealtime();
+}
 async function loadProfile(){if(!session?.user){profile=null;emit();syncHeaderFix();return}let r=await client.from("viewer_profiles").select("*").eq("user_id",session.user.id).maybeSingle();profile=r.data||null;if(profile?.account_status==="banned"){alert("This ShoufHon account is banned."+(profile.banned_reason?"\nReason: "+profile.banned_reason:""));await logout();return}if(profile?.account_status==="deleted"){alert("This ShoufHon account has been disabled.");await logout();return}emit();syncHeaderFix()}
 function css(){if(document.getElementById("m7a-v91-css"))return;let s=document.createElement("style");s.id="m7a-v91-css";s.textContent=`#m7-account-overlay{position:fixed;inset:0;background:#000c;z-index:2147483600;display:grid;place-items:center;padding:18px;font-family:Arial}#m7-account-card{width:min(430px,100%);max-height:92vh;overflow:auto;background:linear-gradient(160deg,#21150f,#0f0d0c);border:1px solid #d99a4566;border-radius:24px;padding:22px;color:#fff;box-shadow:0 24px 70px #000a}#m7-account-card h2{margin:0;color:#f4b85d}.m7a-close{float:right;border:0;background:none;color:#fff;font-size:25px}.m7a-row{display:grid;gap:10px;margin-top:15px}.m7a-btn{border:0;border-radius:14px;padding:13px;font-weight:900;cursor:pointer;background:#d99a45}.m7a-btn.google{background:#fff;color:#171717}.m7a-btn.dark{background:#2d2723;color:#fff}.m7a-input{width:100%;box-sizing:border-box;background:#15110f;color:#fff;border:1px solid #4a382c;border-radius:13px;padding:12px}#m7a-avatar{width:104px;height:104px;border-radius:50%;overflow:hidden;border:2px solid #d99a45;margin:15px auto;display:grid;place-items:center;background:#1b1613;cursor:pointer}#m7a-avatar img{width:100%;height:100%;object-fit:cover}#m7a-status{font-size:12px;color:#f4b85d;margin-top:10px}.m7a-coming{margin-top:18px;padding:14px;border:1px solid #d99a4538;border-radius:15px;background:#ffffff08;text-align:center}.m7a-coming strong{display:block;color:#f4b85d;font-size:12px;letter-spacing:.4px}.m7a-coming span{display:block;margin-top:5px;color:#ffffff8f;font-size:10px;line-height:1.4}#m7a-header-logout{cursor:pointer!important}#m7a-toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));z-index:2147483647;transform:translate(-50%,18px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 30px);padding:13px 17px;border:1px solid #d99a4570;border-radius:14px;background:#17120f;color:#fff;font:700 14px/1.25 Arial;box-shadow:0 16px 45px #0009;transition:opacity .2s,transform .2s}#m7a-toast.visible{opacity:1;transform:translate(-50%,0)}#m7a-toast .m7a-toast-check{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#d99a45;color:#17120f;font-size:15px}`;document.head.appendChild(s)}
 function ensureMenuLogout(){
@@ -81,7 +181,22 @@ async function init(){
   await loadSB();
   if(!window.__MA7ALAK_SHARED_SUPABASE_CLIENT__){window.__MA7ALAK_SHARED_SUPABASE_CLIENT__=window.supabase.createClient(URL,KEY,{auth:{storage:localStorage,storageKey:STORAGE_KEY,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
   client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
-  let r=await client.auth.getSession();session=r.data.session;startHeaderFixWatcher();await loadProfile();client.auth.onAuthStateChange((_e,s)=>{session=s;setTimeout(()=>loadProfile(),0)})
+  let r=await client.auth.getSession();
+  session=r.data.session;
+  startHeaderFixWatcher();
+  await loadProfile();
+  await syncPersonalNotifications();
+  client.auth.onAuthStateChange((_e,s)=>{
+    session=s;
+    setTimeout(async()=>{
+      try{
+        await loadProfile();
+        await syncPersonalNotifications();
+      }catch(error){
+        console.warn("ShoufHon account refresh:",error);
+      }
+    },0);
+  });
 }
 
 /* =========================================================
@@ -142,10 +257,25 @@ function restoreInlineStyle(node,value){
   else node.setAttribute("style",value);
 }
 
-function closeEmbedViewerPortal(source){
+function portalHistoryToken(){
+  return "m7portal-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+}
+
+function closeEmbedViewerPortal(source,options={}){
   const state=activeEmbedViewerPortal;
-  if(!state)return;
-  if(source&&state.source&&source!==state.source)return;
+  if(!state)return false;
+  if(source&&state.source&&source!==state.source)return false;
+
+  const requestedKind=
+    String(options.viewerKind||"").trim();
+
+  if(
+    requestedKind &&
+    state.viewerKind &&
+    requestedKind!==state.viewerKind
+  ){
+    return false;
+  }
 
   activeEmbedViewerPortal=null;
 
@@ -155,21 +285,60 @@ function closeEmbedViewerPortal(source){
     restoreInlineStyle(item.node,item.style);
   });
 
-  restoreInlineStyle(document.documentElement,state.htmlStyle);
-  restoreInlineStyle(document.body,state.bodyStyle);
+  restoreInlineStyle(
+    document.documentElement,
+    state.htmlStyle
+  );
+  restoreInlineStyle(
+    document.body,
+    state.bodyStyle
+  );
 
   try{
-    state.frame.removeAttribute("data-shoufhon-viewer-portal");
+    state.frame.removeAttribute(
+      "data-shoufhon-viewer-portal"
+    );
   }catch(_){}
+
+  /*
+     If the child closed with its own X button, remove the temporary
+     history sentinel without navigating away from the shop page.
+  */
+  if(
+    options.fromHistory!==true &&
+    state.historyToken &&
+    history.state?.__shoufhonEmbedPortal===
+      state.historyToken
+  ){
+    try{history.back()}catch(_){}
+  }
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      try{
+        window.scrollTo(
+          state.scrollX||0,
+          state.scrollY||0
+        );
+      }catch(_){}
+    });
+  });
+
+  return true;
 }
 
-function openEmbedViewerPortal(source){
+function openEmbedViewerPortal(source,data={}){
   const frame=embedFrameForSource(source);
   if(!frame)return false;
 
+  const viewerKind=
+    String(data.viewerKind||"media-viewer").trim()||
+    "media-viewer";
+
   if(
-    activeEmbedViewerPortal&&
-    activeEmbedViewerPortal.frame===frame
+    activeEmbedViewerPortal &&
+    activeEmbedViewerPortal.frame===frame &&
+    activeEmbedViewerPortal.viewerKind===viewerKind
   ){
     return true;
   }
@@ -179,62 +348,175 @@ function openEmbedViewerPortal(source){
   const ancestors=[];
   let node=frame.parentElement;
 
-  while(node&&node!==document.body&&node!==document.documentElement){
+  while(
+    node &&
+    node!==document.body &&
+    node!==document.documentElement
+  ){
     ancestors.push({
       node,
       style:captureInlineStyle(node)
     });
 
-    node.style.setProperty("overflow","visible","important");
-    node.style.setProperty("transform","none","important");
-    node.style.setProperty("filter","none","important");
-    node.style.setProperty("perspective","none","important");
-    node.style.setProperty("contain","none","important");
-    node.style.setProperty("clip-path","none","important");
-    node.style.setProperty("isolation","auto","important");
-    node.style.setProperty("z-index","2147483645","important");
+    node.style.setProperty(
+      "overflow","visible","important"
+    );
+    node.style.setProperty(
+      "transform","none","important"
+    );
+    node.style.setProperty(
+      "filter","none","important"
+    );
+    node.style.setProperty(
+      "perspective","none","important"
+    );
+    node.style.setProperty(
+      "contain","none","important"
+    );
+    node.style.setProperty(
+      "clip-path","none","important"
+    );
+    node.style.setProperty(
+      "isolation","auto","important"
+    );
+    node.style.setProperty(
+      "z-index","2147483645","important"
+    );
 
     node=node.parentElement;
   }
 
+  const historyToken=portalHistoryToken();
+
   const state={
     source,
     frame,
+    viewerKind,
+    shopSlug:String(data.shopSlug||"").trim(),
     frameStyle:captureInlineStyle(frame),
     ancestors,
-    htmlStyle:captureInlineStyle(document.documentElement),
-    bodyStyle:captureInlineStyle(document.body)
+    htmlStyle:captureInlineStyle(
+      document.documentElement
+    ),
+    bodyStyle:captureInlineStyle(
+      document.body
+    ),
+    scrollX:window.scrollX||0,
+    scrollY:window.scrollY||0,
+    historyToken
   };
 
   activeEmbedViewerPortal=state;
 
-  document.documentElement.style.setProperty("overflow","hidden","important");
-  document.body.style.setProperty("overflow","hidden","important");
+  try{
+    history.pushState(
+      {
+        ...(history.state||{}),
+        __shoufhonEmbedPortal:historyToken
+      },
+      "",
+      location.href
+    );
+  }catch(_){}
 
-  frame.setAttribute("data-shoufhon-viewer-portal","1");
-  frame.style.setProperty("position","fixed","important");
-  frame.style.setProperty("inset","0","important");
-  frame.style.setProperty("left","0","important");
-  frame.style.setProperty("top","0","important");
-  frame.style.setProperty("width","100vw","important");
-  frame.style.setProperty("height","100dvh","important");
-  frame.style.setProperty("min-width","100vw","important");
-  frame.style.setProperty("min-height","100vh","important");
-  frame.style.setProperty("max-width","none","important");
-  frame.style.setProperty("max-height","none","important");
-  frame.style.setProperty("margin","0","important");
-  frame.style.setProperty("padding","0","important");
-  frame.style.setProperty("border","0","important");
-  frame.style.setProperty("border-radius","0","important");
-  frame.style.setProperty("transform","none","important");
-  frame.style.setProperty("z-index","2147483646","important");
-  frame.style.setProperty("background","#050505","important");
-  frame.style.setProperty("display","block","important");
-  frame.style.setProperty("visibility","visible","important");
-  frame.style.setProperty("opacity","1","important");
+  document.documentElement.style.setProperty(
+    "overflow","hidden","important"
+  );
+  document.body.style.setProperty(
+    "overflow","hidden","important"
+  );
+
+  frame.setAttribute(
+    "data-shoufhon-viewer-portal",
+    viewerKind
+  );
+  frame.style.setProperty(
+    "position","fixed","important"
+  );
+  frame.style.setProperty(
+    "inset","0","important"
+  );
+  frame.style.setProperty(
+    "left","0","important"
+  );
+  frame.style.setProperty(
+    "top","0","important"
+  );
+  frame.style.setProperty(
+    "width","100vw","important"
+  );
+  frame.style.setProperty(
+    "height","100dvh","important"
+  );
+  frame.style.setProperty(
+    "min-width","100vw","important"
+  );
+  frame.style.setProperty(
+    "min-height","100vh","important"
+  );
+  frame.style.setProperty(
+    "max-width","none","important"
+  );
+  frame.style.setProperty(
+    "max-height","none","important"
+  );
+  frame.style.setProperty(
+    "margin","0","important"
+  );
+  frame.style.setProperty(
+    "padding","0","important"
+  );
+  frame.style.setProperty(
+    "border","0","important"
+  );
+  frame.style.setProperty(
+    "border-radius","0","important"
+  );
+  frame.style.setProperty(
+    "transform","none","important"
+  );
+  frame.style.setProperty(
+    "z-index","2147483646","important"
+  );
+  frame.style.setProperty(
+    "background","#050505","important"
+  );
+  frame.style.setProperty(
+    "display","block","important"
+  );
+  frame.style.setProperty(
+    "visibility","visible","important"
+  );
+  frame.style.setProperty(
+    "opacity","1","important"
+  );
 
   return true;
 }
+
+window.addEventListener("popstate",()=>{
+  const state=activeEmbedViewerPortal;
+  if(!state)return;
+
+  try{
+    state.source?.postMessage(
+      {
+        type:"SHOUFHON_EMBED_VIEWER_BACK",
+        viewerKind:state.viewerKind,
+        shopSlug:state.shopSlug||""
+      },
+      "*"
+    );
+  }catch(_){}
+
+  closeEmbedViewerPortal(
+    state.source,
+    {
+      fromHistory:true,
+      viewerKind:state.viewerKind
+    }
+  );
+});
 
 function safeBridgeError(error){
   return {
@@ -249,12 +531,22 @@ async function handleMediaBridge(event){
   if(!trustedEmbedSource(event?.source))return;
 
   if(data.type==="SHOUFHON_EMBED_VIEWER_OPEN"){
-    openEmbedViewerPortal(event.source);
+    openEmbedViewerPortal(
+      event.source,
+      data
+    );
     return;
   }
 
   if(data.type==="SHOUFHON_EMBED_VIEWER_CLOSE"){
-    closeEmbedViewerPortal(event.source);
+    closeEmbedViewerPortal(
+      event.source,
+      {
+        viewerKind:String(
+          data.viewerKind||""
+        ).trim()
+      }
+    );
     return;
   }
 
@@ -328,7 +620,22 @@ async function handleMediaBridge(event){
 }
 window.addEventListener("message",handleMediaBridge);
 
-window.Ma7alakAccount={open,close,logout,get client(){return client},get session(){return session},get user(){return session?.user||null},get profile(){return profile},ready:()=>initPromise};
+window.Ma7alakAccount={
+  open,
+  close,
+  logout,
+  get client(){return client},
+  get session(){return session},
+  get user(){return session?.user||null},
+  get profile(){return profile},
+  get personalNotifications(){
+    return Array.isArray(personalNotificationRows)
+      ?personalNotificationRows.map(row=>({...row}))
+      :[];
+  },
+  refreshPersonalNotifications:()=>refreshPersonalNotifications(true),
+  ready:()=>initPromise
+};
 window.Ma7alakSupabase={get client(){return client||window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||null},ready:async()=>{await initPromise;return client},loadLibrary:loadSB,url:URL,key:KEY};
 initPromise=init().catch(error=>{console.error("SHOUFHON account init:",error);throw error});
 })();
