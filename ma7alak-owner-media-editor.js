@@ -18,7 +18,7 @@
   let changed=false;
   let nativeFullscreenEntered=false;
   let closingEditor=false;
-  let snapshot={photos:[],videos:[],albums:[],albumItems:[],photoLimit:0,videoLimit:0,albumLimit:8};
+  let snapshot={photos:[],videos:[],albums:[],albumItems:[],photoLimit:0,videoLimit:0,albumLimit:8,commentsEnabled:true};
   let pending=new Map();
   let reviewUrls=[];
   let librarySelectionMode="";
@@ -45,7 +45,11 @@
       albumItems:Array.isArray(data.albumItems)?data.albumItems:(snapshot.albumItems||[]),
       photoLimit:finiteLimit(data.photoLimit,snapshot.photoLimit||6),
       videoLimit:finiteLimit(data.videoLimit,snapshot.videoLimit||2),
-      albumLimit:finiteLimit(data.albumLimit,snapshot.albumLimit??8)
+      albumLimit:finiteLimit(data.albumLimit,snapshot.albumLimit??8),
+      commentsEnabled:
+        data.commentsEnabled===undefined
+          ?snapshot.commentsEnabled!==false
+          :data.commentsEnabled!==false
     };
 
     return snapshot;
@@ -387,7 +391,12 @@
         '<b>Media library</b>'+
         '<div class="m7om-section-tools">'+
           '<small>Hold one item, then tap more to select.</small>'+
-          '<button type="button" data-media-add-menu>＋ Add Media</button>'+
+          '<div class="m7om-section-actions">'+
+            '<button type="button" class="m7om-comments-toggle '+(snapshot.commentsEnabled!==false?"on":"off")+'" data-media-comments-toggle aria-pressed="'+(snapshot.commentsEnabled!==false?"true":"false")+'" title="Comments for all Media">'+
+              '<span>💬 Comments</span><b>'+(snapshot.commentsEnabled!==false?"ON":"OFF")+'</b>'+
+            '</button>'+
+            '<button type="button" data-media-add-menu>＋ Add Media</button>'+
+          '</div>'+
         '</div>'+
       '</div>'+
       (items.length
@@ -1625,6 +1634,15 @@
       #m7-media-showcase{position:relative!important;overflow:visible!important}
       #m7-media-showcase .m7-media-head{position:relative!important;overflow:visible!important}
       #m7-owner-media-tools{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0}
+      .m7om-section-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+      .m7om-comments-toggle{min-height:36px;padding:0 9px;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:#151515;color:#ddd;font-size:8px;font-weight:900;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      .m7om-comments-toggle span{white-space:nowrap}
+      .m7om-comments-toggle b{min-width:28px;padding:4px 6px;border-radius:999px;font-size:7px;letter-spacing:.35px;text-align:center}
+      .m7om-comments-toggle.on{border-color:rgba(79,210,137,.34);background:rgba(32,116,72,.13);color:#bff5d3}
+      .m7om-comments-toggle.on b{background:rgba(65,204,124,.18);color:#83efa9}
+      .m7om-comments-toggle.off{border-color:rgba(255,121,121,.24);background:rgba(116,39,39,.10);color:#d9a6a6}
+      .m7om-comments-toggle.off b{background:rgba(255,102,102,.12);color:#ff9e9e}
+      .m7om-comments-toggle:disabled{opacity:.55;pointer-events:none}
       #m7-owner-media-tools .m7-media-counts{padding:0!important;text-align:right!important}
       #m7-media-showcase .m7-media-filters{margin-top:10px!important;gap:6px!important}
       #m7-media-showcase .m7-media-filter{min-height:32px!important;border-radius:9px!important;background:color-mix(in srgb,var(--m7-media-button-bg,#17130f) 88%,transparent)!important}
@@ -1635,6 +1653,8 @@
       @media(max-width:520px){
         #m7-media-showcase .m7-media-head{padding:11px 10px 10px!important;margin-bottom:7px!important;border-radius:17px 17px 11px 11px!important}
         #m7-owner-media-tools{gap:5px}
+        .m7om-section-actions{gap:5px;width:100%;justify-content:flex-end}
+        .m7om-comments-toggle{min-height:34px;padding:0 8px;font-size:7.5px}
         #m7-owner-media-tools .m7-media-counts{font-size:7px!important;max-width:72px;white-space:normal!important;line-height:1.2!important}
         #m7-owner-media-edit{right:16px!important;top:0!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;font-size:21px!important}
         #m7-media-showcase .m7-media-title{font-size:24px!important}
@@ -2113,8 +2133,50 @@
       openAlbumEditor(hit.card.dataset.albumId);
     });
 
-    mediaList.addEventListener("click",event=>{
+    mediaList.addEventListener("click",async event=>{
       if(busy)return;
+
+      const commentsToggle=
+        event.target.closest(
+          "[data-media-comments-toggle]"
+        );
+
+      if(commentsToggle){
+        const next=
+          snapshot.commentsEnabled===false;
+
+        busy=true;
+        commentsToggle.disabled=true;
+
+        try{
+          const data=await request({
+            op:"comments-toggle",
+            enabled:next
+          });
+
+          applySnapshot(data);
+          changed=true;
+          render();
+          notifyMediaUpdated("comments-toggle");
+
+          status(
+            snapshot.commentsEnabled!==false
+              ?"Comments are ON for all Media."
+              :"Comments are OFF for all Media.",
+            "ok"
+          );
+        }catch(error){
+          status(
+            error?.message||
+            "Could not update comments.",
+            "error"
+          );
+        }finally{
+          busy=false;
+        }
+
+        return;
+      }
 
       if(event.target.closest("[data-media-add-menu]")){
         openAddMediaMenu();
