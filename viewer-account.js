@@ -80,6 +80,101 @@ async function init(){
   client=window.__MA7ALAK_SHARED_SUPABASE_CLIENT__;
   let r=await client.auth.getSession();session=r.data.session;startHeaderFixWatcher();await loadProfile();client.auth.onAuthStateChange((_e,s)=>{session=s;setTimeout(()=>loadProfile(),0)})
 }
+
+/* =========================================================
+   SHOUFHON AUTHENTICATED MEDIA BRIDGE
+   ---------------------------------------------------------
+   Hostinger Custom Embeds may run in isolated iframe contexts.
+   This bridge lets only child frames on the current ShoufHon page
+   call a small allow-list of media RPCs through the real account
+   session. SQL still derives auth.uid() server-side.
+========================================================= */
+const MEDIA_RPC_ALLOWLIST=new Set([
+  "ma7alak_toggle_media_like",
+  "ma7alak_create_media_comment",
+  "ma7alak_edit_media_comment",
+  "ma7alak_delete_media_comment",
+  "ma7alak_toggle_media_comment_like"
+]);
+function trustedEmbedSource(source){
+  if(!source)return false;
+  if(source===window)return true;
+  try{
+    return Array.from(document.querySelectorAll("iframe")).some(frame=>{
+      try{return frame.contentWindow===source}catch(_){return false}
+    });
+  }catch(_){return false}
+}
+function safeBridgeError(error){
+  return {
+    message:String(error?.message||"REQUEST_FAILED"),
+    code:String(error?.code||""),
+    details:String(error?.details||""),
+    hint:String(error?.hint||"")
+  };
+}
+async function handleMediaBridge(event){
+  const data=event?.data||{};
+  if(!trustedEmbedSource(event?.source))return;
+
+  if(data.type==="SHOUFHON_ACCOUNT_OPEN_REQUEST"){
+    open();
+    return;
+  }
+
+  if(data.type==="SHOUFHON_ACCOUNT_STATE_REQUEST"){
+    try{await initPromise}catch(_){}
+    const meta=session?.user?.user_metadata||{};
+    event.source?.postMessage({
+      type:"SHOUFHON_ACCOUNT_STATE_RESPONSE",
+      requestId:String(data.requestId||""),
+      loggedIn:!!session?.user,
+      user:session?.user?{
+        id:session.user.id,
+        display_name:profile?.display_name||meta.full_name||meta.name||"ShoufHon user",
+        avatar_url:profile?.avatar_url||meta.avatar_url||meta.picture||""
+      }:null
+    },"*");
+    return;
+  }
+
+  if(data.type!=="SHOUFHON_MEDIA_RPC_REQUEST")return;
+
+  const requestId=String(data.requestId||"");
+  const fn=String(data.fn||"");
+
+  if(!MEDIA_RPC_ALLOWLIST.has(fn)){
+    event.source?.postMessage({
+      type:"SHOUFHON_MEDIA_RPC_RESPONSE",
+      requestId,
+      error:{message:"RPC_NOT_ALLOWED"}
+    },"*");
+    return;
+  }
+
+  try{
+    await initPromise;
+    if(!session?.user||!client)throw new Error("LOGIN_REQUIRED");
+    const result=await client.rpc(
+      fn,
+      data.args&&typeof data.args==="object"?data.args:{}
+    );
+    if(result.error)throw result.error;
+    event.source?.postMessage({
+      type:"SHOUFHON_MEDIA_RPC_RESPONSE",
+      requestId,
+      data:result.data
+    },"*");
+  }catch(error){
+    event.source?.postMessage({
+      type:"SHOUFHON_MEDIA_RPC_RESPONSE",
+      requestId,
+      error:safeBridgeError(error)
+    },"*");
+  }
+}
+window.addEventListener("message",handleMediaBridge);
+
 window.Ma7alakAccount={open,close,logout,get client(){return client},get session(){return session},get user(){return session?.user||null},get profile(){return profile},ready:()=>initPromise};
 window.Ma7alakSupabase={get client(){return client||window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||null},ready:async()=>{await initPromise;return client},loadLibrary:loadSB,url:URL,key:KEY};
 initPromise=init().catch(error=>{console.error("SHOUFHON account init:",error);throw error});
