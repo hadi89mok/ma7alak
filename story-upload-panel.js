@@ -4962,7 +4962,7 @@
 
   function syncOwnerMediaIsolation(){
     const open=Array.from(activeFrames.values()).some(function(state){
-      return state&&state.viewerKind==="owner-media-editor";
+      return state&&(state.viewerKind==="owner-media-editor"||state.viewerKind==="owner-catalog-editor");
     });
 
     document.documentElement.classList.toggle(
@@ -5056,7 +5056,7 @@
     host.classList.add("shoufhon-embed-viewer-host");
     frame.classList.add("shoufhon-embed-viewer-frame");
 
-    if(state.viewerKind==="owner-media-editor"){
+    if((state.viewerKind==="owner-media-editor"||state.viewerKind==="owner-catalog-editor")){
       host.classList.add("shoufhon-owner-media-editor-host");
       frame.classList.add("shoufhon-owner-media-editor-frame");
     }
@@ -5064,7 +5064,7 @@
     document.documentElement.classList.add("shoufhon-embed-viewer-open");
     document.body.classList.add("shoufhon-embed-viewer-open");
 
-    if(state.viewerKind==="owner-media-editor"){
+    if((state.viewerKind==="owner-media-editor"||state.viewerKind==="owner-catalog-editor")){
       /*
          Same-document history.back() can restore an older scroll position
          before Hostinger has finished demoting the fullscreen Media iframe.
@@ -5183,7 +5183,7 @@
       try{history.back()}catch(_){suppressNextViewerPop=false}
     }
 
-    if(state.viewerKind==="owner-media-editor"){
+    if((state.viewerKind==="owner-media-editor"||state.viewerKind==="owner-catalog-editor")){
       frame.classList.remove("shoufhon-owner-media-editor-frame");
       state.host?.classList.remove("shoufhon-owner-media-editor-host");
     }
@@ -5293,7 +5293,7 @@
       if(
         state &&
         state.historyArmed &&
-        state.viewerKind==="owner-media-editor"
+        (state.viewerKind==="owner-media-editor"||state.viewerKind==="owner-catalog-editor")
       ){
         targetFrame=frame;
         targetState=state;
@@ -6132,5 +6132,275 @@
     if(data.type==="SHOUFHON_OWNER_HUB_LOCATION_REQUEST"){
       handleHubLocationRequest(event);
     }
+  });
+})();
+
+
+/* =========================================================
+   SHOUFHON — CATALOG OWNER / REALTIME / HEIGHT BRIDGE V1
+   - Authenticated owner RPC bridge for Hostinger Catalog iframe
+   - Catalog image upload + cleanup in shop-gallery/owner-catalog
+   - Realtime invalidation through catalog header/profile changes
+   - Dynamic iframe/Hostinger host height
+========================================================= */
+(function(){
+  "use strict";
+  if(window.__SHOUFHON_CATALOG_PARENT_BRIDGE_V1__)return;
+  window.__SHOUFHON_CATALOG_PARENT_BRIDGE_V1__=true;
+
+  var realtimeBySource=new Map();
+
+  function trusted(event){
+    return !!window.ShoufHonMessageSecurity?.isTrustedEvent(event,true);
+  }
+
+  function frameFor(source){
+    try{return window.ShoufHonMessageSecurity?.frameForSource(source)||null}catch(_){return null}
+  }
+
+  async function clientReady(){
+    try{
+      if(window.Ma7alakAccount&&typeof window.Ma7alakAccount.ready==="function"){
+        await window.Ma7alakAccount.ready();
+      }
+    }catch(_){}
+    try{
+      if(window.Ma7alakSupabaseBootstrap&&typeof window.Ma7alakSupabaseBootstrap.ready==="function"){
+        await window.Ma7alakSupabaseBootstrap.ready();
+      }
+    }catch(_){}
+    return (window.Ma7alakAccount&&window.Ma7alakAccount.client)||
+      (window.Ma7alakOwnerAuth&&window.Ma7alakOwnerAuth.client)||
+      window.__MA7ALAK_SHARED_SUPABASE_CLIENT__||
+      null;
+  }
+
+  function cleanSlug(v){
+    var s=String(v||"").trim().toLowerCase();
+    return /^[a-z0-9][a-z0-9._&-]{0,119}$/i.test(s)?s:"";
+  }
+
+  function reply(source,requestId,ok,data,error){
+    try{
+      source?.postMessage({
+        type:"SHOUFHON_OWNER_CATALOG_RESULT",
+        requestId:String(requestId||""),
+        ok:!!ok,
+        data:data||null,
+        error:error?String(error):""
+      },"*");
+    }catch(_){}
+  }
+
+  async function requireCatalogOwner(client,slug){
+    if(!client)throw new Error("Owner account is still loading.");
+    var u=await client.auth.getUser();
+    var user=u&&u.data&&u.data.user;
+    if(!user)throw new Error("Owner login required.");
+
+    var own=await client.from("shop_owners")
+      .select("shop_slug")
+      .eq("user_id",user.id)
+      .eq("shop_slug",slug)
+      .maybeSingle();
+    if(own.error)throw own.error;
+    if(!own.data)throw new Error("This account does not own this shop.");
+
+    var profile=await client.from("shop_profiles")
+      .select("shop_slug,directory_options")
+      .eq("shop_slug",slug)
+      .maybeSingle();
+    if(profile.error)throw profile.error;
+    if(!profile.data)throw new Error("Shop profile was not found.");
+
+    var opts=profile.data.directory_options||{};
+    var enabled=["true","1","yes","on"].includes(String(opts.catalog_enabled||"").toLowerCase())||opts.catalog_enabled===true;
+    if(!enabled)throw new Error("Catalog is disabled by Admin.");
+
+    return {user:user,profile:profile.data,options:opts};
+  }
+
+  function imageExtension(file){
+    var mime=String(file?.type||"").toLowerCase();
+    if(mime==="image/png")return"png";
+    if(mime==="image/webp")return"webp";
+    if(mime==="image/gif")return"gif";
+    return"jpg";
+  }
+
+  function validateImage(file){
+    if(!file)throw new Error("No image selected.");
+    var allowed=["image/jpeg","image/png","image/webp","image/gif"];
+    if(!allowed.includes(String(file.type||"").toLowerCase())){
+      throw new Error("Use JPG, PNG, WEBP or GIF image.");
+    }
+    var size=Number(file.size||0);
+    if(!Number.isFinite(size)||size<=0)throw new Error("The selected image is empty.");
+    if(size>12*1024*1024)throw new Error("Catalog image must be under 12 MB.");
+  }
+
+  async function removePaths(client,paths){
+    var list=(Array.isArray(paths)?paths:[]).map(function(v){return String(v||"").trim()}).filter(Boolean);
+    if(!list.length)return;
+    try{await client.storage.from("shop-gallery").remove(list)}catch(_){}
+  }
+
+  async function handleOwner(event){
+    var d=event.data||{};
+    var source=event.source;
+    var requestId=String(d.requestId||"");
+    var slug=cleanSlug(d.shopSlug);
+    if(!requestId||!slug||!source)return;
+
+    try{
+      var client=await clientReady();
+      await requireCatalogOwner(client,slug);
+
+      if(d.op==="load"){
+        var got=await client.rpc("ma7alak_owner_get_catalog",{p_shop_slug:slug});
+        if(got.error)throw got.error;
+        reply(source,requestId,true,got.data,"");
+        return;
+      }
+
+      if(d.op!=="mutate")throw new Error("Unknown Catalog request.");
+
+      var action=String(d.action||"").trim();
+      var payload=(d.payload&&typeof d.payload==="object")?{...d.payload}:{};
+      var uploadedPath="";
+
+      if(d.imageFile){
+        validateImage(d.imageFile);
+        var current=await client.from("shop_profiles")
+          .select("directory_options")
+          .eq("shop_slug",slug)
+          .maybeSingle();
+        if(current.error)throw current.error;
+        var options=current.data?.directory_options||{};
+        var imagesEnabled=options.catalog_images_enabled===true||
+          ["true","1","yes","on"].includes(String(options.catalog_images_enabled||"").toLowerCase());
+        if(!imagesEnabled)throw new Error("Catalog images are disabled by Admin.");
+
+        var id=(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+"-"+Date.now();
+        uploadedPath="owner-catalog/"+slug+"/"+id+"."+imageExtension(d.imageFile);
+
+        var up=await client.storage.from("shop-gallery").upload(uploadedPath,d.imageFile,{
+          cacheControl:"31536000",
+          upsert:false,
+          contentType:d.imageFile.type||undefined
+        });
+        if(up.error)throw up.error;
+
+        var publicUrl=client.storage.from("shop-gallery").getPublicUrl(uploadedPath).data.publicUrl;
+        if(!publicUrl){
+          await removePaths(client,[uploadedPath]);
+          throw new Error("Could not create Catalog image URL.");
+        }
+
+        payload.image_mode="replace";
+        payload.image_url=publicUrl;
+        payload.image_storage_path=uploadedPath;
+      }
+
+      var result=await client.rpc("ma7alak_owner_catalog_mutate",{
+        p_shop_slug:slug,
+        p_action:action,
+        p_payload:payload
+      });
+
+      if(result.error){
+        if(uploadedPath)await removePaths(client,[uploadedPath]);
+        throw result.error;
+      }
+
+      await removePaths(client,result.data?.cleanup_paths||[]);
+      reply(source,requestId,true,result.data?.snapshot||result.data,"");
+    }catch(error){
+      reply(source,requestId,false,null,error?.message||"Catalog action failed.");
+    }
+  }
+
+  async function unregister(source){
+    var state=realtimeBySource.get(source);
+    if(!state)return;
+    realtimeBySource.delete(source);
+    try{
+      var client=state.client||await clientReady();
+      if(client&&state.channel)client.removeChannel(state.channel);
+    }catch(_){}
+  }
+
+  async function register(event){
+    var source=event.source;
+    var slug=cleanSlug(event.data?.shopSlug);
+    if(!source||!slug)return;
+    await unregister(source);
+    var client=await clientReady();
+    if(!client||typeof client.channel!=="function")return;
+
+    var invalidate=function(){
+      try{
+        source.postMessage({
+          type:"SHOUFHON_CATALOG_INVALIDATE",
+          shopSlug:slug
+        },"*");
+      }catch(_){}
+    };
+
+    var channel=client.channel("shoufhon-catalog-"+slug+"-"+Math.random().toString(36).slice(2))
+      .on("postgres_changes",{event:"*",schema:"public",table:"shop_catalogs",filter:"shop_slug=eq."+slug},invalidate)
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"shop_profiles",filter:"shop_slug=eq."+slug},invalidate)
+      .subscribe();
+
+    realtimeBySource.set(source,{client:client,channel:channel,slug:slug});
+  }
+
+  function applyHeight(event){
+    var d=event.data||{};
+    if(d.module!=="catalog")return;
+    var frame=frameFor(event.source);
+    if(!frame)return;
+    var h=Math.max(0,Math.min(10000,Math.ceil(Number(d.height)||0)));
+    var px=h+"px";
+
+    frame.style.setProperty("height",px,"important");
+    frame.style.setProperty("min-height",px,"important");
+    frame.style.setProperty("max-height",px,"important");
+    frame.style.setProperty("overflow","hidden","important");
+    frame.setAttribute("scrolling","no");
+
+    var host=frame.parentElement;
+    if(host){
+      host.style.setProperty("height",px,"important");
+      host.style.setProperty("min-height",px,"important");
+      host.style.setProperty("max-height",px,"important");
+      host.style.setProperty("overflow","hidden","important");
+      host.dataset.shoufhonCatalogAutoHeight="1";
+    }
+  }
+
+  window.addEventListener("message",function(event){
+    if(!trusted(event))return;
+    var d=event.data||{};
+
+    if(d.type==="SHOUFHON_OWNER_CATALOG_REQUEST"){
+      handleOwner(event);
+      return;
+    }
+    if(d.type==="SHOUFHON_CATALOG_REALTIME_REGISTER"){
+      register(event);
+      return;
+    }
+    if(d.type==="SHOUFHON_CATALOG_REALTIME_UNREGISTER"){
+      unregister(event.source);
+      return;
+    }
+    if(d.type==="SHOUFHON_EMBED_HEIGHT"){
+      applyHeight(event);
+    }
+  });
+
+  window.addEventListener("beforeunload",function(){
+    Array.from(realtimeBySource.keys()).forEach(function(source){unregister(source)});
   });
 })();
