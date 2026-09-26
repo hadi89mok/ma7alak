@@ -5,7 +5,7 @@
 if(window.self!==window.top)return;
 if(window.__MA7ALAK_NOTIFICATIONS_ENGINE__)return;
 window.__MA7ALAK_NOTIFICATIONS_ENGINE__=true;
-window.__SHOUFHON_NOTIFICATIONS_BUILD__="2026-09-26-social-center-v6";
+window.__SHOUFHON_NOTIFICATIONS_BUILD__="2026-09-26-social-center-v7-inline-media";
 
 
 /* =========================================================
@@ -5359,6 +5359,564 @@ function openNotificationActionSheet(notification,item){
 
 
 /* =========================================================
+   SHOUFHON MEDIA ACTIVITY OVERLAY
+   ---------------------------------------------------------
+   Opens exact photo/video + comments on TOP of the current page.
+   No shop-page navigation and no native fullscreen prompt.
+========================================================= */
+
+const mediaActivityState={
+  current:null,
+  engagement:null,
+  comments:[],
+  replyTo:null,
+  channel:null,
+  historyToken:"",
+  loading:false
+};
+
+function mediaActivityClient(){
+  return (
+    window.Ma7alakAccount?.client ||
+    window.Ma7alakOwnerAuth?.client ||
+    ma7alakSupabase ||
+    null
+  );
+}
+
+function ensureMediaActivityCss(){
+  if(document.getElementById("m7-media-activity-css"))return;
+
+  const style=document.createElement("style");
+  style.id="m7-media-activity-css";
+  style.textContent=`
+#m7-media-activity-overlay{
+  position:fixed;
+  inset:0;
+  z-index:2147483647;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:12px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(18px) saturate(120%);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+  font-family:Arial,"Segoe UI",sans-serif;
+  color:#fff;
+  box-sizing:border-box;
+}
+#m7-media-activity-overlay.open{display:flex}
+#m7-media-activity-card{
+  width:min(960px,100%);
+  height:min(780px,calc(100dvh - 24px));
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(300px,.75fr);
+  overflow:hidden;
+  border:1px solid rgba(217,164,65,.28);
+  border-radius:26px;
+  background:#0b0b0b;
+  box-shadow:0 32px 100px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);
+}
+#m7-media-activity-main{min-width:0;min-height:0;display:flex;flex-direction:column;background:#050505}
+#m7-media-activity-head{height:58px;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(15,15,15,.94);box-sizing:border-box}
+#m7-media-activity-shop-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#1b1b1b;border:1px solid rgba(217,164,65,.38)}
+#m7-media-activity-shop-copy{min-width:0;flex:1}
+#m7-media-activity-shop-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+#m7-media-activity-shop-copy small{display:block;margin-top:2px;color:#777;font-size:9px;font-weight:800;letter-spacing:.35px}
+#m7-media-activity-close{width:38px;height:38px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:#171717;color:#fff;font-size:22px;line-height:1;display:grid;place-items:center}
+#m7-media-activity-stage{position:relative;flex:1 1 auto;min-height:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 40%,#171717,#050505 70%)}
+#m7-media-activity-stage img,#m7-media-activity-stage video{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block}
+#m7-media-activity-loading{color:#888;font-size:11px;font-weight:800}
+#m7-media-activity-toolbar{height:58px;display:flex;align-items:center;gap:7px;padding:0 12px;border-top:1px solid rgba(255,255,255,.07);background:#0d0d0d}
+.m7-media-activity-tool{min-height:38px;padding:0 12px;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:#151515;color:#ddd;font-size:11px;font-weight:900}
+.m7-media-activity-tool svg{width:19px;height:19px;display:block}
+.m7-media-activity-tool.like.on{color:#ff5b70;border-color:rgba(255,91,112,.28);background:rgba(255,91,112,.08)}
+#m7-media-activity-side{min-width:0;min-height:0;display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,.07);background:#101010}
+#m7-media-activity-comments-head{height:58px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+#m7-media-activity-comments-head b{font-size:14px}
+#m7-media-activity-comments-head small{color:#777;font-size:10px}
+#m7-media-activity-comments{flex:1 1 auto;min-height:0;overflow-y:auto;padding:10px 12px 16px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.m7-media-comment{display:flex;gap:9px;padding:8px 5px;border-radius:12px;scroll-margin:80px 0}
+.m7-media-comment.reply{padding-left:36px}
+.m7-media-comment.focus{background:rgba(217,164,65,.09);box-shadow:inset 2px 0 0 #d9a441}
+.m7-media-comment img,.m7-media-comment .avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;object-fit:cover;background:#252525;display:grid;place-items:center;font-size:11px;font-weight:900}
+.m7-media-comment-copy{min-width:0;flex:1}
+.m7-media-comment-name{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:900}
+.m7-media-owner-tag{padding:2px 5px;border:1px solid rgba(217,164,65,.35);border-radius:999px;color:#efc66e;font-size:6px;letter-spacing:.35px}
+.m7-media-comment-body{margin-top:4px;color:#e5e5e5;font-size:11px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.m7-media-comment-meta{display:flex;align-items:center;gap:10px;margin-top:5px;color:#777;font-size:9px;font-weight:800}
+.m7-media-comment-action{padding:0;border:0;background:transparent;color:#aaa;font:inherit;font-weight:900}
+.m7-media-comment-action.on{color:#ff6a7e}
+.m7-media-shop-like{color:#efc66e}
+#m7-media-activity-empty{padding:28px 14px;text-align:center;color:#777;font-size:11px;line-height:1.5}
+#m7-media-activity-reply{display:none;padding:7px 10px;border-top:1px solid rgba(255,255,255,.07);background:#141414;color:#aaa;font-size:9px}
+#m7-media-activity-reply.show{display:flex;align-items:center;gap:7px}
+#m7-media-activity-reply span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#m7-media-activity-reply button{border:0;background:transparent;color:#fff;font-size:16px}
+#m7-media-activity-compose{display:flex;align-items:center;gap:7px;padding:9px 10px max(9px,env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.07);background:#0c0c0c}
+#m7-media-activity-compose input{min-width:0;flex:1;height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:#181818;color:#fff;outline:0;font-size:11px}
+#m7-media-activity-compose input:focus{border-color:rgba(217,164,65,.42)}
+#m7-media-activity-send{height:42px;padding:0 15px;border:0;border-radius:999px;background:linear-gradient(135deg,#f0bd62,#c9812d);color:#17100b;font-size:10px;font-weight:950}
+#m7-media-activity-send:disabled{opacity:.45}
+@media(max-width:760px){
+  #m7-media-activity-overlay{padding:0;background:#050505}
+  #m7-media-activity-card{width:100%;height:100dvh;border:0;border-radius:0;display:flex;flex-direction:column}
+  #m7-media-activity-main{height:55dvh;min-height:280px;flex:0 0 55dvh}
+  #m7-media-activity-head{height:52px;padding-top:env(safe-area-inset-top);box-sizing:content-box}
+  #m7-media-activity-toolbar{height:50px}
+  #m7-media-activity-side{flex:1 1 auto;border-left:0;border-top:1px solid rgba(255,255,255,.07)}
+  #m7-media-activity-comments-head{height:46px}
+  #m7-media-activity-comments{padding-top:7px}
+}
+`;
+  document.head.appendChild(style);
+}
+
+function mediaActivityRelativeTime(value){
+  const time=new Date(value||0).getTime();
+  if(!Number.isFinite(time)||time<=0)return "";
+  const diff=Math.max(0,Date.now()-time);
+  const min=Math.floor(diff/60000);
+  if(min<1)return "now";
+  if(min<60)return min+"m";
+  const hour=Math.floor(min/60);
+  if(hour<24)return hour+"h";
+  const day=Math.floor(hour/24);
+  if(day<7)return day+"d";
+  try{return new Date(time).toLocaleDateString([],{month:"short",day:"numeric"})}catch(_){return ""}
+}
+
+function mediaActivityMount(){
+  ensureMediaActivityCss();
+
+  let overlay=document.getElementById("m7-media-activity-overlay");
+  if(overlay)return overlay;
+
+  overlay=document.createElement("div");
+  overlay.id="m7-media-activity-overlay";
+  overlay.setAttribute("aria-hidden","true");
+  overlay.innerHTML=`
+    <div id="m7-media-activity-card" role="dialog" aria-modal="true" aria-label="Media activity">
+      <section id="m7-media-activity-main">
+        <header id="m7-media-activity-head">
+          <img id="m7-media-activity-shop-avatar" alt="">
+          <div id="m7-media-activity-shop-copy"><b>Media</b><small>SHOUFHON</small></div>
+          <button id="m7-media-activity-close" type="button" aria-label="Close">×</button>
+        </header>
+        <div id="m7-media-activity-stage"><div id="m7-media-activity-loading">Loading media…</div></div>
+        <div id="m7-media-activity-toolbar">
+          <button id="m7-media-activity-like" class="m7-media-activity-tool like" type="button" aria-label="Like media">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.3 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="m7-media-activity-like-count">0</span>
+          </button>
+          <button id="m7-media-activity-comments-button" class="m7-media-activity-tool" type="button" aria-label="Comments">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+            <span id="m7-media-activity-comment-count">0</span>
+          </button>
+        </div>
+      </section>
+      <aside id="m7-media-activity-side">
+        <div id="m7-media-activity-comments-head"><b>Comments</b><small id="m7-media-activity-comments-count"></small></div>
+        <div id="m7-media-activity-comments"></div>
+        <div id="m7-media-activity-reply"><span></span><button type="button" aria-label="Cancel reply">×</button></div>
+        <form id="m7-media-activity-compose">
+          <input id="m7-media-activity-input" maxlength="500" autocomplete="off" placeholder="Write a comment…">
+          <button id="m7-media-activity-send" type="submit">Send</button>
+        </form>
+      </aside>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click",event=>{
+    if(event.target===overlay)closeMediaActivityOverlay();
+  });
+
+  overlay.querySelector("#m7-media-activity-close")?.addEventListener("click",closeMediaActivityOverlay);
+
+  overlay.querySelector("#m7-media-activity-like")?.addEventListener("click",async()=>{
+    const current=mediaActivityState.current;
+    if(!current)return;
+
+    const client=mediaActivityClient();
+    if(!client||!window.Ma7alakAccount?.user){
+      window.Ma7alakAccount?.open?.();
+      return;
+    }
+
+    const button=document.getElementById("m7-media-activity-like");
+    button.disabled=true;
+    try{
+      const result=await client.rpc("ma7alak_toggle_media_like",{
+        p_shop_slug:current.shopSlug,
+        p_media_type:current.mediaType,
+        p_media_id:current.mediaId
+      });
+      if(result.error)throw result.error;
+      const row=Array.isArray(result.data)?result.data[0]:result.data;
+      mediaActivityState.engagement={
+        ...(mediaActivityState.engagement||{}),
+        liked_by_me:row?.liked===true,
+        like_count:Number(row?.like_count)||0,
+        comment_count:Number(row?.comment_count)||0
+      };
+      renderMediaActivityToolbar();
+    }catch(error){
+      console.warn("ShoufHon media like:",error);
+    }finally{
+      button.disabled=false;
+    }
+  });
+
+  overlay.querySelector("#m7-media-activity-comments-button")?.addEventListener("click",()=>{
+    document.getElementById("m7-media-activity-side")?.scrollIntoView({behavior:"smooth",block:"end"});
+    document.getElementById("m7-media-activity-input")?.focus();
+  });
+
+  overlay.querySelector("#m7-media-activity-reply button")?.addEventListener("click",()=>{
+    mediaActivityState.replyTo=null;
+    renderMediaActivityReply();
+  });
+
+  overlay.querySelector("#m7-media-activity-compose")?.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const current=mediaActivityState.current;
+    const input=document.getElementById("m7-media-activity-input");
+    const body=String(input?.value||"").trim();
+    if(!current||!body)return;
+
+    const client=mediaActivityClient();
+    if(!client||!window.Ma7alakAccount?.user){
+      window.Ma7alakAccount?.open?.();
+      return;
+    }
+
+    const send=document.getElementById("m7-media-activity-send");
+    send.disabled=true;
+
+    try{
+      const result=await client.rpc("ma7alak_create_media_comment",{
+        p_shop_slug:current.shopSlug,
+        p_media_type:current.mediaType,
+        p_media_id:current.mediaId,
+        p_parent_comment_id:mediaActivityState.replyTo?.id||null,
+        p_body:body
+      });
+      if(result.error)throw result.error;
+      input.value="";
+      mediaActivityState.replyTo=null;
+      renderMediaActivityReply();
+      await loadMediaActivityComments();
+    }catch(error){
+      console.warn("ShoufHon media comment:",error);
+    }finally{
+      send.disabled=false;
+    }
+  });
+
+  overlay.querySelector("#m7-media-activity-comments")?.addEventListener("click",async event=>{
+    const action=event.target.closest("[data-media-comment-action]");
+    if(!action)return;
+
+    const id=Number(action.dataset.commentId||0);
+    const row=mediaActivityState.comments.find(x=>Number(x.id)===id);
+    if(!row)return;
+
+    const kind=String(action.dataset.mediaCommentAction||"");
+
+    if(kind==="reply"){
+      mediaActivityState.replyTo={id:row.id,name:row.author_name||"user"};
+      renderMediaActivityReply();
+      document.getElementById("m7-media-activity-input")?.focus();
+      return;
+    }
+
+    if(kind==="like"){
+      const client=mediaActivityClient();
+      if(!client||!window.Ma7alakAccount?.user){
+        window.Ma7alakAccount?.open?.();
+        return;
+      }
+
+      action.disabled=true;
+      try{
+        const result=await client.rpc("ma7alak_toggle_media_comment_like",{p_comment_id:id});
+        if(result.error)throw result.error;
+        await loadMediaActivityComments();
+      }catch(error){
+        console.warn("ShoufHon comment like:",error);
+      }finally{
+        action.disabled=false;
+      }
+    }
+  });
+
+  return overlay;
+}
+
+function renderMediaActivityReply(){
+  const bar=document.getElementById("m7-media-activity-reply");
+  if(!bar)return;
+  const reply=mediaActivityState.replyTo;
+  bar.classList.toggle("show",!!reply);
+  const span=bar.querySelector("span");
+  if(span)span.textContent=reply?"Replying to "+String(reply.name||"comment"):"";
+}
+
+function renderMediaActivityToolbar(){
+  const row=mediaActivityState.engagement||{};
+  const like=document.getElementById("m7-media-activity-like");
+  const likeCount=document.getElementById("m7-media-activity-like-count");
+  const commentCount=document.getElementById("m7-media-activity-comment-count");
+  const commentsCount=document.getElementById("m7-media-activity-comments-count");
+
+  like?.classList.toggle("on",row.liked_by_me===true);
+  if(likeCount)likeCount.textContent=String(Number(row.like_count)||0);
+  if(commentCount)commentCount.textContent=String(Number(row.comment_count)||0);
+  if(commentsCount)commentsCount.textContent=(Number(row.comment_count)||0)+" total";
+}
+
+function renderMediaActivityComments(){
+  const root=document.getElementById("m7-media-activity-comments");
+  if(!root)return;
+
+  const rows=mediaActivityState.comments||[];
+  if(!rows.length){
+    root.innerHTML='<div id="m7-media-activity-empty">No comments yet.<br>Start the conversation.</div>';
+    return;
+  }
+
+  const current=mediaActivityState.current||{};
+  root.innerHTML=rows.map(row=>{
+    const reply=!!row.parent_comment_id;
+    const avatar=row.author_avatar
+      ?'<img src="'+escapeAttribute(row.author_avatar)+'" alt="">'
+      :'<div class="avatar">'+escapeHtml(String(row.author_name||"?").slice(0,1).toUpperCase())+'</div>';
+
+    return '<div class="m7-media-comment '+(reply?"reply ":"")+'" data-comment-row="'+escapeAttribute(String(row.id))+'">'+
+      avatar+
+      '<div class="m7-media-comment-copy">'+
+        '<div class="m7-media-comment-name">'+
+          '<span>'+escapeHtml(row.author_name||"ShoufHon user")+'</span>'+
+          (row.author_is_shop_owner?'<span class="m7-media-owner-tag">SHOP OWNER</span>':"")+
+        '</div>'+
+        '<div class="m7-media-comment-body">'+escapeHtml(row.body||"")+'</div>'+
+        '<div class="m7-media-comment-meta">'+
+          '<span>'+escapeHtml(mediaActivityRelativeTime(row.created_at))+(row.edited_at?" · edited":"")+'</span>'+
+          '<button class="m7-media-comment-action '+(row.liked_by_me?"on":"")+'" type="button" data-media-comment-action="like" data-comment-id="'+escapeAttribute(String(row.id))+'">Like'+(Number(row.like_count)?' · '+Number(row.like_count):"")+'</button>'+
+          '<button class="m7-media-comment-action" type="button" data-media-comment-action="reply" data-comment-id="'+escapeAttribute(String(row.id))+'">Reply</button>'+
+          (row.liked_by_shop_owner?'<span class="m7-media-shop-like">SHOP ♥</span>':"")+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+
+  if(current.commentId){
+    requestAnimationFrame(()=>{
+      const row=root.querySelector('[data-comment-row="'+CSS.escape(String(current.commentId))+'"]');
+      if(row){
+        row.classList.add("focus");
+        row.scrollIntoView({behavior:"smooth",block:"center"});
+        setTimeout(()=>row.classList.remove("focus"),2200);
+      }
+    });
+  }
+}
+
+async function loadMediaActivityComments(){
+  const current=mediaActivityState.current;
+  if(!current)return;
+
+  const client=mediaActivityClient();
+  if(!client)return;
+
+  const [commentsResult,engagementResult]=await Promise.all([
+    client.rpc("ma7alak_get_media_comments",{
+      p_shop_slug:current.shopSlug,
+      p_media_type:current.mediaType,
+      p_media_id:current.mediaId,
+      p_limit:200
+    }),
+    client.rpc("ma7alak_get_shop_media_engagement",{
+      p_shop_slug:current.shopSlug
+    })
+  ]);
+
+  if(!commentsResult.error){
+    mediaActivityState.comments=Array.isArray(commentsResult.data)?commentsResult.data:[];
+  }
+
+  if(!engagementResult.error){
+    mediaActivityState.engagement=(engagementResult.data||[]).find(row=>
+      String(row.media_type)===String(current.mediaType)&&
+      Number(row.media_id)===Number(current.mediaId)
+    )||mediaActivityState.engagement||{};
+  }
+
+  renderMediaActivityComments();
+  renderMediaActivityToolbar();
+}
+
+async function loadMediaActivity(){
+  const current=mediaActivityState.current;
+  if(!current)return false;
+
+  const client=mediaActivityClient()||await loadMa7alakSupabase();
+  if(!client)return false;
+
+  const table=current.mediaType==="video"?"shop_videos":"shop_gallery";
+  const columns=current.mediaType==="video"
+    ?"id,shop_slug,video_url"
+    :"id,shop_slug,image_url";
+
+  const [mediaResult,profileResult,engagementResult]=await Promise.all([
+    client.from(table).select(columns).eq("id",current.mediaId).eq("shop_slug",current.shopSlug).maybeSingle(),
+    client.from("shop_profiles").select("shop_slug,shop_name,profile_image_url").eq("shop_slug",current.shopSlug).maybeSingle(),
+    client.rpc("ma7alak_get_shop_media_engagement",{p_shop_slug:current.shopSlug})
+  ]);
+
+  if(mediaResult.error)throw mediaResult.error;
+  if(!mediaResult.data)throw new Error("Media not found.");
+
+  const media=mediaResult.data;
+  const profile=profileResult.data||{};
+  const url=current.mediaType==="video"?media.video_url:media.image_url;
+
+  const stage=document.getElementById("m7-media-activity-stage");
+  const name=document.querySelector("#m7-media-activity-shop-copy b");
+  const avatar=document.getElementById("m7-media-activity-shop-avatar");
+
+  if(name)name.textContent=profile.shop_name||current.shopSlug;
+  if(avatar){
+    avatar.src=profile.profile_image_url||"";
+    avatar.style.visibility=profile.profile_image_url?"visible":"hidden";
+  }
+
+  stage.innerHTML=current.mediaType==="video"
+    ?'<video src="'+escapeAttribute(url||"")+'" controls playsinline autoplay></video>'
+    :'<img src="'+escapeAttribute(url||"")+'" alt="">';
+
+  mediaActivityState.engagement=(engagementResult.data||[]).find(row=>
+    String(row.media_type)===String(current.mediaType)&&
+    Number(row.media_id)===Number(current.mediaId)
+  )||{like_count:0,comment_count:0,liked_by_me:false};
+
+  renderMediaActivityToolbar();
+
+  if(current.comments){
+    await loadMediaActivityComments();
+  }else{
+    mediaActivityState.comments=[];
+    renderMediaActivityComments();
+  }
+
+  if(mediaActivityState.channel){
+    try{client.removeChannel(mediaActivityState.channel)}catch(_){}
+    mediaActivityState.channel=null;
+  }
+
+  mediaActivityState.channel=client.channel(
+    "m7-media-activity-"+current.shopSlug+"-"+current.mediaType+"-"+current.mediaId+"-"+Math.random().toString(36).slice(2)
+  ).on(
+    "postgres_changes",
+    {
+      event:"*",
+      schema:"public",
+      table:"shop_media_engagement",
+      filter:"shop_slug=eq."+current.shopSlug
+    },
+    ()=>setTimeout(()=>loadMediaActivityComments().catch(()=>{}),45)
+  ).subscribe();
+
+  return true;
+}
+
+function closeMediaActivityOverlay(options={}){
+  const overlay=document.getElementById("m7-media-activity-overlay");
+  if(!overlay||!overlay.classList.contains("open"))return;
+
+  overlay.classList.remove("open");
+  overlay.setAttribute("aria-hidden","true");
+  document.documentElement.style.removeProperty("overflow");
+  document.body.style.removeProperty("overflow");
+
+  const client=mediaActivityClient();
+  if(mediaActivityState.channel&&client){
+    try{client.removeChannel(mediaActivityState.channel)}catch(_){}
+  }
+  mediaActivityState.channel=null;
+  mediaActivityState.current=null;
+  mediaActivityState.comments=[];
+  mediaActivityState.replyTo=null;
+
+  const stage=document.getElementById("m7-media-activity-stage");
+  if(stage)stage.innerHTML='<div id="m7-media-activity-loading">Loading media…</div>';
+
+  if(!options.fromHistory&&mediaActivityState.historyToken&&history.state?.__m7MediaActivity===mediaActivityState.historyToken){
+    try{history.back()}catch(_){}
+  }
+
+  mediaActivityState.historyToken="";
+}
+
+async function openMediaActivityOverlay(input){
+  input=input&&typeof input==="object"?input:{};
+  const shopSlug=String(input.shopSlug||"").trim().toLowerCase();
+  const mediaType=String(input.mediaType||"").trim().toLowerCase();
+  const mediaId=Number(input.mediaId)||0;
+
+  if(!shopSlug||!["photo","video"].includes(mediaType)||!mediaId)return false;
+
+  closeNotifications();
+  const overlay=mediaActivityMount();
+
+  mediaActivityState.current={
+    shopSlug,
+    mediaType,
+    mediaId,
+    comments:input.comments!==false,
+    commentId:Number(input.commentId)||null
+  };
+  mediaActivityState.replyTo=null;
+  mediaActivityState.comments=[];
+  mediaActivityState.engagement=null;
+
+  overlay.classList.add("open");
+  overlay.setAttribute("aria-hidden","false");
+  document.documentElement.style.setProperty("overflow","hidden","important");
+  document.body.style.setProperty("overflow","hidden","important");
+
+  mediaActivityState.historyToken="m7-media-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+  try{
+    history.pushState({...history.state,__m7MediaActivity:mediaActivityState.historyToken},"",location.href);
+  }catch(_){}
+
+  try{
+    await loadMediaActivity();
+    return true;
+  }catch(error){
+    console.warn("ShoufHon media activity overlay:",error);
+    const stage=document.getElementById("m7-media-activity-stage");
+    if(stage)stage.innerHTML='<div id="m7-media-activity-empty">Could not load this media.</div>';
+    return false;
+  }
+}
+
+window.addEventListener("popstate",()=>{
+  const overlay=document.getElementById("m7-media-activity-overlay");
+  if(overlay?.classList.contains("open")){
+    closeMediaActivityOverlay({fromHistory:true});
+  }
+});
+
+window.ShoufHonMediaActivity={
+  open:openMediaActivityOverlay,
+  close:closeMediaActivityOverlay
+};
+
+
+/* =========================================================
    RENDER
 ========================================================= */
 
@@ -5922,20 +6480,32 @@ function renderNotifications(){
                   notificationId
                 );
 
-                navigateFromNotification(
-                  buildNotificationUrl(
-                    "/" + encodeURIComponent(shopSlug),
-                    {
-                      media:
-                        mediaType +
-                        ":" +
-                        mediaId,
-                      comments:"1",
-                      comment:
-                        commentId || ""
-                    }
-                  )
-                );
+                const openedInline=
+                  await openMediaActivityOverlay({
+                    shopSlug:shopSlug,
+                    mediaType:mediaType,
+                    mediaId:Number(mediaId),
+                    comments:true,
+                    commentId:
+                      Number(commentId)||null
+                  });
+
+                if(!openedInline){
+                  navigateFromNotification(
+                    buildNotificationUrl(
+                      "/" + encodeURIComponent(shopSlug),
+                      {
+                        media:
+                          mediaType +
+                          ":" +
+                          mediaId,
+                        comments:"1",
+                        comment:
+                          commentId || ""
+                      }
+                    )
+                  );
+                }
               }
 
             }
