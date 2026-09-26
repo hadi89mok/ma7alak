@@ -257,7 +257,7 @@ function renderBrowser(){
     '</div>';
 
   $("[data-br-close]",browser).onclick=function(){closeBrowser()};
-  $("[data-br-edit]",browser)?.addEventListener("click",function(){closeBrowser();setTimeout(openEditor,40)});
+  $("[data-br-edit]",browser)?.addEventListener("click",function(){closeBrowser({fromPortalBack:true});setTimeout(openEditor,40)});
   $$("[data-br-section]",browser).forEach(function(b){
     b.onclick=function(){activeSection=String(b.dataset.brSection);renderBrowser()};
   });
@@ -524,10 +524,13 @@ window.addEventListener("message",function(event){
   }
   if(d.type==="SHOUFHON_EMBED_VIEWER_BACK"){
     if(d.shopSlug&&norm(d.shopSlug)!==slug)return;
-    if(d.viewerKind==="owner-catalog-editor"&&editorOpen){closeEditor({fromPortalBack:true});return}
-    if(productOpen){closeProduct({fromPortalBack:true});if(browserOpen)return}
-    if((d.viewerKind==="catalog-browser"||browserOpen)&&browserOpen){closeBrowser({fromPortalBack:true});return}
-    if(d.viewerKind==="catalog-product-viewer"&&productOpen){closeProduct({fromPortalBack:true});return}
+    if(editorOpen){closeEditor({fromPortalBack:true});return}
+    if(productOpen){
+      closeProduct({fromPortalBack:true});
+      if(browserOpen)closeBrowser({fromPortalBack:true});
+      return;
+    }
+    if(browserOpen){closeBrowser({fromPortalBack:true});return}
   }
 });
 
