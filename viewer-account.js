@@ -91,6 +91,7 @@ async function init(){
 ========================================================= */
 const MEDIA_RPC_READ_ALLOWLIST=new Set([
   "ma7alak_get_shop_media_engagement",
+  "ma7alak_get_shop_media_catalog",
   "ma7alak_get_media_comments"
 ]);
 const MEDIA_RPC_WRITE_ALLOWLIST=new Set([
@@ -127,6 +128,17 @@ async function handleMediaBridge(event){
 
   if(data.type==="SHOUFHON_ACCOUNT_OPEN_REQUEST"){
     open();
+    return;
+  }
+
+  if(data.type==="SHOUFHON_MEDIA_DEEPLINK_CONSUMED"){
+    try{
+      const url=new URL(window.location.href);
+      url.searchParams.delete("media");
+      url.searchParams.delete("comments");
+      url.searchParams.delete("comment");
+      history.replaceState(history.state,"",url.pathname+url.search+url.hash);
+    }catch(_){}
     return;
   }
 
