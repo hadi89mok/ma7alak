@@ -70,6 +70,9 @@ function startHeaderFixWatcher(){
 function close(){document.getElementById("m7-account-overlay")?.remove()}
 function status(t){let x=document.getElementById("m7a-status");if(x)x.textContent=t||""}
 function toast(message){css();document.getElementById("m7a-toast")?.remove();const el=document.createElement("div");el.id="m7a-toast";el.setAttribute("role","status");el.setAttribute("aria-live","polite");el.innerHTML='<span class="m7a-toast-check">✓</span><span>'+esc(message)+'</span>';document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("visible"));setTimeout(()=>{el.classList.remove("visible");setTimeout(()=>el.remove(),250)},2800)}
+window.addEventListener("pagehide",()=>closeEmbedViewerPortal());
+window.addEventListener("beforeunload",()=>closeEmbedViewerPortal());
+
 async function logout(){const buttons=[document.getElementById("m7a-logout"),document.getElementById("m7a-header-logout")].filter(Boolean);buttons.forEach(button=>{if(button.id==="m7a-header-logout"){button.dataset.logoutHtml=button.innerHTML;const main=button.querySelector(".ma7alak-header-menu-main");if(main)main.textContent="Logging out…"}else{button.dataset.logoutText=button.textContent;button.textContent="Logging out…"}button.style.pointerEvents="none"});try{const result=await client?.auth.signOut({scope:"local"});if(result?.error)throw result.error;session=null;profile=null;ownerState=false;emit();syncHeaderFix();close();toast("You’re logged out");return true}catch(error){buttons.forEach(button=>{if(button.id==="m7a-header-logout"&&button.dataset.logoutHtml){button.innerHTML=button.dataset.logoutHtml}else{button.textContent=button.dataset.logoutText||"Log out"}button.style.pointerEvents=""});status(error?.message||"Could not log out. Please try again.");console.error("SHOUFHON logout:",error);return false}}
 async function saveProfile(name,avatarUrl){return client.rpc("ma7alak_update_my_profile",{p_display_name:name,p_username:profile?.username||null,p_avatar_url:avatarUrl||null,p_bio:profile?.bio||null})}
 async function upload(file){if(!file||!session?.user)return;if(!file.type.startsWith("image/")||file.size>5*1024*1024){status("Choose an image under 5 MB.");return}let ext=(file.name.split(".").pop()||"jpg").replace(/[^a-z0-9]/gi,""),path=`${session.user.id}/avatar-${Date.now()}.${ext}`;let u=await client.storage.from(BUCKET).upload(path,file,{contentType:file.type});if(u.error){status(u.error.message);return}let url=client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,name=document.getElementById("m7a-name")?.value.trim()||profile?.display_name||session.user.user_metadata?.full_name||"ShoufHon User";let r=await saveProfile(name,url);if(r.error){status(r.error.message);return}await loadProfile();open()}
@@ -114,6 +117,125 @@ function trustedEmbedSource(source){
     });
   }catch(_){return false}
 }
+
+let activeEmbedViewerPortal=null;
+
+function embedFrameForSource(source){
+  if(!source)return null;
+  try{
+    return Array.from(document.querySelectorAll("iframe")).find(frame=>{
+      try{return frame.contentWindow===source}catch(_){return false}
+    })||null;
+  }catch(_){
+    return null;
+  }
+}
+
+function captureInlineStyle(node){
+  if(!node)return null;
+  return node.getAttribute("style");
+}
+
+function restoreInlineStyle(node,value){
+  if(!node)return;
+  if(value===null||value===undefined)node.removeAttribute("style");
+  else node.setAttribute("style",value);
+}
+
+function closeEmbedViewerPortal(source){
+  const state=activeEmbedViewerPortal;
+  if(!state)return;
+  if(source&&state.source&&source!==state.source)return;
+
+  activeEmbedViewerPortal=null;
+
+  restoreInlineStyle(state.frame,state.frameStyle);
+
+  (state.ancestors||[]).forEach(item=>{
+    restoreInlineStyle(item.node,item.style);
+  });
+
+  restoreInlineStyle(document.documentElement,state.htmlStyle);
+  restoreInlineStyle(document.body,state.bodyStyle);
+
+  try{
+    state.frame.removeAttribute("data-shoufhon-viewer-portal");
+  }catch(_){}
+}
+
+function openEmbedViewerPortal(source){
+  const frame=embedFrameForSource(source);
+  if(!frame)return false;
+
+  if(
+    activeEmbedViewerPortal&&
+    activeEmbedViewerPortal.frame===frame
+  ){
+    return true;
+  }
+
+  closeEmbedViewerPortal();
+
+  const ancestors=[];
+  let node=frame.parentElement;
+
+  while(node&&node!==document.body&&node!==document.documentElement){
+    ancestors.push({
+      node,
+      style:captureInlineStyle(node)
+    });
+
+    node.style.setProperty("overflow","visible","important");
+    node.style.setProperty("transform","none","important");
+    node.style.setProperty("filter","none","important");
+    node.style.setProperty("perspective","none","important");
+    node.style.setProperty("contain","none","important");
+    node.style.setProperty("clip-path","none","important");
+    node.style.setProperty("isolation","auto","important");
+    node.style.setProperty("z-index","2147483645","important");
+
+    node=node.parentElement;
+  }
+
+  const state={
+    source,
+    frame,
+    frameStyle:captureInlineStyle(frame),
+    ancestors,
+    htmlStyle:captureInlineStyle(document.documentElement),
+    bodyStyle:captureInlineStyle(document.body)
+  };
+
+  activeEmbedViewerPortal=state;
+
+  document.documentElement.style.setProperty("overflow","hidden","important");
+  document.body.style.setProperty("overflow","hidden","important");
+
+  frame.setAttribute("data-shoufhon-viewer-portal","1");
+  frame.style.setProperty("position","fixed","important");
+  frame.style.setProperty("inset","0","important");
+  frame.style.setProperty("left","0","important");
+  frame.style.setProperty("top","0","important");
+  frame.style.setProperty("width","100vw","important");
+  frame.style.setProperty("height","100dvh","important");
+  frame.style.setProperty("min-width","100vw","important");
+  frame.style.setProperty("min-height","100vh","important");
+  frame.style.setProperty("max-width","none","important");
+  frame.style.setProperty("max-height","none","important");
+  frame.style.setProperty("margin","0","important");
+  frame.style.setProperty("padding","0","important");
+  frame.style.setProperty("border","0","important");
+  frame.style.setProperty("border-radius","0","important");
+  frame.style.setProperty("transform","none","important");
+  frame.style.setProperty("z-index","2147483646","important");
+  frame.style.setProperty("background","#050505","important");
+  frame.style.setProperty("display","block","important");
+  frame.style.setProperty("visibility","visible","important");
+  frame.style.setProperty("opacity","1","important");
+
+  return true;
+}
+
 function safeBridgeError(error){
   return {
     message:String(error?.message||"REQUEST_FAILED"),
@@ -125,6 +247,16 @@ function safeBridgeError(error){
 async function handleMediaBridge(event){
   const data=event?.data||{};
   if(!trustedEmbedSource(event?.source))return;
+
+  if(data.type==="SHOUFHON_EMBED_VIEWER_OPEN"){
+    openEmbedViewerPortal(event.source);
+    return;
+  }
+
+  if(data.type==="SHOUFHON_EMBED_VIEWER_CLOSE"){
+    closeEmbedViewerPortal(event.source);
+    return;
+  }
 
   if(data.type==="SHOUFHON_ACCOUNT_OPEN_REQUEST"){
     open();
