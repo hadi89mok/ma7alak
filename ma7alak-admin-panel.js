@@ -5827,6 +5827,8 @@ window.Ma7alakDirectoryAdmin={
       throw Error('Review count must be a whole positive number.');
     }
 
+    delete options.availability_extra_rows;
+
     const result={directory_options:options};
 
     profileFields.forEach(([k,l,t])=>{
@@ -14336,6 +14338,14 @@ function ensureCss(){
 
     #ma-admin-edit-card .m7da-sectioned-extras [data-m7-extra-key]{
       display:none!important;
+    }
+
+    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-hours{
+      display:none!important;
+    }
+
+    #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-about{
+      display:block!important;
     }
 
     #ma-admin-edit-card .m7da-sectioned-extras.m7v4-extras-details [data-m7-extra-key="facebook_url"],
