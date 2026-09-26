@@ -180,6 +180,16 @@ function getShopProfileImage(
 
 let notifications = [];
 
+/*
+   Personal replies / comment likes are account-owned, not visitor/follow-owned.
+   Keep them in an independent state so a concurrent Story/Reel/Follow refresh
+   can never erase them from the bell.
+*/
+let personalMediaNotifications = [];
+let personalMediaNotificationsUserId = "";
+let personalMediaNotificationsPromise = null;
+let personalMediaNotificationsLoadedAt = 0;
+
 let notificationsOpen = false;
 
 let visitorId = null;
@@ -3132,6 +3142,141 @@ async function getFollowedShopSlugSet(client){
    LOAD NOTIFICATIONS
 ========================================================= */
 
+function mediaSocialKey(row){
+  return "media-social:"+String(row&&row.id||"");
+}
+
+function normalizePersonalMediaNotification(row){
+  return {
+    ...(row||{}),
+    key:mediaSocialKey(row),
+    seen:row?.seen===true,
+    badge_acknowledged:
+      row?.badge_acknowledged===true
+  };
+}
+
+function mergePersonalMediaNotifications(rows){
+  const base=(Array.isArray(rows)?rows:[])
+    .filter(function(row){
+      return !String(row?.key||"").startsWith("media-social:");
+    });
+
+  const merged=
+    base.concat(personalMediaNotifications||[]);
+
+  merged.sort(function(a,b){
+    return (
+      new Date(b?.created_at||0).getTime() -
+      new Date(a?.created_at||0).getTime()
+    );
+  });
+
+  return merged;
+}
+
+async function refreshPersonalMediaNotifications(force){
+  try{
+    await waitForNotificationAccountRuntime();
+
+    const account=window.Ma7alakAccount;
+    const userId=
+      String(account?.user?.id||"").trim();
+
+    if(!userId){
+      personalMediaNotifications=[];
+      personalMediaNotificationsUserId="";
+      personalMediaNotificationsLoadedAt=Date.now();
+      return personalMediaNotifications;
+    }
+
+    if(
+      personalMediaNotificationsUserId &&
+      personalMediaNotificationsUserId!==userId
+    ){
+      personalMediaNotifications=[];
+      personalMediaNotificationsLoadedAt=0;
+    }
+
+    personalMediaNotificationsUserId=userId;
+
+    if(
+      !force &&
+      personalMediaNotificationsPromise
+    ){
+      return await personalMediaNotificationsPromise;
+    }
+
+    if(
+      !force &&
+      personalMediaNotificationsLoadedAt &&
+      Date.now()-personalMediaNotificationsLoadedAt<250
+    ){
+      return personalMediaNotifications;
+    }
+
+    const client=
+      account?.client ||
+      await loadMa7alakSupabase();
+
+    personalMediaNotificationsPromise=
+      (async function(){
+        const result=
+          await client.rpc(
+            "ma7alak_get_my_media_notifications"
+          );
+
+        if(result.error){
+          throw result.error;
+        }
+
+        personalMediaNotifications=
+          (Array.isArray(result.data)?result.data:[])
+            .map(normalizePersonalMediaNotification);
+
+        personalMediaNotificationsLoadedAt=Date.now();
+
+        return personalMediaNotifications;
+      })();
+
+    return await personalMediaNotificationsPromise;
+  }
+  catch(error){
+    console.warn(
+      "ShoufHon personal media notifications:",
+      error
+    );
+
+    /*
+       Keep the last good rows if a transient request fails.
+       Never replace a valid personal notification list with [].
+    */
+    return personalMediaNotifications;
+  }
+  finally{
+    personalMediaNotificationsPromise=null;
+  }
+}
+
+function refreshRenderedPersonalMediaNotifications(force){
+  return refreshPersonalMediaNotifications(force)
+    .then(function(){
+      notifications=
+        mergePersonalMediaNotifications(
+          notifications
+        );
+
+      notificationBadgeCount=
+        calculateBadgeCount();
+
+      updateNotificationBadge();
+      renderNotifications();
+
+      return personalMediaNotifications;
+    });
+}
+
+
 async function loadNotifications(){
 
   try{
@@ -3140,6 +3285,13 @@ async function loadNotifications(){
 
     const client =
       await loadMa7alakSupabase();
+
+    /*
+       Load account-owned Media notifications independently first.
+       Even if another notification query races this load, these rows
+       remain in their own state and are merged again at render time.
+    */
+    await refreshPersonalMediaNotifications(false);
 
 
     /*
@@ -3572,51 +3724,12 @@ async function loadNotifications(){
 
     /* -------------------------------------------------------
        PERSONAL MEDIA SOCIAL NOTIFICATIONS
-       Replies and comment likes are account-specific and do not
-       depend on Following state.
+       Stored independently so general notification refreshes
+       cannot wipe them from the logged user's bell.
     ------------------------------------------------------- */
 
-    let mediaSocialNotifications = [];
-
-    try{
-      if(window.Ma7alakAccount?.ready){
-        await window.Ma7alakAccount.ready();
-      }
-
-      if(window.Ma7alakAccount?.user){
-        const socialResult =
-          await client.rpc(
-            "ma7alak_get_my_media_notifications"
-          );
-
-        if(socialResult.error){
-          console.warn(
-            "ShoufHon media notifications:",
-            socialResult.error
-          );
-        }
-        else{
-          mediaSocialNotifications =
-            (socialResult.data || []).map(
-              function(row){
-                return {
-                  ...row,
-                  key:"media-social:"+String(row.id||""),
-                  seen:row.seen===true,
-                  badge_acknowledged:
-                    row.badge_acknowledged===true
-                };
-              }
-            );
-        }
-      }
-    }
-    catch(error){
-      console.warn(
-        "ShoufHon media notifications failed:",
-        error
-      );
-    }
+    const mediaSocialNotifications =
+      personalMediaNotifications.slice();
 
 
     /* -------------------------------------------------------
@@ -4740,6 +4853,16 @@ function notificationFallbackEmoji(notification){
 
 function renderNotifications(){
 
+  /*
+     Last-line protection against race conditions:
+     always merge account-owned Media rows back into the panel
+     before deciding that the list is empty.
+  */
+  notifications=
+    mergePersonalMediaNotifications(
+      notifications
+    );
+
   const list =
     document.getElementById(
       "ma7alak-notification-list"
@@ -5605,7 +5728,15 @@ function openNotifications(){
 
 
   /*
-     Refresh in the background after the panel is already visible.
+     Refresh account-owned Media notifications directly. This is separate
+     from the old Story/Reel/Follow loader so the panel cannot show
+     "No notifications" while valid personal rows exist.
+  */
+  refreshRenderedPersonalMediaNotifications(true)
+    .catch(function(){});
+
+  /*
+     Refresh the remaining notification sources in the background.
   */
   loadNotifications();
 
@@ -5796,7 +5927,7 @@ async function setupUserNotificationRealtime(){
           function(){
             setTimeout(
               function(){
-                loadNotifications()
+                refreshRenderedPersonalMediaNotifications(true)
                   .catch(function(){});
               },
               25
@@ -6157,6 +6288,8 @@ async function startMa7alakNotifications(){
 
     setupReelNotificationBridge();
 
+    await refreshPersonalMediaNotifications(true);
+
     await loadNotifications();
 
     await setupRealtime();
@@ -6231,7 +6364,25 @@ window.addEventListener(
 window.addEventListener(
   "ma7alak:account-change",
   function(){
+    const nextUserId=
+      String(
+        window.Ma7alakAccount?.user?.id||
+        ""
+      ).trim();
+
+    if(
+      nextUserId!==
+      personalMediaNotificationsUserId
+    ){
+      personalMediaNotifications=[];
+      personalMediaNotificationsUserId=nextUserId;
+      personalMediaNotificationsLoadedAt=0;
+    }
+
     setupUserNotificationRealtime()
+      .catch(function(){});
+
+    refreshRenderedPersonalMediaNotifications(true)
       .catch(function(){});
 
     loadNotifications()
