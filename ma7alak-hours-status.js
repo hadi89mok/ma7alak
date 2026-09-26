@@ -1,7 +1,7 @@
 /* =========================================================
    SHOUFHON HOURS STATUS — SINGLE AUTHORITATIVE CONTROLLER
-   Manual status text overrides the automatic weekly schedule.
-   Blank manual text restores automatic schedule behavior.
+   Weekly Hours are automatic.
+   Online Service / Online Delivery can temporarily override the schedule.
    ========================================================= */
 (function(){
 "use strict";
@@ -59,6 +59,11 @@ async function resolveSlug(){
 function safeHex(value,fallback=""){
   const raw=String(value||"").trim();
   return /^#[0-9a-f]{6}$/i.test(raw)?raw:fallback;
+}
+
+function normalizeStatusMode(value){
+  const mode=String(value||"").trim().toLowerCase();
+  return mode==="online_service"||mode==="online_delivery"?mode:"";
 }
 
 function rgb(hex){
@@ -178,33 +183,34 @@ function automaticState(){
 }
 
 function applyDesign(){
-  const accent=safeHex(options.hours_accent_color)||
+  /* The retired manual Status-pill color fields are intentionally ignored. */
+  const accent=
     safeHex(options.story_color)||
     safeHex(options.card_color)||
     "#d9a441";
-  const main=safeHex(options.hours_text_color,"#f7e5b6");
-  const sub=safeHex(options.hours_sub_color,"#c9b889");
   const a=rgb(accent);
 
   root.style.setProperty("--m7-hours-accent",accent);
   root.style.setProperty("--m7-hours-accent-rgb",a.r+","+a.g+","+a.b);
   root.style.setProperty("--m7-hours-accent-light",mix(accent,"#ffffff",.42));
   root.style.setProperty("--m7-hours-accent-dark",mix(accent,"#000000",.42));
-  root.style.setProperty("--m7-hours-main",main);
-  root.style.setProperty("--m7-hours-sub",sub);
+  root.style.setProperty("--m7-hours-main","#f7e5b6");
+  root.style.setProperty("--m7-hours-sub","#c9b889");
 
   const motion=String(options.page_motion_mode||options.global_motion_mode||"").trim().toLowerCase();
   root.classList.toggle("m7-hours-static",["none","off","static"].includes(motion));
   root.classList.toggle("m7-hours-subtle",["subtle","low","reduced"].includes(motion));
 }
 
-function setDotState(open,automatic){
-  const custom=safeHex(options.hours_dot_color);
-  const accent=safeHex(options.hours_accent_color)||safeHex(options.story_color)||"#d9a441";
-  const color=custom||(automatic?(open?"#22c55e":"#ef4444"):accent);
-  const value=rgb(color);
-  root.style.setProperty("--m7-hours-dot",color);
+function setDotColor(color){
+  const safe=safeHex(color,"#d9a441");
+  const value=rgb(safe);
+  root.style.setProperty("--m7-hours-dot",safe);
   root.style.setProperty("--m7-hours-dot-rgb",value.r+","+value.g+","+value.b);
+}
+
+function setDotState(open){
+  setDotColor(open?"#22c55e":"#ef4444");
 }
 
 function setText(main,sub){
@@ -222,30 +228,34 @@ function setText(main,sub){
 }
 
 function render(){
-  /*
-     Manual text is the explicit override.
-     If either field contains text, automatic date/time logic is bypassed.
-     Clear BOTH fields to return to the weekly Hours schedule.
-  */
-  const manualMain=String(options.hours_status_text||"").trim();
-  const manualSub=String(options.hours_sub_text||"").trim();
+  const mode=normalizeStatusMode(options.hours_status_mode);
 
-  if(manualMain||manualSub){
-    setDotState(false,false);
-    setText(manualMain||"Availability",manualSub);
+  if(mode==="online_service"){
+    setDotColor("#38a8ff");
+    setText("Online Service","Available online");
+    return;
+  }
+
+  if(mode==="online_delivery"){
+    setDotColor("#a855f7");
+    setText("Online Delivery","Delivery available now");
     return;
   }
 
   const state=automaticState();
 
   if(!state){
-    setDotState(false,false);
+    setDotColor(
+      safeHex(options.story_color)||
+      safeHex(options.card_color)||
+      "#d9a441"
+    );
     setText("Flexible hours","Request Only");
     return;
   }
 
   if(state.open){
-    setDotState(true,true);
+    setDotState(true);
     setText(
       "Open now",
       state.open24?"Open 24 hours":"Closes at "+formatTime(state.closesAt)
@@ -253,7 +263,7 @@ function render(){
     return;
   }
 
-  setDotState(false,true);
+  setDotState(false);
 
   if(state.next){
     setText(
