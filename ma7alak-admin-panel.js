@@ -16727,10 +16727,15 @@ function previewHoursHtml(shop){
     .join("");
 
   const modeBox=document.querySelector("#ma-admin-edit-form .m7-hours-schedule-box");
-  const mode=normalizeStatusMode(
+  const rawMode=String(
     modeBox?.dataset?.hoursStatusMode||
-    shop?.directory_options?.hours_status_mode
-  );
+    shop?.directory_options?.hours_status_mode||
+    ""
+  ).trim().toLowerCase();
+  const mode=
+    rawMode==="online_service"||rawMode==="online_delivery"
+      ?rawMode
+      :"";
 
   const modeMeta=
     mode==="online_service"
