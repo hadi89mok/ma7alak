@@ -1332,6 +1332,19 @@ function injectNotificationCSS(){
 }
 
 
+.ma7alak-notification-preview{
+  display:block;
+  max-width:100%;
+  margin-top:4px;
+  overflow:hidden;
+  color:rgba(255,255,255,.44);
+  font-size:10px;
+  font-weight:600;
+  line-height:1.3;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
 .ma7alak-notification-time{
 
   margin-top:5px;
@@ -4851,6 +4864,12 @@ function renderNotifications(){
                   </strong>
 
                   ${escapeHtml(activityText)}
+
+                  ${isMediaSocial && notification.preview_text
+                    ? '<span class="ma7alak-notification-preview">“' +
+                        escapeHtml(String(notification.preview_text).slice(0,110)) +
+                      '”</span>'
+                    : ""}
 
                 </p>
 
